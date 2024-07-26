@@ -15,26 +15,26 @@
 
       <div v-if="isMobile" class="channel-view__header-actions">
         <j-box pr="500" @click="onIsChannelChange">
-            <j-flex a="center" gap="200">
-              <j-icon name="hash" size="md" color="ui-300"></j-icon>
-              <j-text color="black" weight="700" size="500" nomargin>
-                {{ channel?.name }}
-              </j-text>
-            </j-flex>
-            <j-box pl="600">
-              <j-text variant="label" size="200">Change View</j-text>
-            </j-box>
+          <j-flex a="center" gap="200">
+            <j-icon name="hash" size="md" color="ui-300"></j-icon>
+            <j-text color="black" weight="700" size="500" nomargin>
+              {{ channel?.name }}
+            </j-text>
+          </j-flex>
+          <j-box pl="600">
+            <j-text variant="label" size="200">Change View</j-text>
+          </j-box>
         </j-box>
-          <j-tooltip placement="auto" title="Manage views">
-              <j-button
-                v-if="sameAgent"
-                @click="() => goToEditChannel(channel?.id)"
-                size="sm"
-                variant="ghost"
-              >
-                <j-icon size="md" name="plus"></j-icon>
-              </j-button>
-            </j-tooltip>
+        <j-tooltip placement="auto" title="Manage views">
+          <j-button
+            v-if="sameAgent"
+            @click="() => goToEditChannel(channel?.id)"
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="md" name="plus"></j-icon>
+          </j-button>
+        </j-tooltip>
       </div>
       <div class="channel-view__header-actions" v-if="!isMobile">
         <div class="channel-view__header-left">
@@ -76,7 +76,7 @@
           </div>
         </div>
       </div>
-      <div v-if="!isMobile"  class="channel-view__header-right">
+      <div v-if="!isMobile" class="channel-view__header-right">
         <j-tooltip
           placement="auto"
           :title="isExpanded ? 'Minimize' : 'Fullsize'"
@@ -146,23 +146,23 @@
         <j-box pb="300">
           <j-text variant="heading-sm">Select a channel</j-text>
         </j-box>
-            <label
-              :class="{
-                'channel-view-tab-2': true,
-                checked: app.pkg === currentView,
-              }"
-              v-for="app in apps"
-              @click="changeCurrentView"
-            >
-              <input
-                :name="channel?.id"
-                type="radio"
-                :checked.prop="app.pkg === currentView"
-                :value.prop="app.pkg"
-              />
-              <j-icon :name="app.icon" size="xs"></j-icon>
-              <span>{{ app.name }}</span>
-            </label>
+        <label
+          :class="{
+            'channel-view-tab-2': true,
+            checked: app.pkg === currentView,
+          }"
+          v-for="app in apps"
+          @click="changeCurrentView"
+        >
+          <input
+            :name="channel?.id"
+            type="radio"
+            :checked.prop="app.pkg === currentView"
+            :value.prop="app.pkg"
+          />
+          <j-icon :name="app.icon" size="xs"></j-icon>
+          <span>{{ app.name }}</span>
+        </label>
       </j-box>
     </j-modal>
   </div>
@@ -257,7 +257,7 @@ export default defineComponent({
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
       isExpanded: ref(false),
-      isChangeChannel: ref(false)
+      isChangeChannel: ref(false),
     };
   },
   computed: {
@@ -341,11 +341,15 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      this.webrtcModalOpen =
-        window.screen.width > 900 &&
-        this.currentView === "@coasys/flux-webrtc-view";
+      // if entering webrtc view close modal
+      if (value === "@coasys/flux-webrtc-view") this.webrtcModalOpen = false;
+      else if (
+        // if leaving webrtc view (& not small screen) open modal
+        this.currentView === "@coasys/flux-webrtc-view" &&
+        window.screen.width > 900
+      )
+        this.webrtcModalOpen = true;
       this.currentView = value;
-      console.log("changed view", value);
       this.isChangeChannel = false;
     },
     toggleSidebar() {
@@ -525,7 +529,6 @@ export default defineComponent({
   border-bottom: 1px solid transparent;
 }
 
-
 .channel-view-tab-2 {
   height: 100%;
   font-weight: 500;
@@ -559,7 +562,6 @@ export default defineComponent({
   background: var(--j-color-primary-100);
   color: var(--j-color-black);
 }
-
 
 .channel-view-tab input {
   position: absolute;
