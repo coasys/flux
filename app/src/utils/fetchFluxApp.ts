@@ -7,6 +7,7 @@ const fetchFluxApp = async function (packageName: string) {
     "@coasys/flux-table-view",
     "@coasys/flux-kanban-view",
     "@coasys/flux-webrtc-view",
+    "@coasys/nillion-file-store",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
 
@@ -30,10 +31,16 @@ const fetchFluxApp = async function (packageName: string) {
       if (packageName === "@coasys/flux-kanban-view") {
         module = await import("@coasys/flux-kanban-view");
       }
+      if (packageName === "@coasys/nillion-file-store") {
+        module = await import(
+          /* @vite-ignore */
+          new URL("./@coasys/nillion-file-store/main.js", import.meta.url).href
+        );
+      }
     } else {
       module = await import(
         /* @vite-ignore */
-        `https://cdn.jsdelivr.net/npm/${packageName}@latest/+esm`
+        `/cdn-proxy/npm/${packageName}@latest/+esm`
       );
     }
   } catch (error) {
