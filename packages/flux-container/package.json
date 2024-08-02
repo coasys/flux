@@ -20,7 +20,7 @@
     "publish-package": "npm publish"
   },
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc2",
+    "@coasys/ad4m": "0.10.0-rc5",
     "@coasys/ad4m-connect": "0.10.0-prerelease-fix-2",
     "@coasys/flux-api": "*",
     "@coasys/flux-ui": "*",

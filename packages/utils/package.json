@@ -18,7 +18,7 @@
     "@coasys/flux-types": "*"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.10.0-rc2",
+    "@coasys/ad4m": "0.10.0-rc5",
     "@coasys/ad4m-connect": "*0.9.1-prerelease.1"
   },
   "keywords": [],
