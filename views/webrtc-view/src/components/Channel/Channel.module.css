@@ -11,6 +11,7 @@
 
 .closeButton {
   all: unset;
+  cursor: pointer;
   width: 26px;
   height: 26px;
   border-radius: 50%;

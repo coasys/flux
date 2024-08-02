@@ -137,6 +137,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             <j-icon name="telephone-x"></j-icon>
           </j-button>
         </j-tooltip>
+
         <j-tooltip placement="top" title="Debug">
           <j-button
             variant="secondary"

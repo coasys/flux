@@ -191,7 +191,7 @@ export default function Transcriber({ source, perspective }: Props) {
       {transcribeAudio && (
         <j-box mt="200">
           <j-flex direction="column" gap="500">
-            <j-flex a="center" gap="400">
+            <j-flex a="center" gap="400" wrap>
               <j-text nomargin style={{ flexShrink: 0 }}>
                 AI model
               </j-text>
@@ -211,7 +211,7 @@ export default function Transcriber({ source, perspective }: Props) {
                 </j-menu-group>
               </j-menu>
             </j-flex>
-            <j-flex a="center" gap="400">
+            <j-flex a="center" gap="400" wrap>
               <j-text nomargin style={{ flexShrink: 0 }}>
                 Volume threshold to trigger recording
               </j-text>
@@ -234,19 +234,21 @@ export default function Transcriber({ source, perspective }: Props) {
                 />
               </div>
             </j-flex>
-            <j-flex a="center" gap="400">
+            <j-flex a="center" gap="400" wrap>
               <j-text nomargin>
                 Seconds of silence before recording stops
               </j-text>
-              <j-button size="xs" square onClick={() => incrementTimeout(-1)}>
-                <j-icon name="caret-left-fill" />
-              </j-button>
-              <j-text nomargin color="color-white">
-                {silenceTimeout}
-              </j-text>
-              <j-button size="xs" square onClick={() => incrementTimeout(1)}>
-                <j-icon name="caret-right-fill" />
-              </j-button>
+              <j-flex a="center" gap="400">
+                <j-button size="xs" square onClick={() => incrementTimeout(-1)}>
+                  <j-icon name="caret-left-fill" />
+                </j-button>
+                <j-text nomargin color="color-white">
+                  {silenceTimeout}
+                </j-text>
+                <j-button size="xs" square onClick={() => incrementTimeout(1)}>
+                  <j-icon name="caret-right-fill" />
+                </j-button>
+              </j-flex>
             </j-flex>
             <j-flex a="center" gap="400">
               <j-text nomargin>State:</j-text>
