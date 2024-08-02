@@ -85,25 +85,29 @@ export async function registerNotification() {
             webhookAuth: result
         });
     } else {
-        await client.runtime.requestInstallNotification({
-            appName: "Flux",
-            description: "Messages with mentions",
-            appUrl: window.location.origin,
-            appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-            trigger: `
-              agent_did(Did),
-              subject_class("Message", C),
-              instance(C, Base),
-              property_getter(C, Base, "body", Body),
-              literal_from_url(Body, JsonString, _),
-              json_property(JsonString, "data", MessageContent),
-              append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
-              string_includes(MessageContent, MentionString),
-              remove_html_tags(MessageContent, Description),
-              Title="You were mentioned".`,
-            perspectiveIds: perspectiveIds,
-            webhookUrl: "http://140.82.10.81:13000/notification",
-            webhookAuth: ""
-        });
+        const isNotificationRegistered = localStorage.getItem('notificationRegistered');
+        if (isNotificationRegistered !== 'true') {
+            localStorage.setItem('notificationRegistered', 'true');
+            await client.runtime.requestInstallNotification({
+                appName: "Flux",
+                description: "Messages with mentions",
+                appUrl: window.location.origin,
+                appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
+                trigger: `
+                  agent_did(Did),
+                  subject_class("Message", C),
+                  instance(C, Base),
+                  property_getter(C, Base, "body", Body),
+                  literal_from_url(Body, JsonString, _),
+                  json_property(JsonString, "data", MessageContent),
+                  append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
+                  string_includes(MessageContent, MentionString),
+                  remove_html_tags(MessageContent, Description),
+                  Title="You were mentioned".`,
+                perspectiveIds: perspectiveIds,
+                webhookUrl: "http://140.82.10.81:13000/notification",
+                webhookAuth: ""
+            });
+        }
     }
 }
