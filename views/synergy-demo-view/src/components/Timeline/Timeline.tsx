@@ -14,16 +14,27 @@ export default function Timeline({ agent, perspective, source, items }: Props) {
 
   return (
     <div className={styles.wrapper}>
-      {items.map((item) => (
-        <TimelineItem
-          agent={agent}
-          perspective={perspective}
-          source={source}
-          item={item}
-          selected={item.id === selectedNodeId}
-          setSelected={() => setSelectedNodeId(item.id)}
-        />
-      ))}
+      <div className={styles.fades}>
+        <div className={styles.fadeTop} />
+        <div className={styles.fadeBottom} />
+        <div className={styles.line} />
+      </div>
+      <div className={styles.items}>
+        <div className={styles.line} />
+        {items.map((item) => (
+          <TimelineItem
+            agent={agent}
+            perspective={perspective}
+            source={source}
+            item={item}
+            selected={item.id === selectedNodeId}
+            setSelected={() =>
+              setSelectedNodeId(item.id === selectedNodeId ? null : item.id)
+            }
+          />
+        ))}
+        <div className={styles.line} />
+      </div>
     </div>
   );
 }
