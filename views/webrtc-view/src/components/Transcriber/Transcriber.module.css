@@ -49,8 +49,14 @@
   cursor: pointer;
 }
 
-/* .slider::-moz-range-thumb {
-} */
+.slider::-moz-range-thumb {
+  all: unset;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--j-color-danger-400);
+  cursor: pointer;
+}
 
 .text {
   border: 1px solid var(--j-color-ui-200);

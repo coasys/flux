@@ -1,7 +1,7 @@
 PODS:
-  - Capacitor (6.0.0):
+  - Capacitor (6.1.1):
     - CapacitorCordova
-  - CapacitorCordova (6.0.0)
+  - CapacitorCordova (6.1.1)
   - CapacitorPushNotifications (6.0.1):
     - Capacitor
   - CapacitorStatusBar (6.0.0):
@@ -97,8 +97,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: 559d073c4ca6c27f8e7002c807eea94c3ba435a9
-  CapacitorCordova: 8c4bfdf69368512e85b1d8b724dd7546abeb30af
+  Capacitor: 8941aba4364ba9d1b22188569001f2ce45cc2b00
+  CapacitorCordova: 8f2cc8d8d3619c566e9418fe8772064a94266106
   CapacitorPushNotifications: 293fabe42c7229756078e81f2d3a60394ba4e5d8
   CapacitorStatusBar: 2e4369f99166125435641b1908d05f561eaba6f6
   Firebase: 49e62242b3ae422a002ab647a7e62a332a8c3ec1
