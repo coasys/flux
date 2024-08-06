@@ -1,12 +1,10 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Message, Post } from "@coasys/flux-api";
-import { isEqual } from "lodash";
-import { useEffect, useState } from "preact/hooks";
-import Item from "../Item";
-import { transformItem } from "./../../utils";
+import { useState } from "preact/hooks";
+import Timeline from "../Timeline";
 import styles from "./SynergyDemoView.module.css";
 // import { PerspectiveProxy } from "@coasys/ad4m";
+import { Channel, SubjectRepository } from "@coasys/flux-api";
+import Topic from "../../models/Topic";
 
 type Props = {
   perspective: any; // PerspectiveProxy;
@@ -18,38 +16,88 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [openAIKey, setOpenAIKey] = useState(
     localStorage?.getItem("openAIKey") || ""
   );
-  const [items, setItems] = useState<any[]>([]);
-  const { entries: messages } = useSubjects({
-    perspective,
-    source,
-    subject: Message,
-  });
-  const { entries: posts } = useSubjects({
-    perspective,
-    source,
-    subject: Post,
-  });
-  const { entries: tasks } = useSubjects({
-    perspective,
-    source,
-    subject: "Task",
-  });
+  const [matches, setMatches] = useState<any[]>([]);
 
-  useEffect(() => {
-    // aggregate all items into array and sort by date
-    const newItems = [
-      ...messages.map((message) => transformItem(source, "Message", message)),
-      ...posts.map((post) => transformItem(source, "Post", post)),
-      ...tasks.map((task) => transformItem(source, "Task", task)),
-    ].sort((a, b) => {
-      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+  async function findMatches(
+    channelId: string,
+    subjectClass: string,
+    topic: string
+  ): Promise<any[]> {
+    // searches for instances of the subject class with matching topics in the channel
+    return await new Promise(async (resolveMatches: any) => {
+      const newMatches = [];
+      const instances = await new SubjectRepository(subjectClass, {
+        perspective,
+        source: channelId,
+      }).getAllData();
+
+      Promise.all(
+        instances.map(
+          (instance: any) =>
+            new Promise(async (resolve: any) => {
+              // fetch all topics attached to the instance
+              const instanceTopics = await new SubjectRepository(Topic, {
+                perspective,
+                source: instance.id,
+              }).getAllData();
+              // search for matches with source topics
+              instanceTopics.forEach((it: any) => {
+                if (topic === it.topic)
+                  newMatches.push({ channelId, itemId: instance.id });
+                // newMatches.push(
+                //   transformItem(channelId, subjectClass, instance)
+                // );
+              });
+              resolve();
+            })
+        )
+      )
+        .then(() => resolveMatches(newMatches))
+        .catch((error) => {
+          console.log(error);
+          resolveMatches([]);
+        });
     });
-    // compare previous and new items before updating state to prevent infinite render loop
-    setItems((prevItems) => {
-      if (!isEqual(prevItems, newItems)) return newItems;
-      return prevItems;
+  }
+
+  async function synergize(item, topic) {
+    console.log("synergize: ", item, topic);
+    // searches other channels in the neighbourhood to find items with matching topic tags
+    // setSynergizing(true);
+
+    const channels = await new SubjectRepository(Channel, {
+      perspective,
+    }).getAllData();
+
+    let newMatches = [];
+    Promise.all(
+      channels
+        .filter((channel: any) => channel.id !== item.channelId)
+        .map(
+          (channel: any) =>
+            new Promise(async (resolve: any) => {
+              const messageMatches = await findMatches(
+                channel.id,
+                "Message",
+                topic
+              );
+              const postMatches = await findMatches(channel.id, "Post", topic);
+              const taskMatches = await findMatches(channel.id, "Task", topic);
+              newMatches.push(
+                ...messageMatches,
+                ...postMatches,
+                ...taskMatches
+              );
+              resolve();
+            })
+        )
+    ).then(() => {
+      console.log("newMatches: ", newMatches);
+      setMatches(newMatches);
+      // setSynergizing(false);
+      // setSynergized(true);
     });
-  }, [messages, posts, tasks]);
+  }
 
   return (
     <div className={styles.container}>
@@ -69,9 +117,23 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             }}
           />
         </j-box>
-        <j-flex direction="column" gap="400">
-          {items.map((item) => (
-            <Item perspective={perspective} item={item} openAIKey={openAIKey} />
+        <j-flex gap="500">
+          <Timeline
+            agent={agent}
+            perspective={perspective}
+            channelId={source}
+            // itemId={}
+            synergize={synergize}
+          />
+          {matches.map((match, index) => (
+            <Timeline
+              agent={agent}
+              perspective={perspective}
+              channelId={match.channelId}
+              itemId={match.itemId}
+              index={index}
+              synergize={synergize}
+            />
           ))}
         </j-flex>
       </j-box>
