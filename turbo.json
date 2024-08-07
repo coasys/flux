@@ -15,7 +15,7 @@
       "outputs": ["packages/ui/dist/**"]
     },
     "build:packages": {
-      "dependsOn": ["^build:ui"],
+      "dependsOn": ["build:ui"],
       "outputs": ["packages/*/dist/**"]
     },
     "build:views": {
