@@ -3,16 +3,13 @@
   "tasks": {
     "build": {
       "dependsOn": [
-        "^build:ui",
-        "^build:packages",
-        "^build:views",
-        "^build:app"
+        "^build"
       ],
       "outputs": ["dist/**"]
     },
     "build:ui": {
-      "dependsOn": [],
-      "outputs": ["packages/ui/dist/**"]
+      "dependsOn": ["@coasys/flux-ui#build"],
+      "outputs": ["dist/**"]
     },
     "build:packages": {
       "dependsOn": ["build:ui"],
