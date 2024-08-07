@@ -1,7 +1,8 @@
-import styles from "./App.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import SynergyDemoView from "./components/SynergyDemoView";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import "@coasys/flux-ui/dist/main.d.ts";
+import styles from "./App.module.css";
+import SynergyDemoView from "./components/SynergyDemoView";
 
 type Props = {
   agent: AgentClient;

@@ -3,7 +3,7 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message, Post } from "@coasys/flux-api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
-import Item from "../Item";
+import Timeline from "../Timeline";
 import { transformItem } from "./../../utils";
 import styles from "./SynergyDemoView.module.css";
 // import { PerspectiveProxy } from "@coasys/ad4m";
@@ -69,11 +69,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             }}
           />
         </j-box>
-        <j-flex direction="column" gap="400">
-          {items.map((item) => (
-            <Item perspective={perspective} item={item} openAIKey={openAIKey} />
-          ))}
-        </j-flex>
+        <Timeline
+          agent={agent}
+          perspective={perspective}
+          source={source}
+          items={items}
+        />
       </j-box>
     </div>
   );
