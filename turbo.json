@@ -15,15 +15,15 @@
       "outputs": ["packages/ui/dist/**"]
     },
     "build:packages": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build:ui"],
       "outputs": ["packages/*/dist/**"]
     },
     "build:views": {
-      "dependsOn": ["build:packages"],
+      "dependsOn": ["build:ui", "build:packages"],
       "outputs": ["views/**/dist/**"]
     },
     "build:app": {
-      "dependsOn": ["build:views"],
+      "dependsOn": ["build:ui", "build:packages", "build:views"],
       "outputs": ["app/dist/**"]
     },
     "lint": {
