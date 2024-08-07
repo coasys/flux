@@ -14,9 +14,10 @@ type Props = {
   perspective: any;
   item: any;
   index: number;
+  topic: string;
   match: boolean;
   selected: boolean;
-  setSelected: () => void;
+  setSelectedItemId: (id: string) => void;
   synergize: (item: any, topic: string) => void;
 };
 
@@ -28,9 +29,9 @@ export default function TimelineItem({
   perspective,
   item,
   index,
-  match,
+  topic,
   selected,
-  setSelected,
+  setSelectedItemId,
   synergize,
 }: Props) {
   const { type, id, timestamp, author, text, icon } = item;
@@ -58,14 +59,6 @@ export default function TimelineItem({
     source: id,
     subject: Intent,
   });
-
-  // useEffect(() => {
-  //   console.log("items: ", topics);
-  // }, [topics]);
-
-  // useEffect(() => {
-  //   console.log("profile: ", profile);
-  // }, [profile]);
 
   async function process() {
     setProcessing(true);
@@ -138,9 +131,12 @@ export default function TimelineItem({
   return (
     <div
       id={`${index}-${item.id}`}
-      className={`${styles.wrapper} ${selected && styles.selected} ${match && styles.match}`}
+      className={`${styles.wrapper} ${selected && styles.selected} ${index > 0 && styles.match}`}
     >
-      <button className={styles.button} onClick={setSelected} />
+      <button
+        className={styles.button}
+        onClick={() => setSelectedItemId(selected ? null : id)}
+      />
       <div className={styles.timestamp}>
         <j-timestamp value={timestamp} dateStyle="short" timeStyle="short" />
       </div>
@@ -148,86 +144,33 @@ export default function TimelineItem({
         <div className={styles.node} />
         <div className={styles.line} />
       </div>
-      <div className={styles.content}>
-        <j-flex gap="400" a="center">
+      <j-flex
+        direction="column"
+        gap="500"
+        j="center"
+        className={styles.content}
+      >
+        <j-flex gap="400" a="center" wrap>
           <j-icon name={icon} />
           <Avatar size="sm" did={author} profile={profile} />
-          {!selected && (
-            <j-flex gap="300">
-              {topics.map((t) => (
-                <j-button
-                  size="sm"
-                  onClick={() => {
-                    setSelected();
-                    synergize(item, t.topic);
-                  }}
-                >
-                  #{t.topic}
-                </j-button>
-              ))}
-            </j-flex>
-          )}
+          <j-flex gap="300" wrap>
+            {topics.map((t) => (
+              <button
+                className={`${styles.topic} ${selected && topic === t.topic && styles.focus}`}
+                onClick={() => {
+                  setSelectedItemId(id);
+                  synergize(item, t.topic);
+                }}
+              >
+                #{t.topic}
+              </button>
+            ))}
+          </j-flex>
         </j-flex>
         {selected && (
           <j-flex direction="column" gap="300">
             <j-text nomargin dangerouslySetInnerHTML={{ __html: text }} />
-            {topics.length ? (
-              <div className={styles.processedData}>
-                {topics.length > 0 && (
-                  <j-box>
-                    <j-text
-                      uppercase
-                      size="300"
-                      weight="800"
-                      color="primary-500"
-                    >
-                      Topics
-                    </j-text>
-                    <j-flex gap="400">
-                      {topics.map((t) => (
-                        <j-button
-                          size="sm"
-                          onClick={() => {
-                            setSelected();
-                            synergize(item, t.topic);
-                          }}
-                        >
-                          #{t.topic}
-                        </j-button>
-                      ))}
-                    </j-flex>
-                  </j-box>
-                )}
-
-                {meanings.length > 0 && (
-                  <j-box mt="600">
-                    <j-text
-                      uppercase
-                      size="300"
-                      weight="800"
-                      color="primary-500"
-                    >
-                      Meaning
-                    </j-text>
-                    <j-text>{meanings[0].meaning}</j-text>
-                  </j-box>
-                )}
-
-                {intents.length > 0 && (
-                  <j-box mt="600">
-                    <j-text
-                      uppercase
-                      size="300"
-                      weight="800"
-                      color="primary-500"
-                    >
-                      Intent
-                    </j-text>
-                    <j-text nomargin>{intents[0].intent}</j-text>
-                  </j-box>
-                )}
-              </div>
-            ) : (
+            {!topics.length && (
               <j-button
                 variant="primary"
                 size="sm"
@@ -239,7 +182,65 @@ export default function TimelineItem({
             )}
           </j-flex>
         )}
-      </div>
+      </j-flex>
     </div>
   );
+}
+
+{
+  /* <div className={styles.processedData}>
+  {topics.length > 0 && (
+    <j-box>
+      <j-text
+        uppercase
+        size="300"
+        weight="800"
+        color="primary-500"
+      >
+        Topics
+      </j-text>
+      <j-flex gap="400">
+        {topics.map((t) => (
+          <j-button
+            size="sm"
+            onClick={() => {
+              setSelected();
+              synergize(item, t.topic);
+            }}
+          >
+            #{t.topic}
+          </j-button>
+        ))}
+      </j-flex>
+    </j-box>
+  )}
+
+  {meanings.length > 0 && (
+    <j-box mt="600">
+      <j-text
+        uppercase
+        size="300"
+        weight="800"
+        color="primary-500"
+      >
+        Meaning
+      </j-text>
+      <j-text>{meanings[0].meaning}</j-text>
+    </j-box>
+  )}
+
+  {intents.length > 0 && (
+    <j-box mt="600">
+      <j-text
+        uppercase
+        size="300"
+        weight="800"
+        color="primary-500"
+      >
+        Intent
+      </j-text>
+      <j-text nomargin>{intents[0].intent}</j-text>
+    </j-box>
+  )}
+</div> */
 }

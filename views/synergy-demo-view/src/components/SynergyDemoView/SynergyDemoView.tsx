@@ -1,9 +1,10 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useState } from "preact/hooks";
 import Timeline from "../Timeline";
-import styles from "./SynergyDemoView.module.css";
+import styles from "./SynergyDemoView.module.scss";
 // import { PerspectiveProxy } from "@coasys/ad4m";
 import { Channel, SubjectRepository } from "@coasys/flux-api";
+import { useEffect } from "preact/hooks";
 import Topic from "../../models/Topic";
 
 type Props = {
@@ -17,9 +18,10 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     localStorage?.getItem("openAIKey") || ""
   );
   const [matches, setMatches] = useState<any[]>([]);
+  const [topic, setTopic] = useState("");
 
   async function findMatches(
-    channelId: string,
+    channel: any,
     subjectClass: string,
     topic: string
   ): Promise<any[]> {
@@ -28,7 +30,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       const newMatches = [];
       const instances = await new SubjectRepository(subjectClass, {
         perspective,
-        source: channelId,
+        source: channel.id,
       }).getAllData();
 
       Promise.all(
@@ -43,10 +45,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               // search for matches with source topics
               instanceTopics.forEach((it: any) => {
                 if (topic === it.topic)
-                  newMatches.push({ channelId, itemId: instance.id });
-                // newMatches.push(
-                //   transformItem(channelId, subjectClass, instance)
-                // );
+                  newMatches.push({ channel, itemId: instance.id });
               });
               resolve();
             })
@@ -61,10 +60,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   }
 
   async function synergize(item, topic) {
-    console.log("synergize: ", item, topic);
     // searches other channels in the neighbourhood to find items with matching topic tags
-    // setSynergizing(true);
-
+    setMatches([]);
+    setTopic(topic);
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
@@ -77,12 +75,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           (channel: any) =>
             new Promise(async (resolve: any) => {
               const messageMatches = await findMatches(
-                channel.id,
+                channel,
                 "Message",
                 topic
               );
-              const postMatches = await findMatches(channel.id, "Post", topic);
-              const taskMatches = await findMatches(channel.id, "Task", topic);
+              const postMatches = await findMatches(channel, "Post", topic);
+              const taskMatches = await findMatches(channel, "Task", topic);
               newMatches.push(
                 ...messageMatches,
                 ...postMatches,
@@ -92,51 +90,93 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             })
         )
     ).then(() => {
-      console.log("newMatches: ", newMatches);
       setMatches(newMatches);
-      // setSynergizing(false);
-      // setSynergized(true);
     });
   }
 
+  function scrollToTimeline(index) {
+    const timeline = document.getElementById(`timeline-${index}`);
+    timeline.scrollIntoView({ behavior: "smooth" });
+  }
+
+  useEffect(() => {
+    setMatches([]);
+  }, [source]);
+
   return (
     <div className={styles.container}>
-      <j-box pt="900" pb="400">
-        <j-text uppercase size="500" weight="800" color="primary-500">
-          Synergy Demo
-        </j-text>
-        <j-box mb="400">
-          <j-input
-            label="OpenAI Key"
-            value={openAIKey}
-            placeholder="Required to process content..."
-            onInput={(event) => {
-              const value = (event.target as HTMLInputElement).value;
-              setOpenAIKey(value);
-              localStorage?.setItem("openAIKey", value);
-            }}
-          />
-        </j-box>
-        <j-flex gap="500">
+      <j-text uppercase size="500" weight="800" color="primary-500">
+        Synergy Demo
+      </j-text>
+      <j-box mb="400">
+        <j-input
+          label="OpenAI Key"
+          value={openAIKey}
+          placeholder="Required to process content..."
+          onInput={(event) => {
+            const value = (event.target as HTMLInputElement).value;
+            setOpenAIKey(value);
+            localStorage?.setItem("openAIKey", value);
+          }}
+        />
+      </j-box>
+      {window.innerWidth > 1200 ? (
+        <j-flex className={styles.wrapper}>
+          <div style={{ flexBasis: "50%", flexShrink: 0 }}>
+            <Timeline
+              agent={agent}
+              perspective={perspective}
+              channel={source}
+              topic={topic}
+              synergize={synergize}
+              scrollToTimeline={scrollToTimeline}
+              index={0}
+              totalMatches={matches.length}
+            />
+          </div>
+          <j-flex gap="500" className={styles.timelines}>
+            {matches.map((match, index) => (
+              <Timeline
+                agent={agent}
+                perspective={perspective}
+                channel={match.channel}
+                topic={topic}
+                synergize={synergize}
+                scrollToTimeline={scrollToTimeline}
+                itemId={match.itemId}
+                index={index + 1}
+                totalMatches={matches.length}
+              />
+            ))}
+          </j-flex>
+        </j-flex>
+      ) : (
+        <j-flex gap="500" className={styles.timelines}>
           <Timeline
             agent={agent}
             perspective={perspective}
-            channelId={source}
-            // itemId={}
+            channel={source}
+            topic={topic}
             synergize={synergize}
+            scrollToTimeline={scrollToTimeline}
+            index={0}
+            totalMatches={matches.length}
           />
           {matches.map((match, index) => (
             <Timeline
               agent={agent}
               perspective={perspective}
-              channelId={match.channelId}
-              itemId={match.itemId}
-              index={index}
+              channel={match.channel}
+              topic={topic}
               synergize={synergize}
+              scrollToTimeline={scrollToTimeline}
+              itemId={match.itemId}
+              index={index + 1}
+              totalMatches={matches.length}
             />
           ))}
         </j-flex>
-      </j-box>
+      )}
     </div>
   );
 }

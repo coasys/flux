@@ -1,6 +1,5 @@
 .wrapper {
   position: relative;
-  min-height: 100px;
   display: flex;
   align-items: stretch;
 
@@ -18,11 +17,13 @@
     justify-content: flex-end;
     align-items: center;
     flex-shrink: 0;
+    color: var(--j-color-ui-500);
+    font-size: 14px;
   }
 
   .position {
     position: relative;
-    width: 20px;
+    width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,24 +50,45 @@
   }
 
   .content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     word-break: break-word;
     width: 100%;
+    margin: 30px 0;
 
-    .processedData {
-      border: 1px solid var(--j-color-ui-200);
-      border-radius: var(--j-border-radius);
-      padding: var(--j-space-400);
+    .topic {
+      all: unset;
+      cursor: pointer;
+      border: 1px solid var(--j-color-primary-500);
+      border-radius: 8px;
+      padding: 8px 10px;
       background-color: var(--j-color-ui-50);
+      color: var(--j-color-primary-500);
+      font-weight: 600;
+      font-size: 15px;
+      z-index: 5;
+
+      &.focus {
+        border: 1px solid white;
+        color: white;
+      }
     }
+
+    // .processedData {
+    //   border: 1px solid var(--j-color-ui-200);
+    //   border-radius: var(--j-border-radius);
+    //   padding: var(--j-space-400);
+    //   background-color: var(--j-color-ui-50);
+    // }
   }
 
   &.selected {
+    .timestamp {
+      color: white;
+      font-size: 16px;
+    }
+
     .node {
-      width: 30px;
-      height: 30px;
+      width: 36px;
+      height: 36px;
     }
 
     .content {
@@ -78,10 +100,7 @@
   }
 
   &.match {
-    .line {
-      background-color: var(--j-color-success-500);
-    }
-
+    .line,
     .node {
       background-color: var(--j-color-success-500);
     }

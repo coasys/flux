@@ -346,7 +346,7 @@ export default defineComponent({
       else if (
         // if leaving webrtc view (& not small screen) open modal
         this.currentView === "@coasys/flux-webrtc-view" &&
-        window.screen.width > 900
+        window.innerWidth > 900
       )
         this.webrtcModalOpen = true;
       this.currentView = value;
