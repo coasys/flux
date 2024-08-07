@@ -3,11 +3,16 @@
   "tasks": {
     "build": {
       "dependsOn": [
+        "^build:ui",
         "^build:packages",
         "^build:views",
         "^build:app"
       ],
       "outputs": ["dist/**"]
+    },
+    "build:ui": {
+      "dependsOn": [],
+      "outputs": ["packages/ui/dist/**"]
     },
     "build:packages": {
       "dependsOn": ["^build"],
