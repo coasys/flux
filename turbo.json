@@ -20,7 +20,7 @@
     "build:app": {
       "dependsOn": ["build:views"],
       "outputs": ["app/dist/**"]
-    }
+    },
     "lint": {
       "outputs": []
     },
