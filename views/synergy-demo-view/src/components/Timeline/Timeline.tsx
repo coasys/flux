@@ -1,10 +1,15 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { Message, Post } from "@coasys/flux-api";
+import { Message, Post, SubjectRepository } from "@coasys/flux-api";
 import { isEqual } from "lodash";
+import OpenAI from "openai";
 import { useEffect, useState } from "preact/hooks";
+import Topic from "../../models/Topic";
 import TimelineItem from "../TimelineItem";
 import { transformItem } from "./../../utils";
 import styles from "./Timeline.module.scss";
+
+const prompt =
+  "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
 
 type Props = {
   agent: any;
@@ -12,7 +17,7 @@ type Props = {
   channel: any;
   itemId?: string;
   index?: number;
-  topic?: string;
+  selectedTopic?: string;
   match?: boolean;
   totalMatches: number;
   scrollToTimeline: (index: number) => void;
@@ -25,13 +30,15 @@ export default function Timeline({
   channel,
   itemId,
   index,
-  topic,
+  selectedTopic,
   totalMatches,
   scrollToTimeline,
   synergize,
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<any>(itemId || null);
+  const [unprocessedItems, setUnprocessedItems] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const id = channel?.id || channel;
 
   const { entries: messages } = useSubjects({
@@ -58,8 +65,54 @@ export default function Timeline({
       return `${totalMatches - index} more match${totalMatches - index > 1 ? "es" : ""}`;
   }
 
+  async function process() {
+    setProcessing(true);
+    // send prompt & item text to Open AI
+    Promise.all(
+      items.map(
+        (item) =>
+          new Promise(async (resolve: any) => {
+            const topicRepo = await new SubjectRepository(Topic, {
+              perspective,
+              //@ts-ignore
+              source: item.id,
+            });
+            const topics = await topicRepo.getAllData();
+            if (topics.length) resolve();
+            else {
+              const openai = new OpenAI({
+                apiKey: localStorage?.getItem("openAIKey"),
+                dangerouslyAllowBrowser: true,
+              });
+              openai.chat.completions
+                .create({
+                  messages: [
+                    { role: "user", content: `${prompt} ${item.text}` },
+                  ],
+                  model: "gpt-3.5-turbo",
+                })
+                .then(async (response) => {
+                  const data = JSON.parse(response.choices[0].message.content);
+                  console.log("Open AI response: ", data);
+                  // store results as linked topic, meaning, & intent expressions
+                  Promise.all(
+                    // @ts-ignore
+                    data.topics.map((topic) => topicRepo.create({ topic }))
+                  )
+                    .then(() => resolve())
+                    .catch(console.log);
+                })
+                .catch(console.log);
+            }
+          })
+      )
+    )
+      .then(() => setProcessing(false))
+      .catch(console.log);
+  }
+
+  // aggregate all items into array and sort by date
   useEffect(() => {
-    // aggregate all items into array and sort by date
     const newItems = [
       ...messages.map((message) => transformItem(id, "Message", message)),
       ...posts.map((post) => transformItem(id, "Post", post)),
@@ -74,8 +127,8 @@ export default function Timeline({
     });
   }, [messages, posts, tasks]);
 
+  // scroll to matching item
   useEffect(() => {
-    // scroll to matching item
     if (selectedItemId && items.length) {
       const item = document.getElementById(`${index}-${selectedItemId}`);
       const timelineItems = document.getElementById(`timeline-items-${index}`);
@@ -86,13 +139,46 @@ export default function Timeline({
     }
   }, [items, selectedItemId]);
 
+  // check for unprocessed items
+  useEffect(() => {
+    let match = false;
+    Promise.all(
+      items.map(
+        (item) =>
+          new Promise(async (resolve: any) => {
+            const topics = await new SubjectRepository(Topic, {
+              perspective,
+              //@ts-ignore
+              source: item.id,
+            }).getAllData();
+            if (!topics.length) match = true;
+            resolve();
+          })
+      )
+    )
+      .then(() => setUnprocessedItems(match))
+      .catch(console.log);
+  }, [items, selectedItemId]);
+
   return (
     <div
       id={`timeline-${index}`}
       className={`${styles.wrapper} ${index > 0 && styles.match}`}
     >
       <div className={styles.header}>
-        <h2>{channel?.name || "This channel"}</h2>
+        <j-flex gap="400" a="center">
+          <h2>{channel?.name || "This channel"}</h2>
+          {index === 0 && unprocessedItems && (
+            <j-button
+              variant="primary"
+              size="sm"
+              onClick={process}
+              loading={processing}
+            >
+              Process unprocessed items
+            </j-button>
+          )}
+        </j-flex>
         {window.innerWidth < 1200 || index > 0 ? (
           <j-flex gap="400" a="center">
             {index > (window.innerWidth < 1200 ? 0 : 1) && (
@@ -140,7 +226,7 @@ export default function Timeline({
                 perspective={perspective}
                 item={item}
                 index={index}
-                topic={topic}
+                selectedTopic={selectedTopic}
                 selected={item.id === selectedItemId}
                 setSelectedItemId={setSelectedItemId}
                 synergize={synergize}

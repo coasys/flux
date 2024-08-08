@@ -1,14 +1,12 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { useState } from "preact/hooks";
+import { Channel, SubjectRepository } from "@coasys/flux-api";
+import { useEffect, useState } from "preact/hooks";
+import Topic from "../../models/Topic";
 import Timeline from "../Timeline";
 import styles from "./SynergyDemoView.module.scss";
-// import { PerspectiveProxy } from "@coasys/ad4m";
-import { Channel, SubjectRepository } from "@coasys/flux-api";
-import { useEffect } from "preact/hooks";
-import Topic from "../../models/Topic";
 
 type Props = {
-  perspective: any; // PerspectiveProxy;
+  perspective: any;
   source: string;
   agent: AgentClient;
 };
@@ -127,7 +125,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               agent={agent}
               perspective={perspective}
               channel={source}
-              topic={topic}
+              selectedTopic={topic}
               synergize={synergize}
               scrollToTimeline={scrollToTimeline}
               index={0}
@@ -140,7 +138,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
                 agent={agent}
                 perspective={perspective}
                 channel={match.channel}
-                topic={topic}
+                selectedTopic={topic}
                 synergize={synergize}
                 scrollToTimeline={scrollToTimeline}
                 itemId={match.itemId}
@@ -156,7 +154,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             agent={agent}
             perspective={perspective}
             channel={source}
-            topic={topic}
+            selectedTopic={topic}
             synergize={synergize}
             scrollToTimeline={scrollToTimeline}
             index={0}
@@ -167,7 +165,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               agent={agent}
               perspective={perspective}
               channel={match.channel}
-              topic={topic}
+              selectedTopic={topic}
               synergize={synergize}
               scrollToTimeline={scrollToTimeline}
               itemId={match.itemId}

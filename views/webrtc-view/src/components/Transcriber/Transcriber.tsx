@@ -3,8 +3,6 @@ import { Message, SubjectRepository } from "@coasys/flux-api";
 import OpenAI from "openai";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
-// import Intent from "../../models/Intent";
-// import Meaning from "../../models/Meaning";
 import Topic from "../../models/Topic";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
@@ -25,7 +23,7 @@ const prompt =
 
 type Props = {
   source: string;
-  perspective: any; // PerspectiveProxy;
+  perspective: any;
   muted: boolean;
 };
 
@@ -214,39 +212,13 @@ export default function Transcriber({ source, perspective, muted }: Props) {
                 )
               );
 
-              // const createMeaning = await meaningRepo
-              //   // @ts-ignore
-              //   .create({ meaning: data.meaning })
-              //   .then((expression) => {
-              //     perspective.add({
-              //       source: id,
-              //       predicate: "flux://has_meaning",
-              //       // @ts-ignore
-              //       target: expression.id,
-              //     });
-              //   });
-
-              // const createIntent = await intentRepo
-              //   // @ts-ignore
-              //   .create({ intent: data.intent })
-              //   .then((expression) =>
-              //     perspective.add({
-              //       source: id,
-              //       predicate: "flux://has_intent",
-              //       // @ts-ignore
-              //       target: expression.id,
-              //     })
-              //   );
-
               Promise.all([createTopics]) // createMeaning, createIntent
                 .then(() => console.log("processing complete!"))
                 .catch(console.log);
             })
-            .catch((error) => {
-              console.log(error);
-            });
+            .catch(console.log);
         })
-        .catch((error) => console.log("message error: ", error));
+        .catch(console.log);
     };
     return () => worker.current?.terminate();
   }, []);
