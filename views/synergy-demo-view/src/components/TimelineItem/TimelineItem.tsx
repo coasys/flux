@@ -15,7 +15,6 @@ type Props = {
   item: any;
   index: number;
   topic: string;
-  match: boolean;
   selected: boolean;
   setSelectedItemId: (id: string) => void;
   synergize: (item: any, topic: string) => void;
