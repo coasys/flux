@@ -60,7 +60,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
       const maxValue = Math.max(...dataArray.current);
       // update volume display
       const volume = document.getElementById("volume");
-      volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
+      if (volume) volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
       // if volume threshold reached
       if (maxValue > 128 + volumeThresholdRef.current) {
         // clear silence timeout & interval if present
@@ -175,15 +175,12 @@ export default function Transcriber({ source, perspective, muted }: Props) {
 
   useEffect(() => {
     if (transcribeAudio && !muted) startListening();
-    else stopListening();
+    else if (listening.current) stopListening();
   }, [transcribeAudio]);
 
   useEffect(() => {
-    if (muted) listening.current = false;
-    else {
-      listening.current = true;
-      startListening();
-    }
+    if (muted && listening.current) stopListening();
+    else if (transcribeAudio) startListening();
   }, [muted]);
 
   return (
