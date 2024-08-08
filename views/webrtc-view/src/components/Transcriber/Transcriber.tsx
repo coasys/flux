@@ -19,9 +19,10 @@ const models = [
 type Props = {
   source: string;
   perspective: any; // PerspectiveProxy;
+  muted: boolean;
 };
 
-export default function Transcriber({ source, perspective }: Props) {
+export default function Transcriber({ source, perspective, muted }: Props) {
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
@@ -173,9 +174,17 @@ export default function Transcriber({ source, perspective }: Props) {
   }, []);
 
   useEffect(() => {
-    if (transcribeAudio) startListening();
+    if (transcribeAudio && !muted) startListening();
     else stopListening();
   }, [transcribeAudio]);
+
+  useEffect(() => {
+    if (muted) listening.current = false;
+    else {
+      listening.current = true;
+      startListening();
+    }
+  }, [muted]);
 
   return (
     <div className={styles.wrapper}>
@@ -253,7 +262,11 @@ export default function Transcriber({ source, perspective }: Props) {
             <j-flex a="center" gap="400">
               <j-text nomargin>State:</j-text>
               <j-text color="color-white" nomargin>
-                {speechDetected ? "Recording!" : "Listening for speech..."}
+                {muted
+                  ? "Muted"
+                  : speechDetected
+                    ? "Recording!"
+                    : "Listening for speech..."}
               </j-text>
               {secondsOfSilence > 0 && (
                 <j-text nomargin>
