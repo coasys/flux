@@ -195,6 +195,7 @@ import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-ho
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
+import { ad4mConnect } from "@/ad4mConnect";
 
 export default defineComponent({
   name: "MainAppView",
@@ -230,7 +231,8 @@ export default defineComponent({
       appStore,
       isInit: ref(false),
       hasCopied: ref(false),
-      data
+      data,
+      oldAuthState: ref(ad4mConnect.authState)
     };
   },
   components: {
@@ -246,6 +248,14 @@ export default defineComponent({
   async mounted() {
     registerNotification();
     
+    ad4mConnect.addEventListener("authstatechange", async (e) => {
+      let oldState = this.oldAuthState;
+      this.oldAuthState = ad4mConnect.authState;
+      if (ad4mConnect.authState === "authenticated" && oldState !== "authenticated") {
+        window.location.reload();
+      }
+    });
+
     this.onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
       if (link.data.predicate === EntryType.Message) {
         this.gotNewMessage(p, link);
