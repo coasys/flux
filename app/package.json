@@ -23,7 +23,7 @@
     "@capacitor/ios": "^6.0.0",
     "@capacitor/push-notifications": "^6.0.1",
     "@capacitor/status-bar": "^6.0.0",
-    "@coasys/ad4m-connect": "0.10.0-rc5",
+    "@coasys/ad4m-connect": "0.10.0-rc5-fix.3",
     "@coasys/ad4m-vue-hooks": "0.10.0-rc5",
     "@coasys/flux-api": "*",
     "@coasys/flux-chat-view": "*",
