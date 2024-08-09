@@ -1,7 +1,9 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { Message } from "@coasys/flux-api";
+import { Message, SubjectRepository } from "@coasys/flux-api";
+import OpenAI from "openai";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
+import Topic from "../../models/Topic";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
 
@@ -16,12 +18,19 @@ const models = [
   // "distil-whisper/distil-large-v2",
 ];
 
+const prompt =
+  "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
+
 type Props = {
   source: string;
-  perspective: any; // PerspectiveProxy;
+  perspective: any;
+  muted: boolean;
 };
 
-export default function Transcriber({ source, perspective }: Props) {
+export default function Transcriber({ source, perspective, muted }: Props) {
+  const [openAIKey, setOpenAIKey] = useState(
+    localStorage?.getItem("openAIKey") || ""
+  );
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
@@ -59,7 +68,7 @@ export default function Transcriber({ source, perspective }: Props) {
       const maxValue = Math.max(...dataArray.current);
       // update volume display
       const volume = document.getElementById("volume");
-      volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
+      if (volume) volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
       // if volume threshold reached
       if (maxValue > 128 + volumeThresholdRef.current) {
         // clear silence timeout & interval if present
@@ -166,16 +175,63 @@ export default function Transcriber({ source, perspective }: Props) {
       messageRepo
         // @ts-ignore
         .create({ body: `<p>${text}</p>` })
-        .then((message) => console.log("message created: ", message))
-        .catch((error) => console.log("message error: ", error));
+        .then((message) => {
+          console.log("message created: ", message);
+          // parse topics and save...
+          const openai = new OpenAI({
+            apiKey: localStorage?.getItem("openAIKey"),
+            dangerouslyAllowBrowser: true,
+          });
+          openai.chat.completions
+            .create({
+              messages: [{ role: "user", content: `${prompt} ${text}` }],
+              model: "gpt-3.5-turbo",
+            })
+            .then(async (response) => {
+              const data = JSON.parse(response.choices[0].message.content);
+              console.log("Open AI response: ", data);
+              const topicRepo = await new SubjectRepository(Topic, {
+                perspective,
+                //@ts-ignore
+                source: message.id,
+              });
+              // store results as linked topic, meaning, & intent expressions
+              const createTopics = await Promise.all(
+                data.topics.map((topic) =>
+                  topicRepo
+                    // @ts-ignore
+                    .create({ topic })
+                    .then((expression) =>
+                      perspective.add({
+                        source: id,
+                        predicate: "flux://has_topic",
+                        // @ts-ignore
+                        target: expression.id,
+                      })
+                    )
+                )
+              );
+
+              Promise.all([createTopics]) // createMeaning, createIntent
+                .then(() => console.log("processing complete!"))
+                .catch(console.log);
+            })
+            .catch(console.log);
+        })
+        .catch(console.log);
     };
     return () => worker.current?.terminate();
   }, []);
 
   useEffect(() => {
-    if (transcribeAudio) startListening();
-    else stopListening();
+    if (transcribeAudio && !muted) startListening();
+    else if (listening.current) stopListening();
   }, [transcribeAudio]);
+
+  useEffect(() => {
+    if (muted && listening.current) stopListening();
+    else if (transcribeAudio) startListening();
+  }, [muted]);
 
   return (
     <div className={styles.wrapper}>
@@ -211,6 +267,16 @@ export default function Transcriber({ source, perspective }: Props) {
                 </j-menu-group>
               </j-menu>
             </j-flex>
+            <j-input
+              label="OpenAI key for topic parsing"
+              value={openAIKey}
+              placeholder="Required for topic parsing..."
+              onInput={(event) => {
+                const value = (event.target as HTMLInputElement).value;
+                setOpenAIKey(value);
+                localStorage?.setItem("openAIKey", value);
+              }}
+            />
             <j-flex a="center" gap="400" wrap>
               <j-text nomargin style={{ flexShrink: 0 }}>
                 Volume threshold to trigger recording
@@ -253,7 +319,11 @@ export default function Transcriber({ source, perspective }: Props) {
             <j-flex a="center" gap="400">
               <j-text nomargin>State:</j-text>
               <j-text color="color-white" nomargin>
-                {speechDetected ? "Recording!" : "Listening for speech..."}
+                {muted
+                  ? "Muted"
+                  : speechDetected
+                    ? "Recording!"
+                    : "Listening for speech..."}
               </j-text>
               {secondsOfSilence > 0 && (
                 <j-text nomargin>

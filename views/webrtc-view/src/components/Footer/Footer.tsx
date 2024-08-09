@@ -7,9 +7,10 @@ import styles from "./Footer.module.css";
 type Props = {
   webRTC: WebRTC;
   onToggleSettings: () => void;
+  setMuted: (state: boolean) => void;
 };
 
-export default function Footer({ webRTC, onToggleSettings }: Props) {
+export default function Footer({ webRTC, onToggleSettings, setMuted }: Props) {
   const {
     state: { showSettings },
     methods: { toggleShowSettings },
@@ -68,9 +69,10 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
         >
           <j-button
             variant={webRTC.localState.settings.audio ? "secondary" : "primary"}
-            onClick={() =>
-              webRTC.onToggleAudio(!webRTC.localState.settings.audio)
-            }
+            onClick={() => {
+              setMuted(!!webRTC.localState.settings.audio);
+              webRTC.onToggleAudio(!webRTC.localState.settings.audio);
+            }}
             square
             circle
             size="lg"
