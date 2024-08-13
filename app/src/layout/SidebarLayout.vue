@@ -110,6 +110,8 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .sidebar-layout--closed .sidebar-layout__drawer {
     opacity: 0;
@@ -130,6 +132,8 @@ export default defineComponent({
     opacity: 1;
     left: 0;
     top: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     z-index: 999;
   }
 }

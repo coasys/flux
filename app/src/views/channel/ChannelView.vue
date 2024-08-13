@@ -13,7 +13,30 @@
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
-      <div class="channel-view__header-actions">
+      <div v-if="isMobile" class="channel-view__header-actions">
+        <j-box pr="500" @click="onIsChannelChange">
+          <j-flex a="center" gap="200">
+            <j-icon name="hash" size="md" color="ui-300"></j-icon>
+            <j-text color="black" weight="700" size="500" nomargin>
+              {{ channel?.name }}
+            </j-text>
+          </j-flex>
+          <j-box pl="600">
+            <j-text variant="label" size="200">Change View</j-text>
+          </j-box>
+        </j-box>
+        <j-tooltip placement="auto" title="Manage views">
+          <j-button
+            v-if="sameAgent"
+            @click="() => goToEditChannel(channel?.id)"
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="md" name="plus"></j-icon>
+          </j-button>
+        </j-tooltip>
+      </div>
+      <div class="channel-view__header-actions" v-if="!isMobile">
         <div class="channel-view__header-left">
           <j-box pr="500">
             <j-flex a="center" gap="200">
@@ -34,7 +57,6 @@
               <input
                 :name="channel?.id"
                 type="radio"
-                :checked.prop="app.pkg === currentView"
                 :value.prop="app.pkg"
                 @change="changeCurrentView"
               />
@@ -54,7 +76,7 @@
           </div>
         </div>
       </div>
-      <div class="channel-view__header-right">
+      <div v-if="!isMobile" class="channel-view__header-right">
         <j-tooltip
           placement="auto"
           :title="isExpanded ? 'Minimize' : 'Fullsize'"
@@ -75,12 +97,21 @@
     <template v-for="app in apps">
       <component
         v-if="wcNames[app.pkg]"
-        v-show="currentView === app.pkg && wcNames[app.pkg]"
+        v-show="
+          (currentView === app.pkg && wcNames[app.pkg]) ||
+          (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
+        "
         :is="wcNames[app.pkg]"
         class="perspective-view"
+        :class="{
+          split: webrtcModalOpen,
+          right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view',
+        }"
         :source="channelId"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
+        :agent="agentClient"
+        :perspective="data.perspective"
+        :currentView="currentView"
+        :setModalOpen="() => (webrtcModalOpen = false)"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       />
@@ -110,33 +141,57 @@
         <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
+    <j-modal size="xs" v-if="isChangeChannel" :open="isChangeChannel">
+      <j-box pt="600" pb="800" px="400">
+        <j-box pb="300">
+          <j-text variant="heading-sm">Select a channel</j-text>
+        </j-box>
+        <label
+          :class="{
+            'channel-view-tab-2': true,
+            checked: app.pkg === currentView,
+          }"
+          v-for="app in apps"
+          @click="changeCurrentView"
+        >
+          <input
+            :name="channel?.id"
+            type="radio"
+            :checked.prop="app.pkg === currentView"
+            :value.prop="app.pkg"
+          />
+          <j-icon :name="app.icon" size="xs"></j-icon>
+          <span>{{ app.name }}</span>
+        </label>
+      </j-box>
+    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { ChannelView } from "@coasys/flux-types";
-import Hourglass from "@/components/hourglass/Hourglass.vue";
+import fetchFluxApp from "@/utils/fetchFluxApp";
+import { Ad4mClient } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
-  useSubject,
+  useMe,
   usePerspective,
   usePerspectives,
-  useMe,
+  useSubject,
   useSubjects,
 } from "@coasys/ad4m-vue-hooks";
 import {
-  Community,
-  Channel,
   App,
-  joinCommunity,
+  Channel,
+  Community,
   generateWCName,
+  joinCommunity,
 } from "@coasys/flux-api";
-import { Ad4mClient } from "@coasys/ad4m";
-import fetchFluxApp from "@/utils/fetchFluxApp";
+import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
+import { defineComponent, ref } from "vue";
 
 interface MentionTrigger {
   label: string;
@@ -191,6 +246,7 @@ export default defineComponent({
       channel,
       channelRepo,
       currentView: ref(""),
+      webrtcModalOpen: ref(false),
       allDefined: ref(false),
       ChannelView: ChannelView,
       showEditChannel: ref(false),
@@ -201,11 +257,15 @@ export default defineComponent({
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
       isExpanded: ref(false),
+      isChangeChannel: ref(false),
     };
   },
   computed: {
     sameAgent() {
       return this.channel?.author === this.agent?.did;
+    },
+    isMobile() {
+      return window.innerWidth <= 768;
     },
   },
   watch: {
@@ -281,13 +341,25 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
+      // if entering webrtc view close modal
+      if (value === "@coasys/flux-webrtc-view") this.webrtcModalOpen = false;
+      else if (
+        // if leaving webrtc view (& not small screen) open modal
+        this.currentView === "@coasys/flux-webrtc-view" &&
+        window.screen.width > 900
+      )
+        this.webrtcModalOpen = true;
       this.currentView = value;
+      this.isChangeChannel = false;
     },
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },
     onAgentClick(did: string) {
       this.toggleProfile(true, did);
+    },
+    onIsChannelChange() {
+      this.isChangeChannel = !this.isChangeChannel;
     },
     onChannelClick(channel: string) {
       this.$router.push({
@@ -382,6 +454,7 @@ export default defineComponent({
 }
 
 .channel-view {
+  position: relative;
   background: var(--app-channel-bg-color, transparent);
 }
 
@@ -417,9 +490,22 @@ export default defineComponent({
 }
 
 .perspective-view {
+  position: relative;
   height: calc(100% - var(--app-header-height));
   overflow-y: auto;
   display: block;
+}
+
+.split {
+  width: 50%;
+}
+
+.right {
+  position: absolute;
+  top: var(--app-header-height);
+  right: 0;
+  padding: var(--j-space-600);
+  width: 50%;
 }
 
 .channel-view__tabs {
@@ -443,7 +529,25 @@ export default defineComponent({
   border-bottom: 1px solid transparent;
 }
 
+.channel-view-tab-2 {
+  height: 100%;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
+  cursor: pointer;
+  position: relative;
+  padding: var(--j-space-300);
+  border-radius: 6px;
+}
+
 .channel-view-tab:hover {
+  color: var(--j-color-black);
+}
+
+.channel-view-tab-2:hover {
   color: var(--j-color-black);
 }
 
@@ -453,7 +557,20 @@ export default defineComponent({
   color: var(--j-color-black);
 }
 
+.channel-view-tab-2.checked {
+  position: relative;
+  background: var(--j-color-primary-100);
+  color: var(--j-color-black);
+}
+
 .channel-view-tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
+}
+
+.channel-view-tab-2 input {
   position: absolute;
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);

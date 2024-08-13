@@ -1,0 +1,45 @@
+# Flux Preact Starter Template
+
+## About
+
+This starter template includes everything you need to make an app for Flux.
+
+Dependencies:
+
+- ad4m
+- ad4m-connect
+- ad4m-elements
+
+## Setup
+
+Make sure to install the dependencies:
+
+```bash
+# yarn
+yarn install
+
+# npm
+npm install
+```
+
+## Development
+
+```bash
+# yarn
+yarn dev
+
+# npm
+npm dev
+```
+
+## Production
+
+```bash
+# yarn
+yarn build
+
+# npm
+npm build
+```
+
+The output of the build will end up in `dist/main.js`. This build will output a web component that can be published on npm by running `npm run release`.

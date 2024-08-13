@@ -37,7 +37,7 @@ export default function Item({
   const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
 
   const { profile } = useAgent<Profile>({ client: agentClient, did: () => userId, formatter: (profile: any) => {
-    return profileFormatter(profile.perspective.links)
+    return profileFormatter(profile?.perspective?.links || profile)
   } });
 
   const peer = webRTC.connections.find((p) => p.did === userId);

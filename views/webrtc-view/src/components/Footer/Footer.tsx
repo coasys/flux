@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef } from "preact/hooks";
-import UiContext from "../../context/UiContext";
 import { WebRTC } from "@coasys/flux-react-web";
+import { useContext, useRef } from "preact/hooks";
+import UiContext from "../../context/UiContext";
 
 import styles from "./Footer.module.css";
 
@@ -137,6 +137,18 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             <j-icon name="telephone-x"></j-icon>
           </j-button>
         </j-tooltip>
+
+        <j-tooltip placement="top" title="Debug">
+          <j-button
+            variant="secondary"
+            onClick={() => onToggleSettings(!showSettings)}
+            square
+            circle
+            size="lg"
+          >
+            <j-icon name="gear"></j-icon>
+          </j-button>
+        </j-tooltip>
         {/* 
         <j-tooltip placement="top" title="Experiments">
           <j-button
@@ -152,7 +164,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
         </j-tooltip> */}
       </div>
 
-      <div className={styles.debug}>
+      {/* <div className={styles.debug}>
         <j-tooltip placement="top" title="Debug">
           <j-button
             variant="secondary"
@@ -164,7 +176,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             <j-icon name="gear"></j-icon>
           </j-button>
         </j-tooltip>
-      </div>
+      </div> */}
     </div>
   );
 }

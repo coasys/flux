@@ -1,24 +1,25 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile, Profiles } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
+import { Profile } from "@coasys/flux-types";
+import { useEffect, useRef } from "preact/hooks";
 
-import styles from "./JoinScreen.module.css";
-import Disclaimer from "../Disclaimer";
 import Avatar from "../Avatar";
+import Disclaimer from "../Disclaimer";
+import styles from "./JoinScreen.module.css";
 
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
   onToggleSettings: () => void;
   did?: string;
+  currentView: string;
 };
 
 export default function JoinScreen({
   webRTC,
   profile,
   onToggleSettings,
-  did
+  did,
+  currentView,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -112,9 +113,11 @@ export default function JoinScreen({
         </j-button>
       </j-box>
 
-      <j-box pt="400">
-        <Disclaimer />
-      </j-box>
+      {currentView === "@coasys/flux-webrtc-view" && (
+        <j-box pt="400">
+          <Disclaimer />
+        </j-box>
+      )}
 
       <>
         {!webRTC.audioPermissionGranted && (
