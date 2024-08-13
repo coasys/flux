@@ -33,7 +33,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc5",
+    "@coasys/ad4m": "0.10.0-rc7",
     "@coasys/flux-api": "*",
     "@coasys/flux-comment-section": "*",
     "@coasys/flux-container": "*",
