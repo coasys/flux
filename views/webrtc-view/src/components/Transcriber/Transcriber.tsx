@@ -109,6 +109,7 @@ export default function Transcriber({ source, perspective }: Props) {
       id,
       float32Array,
       model: selectedModelRef.current,
+      type: "transcribe",
     });
     context.close();
   }
@@ -156,18 +157,21 @@ export default function Transcriber({ source, perspective }: Props) {
     // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
     worker.current = new TranscriptionWorker();
     worker.current.onmessage = (e) => {
-      const { id, text } = e.data;
-      setTranscripts((ts) => {
-        const match = ts.find((t) => t.id === id);
-        match.text = text;
-        match.done = true;
-        return [...ts];
-      });
-      messageRepo
-        // @ts-ignore
-        .create({ body: `<p>${text}</p>` })
-        .then((message) => console.log("message created: ", message))
-        .catch((error) => console.log("message error: ", error));
+      if (e.data.type === "transcribe") {
+        const { id, text } = e.data;
+        setTranscripts((ts) => {
+          const match = ts.find((t) => t.id === id);
+          match.text = text;
+          match.done = true;
+          return [...ts];
+        });
+
+        messageRepo
+          // @ts-ignore
+          .create({ body: `<p>${text}</p>` })
+          .then((message) => console.log("message created: ", message))
+          .catch((error) => console.log("message error: ", error));
+      }
     };
     return () => worker.current?.terminate();
   }, []);
