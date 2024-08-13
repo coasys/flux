@@ -1,11 +1,10 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { Relationship } from "@coasys/flux-api";
 import { useAgent } from "@coasys/flux-react-web";
-import { profileFormatter } from "@coasys/flux-utils";
+import { findTopics, profileFormatter } from "@coasys/flux-utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
-import Relationship from "../../models/Relationship";
 import Avatar from "../Avatar";
-import { findTopics } from "./../../utils";
 import styles from "./TimelineItem.module.scss";
 
 type Props = {

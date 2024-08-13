@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@coasys/flux-constants": "*",
-    "@coasys/flux-types": "*"
+    "@coasys/flux-types": "*",
+    "openai": "^4.55.5"
   },
   "peerDependencies": {
     "@coasys/ad4m": "0.10.0-rc7",

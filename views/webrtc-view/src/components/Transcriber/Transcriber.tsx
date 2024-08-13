@@ -1,9 +1,8 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { Message, SubjectRepository } from "@coasys/flux-api";
-import OpenAI from "openai";
+import { Message } from "@coasys/flux-api";
+import { processItem } from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
-import Topic from "../../models/Topic";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
 
@@ -18,9 +17,6 @@ const models = [
   // "distil-whisper/distil-large-v2",
 ];
 
-const prompt =
-  "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
-
 type Props = {
   source: string;
   perspective: any;
@@ -31,6 +27,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const [openAIKey, setOpenAIKey] = useState(
     localStorage?.getItem("openAIKey") || ""
   );
+  const [allTopics, setAllTopics] = useState<any[]>([]);
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
@@ -161,10 +158,26 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     }
   }
 
+  function getAllTopics() {
+    // gather up all existing topics in the neighbourhood
+    perspective
+      .getAllSubjectInstances("Topic")
+      .then(async (topics) => {
+        setAllTopics(
+          await Promise.all(
+            topics.map(async (t) => {
+              return { id: t.baseExpression, name: await t.topic };
+            })
+          )
+        );
+      })
+      .catch(console.log);
+  }
+
   useEffect(() => {
     // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
     worker.current = new TranscriptionWorker();
-    worker.current.onmessage = (e) => {
+    worker.current.onmessage = async (e) => {
       const { id, text } = e.data;
       setTranscripts((ts) => {
         const match = ts.find((t) => t.id === id);
@@ -172,56 +185,16 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         match.done = true;
         return [...ts];
       });
-      messageRepo
-        // @ts-ignore
-        .create({ body: `<p>${text}</p>` })
-        .then((message) => {
-          console.log("message created: ", message);
-          // parse topics and save...
-          const openai = new OpenAI({
-            apiKey: localStorage?.getItem("openAIKey"),
-            dangerouslyAllowBrowser: true,
-          });
-          openai.chat.completions
-            .create({
-              messages: [{ role: "user", content: `${prompt} ${text}` }],
-              model: "gpt-3.5-turbo",
-            })
-            .then(async (response) => {
-              const data = JSON.parse(response.choices[0].message.content);
-              console.log("Open AI response: ", data);
-              const topicRepo = await new SubjectRepository(Topic, {
-                perspective,
-                //@ts-ignore
-                source: message.id,
-              });
-              // store results as linked topic, meaning, & intent expressions
-              const createTopics = await Promise.all(
-                data.topics.map((topic) =>
-                  topicRepo
-                    // @ts-ignore
-                    .create({ topic })
-                    .then((expression) =>
-                      perspective.add({
-                        source: id,
-                        predicate: "flux://has_topic",
-                        // @ts-ignore
-                        target: expression.id,
-                      })
-                    )
-                )
-              );
-
-              Promise.all([createTopics]) // createMeaning, createIntent
-                .then(() => console.log("processing complete!"))
-                .catch(console.log);
-            })
-            .catch(console.log);
-        })
+      // @ts-ignore
+      const message = (await messageRepo.create({
+        body: `<p>${text}</p>`,
+      })) as any;
+      processItem(perspective, allTopics, { id: message.id, text })
+        .then(() => getAllTopics())
         .catch(console.log);
     };
     return () => worker.current?.terminate();
-  }, []);
+  }, [allTopics]);
 
   useEffect(() => {
     if (transcribeAudio && !muted) startListening();
@@ -232,6 +205,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     if (muted && listening.current) stopListening();
     else if (transcribeAudio) startListening();
   }, [muted]);
+
+  useEffect(() => getAllTopics(), []);
 
   return (
     <div className={styles.wrapper}>

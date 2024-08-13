@@ -1,6 +1,3 @@
-import { SubjectRepository } from "@coasys/flux-api";
-import Relationship from "../models/Relationship";
-
 export function transformItem(channelId, type, item) {
   // used to transform message, post, or task expressions into a common format
   const newItem = {
@@ -23,23 +20,4 @@ export function transformItem(channelId, type, item) {
     newItem.icon = "kanban";
   }
   return newItem;
-}
-
-export async function findRelationships(perspective, itemId) {
-  return await new SubjectRepository(Relationship, {
-    perspective,
-    source: itemId,
-  }).getAllData();
-}
-
-export async function findTopics(perspective, relationships) {
-  return await Promise.all(
-    relationships.map(
-      (r) =>
-        new Promise(async (resolve) => {
-          const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
-          resolve(await topicProxy.topic);
-        })
-    )
-  );
 }

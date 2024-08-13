@@ -1,44 +1,48 @@
+import App from "./app";
+import Channel from "./channel";
+import Community from "./community";
+import createAgentWebLink from "./createAgentWebLink";
 import createCommunity from "./createCommunity";
+import createProfile from "./createProfile";
+import { SubjectRepository } from "./factory";
+import getAd4mProfile from "./getAd4mProfile";
 import getAgentLinks from "./getAgentLinks";
-import getMe from "./getMe";
+import getAgentWebLinks from "./getAgentWebLinks";
 import type { Me } from "./getMe";
+import getMe from "./getMe";
 import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import joinCommunity from "./joinCommunity";
-import subscribeToLinks from "./subscribeToLinks";
-import Channel from "./channel";
-import Community from "./community";
 import Message from "./message";
 import Post from "./post";
-import App from "./app";
-import updateProfile from "./updateProfile";
-import createProfile from "./createProfile";
-import createAgentWebLink from "./createAgentWebLink";
-import getAgentWebLinks from "./getAgentWebLinks";
-import getAd4mProfile from "./getAd4mProfile";
+import Relationship from "./relationship";
+import subscribeToLinks from "./subscribeToLinks";
 import subscribeToSyncState from "./subscribeToSyncState";
-import { SubjectRepository } from "./factory";
+import Topic from "./topic";
+import updateProfile from "./updateProfile";
 export * from "./npmApi";
 
 export {
-  SubjectRepository,
-  Me,
   App,
   Channel,
   Community,
-  Message,
-  Post,
+  createAgentWebLink,
   createCommunity,
+  createProfile,
+  getAd4mProfile,
   getAgentLinks,
+  getAgentWebLinks,
   getMe,
   getPerspectiveMeta,
   getProfile,
   joinCommunity,
+  Me,
+  Message,
+  Post,
+  Relationship,
+  SubjectRepository,
   subscribeToLinks,
-  updateProfile,
-  createProfile,
-  createAgentWebLink,
-  getAgentWebLinks,
-  getAd4mProfile,
   subscribeToSyncState,
+  Topic,
+  updateProfile,
 };

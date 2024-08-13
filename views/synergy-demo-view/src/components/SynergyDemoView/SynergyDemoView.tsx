@@ -1,8 +1,8 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Channel, SubjectRepository } from "@coasys/flux-api";
+import { findRelationships, findTopics } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 import Timeline from "../Timeline";
-import { findRelationships, findTopics } from "./../../utils";
 import styles from "./SynergyDemoView.module.scss";
 
 type Props = {
@@ -62,7 +62,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
-
     let newMatches = [];
     Promise.all(
       channels
