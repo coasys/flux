@@ -10,12 +10,6 @@ export default class Intent {
   })
   type: string;
 
-  // @SubjectProperty({
-  //   through: "rdf://description",
-  //   resolveLanguage: "literal",
-  // })
-  // desc: "";
-
   @SubjectProperty({
     through: "flux://intent",
     writable: true,

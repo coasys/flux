@@ -3,13 +3,11 @@ import { Message, Post, SubjectRepository } from "@coasys/flux-api";
 import { isEqual } from "lodash";
 import OpenAI from "openai";
 import { useEffect, useState } from "preact/hooks";
+import Relationship from "../../models/Relationship";
 import Topic from "../../models/Topic";
 import TimelineItem from "../TimelineItem";
-import { transformItem } from "./../../utils";
+import { findRelationships, transformItem } from "./../../utils";
 import styles from "./Timeline.module.scss";
-
-const prompt =
-  "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
 
 type Props = {
   agent: any;
@@ -22,6 +20,8 @@ type Props = {
   totalMatches: number;
   scrollToTimeline: (index: number) => void;
   synergize: (item: any, topic: string) => void;
+  allTopics: any[];
+  getAllTopics: () => void;
 };
 
 export default function Timeline({
@@ -34,6 +34,8 @@ export default function Timeline({
   totalMatches,
   scrollToTimeline,
   synergize,
+  allTopics,
+  getAllTopics,
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<any>(itemId || null);
@@ -65,49 +67,70 @@ export default function Timeline({
       return `${totalMatches - index} more match${totalMatches - index > 1 ? "es" : ""}`;
   }
 
+  async function parseTopics(item) {
+    const prompt = `Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of between (min) 1 and (max) 5 objects which each contain a name property (one word string in lowercase) describing the topic of the content and a relevance property with a number between 0 and 100 indicating how relevant the topic is to the text. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. If any of the selected topics are close to the topics listed in this array ([${allTopics.map((t) => t.name)}]), use the existing topics instead of creating new ones: <br/> <br/>`;
+    const openai = new OpenAI({
+      apiKey: localStorage?.getItem("openAIKey"),
+      dangerouslyAllowBrowser: true,
+    });
+    const result = await openai.chat.completions.create({
+      messages: [{ role: "user", content: `${prompt} ${item.text}` }],
+      model: "gpt-3.5-turbo",
+    });
+    const data = JSON.parse(result.choices[0].message.content);
+    console.log("Open AI response: ", data);
+    return data;
+  }
+
+  async function createTopic(itemId, topic) {
+    const { name, relevance } = topic;
+    let topicId;
+    // check if topic already exists
+    const match = allTopics.find((t) => t.name === name);
+    if (match) topicId = match.id;
+    else {
+      // create topic
+      const topicRepo = await new SubjectRepository(Topic, { perspective });
+      //@ts-ignore
+      const topicExpression = (await topicRepo.create({ topic: name })) as any;
+      topicId = topicExpression.id;
+    }
+    // create relationship to link topic with expression
+    const relationshipRepo = await new SubjectRepository(Relationship, {
+      perspective,
+      source: itemId,
+    });
+    //@ts-ignore
+    return await relationshipRepo.create({
+      expression: itemId,
+      tag: topicId,
+      relevance,
+    });
+  }
+
+  async function processItem(item) {
+    return new Promise(async (resolve: any) => {
+      // check for existing relationships
+      const relationships = await findRelationships(perspective, item.id);
+      // skip if already processed
+      if (relationships.length) resolve();
+      else {
+        // parse & create new topics
+        const data = await parseTopics(item);
+        Promise.all(data.topics.map((topic) => createTopic(item.id, topic)))
+          .then(() => resolve())
+          .catch(console.log);
+      }
+    });
+  }
+
   async function process() {
     setProcessing(true);
-    // send prompt & item text to Open AI
-    Promise.all(
-      items.map(
-        (item) =>
-          new Promise(async (resolve: any) => {
-            const topicRepo = await new SubjectRepository(Topic, {
-              perspective,
-              //@ts-ignore
-              source: item.id,
-            });
-            const topics = await topicRepo.getAllData();
-            if (topics.length) resolve();
-            else {
-              const openai = new OpenAI({
-                apiKey: localStorage?.getItem("openAIKey"),
-                dangerouslyAllowBrowser: true,
-              });
-              openai.chat.completions
-                .create({
-                  messages: [
-                    { role: "user", content: `${prompt} ${item.text}` },
-                  ],
-                  model: "gpt-3.5-turbo",
-                })
-                .then(async (response) => {
-                  const data = JSON.parse(response.choices[0].message.content);
-                  console.log("Open AI response: ", data);
-                  // store results as linked topic, meaning, & intent expressions
-                  Promise.all(
-                    // @ts-ignore
-                    data.topics.map((topic) => topicRepo.create({ topic }))
-                  )
-                    .then(() => resolve())
-                    .catch(console.log);
-                })
-                .catch(console.log);
-            }
-          })
-      )
-    )
-      .then(() => setProcessing(false))
+    Promise.all(items.map((item) => processItem(item)))
+      .then(() => {
+        getAllTopics();
+        setProcessing(false);
+      })
       .catch(console.log);
   }
 
@@ -133,7 +156,7 @@ export default function Timeline({
       const item = document.getElementById(`${index}-${selectedItemId}`);
       const timelineItems = document.getElementById(`timeline-items-${index}`);
       timelineItems.scrollBy({
-        top: item.getBoundingClientRect().top - 420,
+        top: item?.getBoundingClientRect().top - 420,
         behavior: "smooth",
       });
     }
@@ -146,12 +169,8 @@ export default function Timeline({
       items.map(
         (item) =>
           new Promise(async (resolve: any) => {
-            const topics = await new SubjectRepository(Topic, {
-              perspective,
-              //@ts-ignore
-              source: item.id,
-            }).getAllData();
-            if (!topics.length) match = true;
+            const relationships = await findRelationships(perspective, item.id);
+            if (!relationships.length) match = true;
             resolve();
           })
       )

@@ -1,8 +1,11 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { useAgent } from "@coasys/flux-react-web";
 import { profileFormatter } from "@coasys/flux-utils";
-import Topic from "../../models/Topic";
+import { isEqual } from "lodash";
+import { useEffect, useState } from "preact/hooks";
+import Relationship from "../../models/Relationship";
 import Avatar from "../Avatar";
+import { findTopics } from "./../../utils";
 import styles from "./TimelineItem.module.scss";
 
 type Props = {
@@ -27,6 +30,7 @@ export default function TimelineItem({
   synergize,
 }: Props) {
   const { id, timestamp, author, text, icon } = item;
+  const [topics, setTopics] = useState<any[]>([]);
 
   const { profile } = useAgent({
     client: agent,
@@ -35,11 +39,22 @@ export default function TimelineItem({
     formatter: profileFormatter,
   });
 
-  const { entries: topics } = useSubjects({
+  const { entries: relationships } = useSubjects({
     perspective,
     source: id,
-    subject: Topic,
+    subject: Relationship,
   });
+
+  useEffect(() => {
+    if (relationships.length) {
+      findTopics(perspective, relationships).then((results) => {
+        setTopics((prevItems) => {
+          if (!isEqual(prevItems, results)) return results;
+          return prevItems;
+        });
+      });
+    }
+  }, [relationships]);
 
   return (
     <div
@@ -67,15 +82,15 @@ export default function TimelineItem({
           <j-icon name={icon} />
           <Avatar size="sm" did={author} profile={profile} />
           <j-flex gap="300" wrap>
-            {topics.map((t) => (
+            {topics.map((topic) => (
               <button
-                className={`${styles.topic} ${selected && selectedTopic === t.topic && styles.focus}`}
+                className={`${styles.topic} ${selected && selectedTopic === topic && styles.focus}`}
                 onClick={() => {
                   setSelectedItemId(id);
-                  synergize(item, t.topic);
+                  synergize(item, topic);
                 }}
               >
-                #{t.topic}
+                #{topic}
               </button>
             ))}
           </j-flex>

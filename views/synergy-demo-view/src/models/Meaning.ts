@@ -10,12 +10,6 @@ export default class Meaning {
   })
   type: string;
 
-  // @SubjectProperty({
-  //   through: "rdf://description",
-  //   resolveLanguage: "literal",
-  // })
-  // desc: "";
-
   @SubjectProperty({
     through: "flux://meaning",
     writable: true,

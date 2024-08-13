@@ -1,8 +1,8 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Channel, SubjectRepository } from "@coasys/flux-api";
 import { useEffect, useState } from "preact/hooks";
-import Topic from "../../models/Topic";
 import Timeline from "../Timeline";
+import { findRelationships, findTopics } from "./../../utils";
 import styles from "./SynergyDemoView.module.scss";
 
 type Props = {
@@ -16,6 +16,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     localStorage?.getItem("openAIKey") || ""
   );
   const [matches, setMatches] = useState<any[]>([]);
+  const [allTopics, setAllTopics] = useState<any[]>([]);
   const [topic, setTopic] = useState("");
 
   async function findMatches(
@@ -23,27 +24,24 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     subjectClass: string,
     topic: string
   ): Promise<any[]> {
-    // searches for instances of the subject class with matching topics in the channel
+    // searches for items of the subject class with matching topics in the channel
     return await new Promise(async (resolveMatches: any) => {
       const newMatches = [];
-      const instances = await new SubjectRepository(subjectClass, {
+      const items = await new SubjectRepository(subjectClass, {
         perspective,
         source: channel.id,
       }).getAllData();
-
       Promise.all(
-        instances.map(
-          (instance: any) =>
+        items.map(
+          (item: any) =>
             new Promise(async (resolve: any) => {
-              // fetch all topics attached to the instance
-              const instanceTopics = await new SubjectRepository(Topic, {
+              const relationships = await findRelationships(
                 perspective,
-                source: instance.id,
-              }).getAllData();
-              // search for matches with source topics
-              instanceTopics.forEach((it: any) => {
-                if (topic === it.topic)
-                  newMatches.push({ channel, itemId: instance.id });
+                item.id
+              );
+              const topics = await findTopics(perspective, relationships);
+              topics.forEach((t: any) => {
+                if (topic === t) newMatches.push({ channel, itemId: item.id });
               });
               resolve();
             })
@@ -97,9 +95,28 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     timeline.scrollIntoView({ behavior: "smooth" });
   }
 
+  function getAllTopics() {
+    // gather up all existing topics in the neighbourhood
+    perspective
+      .getAllSubjectInstances("Topic")
+      .then(async (topics) => {
+        setAllTopics(
+          await Promise.all(
+            topics.map(async (t) => {
+              return { id: t.baseExpression, name: await t.topic };
+            })
+          )
+        );
+      })
+      .catch(console.log);
+  }
+
+  // reset matches when channel changes
   useEffect(() => {
     setMatches([]);
   }, [source]);
+
+  useEffect(() => getAllTopics(), []);
 
   return (
     <div className={styles.container}>
@@ -118,6 +135,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           }}
         />
       </j-box>
+      <j-flex gap="400">
+        All topics:
+        {allTopics.map((t) => (
+          <j-text>#{t.name}</j-text>
+        ))}
+      </j-flex>
       {window.innerWidth > 1200 ? (
         <j-flex className={styles.wrapper}>
           <div style={{ flexBasis: "50%", flexShrink: 0 }}>
@@ -130,6 +153,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               scrollToTimeline={scrollToTimeline}
               index={0}
               totalMatches={matches.length}
+              allTopics={allTopics}
+              getAllTopics={getAllTopics}
             />
           </div>
           <j-flex gap="500" className={styles.timelines}>
@@ -144,6 +169,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
                 itemId={match.itemId}
                 index={index + 1}
                 totalMatches={matches.length}
+                allTopics={allTopics}
+                getAllTopics={getAllTopics}
               />
             ))}
           </j-flex>
@@ -159,6 +186,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             scrollToTimeline={scrollToTimeline}
             index={0}
             totalMatches={matches.length}
+            allTopics={allTopics}
+            getAllTopics={getAllTopics}
           />
           {matches.map((match, index) => (
             <Timeline
@@ -171,6 +200,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               itemId={match.itemId}
               index={index + 1}
               totalMatches={matches.length}
+              allTopics={allTopics}
+              getAllTopics={getAllTopics}
             />
           ))}
         </j-flex>
