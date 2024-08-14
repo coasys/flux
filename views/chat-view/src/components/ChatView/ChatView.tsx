@@ -12,6 +12,8 @@ import styles from "./ChatView.module.css";
 import { EntryType, Profile } from "@coasys/flux-types";
 import Avatar from "../Avatar";
 import { profileFormatter } from "@coasys/flux-utils";
+// @ts-ignore
+import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -41,6 +43,7 @@ export default function ChatView({
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
   const editor = useRef(null);
   const threadContainer = useRef(null);
+  const worker = useRef<Worker | null>(null);
 
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
@@ -66,13 +69,46 @@ export default function ChatView({
     formatter: profileFormatter
   });
 
+  useEffect(() => {
+    worker.current = new EmbedingWorker();
+
+    worker.current.onmessage = async (e) => {
+      if (e.data.type === "embed") {
+        const { text, embedding, messageId } = e.data;
+        
+        await repo.update(messageId, { embedding: Array.from(embedding) });
+      }
+    }
+
+    return () => {
+      worker.current?.terminate();
+    };
+  }, [])
+
+  useEffect(() => {
+    repo.getAllData().then((messages) => {
+      console.log("messages: ", messages);
+    }).catch((error) => console.log("message error: ", error));
+  }, []);
+
   async function submit() {
     try {
       const html = editor.current?.editor.getHTML();
+      const text = editor.current?.editor.getText();
       editor.current?.clear();
       const message = await repo.create({
         body: html,
       });
+
+      console.log("message created: ", message);
+
+      worker.current.postMessage({
+        type: "embed",
+        text: text,
+        // @ts-ignore
+        messageId: message?.id,
+      })
+
       if (replyMessage) {
         perspective.addLinks([
           {

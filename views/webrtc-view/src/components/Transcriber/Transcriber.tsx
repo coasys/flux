@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
+import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 
 const defaultVolumeThreshold = 40; // 0 - 128
 const defaultSilenceTimeout = 3; // seconds
@@ -44,7 +45,9 @@ export default function Transcriber({ source, perspective }: Props) {
   const sourceNode = useRef(null);
   const recording = useRef(false);
   const listening = useRef(false);
+  const query = useRef("");
   const worker = useRef<Worker | null>(null);
+  const embeddingWorker = useRef<Worker | null>(null);
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -114,6 +117,12 @@ export default function Transcriber({ source, perspective }: Props) {
     context.close();
   }
 
+  async function embed(text: string) {
+    const id = uuidv4();
+
+    EmbedingWorker.current?.postMessage({ id, text, type: "embed" });
+  }
+
   function startListening() {
     navigator.mediaDevices
       .getUserMedia({
@@ -156,8 +165,9 @@ export default function Transcriber({ source, perspective }: Props) {
   useEffect(() => {
     // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
     worker.current = new TranscriptionWorker();
+    embeddingWorker.current = new EmbedingWorker();
+
     worker.current.onmessage = (e) => {
-      if (e.data.type === "transcribe") {
         const { id, text } = e.data;
         setTranscripts((ts) => {
           const match = ts.find((t) => t.id === id);
@@ -169,11 +179,36 @@ export default function Transcriber({ source, perspective }: Props) {
         messageRepo
           // @ts-ignore
           .create({ body: `<p>${text}</p>` })
-          .then((message) => console.log("message created: ", message))
-          .catch((error) => console.log("message error: ", error));
-      }
+          .then((message) => {
+            console.log("message created: ", message);
+
+            embeddingWorker.current.postMessage({
+              type: "embed",
+              text,
+              // @ts-ignore
+              messageId: message?.id,
+            })
+          })
+          .catch((error) => console.log("message error 1: ", error));
     };
-    return () => worker.current?.terminate();
+
+    embeddingWorker.current.onmessage = (e) => {
+      if (e.data.type === "embed") {
+        const { embedding, messageId } = e.data;
+        console.log("embedding: ", embedding, Array.isArray(Array.from(embedding)));
+        messageRepo
+          // @ts-ignore
+          .update(messageId, { embedding: Array.from(embedding) })
+          .then((message) => {
+            console.log("message updated: ", message);
+          })
+          .catch((error) => console.log("message error 2: ", error));
+      }
+    }
+    return () => {
+      worker.current?.terminate();
+      embeddingWorker.current?.terminate();
+    }
   }, []);
 
   useEffect(() => {
