@@ -54,6 +54,11 @@ export class Message {
     through: REPLY_TO,
   })
   replies: string[] = [];
+
+  @SubjectCollection({
+    through: "ad4m://embeding",
+  })
+  embedding: number[] = []
 }
 
 export default Message;
