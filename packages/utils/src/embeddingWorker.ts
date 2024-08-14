@@ -10,9 +10,21 @@ onmessage = async function (message) {
         const { text, messageId } = message.data;
         const data = await embed(text);
         postMessage({ type: "embed", text, embedding: data, messageId });
+    } else if(message.data.type === "query-embed") {
+        const { text, messageId } = message.data;
+        const data = await embed(text, false);
+        postMessage({ type: "query-embed", text, embedding: data, messageId });
     } else if (message.data.type === "similarity") {
-        const similarity = await cos_sim(message.data.embedding1, message.data.embedding2);
-        postMessage({ type: "similarity", similarity });
+        const messages = message.data.messages;
+        const resolvedMessages = await Promise.all(messages.map(async (m) => {
+            const similarity = await cos_sim(message.data.queryEmbedding, m.embedding);
+            m.similarity = similarity;
+            return m;
+        }))
+
+        resolvedMessages.sort((a, b) => b.similarity - a.similarity);
+
+        postMessage({ type: "similarity", messages: resolvedMessages });
     }
 };
 
