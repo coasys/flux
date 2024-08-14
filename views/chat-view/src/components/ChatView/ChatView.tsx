@@ -77,6 +77,8 @@ export default function ChatView({
         const { text, embedding, messageId } = e.data;
         
         await repo.update(messageId, { embedding: Array.from(embedding) });
+      } else if (e.data.type === "similarity") {
+        console.log("similarity: ", e.data.messages);
       }
     }
 
@@ -87,7 +89,8 @@ export default function ChatView({
 
   useEffect(() => {
     repo.getAllData().then((messages) => {
-      console.log("messages: ", messages);
+      similarity();
+
     }).catch((error) => console.log("message error: ", error));
   }, []);
 
@@ -127,6 +130,41 @@ export default function ChatView({
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async function queryEmbedding(text: string) {
+    return new Promise((resolve, reject) => {
+      worker.current.postMessage({
+        type: "query-embed",
+        text,
+        messageId: new Date().getTime().toString(),
+      });
+
+      worker.current.onmessage = (e) => {
+        console.log("e: ", e);
+        if (e.data.type === "query-embed") {
+          resolve(e.data.embedding);
+        }
+      }
+    });
+  }
+
+  async function similarity(query: string = "food") {
+    const queryEmbed = await queryEmbedding(query);
+    const messages = await repo.getAllData();
+    const embededMessages = messages.filter((m) => m.embedding && m.embedding.length > 0);
+    const embededMessagesFloat = embededMessages.map((m) => {
+      return {
+        ...m,
+        embedding: Float32Array.from(m.embedding.map((e) => parseFloat(e)))
+      }
+    });
+
+    worker.current.postMessage({
+      type: "similarity",
+      messages: embededMessagesFloat,
+      queryEmbedding: queryEmbed
+    });
   }
 
   function onKeydown(e) {
