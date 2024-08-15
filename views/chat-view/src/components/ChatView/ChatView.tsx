@@ -334,7 +334,7 @@ export default function ChatView({
 
       <j-modal 
         open={showSimilarityModal}
-        onToggle={() => setShowSimilarityModal(e.currentTarget.open)}
+        onToggle={(e) => setShowSimilarityModal(e.currentTarget.open)}
       >
           <j-box px="800" py="600">
             <j-box pb="800">
@@ -353,6 +353,7 @@ export default function ChatView({
                       showAvatar={true}
                       isReplying={false}
                       isThread={false}
+                      hideToolbar={true}
                     />
                     <j-box px="400">
                       <j-text variant="label" >
