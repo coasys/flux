@@ -14,7 +14,7 @@ onmessage = async function (message) {
         const data = await embed(text);
         postMessage({ type: "query-embed", text, embedding: data, messageId });
     } else if (message.data.type === "similarity") {
-        const messages = message.data.messages;
+        const messages = message.data.messages.filter(m => m.body !== undefined );
         const resolvedMessages = await Promise.all(messages.map(async (m) => {
             const queryEmbedding = await embed("food");
             const embedding = await embed(m.body);
