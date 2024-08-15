@@ -11,7 +11,7 @@ import { getPosition } from "../../utils/getPosition";
 import styles from "./ChatView.module.css";
 import { EntryType, Profile } from "@coasys/flux-types";
 import Avatar from "../Avatar";
-import { profileFormatter } from "@coasys/flux-utils";
+import { profileFormatter, set } from "@coasys/flux-utils";
 // @ts-ignore
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import MessageItem from "../MessageItem";
@@ -47,6 +47,7 @@ export default function ChatView({
   const worker = useRef<Worker | null>(null);
   const [similarityMessages, setSimilarityMessages] = useState<Message[]>([]);
   const [showSimilarityModal, setShowSimilarityModal] = useState(false);
+  const [similarityLoading, setSimilarityLoading] = useState(false);
 
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
@@ -76,14 +77,11 @@ export default function ChatView({
     worker.current = new EmbedingWorker();
 
     worker.current.onmessage = async (e) => {
-      if (e.data.type === "embed") {
-        const { text, embedding, messageId } = e.data;
-        
-        await repo.update(messageId, { embedding: Array.from(embedding) });
-      } else if (e.data.type === "similarity") {
+      if (e.data.type === "similarity") {
         console.log("similarity: ", e.data.messages);
         setSimilarityMessages(e.data.messages);
         setShowSimilarityModal(true);
+        setSimilarityLoading(false);
       }
     }
 
@@ -97,18 +95,13 @@ export default function ChatView({
       const html = editor.current?.editor.getHTML();
       const text = editor.current?.editor.getText();
       editor.current?.clear();
+      const queryEmbed = await queryEmbedding(text);
       const message = await repo.create({
         body: html,
+        embedding: Array.from(queryEmbed)
       });
 
       console.log("message created: ", message);
-
-      worker.current.postMessage({
-        type: "embed",
-        text: text,
-        // @ts-ignore
-        messageId: message?.id,
-      })
 
       if (replyMessage) {
         perspective.addLinks([
@@ -149,7 +142,8 @@ export default function ChatView({
   }
 
   async function similarity(query: string = "food") {
-    const queryEmbed = await queryEmbedding(query);
+    // const queryEmbed = await queryEmbedding(query);
+    setSimilarityLoading(true);
     const messages = await repo.getAllData();
     const embededMessages = messages.filter((m) => m.embedding && m.embedding.length > 0);
     const embededMessagesFloat = embededMessages.map((m) => {
@@ -253,7 +247,7 @@ export default function ChatView({
 
         <div style={{position: "absolute", top: 30, zIndex: 100000, width: '100%'}}>
           <j-flex a="center" j="center">
-            <j-button onClick={() => similarity()}>
+            <j-button onClick={() => similarity()} loading={similarityLoading}>
               Search Similarity
             </j-button>
           </j-flex>
