@@ -14,6 +14,7 @@ import Avatar from "../Avatar";
 import { profileFormatter } from "@coasys/flux-utils";
 // @ts-ignore
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
+import MessageItem from "../MessageItem";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -44,6 +45,8 @@ export default function ChatView({
   const editor = useRef(null);
   const threadContainer = useRef(null);
   const worker = useRef<Worker | null>(null);
+  const [similarityMessages, setSimilarityMessages] = useState<Message[]>([]);
+  const [showSimilarityModal, setShowSimilarityModal] = useState(false);
 
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
@@ -79,6 +82,8 @@ export default function ChatView({
         await repo.update(messageId, { embedding: Array.from(embedding) });
       } else if (e.data.type === "similarity") {
         console.log("similarity: ", e.data.messages);
+        setSimilarityMessages(e.data.messages);
+        setShowSimilarityModal(true);
       }
     }
 
@@ -86,13 +91,6 @@ export default function ChatView({
       worker.current?.terminate();
     };
   }, [])
-
-  useEffect(() => {
-    repo.getAllData().then((messages) => {
-      similarity();
-
-    }).catch((error) => console.log("message error: ", error));
-  }, []);
 
   async function submit() {
     try {
@@ -133,15 +131,16 @@ export default function ChatView({
   }
 
   async function queryEmbedding(text: string) {
+    const worker = new EmbedingWorker();
+
     return new Promise((resolve, reject) => {
-      worker.current.postMessage({
+      worker.postMessage({
         type: "query-embed",
         text,
         messageId: new Date().getTime().toString(),
       });
 
-      worker.current.onmessage = (e) => {
-        console.log("e: ", e);
+      worker.onmessage = (e) => {
         if (e.data.type === "query-embed") {
           resolve(e.data.embedding);
         }
@@ -156,14 +155,14 @@ export default function ChatView({
     const embededMessagesFloat = embededMessages.map((m) => {
       return {
         ...m,
-        embedding: Float32Array.from(m.embedding.map((e) => parseFloat(e)))
+        embedding: m.embedding.map((e) => parseFloat(e))
       }
     });
 
     worker.current.postMessage({
       type: "similarity",
       messages: embededMessagesFloat,
-      queryEmbedding: queryEmbed
+      queryEmbedding: query
     });
   }
 
@@ -252,6 +251,14 @@ export default function ChatView({
         }}
       ></j-emoji-picker>
 
+        <div style={{position: "absolute", top: 30, zIndex: 100000, width: '100%'}}>
+          <j-flex a="center" j="center">
+            <j-button onClick={() => similarity()}>
+              Search Similarity
+            </j-button>
+          </j-flex>
+        </div>
+
       <div className={styles.inner}>
         <MessageList
           onEmojiClick={onOpenEmojiPicker}
@@ -323,6 +330,41 @@ export default function ChatView({
           </flux-editor>
         </footer>
       </div>
+      
+
+      <j-modal 
+        open={showSimilarityModal}
+        onToggle={() => setShowSimilarityModal(e.currentTarget.open)}
+      >
+          <j-box px="800" py="600">
+            <j-box pb="800">
+              <j-text nomargin variant="heading">
+                Similarity
+              </j-text>
+            </j-box>
+            <j-flex direction="column" gap="400">
+              {similarityMessages.map((m) => (
+                <j-box key={m.id} p="400" border="1px solid var(--j-color-gray-300)">
+                  <j-flex direction="column" gap="200">
+                    <MessageItem 
+                      agent={agent}
+                      message={m}
+                      perspective={perspective}
+                      showAvatar={true}
+                      isReplying={false}
+                      isThread={false}
+                    />
+                    <j-box px="400">
+                      <j-text variant="label" >
+                        Similarity: {m.similarity}
+                      </j-text>
+                    </j-box>
+                  </j-flex>
+                </j-box>
+              ))}
+            </j-flex>
+          </j-box>
+      </j-modal>
 
       <div ref={threadContainer} className={styles.thread}>
         <div className={styles.threadHeader}>

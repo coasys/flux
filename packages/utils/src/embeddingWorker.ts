@@ -4,7 +4,6 @@ let embeddingsDict = {};
 let embedder;
 let currentNullVector: any[] = [];
 
-
 onmessage = async function (message) {
     if (message.data.type === "embed") {
         const { text, messageId } = message.data;
@@ -12,19 +11,26 @@ onmessage = async function (message) {
         postMessage({ type: "embed", text, embedding: data, messageId });
     } else if(message.data.type === "query-embed") {
         const { text, messageId } = message.data;
-        const data = await embed(text, false);
+        const data = await embed(text);
         postMessage({ type: "query-embed", text, embedding: data, messageId });
     } else if (message.data.type === "similarity") {
         const messages = message.data.messages;
         const resolvedMessages = await Promise.all(messages.map(async (m) => {
-            const similarity = await cos_sim(message.data.queryEmbedding, m.embedding);
+            const queryEmbedding = await embed("food");
+            const embedding = await embed(m.body);
+            console.log('embedding', embedding, m.embedding, queryEmbedding);
+            const similarity = await cos_sim(queryEmbedding, embedding);
             m.similarity = similarity;
             return m;
         }))
 
         resolvedMessages.sort((a, b) => b.similarity - a.similarity);
 
-        postMessage({ type: "similarity", messages: resolvedMessages });
+        const messagesPrecision = resolvedMessages
+            .filter(m => !Number.isNaN(m.similarity))
+            .map((m) => ({ ...m, similarity: m.similarity.toFixed(3) }));
+
+        postMessage({ type: "similarity", messages: messagesPrecision });
     }
 };
 
