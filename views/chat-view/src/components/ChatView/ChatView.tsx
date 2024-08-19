@@ -96,12 +96,24 @@ export default function ChatView({
       const text = editor.current?.editor.getText();
       editor.current?.clear();
       const queryEmbed = await queryEmbedding(text);
+      const expr = await perspective.createExpression({
+        model: "TaylorAI/gte-tiny",
+        data: queryEmbed,
+      }, "QmzSYwdcW2siKPjxdzpLZZKmQhZKiHPbwCJiBPKg31pMi73UmFz");
+
+      console.log("expr", expr);
+
       const message = await repo.create({
         body: html,
-        embedding: Array.from(queryEmbed)
       });
 
-      console.log("message created: ", message);
+      const link = await perspective.add({
+        source: message.id,
+        predicate: "ad4m://embedding",
+        target: expr,
+      });
+
+      console.log("message created: ", message, link);
 
       if (replyMessage) {
         perspective.addLinks([
@@ -142,21 +154,40 @@ export default function ChatView({
   }
 
   async function similarity(query: string = "food") {
-    // const queryEmbed = await queryEmbedding(query);
+    const queryEmbed = await queryEmbedding(query);
     setSimilarityLoading(true);
+
     const messages = await repo.getAllData();
-    const embededMessages = messages.filter((m) => m.embedding && m.embedding.length > 0);
-    const embededMessagesFloat = embededMessages.map((m) => {
-      return {
-        ...m,
-        embedding: m.embedding.map((e) => parseFloat(e))
+    const getEmbedding = messages.map(async (m) => {
+      const link = await perspective.get(new LinkQuery({
+        source: m.id,
+        predicate: "ad4m://embedding",
+      }));
+
+      if (link.length > 0) {
+        const expr = await perspective.getExpression(link[0].target);
+        const parsedExpr = JSON.parse(expr?.data);
+        const embedding = Float32Array.from(Object.values(parsedExpr?.data));
+        return {
+          ...m,
+          embedding: embedding,
+        }
+      } else {
+        return {
+          ...m,
+          embedding: []
+        }
       }
     });
 
+    const messagesWithEmbedding = await Promise.all(getEmbedding);
+
+    const embededMessages = messagesWithEmbedding.filter((m) => m.embedding && m.embedding.length > 0);
+
     worker.current.postMessage({
       type: "similarity",
-      messages: embededMessagesFloat,
-      queryEmbedding: query
+      messages: embededMessages,
+      queryEmbedding: queryEmbed
     });
   }
 
@@ -245,13 +276,13 @@ export default function ChatView({
         }}
       ></j-emoji-picker>
 
-        <div style={{position: "absolute", top: 30, zIndex: 100000, width: '100%'}}>
-          <j-flex a="center" j="center">
-            <j-button onClick={() => similarity()} loading={similarityLoading}>
-              Search Similarity
-            </j-button>
-          </j-flex>
-        </div>
+      <div style={{ position: "absolute", top: 30, zIndex: 100000, width: '100%' }}>
+        <j-flex a="center" j="center">
+          <j-button onClick={() => similarity()} loading={similarityLoading}>
+            Search Similarity
+          </j-button>
+        </j-flex>
+      </div>
 
       <div className={styles.inner}>
         <MessageList
@@ -324,41 +355,41 @@ export default function ChatView({
           </flux-editor>
         </footer>
       </div>
-      
 
-      <j-modal 
+
+      <j-modal
         open={showSimilarityModal}
         onToggle={(e) => setShowSimilarityModal(e.currentTarget.open)}
       >
-          <j-box px="800" py="600">
-            <j-box pb="800">
-              <j-text nomargin variant="heading">
-                Similarity
-              </j-text>
-            </j-box>
-            <j-flex direction="column" gap="400">
-              {similarityMessages.map((m) => (
-                <j-box key={m.id} p="400" border="1px solid var(--j-color-gray-300)">
-                  <j-flex direction="column" gap="200">
-                    <MessageItem 
-                      agent={agent}
-                      message={m}
-                      perspective={perspective}
-                      showAvatar={true}
-                      isReplying={false}
-                      isThread={false}
-                      hideToolbar={true}
-                    />
-                    <j-box px="400">
-                      <j-text variant="label" >
-                        Similarity: {m.similarity}
-                      </j-text>
-                    </j-box>
-                  </j-flex>
-                </j-box>
-              ))}
-            </j-flex>
+        <j-box px="800" py="600">
+          <j-box pb="800">
+            <j-text nomargin variant="heading">
+              Similarity
+            </j-text>
           </j-box>
+          <j-flex direction="column" gap="400">
+            {similarityMessages.map((m) => (
+              <j-box key={m.id} p="400" border="1px solid var(--j-color-gray-300)">
+                <j-flex direction="column" gap="200">
+                  <MessageItem
+                    agent={agent}
+                    message={m}
+                    perspective={perspective}
+                    showAvatar={true}
+                    isReplying={false}
+                    isThread={false}
+                    hideToolbar={true}
+                  />
+                  <j-box px="400">
+                    <j-text variant="label" >
+                      Similarity: {m.similarity}
+                    </j-text>
+                  </j-box>
+                </j-flex>
+              </j-box>
+            ))}
+          </j-flex>
+        </j-box>
       </j-modal>
 
       <div ref={threadContainer} className={styles.thread}>
