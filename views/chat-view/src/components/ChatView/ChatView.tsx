@@ -15,7 +15,9 @@ import { profileFormatter, set } from "@coasys/flux-utils";
 // @ts-ignore
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import MessageItem from "../MessageItem";
-import { EMBEDDING_VECTOR_LANGUAGE } from "@coasys/flux-constants/src/languages";
+import { languages } from "@coasys/flux-constants";
+
+const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 
 const { REPLY_TO, REACTION } = community;
 

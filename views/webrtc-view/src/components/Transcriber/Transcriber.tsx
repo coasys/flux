@@ -5,7 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
-import { EMBEDDING_VECTOR_LANGUAGE } from "@coasys/flux-constants/src/languages";
+import { languages } from "@coasys/flux-constants";
+
+const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 
 const defaultVolumeThreshold = 40; // 0 - 128
 const defaultSilenceTimeout = 3; // seconds
