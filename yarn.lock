@@ -1319,10 +1319,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-connect@0.10.0-rc5":
-  version "0.10.0-rc5"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc5.tgz#30b66b4bf1e688ff8007b98fe907c9d8a64048d1"
-  integrity sha512-KZ/rty/E2SX8ZImg/Art68pOfujxgT9JtMAhWfupo79Bao7wNMt9CfODn6HIlJB16uLWbh4DuKkzR49GimTH0g==
+"@coasys/ad4m-connect@0.10.0-rc5-fix.3":
+  version "0.10.0-rc5-fix.3"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc5-fix.3.tgz#03a4f1476a5240f276d48d589a5c829bbbd1aeae"
+  integrity sha512-01di4/qhIn6cT+FGi73O1TMxtyrVr4jw+nqWQZchr6aFZAmvZ8mPJ/h3aOlyfzeboZeij20gaL8rrVrLvc2wfg==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1403,6 +1403,14 @@
     graphql "15.7.2"
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
+
+"@coasys/flux-utils@*", "@coasys/flux-utils@0.9.0":
+  version "0.9.0"
+  resolved "https://registry.npmjs.org/@coasys/flux-utils/-/flux-utils-0.9.0.tgz#995d52dd5a50be7b18f2b2ce0fb363f0cde3386e"
+  integrity sha512-JDKYX7mvDbJQVZL9kM60dMUX/e1w0mhPLdhfeBiUwKXCAGUyKWg9q5Mvx30e/A4YzXSAVFRsDZzVngthg7EUOw==
+  dependencies:
+    "@coasys/flux-constants" "*"
+    "@coasys/flux-types" "*"
 
 "@coasys/flux-utils@0.8.1":
   version "0.8.1"
