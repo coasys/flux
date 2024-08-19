@@ -15,6 +15,7 @@ import { profileFormatter, set } from "@coasys/flux-utils";
 // @ts-ignore
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import MessageItem from "../MessageItem";
+import { EMBEDDING_VECTOR_LANGUAGE } from "@coasys/flux-constants/src/languages";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -99,7 +100,7 @@ export default function ChatView({
       const expr = await perspective.createExpression({
         model: "TaylorAI/gte-tiny",
         data: queryEmbed,
-      }, "QmzSYwdcW2siKPjxdzpLZZKmQhZKiHPbwCJiBPKg31pMi73UmFz");
+      }, EMBEDDING_VECTOR_LANGUAGE);
 
       console.log("expr", expr);
 

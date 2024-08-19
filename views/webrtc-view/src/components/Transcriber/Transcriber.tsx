@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
+import { EMBEDDING_VECTOR_LANGUAGE } from "@coasys/flux-constants/src/languages";
 
 const defaultVolumeThreshold = 40; // 0 - 128
 const defaultSilenceTimeout = 3; // seconds
@@ -162,6 +163,24 @@ export default function Transcriber({ source, perspective }: Props) {
     }
   }
 
+  async function queryEmbedding(text: string) {
+    const worker = new EmbedingWorker();
+
+    return new Promise((resolve, reject) => {
+      worker.postMessage({
+        type: "query-embed",
+        text,
+        messageId: new Date().getTime().toString(),
+      });
+
+      worker.onmessage = (e) => {
+        if (e.data.type === "query-embed") {
+          resolve(e.data.embedding);
+        }
+      }
+    });
+  }
+
   useEffect(() => {
     // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
     worker.current = new TranscriptionWorker();
@@ -179,32 +198,25 @@ export default function Transcriber({ source, perspective }: Props) {
         messageRepo
           // @ts-ignore
           .create({ body: `<p>${text}</p>` })
-          .then((message) => {
+          .then(async (message) => {
             console.log("message created: ", message);
 
-            embeddingWorker.current.postMessage({
-              type: "embed",
-              text,
-              // @ts-ignore
-              messageId: message?.id,
-            })
+            const queryEmbed = await queryEmbedding(text);
+
+            const expr = await perspective.createExpression({
+              model: "TaylorAI/gte-tiny",
+              data: queryEmbed,
+            }, EMBEDDING_VECTOR_LANGUAGE);
+
+            const link = await perspective.add({
+              source: message.id,
+              predicate: "ad4m://embedding",
+              target: expr,
+            });
           })
           .catch((error) => console.log("message error 1: ", error));
     };
 
-    embeddingWorker.current.onmessage = (e) => {
-      if (e.data.type === "embed") {
-        const { embedding, messageId } = e.data;
-        console.log("embedding: ", embedding, Array.isArray(Array.from(embedding)));
-        messageRepo
-          // @ts-ignore
-          .update(messageId, { embedding: Array.from(embedding) })
-          .then((message) => {
-            console.log("message updated: ", message);
-          })
-          .catch((error) => console.log("message error 2: ", error));
-      }
-    }
     return () => {
       worker.current?.terminate();
       embeddingWorker.current?.terminate();
