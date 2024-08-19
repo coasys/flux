@@ -12,7 +12,6 @@ import styles from "./ChatView.module.css";
 import { EntryType, Profile } from "@coasys/flux-types";
 import Avatar from "../Avatar";
 import { profileFormatter, set } from "@coasys/flux-utils";
-// @ts-ignore
 import EmbedingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import MessageItem from "../MessageItem";
 import { languages } from "@coasys/flux-constants";
