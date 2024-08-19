@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal, LinkQuery } from "@coasys/ad4m";
-import { useAgent, useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAgent, useSubjects, useClient } from "@coasys/ad4m-react-hooks";
 import { Message, generateWCName } from "@coasys/flux-api";
 import { name } from "../../../package.json";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
@@ -35,6 +35,7 @@ export default function ChatView({
   threaded,
   element,
 }: Props) {
+  const {client} = useClient();
   const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
   const [pickerInfo, setPickerInfo] = useState<{
@@ -103,8 +104,6 @@ export default function ChatView({
         data: queryEmbed,
       }, EMBEDDING_VECTOR_LANGUAGE);
 
-      console.log("expr", expr);
-
       const message = await repo.create({
         body: html,
       });
@@ -133,7 +132,7 @@ export default function ChatView({
       }
       setReplyMessage(null);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -167,7 +166,7 @@ export default function ChatView({
       }));
 
       if (link.length > 0) {
-        const expr = await perspective.getExpression(link[0].target);
+        const expr = await perspective.getExpression(link[0].data.target);
         const parsedExpr = JSON.parse(expr?.data);
         const embedding = Float32Array.from(Object.values(parsedExpr?.data));
         return {
