@@ -1,10 +1,10 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
-import { processItem } from "@coasys/flux-utils";
+import { getAllTopics, processItem } from "@coasys/flux-utils";
+import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
-import TranscriptionWorker from "./worker?worker&inline";
 
 const defaultVolumeThreshold = 40; // 0 - 128
 const defaultSilenceTimeout = 3; // seconds
@@ -50,7 +50,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const sourceNode = useRef(null);
   const recording = useRef(false);
   const listening = useRef(false);
-  const worker = useRef<Worker | null>(null);
+  const transcriptionWorker = useRef<Worker | null>(null);
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -111,10 +111,11 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     const audioBuffer = await context.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
     // send formatted audio to transcription worker
-    worker.current?.postMessage({
+    transcriptionWorker.current?.postMessage({
       id,
       float32Array,
       model: selectedModelRef.current,
+      type: "transcribe",
     });
     context.close();
   }
@@ -158,26 +159,9 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     }
   }
 
-  function getAllTopics() {
-    // gather up all existing topics in the neighbourhood
-    perspective
-      .getAllSubjectInstances("Topic")
-      .then(async (topics) => {
-        setAllTopics(
-          await Promise.all(
-            topics.map(async (t) => {
-              return { id: t.baseExpression, name: await t.topic };
-            })
-          )
-        );
-      })
-      .catch(console.log);
-  }
-
   useEffect(() => {
-    // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
-    worker.current = new TranscriptionWorker();
-    worker.current.onmessage = async (e) => {
+    transcriptionWorker.current = new TranscriptionWorker();
+    transcriptionWorker.current.onmessage = async (e) => {
       const { id, text } = e.data;
       setTranscripts((ts) => {
         const match = ts.find((t) => t.id === id);
@@ -190,11 +174,13 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         body: `<p>${text}</p>`,
       })) as any;
       processItem(perspective, allTopics, { id: message.id, text })
-        .then(() => getAllTopics())
+        .then(() => getAllTopics(perspective, setAllTopics))
         .catch(console.log);
     };
-    return () => worker.current?.terminate();
-  }, [allTopics]);
+    return () => {
+      transcriptionWorker.current?.terminate();
+    };
+  }, []);
 
   useEffect(() => {
     if (transcribeAudio && !muted) startListening();
@@ -206,7 +192,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     else if (transcribeAudio) startListening();
   }, [muted]);
 
-  useEffect(() => getAllTopics(), []);
+  useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
   return (
     <div className={styles.wrapper}>

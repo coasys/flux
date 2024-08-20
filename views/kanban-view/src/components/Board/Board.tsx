@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import styles from "./Board.module.css";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { useEffect, useMemo } from "preact/hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
+import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { getAllTopics, processItem } from "@coasys/flux-utils";
+import { useEffect, useMemo } from "preact/hooks";
+import { useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import Card from "../Card";
 import CardDetails from "../CardDetails";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import styles from "./Board.module.css";
 
 // @ts-ignore
 import taskSDNA from "./Task.pl?raw";
@@ -33,6 +34,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   const [selectedProperty, setSelectedProperty] = useState("");
   const [namedOptions, setNamedOptions] = useState<NamedOptions>({});
   const [tasks, setTasks] = useState([]);
+  const [allTopics, setAllTopics] = useState<any[]>([]);
 
   useEffect(() => {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
@@ -79,6 +81,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     loadColumns();
   }, [perspective.uuid, selectedClass]);
 
+  useEffect(() => getAllTopics(perspective, setAllTopics), []);
+
   const data = useMemo(() => {
     return transformData(
       tasks,
@@ -87,8 +91,16 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     );
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
-  function createNewTodo(propertyName, value) {
-    repo.create({ [propertyName]: value });
+  async function createNewTodo(propertyName, value) {
+    console.log("createNewTodo: ", propertyName, value);
+    // bug: does not succeed in creating todo (error: Expression literal://string:x is not a subject instance of given class: "Task")
+    const newTodo = (await repo.create({ [propertyName]: value })) as any;
+    processItem(perspective, allTopics, {
+      id: newTodo.id,
+      text: data.title || data.body,
+    })
+      .then(() => getAllTopics(perspective, setAllTopics))
+      .catch(console.log);
   }
 
   const onDragEnd = (result) => {

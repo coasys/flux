@@ -54,7 +54,7 @@
     width: 100%;
     margin: 30px 0;
 
-    .topic {
+    .tag {
       all: unset;
       cursor: pointer;
       border: 1px solid var(--j-color-primary-500);
@@ -70,14 +70,12 @@
         border: 1px solid white;
         color: white;
       }
-    }
 
-    // .processedData {
-    //   border: 1px solid var(--j-color-ui-200);
-    //   border-radius: var(--j-border-radius);
-    //   padding: var(--j-space-400);
-    //   background-color: var(--j-color-ui-50);
-    // }
+      &.vector {
+        border: 1px solid var(--j-color-success-500);
+        color: var(--j-color-success-500);
+      }
+    }
   }
 
   &.selected {

@@ -1,86 +1,73 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message, Post } from "@coasys/flux-api";
-import { findRelationships, processItem } from "@coasys/flux-utils";
+import { transformItem } from "@coasys/flux-utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
 import TimelineItem from "../TimelineItem";
-import { transformItem } from "./../../utils";
 import styles from "./Timeline.module.scss";
 
 type Props = {
   agent: any;
   perspective: any;
-  channel: any;
-  itemId?: string;
   index?: number;
-  selectedTopic?: string;
-  match?: boolean;
+  channelId: string;
+  match?: any;
   totalMatches: number;
+  selectedTopic?: string;
   scrollToTimeline: (index: number) => void;
-  synergize: (item: any, topic: string) => void;
-  allTopics: any[];
-  getAllTopics: () => void;
+  topicSearch: (item: any, topic: string) => void;
+  similaritySearch: (item: any) => void;
 };
 
 export default function Timeline({
   agent,
   perspective,
-  channel,
-  itemId,
   index,
-  selectedTopic,
+  channelId,
+  match,
   totalMatches,
+  selectedTopic,
   scrollToTimeline,
-  synergize,
-  allTopics,
-  getAllTopics,
+  topicSearch,
+  similaritySearch,
 }: Props) {
   const [items, setItems] = useState<any[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<any>(itemId || null);
-  const [unprocessedItems, setUnprocessedItems] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const id = channel?.id || channel;
+  const [selectedItemId, setSelectedItemId] = useState<any>(
+    match?.itemId || null
+  );
 
   const { entries: messages } = useSubjects({
     perspective,
-    source: id,
+    source: channelId,
     subject: Message,
   });
   const { entries: posts } = useSubjects({
     perspective,
-    source: id,
+    source: channelId,
     subject: Post,
   });
   const { entries: tasks } = useSubjects({
     perspective,
-    source: id,
+    source: channelId,
     subject: "Task",
   });
 
   function matchText() {
-    if (!totalMatches) return "";
+    if (!totalMatches) return "No matches";
     if (index === 0)
       return `${totalMatches} match${totalMatches > 1 ? "es" : ""}`;
     if (totalMatches > index)
       return `${totalMatches - index} more match${totalMatches - index > 1 ? "es" : ""}`;
   }
 
-  async function process() {
-    setProcessing(true);
-    Promise.all(items.map((item) => processItem(perspective, allTopics, item)))
-      .then(() => {
-        getAllTopics();
-        setProcessing(false);
-      })
-      .catch(console.log);
-  }
-
   // aggregate all items into array and sort by date
   useEffect(() => {
     const newItems = [
-      ...messages.map((message) => transformItem(id, "Message", message)),
-      ...posts.map((post) => transformItem(id, "Post", post)),
-      ...tasks.map((task) => transformItem(id, "Task", task)),
+      ...messages.map((message) =>
+        transformItem(channelId, "Message", message)
+      ),
+      ...posts.map((post) => transformItem(channelId, "Post", post)),
+      ...tasks.map((task) => transformItem(channelId, "Task", task)),
     ].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
@@ -103,23 +90,6 @@ export default function Timeline({
     }
   }, [items, selectedItemId]);
 
-  // check for unprocessed items
-  useEffect(() => {
-    let match = false;
-    Promise.all(
-      items.map(
-        (item) =>
-          new Promise(async (resolve: any) => {
-            const relationships = await findRelationships(perspective, item.id);
-            if (!relationships.length) match = true;
-            resolve();
-          })
-      )
-    )
-      .then(() => setUnprocessedItems(match))
-      .catch(console.log);
-  }, [items, selectedItemId]);
-
   return (
     <div
       id={`timeline-${index}`}
@@ -127,16 +97,19 @@ export default function Timeline({
     >
       <div className={styles.header}>
         <j-flex gap="400" a="center">
-          <h2>{channel?.name || "This channel"}</h2>
-          {index === 0 && unprocessedItems && (
-            <j-button
-              variant="primary"
-              size="sm"
-              onClick={process}
-              loading={processing}
-            >
-              Process unprocessed items
-            </j-button>
+          <h2>{match?.channel.name || "This channel"}</h2>
+          {!!match && (
+            <>
+              {match.similarity ? (
+                <p>
+                  Similarity score: <b>{match.similarity.toFixed(5)}</b>
+                </p>
+              ) : (
+                <p>
+                  Matching topic: <b>#{selectedTopic}</b>
+                </p>
+              )}
+            </>
           )}
         </j-flex>
         {window.innerWidth < 1200 || index > 0 ? (
@@ -189,7 +162,8 @@ export default function Timeline({
                 selectedTopic={selectedTopic}
                 selected={item.id === selectedItemId}
                 setSelectedItemId={setSelectedItemId}
-                synergize={synergize}
+                topicSearch={topicSearch}
+                similaritySearch={similaritySearch}
               />
             ))}
           </div>

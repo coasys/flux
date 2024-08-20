@@ -1,7 +1,13 @@
+import { LinkQuery } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Channel, SubjectRepository } from "@coasys/flux-api";
-import { findRelationships, findTopics } from "@coasys/flux-utils";
-import { useEffect, useState } from "preact/hooks";
+import {
+  findRelationships,
+  findTopics,
+  getAllTopics,
+} from "@coasys/flux-utils";
+import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
+import { useEffect, useRef, useState } from "preact/hooks";
 import Timeline from "../Timeline";
 import styles from "./SynergyDemoView.module.scss";
 
@@ -17,12 +23,29 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   );
   const [matches, setMatches] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
-  const [topic, setTopic] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const worker = useRef<Worker | null>(null);
 
-  async function findMatches(
+  async function findEmbedding(item) {
+    const links = await perspective.get(
+      new LinkQuery({
+        source: item.id,
+        predicate: "ad4m://embedding",
+      })
+    );
+    if (links.length) {
+      const expression = await perspective.getExpression(links[0].data.target);
+      const embedding = Float32Array.from(
+        Object.values(JSON.parse(expression.data).data)
+      );
+      return embedding;
+    } else return null;
+  }
+
+  async function findTopicMatches(
     channel: any,
     subjectClass: string,
-    topic: string
+    sourceTopic: string
   ): Promise<any[]> {
     // searches for items of the subject class with matching topics in the channel
     return await new Promise(async (resolveMatches: any) => {
@@ -40,9 +63,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
                 item.id
               );
               const topics = await findTopics(perspective, relationships);
-              topics.forEach((t: any) => {
-                if (topic === t) newMatches.push({ channel, itemId: item.id });
-              });
+              const match = topics.find((topic) => topic === sourceTopic);
+              if (match) newMatches.push({ channel, itemId: item.id });
               resolve();
             })
         )
@@ -55,10 +77,47 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
-  async function synergize(item, topic) {
+  async function findEmbeddingMatches(
+    channel: any,
+    subjectClass: string,
+    sourceEmbedding: any
+  ): Promise<any[]> {
+    // searches for items of the given subject class with similar vector embeddings in the channel
+    return await new Promise(async (resolveMatches: any) => {
+      const items = await new SubjectRepository(subjectClass, {
+        perspective,
+        source: channel.id,
+      }).getAllData();
+      // find embeddings for each item
+      const itemsWithEmbedding = await Promise.all(
+        items.map(async (item) => {
+          const embedding = await findEmbedding(item);
+          console.log();
+          return { channel, itemId: item.id, embedding };
+        })
+      );
+      // create new embedding worker with listener for results
+      const embeddingWorker = new EmbeddingWorker();
+      embeddingWorker.onmessage = async (message) => {
+        const { type, items } = message.data;
+        if (type === "similarity") {
+          resolveMatches(items);
+          worker.current?.terminate();
+        }
+      };
+      // request embeddings
+      embeddingWorker.postMessage({
+        type: "similarity",
+        items: itemsWithEmbedding.filter((item) => item.embedding),
+        sourceEmbedding,
+      });
+    });
+  }
+
+  async function topicSearch(item, topic) {
     // searches other channels in the neighbourhood to find items with matching topic tags
     setMatches([]);
-    setTopic(topic);
+    setSelectedTopic(topic);
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
@@ -69,13 +128,21 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         .map(
           (channel: any) =>
             new Promise(async (resolve: any) => {
-              const messageMatches = await findMatches(
+              const messageMatches = await findTopicMatches(
                 channel,
                 "Message",
                 topic
               );
-              const postMatches = await findMatches(channel, "Post", topic);
-              const taskMatches = await findMatches(channel, "Task", topic);
+              const postMatches = await findTopicMatches(
+                channel,
+                "Post",
+                topic
+              );
+              const taskMatches = await findTopicMatches(
+                channel,
+                "Task",
+                topic
+              );
               newMatches.push(
                 ...messageMatches,
                 ...postMatches,
@@ -89,33 +156,54 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
+  async function similaritySearch(item) {
+    // searches other channels in the neighbourhood to find items with similar vector embeddings
+    setSelectedTopic("");
+    setMatches([]);
+    let newMatches = [];
+    const sourceEmbedding = await findEmbedding(item);
+    const channels = await new SubjectRepository(Channel, {
+      perspective,
+    }).getAllData();
+    Promise.all(
+      channels
+        .filter((channel: any) => channel.id !== item.channelId)
+        .map(
+          (channel: any) =>
+            new Promise(async (resolve: any) => {
+              const messageMatches = await findEmbeddingMatches(
+                channel,
+                "Message",
+                sourceEmbedding
+              );
+              // const postMatches = await findEmbeddingMatches(channel, "Post", sourceEmbedding);
+              // const taskMatches = await findEmbeddingMatches(channel, "Task", sourceEmbedding);
+              newMatches.push(
+                ...messageMatches
+                // ...postMatches,
+                // ...taskMatches
+              );
+              resolve();
+            })
+        )
+    ).then(() => {
+      const sortedMatches = newMatches.sort(
+        (a, b) => b.similarity - a.similarity
+      );
+      console.log("sortedMatches: ", sortedMatches);
+      setMatches(sortedMatches);
+    });
+  }
+
   function scrollToTimeline(index) {
     const timeline = document.getElementById(`timeline-${index}`);
     timeline.scrollIntoView({ behavior: "smooth" });
   }
 
-  function getAllTopics() {
-    // gather up all existing topics in the neighbourhood
-    perspective
-      .getAllSubjectInstances("Topic")
-      .then(async (topics) => {
-        setAllTopics(
-          await Promise.all(
-            topics.map(async (t) => {
-              return { id: t.baseExpression, name: await t.topic };
-            })
-          )
-        );
-      })
-      .catch(console.log);
-  }
+  useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
   // reset matches when channel changes
-  useEffect(() => {
-    setMatches([]);
-  }, [source]);
-
-  useEffect(() => getAllTopics(), []);
+  useEffect(() => setMatches([]), [source]);
 
   return (
     <div className={styles.container}>
@@ -146,14 +234,13 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             <Timeline
               agent={agent}
               perspective={perspective}
-              channel={source}
-              selectedTopic={topic}
-              synergize={synergize}
-              scrollToTimeline={scrollToTimeline}
               index={0}
+              channelId={source}
               totalMatches={matches.length}
-              allTopics={allTopics}
-              getAllTopics={getAllTopics}
+              selectedTopic={selectedTopic}
+              topicSearch={topicSearch}
+              similaritySearch={similaritySearch}
+              scrollToTimeline={scrollToTimeline}
             />
           </div>
           <j-flex gap="500" className={styles.timelines}>
@@ -161,15 +248,14 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
               <Timeline
                 agent={agent}
                 perspective={perspective}
-                channel={match.channel}
-                selectedTopic={topic}
-                synergize={synergize}
-                scrollToTimeline={scrollToTimeline}
-                itemId={match.itemId}
                 index={index + 1}
+                channelId={match.channel.id}
+                match={match}
                 totalMatches={matches.length}
-                allTopics={allTopics}
-                getAllTopics={getAllTopics}
+                selectedTopic={selectedTopic}
+                topicSearch={topicSearch}
+                similaritySearch={similaritySearch}
+                scrollToTimeline={scrollToTimeline}
               />
             ))}
           </j-flex>
@@ -179,28 +265,26 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           <Timeline
             agent={agent}
             perspective={perspective}
-            channel={source}
-            selectedTopic={topic}
-            synergize={synergize}
-            scrollToTimeline={scrollToTimeline}
             index={0}
+            channelId={source}
             totalMatches={matches.length}
-            allTopics={allTopics}
-            getAllTopics={getAllTopics}
+            selectedTopic={selectedTopic}
+            topicSearch={topicSearch}
+            similaritySearch={similaritySearch}
+            scrollToTimeline={scrollToTimeline}
           />
           {matches.map((match, index) => (
             <Timeline
               agent={agent}
               perspective={perspective}
-              channel={match.channel}
-              selectedTopic={topic}
-              synergize={synergize}
-              scrollToTimeline={scrollToTimeline}
-              itemId={match.itemId}
               index={index + 1}
+              channelId={match.channel.id}
+              match={match}
               totalMatches={matches.length}
-              allTopics={allTopics}
-              getAllTopics={getAllTopics}
+              selectedTopic={selectedTopic}
+              topicSearch={topicSearch}
+              similaritySearch={similaritySearch}
+              scrollToTimeline={scrollToTimeline}
             />
           ))}
         </j-flex>

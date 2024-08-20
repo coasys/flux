@@ -1,12 +1,16 @@
-import { useRef, useState, useEffect, useMemo } from "preact/hooks";
-import Editor from "../Editor";
+import { Post as PostSubject, SubjectRepository } from "@coasys/flux-api";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  getAllTopics,
+  processItem,
+  resizeImage,
+} from "@coasys/flux-utils";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../FileUpload";
-import styles from "./index.module.css";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import PostImagePreview from "../PostImagePreview";
-import { SubjectRepository } from "@coasys/flux-api";
-import { Post as PostSubject } from "@coasys/flux-api";
+import styles from "./index.module.css";
 
 const initialState = {
   title: null,
@@ -31,6 +35,7 @@ export default function CreatePost({
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
   const [initState, setInitState] = useState(initialState);
+  const [allTopics, setAllTopics] = useState<any[]>([]);
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
@@ -41,6 +46,7 @@ export default function CreatePost({
   }, [perspective.uuid, source]);
 
   useEffect(() => {
+    getAllTopics(perspective, setAllTopics);
     setTimeout(() => {
       inputRefs.current.title?.el.focus();
     }, 100);
@@ -109,6 +115,12 @@ export default function CreatePost({
         });
       } else {
         newPost = await Post.create(data);
+        processItem(perspective, allTopics, {
+          id: newPost.id,
+          text: data.title || data.body,
+        })
+          .then(() => getAllTopics(perspective, setAllTopics))
+          .catch(console.log);
       }
 
       onPublished(isEditing ? postId : newPost?.id);

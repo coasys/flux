@@ -15,7 +15,8 @@ type Props = {
   selectedTopic: string;
   selected: boolean;
   setSelectedItemId: (id: string) => void;
-  synergize: (item: any, topic: string) => void;
+  topicSearch: (item: any, topic: string) => void;
+  similaritySearch: (item: any) => void;
 };
 
 export default function TimelineItem({
@@ -26,7 +27,8 @@ export default function TimelineItem({
   selectedTopic,
   selected,
   setSelectedItemId,
-  synergize,
+  topicSearch,
+  similaritySearch,
 }: Props) {
   const { id, timestamp, author, text, icon } = item;
   const [topics, setTopics] = useState<any[]>([]);
@@ -83,15 +85,24 @@ export default function TimelineItem({
           <j-flex gap="300" wrap>
             {topics.map((topic) => (
               <button
-                className={`${styles.topic} ${selected && selectedTopic === topic && styles.focus}`}
+                className={`${styles.tag} ${selected && selectedTopic === topic && styles.focus}`}
                 onClick={() => {
                   setSelectedItemId(id);
-                  synergize(item, topic);
+                  topicSearch(item, topic);
                 }}
               >
                 #{topic}
               </button>
             ))}
+            <button
+              className={`${styles.tag} ${styles.vector}`}
+              onClick={() => {
+                setSelectedItemId(id);
+                similaritySearch(item);
+              }}
+            >
+              Vector search
+            </button>
           </j-flex>
         </j-flex>
         {selected && (

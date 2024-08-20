@@ -4,6 +4,7 @@ import Community from "./community";
 import createAgentWebLink from "./createAgentWebLink";
 import createCommunity from "./createCommunity";
 import createProfile from "./createProfile";
+import Embedding from "./embedding";
 import { SubjectRepository } from "./factory";
 import getAd4mProfile from "./getAd4mProfile";
 import getAgentLinks from "./getAgentLinks";
@@ -29,6 +30,7 @@ export {
   createAgentWebLink,
   createCommunity,
   createProfile,
+  Embedding,
   getAd4mProfile,
   getAgentLinks,
   getAgentWebLinks,
