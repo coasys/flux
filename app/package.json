@@ -34,7 +34,7 @@
     "@coasys/flux-table-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.8.1",
+    "@coasys/flux-utils": "0.9.1-aplha.1",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "0.8.1-fix.1",
     "@metamask/jazzicon": "^2.0.0",
