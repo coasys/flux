@@ -106,7 +106,10 @@ export default function Timeline({
                 </p>
               ) : (
                 <p>
-                  Matching topic: <b>#{selectedTopic}</b>
+                  Matching topic:{" "}
+                  <b>
+                    #{selectedTopic} ({match.relevance}% relevance)
+                  </b>
                 </p>
               )}
             </>

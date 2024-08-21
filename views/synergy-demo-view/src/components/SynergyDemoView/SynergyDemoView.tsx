@@ -63,8 +63,13 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
                 item.id
               );
               const topics = await findTopics(perspective, relationships);
-              const match = topics.find((topic) => topic === sourceTopic);
-              if (match) newMatches.push({ channel, itemId: item.id });
+              const match = topics.find((topic) => topic.name === sourceTopic);
+              if (match)
+                newMatches.push({
+                  channel,
+                  itemId: item.id,
+                  relevance: match.relevance,
+                });
               resolve();
             })
         )
@@ -92,7 +97,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       const itemsWithEmbedding = await Promise.all(
         items.map(async (item) => {
           const embedding = await findEmbedding(item);
-          console.log();
           return { channel, itemId: item.id, embedding };
         })
       );
@@ -152,7 +156,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             })
         )
     ).then(() => {
-      setMatches(newMatches);
+      setMatches(newMatches.sort((a, b) => b.relevance - a.relevance));
     });
   }
 
@@ -190,7 +194,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       const sortedMatches = newMatches.sort(
         (a, b) => b.similarity - a.similarity
       );
-      console.log("sortedMatches: ", sortedMatches);
       setMatches(sortedMatches);
     });
   }

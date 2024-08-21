@@ -49,8 +49,9 @@ export default function TimelineItem({
   useEffect(() => {
     if (relationships.length) {
       findTopics(perspective, relationships).then((results) => {
+        const topicNames = results.map((result) => result.name);
         setTopics((prevItems) => {
-          if (!isEqual(prevItems, results)) return results;
+          if (!isEqual(prevItems, topicNames)) return topicNames;
           return prevItems;
         });
       });
