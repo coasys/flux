@@ -1,8 +1,12 @@
-import { useEffect, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@coasys/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject } from "@coasys/ad4m-react-hooks";
+import {
+  getAllTopics,
+  processItem,
+  removeProcessedData,
+} from "@coasys/flux-utils";
+import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
-import styles from "./Entry.module.css";
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -18,11 +22,14 @@ export default function Entry({
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
+  const [allTopics, setAllTopics] = useState<any[]>([]);
   const { entry, repo } = useSubject({
     perspective,
     subject: selectedClass,
     id,
   });
+
+  useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
   useEffect(() => {
     perspective
@@ -46,7 +53,21 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    repo.update(id, { [propName]: value });
+    await repo.update(id, { [propName]: value }).then(() => {
+      if (["name", "status"].includes(propName)) {
+        removeProcessedData(perspective, id).then(() => {
+          const task = propName === "name" ? value : entry.name;
+          const status =
+            propName === "status"
+              ? value.split("task://")[1]
+              : entry.status.split("task://")[1];
+          const taskText = `Task: "${task}", Status: "${status}"`;
+          processItem(perspective, allTopics, { id, text: taskText })
+            .then(() => getAllTopics(perspective, setAllTopics))
+            .catch(console.log);
+        });
+      }
+    });
   }
 
   if (entry) {

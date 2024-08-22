@@ -49,7 +49,6 @@ export default function TimelineItem({
   useEffect(() => {
     if (relationships.length) {
       findTopics(perspective, relationships).then((results) => {
-        console.log("topics: ", results);
         const topicNames = results.map((result) => result.name);
         setTopics((prevItems) => {
           if (!isEqual(prevItems, topicNames)) return topicNames;

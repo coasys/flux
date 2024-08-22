@@ -4,6 +4,7 @@ import {
   dataURItoBlob,
   getAllTopics,
   processItem,
+  removeProcessedData,
   resizeImage,
 } from "@coasys/flux-utils";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
@@ -112,6 +113,15 @@ export default function CreatePost({
           ...data,
           // if we send in null the property does not get updated
           image: imageReplaced ? data.image : undefined,
+        }).then(() => {
+          removeProcessedData(perspective, postId).then(() => {
+            processItem(perspective, allTopics, {
+              id: postId,
+              text: data.title || data.body,
+            })
+              .then(() => getAllTopics(perspective, setAllTopics))
+              .catch(console.log);
+          });
         });
       } else {
         newPost = await Post.create(data);

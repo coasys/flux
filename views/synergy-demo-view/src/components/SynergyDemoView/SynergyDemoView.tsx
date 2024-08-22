@@ -26,10 +26,10 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [selectedTopic, setSelectedTopic] = useState("");
   const worker = useRef<Worker | null>(null);
 
-  async function findEmbedding(item) {
+  async function findEmbedding(itemId) {
     const links = await perspective.get(
       new LinkQuery({
-        source: item.id,
+        source: itemId,
         predicate: "ad4m://embedding",
       })
     );
@@ -96,7 +96,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       // find embeddings for each item
       const itemsWithEmbedding = await Promise.all(
         items.map(async (item) => {
-          const embedding = await findEmbedding(item);
+          const embedding = await findEmbedding(item.id);
           return { channel, itemId: item.id, embedding };
         })
       );
@@ -165,7 +165,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     setSelectedTopic("");
     setMatches([]);
     let newMatches = [];
-    const sourceEmbedding = await findEmbedding(item);
+    const sourceEmbedding = await findEmbedding(item.id);
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
