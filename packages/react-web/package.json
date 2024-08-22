@@ -20,7 +20,7 @@
     "@coasys/flux-api": "*",
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "0.9.1-aplha.2",
+    "@coasys/flux-utils": "0.9.1",
     "@coasys/flux-webrtc": "*"
   },
   "peerDependencies": {
