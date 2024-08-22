@@ -49,6 +49,7 @@ export default function TimelineItem({
   useEffect(() => {
     if (relationships.length) {
       findTopics(perspective, relationships).then((results) => {
+        console.log("topics: ", results);
         const topicNames = results.map((result) => result.name);
         setTopics((prevItems) => {
           if (!isEqual(prevItems, topicNames)) return topicNames;
@@ -68,8 +69,8 @@ export default function TimelineItem({
         onClick={() => setSelectedItemId(selected ? null : id)}
       />
       <div className={styles.timestamp}>
-        <j-timestamp value={timestamp} relative />
-        {/* dateStyle="short" timeStyle="short" */}
+        {/* <j-timestamp value={timestamp} relative /> */}
+        <j-timestamp value={timestamp} dateStyle="short" timeStyle="short" />
       </div>
       <div className={styles.position}>
         <div className={styles.node} />

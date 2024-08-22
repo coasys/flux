@@ -40,6 +40,7 @@ export async function findTopics(perspective, relationships) {
       (r) =>
         new Promise(async (resolve) => {
           const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
+          console.log("topicProxy: ", topicProxy);
           resolve({ name: await topicProxy.topic, relevance: r.relevance });
         })
     )
