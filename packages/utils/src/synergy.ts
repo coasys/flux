@@ -1,3 +1,4 @@
+import { LinkQuery } from "@coasys/ad4m";
 import { Relationship, SubjectRepository, Topic } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
 import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
@@ -27,6 +28,37 @@ export function transformItem(channelId, type, item) {
   return newItem;
 }
 
+async function removeEmbedding(perspective, itemId) {
+  const embeddingLink = await perspective.get(
+    new LinkQuery({ source: itemId, predicate: "ad4m://embedding" })
+  );
+  if (embeddingLink[0]) return await perspective.remove(embeddingLink[0]);
+}
+
+async function removeTopics(perspective, itemId) {
+  const relationships = (await findRelationships(perspective, itemId)) as any;
+  return await Promise.all(
+    relationships.map(async (r) => {
+      const itemRelationshipLink = await perspective.get(
+        new LinkQuery({ source: itemId, target: r.id })
+      );
+      const relationshipTagLink = await perspective.get(
+        new LinkQuery({ source: r.id, predicate: "flux://has_tag" })
+      );
+      const linksToRemove = [];
+      if (itemRelationshipLink[0]) linksToRemove.push(itemRelationshipLink[0]);
+      if (relationshipTagLink[0]) linksToRemove.push(relationshipTagLink[0]);
+      return await perspective.removeLinks(linksToRemove);
+    })
+  );
+}
+
+export async function removeProcessedData(perspective, itemId) {
+  const deleteEmbedding = await removeEmbedding(perspective, itemId);
+  const deleteTopics = await removeTopics(perspective, itemId);
+  return await Promise.all([deleteEmbedding, deleteTopics]);
+}
+
 export async function findRelationships(perspective, itemId) {
   return await new SubjectRepository(Relationship, {
     perspective,
@@ -40,7 +72,6 @@ export async function findTopics(perspective, relationships) {
       (r) =>
         new Promise(async (resolve) => {
           const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
-          console.log("topicProxy: ", topicProxy);
           resolve({ name: await topicProxy.topic, relevance: r.relevance });
         })
     )
