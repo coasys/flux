@@ -97,7 +97,9 @@ export default function Timeline({
     >
       <div className={styles.header}>
         <j-flex gap="400" a="center">
-          <h2>{match?.channel.name || "This channel"}</h2>
+          <h2 style={{ margin: "20px 0" }}>
+            {match?.channel.name || "This channel"}
+          </h2>
           {!!match && (
             <>
               {match.similarity ? (

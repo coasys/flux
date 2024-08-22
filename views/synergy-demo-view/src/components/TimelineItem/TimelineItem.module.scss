@@ -76,6 +76,12 @@
         color: var(--j-color-success-500);
       }
     }
+
+    .text {
+      p {
+        margin: 0;
+      }
+    }
   }
 
   &.selected {

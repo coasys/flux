@@ -68,7 +68,8 @@ export default function TimelineItem({
         onClick={() => setSelectedItemId(selected ? null : id)}
       />
       <div className={styles.timestamp}>
-        <j-timestamp value={timestamp} dateStyle="short" timeStyle="short" />
+        <j-timestamp value={timestamp} relative />
+        {/* dateStyle="short" timeStyle="short" */}
       </div>
       <div className={styles.position}>
         <div className={styles.node} />
@@ -76,39 +77,46 @@ export default function TimelineItem({
       </div>
       <j-flex
         direction="column"
-        gap="500"
+        gap="300"
         j="center"
         className={styles.content}
       >
         <j-flex gap="400" a="center" wrap>
           <j-icon name={icon} />
           <Avatar size="sm" did={author} profile={profile} />
-          <j-flex gap="300" wrap>
-            {topics.map((topic) => (
-              <button
-                className={`${styles.tag} ${selected && selectedTopic === topic && styles.focus}`}
-                onClick={() => {
-                  setSelectedItemId(id);
-                  topicSearch(item, topic);
-                }}
-              >
-                #{topic}
-              </button>
-            ))}
-            <button
-              className={`${styles.tag} ${styles.vector}`}
-              onClick={() => {
-                setSelectedItemId(id);
-                similaritySearch(item);
-              }}
-            >
-              Vector search
-            </button>
-          </j-flex>
+          {selected && (
+            <j-flex gap="300" wrap>
+              {topics.map((topic) => (
+                <button
+                  className={`${styles.tag} ${selected && selectedTopic === topic && styles.focus}`}
+                  disabled={index > 0}
+                  onClick={() => {
+                    setSelectedItemId(id);
+                    topicSearch(item, topic);
+                  }}
+                >
+                  #{topic}
+                </button>
+              ))}
+              {index === 0 && (
+                <button
+                  className={`${styles.tag} ${styles.vector}`}
+                  onClick={() => {
+                    setSelectedItemId(id);
+                    similaritySearch(item);
+                  }}
+                >
+                  Vector search
+                </button>
+              )}
+            </j-flex>
+          )}
         </j-flex>
-        {selected && (
-          <j-text nomargin dangerouslySetInnerHTML={{ __html: text }} />
-        )}
+        <j-text
+          nomargin
+          dangerouslySetInnerHTML={{ __html: text }}
+          className={styles.text}
+        />
       </j-flex>
     </div>
   );
