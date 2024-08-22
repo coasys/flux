@@ -158,6 +158,7 @@ export default function Timeline({
           <div style={{ minHeight: "100%" }}>
             {items.map((item) => (
               <TimelineItem
+                key={item.id}
                 agent={agent}
                 perspective={perspective}
                 item={item}
