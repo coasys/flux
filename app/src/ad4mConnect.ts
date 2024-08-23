@@ -5,10 +5,10 @@ const ad4mConnect = Ad4mConnectUI({
   appDesc: "A Social Toolkit for the New Internet",
   appUrl: window.location.origin,
   appDomain: window.location.origin,
-  appIconPath: "https://i.ibb.co/QKPGNfn/icon-512.png",
+  appIconPath: "/icon.png",
   capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
   hosting: true,
-  mobile: true
+  mobile: true,
 });
 
 export { ad4mConnect };
