@@ -181,7 +181,7 @@ useEffect(() => {
         overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
         computeItemKey={(index) => messages[index].id}
-        totalCount={totalCount}
+        totalCount={messages.length}
         initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (

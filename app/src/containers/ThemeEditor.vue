@@ -29,6 +29,7 @@
       </j-box>
       <j-tabs
         variant="button"
+        wrap
         :value="theme.name"
         @change="(e: any) => updateTheme({ name: e.target.value })"
       >
@@ -46,6 +47,7 @@
       </j-box>
       <j-tabs
         variant="button"
+        wrap
         :value="theme.fontFamily"
         @change="(e: any) => updateTheme({ fontFamily: e.target.value })"
       >
@@ -66,6 +68,7 @@
       </j-box>
       <j-tabs
         variant="button"
+        wrap
         :value="theme.saturation.toString()"
         @change="(e: any) => updateTheme({ saturation: e.target.value })"
       >
@@ -80,6 +83,7 @@
       </j-box>
       <j-tabs
         variant="button"
+        wrap
         :value="theme.fontSize.replace('px', '')"
         @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
       >

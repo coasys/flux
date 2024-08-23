@@ -18,7 +18,7 @@
     ]
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "publish-package": "turbo run publish-package",
     "lint": "turbo run lint",
