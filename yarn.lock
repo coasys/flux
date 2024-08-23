@@ -1306,23 +1306,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-connect@0.10.0-prerelease-fix-2":
-  version "0.10.0-prerelease-fix-2"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-prerelease-fix-2.tgz#3751d898ec2efa34e862de5e05441aead1c95e0b"
-  integrity sha512-LsrXTfDBSI33NbnhkGZ3MnraT5Uogojw/n+DyZEWQ8F94KS8zM1u+Ua3Pu4QXLqFdvLF4j8t9E29XjlYzdllxA==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
-    auto-bind "^5.0.1"
-    electron "^20.0.3"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
-    lit "^2.3.1"
-
-"@coasys/ad4m-connect@0.10.0-rc5":
-  version "0.10.0-rc5"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc5.tgz#30b66b4bf1e688ff8007b98fe907c9d8a64048d1"
-  integrity sha512-KZ/rty/E2SX8ZImg/Art68pOfujxgT9JtMAhWfupo79Bao7wNMt9CfODn6HIlJB16uLWbh4DuKkzR49GimTH0g==
+"@coasys/ad4m-connect@0.10.0-rc7":
+  version "0.10.0-rc7"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc7.tgz#670c8bee22dfcedf114199cab0499c7fe43bf5ed"
+  integrity sha512-rKxagJRdlhKdscTFfT3DkgnmE+vvuc1tab56KLySgkHkcdQ4breWgo6+FGs4q7PneV/DaOtwpsdB9ld1hJcfRA==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1343,10 +1330,10 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-react-hooks@0.10.0-rc5":
-  version "0.10.0-rc5"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc5.tgz#cbef02510694d7ad8963e234633621e0ea3b3d34"
-  integrity sha512-M+KIuokKhXbv6f6AAy4p8+AWN9/x88jE7UyimG9flL7t5crHj/WbxhAMGavWINIRsp3/ec9VlLslQbIzvKw3NQ==
+"@coasys/ad4m-react-hooks@0.10.0-rc7.fix.2":
+  version "0.10.0-rc7.fix.2"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc7.fix.2.tgz#d8496913c3e06f3047908dc721853c616598cbd4"
+  integrity sha512-vmyQhy2xTS+rDowig3lGjBpcIFqIPDer+6VUKwIqsLFVeftXzCcAV00ELAyXYHUntOIROasO30jJuAKlvFrUyA==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"
@@ -1376,20 +1363,6 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/ad4m@0.10.0-prerelease":
-  version "0.10.0-prerelease"
-  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
-  integrity sha512-Q6pxs/0ZvplcYgwn1zRDVJ8wobmKdt6DukU6uM2LKNd+D6neP/gs173+gxDAB7SdtjGr0/IhvUFHAKDApt2/Fw==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@holochain/client" "0.16.0"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "1.1.1"
-
 "@coasys/ad4m@0.10.0-rc5":
   version "0.10.0-rc5"
   resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-rc5.tgz#c033c3c730d7094d917031aaf93e41ef4ae97290"
@@ -1404,13 +1377,19 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/flux-utils@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.npmjs.org/@coasys/flux-utils/-/flux-utils-0.8.1.tgz#d389f14d7e3b418245ced5532df2da1b5c745921"
-  integrity sha512-YUQ0LwX2kaLui/mnmNhCVX3pzOVNM3gb1V6rUA2u/kpUF7gXp1ABlV44pK0idqw5KqCkr4oP2/4iCyRs/8cARg==
+"@coasys/ad4m@0.10.0-rc7":
+  version "0.10.0-rc7"
+  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-rc7.tgz#0d91285c5f6ee5b62d0d095935ca310c36ef622b"
+  integrity sha512-V514sJgeLFYwSbfxFruzvGdMrYhYUdpHJHLmjZdKPAK8bzafaQWCNKxa3SUVLbt01G+9A2D61vd3qgqp7w33hg==
   dependencies:
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-types" "*"
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.16.0"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
 
 "@coasys/flux-vue@*":
   version "0.7.6"
@@ -9763,10 +9742,10 @@ open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openai@^4.52.0:
-  version "4.53.2"
-  resolved "https://registry.npmjs.org/openai/-/openai-4.53.2.tgz#86f54a38091a87db36f651cf28c9e5ee7c98d56a"
-  integrity sha512-ohYEv6OV3jsFGqNrgolDDWN6Ssx1nFg6JDJQuaBFo4SL2i+MBoOQ16n2Pq1iBF5lH1PKnfCIOfqAGkmzPvdB9g==
+openai@^4.55.5:
+  version "4.56.0"
+  resolved "https://registry.npmjs.org/openai/-/openai-4.56.0.tgz#07d3982544cabd5781127288a8dfcceb7319a4cf"
+  integrity sha512-zcag97+3bG890MNNa0DQD9dGmmTWL8unJdNkulZzWRXrl+QeD+YkBI4H58rJcwErxqGK6a0jVPZ4ReJjhDGcmw==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
