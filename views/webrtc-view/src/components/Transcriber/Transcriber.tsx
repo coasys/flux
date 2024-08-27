@@ -1,6 +1,6 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
-import { getAllTopics, processItem } from "@coasys/flux-utils";
+import { getAllTopics, processItem, set } from "@coasys/flux-utils";
 import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
@@ -51,6 +51,9 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const recording = useRef(false);
   const listening = useRef(false);
   const transcriptionWorker = useRef<Worker | null>(null);
+  const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const currentTransciptsId = useRef(null);
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -137,8 +140,92 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         mediaRecorder.current = new MediaRecorder(stream);
         mediaRecorder.current.ondataavailable = (event) => {
           audioChunks.current.push(event.data);
+          if (mediaRecorder.current?.state === 'inactive') {
+            // @ts-ignore
+            if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+              transcribe();
+            }
+          }
         };
-        mediaRecorder.current.onstop = transcribe;
+        // mediaRecorder.current.onstop = transcribe;
+
+        // @ts-ignore
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+          // @ts-ignore
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          const recognition = new SpeechRecognition();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          let noTextTimeoutId: NodeJS.Timeout;
+
+          recognition.onresult = (event) => {
+            let interim = '';
+            let final = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const result = event.results[i];
+              if (result.isFinal) {
+                final += result[0].transcript;
+              } else {
+                interim += result[0].transcript;
+                if (!currentTransciptsId.current) {
+                  const id = uuidv4();
+                  currentTransciptsId.current = id;
+                  setTranscripts((ts) => [...ts, { id, text: interim, timestamp: new Date(), done: true }]);
+                } else {
+                  setTranscripts((ts) => {
+                    const match = ts.find((t) => t.id === currentTransciptsId.current);
+                    match.text = interim;
+                    return [...ts];
+                  });
+                }
+              }
+            }
+            let text = "";
+            setTranscript((prev) => {
+              text = prev + final;
+              return text;
+            });
+            setInterimTranscript(interim);
+
+            if (noTextTimeoutId) {
+              clearTimeout(noTextTimeoutId);
+            }
+            if (interim.length === 0) {
+              noTextTimeoutId = setTimeout(() => {
+                if (text.length > 0) {
+                  setTranscripts((ts) => {
+                    const match = ts.find((t) => t.id === currentTransciptsId.current);
+                    match.done = true;
+                    return [...ts];
+                  });
+                  currentTransciptsId.current = null;
+                  // @ts-ignore
+                  messageRepo.create({
+                    body: `<p>${text}</p>`,
+                  }).then((message) => {
+                    // @ts-ignore
+                    processItem(perspective, allTopics, { id: message.id, transcript })
+                      .then(() => {
+                        getAllTopics(perspective, setAllTopics);
+                      })
+                      .catch(console.log)
+                  }).catch(console.log)
+                  .finally(() => {
+                    setTranscript('');
+                    setInterimTranscript('');
+                  });;
+                }
+              }, secondsOfSilence * 1000);
+            }
+          };
+
+          recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+          };
+
+          recognition.start();
+        }
+
         listening.current = true;
         detectSpeech();
       });
