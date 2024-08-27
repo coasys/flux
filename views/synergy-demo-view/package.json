@@ -38,7 +38,7 @@
     "@coasys/flux-utils": "0.9.1",
     "@coasys/ad4m-react-hooks": "0.10.0-rc7.fix.2",
     "@coasys/flux-api": "*",
-    "@coasys/flux-webrtc-view": "*",
+    "@coasys/flux-webrtc-view": "0.8.1-fix.2",
     "preact": "^10.13.1"
   },
   "devDependencies": {
