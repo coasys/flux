@@ -18,7 +18,7 @@ import { Profile } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
 import Debug from "../Debug";
 import Transcriber from "../Transcriber";
-import styles from "./Channel.module.css";
+import styles from "./Channel.module.scss";
 
 type Props = {
   source: string;
@@ -84,8 +84,13 @@ export default function Channel({
   }, [agent]);
 
   return (
-    <section className={styles.outer} ref={wrapperEl}>
-      {currentView !== "@coasys/flux-webrtc-view" && (
+    <section
+      className={`${styles.outer} ${currentView === "@coasys/synergy-demo-view" && styles.synergy}`}
+      ref={wrapperEl}
+    >
+      {!["@coasys/flux-webrtc-view", "@coasys/synergy-demo-view"].includes(
+        currentView
+      ) && (
         <button
           className={styles.closeButton}
           onClick={() => setModalOpen(false)}

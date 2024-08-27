@@ -32,12 +32,12 @@ async function removeEmbedding(perspective, itemId) {
   const embeddingLink = await perspective.get(
     new LinkQuery({ source: itemId, predicate: "ad4m://embedding" })
   );
-  if (embeddingLink[0]) return await perspective.remove(embeddingLink[0]);
+  if (embeddingLink[0]) return perspective.remove(embeddingLink[0]);
 }
 
 async function removeTopics(perspective, itemId) {
   const relationships = (await findRelationships(perspective, itemId)) as any;
-  return await Promise.all(
+  return Promise.all(
     relationships.map(async (r) => {
       const itemRelationshipLink = await perspective.get(
         new LinkQuery({ source: itemId, target: r.id })
@@ -54,9 +54,10 @@ async function removeTopics(perspective, itemId) {
 }
 
 export async function removeProcessedData(perspective, itemId) {
-  const deleteEmbedding = await removeEmbedding(perspective, itemId);
-  const deleteTopics = await removeTopics(perspective, itemId);
-  return await Promise.all([deleteEmbedding, deleteTopics]);
+  return await Promise.all([
+    removeEmbedding(perspective, itemId),
+    removeTopics(perspective, itemId),
+  ]);
 }
 
 export async function findRelationships(perspective, itemId) {

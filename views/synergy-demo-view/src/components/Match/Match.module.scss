@@ -1,0 +1,13 @@
+.wrapper {
+  border: 1px solid var(--j-color-ui-300);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-400);
+  background-color: var(--j-color-ui-100);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  p {
+    margin: 0;
+  }
+}

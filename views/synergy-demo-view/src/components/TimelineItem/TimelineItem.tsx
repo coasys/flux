@@ -68,8 +68,8 @@ export default function TimelineItem({
         onClick={() => setSelectedItemId(selected ? null : id)}
       />
       <div className={styles.timestamp}>
-        {/* <j-timestamp value={timestamp} relative /> */}
-        <j-timestamp value={timestamp} dateStyle="short" timeStyle="short" />
+        <j-timestamp value={timestamp} dateStyle="short" />
+        <j-timestamp value={timestamp} timeStyle="short" />
       </div>
       <div className={styles.position}>
         <div className={styles.node} />
@@ -82,8 +82,8 @@ export default function TimelineItem({
         className={styles.content}
       >
         <j-flex gap="400" a="center" wrap>
-          <j-icon name={icon} />
-          <Avatar size="sm" did={author} profile={profile} />
+          <j-icon name={icon} color="ui-400" />
+          <Avatar size="xs" did={author} profile={profile} />
           {selected && (
             <j-flex gap="300" wrap>
               {topics.map((topic) => (
@@ -116,6 +116,7 @@ export default function TimelineItem({
           nomargin
           dangerouslySetInnerHTML={{ __html: text }}
           className={styles.text}
+          color="color-white"
         />
       </j-flex>
     </div>

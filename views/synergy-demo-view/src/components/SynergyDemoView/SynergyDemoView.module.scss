@@ -9,19 +9,28 @@
 
   .wrapper {
     width: 100%;
-  }
+    margin-top: 20px;
 
-  .timelines {
-    width: 50%;
-    overflow-x: scroll;
-    position: relative;
-
-    &::-webkit-scrollbar {
-      display: none;
+    .channelTimeline {
+      width: 33%;
     }
 
-    @media screen and (max-width: 1200px) {
-      width: 100%;
+    .videoWall {
+      width: 33%;
+    }
+
+    .matches {
+      width: 33%;
+      overflow-x: scroll;
+      position: relative;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .match {
+        width: 100%;
+      }
     }
   }
 }

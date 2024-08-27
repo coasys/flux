@@ -12,7 +12,8 @@
     "ad4m-view"
   ],
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "main": "./dist/main.umd.cjs",
   "module": "./dist/main.js",
@@ -20,6 +21,10 @@
     ".": {
       "import": "./dist/main.js",
       "require": "./dist/main.umd.cjs"
+    },
+    "./src/App": {
+      "import": "./src/App.tsx",
+      "require": "./src/App.tsx"
     }
   },
   "baseUrl": "./",

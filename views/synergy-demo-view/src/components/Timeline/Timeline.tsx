@@ -12,9 +12,7 @@ type Props = {
   index?: number;
   channelId: string;
   match?: any;
-  totalMatches: number;
   selectedTopic?: string;
-  scrollToTimeline: (index: number) => void;
   topicSearch: (item: any, topic: string) => void;
   similaritySearch: (item: any) => void;
 };
@@ -25,9 +23,7 @@ export default function Timeline({
   index,
   channelId,
   match,
-  totalMatches,
   selectedTopic,
-  scrollToTimeline,
   topicSearch,
   similaritySearch,
 }: Props) {
@@ -51,14 +47,6 @@ export default function Timeline({
     source: channelId,
     subject: "Task",
   });
-
-  function matchText() {
-    if (!totalMatches) return "No matches";
-    if (index === 0)
-      return `${totalMatches} match${totalMatches > 1 ? "es" : ""}`;
-    if (totalMatches > index)
-      return `${totalMatches - index} more match${totalMatches - index > 1 ? "es" : ""}`;
-  }
 
   // aggregate all items into array and sort by date
   useEffect(() => {
@@ -95,60 +83,6 @@ export default function Timeline({
       id={`timeline-${index}`}
       className={`${styles.wrapper} ${index > 0 && styles.match}`}
     >
-      <div className={styles.header}>
-        <j-flex gap="400" a="center">
-          <h2 style={{ margin: "20px 0" }}>
-            {match?.channel.name || "This channel"}
-          </h2>
-          {!!match && (
-            <>
-              {match.similarity ? (
-                <p>
-                  Similarity score: <b>{match.similarity.toFixed(5)}</b>
-                </p>
-              ) : (
-                <p>
-                  Matching topic:{" "}
-                  <b>
-                    #{selectedTopic} ({match.relevance}% relevance)
-                  </b>
-                </p>
-              )}
-            </>
-          )}
-        </j-flex>
-        {window.innerWidth < 1200 || index > 0 ? (
-          <j-flex gap="400" a="center">
-            {index > (window.innerWidth < 1200 ? 0 : 1) && (
-              <j-button
-                size="sm"
-                circle
-                onClick={() => scrollToTimeline(index - 1)}
-              >
-                <j-icon name="caret-left-fill" />
-              </j-button>
-            )}
-            {index < totalMatches && (
-              <j-button
-                size="sm"
-                circle
-                onClick={() => scrollToTimeline(index + 1)}
-              >
-                <j-icon name="caret-right-fill" />
-              </j-button>
-            )}
-            <j-text
-              nomargin
-              onClick={() => scrollToTimeline(index + 1)}
-              style={{ cursor: "pointer" }}
-            >
-              {matchText()}
-            </j-text>
-          </j-flex>
-        ) : (
-          <j-text nomargin>{matchText()}</j-text>
-        )}
-      </div>
       <div className={styles.content}>
         <div className={styles.fades}>
           <div className={styles.fadeTop} />

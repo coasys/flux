@@ -1,15 +1,10 @@
-$line-offset: 182px;
+$line-offset: 112px;
 
 .wrapper {
   display: flex;
   flex-direction: column;
   flex-basis: 100%;
-  flex-shrink: 0;
-  height: calc(100vh - 250px);
-
-  .header {
-    height: 120px;
-  }
+  height: calc(100vh - 150px);
 
   .content {
     display: flex;

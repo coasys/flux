@@ -12,10 +12,11 @@
   }
 
   .timestamp {
-    width: 150px;
+    width: 80px;
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
     flex-shrink: 0;
     color: var(--j-color-ui-500);
     font-size: 14px;
@@ -52,19 +53,25 @@
   .content {
     word-break: break-word;
     width: 100%;
-    margin: 30px 0;
+    margin: 20px 0;
 
     .tag {
       all: unset;
       cursor: pointer;
-      border: 1px solid var(--j-color-primary-500);
       border-radius: 8px;
       padding: 8px 10px;
       background-color: var(--j-color-ui-50);
+      border: 1px solid var(--j-color-primary-500);
       color: var(--j-color-primary-500);
       font-weight: 600;
       font-size: 15px;
       z-index: 5;
+      transition: all 0.3s;
+
+      &:hover {
+        border: 1px solid var(--j-color-primary-700);
+        color: var(--j-color-primary-700);
+      }
 
       &.focus {
         border: 1px solid white;
@@ -74,6 +81,11 @@
       &.vector {
         border: 1px solid var(--j-color-success-500);
         color: var(--j-color-success-500);
+
+        &:hover {
+          border: 1px solid var(--j-color-success-700);
+          color: var(--j-color-success-700);
+        }
       }
     }
 

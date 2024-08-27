@@ -7,7 +7,9 @@ import {
   getAllTopics,
 } from "@coasys/flux-utils";
 import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
+import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { useEffect, useRef, useState } from "preact/hooks";
+import Match from "../Match/Match";
 import Timeline from "../Timeline";
 import styles from "./SynergyDemoView.module.scss";
 
@@ -24,6 +26,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [matches, setMatches] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState("");
+  const [searchType, setSearchType] = useState("");
+  const [searching, setSearching] = useState(false);
   const worker = useRef<Worker | null>(null);
 
   async function findEmbedding(itemId) {
@@ -120,8 +124,10 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   async function topicSearch(item, topic) {
     // searches other channels in the neighbourhood to find items with matching topic tags
+    setSearching(true);
     setMatches([]);
     setSelectedTopic(topic);
+    setSearchType("topic");
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
@@ -157,13 +163,16 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         )
     ).then(() => {
       setMatches(newMatches.sort((a, b) => b.relevance - a.relevance));
+      setSearching(false);
     });
   }
 
   async function similaritySearch(item) {
     // searches other channels in the neighbourhood to find items with similar vector embeddings
+    setSearching(true);
     setSelectedTopic("");
     setMatches([]);
+    setSearchType("vector");
     let newMatches = [];
     const sourceEmbedding = await findEmbedding(item.id);
     const channels = await new SubjectRepository(Channel, {
@@ -195,12 +204,16 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         (a, b) => b.similarity - a.similarity
       );
       setMatches(sortedMatches);
+      setSearching(false);
     });
   }
 
-  function scrollToTimeline(index) {
-    const timeline = document.getElementById(`timeline-${index}`);
-    timeline.scrollIntoView({ behavior: "smooth" });
+  function matchText() {
+    if (!searchType) return "";
+    if (searching) return "Searching for matches...";
+    if (matches.length === 0)
+      return `No ${searchType} matches ${searchType === "topic" ? `for #${selectedTopic}` : ""}`;
+    return `${matches.length} ${searchType} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic}` : ""}`;
   }
 
   useEffect(() => getAllTopics(perspective, setAllTopics), []);
@@ -225,73 +238,42 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           }}
         />
       </j-box>
-      <j-flex gap="400">
+      <j-flex gap="400" wrap style={{ width: "100%" }}>
         All topics:
         {allTopics.map((t) => (
-          <j-text>#{t.name}</j-text>
+          <j-text nomargin>#{t.name}</j-text>
         ))}
       </j-flex>
-      {window.innerWidth > 1200 ? (
-        <j-flex className={styles.wrapper}>
-          <div style={{ flexBasis: "50%", flexShrink: 0 }}>
-            <Timeline
-              agent={agent}
-              perspective={perspective}
-              index={0}
-              channelId={source}
-              totalMatches={matches.length}
-              selectedTopic={selectedTopic}
-              topicSearch={topicSearch}
-              similaritySearch={similaritySearch}
-              scrollToTimeline={scrollToTimeline}
-            />
-          </div>
-          <j-flex gap="500" className={styles.timelines}>
-            {matches.map((match, index) => (
-              <Timeline
-                agent={agent}
-                perspective={perspective}
-                index={index + 1}
-                channelId={match.channel.id}
-                match={match}
-                totalMatches={matches.length}
-                selectedTopic={selectedTopic}
-                topicSearch={topicSearch}
-                similaritySearch={similaritySearch}
-                scrollToTimeline={scrollToTimeline}
-              />
-            ))}
-          </j-flex>
-        </j-flex>
-      ) : (
-        <j-flex gap="500" className={styles.timelines}>
+      <j-flex className={styles.wrapper}>
+        <div className={styles.channelTimeline}>
           <Timeline
             agent={agent}
             perspective={perspective}
             index={0}
             channelId={source}
-            totalMatches={matches.length}
             selectedTopic={selectedTopic}
             topicSearch={topicSearch}
             similaritySearch={similaritySearch}
-            scrollToTimeline={scrollToTimeline}
           />
-          {matches.map((match, index) => (
-            <Timeline
-              agent={agent}
-              perspective={perspective}
-              index={index + 1}
-              channelId={match.channel.id}
-              match={match}
-              totalMatches={matches.length}
-              selectedTopic={selectedTopic}
-              topicSearch={topicSearch}
-              similaritySearch={similaritySearch}
-              scrollToTimeline={scrollToTimeline}
-            />
+        </div>
+        <div id="video-wall" className={styles.videoWall}>
+          <WebRTCView
+            perspective={perspective}
+            source={source}
+            agent={agent}
+            currentView="@coasys/synergy-demo-view"
+            setModalOpen={() => null}
+          />
+        </div>
+        <j-flex direction="column" gap="500" className={styles.matches}>
+          <div className={styles.header}>
+            <h2>{matchText()}</h2>
+          </div>
+          {matches.map((match) => (
+            <Match perspective={perspective} agent={agent} match={match} />
           ))}
         </j-flex>
-      )}
+      </j-flex>
     </div>
   );
 }
