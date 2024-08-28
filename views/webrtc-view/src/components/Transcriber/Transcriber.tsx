@@ -56,6 +56,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const currentTransciptsId = useRef(null);
   const recognition = useRef(null);
 
+  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+
   const { repo: messageRepo } = useSubjects({
     perspective,
     source,
@@ -151,7 +153,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         // mediaRecorder.current.onstop = transcribe;
 
         // @ts-ignore
-        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        if (isChrome && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
           // @ts-ignore
           const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
           recognition.current = new SpeechRecognition();
@@ -239,7 +241,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     audioContext.current?.close();
 
     // @ts-ignore
-    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+    if (isChrome && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
       recognition.current.stop();
     }
   }
