@@ -54,6 +54,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const currentTransciptsId = useRef(null);
+  const recognition = useRef(null);
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -153,12 +154,12 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         if (window.SpeechRecognition || window.webkitSpeechRecognition) {
           // @ts-ignore
           const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-          const recognition = new SpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
+          recognition.current = new SpeechRecognition();
+          recognition.current.continuous = true;
+          recognition.current.interimResults = true;
           let noTextTimeoutId: NodeJS.Timeout;
 
-          recognition.onresult = (event) => {
+          recognition.current.onresult = (event) => {
             let interim = '';
             let final = '';
             for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -219,11 +220,11 @@ export default function Transcriber({ source, perspective, muted }: Props) {
             }
           };
 
-          recognition.onerror = (event) => {
+          recognition.current.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
           };
 
-          recognition.start();
+          recognition.current.start();
         }
 
         listening.current = true;
@@ -236,6 +237,11 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     mediaRecorder.current?.stop();
     sourceNode.current?.disconnect();
     audioContext.current?.close();
+
+    // @ts-ignore
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+      recognition.current.stop();
+    }
   }
 
   function incrementTimeout(value) {
@@ -278,6 +284,10 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     if (muted && listening.current) stopListening();
     else if (transcribeAudio) startListening();
   }, [muted]);
+
+  useEffect(() => {
+    console.log('transcript', transcript);
+  }, [transcripts]);
 
   useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
