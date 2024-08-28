@@ -1319,17 +1319,6 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.10.0-prerelease":
-  version "0.10.0-prerelease"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-prerelease.tgz#91abd945c17fd19011969f386777da03389fb751"
-  integrity sha512-utEwwTcM6kBd56947yA2EeCTbdrCuCZjkad4nPEcPuc9BOjHZe2iGymHPjsMb6IMgJi3nms2wD0cUmYvi8H+Nw==
-  dependencies:
-    "@coasys/ad4m" "*"
-    "@coasys/ad4m-connect" "*"
-    "@coasys/hooks-helpers" "*"
-    "@types/react" "^18.2.55"
-    "@types/react-dom" "^18.2.19"
-
 "@coasys/ad4m-react-hooks@0.10.0-rc7.fix.2":
   version "0.10.0-rc7.fix.2"
   resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc7.fix.2.tgz#d8496913c3e06f3047908dc721853c616598cbd4"
@@ -1341,15 +1330,26 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.10.0-rc5":
-  version "0.10.0-rc5"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-rc5.tgz#d56a67ac0d6e3114589cbbd3a92574e64496be2c"
-  integrity sha512-fuaGt3TCat9kzE/Yb+HYSNvVbttwArieLRfQOLW7Cez8CiPAMnZBRSzUZiDfivQrWzTKh5CsQMa05VIfBIq1TA==
+"@coasys/ad4m-react-hooks@0.9.0":
+  version "0.9.0"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0.tgz#15f9a11a273a9f9dbe676722d5d6757814e9d077"
+  integrity sha512-pG7CszlLSbODr26jriJ8BGaJIyOSYQOKSdJcISf8lUltkgLPVhJW3DEa1K4dpRZ0t98BGgnen3NhOCyFWtUjYg==
+  dependencies:
+    "@coasys/ad4m" "*"
+    "@coasys/ad4m-connect" "*"
+    "@coasys/hooks-helpers" "*"
+    "@types/react" "^18.2.55"
+    "@types/react-dom" "^18.2.19"
+
+"@coasys/ad4m-vue-hooks@0.10.0-rc7.fix.2":
+  version "0.10.0-rc7.fix.2"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-rc7.fix.2.tgz#ba8b1a0883dcefcc058355ff1f2586b4700ff310"
+  integrity sha512-XJ3lQgsStlcCR1SYBkKvMsC+Bw3M4VOb9j/amHO71yRBZPlQ9iwAf5Np9XNv73/WFdVLYdoJsMyHATlNivRWTg==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*":
+"@coasys/ad4m@*", "@coasys/ad4m@0.9.0":
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.9.0.tgz#39e917b7263f8d59ee6bca00cc8c16d4ca8f43c3"
   integrity sha512-7b+YYHC3JX05MJHkUjDA0ZbuKxH2/Rp4yiuMCLCDd5TKxVm04OMgo8JlI8vU79jOu5B7kSRSBUKhH+irTKWRFw==
@@ -1400,6 +1400,23 @@
     "@coasys/flux-constants" "*"
     "@coasys/flux-types" "*"
     "@coasys/flux-utils" "*"
+
+"@coasys/flux-webrtc-view@0.8.1-fix.1":
+  version "0.8.1-fix.1"
+  resolved "https://registry.npmjs.org/@coasys/flux-webrtc-view/-/flux-webrtc-view-0.8.1-fix.1.tgz#ca0d8835642bc88b9e5769b140a03991153fff44"
+  integrity sha512-xcrQM+JVJiTNSoAD+DaFwOSvHGec93UFmK2Xv7tnnDFOtdygraKXD50EPh5RhiJ2QJCBgbyLt3PyxwlAJLaHag==
+  dependencies:
+    "@coasys/ad4m" "0.9.0"
+    "@coasys/ad4m-react-hooks" "0.9.0"
+    "@coasys/flux-container" "*"
+    "@coasys/flux-webrtc" "*"
+    "@types/simple-peer" "^9.11.8"
+    classnames "^2.3.2"
+    emoji-picker-element "^1.14.0"
+    hark "^1.2.3"
+    howler "^2.2.3"
+    npm-run-all "^4.1.5"
+    preact "^10.11.3"
 
 "@coasys/hooks-helpers@*":
   version "0.9.0"
