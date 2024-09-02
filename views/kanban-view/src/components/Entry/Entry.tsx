@@ -1,16 +1,13 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject } from "@coasys/ad4m-react-hooks";
-import {
-  getAllTopics,
-  processItem,
-  removeProcessedData,
-} from "@coasys/flux-utils";
+import { processItem } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
 type Props = {
   perspective: PerspectiveProxy;
   id: string;
+  channelId: string;
   selectedClass: string;
   onUrlClick?: Function;
 };
@@ -18,18 +15,16 @@ type Props = {
 export default function Entry({
   perspective,
   id,
+  channelId,
   selectedClass,
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const [allTopics, setAllTopics] = useState<any[]>([]);
   const { entry, repo } = useSubject({
     perspective,
     subject: selectedClass,
     id,
   });
-
-  useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
   useEffect(() => {
     perspective
@@ -55,17 +50,13 @@ export default function Entry({
   async function onUpdate(propName, value) {
     await repo.update(id, { [propName]: value }).then(() => {
       if (["name", "status"].includes(propName)) {
-        removeProcessedData(perspective, id).then(() => {
-          const task = propName === "name" ? value : entry.name;
-          const status =
-            propName === "status"
-              ? value.split("task://")[1]
-              : entry.status.split("task://")[1];
-          const taskText = `Task: "${task}", Status: "${status}"`;
-          processItem(perspective, allTopics, { id, text: taskText })
-            .then(() => getAllTopics(perspective, setAllTopics))
-            .catch(console.log);
-        });
+        const task = propName === "name" ? value : entry.name;
+        const status =
+          propName === "status"
+            ? value.split("task://")[1]
+            : entry.status.split("task://")[1];
+        const taskText = `Task: "${task}", Status: "${status}"`;
+        processItem(perspective, channelId, { id, text: taskText });
       }
     });
   }

@@ -188,6 +188,7 @@ import {
   Community,
   generateWCName,
   joinCommunity,
+  Topic,
 } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
@@ -215,6 +216,9 @@ export default defineComponent({
     const { perspectives } = usePerspectives(client);
 
     const { data } = usePerspective(client, () => props.communityId);
+
+    // ensure SNDA is working for topics
+    await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
     const { entry: community } = useSubject({
       perspective: () => data.value.perspective,

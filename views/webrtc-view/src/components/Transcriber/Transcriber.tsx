@@ -1,6 +1,6 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
-import { getAllTopics, processItem, set } from "@coasys/flux-utils";
+import { processItem } from "@coasys/flux-utils";
 import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
@@ -27,7 +27,6 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const [openAIKey, setOpenAIKey] = useState(
     localStorage?.getItem("openAIKey") || ""
   );
-  const [allTopics, setAllTopics] = useState<any[]>([]);
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
@@ -51,8 +50,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const recording = useRef(false);
   const listening = useRef(false);
   const transcriptionWorker = useRef<Worker | null>(null);
-  const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
   const currentTransciptsId = useRef(null);
 
   const { repo: messageRepo } = useSubjects({
@@ -140,7 +139,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         mediaRecorder.current = new MediaRecorder(stream);
         mediaRecorder.current.ondataavailable = (event) => {
           audioChunks.current.push(event.data);
-          if (mediaRecorder.current?.state === 'inactive') {
+          if (mediaRecorder.current?.state === "inactive") {
             // @ts-ignore
             if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
               transcribe();
@@ -152,15 +151,16 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         // @ts-ignore
         if (window.SpeechRecognition || window.webkitSpeechRecognition) {
           // @ts-ignore
-          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
           const recognition = new SpeechRecognition();
           recognition.continuous = true;
           recognition.interimResults = true;
           let noTextTimeoutId: NodeJS.Timeout;
 
           recognition.onresult = (event) => {
-            let interim = '';
-            let final = '';
+            let interim = "";
+            let final = "";
             for (let i = event.resultIndex; i < event.results.length; i++) {
               const result = event.results[i];
               if (result.isFinal) {
@@ -170,10 +170,15 @@ export default function Transcriber({ source, perspective, muted }: Props) {
                 if (!currentTransciptsId.current) {
                   const id = uuidv4();
                   currentTransciptsId.current = id;
-                  setTranscripts((ts) => [...ts, { id, text: interim, timestamp: new Date(), done: true }]);
+                  setTranscripts((ts) => [
+                    ...ts,
+                    { id, text: interim, timestamp: new Date(), done: true },
+                  ]);
                 } else {
                   setTranscripts((ts) => {
-                    const match = ts.find((t) => t.id === currentTransciptsId.current);
+                    const match = ts.find(
+                      (t) => t.id === currentTransciptsId.current
+                    );
                     match.text = interim;
                     return [...ts];
                   });
@@ -191,36 +196,34 @@ export default function Transcriber({ source, perspective, muted }: Props) {
               clearTimeout(noTextTimeoutId);
             }
             if (interim.length === 0) {
-              noTextTimeoutId = setTimeout(() => {
+              noTextTimeoutId = setTimeout(async () => {
                 if (text.length > 0) {
                   setTranscripts((ts) => {
-                    const match = ts.find((t) => t.id === currentTransciptsId.current);
+                    const match = ts.find(
+                      (t) => t.id === currentTransciptsId.current
+                    );
                     match.done = true;
                     return [...ts];
                   });
                   currentTransciptsId.current = null;
                   // @ts-ignore
-                  messageRepo.create({
+                  const newMessage = (await messageRepo.create({
                     body: `<p>${text}</p>`,
-                  }).then((message) => {
-                    // @ts-ignore
-                    processItem(perspective, allTopics, { id: message.id, transcript })
-                      .then(() => {
-                        getAllTopics(perspective, setAllTopics);
-                      })
-                      .catch(console.log)
-                  }).catch(console.log)
-                  .finally(() => {
-                    setTranscript('');
-                    setInterimTranscript('');
-                  });;
+                  })) as any;
+                  processItem(perspective, source, {
+                    id: newMessage.id,
+                    text,
+                  }).then(() => {
+                    setTranscript("");
+                    setInterimTranscript("");
+                  });
                 }
               }, secondsOfSilence * 1000);
             }
           };
 
           recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
+            console.error("Speech recognition error:", event.error);
           };
 
           recognition.start();
@@ -260,9 +263,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
       const message = (await messageRepo.create({
         body: `<p>${text}</p>`,
       })) as any;
-      processItem(perspective, allTopics, { id: message.id, text })
-        .then(() => getAllTopics(perspective, setAllTopics))
-        .catch(console.log);
+      processItem(perspective, source, { id: message.id, text });
     };
     return () => {
       transcriptionWorker.current?.terminate();
@@ -278,8 +279,6 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     if (muted && listening.current) stopListening();
     else if (transcribeAudio) startListening();
   }, [muted]);
-
-  useEffect(() => getAllTopics(perspective, setAllTopics), []);
 
   return (
     <div className={styles.wrapper}>

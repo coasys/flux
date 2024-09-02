@@ -37,13 +37,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         predicate: "ad4m://embedding",
       })
     );
-    if (links.length) {
-      const expression = await perspective.getExpression(links[0].data.target);
-      const embedding = Float32Array.from(
-        Object.values(JSON.parse(expression.data).data)
-      );
-      return embedding;
-    } else return null;
+    if (!links.length) return null;
+    const expression = await perspective.getExpression(links[0].data.target);
+    const embedding = Float32Array.from(
+      Object.values(JSON.parse(expression.data).data)
+    );
+    return embedding;
   }
 
   async function findTopicMatches(
@@ -122,7 +121,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
-  async function topicSearch(item, topic) {
+  async function topicSearch(channelId, topic) {
     // searches other channels in the neighbourhood to find items with matching topic tags
     setSearching(true);
     setMatches([]);
@@ -134,7 +133,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     let newMatches = [];
     Promise.all(
       channels
-        .filter((channel: any) => channel.id !== item.channelId)
+        .filter((channel: any) => channel.id !== channelId)
         .map(
           (channel: any) =>
             new Promise(async (resolve: any) => {
@@ -167,20 +166,20 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
-  async function similaritySearch(item) {
+  async function similaritySearch(itemId) {
     // searches other channels in the neighbourhood to find items with similar vector embeddings
     setSearching(true);
     setSelectedTopic("");
     setMatches([]);
     setSearchType("vector");
     let newMatches = [];
-    const sourceEmbedding = await findEmbedding(item.id);
+    const sourceEmbedding = await findEmbedding(itemId);
     const channels = await new SubjectRepository(Channel, {
       perspective,
     }).getAllData();
     Promise.all(
       channels
-        .filter((channel: any) => channel.id !== item.channelId)
+        .filter((channel: any) => channel.id !== source)
         .map(
           (channel: any) =>
             new Promise(async (resolve: any) => {
@@ -189,12 +188,20 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
                 "Message",
                 sourceEmbedding
               );
-              // const postMatches = await findEmbeddingMatches(channel, "Post", sourceEmbedding);
-              // const taskMatches = await findEmbeddingMatches(channel, "Task", sourceEmbedding);
+              const postMatches = await findEmbeddingMatches(
+                channel,
+                "Post",
+                sourceEmbedding
+              );
+              const taskMatches = await findEmbeddingMatches(
+                channel,
+                "Task",
+                sourceEmbedding
+              );
               newMatches.push(
-                ...messageMatches
-                // ...postMatches,
-                // ...taskMatches
+                ...messageMatches,
+                ...postMatches,
+                ...taskMatches
               );
               resolve();
             })
@@ -216,7 +223,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return `${matches.length} ${searchType} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic}` : ""}`;
   }
 
-  useEffect(() => getAllTopics(perspective, setAllTopics), []);
+  useEffect(() => {
+    getAllTopics(perspective).then((topics: any[]) => setAllTopics(topics));
+  }, []);
 
   // reset matches when channel changes
   useEffect(() => setMatches([]), [source]);

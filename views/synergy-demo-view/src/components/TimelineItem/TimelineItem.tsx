@@ -10,6 +10,7 @@ import styles from "./TimelineItem.module.scss";
 type Props = {
   agent: any;
   perspective: any;
+  channelId: string;
   item: any;
   index: number;
   selectedTopic: string;
@@ -22,6 +23,7 @@ type Props = {
 export default function TimelineItem({
   agent,
   perspective,
+  channelId,
   item,
   index,
   selectedTopic,
@@ -92,23 +94,21 @@ export default function TimelineItem({
                   disabled={index > 0}
                   onClick={() => {
                     setSelectedItemId(id);
-                    topicSearch(item, topic);
+                    topicSearch(channelId, topic);
                   }}
                 >
                   #{topic}
                 </button>
               ))}
-              {index === 0 && (
-                <button
-                  className={`${styles.tag} ${styles.vector}`}
-                  onClick={() => {
-                    setSelectedItemId(id);
-                    similaritySearch(item);
-                  }}
-                >
-                  Vector search
-                </button>
-              )}
+              <button
+                className={`${styles.tag} ${styles.vector}`}
+                onClick={() => {
+                  setSelectedItemId(id);
+                  similaritySearch(item.id);
+                }}
+              >
+                Vector search
+              </button>
             </j-flex>
           )}
         </j-flex>

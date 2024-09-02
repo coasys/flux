@@ -54,6 +54,7 @@ $line-offset: 112px;
     .items {
       height: 100%;
       overflow-y: scroll;
+      z-index: 5;
 
       &::-webkit-scrollbar {
         display: none;
@@ -64,6 +65,58 @@ $line-offset: 112px;
         width: 6px;
         margin-left: $line-offset;
         background-color: var(--j-color-primary-400);
+      }
+
+      .tag {
+        all: unset;
+        cursor: pointer;
+        border-radius: 8px;
+        padding: 8px 10px;
+        background-color: var(--j-color-ui-50);
+        border: 1px solid var(--j-color-primary-500);
+        color: var(--j-color-primary-500);
+        font-weight: 600;
+        font-size: 15px;
+        z-index: 5;
+        transition: all 0.3s;
+
+        &:hover {
+          border: 1px solid var(--j-color-primary-700);
+          color: var(--j-color-primary-700);
+        }
+
+        &.focus {
+          border: 1px solid white;
+          color: white;
+        }
+
+        &.vector {
+          border: 1px solid var(--j-color-success-500);
+          color: var(--j-color-success-500);
+
+          &:hover {
+            border: 1px solid var(--j-color-success-700);
+            color: var(--j-color-success-700);
+          }
+        }
+      }
+
+      .conversation {
+        h1 {
+          font-size: 26px;
+          font-weight: 500;
+          margin: 0;
+        }
+
+        .subgroup {
+          margin-top: 20px;
+
+          h2 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+          }
+        }
       }
     }
   }

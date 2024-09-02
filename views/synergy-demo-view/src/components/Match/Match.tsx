@@ -45,11 +45,9 @@ export default function Match({ perspective, agent, match }: Props) {
   // aggregate all items into array and sort by date
   useEffect(() => {
     const newItems = [
-      ...messages.map((message) =>
-        transformItem(channel.id, "Message", message)
-      ),
-      ...posts.map((post) => transformItem(channel.id, "Post", post)),
-      ...tasks.map((task) => transformItem(channel.id, "Task", task)),
+      ...messages.map((message) => transformItem("Message", message)),
+      ...posts.map((post) => transformItem("Post", post)),
+      ...tasks.map((task) => transformItem("Task", task)),
     ].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });

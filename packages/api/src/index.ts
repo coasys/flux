@@ -1,6 +1,8 @@
 import App from "./app";
 import Channel from "./channel";
 import Community from "./community";
+import Conversation from "./conversation";
+import ConversationSubgroup from "./conversation-subgroup";
 import createAgentWebLink from "./createAgentWebLink";
 import createCommunity from "./createCommunity";
 import createProfile from "./createProfile";
@@ -27,6 +29,8 @@ export {
   App,
   Channel,
   Community,
+  Conversation,
+  ConversationSubgroup,
   createAgentWebLink,
   createCommunity,
   createProfile,

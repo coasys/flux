@@ -2,9 +2,7 @@ import { Post as PostSubject, SubjectRepository } from "@coasys/flux-api";
 import {
   blobToDataURL,
   dataURItoBlob,
-  getAllTopics,
   processItem,
-  removeProcessedData,
   resizeImage,
 } from "@coasys/flux-utils";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
@@ -36,7 +34,6 @@ export default function CreatePost({
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
   const [initState, setInitState] = useState(initialState);
-  const [allTopics, setAllTopics] = useState<any[]>([]);
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
@@ -47,7 +44,6 @@ export default function CreatePost({
   }, [perspective.uuid, source]);
 
   useEffect(() => {
-    getAllTopics(perspective, setAllTopics);
     setTimeout(() => {
       inputRefs.current.title?.el.focus();
     }, 100);
@@ -113,24 +109,17 @@ export default function CreatePost({
           ...data,
           // if we send in null the property does not get updated
           image: imageReplaced ? data.image : undefined,
-        }).then(() => {
-          removeProcessedData(perspective, postId).then(() => {
-            processItem(perspective, allTopics, {
-              id: postId,
-              text: data.title || data.body,
-            })
-              .then(() => getAllTopics(perspective, setAllTopics))
-              .catch(console.log);
-          });
+        });
+        processItem(perspective, source, {
+          id: postId,
+          text: data.title || data.body,
         });
       } else {
         newPost = await Post.create(data);
-        processItem(perspective, allTopics, {
+        processItem(perspective, source, {
           id: newPost.id,
           text: data.title || data.body,
-        })
-          .then(() => getAllTopics(perspective, setAllTopics))
-          .catch(console.log);
+        });
       }
 
       onPublished(isEditing ? postId : newPost?.id);

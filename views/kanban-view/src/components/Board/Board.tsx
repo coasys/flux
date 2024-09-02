@@ -251,10 +251,11 @@ export default function Board({ perspective, source, agent }: BoardProps) {
           <CardDetails
             agent={agent}
             perspective={perspective}
+            channelId={source}
             id={currentTaskId}
             selectedClass={selectedClass}
             onDeleted={() => setCurrentTaskId(null)}
-          ></CardDetails>
+          />
         </j-modal>
       )}
       <j-modal
