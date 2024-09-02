@@ -53,6 +53,10 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const currentTransciptsId = useRef(null);
+  const recognition = useRef(null);
+
+  const isChrome =
+    /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -149,16 +153,19 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         // mediaRecorder.current.onstop = transcribe;
 
         // @ts-ignore
-        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        if (
+          isChrome &&
+          (window.SpeechRecognition || window.webkitSpeechRecognition)
+        ) {
           // @ts-ignore
           const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
-          const recognition = new SpeechRecognition();
-          recognition.continuous = true;
-          recognition.interimResults = true;
+          recognition.current = new SpeechRecognition();
+          recognition.current.continuous = true;
+          recognition.current.interimResults = true;
           let noTextTimeoutId: NodeJS.Timeout;
 
-          recognition.onresult = (event) => {
+          recognition.current.onresult = (event) => {
             let interim = "";
             let final = "";
             for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -222,11 +229,11 @@ export default function Transcriber({ source, perspective, muted }: Props) {
             }
           };
 
-          recognition.onerror = (event) => {
+          recognition.current.onerror = (event) => {
             console.error("Speech recognition error:", event.error);
           };
 
-          recognition.start();
+          recognition.current.start();
         }
 
         listening.current = true;
@@ -239,6 +246,14 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     mediaRecorder.current?.stop();
     sourceNode.current?.disconnect();
     audioContext.current?.close();
+
+    // @ts-ignore
+    if (
+      isChrome &&
+      (window.SpeechRecognition || window.webkitSpeechRecognition)
+    ) {
+      recognition.current.stop();
+    }
   }
 
   function incrementTimeout(value) {

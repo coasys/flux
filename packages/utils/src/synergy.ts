@@ -9,7 +9,6 @@ import {
   Topic,
 } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
-import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import OpenAI from "openai";
 
 async function removeEmbedding(perspective, itemId) {
@@ -45,7 +44,7 @@ async function removeProcessedData(perspective, itemId) {
 }
 
 async function generateEmbedding(text: string) {
-  const embeddingWorker = new EmbeddingWorker();
+  const embeddingWorker = new Worker(new URL("./embeddingWorker.ts", import.meta.url));
   return new Promise((resolve) => {
     embeddingWorker.postMessage({
       type: "embed",

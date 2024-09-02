@@ -23,8 +23,8 @@
     "@capacitor/ios": "^6.0.0",
     "@capacitor/push-notifications": "^6.0.1",
     "@capacitor/status-bar": "^6.0.0",
-    "@coasys/ad4m-connect": "0.10.0-rc7",
-    "@coasys/ad4m-vue-hooks": "0.10.0-rc5",
+    "@coasys/ad4m-connect": "0.10.0-rc7.fix.3",
+    "@coasys/ad4m-vue-hooks": "0.10.0-rc7.fix.3",
     "@coasys/flux-api": "*",
     "@coasys/flux-chat-view": "*",
     "@coasys/flux-graph-view": "*",
@@ -34,7 +34,7 @@
     "@coasys/flux-table-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-utils": "0.9.0",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "0.8.1-fix.1",
     "@metamask/jazzicon": "^2.0.0",
@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.20.13",
+    "@babel/plugin-transform-class-properties": "^7.25.4",
     "@capacitor/assets": "^3.0.5",
     "@testing-library/vue": "^6.4.2",
     "@types/jest": "^29.5.12",
@@ -78,6 +79,7 @@
     "vite": "^4.3.5",
     "vite-plugin-babel-compiler": "^0.3.0",
     "vite-plugin-pwa": "^0.14.7",
+    "vite-plugin-worker": "^1.0.5",
     "vue-devtools": "^5.1.4"
   },
   "contributors": [
