@@ -34,7 +34,7 @@
     "@coasys/flux-table-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-utils": "0.9.0",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "0.8.1-fix.1",
     "@metamask/jazzicon": "^2.0.0",
@@ -79,6 +79,7 @@
     "vite": "^4.3.5",
     "vite-plugin-babel-compiler": "^0.3.0",
     "vite-plugin-pwa": "^0.14.7",
+    "vite-plugin-worker": "^1.0.5",
     "vue-devtools": "^5.1.4"
   },
   "contributors": [
