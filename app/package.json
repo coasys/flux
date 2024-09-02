@@ -23,8 +23,8 @@
     "@capacitor/ios": "^6.0.0",
     "@capacitor/push-notifications": "^6.0.1",
     "@capacitor/status-bar": "^6.0.0",
-    "@coasys/ad4m-connect": "0.10.0-rc7",
-    "@coasys/ad4m-vue-hooks": "0.10.0-rc7.fix.2",
+    "@coasys/ad4m-connect": "0.10.0-rc7.fix.3",
+    "@coasys/ad4m-vue-hooks": "0.10.0-rc7.fix.3",
     "@coasys/flux-api": "*",
     "@coasys/flux-chat-view": "*",
     "@coasys/flux-graph-view": "*",
@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.20.13",
+    "@babel/plugin-transform-class-properties": "^7.25.4",
     "@capacitor/assets": "^3.0.5",
     "@testing-library/vue": "^6.4.2",
     "@types/jest": "^29.5.12",
