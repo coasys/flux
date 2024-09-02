@@ -1,7 +1,6 @@
 import { LinkQuery } from "@coasys/ad4m";
 import { Relationship, SubjectRepository, Topic } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
-import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import OpenAI from "openai";
 
 export function transformItem(channelId, type, item) {
@@ -111,7 +110,7 @@ async function generateTopics(allTopics, text) {
 }
 
 async function generateEmbedding(text: string) {
-  const embeddingWorker = new EmbeddingWorker();
+  const embeddingWorker = new Worker(new URL("./embeddingWorker.ts", import.meta.url));
   return new Promise((resolve) => {
     embeddingWorker.postMessage({
       type: "embed",
