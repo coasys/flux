@@ -11,6 +11,7 @@ import {
   findTopics,
   getSubgroupItems,
 } from "@coasys/flux-utils";
+import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
 import TimelineItem from "../TimelineItem";
 import styles from "./Timeline.module.scss";
@@ -36,7 +37,6 @@ export default function Timeline({
   topicSearch,
   similaritySearch,
 }: Props) {
-  const [items, setItems] = useState<any[]>([]);
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<any>(
     match?.itemId || null
@@ -106,17 +106,23 @@ export default function Timeline({
         return conversation;
       })
     );
-    setConversations(conversationsWithData);
+    return conversationsWithData;
   }
 
-  // todo: grab data when new items appear without triggering render loop
   useEffect(() => {
-    if (channelId) getConvoData();
-  }, [channelId]); // , messages, posts, tasks
+    if (channelId) {
+      getConvoData().then((conversationData) => {
+        setConversations((prevItems) => {
+          if (!isEqual(prevItems, conversationData)) return conversationData;
+          return prevItems;
+        });
+      });
+    }
+  }, [channelId, messages, posts, tasks]);
 
   // scroll to matching item
   useEffect(() => {
-    if (selectedItemId && items.length) {
+    if (selectedItemId && conversations.length) {
       const item = document.getElementById(`${index}-${selectedItemId}`);
       const timelineItems = document.getElementById(`timeline-items-${index}`);
       timelineItems.scrollBy({
