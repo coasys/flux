@@ -35,7 +35,8 @@ export default function JoinScreen({
       a="center"
       direction="column"
       style={{
-        width: currentView === "@coasys/synergy-demo-view" ? "100%" : undefined,
+        width:
+          currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
       }}
     >
       <h1>You haven't joined this room</h1>
@@ -46,11 +47,13 @@ export default function JoinScreen({
         pt="200"
         style={{
           width:
-            currentView === "@coasys/synergy-demo-view" ? "100%" : undefined,
+            currentView === "@coasys/flux-synergy-demo-view"
+              ? "100%"
+              : undefined,
         }}
       >
         <div
-          className={`${styles.preview} ${currentView === "@coasys/synergy-demo-view" && styles.synergy}`}
+          className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
           data-camera-enabled={!!webRTC.localState.settings.video}
           data-mirrored={true}
         >

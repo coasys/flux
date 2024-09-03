@@ -345,8 +345,13 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      // if entering webrtc view close modal
-      if (value === "@coasys/flux-webrtc-view") this.webrtcModalOpen = false;
+      // if entering webrtc or synergy view, close modal
+      if (
+        ["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
+          value
+        )
+      )
+        this.webrtcModalOpen = false;
       else if (
         // if leaving webrtc view (& not small screen) open modal
         this.currentView === "@coasys/flux-webrtc-view" &&

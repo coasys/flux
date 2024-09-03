@@ -85,10 +85,10 @@ export default function Channel({
 
   return (
     <section
-      className={`${styles.outer} ${currentView === "@coasys/synergy-demo-view" && styles.synergy}`}
+      className={`${styles.outer} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
       ref={wrapperEl}
     >
-      {!["@coasys/flux-webrtc-view", "@coasys/synergy-demo-view"].includes(
+      {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
         currentView
       ) && (
         <button

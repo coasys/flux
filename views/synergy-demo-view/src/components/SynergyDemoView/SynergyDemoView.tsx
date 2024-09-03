@@ -270,7 +270,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             perspective={perspective}
             source={source}
             agent={agent}
-            currentView="@coasys/synergy-demo-view"
+            currentView="@coasys/flux-synergy-demo-view"
             setModalOpen={() => null}
           />
         </div>
