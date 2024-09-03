@@ -148,82 +148,106 @@ export default function Timeline({
           <div style={{ minHeight: "100%" }}>
             {conversations.map((conversation: any) => (
               <div className={styles.conversation}>
-                <j-flex a="center" gap="400">
-                  <h1>{conversation.conversationName}</h1>
-                  <j-button
-                    size="xs"
-                    circle
-                    onClick={() => toggleSummary(conversation.id)}
-                  >
-                    <j-icon name="info" />
-                  </j-button>
-                </j-flex>
-                {showSummary[conversation.id] && (
-                  <div>
-                    <p>{conversation.summary}</p>
-                    <j-flex gap="300" wrap>
-                      {conversation.topics.map((topic) => (
-                        <button
-                          className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
-                          onClick={() => {
-                            setSelectedItemId(conversation.id);
-                            topicSearch(channelId, topic.name);
-                          }}
-                        >
-                          #{topic.name}
-                        </button>
-                      ))}
-                      <button
-                        className={`${styles.tag} ${styles.vector}`}
-                        onClick={() => {
-                          setSelectedItemId(conversation.id);
-                          similaritySearch(conversation.id);
-                        }}
-                      >
-                        Vector search
-                      </button>
-                    </j-flex>
+                <div className={styles.info}>
+                  <div className={styles.backgroundFades}>
+                    <div className={styles.top} />
+                    <div className={styles.center} />
+                    <div className={styles.bottom} />
                   </div>
-                )}
-                {conversation.subgroups.map((subgroup) => (
-                  <div className={styles.subgroup}>
-                    <j-flex a="center" gap="400">
-                      <h2>{subgroup.subgroupName}</h2>
-                      <j-button
-                        size="xs"
-                        circle
-                        onClick={() => toggleSummary(subgroup.id)}
-                      >
-                        <j-icon name="info" />
-                      </j-button>
-                    </j-flex>
-                    {showSummary[subgroup.id] && (
-                      <div>
-                        <p>{subgroup.summary}</p>
-                        <j-flex gap="300" wrap>
-                          {subgroup.topics.map((topic) => (
-                            <button
-                              className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
-                              onClick={() => {
-                                setSelectedItemId(subgroup.id);
-                                topicSearch(channelId, topic.name); // test
-                              }}
-                            >
-                              #{topic.name}
-                            </button>
-                          ))}
+                  <j-flex a="center" gap="400">
+                    <h1
+                      onClick={() => toggleSummary(conversation.id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {conversation.conversationName}
+                    </h1>
+                    <j-button
+                      size="xs"
+                      circle
+                      onClick={() => toggleSummary(conversation.id)}
+                    >
+                      <j-icon name="info" />
+                    </j-button>
+                  </j-flex>
+                  {showSummary[conversation.id] && (
+                    <div style={{ marginTop: 8 }}>
+                      <p>{conversation.summary}</p>
+                      <j-flex gap="300" wrap>
+                        {conversation.topics.map((topic) => (
                           <button
-                            className={`${styles.tag} ${styles.vector}`}
+                            className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
                             onClick={() => {
-                              setSelectedItemId(subgroup.id);
-                              similaritySearch(subgroup.id); // test
+                              setSelectedItemId(conversation.id);
+                              topicSearch(channelId, topic.name);
                             }}
                           >
-                            Vector search
+                            #{topic.name}
                           </button>
-                        </j-flex>
+                        ))}
+                        <button
+                          className={`${styles.tag} ${styles.vector}`}
+                          onClick={() => {
+                            setSelectedItemId(conversation.id);
+                            similaritySearch(conversation.id);
+                          }}
+                        >
+                          Vector search
+                        </button>
+                      </j-flex>
+                    </div>
+                  )}
+                </div>
+                {conversation.subgroups.map((subgroup) => (
+                  <div className={styles.subgroup}>
+                    <div className={styles.info}>
+                      <div className={styles.backgroundFades}>
+                        <div className={styles.top} />
+                        <div className={styles.center} />
+                        <div className={styles.bottom} />
                       </div>
-                    )}
+                      <j-flex a="center" gap="400">
+                        <h2
+                          onClick={() => toggleSummary(subgroup.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {subgroup.subgroupName}
+                        </h2>
+                        <j-button
+                          size="xs"
+                          circle
+                          onClick={() => toggleSummary(subgroup.id)}
+                        >
+                          <j-icon name="info" />
+                        </j-button>
+                      </j-flex>
+                      {showSummary[subgroup.id] && (
+                        <div style={{ marginTop: 8 }}>
+                          <p>{subgroup.summary}</p>
+                          <j-flex gap="300" wrap>
+                            {subgroup.topics.map((topic) => (
+                              <button
+                                className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
+                                onClick={() => {
+                                  setSelectedItemId(subgroup.id);
+                                  topicSearch(channelId, topic.name);
+                                }}
+                              >
+                                #{topic.name}
+                              </button>
+                            ))}
+                            <button
+                              className={`${styles.tag} ${styles.vector}`}
+                              onClick={() => {
+                                setSelectedItemId(subgroup.id);
+                                similaritySearch(subgroup.id);
+                              }}
+                            >
+                              Vector search
+                            </button>
+                          </j-flex>
+                        </div>
+                      )}
+                    </div>
                     {subgroup.items.map((item) => (
                       <TimelineItem
                         key={item.id}
