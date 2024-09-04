@@ -13,13 +13,11 @@ onmessage = async function (message) {
     const { items, sourceEmbedding } = message.data;
     const itemsWithSimilarity = await Promise.all(
       items.map(async (item) => {
-        const similarity = await cos_sim(sourceEmbedding, item.embedding);
-        return { ...item, similarity };
+        const score = await cos_sim(sourceEmbedding, item.embedding);
+        return { ...item, score };
       })
     );
-    const filteredItems = itemsWithSimilarity.filter(
-      (item) => item.similarity > 0.8
-    );
+    const filteredItems = itemsWithSimilarity.filter((item) => item.score > 0.8);
     postMessage({ type: "similarity", items: filteredItems });
   }
 };

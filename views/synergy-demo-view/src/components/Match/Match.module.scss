@@ -4,10 +4,30 @@
   padding: var(--j-space-400);
   background-color: var(--j-color-ui-100);
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+  word-break: break-word;
 
   p {
     margin: 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  .item {
+    border: 1px solid var(--j-color-ui-300);
+    border-radius: var(--j-border-radius);
+    background-color: var(--j-color-ui-200);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+
+    .timestamp {
+      font-size: 15px;
+      color: var(--j-color-ui-600);
+    }
   }
 }

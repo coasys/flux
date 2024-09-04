@@ -6,11 +6,7 @@ import {
   Post,
   SubjectRepository,
 } from "@coasys/flux-api";
-import {
-  findRelationships,
-  findTopics,
-  getSubgroupItems,
-} from "@coasys/flux-utils";
+import { findRelationships, findTopics, getSubgroupItems } from "@coasys/flux-utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
 import TimelineItem from "../TimelineItem";
@@ -23,8 +19,7 @@ type Props = {
   channelId: string;
   match?: any;
   selectedTopic?: string;
-  topicSearch: (channelId: string, topic: string) => void;
-  similaritySearch: (item: any) => void;
+  search: (type: "topic" | "vector", id: string) => void;
 };
 
 export default function Timeline({
@@ -34,16 +29,11 @@ export default function Timeline({
   channelId,
   match,
   selectedTopic,
-  topicSearch,
-  similaritySearch,
+  search,
 }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<any>(
-    match?.itemId || null
-  );
-  const [showSummary, setShowSummary] = useState<{ [key: string]: boolean }>(
-    {}
-  );
+  const [selectedItemId, setSelectedItemId] = useState<any>(match?.itemId || null);
+  const [showSummary, setShowSummary] = useState<{ [key: string]: boolean }>({});
 
   const { entries: messages } = useSubjects({
     perspective,
@@ -83,26 +73,14 @@ export default function Timeline({
           subgroups.map(async (subgroup) => {
             const items = await getSubgroupItems(perspective, subgroup.id);
             subgroup.items = items;
-            const subgroupRelationships = await findRelationships(
-              perspective,
-              subgroup.id
-            );
-            subgroup.topics = await findTopics(
-              perspective,
-              subgroupRelationships
-            );
+            const subgroupRelationships = await findRelationships(perspective, subgroup.id);
+            subgroup.topics = await findTopics(perspective, subgroupRelationships);
             return subgroup;
           })
         );
         conversation.subgroups = subgroupsWithData;
-        const conversationRelationships = await findRelationships(
-          perspective,
-          conversation.id
-        );
-        conversation.topics = await findTopics(
-          perspective,
-          conversationRelationships
-        );
+        const conversationRelationships = await findRelationships(perspective, conversation.id);
+        conversation.topics = await findTopics(perspective, conversationRelationships);
         return conversation;
       })
     );
@@ -133,10 +111,7 @@ export default function Timeline({
   }, [conversations, selectedItemId]);
 
   return (
-    <div
-      id={`timeline-${index}`}
-      className={`${styles.wrapper} ${index > 0 && styles.match}`}
-    >
+    <div id={`timeline-${index}`} className={`${styles.wrapper} ${index > 0 && styles.match}`}>
       <div className={styles.content}>
         <div className={styles.fades}>
           <div className={styles.fadeTop} />
@@ -161,11 +136,7 @@ export default function Timeline({
                     >
                       {conversation.conversationName}
                     </h1>
-                    <j-button
-                      size="xs"
-                      circle
-                      onClick={() => toggleSummary(conversation.id)}
-                    >
+                    <j-button size="xs" circle onClick={() => toggleSummary(conversation.id)}>
                       <j-icon name="info" />
                     </j-button>
                   </j-flex>
@@ -178,7 +149,7 @@ export default function Timeline({
                             className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
                             onClick={() => {
                               setSelectedItemId(conversation.id);
-                              topicSearch(channelId, topic.name);
+                              search("topic", topic.name);
                             }}
                           >
                             #{topic.name}
@@ -188,7 +159,7 @@ export default function Timeline({
                           className={`${styles.tag} ${styles.vector}`}
                           onClick={() => {
                             setSelectedItemId(conversation.id);
-                            similaritySearch(conversation.id);
+                            search("vector", conversation.id);
                           }}
                         >
                           Vector search
@@ -212,11 +183,7 @@ export default function Timeline({
                         >
                           {subgroup.subgroupName}
                         </h2>
-                        <j-button
-                          size="xs"
-                          circle
-                          onClick={() => toggleSummary(subgroup.id)}
-                        >
+                        <j-button size="xs" circle onClick={() => toggleSummary(subgroup.id)}>
                           <j-icon name="info" />
                         </j-button>
                       </j-flex>
@@ -229,7 +196,7 @@ export default function Timeline({
                                 className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
                                 onClick={() => {
                                   setSelectedItemId(subgroup.id);
-                                  topicSearch(channelId, topic.name);
+                                  search("topic", topic.name);
                                 }}
                               >
                                 #{topic.name}
@@ -239,7 +206,7 @@ export default function Timeline({
                               className={`${styles.tag} ${styles.vector}`}
                               onClick={() => {
                                 setSelectedItemId(subgroup.id);
-                                similaritySearch(subgroup.id);
+                                search("vector", subgroup.id);
                               }}
                             >
                               Vector search
@@ -259,8 +226,7 @@ export default function Timeline({
                         selectedTopic={selectedTopic}
                         selected={item.id === selectedItemId}
                         setSelectedItemId={setSelectedItemId}
-                        topicSearch={topicSearch}
-                        similaritySearch={similaritySearch}
+                        search={search}
                       />
                     ))}
                   </div>

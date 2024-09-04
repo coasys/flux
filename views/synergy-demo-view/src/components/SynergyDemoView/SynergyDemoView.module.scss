@@ -1,4 +1,4 @@
-.container {
+.wrapper {
   margin: 0 auto;
   padding: var(--j-space-800);
   width: 100%;
@@ -7,29 +7,32 @@
   display: flex;
   flex-direction: column;
 
-  .wrapper {
+  .content {
     width: 100%;
     margin-top: 20px;
 
-    .channelTimeline {
+    .timelineColumn {
       width: 33%;
     }
 
-    .videoWall {
+    .videoColumn {
       width: 33%;
     }
 
-    .matches {
+    .matchColumn {
       width: 33%;
-      overflow-x: scroll;
-      position: relative;
 
-      &::-webkit-scrollbar {
-        display: none;
-      }
+      .results {
+        height: calc(100vh - 420px);
+        overflow-y: scroll;
 
-      .match {
-        width: 100%;
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        .match {
+          width: 100%;
+        }
       }
     }
   }

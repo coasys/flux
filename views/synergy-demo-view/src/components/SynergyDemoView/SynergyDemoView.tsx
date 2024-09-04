@@ -1,11 +1,7 @@
 import { LinkQuery } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Channel, SubjectRepository } from "@coasys/flux-api";
-import {
-  findRelationships,
-  findTopics,
-  getAllTopics,
-} from "@coasys/flux-utils";
+import { findRelationships, findTopics, getAllTopics } from "@coasys/flux-utils";
 import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { useEffect, useRef, useState } from "preact/hooks";
@@ -19,15 +15,17 @@ type Props = {
   agent: AgentClient;
 };
 
+const filterOptions = ["Conversations", "Subgroups", "Items"];
+
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
-  const [openAIKey, setOpenAIKey] = useState(
-    localStorage?.getItem("openAIKey") || ""
-  );
+  const [openAIKey, setOpenAIKey] = useState(localStorage?.getItem("openAIKey") || "");
   const [matches, setMatches] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [searchType, setSearchType] = useState("");
+  const [searchId, setSearchId] = useState("");
   const [searching, setSearching] = useState(false);
+  const [filter, setFilter] = useState("Conversations");
   const worker = useRef<Worker | null>(null);
 
   async function findEmbedding(itemId) {
@@ -39,37 +37,28 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     );
     if (!links.length) return null;
     const expression = await perspective.getExpression(links[0].data.target);
-    const embedding = Float32Array.from(
-      Object.values(JSON.parse(expression.data).data)
-    );
+    const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
     return embedding;
   }
 
-  async function findTopicMatches(
-    channel: any,
-    subjectClass: string,
-    sourceTopic: string
-  ): Promise<any[]> {
+  async function findTopicMatches(subjectClass: string, sourceTopic: string): Promise<any[]> {
     // searches for items of the subject class with matching topics in the channel
     return await new Promise(async (resolveMatches: any) => {
       const newMatches = [];
       const items = await new SubjectRepository(subjectClass, {
         perspective,
-        source: channel.id,
+        source,
       }).getAllData();
       Promise.all(
         items.map(
           (item: any) =>
             new Promise(async (resolve: any) => {
-              const relationships = await findRelationships(
-                perspective,
-                item.id
-              );
+              const relationships = await findRelationships(perspective, item.id);
               const topics = await findTopics(perspective, relationships);
               const match = topics.find((topic) => topic.name === sourceTopic);
               if (match)
                 newMatches.push({
-                  channel,
+                  channel: { id: source },
                   itemId: item.id,
                   relevance: match.relevance,
                 });
@@ -85,25 +74,61 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
-  async function findEmbeddingMatches(
-    channel: any,
-    subjectClass: string,
-    sourceEmbedding: any
-  ): Promise<any[]> {
-    // searches for items of the given subject class with similar vector embeddings in the channel
+  function entryTypeToSubjectClass(entryType: string) {
+    if (entryType === "flux://conversation") return "Conversation";
+    else if (entryType === "flux://conversation_subgroup") return "ConversationSubgroup";
+    else if (entryType === "flux://has_message") return "Message";
+    else if (entryType === "flux://has_post") return "Post";
+    else return "Task"; // todo: find way to identify tasks without entry type flags
+  }
+
+  async function findEntryType(itemId) {
+    const entryTypeLink = await perspective.get(
+      new LinkQuery({ source: itemId, predicate: "flux://entry_type" })
+    );
+    if (!entryTypeLink[0]) return "Task";
+    else return entryTypeToSubjectClass(entryTypeLink[0].data.target);
+  }
+
+  async function findChannel(itemId, channels) {
+    const parentLinks = await perspective.get(
+      new LinkQuery({ predicate: "ad4m://has_child", target: itemId })
+    );
+    return channels.find((c) => parentLinks.find((p) => p.data.source === c.id));
+  }
+
+  async function findEmbeddingMatches(itemId: string, allowedTypes: string[]): Promise<any[]> {
+    // searches for items in the neighbourhood with similar embedding scores & matching the search filters
     return await new Promise(async (resolveMatches: any) => {
-      const items = await new SubjectRepository(subjectClass, {
+      const sourceEmbedding = await findEmbedding(itemId);
+      const embeddingLinks = await perspective.get(
+        new LinkQuery({ predicate: "ad4m://embedding" })
+      );
+      const channels = (await new SubjectRepository(Channel, {
         perspective,
-        source: channel.id,
-      }).getAllData();
-      // find embeddings for each item
-      const itemsWithEmbedding = await Promise.all(
-        items.map(async (item) => {
-          const embedding = await findEmbedding(item.id);
-          return { channel, itemId: item.id, embedding };
+      }).getAllData()) as any;
+      const itemsWithEmbeddings = await Promise.all(
+        embeddingLinks.map(async (link: any) => {
+          const channel = await findChannel(link.data.source, channels);
+          const type = await findEntryType(link.data.source);
+          // if it doesn't match the search filters return null
+          if (channel.id === source || !allowedTypes.includes(type)) return null;
+          else {
+            // otherwise grab the required data linked to the item
+            const expression = await perspective.getExpression(link.data.target);
+            const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
+            return {
+              id: link.data.source,
+              author: expression.author,
+              timestamp: expression.timestamp,
+              channel,
+              type,
+              embedding,
+            };
+          }
         })
       );
-      // create new embedding worker with listener for results
+      // generate similarity score for items
       const embeddingWorker = new EmbeddingWorker();
       embeddingWorker.onmessage = async (message) => {
         const { type, items } = message.data;
@@ -112,107 +137,33 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           worker.current?.terminate();
         }
       };
-      // request embeddings
       embeddingWorker.postMessage({
         type: "similarity",
-        items: itemsWithEmbedding.filter((item) => item.embedding),
+        items: itemsWithEmbeddings.filter((i) => i !== null),
         sourceEmbedding,
       });
     });
   }
 
-  async function topicSearch(channelId, topic) {
-    // searches other channels in the neighbourhood to find items with matching topic tags
+  async function search(type: string, id: string) {
     setSearching(true);
     setMatches([]);
-    setSelectedTopic(topic);
-    setSearchType("topic");
-    const channels = await new SubjectRepository(Channel, {
-      perspective,
-    }).getAllData();
+    setSearchType(type);
+    setSearchId(id);
+    setSelectedTopic(type === "topic" ? id : "");
+    const entryTypes = [];
+    if (filter === "Conversations") entryTypes.push("Conversation");
+    if (filter === "Subgroups") entryTypes.push("ConversationSubgroup");
+    if (filter === "Items") entryTypes.push("Message", "Post", "Task");
     let newMatches = [];
-    Promise.all(
-      channels
-        .filter((channel: any) => channel.id !== channelId)
-        .map(
-          (channel: any) =>
-            new Promise(async (resolve: any) => {
-              const messageMatches = await findTopicMatches(
-                channel,
-                "Message",
-                topic
-              );
-              const postMatches = await findTopicMatches(
-                channel,
-                "Post",
-                topic
-              );
-              const taskMatches = await findTopicMatches(
-                channel,
-                "Task",
-                topic
-              );
-              newMatches.push(
-                ...messageMatches,
-                ...postMatches,
-                ...taskMatches
-              );
-              resolve();
-            })
-        )
-    ).then(() => {
-      setMatches(newMatches.sort((a, b) => b.relevance - a.relevance));
-      setSearching(false);
-    });
-  }
-
-  async function similaritySearch(itemId) {
-    // searches other channels in the neighbourhood to find items with similar vector embeddings
-    setSearching(true);
-    setSelectedTopic("");
-    setMatches([]);
-    setSearchType("vector");
-    let newMatches = [];
-    const sourceEmbedding = await findEmbedding(itemId);
-    const channels = await new SubjectRepository(Channel, {
-      perspective,
-    }).getAllData();
-    Promise.all(
-      channels
-        .filter((channel: any) => channel.id !== source)
-        .map(
-          (channel: any) =>
-            new Promise(async (resolve: any) => {
-              const messageMatches = await findEmbeddingMatches(
-                channel,
-                "Message",
-                sourceEmbedding
-              );
-              const postMatches = await findEmbeddingMatches(
-                channel,
-                "Post",
-                sourceEmbedding
-              );
-              const taskMatches = await findEmbeddingMatches(
-                channel,
-                "Task",
-                sourceEmbedding
-              );
-              newMatches.push(
-                ...messageMatches,
-                ...postMatches,
-                ...taskMatches
-              );
-              resolve();
-            })
-        )
-    ).then(() => {
-      const sortedMatches = newMatches.sort(
-        (a, b) => b.similarity - a.similarity
-      );
-      setMatches(sortedMatches);
-      setSearching(false);
-    });
+    if (type === "topic") {
+      // todo: handle topics
+    } else {
+      newMatches = await findEmbeddingMatches(id, entryTypes);
+    }
+    const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
+    setMatches(sortedMatches);
+    setSearching(false);
   }
 
   function matchText() {
@@ -227,11 +178,16 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     getAllTopics(perspective).then((topics: any[]) => setAllTopics(topics));
   }, []);
 
+  // update search results on filter changes
+  useEffect(() => {
+    if (searchId) search(searchType, searchId);
+  }, [filter]);
+
   // reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.wrapper}>
       <j-text uppercase size="500" weight="800" color="primary-500">
         Synergy Demo
       </j-text>
@@ -253,19 +209,18 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           <j-text nomargin>#{t.name}</j-text>
         ))}
       </j-flex>
-      <j-flex className={styles.wrapper}>
-        <div className={styles.channelTimeline}>
+      <j-flex className={styles.content}>
+        <div className={styles.timelineColumn}>
           <Timeline
             agent={agent}
             perspective={perspective}
             index={0}
             channelId={source}
             selectedTopic={selectedTopic}
-            topicSearch={topicSearch}
-            similaritySearch={similaritySearch}
+            search={search}
           />
         </div>
-        <div id="video-wall" className={styles.videoWall}>
+        <div id="video-wall" className={styles.videoColumn}>
           <WebRTCView
             perspective={perspective}
             source={source}
@@ -274,13 +229,23 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             setModalOpen={() => null}
           />
         </div>
-        <j-flex direction="column" gap="500" className={styles.matches}>
+        <j-flex direction="column" gap="500" className={styles.matchColumn}>
+          {/* Todo: create Matches component */}
           <div className={styles.header}>
+            <j-flex gap="500">
+              {filterOptions.map((option) => (
+                <j-checkbox checked={filter === option} onChange={() => setFilter(option)}>
+                  {option}
+                </j-checkbox>
+              ))}
+            </j-flex>
             <h2>{matchText()}</h2>
           </div>
-          {matches.map((match) => (
-            <Match perspective={perspective} agent={agent} match={match} />
-          ))}
+          <j-flex direction="column" gap="400" className={styles.results}>
+            {matches.map((match) => (
+              <Match key={match.id} perspective={perspective} agent={agent} match={match} />
+            ))}
+          </j-flex>
         </j-flex>
       </j-flex>
     </div>

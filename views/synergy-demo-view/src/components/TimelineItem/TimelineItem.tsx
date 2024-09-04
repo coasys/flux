@@ -16,8 +16,7 @@ type Props = {
   selectedTopic: string;
   selected: boolean;
   setSelectedItemId: (id: string) => void;
-  topicSearch: (item: any, topic: string) => void;
-  similaritySearch: (item: any) => void;
+  search: (type: "topic" | "vector", id: string) => void;
 };
 
 export default function TimelineItem({
@@ -29,8 +28,7 @@ export default function TimelineItem({
   selectedTopic,
   selected,
   setSelectedItemId,
-  topicSearch,
-  similaritySearch,
+  search,
 }: Props) {
   const { id, timestamp, author, text, icon } = item;
   const [topics, setTopics] = useState<any[]>([]);
@@ -65,10 +63,7 @@ export default function TimelineItem({
       id={`${index}-${item.id}`}
       className={`${styles.wrapper} ${selected && styles.selected} ${index > 0 && styles.match}`}
     >
-      <button
-        className={styles.button}
-        onClick={() => setSelectedItemId(selected ? null : id)}
-      />
+      <button className={styles.button} onClick={() => setSelectedItemId(selected ? null : id)} />
       <div className={styles.timestamp}>
         <j-timestamp value={timestamp} dateStyle="short" />
         <j-timestamp value={timestamp} timeStyle="short" />
@@ -77,12 +72,7 @@ export default function TimelineItem({
         <div className={styles.node} />
         <div className={styles.line} />
       </div>
-      <j-flex
-        direction="column"
-        gap="300"
-        j="center"
-        className={styles.content}
-      >
+      <j-flex direction="column" gap="300" j="center" className={styles.content}>
         <j-flex gap="400" a="center" wrap>
           <j-icon name={icon} color="ui-400" />
           <Avatar size="xs" did={author} profile={profile} />
@@ -91,10 +81,9 @@ export default function TimelineItem({
               {topics.map((topic) => (
                 <button
                   className={`${styles.tag} ${selected && selectedTopic === topic && styles.focus}`}
-                  disabled={index > 0}
                   onClick={() => {
                     setSelectedItemId(id);
-                    topicSearch(channelId, topic);
+                    search("topic", topic.name);
                   }}
                 >
                   #{topic}
@@ -104,7 +93,7 @@ export default function TimelineItem({
                 className={`${styles.tag} ${styles.vector}`}
                 onClick={() => {
                   setSelectedItemId(id);
-                  similaritySearch(item.id);
+                  search("vector", item.id);
                 }}
               >
                 Vector search

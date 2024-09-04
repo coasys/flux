@@ -85,15 +85,11 @@ async function getConversationData(perspective, conversationRepo) {
     });
     latestSubgroups = (await subgroupRepo.getAllData()) as any;
     const latestSubgroup = latestSubgroups[latestSubgroups.length - 1] as any;
-    const subgroupItems = await getSubgroupItems(
-      perspective,
-      latestSubgroup.id
-    );
+    const subgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
     // calculate time since last item was created
     const lastItemTimestamp = subgroupItems[subgroupItems.length - 1].timestamp;
     const minsSinceLastItemCreated =
-      (new Date().getTime() - new Date(lastItemTimestamp).getTime()) /
-      (1000 * 60);
+      (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
     if (minsSinceLastItemCreated < 30) {
       // if less than 30 mins, consider the new item part of the latest conversation
       conversation = latestConversation;
@@ -141,12 +137,7 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   });
 }
 
-async function LLMProcessing(
-  newItem,
-  latestSubgroups,
-  latestSubgroupItems,
-  allTopics
-) {
+async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allTopics) {
   const prompt = `
     I'm passing you a JSON object with the following properties: 'lastGroupings' (string block broken up into sections by line breaks <br/>), 'lastMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
 
@@ -294,8 +285,10 @@ export async function processItem(perspective, channelId, item) {
       perspective,
       source: channelId,
     });
-    const { conversations, latestSubgroups, latestSubgroupItems } =
-      await getConversationData(perspective, conversationRepo);
+    const { conversations, latestSubgroups, latestSubgroupItems } = await getConversationData(
+      perspective,
+      conversationRepo
+    );
     const conversation = conversations[conversations.length - 1];
     const allTopics = await getAllTopics(perspective);
     // generate new processed data with OpenAI
@@ -306,12 +299,7 @@ export async function processItem(perspective, channelId, item) {
       newSubgroupSummary,
       newConversationName,
       newConversationSummary,
-    } = await LLMProcessing(
-      item,
-      latestSubgroups,
-      latestSubgroupItems,
-      allTopics
-    );
+    } = await LLMProcessing(item, latestSubgroups, latestSubgroupItems, allTopics);
     // update conversation summary and title
     await conversationRepo.update(conversation.id, {
       conversationName: newConversationName,
@@ -338,6 +326,12 @@ export async function processItem(perspective, channelId, item) {
         subgroupName: newSubgroupName,
         summary: newSubgroupSummary,
       })) as any;
+      // link subgroup to channel for use in search
+      await perspective.add({
+        source: channelId,
+        predicate: "ad4m://has_child",
+        target: subgroup.id,
+      });
     }
     // link new item to subgroup
     await perspective.add({
@@ -351,48 +345,22 @@ export async function processItem(perspective, channelId, item) {
         (topic) =>
           new Promise(async (resolve: any) => {
             // find existing topic or create new one
-            const topicId = await findOrCreateTopic(
-              perspective,
-              allTopics,
-              topic.name
-            );
+            const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
             // link topic to new item
             await linkTopic(perspective, item.id, topicId, topic.relevance);
             // find conversation topics
-            const conversationRelationships = await findRelationships(
-              perspective,
-              conversation.id
-            );
-            const conversationTopics = await findTopics(
-              perspective,
-              conversationRelationships
-            );
+            const conversationRelationships = await findRelationships(perspective, conversation.id);
+            const conversationTopics = await findTopics(perspective, conversationRelationships);
             if (!conversationTopics.find((t) => t.name === topic.name)) {
               // link topic to conversation if not already linked
-              await linkTopic(
-                perspective,
-                conversation.id,
-                topicId,
-                topic.relevance
-              );
+              await linkTopic(perspective, conversation.id, topicId, topic.relevance);
             }
             // find subgroup topics
-            const subgroupRelationships = await findRelationships(
-              perspective,
-              subgroup.id
-            );
-            const subgroupTopics = await findTopics(
-              perspective,
-              subgroupRelationships
-            );
+            const subgroupRelationships = await findRelationships(perspective, subgroup.id);
+            const subgroupTopics = await findTopics(perspective, subgroupRelationships);
             if (!subgroupTopics.find((t) => t.name === topic.name)) {
               // link topic to subgroup if not already linked
-              await linkTopic(
-                perspective,
-                subgroup.id,
-                topicId,
-                topic.relevance
-              );
+              await linkTopic(perspective, subgroup.id, topicId, topic.relevance);
             }
             resolve();
           })
@@ -407,11 +375,8 @@ export async function processItem(perspective, channelId, item) {
     await saveEmbedding(perspective, subgroup.id, subgroupEmbedding);
     // generate & save updated embedding for conversation
     await removeEmbedding(perspective, conversation.id);
-    const conversationEmbedding = await generateEmbedding(
-      newConversationSummary
-    );
+    const conversationEmbedding = await generateEmbedding(newConversationSummary);
     await saveEmbedding(perspective, conversation.id, conversationEmbedding);
-
     resolve();
   });
 }
