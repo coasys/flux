@@ -181,37 +181,6 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
   }, {
     input: `{ lastGroupings: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], lastMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
     output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`
-  }, {
-    input: `{ lastGroupings: [The conversation introduces a new topic with an emphasis on discussing models and their effectiveness.], lastMessages: [<p>lets see if this model works better or not</p><p></p>], newMessage: 'haha', existingTopics: [, game, dota2 is the biggest MOBA in the world, esport, dota, esports, hello, dota 2, model, work] }`,
-    output: `{
-    "topics": [
-        { "name": "text", "relevance": 100 }
-    ],
-    "changedSubject": true,
-    "newSubgroupName": "Some Text",
-    "newSubgroupSummary": "The message contains some text.",
-    "newConversationName": "Topic Summary",
-    "newConversationSummary": "The entire discussion so far is about some text."
-}`
-  }, {
-    input: `{ lastGroupings: [The conversation introduces a new topic with an emphasis on discussing models and their effectiveness. <br/> The conversation introduces a new topic with an emphasis on discussing models and their effectiveness. <br/> The conversation introduces a new topic with an emphasis on discussing rap music. <br/> The message contains some text.], lastMessages: [<p>doesnt make sense</p><p></p>], newMessage: 'lets try a
-
-gain', existingTopics: [, game, dota2 is the biggest MOBA in the world, esport, dota, esports, hello, dota 2, model, work, rap, text] }`,
-    output: `
-      {
-    "topics": [
-        {
-            "name": "text",
-            "relevance": 100
-        }
-    ],
-    "changedSubject": true,
-    "newSubgroupName": "New Text Discussed",
-    "newSubgroupSummary": "A new text has been introduced and is open for discussion.",
-    "newConversationName": "Final Discussion",
-    "newConversationSummary": "The latest conversation wraps up the final topics discussed and introduces a new text for consideration."
-}
-    `
   }]
 
   const client: Ad4mClient = await getAd4mClient();
