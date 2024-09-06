@@ -1,4 +1,5 @@
-import { LinkQuery } from "@coasys/ad4m";
+import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
   ConversationSubgroup,
@@ -43,24 +44,18 @@ async function removeProcessedData(perspective, itemId) {
   ]);
 }
 
-async function generateEmbedding(text: string) {
-  const embeddingWorker = new Worker(new URL("./embeddingWorker.ts", import.meta.url));
-  return new Promise((resolve) => {
-    embeddingWorker.postMessage({
-      type: "embed",
-      text,
-      messageId: new Date().getTime().toString(),
-    });
-    embeddingWorker.onmessage = (e) => {
-      if (e.data.type === "embed") resolve(e.data.embedding);
-    };
-  });
+export async function generateEmbedding(text: string) {
+  const client = await getAd4mClient();
+
+  const embedding = await client.ai.embed("berd", text);
+
+  return embedding;
 }
 
 async function saveEmbedding(perspective, itemId, embedding) {
   const { EMBEDDING_VECTOR_LANGUAGE } = languages;
   const embeddingExpression = await perspective.createExpression(
-    { model: "TaylorAI/gte-tiny", data: embedding },
+    { model: "berd", data: embedding },
     EMBEDDING_VECTOR_LANGUAGE
   );
   return await perspective.add({
