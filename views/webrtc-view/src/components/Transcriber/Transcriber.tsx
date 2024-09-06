@@ -1,7 +1,7 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
 import { processItem } from "@coasys/flux-utils";
-import TranscriptionWorker from "./transcriptionWorker?worker&inline";
+import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
@@ -108,18 +108,23 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     }
   }
 
-  async function transcribe(audioChunk: any) {
+  async function transcribe() {
     const id = uuidv4();
-    // setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: false }]);
+    setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: false }]);
     // convert raw audio to float32Array for transcription
+    const arrayBuffer = await audioChunks.current[0].arrayBuffer();
+    const context = new AudioContext({ sampleRate: 16000 });
+    const audioBuffer = await context.decodeAudioData(arrayBuffer);
+    const float32Array = audioBuffer.getChannelData(0);
+
     // send formatted audio to transcription worker
     transcriptionWorker.current?.postMessage({
       id,
-      float32Array: audioChunk,
+      float32Array: float32Array,
       model: selectedModelRef.current,
       type: "transcribe",
     });
-    // context.close();
+    context.close();
   }
 
   function startListening() {
@@ -130,17 +135,16 @@ export default function Transcriber({ source, perspective, muted }: Props) {
       .then(async (stream) => {
         audioContext.current = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
-        await audioContext.current.audioWorklet.addModule('/audio-processor.js');
-        const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
-        const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
-        mediaStreamSource.connect(workletNode);
-        console.log("some workletNode:", workletNode);
-        workletNode.port.onmessage = (event) => {
-          const audioChunk = event.data;
-          // console.log("some chunks:", audioChunk);
-          transcribe(audioChunk);
-          // sendAudioToBackend(audioChunk); // Send chunked audio to backend for processing
-      };
+        // await audioContext.current.audioWorklet.addModule('/audio-processor.js');
+        // const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
+        // const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
+        // mediaStreamSource.connect(workletNode);
+        // console.log("some workletNode:", workletNode);
+        // workletNode.port.onmessage = (event) => {
+        //   const audioChunk = event.data;
+        //   // transcribe();
+        //   // sendAudioToBackend(audioChunk); // Send chunked audio to backend for processing
+        // };
       // workletNode.connect(audioContext.current.destination);
 
         analyser.current = audioContext.current.createAnalyser();
@@ -152,14 +156,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         mediaRecorder.current = new MediaRecorder(stream);
         mediaRecorder.current.ondataavailable = (event) => {
           audioChunks.current.push(event.data);
-          if (mediaRecorder.current?.state === "inactive") {
-            // @ts-ignore
-            if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-              // transcribe();
-            }
-          }
         };
-        // mediaRecorder.current.onstop = transcribe;
+        mediaRecorder.current.onstop = transcribe;
 
         listening.current = true;
         detectSpeech();
@@ -173,12 +171,12 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     audioContext.current?.close();
 
     // @ts-ignore
-    if (
-      isChrome &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition)
-    ) {
-      recognition.current.stop();
-    }
+    // if (
+    //   isChrome &&
+    //   (window.SpeechRecognition || window.webkitSpeechRecognition)
+    // ) {
+    //   recognition.current.stop();
+    // }
   }
 
   function incrementTimeout(value) {
@@ -194,19 +192,17 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     transcriptionWorker.current.onmessage = async (e) => {
       const { id, text } = e.data;
 
-      console.log("some text:", id, " | ", text);
-
-      // setTranscripts((ts) => {
-      //   const match = ts.find((t) => t.id === id);
-      //   match.text = text;
-      //   match.done = true;
-      //   return [...ts];
-      // });
+      setTranscripts((ts) => {
+        const match = ts.find((t) => t.id === id);
+        match.text = text;
+        match.done = true;
+        return [...ts];
+      });
       // @ts-ignore
-      // const message = (await messageRepo.create({
-      //   body: `<p>${text}</p>`,
-      // })) as any;
-      // processItem(perspective, source, { id: message.id, text });
+      const message = (await messageRepo.create({
+        body: `<p>${text}</p>`,
+      })) as any;
+      processItem(perspective, source, { id: message.id, text });
     };
     return () => {
       transcriptionWorker.current?.terminate();
