@@ -16,6 +16,7 @@ type Props = {
 };
 
 const filterOptions = ["Conversations", "Subgroups", "Items"];
+const itemFilterOptions = ["All Types", "Messages", "Posts", "Tasks"];
 
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [openAIKey, setOpenAIKey] = useState(localStorage?.getItem("openAIKey") || "");
@@ -26,6 +27,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [searchId, setSearchId] = useState("");
   const [searching, setSearching] = useState(false);
   const [filter, setFilter] = useState("Conversations");
+  const [itemFilter, setItemFilter] = useState("All Types");
+  const [includeChannel, setIncludeChannel] = useState(false);
   const worker = useRef<Worker | null>(null);
 
   async function findEmbedding(itemId) {
@@ -94,7 +97,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     const parentLinks = await perspective.get(
       new LinkQuery({ predicate: "ad4m://has_child", target: itemId })
     );
-    return channels.find((c) => parentLinks.find((p) => p.data.source === c.id));
+    return (
+      channels.find((c) => parentLinks.find((p) => p.data.source === c.id)) || { id: "unlinked" }
+    );
   }
 
   async function findEmbeddingMatches(itemId: string, allowedTypes: string[]): Promise<any[]> {
@@ -112,7 +117,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const channel = await findChannel(link.data.source, channels);
           const type = await findEntryType(link.data.source);
           // if it doesn't match the search filters return null
-          if (channel.id === source || !allowedTypes.includes(type)) return null;
+          if ((!includeChannel && channel.id === source) || !allowedTypes.includes(type))
+            return null;
           else {
             // otherwise grab the required data linked to the item
             const expression = await perspective.getExpression(link.data.target);
@@ -145,21 +151,31 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
+  function findAllowedTypes() {
+    const allowedTypes = [];
+    if (filter === "Conversations") allowedTypes.push("Conversation");
+    else if (filter === "Subgroups") allowedTypes.push("ConversationSubgroup");
+    else if (filter === "Items") {
+      if (itemFilter === "All Types") allowedTypes.push("Message", "Post", "Task");
+      else if (itemFilter === "Messages") allowedTypes.push("Message");
+      else if (itemFilter === "Posts") allowedTypes.push("Post");
+      else if (itemFilter === "Tasks") allowedTypes.push("Task");
+    }
+    return allowedTypes;
+  }
+
   async function search(type: string, id: string) {
     setSearching(true);
     setMatches([]);
     setSearchType(type);
     setSearchId(id);
     setSelectedTopic(type === "topic" ? id : "");
-    const entryTypes = [];
-    if (filter === "Conversations") entryTypes.push("Conversation");
-    if (filter === "Subgroups") entryTypes.push("ConversationSubgroup");
-    if (filter === "Items") entryTypes.push("Message", "Post", "Task");
+    const allowedTypes = findAllowedTypes();
     let newMatches = [];
     if (type === "topic") {
       // todo: handle topics
     } else {
-      newMatches = await findEmbeddingMatches(id, entryTypes);
+      newMatches = await findEmbeddingMatches(id, allowedTypes);
     }
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
@@ -181,7 +197,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   // update search results on filter changes
   useEffect(() => {
     if (searchId) search(searchType, searchId);
-  }, [filter]);
+  }, [filter, itemFilter, includeChannel]);
 
   // reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
@@ -232,12 +248,36 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         <j-flex direction="column" gap="500" className={styles.matchColumn}>
           {/* Todo: create Matches component */}
           <div className={styles.header}>
-            <j-flex gap="500">
-              {filterOptions.map((option) => (
-                <j-checkbox checked={filter === option} onChange={() => setFilter(option)}>
-                  {option}
-                </j-checkbox>
-              ))}
+            <j-flex a="center" gap="400" wrap>
+              <j-menu>
+                <j-menu-group collapsible title={filter}>
+                  {filterOptions.map((option) => (
+                    <j-menu-item selected={filter === option} onClick={() => setFilter(option)}>
+                      {option}
+                    </j-menu-item>
+                  ))}
+                </j-menu-group>
+              </j-menu>
+              {filter === "Items" && (
+                <j-menu>
+                  <j-menu-group collapsible title={itemFilter}>
+                    {itemFilterOptions.map((option) => (
+                      <j-menu-item
+                        selected={filter === option}
+                        onClick={() => setItemFilter(option)}
+                      >
+                        {option}
+                      </j-menu-item>
+                    ))}
+                  </j-menu-group>
+                </j-menu>
+              )}
+              <j-checkbox
+                checked={includeChannel}
+                onChange={() => setIncludeChannel(!includeChannel)}
+              >
+                Include Channel
+              </j-checkbox>
             </j-flex>
             <h2>{matchText()}</h2>
           </div>
