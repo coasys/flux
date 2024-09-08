@@ -10,10 +10,9 @@ import styles from "./TimelineItem.module.scss";
 type Props = {
   agent: any;
   perspective: any;
-  channelId: string;
   item: any;
   index: number;
-  selectedTopic: string;
+  selectedTopic?: any;
   selected: boolean;
   setSelectedItemId: (id: string) => void;
   search: (type: "topic" | "vector", id: string) => void;
@@ -22,7 +21,6 @@ type Props = {
 export default function TimelineItem({
   agent,
   perspective,
-  channelId,
   item,
   index,
   selectedTopic,
@@ -48,10 +46,9 @@ export default function TimelineItem({
 
   useEffect(() => {
     if (relationships.length) {
-      findTopics(perspective, relationships).then((results) => {
-        const topicNames = results.map((result) => result.name);
+      findTopics(perspective, relationships).then((newTopics) => {
         setTopics((prevItems) => {
-          if (!isEqual(prevItems, topicNames)) return topicNames;
+          if (!isEqual(prevItems, newTopics)) return newTopics;
           return prevItems;
         });
       });
@@ -80,21 +77,15 @@ export default function TimelineItem({
             <j-flex gap="300" wrap>
               {topics.map((topic) => (
                 <button
-                  className={`${styles.tag} ${selected && selectedTopic === topic && styles.focus}`}
-                  onClick={() => {
-                    setSelectedItemId(id);
-                    search("topic", topic.name);
-                  }}
+                  className={`${styles.tag} ${selected && selectedTopic.id === topic.id && styles.focus}`}
+                  onClick={() => search("topic", topic)}
                 >
-                  #{topic}
+                  #{topic.name}
                 </button>
               ))}
               <button
                 className={`${styles.tag} ${styles.vector}`}
-                onClick={() => {
-                  setSelectedItemId(id);
-                  search("vector", item.id);
-                }}
+                onClick={() => search("vector", item)}
               >
                 Vector search
               </button>

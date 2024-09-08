@@ -18,7 +18,7 @@ type Props = {
   index?: number;
   channelId: string;
   match?: any;
-  selectedTopic?: string;
+  selectedTopic?: any;
   search: (type: "topic" | "vector", id: string) => void;
 };
 
@@ -89,6 +89,7 @@ export default function Timeline({
 
   useEffect(() => {
     if (channelId) {
+      // fix: firing even when messages, posts, tasks havent changed...
       getConvoData().then((conversationData) => {
         setConversations((prevItems) => {
           if (!isEqual(prevItems, conversationData)) return conversationData;
@@ -146,21 +147,15 @@ export default function Timeline({
                       <j-flex gap="300" wrap>
                         {conversation.topics.map((topic) => (
                           <button
-                            className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
-                            onClick={() => {
-                              setSelectedItemId(conversation.id);
-                              search("topic", topic.name);
-                            }}
+                            className={`${styles.tag} ${selectedTopic.id === topic.id && styles.focus}`}
+                            onClick={() => search("topic", topic)}
                           >
                             #{topic.name}
                           </button>
                         ))}
                         <button
                           className={`${styles.tag} ${styles.vector}`}
-                          onClick={() => {
-                            setSelectedItemId(conversation.id);
-                            search("vector", conversation.id);
-                          }}
+                          onClick={() => search("vector", conversation)}
                         >
                           Vector search
                         </button>
@@ -193,21 +188,15 @@ export default function Timeline({
                           <j-flex gap="300" wrap>
                             {subgroup.topics.map((topic) => (
                               <button
-                                className={`${styles.tag} ${selectedTopic === topic && styles.focus}`}
-                                onClick={() => {
-                                  setSelectedItemId(subgroup.id);
-                                  search("topic", topic.name);
-                                }}
+                                className={`${styles.tag} ${selectedTopic.id === topic.id && styles.focus}`}
+                                onClick={() => search("topic", topic)}
                               >
                                 #{topic.name}
                               </button>
                             ))}
                             <button
                               className={`${styles.tag} ${styles.vector}`}
-                              onClick={() => {
-                                setSelectedItemId(subgroup.id);
-                                search("vector", subgroup.id);
-                              }}
+                              onClick={() => search("vector", subgroup)}
                             >
                               Vector search
                             </button>
@@ -220,7 +209,6 @@ export default function Timeline({
                         key={item.id}
                         agent={agent}
                         perspective={perspective}
-                        channelId={channelId}
                         item={item}
                         index={index}
                         selectedTopic={selectedTopic}

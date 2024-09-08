@@ -221,7 +221,7 @@ export async function findTopics(perspective, relationships) {
       (r) =>
         new Promise(async (resolve) => {
           const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
-          resolve({ name: await topicProxy.topic, relevance: r.relevance });
+          resolve({ id: r.tag, name: await topicProxy.topic, relevance: r.relevance });
         })
     )
   );
