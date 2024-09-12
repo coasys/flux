@@ -9,7 +9,7 @@ import {
 import { findRelationships, findTopics, getSubgroupItems } from "@coasys/flux-utils";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
-import TimelineItem from "../TimelineItem";
+import TimelineBlock from "../TimelineBlock";
 import styles from "./Timeline.module.scss";
 
 type Props = {
@@ -17,23 +17,23 @@ type Props = {
   perspective: any;
   index?: number;
   channelId: string;
-  match?: any;
   selectedTopic?: any;
   search: (type: "topic" | "vector", id: string) => void;
 };
+
+const zoomOptions = ["Conversations", "Subgroups", "Items"];
 
 export default function Timeline({
   agent,
   perspective,
   index,
   channelId,
-  match,
   selectedTopic,
   search,
 }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
-  const [selectedItemId, setSelectedItemId] = useState<any>(match?.itemId || null);
-  const [showSummary, setShowSummary] = useState<{ [key: string]: boolean }>({});
+  const [selectedItemId, setSelectedItemId] = useState<any>(null);
+  const [zoom, setZoom] = useState("Conversations");
 
   const { entries: messages } = useSubjects({
     perspective,
@@ -51,12 +51,7 @@ export default function Timeline({
     subject: "Task",
   });
 
-  function toggleSummary(id: string) {
-    setShowSummary((prevState) => ({ ...prevState, [id]: !prevState[id] }));
-  }
-
   async function getConvoData() {
-    // gather up conversation data
     const conversationRepo = await new SubjectRepository(Conversation, {
       perspective,
       source: channelId,
@@ -71,48 +66,77 @@ export default function Timeline({
         const subgroups = (await subgroupRepo.getAllData()) as any;
         const subgroupsWithData = await Promise.all(
           subgroups.map(async (subgroup) => {
-            const items = await getSubgroupItems(perspective, subgroup.id);
-            subgroup.items = items;
             const subgroupRelationships = await findRelationships(perspective, subgroup.id);
+            subgroup.type = "subgroup";
             subgroup.topics = await findTopics(perspective, subgroupRelationships);
+            const subgroupItems = await getSubgroupItems(perspective, subgroup.id);
+            subgroup.start = subgroupItems[0].timestamp;
+            subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
+            let subgroupParticipants = [];
+            subgroup.children = await Promise.all(
+              subgroupItems.map(async (item: any) => {
+                if (!subgroupParticipants.find((p) => p === item.author))
+                  subgroupParticipants.push(item.author);
+                const itemRelationships = await findRelationships(perspective, item.id);
+                item.topics = await findTopics(perspective, itemRelationships);
+                return item;
+              })
+            );
+            subgroup.participants = subgroupParticipants;
             return subgroup;
           })
         );
-        conversation.subgroups = subgroupsWithData;
+        conversation.type = "conversation";
+        conversation.participants = [];
+        subgroupsWithData.forEach((subgroup) => {
+          subgroup.participants.forEach((p) => {
+            if (!conversation.participants.includes(p)) conversation.participants.push(p);
+          });
+        });
         const conversationRelationships = await findRelationships(perspective, conversation.id);
         conversation.topics = await findTopics(perspective, conversationRelationships);
+        conversation.children = subgroupsWithData;
         return conversation;
       })
     );
-    return conversationsWithData;
+    setConversations((prevItems) => {
+      if (!isEqual(prevItems, conversationsWithData)) return conversationsWithData;
+      return prevItems;
+    });
   }
 
   useEffect(() => {
-    if (channelId) {
-      // fix: firing even when messages, posts, tasks havent changed...
-      getConvoData().then((conversationData) => {
-        setConversations((prevItems) => {
-          if (!isEqual(prevItems, conversationData)) return conversationData;
-          return prevItems;
-        });
-      });
-    }
-  }, [channelId, messages, posts, tasks]);
+    if (channelId) getConvoData();
+  }, [channelId, JSON.stringify(messages), JSON.stringify(posts), JSON.stringify(tasks)]);
 
-  // scroll to matching item
-  useEffect(() => {
-    if (selectedItemId && conversations.length) {
-      const item = document.getElementById(`${index}-${selectedItemId}`);
-      const timelineItems = document.getElementById(`timeline-items-${index}`);
-      timelineItems.scrollBy({
-        top: item?.getBoundingClientRect().top - 420,
-        behavior: "smooth",
-      });
-    }
-  }, [conversations, selectedItemId]);
+  // // scroll to matching item
+  // useEffect(() => {
+  //   if (selectedItemId && conversations.length) {
+  //     const item = document.getElementById(`${index}-${selectedItemId}`);
+  //     const timelineItems = document.getElementById(`timeline-items-${index}`);
+  //     timelineItems.scrollBy({
+  //       top: item?.getBoundingClientRect().top - 420,
+  //       behavior: "smooth",
+  //     });
+  //   }
+  // }, [conversations, selectedItemId]);
 
   return (
     <div id={`timeline-${index}`} className={`${styles.wrapper} ${index > 0 && styles.match}`}>
+      <j-flex a="center" gap="400" wrap>
+        <j-text nomargin style={{ flexShrink: 0 }}>
+          Zoom
+        </j-text>
+        <j-menu>
+          <j-menu-group collapsible title={zoom}>
+            {zoomOptions.map((option) => (
+              <j-menu-item selected={zoom === option} onClick={() => setZoom(option)}>
+                {option}
+              </j-menu-item>
+            ))}
+          </j-menu-group>
+        </j-menu>
+      </j-flex>
       <div className={styles.content}>
         <div className={styles.fades}>
           <div className={styles.fadeTop} />
@@ -120,109 +144,20 @@ export default function Timeline({
           <div className={styles.line} />
         </div>
         <div id={`timeline-items-${index}`} className={styles.items}>
-          <div className={styles.line} />
-          <div style={{ minHeight: "100%" }}>
+          <div style={{ minHeight: "100%", margin: "130px 0" }}>
             {conversations.map((conversation: any) => (
-              <div className={styles.conversation}>
-                <div className={styles.info}>
-                  <div className={styles.backgroundFades}>
-                    <div className={styles.top} />
-                    <div className={styles.center} />
-                    <div className={styles.bottom} />
-                  </div>
-                  <j-flex a="center" gap="400">
-                    <h1
-                      onClick={() => toggleSummary(conversation.id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {conversation.conversationName}
-                    </h1>
-                    <j-button size="xs" circle onClick={() => toggleSummary(conversation.id)}>
-                      <j-icon name="info" />
-                    </j-button>
-                  </j-flex>
-                  {showSummary[conversation.id] && (
-                    <div style={{ marginTop: 8 }}>
-                      <p>{conversation.summary}</p>
-                      <j-flex gap="300" wrap>
-                        {conversation.topics.map((topic) => (
-                          <button
-                            className={`${styles.tag} ${selectedTopic.id === topic.id && styles.focus}`}
-                            onClick={() => search("topic", topic)}
-                          >
-                            #{topic.name}
-                          </button>
-                        ))}
-                        <button
-                          className={`${styles.tag} ${styles.vector}`}
-                          onClick={() => search("vector", conversation)}
-                        >
-                          Vector search
-                        </button>
-                      </j-flex>
-                    </div>
-                  )}
-                </div>
-                {conversation.subgroups.map((subgroup) => (
-                  <div className={styles.subgroup}>
-                    <div className={styles.info}>
-                      <div className={styles.backgroundFades}>
-                        <div className={styles.top} />
-                        <div className={styles.center} />
-                        <div className={styles.bottom} />
-                      </div>
-                      <j-flex a="center" gap="400">
-                        <h2
-                          onClick={() => toggleSummary(subgroup.id)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {subgroup.subgroupName}
-                        </h2>
-                        <j-button size="xs" circle onClick={() => toggleSummary(subgroup.id)}>
-                          <j-icon name="info" />
-                        </j-button>
-                      </j-flex>
-                      {showSummary[subgroup.id] && (
-                        <div style={{ marginTop: 8 }}>
-                          <p>{subgroup.summary}</p>
-                          <j-flex gap="300" wrap>
-                            {subgroup.topics.map((topic) => (
-                              <button
-                                className={`${styles.tag} ${selectedTopic.id === topic.id && styles.focus}`}
-                                onClick={() => search("topic", topic)}
-                              >
-                                #{topic.name}
-                              </button>
-                            ))}
-                            <button
-                              className={`${styles.tag} ${styles.vector}`}
-                              onClick={() => search("vector", subgroup)}
-                            >
-                              Vector search
-                            </button>
-                          </j-flex>
-                        </div>
-                      )}
-                    </div>
-                    {subgroup.items.map((item) => (
-                      <TimelineItem
-                        key={item.id}
-                        agent={agent}
-                        perspective={perspective}
-                        item={item}
-                        index={index}
-                        selectedTopic={selectedTopic}
-                        selected={item.id === selectedItemId}
-                        setSelectedItemId={setSelectedItemId}
-                        search={search}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
+              <TimelineBlock
+                agent={agent}
+                perspective={perspective}
+                data={conversation}
+                zoom={zoom}
+                selectedTopicId={selectedTopic.id}
+                selectedItemId={selectedItemId}
+                setSelectedItemId={setSelectedItemId}
+                search={search}
+              />
             ))}
           </div>
-          <div className={styles.line} />
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import { ConversationSubgroup, SubjectRepository } from "@coasys/flux-api";
-import { useAgent } from "@coasys/flux-react-web";
-import { getSubgroupItems, profileFormatter, transformItem } from "@coasys/flux-utils";
+import { getSubgroupItems, transformItem } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
@@ -14,15 +13,7 @@ type Props = {
 
 export default function Match({ perspective, agent, match }: Props) {
   const { id, author, timestamp, channel, type, score } = match;
-
   const [data, setData] = useState(null);
-
-  const { profile } = useAgent({
-    client: agent,
-    did: data?.author,
-    //@ts-ignore
-    formatter: profileFormatter,
-  });
 
   async function getConversationData() {
     const conversationProxy = await perspective.getSubjectProxy(id, type);
@@ -80,7 +71,7 @@ export default function Match({ perspective, agent, match }: Props) {
       <div className={styles.wrapper}>
         <j-flex direction="column" gap="400">
           <j-flex gap="300" a="center">
-            <Avatar size="xs" did={author} profile={profile} />
+            <Avatar size="xs" did={author} />
             <p>|</p>
             <b>{channel.name || "subgroup needs linking"}</b>
           </j-flex>
@@ -107,7 +98,7 @@ export default function Match({ perspective, agent, match }: Props) {
       <div className={styles.wrapper}>
         <j-flex direction="column" gap="400">
           <j-flex gap="300" a="center">
-            <Avatar size="xs" did={author} profile={profile} />
+            <Avatar size="xs" did={author} />
             <p>|</p>
             <b>{channel.name || "subgroup needs linking"}</b>
           </j-flex>
@@ -123,8 +114,7 @@ export default function Match({ perspective, agent, match }: Props) {
               <div className={styles.item}>
                 <j-flex gap="300" a="center">
                   <j-icon name={item.icon} color="ui-500" />
-                  {/* Todo: create seperate components for items and load profile data there */}
-                  <Avatar size="xs" did={item.author} profile={profile} />
+                  <Avatar size="xs" did={item.author} />
                   <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
                 </j-flex>
                 <j-text
@@ -145,7 +135,7 @@ export default function Match({ perspective, agent, match }: Props) {
       <j-flex gap="300" direction="column">
         <j-flex gap="400" a="center">
           <j-icon name={data?.icon} color="ui-500" />
-          <Avatar size="xs" did={author} profile={profile} />
+          <Avatar size="xs" did={author} />
           <p>|</p>
           <b>{channel.name || "subgroup needs linking"}</b>
         </j-flex>

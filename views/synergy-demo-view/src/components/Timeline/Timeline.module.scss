@@ -1,4 +1,4 @@
-$line-offset: 112px;
+$line-offset: 92px;
 
 .wrapper {
   display: flex;
@@ -22,11 +22,7 @@ $line-offset: 112px;
         top: 0;
         height: 100px;
         width: 100%;
-        background: linear-gradient(
-          to bottom,
-          var(--app-channel-bg-color),
-          transparent
-        );
+        background: linear-gradient(to bottom, var(--app-channel-bg-color), transparent);
         z-index: 10;
       }
 
@@ -35,11 +31,7 @@ $line-offset: 112px;
         bottom: 0;
         height: 100px;
         width: 100%;
-        background: linear-gradient(
-          to top,
-          var(--app-channel-bg-color),
-          transparent
-        );
+        background: linear-gradient(to top, var(--app-channel-bg-color), transparent);
         z-index: 10;
       }
 
@@ -47,7 +39,7 @@ $line-offset: 112px;
         height: 100%;
         width: 6px;
         margin-left: $line-offset;
-        background-color: var(--j-color-primary-400);
+        background-color: var(--j-color-primary-200);
       }
     }
 
@@ -55,6 +47,7 @@ $line-offset: 112px;
       height: 100%;
       overflow-y: scroll;
       z-index: 5;
+      padding-left: 60px;
 
       &::-webkit-scrollbar {
         display: none;
@@ -64,7 +57,7 @@ $line-offset: 112px;
         height: 130px;
         width: 6px;
         margin-left: $line-offset;
-        background-color: var(--j-color-primary-400);
+        background-color: var(--j-color-primary-200);
       }
 
       .tag {
@@ -121,19 +114,11 @@ $line-offset: 112px;
             }
 
             .top {
-              background: linear-gradient(
-                to top,
-                var(--app-channel-bg-color),
-                transparent
-              );
+              background: linear-gradient(to top, var(--app-channel-bg-color), transparent);
             }
 
             .bottom {
-              background: linear-gradient(
-                to bottom,
-                var(--app-channel-bg-color),
-                transparent
-              );
+              background: linear-gradient(to bottom, var(--app-channel-bg-color), transparent);
             }
 
             .center {
