@@ -33,7 +33,7 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           subgroup.topics = await findTopics(perspective, subgroupRelationships);
           subgroup.start = subgroupItems[0].timestamp;
           subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
-          subgroup.participants = ["did:key:z6Mkjq3AT56DQ5g1D9BrmoeHfidv5xU5ibya5EF5rjWwaquL"];
+          subgroup.participants = [];
           subgroup.children = await Promise.all(
             subgroupItems.map(async (item: any, itemIndex) => {
               const itemRelationships = await findRelationships(perspective, item.id);
@@ -53,7 +53,7 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
         })
       );
       conversation.groupType = "conversation";
-      conversation.participants = ["did:key:z6Mkjq3AT56DQ5g1D9BrmoeHfidv5xU5ibya5EF5rjWwaquL"];
+      conversation.participants = [];
       subgroupsWithData.forEach((subgroup) => {
         subgroup.participants.forEach((p) => {
           if (!conversation.participants.includes(p)) conversation.participants.push(p);
