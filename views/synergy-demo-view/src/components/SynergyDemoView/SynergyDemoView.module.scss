@@ -10,30 +10,5 @@
   .content {
     width: 100%;
     margin-top: 20px;
-
-    .timelineColumn {
-      width: 33%;
-    }
-
-    .videoColumn {
-      width: 33%;
-    }
-
-    .matchColumn {
-      width: 33%;
-
-      .results {
-        height: calc(100vh - 420px);
-        overflow-y: scroll;
-
-        &::-webkit-scrollbar {
-          display: none;
-        }
-
-        .match {
-          width: 100%;
-        }
-      }
-    }
   }
 }

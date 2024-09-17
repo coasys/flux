@@ -9,9 +9,11 @@
       font-weight: 500;
       margin: 0;
     }
+
     .timestamp {
-      left: -60px;
+      left: -64px;
     }
+
     .position {
       .line,
       .node {
@@ -19,6 +21,7 @@
         background-color: var(--j-color-primary-200);
       }
     }
+
     .content {
       margin-bottom: 60px;
       .children {
@@ -26,6 +29,16 @@
         .curveBottom {
           z-index: 2;
           color: var(--j-color-primary-400);
+        }
+
+        .expandButtonWrapper {
+          .expandButton {
+            border-left: 6px dotted var(--j-color-primary-400);
+          }
+        }
+
+        .expandButtonPadding {
+          border-left: 6px solid var(--j-color-primary-400);
         }
       }
     }
@@ -39,7 +52,7 @@
     }
 
     .timestamp {
-      left: -90px;
+      left: -96px;
     }
 
     .position {
@@ -58,13 +71,24 @@
           z-index: 1;
           color: var(--j-color-primary-600);
         }
+
+        .expandButtonWrapper {
+          .expandButton {
+            border-left: 6px dotted var(--j-color-primary-600);
+          }
+        }
+
+        .expandButtonPadding {
+          border-left: 6px solid var(--j-color-primary-600);
+        }
       }
     }
   }
 
   &.item {
     .timestamp {
-      left: -120px;
+      left: -130px;
+      top: 30px;
     }
 
     .position {
@@ -72,6 +96,14 @@
       .node {
         background-color: var(--j-color-primary-600);
         z-index: 3;
+      }
+
+      .node {
+        top: 30px;
+
+        &.selected {
+          top: 25px;
+        }
       }
     }
 
@@ -90,12 +122,12 @@
 
   .timestamp {
     width: 80px;
-    align-items: flex-end;
     flex-shrink: 0;
     color: var(--j-color-ui-500);
     font-size: 14px;
     position: absolute;
     top: 5px;
+    text-align: end;
   }
 
   .position {
@@ -111,7 +143,6 @@
       height: 100%;
       width: 6px;
       position: absolute;
-      top: 12px;
     }
 
     .node {
@@ -137,7 +168,8 @@
     all: unset;
     cursor: pointer;
     border-radius: 8px;
-    padding: 6px 8px;
+    height: 32px;
+    padding: 0 8px;
     background-color: var(--j-color-ui-50);
     border: 1px solid var(--j-color-primary-500);
     color: var(--j-color-primary-500);
@@ -216,17 +248,55 @@
       padding: 20px 0;
       margin-left: -38px;
 
+      .expandButtonWrapper {
+        padding: 6px 0;
+        margin-left: 6px;
+        background-color: var(--app-channel-bg-color);
+        z-index: 5;
+        display: flex;
+        position: relative;
+
+        .expandButton {
+          z-index: 5;
+          position: relative;
+          margin-left: 26px;
+          padding-left: 32px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          background-color: var(--app-channel-bg-color);
+
+          > j-button {
+            > span {
+              color: var(--j-color-ui-300);
+              display: flex;
+
+              > svg {
+                width: 20px;
+                height: 20px;
+                margin-right: 7px;
+              }
+            }
+          }
+        }
+      }
+
+      .expandButtonPadding {
+        height: 14px;
+        margin-left: 32px;
+      }
+
       .curveTop,
       .curveBottom {
         position: absolute;
       }
 
       .curveTop {
-        top: -28px;
+        top: -34px;
       }
 
       .curveBottom {
-        bottom: -50px;
+        bottom: -44px;
         transform: scale(-1, 1);
       }
     }

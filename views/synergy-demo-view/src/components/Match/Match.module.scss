@@ -1,33 +1,101 @@
+$line-offset: 92px;
+
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  height: 100%;
+  min-height: 80px;
+  position: relative;
   border: 1px solid var(--j-color-ui-300);
   border-radius: var(--j-border-radius);
-  padding: var(--j-space-400);
-  background-color: var(--j-color-ui-100);
+  padding: 20px;
   display: flex;
   gap: 15px;
   word-break: break-word;
 
-  p {
-    margin: 0;
+  .fades {
+    position: absolute;
+    width: calc(100% - 40px);
+    height: 100%;
+    pointer-events: none;
+    top: 0;
+
+    .fadeTop {
+      position: absolute;
+      top: 0;
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to bottom, var(--app-channel-bg-color), transparent);
+      z-index: 10;
+    }
+
+    .fadeBottom {
+      position: absolute;
+      bottom: 0;
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to top, var(--app-channel-bg-color), transparent);
+      z-index: 10;
+    }
+
+    .line {
+      height: 100%;
+      width: 6px;
+      margin-left: $line-offset;
+      background-color: var(--j-color-primary-200);
+    }
   }
 
-  h1 {
-    margin: 0;
-    font-size: 20px;
+  .channelName {
+    margin: 0px;
+    position: absolute;
+    z-index: 10;
   }
 
-  .item {
-    border: 1px solid var(--j-color-ui-300);
-    border-radius: var(--j-border-radius);
-    background-color: var(--j-color-ui-200);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 15px;
+  .items {
+    height: 100%;
+    z-index: 5;
+    padding: 40px 0 10px 60px;
 
-    .timestamp {
-      font-size: 15px;
-      color: var(--j-color-ui-600);
+    .line {
+      height: 50px;
+      width: 6px;
+      margin-left: $line-offset;
+      background-color: var(--j-color-primary-200);
+    }
+
+    .expandButtonWrapper {
+      padding: 6px 0;
+      background-color: var(--app-channel-bg-color);
+      z-index: 5;
+      display: flex;
+      position: relative;
+
+      .expandButton {
+        z-index: 5;
+        position: relative;
+        margin-left: 32px;
+        padding-left: 32px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        background-color: var(--app-channel-bg-color);
+        border-left: 6px dotted var(--j-color-primary-200);
+
+        > j-button {
+          > span {
+            color: var(--j-color-ui-300);
+            display: flex;
+
+            > svg {
+              width: 20px;
+              height: 20px;
+              margin-right: 7px;
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,0 +1,71 @@
+$line-offset: 92px;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 320px);
+  width: 33%;
+
+  .header {
+    flex-shrink: 0;
+    z-index: 15;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    height: 100%;
+    position: relative;
+
+    .fades {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+
+      .fadeTop {
+        position: absolute;
+        top: 0;
+        height: 100px;
+        width: 100%;
+        background: linear-gradient(to bottom, var(--app-channel-bg-color), transparent);
+        z-index: 10;
+      }
+
+      .fadeBottom {
+        position: absolute;
+        bottom: 0;
+        height: 100px;
+        width: 100%;
+        background: linear-gradient(to top, var(--app-channel-bg-color), transparent);
+        z-index: 10;
+      }
+
+      .line {
+        height: 100%;
+        width: 6px;
+        margin-left: $line-offset;
+        background-color: var(--j-color-primary-200);
+      }
+    }
+
+    .items {
+      height: 100%;
+      overflow-y: scroll;
+      z-index: 5;
+      padding: 130px 0 130px 60px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .line {
+        height: 130px;
+        width: 6px;
+        margin-left: $line-offset;
+        background-color: var(--j-color-primary-200);
+      }
+    }
+  }
+}
