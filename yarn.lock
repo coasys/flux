@@ -1306,10 +1306,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-connect@0.10.0-rc7.fix.3":
-  version "0.10.0-rc7.fix.3"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc7.fix.3.tgz#5a286dedec89bbc44353702496e77096dedf93d5"
-  integrity sha512-OcLnzSjmXZiF+do2A1ObVOnGs5RoW4ozQtnpV0CMnNQz0bOHo4fMzVumBqxielU+YUhAhwp7NChfIWpSRYtuAA==
+"@coasys/ad4m-connect@0.10.0-rc7.local-ai.1":
+  version "0.10.0-rc7.local-ai.1"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc7.local-ai.1.tgz#1b17df4a979059db4fd8f90d2ba7952df9ba1b6b"
+  integrity sha512-37B5YBcshrPyCiyGtMOLsSYTuI1bhTWv4aE7rqVJqD59Ol8MZEM9fQzQuYFXAY4zHg1SGW5JerW+32SZDX9jDA==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1319,14 +1319,14 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.10.0-rc7.fix.3":
-  version "0.10.0-rc7.fix.3"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc7.fix.3.tgz#7916d45aff9ecc0215361104f4d5d5a9859f9d56"
-  integrity sha512-nKxSJrxuICGpcFrFFihs5RST533XQKMGfCyqDTvNzCuNCuJWRU/NZrZSfxoHaaVCOlWwcCr9zI9sykrdttswLg==
+"@coasys/ad4m-react-hooks@0.10.0-rc7.local-ai.1":
+  version "0.10.0-rc7.local-ai.1"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc7.local-ai.1.tgz#bdbc0b801462d9010f74d21ed972ff414d7a3f15"
+  integrity sha512-ZZbZMvnsRXhH9lAN2j3oP29julko0IN7wfA3sx0KflRpTcw15YSsEwkjUwc2Ezrc47KPZO/OiGj1TWB8uAHGvw==
   dependencies:
-    "@coasys/ad4m" "0.10.0-rc7.fix.3"
-    "@coasys/ad4m-connect" "0.10.0-rc7.fix.3"
-    "@coasys/hooks-helpers" "0.10.0-rc7.fix.3"
+    "@coasys/ad4m" "0.10.0-rc7.local-ai.1"
+    "@coasys/ad4m-connect" "0.10.0-rc7.local-ai.1"
+    "@coasys/hooks-helpers" "0.10.0-rc7.local-ai.1"
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
@@ -1341,13 +1341,13 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.10.0-rc7.fix.3":
-  version "0.10.0-rc7.fix.3"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-rc7.fix.3.tgz#a157b8f45cd21160fcfe783b4f40e129dcb9ed78"
-  integrity sha512-tDyS1ZvDfxLYO7nllV9kULhnNm//WgqqZPmCL/tlgwq6AdI1c6cmlfWoLgXEaTI/NO8wwx2/cUMTwUMv7pKNMA==
+"@coasys/ad4m-vue-hooks@0.10.0-rc7.local-ai.1":
+  version "0.10.0-rc7.local-ai.1"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-rc7.local-ai.1.tgz#e21ef8a4b968bfd95c93751dfb2675c461137617"
+  integrity sha512-tY3zVYVRZyK6d9tsRSeyzgygyHtAEZIwt/85xXVqxq3IPjITeOJtHGzCAAjiyfpFIc8xl9g4PAvbukDDY/vxQw==
   dependencies:
-    "@coasys/ad4m" "0.10.0-rc7.fix.3"
-    "@coasys/hooks-helpers" "0.10.0-rc7.fix.3"
+    "@coasys/ad4m" "0.10.0-rc7.local-ai.1"
+    "@coasys/hooks-helpers" "0.10.0-rc7.local-ai.1"
 
 "@coasys/ad4m@*", "@coasys/ad4m@0.9.0":
   version "0.9.0"
@@ -1377,17 +1377,19 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/ad4m@0.10.0-rc7.fix.3":
-  version "0.10.0-rc7.fix.3"
-  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-rc7.fix.3.tgz#c7372e88d2bc53d7c66145ac8894baab7d011f80"
-  integrity sha512-GK+WNIPgAdph66D1YI9Ck5bgd6C/AACvXOuIvx7hHXm4vhQML4mDKDqlugbzEqjxrHh6hWz+rn8md2iqf3jzEg==
+"@coasys/ad4m@0.10.0-rc7.local-ai.1":
+  version "0.10.0-rc7.local-ai.1"
+  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-rc7.local-ai.1.tgz#b5f723ce2a189db725343430e01df23b6cad3a3d"
+  integrity sha512-Sl326YRuodEPXBJflxJ34rgmdnvq75r9cyf8THUX5GSy6LFmBCXOc+z0ZybHT+lO+r2iI4iqcePCqHcRGQEyGg==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
     "@types/jest" "^26.0.14"
+    base64-js "*"
     class-validator "^0.13.1"
     express "4.18.2"
     graphql "15.7.2"
+    pako "*"
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
@@ -1435,13 +1437,13 @@
     "@coasys/ad4m-connect" "*"
     uuid "*"
 
-"@coasys/hooks-helpers@0.10.0-rc7.fix.3":
-  version "0.10.0-rc7.fix.3"
-  resolved "https://registry.npmjs.org/@coasys/hooks-helpers/-/hooks-helpers-0.10.0-rc7.fix.3.tgz#3096d46fd49a57b9fbee0e8d5af229519b632e64"
-  integrity sha512-ycOjOPcZzmuwc/x/mUPrJTLMU1m9hmFZXczPcgY4wCs8EKHgmChMvG2Lvx8mK2fiyedDEe3piqh6XVjCl6RDVQ==
+"@coasys/hooks-helpers@0.10.0-rc7.local-ai.1":
+  version "0.10.0-rc7.local-ai.1"
+  resolved "https://registry.npmjs.org/@coasys/hooks-helpers/-/hooks-helpers-0.10.0-rc7.local-ai.1.tgz#09a1955a87c3c7a4331365ee57f85816910bb514"
+  integrity sha512-Hffv4lgcreNYMESVkb3hh3E3ChD7VhOVai54BIJ0Md+WcumnaVXNpWGz8RtB8ndzfni/qPUXUZRspqsducgJxg==
   dependencies:
-    "@coasys/ad4m" "0.10.0-rc7.fix.3"
-    "@coasys/ad4m-connect" "0.10.0-rc7.fix.3"
+    "@coasys/ad4m" "*"
+    "@coasys/ad4m-connect" "*"
     uuid "*"
 
 "@cspotcode/source-map-support@^0.8.0":
@@ -4110,7 +4112,7 @@ bare-stream@^2.0.0:
   dependencies:
     streamx "^2.18.0"
 
-base64-js@^1.3.1, base64-js@^1.5.1:
+base64-js@*, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -10171,6 +10173,11 @@ package-json@^6.3.0:
     registry-auth-token "^4.0.0"
     registry-url "^5.0.0"
     semver "^6.2.0"
+
+pako@*:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
+  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
 
 param-case@^2.1.1:
   version "2.1.1"

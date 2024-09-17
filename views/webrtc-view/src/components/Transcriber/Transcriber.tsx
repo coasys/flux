@@ -116,10 +116,11 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     const context = new AudioContext({ sampleRate: 16000 });
     const audioBuffer = await context.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
+
     // send formatted audio to transcription worker
     transcriptionWorker.current?.postMessage({
       id,
-      float32Array,
+      float32Array: float32Array,
       model: selectedModelRef.current,
       type: "transcribe",
     });
@@ -131,9 +132,21 @@ export default function Transcriber({ source, perspective, muted }: Props) {
       .getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
       })
-      .then((stream) => {
+      .then(async (stream) => {
         audioContext.current = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
+        // await audioContext.current.audioWorklet.addModule('/audio-processor.js');
+        // const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
+        // const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
+        // mediaStreamSource.connect(workletNode);
+        // console.log("some workletNode:", workletNode);
+        // workletNode.port.onmessage = (event) => {
+        //   const audioChunk = event.data;
+        //   // transcribe();
+        //   // sendAudioToBackend(audioChunk); // Send chunked audio to backend for processing
+        // };
+      // workletNode.connect(audioContext.current.destination);
+
         analyser.current = audioContext.current.createAnalyser();
         sourceNode.current =
           audioContext.current.createMediaStreamSource(stream);
@@ -143,98 +156,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         mediaRecorder.current = new MediaRecorder(stream);
         mediaRecorder.current.ondataavailable = (event) => {
           audioChunks.current.push(event.data);
-          if (mediaRecorder.current?.state === "inactive") {
-            // @ts-ignore
-            if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-              transcribe();
-            }
-          }
         };
-        // mediaRecorder.current.onstop = transcribe;
-
-        // @ts-ignore
-        if (
-          isChrome &&
-          (window.SpeechRecognition || window.webkitSpeechRecognition)
-        ) {
-          // @ts-ignore
-          const SpeechRecognition =
-            window.SpeechRecognition || window.webkitSpeechRecognition;
-          recognition.current = new SpeechRecognition();
-          recognition.current.continuous = true;
-          recognition.current.interimResults = true;
-          let noTextTimeoutId: NodeJS.Timeout;
-
-          recognition.current.onresult = (event) => {
-            let interim = "";
-            let final = "";
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              const result = event.results[i];
-              if (result.isFinal) {
-                final += result[0].transcript;
-              } else {
-                interim += result[0].transcript;
-                if (!currentTransciptsId.current) {
-                  const id = uuidv4();
-                  currentTransciptsId.current = id;
-                  setTranscripts((ts) => [
-                    ...ts,
-                    { id, text: interim, timestamp: new Date(), done: true },
-                  ]);
-                } else {
-                  setTranscripts((ts) => {
-                    const match = ts.find(
-                      (t) => t.id === currentTransciptsId.current
-                    );
-                    match.text = interim;
-                    return [...ts];
-                  });
-                }
-              }
-            }
-            let text = "";
-            setTranscript((prev) => {
-              text = prev + final;
-              return text;
-            });
-            setInterimTranscript(interim);
-
-            if (noTextTimeoutId) {
-              clearTimeout(noTextTimeoutId);
-            }
-            if (interim.length === 0) {
-              noTextTimeoutId = setTimeout(async () => {
-                if (text.length > 0) {
-                  setTranscripts((ts) => {
-                    const match = ts.find(
-                      (t) => t.id === currentTransciptsId.current
-                    );
-                    match.done = true;
-                    return [...ts];
-                  });
-                  currentTransciptsId.current = null;
-                  // @ts-ignore
-                  const newMessage = (await messageRepo.create({
-                    body: `<p>${text}</p>`,
-                  })) as any;
-                  processItem(perspective, source, {
-                    id: newMessage.id,
-                    text,
-                  }).then(() => {
-                    setTranscript("");
-                    setInterimTranscript("");
-                  });
-                }
-              }, secondsOfSilence * 1000);
-            }
-          };
-
-          recognition.current.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
-          };
-
-          recognition.current.start();
-        }
+        mediaRecorder.current.onstop = transcribe;
 
         listening.current = true;
         detectSpeech();
@@ -248,12 +171,12 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     audioContext.current?.close();
 
     // @ts-ignore
-    if (
-      isChrome &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition)
-    ) {
-      recognition.current.stop();
-    }
+    // if (
+    //   isChrome &&
+    //   (window.SpeechRecognition || window.webkitSpeechRecognition)
+    // ) {
+    //   recognition.current.stop();
+    // }
   }
 
   function incrementTimeout(value) {
@@ -268,6 +191,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     transcriptionWorker.current = new TranscriptionWorker();
     transcriptionWorker.current.onmessage = async (e) => {
       const { id, text } = e.data;
+
       setTranscripts((ts) => {
         const match = ts.find((t) => t.id === id);
         match.text = text;

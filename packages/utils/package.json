@@ -19,8 +19,8 @@
     "openai": "^4.55.5"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.10.0-rc7.fix.3",
-    "@coasys/ad4m-connect": "0.10.0-rc7.fix.3"
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.1",
+    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.1"
   },
   "keywords": [],
   "author": "",

@@ -1,4 +1,5 @@
-import { LinkQuery } from "@coasys/ad4m";
+import { Ad4mClient, Ad4mSignalCB, AITask, LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
   ConversationSubgroup,
@@ -43,24 +44,18 @@ async function removeProcessedData(perspective, itemId) {
   ]);
 }
 
-async function generateEmbedding(text: string) {
-  const embeddingWorker = new Worker(new URL("./embeddingWorker.ts", import.meta.url));
-  return new Promise((resolve) => {
-    embeddingWorker.postMessage({
-      type: "embed",
-      text,
-      messageId: new Date().getTime().toString(),
-    });
-    embeddingWorker.onmessage = (e) => {
-      if (e.data.type === "embed") resolve(e.data.embedding);
-    };
-  });
+export async function generateEmbedding(text: string) {
+  const client = await getAd4mClient();
+
+  const embedding = await client.ai.embed("berd", text);
+
+  return embedding;
 }
 
 async function saveEmbedding(perspective, itemId, embedding) {
   const { EMBEDDING_VECTOR_LANGUAGE } = languages;
   const embeddingExpression = await perspective.createExpression(
-    { model: "TaylorAI/gte-tiny", data: embedding },
+    { model: "berd", data: embedding },
     EMBEDDING_VECTOR_LANGUAGE
   );
   return await perspective.add({
@@ -84,16 +79,18 @@ async function getConversationData(perspective, conversationRepo) {
       source: latestConversation.id,
     });
     latestSubgroups = (await subgroupRepo.getAllData()) as any;
-    const latestSubgroup = latestSubgroups[latestSubgroups.length - 1] as any;
-    const subgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
-    // calculate time since last item was created
-    const lastItemTimestamp = subgroupItems[subgroupItems.length - 1].timestamp;
-    const minsSinceLastItemCreated =
-      (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
-    if (minsSinceLastItemCreated < 30) {
-      // if less than 30 mins, consider the new item part of the latest conversation
-      conversation = latestConversation;
-      latestSubgroupItems = subgroupItems;
+    if (latestSubgroups.length) {
+      const latestSubgroup = latestSubgroups[latestSubgroups.length - 1] as any;
+      const subgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
+      // calculate time since last item was created
+      const lastItemTimestamp = subgroupItems[subgroupItems.length - 1].timestamp;
+      const minsSinceLastItemCreated =
+        (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
+      if (minsSinceLastItemCreated < 30) {
+        // if less than 30 mins, consider the new item part of the latest conversation
+        conversation = latestConversation;
+        latestSubgroupItems = subgroupItems;
+      }
     }
   }
   if (!conversation) {
@@ -141,7 +138,7 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
   const prompt = `
     I'm passing you a JSON object with the following properties: 'lastGroupings' (string block broken up into sections by line breaks <br/>), 'lastMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
 
-    { lastGroupings: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], lastMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t) => t.name).join(", ")}] }
+    { lastGroupings: [], lastMessages: [], newMessage: 'Some text', existingTopics: [] }
 
     Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
 
@@ -172,16 +169,62 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax.
   `;
 
-  const openai = new OpenAI({
-    apiKey: localStorage?.getItem("openAIKey") || "",
-    dangerouslyAllowBrowser: true,
-  });
-  const result = await openai.chat.completions.create({
-    messages: [{ role: "user", content: prompt }],
-    model: "gpt-4o",
-  });
-  const data = JSON.parse(result.choices[0].message.content || "");
-  console.log("Open AI response: ", data);
+  const examples = [{
+    input: `{ lastGroupings: [], lastMessages: [], newMessage: 'hello world', existingTopics: [greeting] }`,
+    output: `{"topics":[{"name":"greeting","relevance":100}],"changedSubject":true,"newSubgroupName":"Hello World","newSubgroupSummary":"The conversation starts with a simple greeting: 'hello world'.","newConversationName":"Hello World","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'."}`,
+  }, {
+    input: `{ lastGroupings: [The conversation starts with a simple greeting: 'hello world'.], lastMessages: [<p>hello world</p><p></p>], newMessage: 'another hello 2', existingTopics: [greeting] }`,
+    output: `{"topics":[{"name":"hello","relevance":80},{"name":"greeting","relevance":70}],"changedSubject":false,"newSubgroupName":"More Greetings","newSubgroupSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries.","newConversationName":"Simple Greetings","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'. Following this, another greeting is exchanged, indicating the continuation of pleasantries."}`,
+  }, {
+    input: `{ lastGroupings: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries.], lastMessages: [<p>hello world</p><p></p>, <p>another hello 2</p><p></p>], newMessage: 'game talk here', existingTopics: [greeting, hello] }`,
+    output: `{"topics":[{"name":"game","relevance":100},{"name":"talk","relevance":80}],"changedSubject":true,"newSubgroupName":"Game Talk","newSubgroupSummary":"The conversation introduces a new topic with a focus on discussing games.","newConversationName":"Exchange of Pleasantries and Game Talk","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation then introduces a new topic with a focus on discussing games."}`
+  }, {
+    input: `{ lastGroupings: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], lastMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
+    output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`
+  }]
+
+  const client: Ad4mClient = await getAd4mClient();
+
+  const tasks = await client.ai.tasks();
+
+  let task = tasks.find((t) => t.systemPrompt.includes("I'm passing you a JSON object with the following properties: 'lastGroupings'"));
+
+  console.log("Task: ", task);
+
+  if (task) {
+    // task.promptExamples = examples;
+    // task.systemPrompt = prompt;
+    // await client.ai.updateTask(task.taskId, task);
+  } else {
+    task = await client.ai.addTask("llama", prompt, examples)
+  }
+
+  console.log("Task: calling prompt");
+
+  const response = await client.ai.prompt(task.taskId, `{ lastGroupings: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], lastMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t) => t.name).join(", ")}] }`);
+
+  console.log("AI Response: ", response);
+
+  // const openai = new OpenAI({
+  //   apiKey: localStorage?.getItem("openAIKey") || "",
+  //   dangerouslyAllowBrowser: true,
+  // });
+  // const result = await openai.chat.completions.create({
+  //   messages: [{ role: "user", content: prompt }],
+  //   model: "gpt-4o",
+  // });
+  // console.log("Open AI request: ", `{ lastGroupings: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], lastMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t) => t.name).join(", ")}] }`);
+  // console.log("Open AI response: ", JSON.parse(response), JSON.parse(result.choices[0].message.content));
+  // const data = JSON.parse(result.choices[0].message.content || "");
+
+  const data = JSON.parse(response);
+  if (!data.newConversationName) data.newConversationName = ""
+  if (!data.newConversationSummary) data.newConversationSummary = ""
+  if (!data.newSubgroupName) data.newSubgroupName = ""
+  if (!data.newSubgroupSummary) data.newSubgroupSummary = ""
+  if (!data.topics) data.topics = []
+  if (!data.changedSubject) data.changedSubject = false
+  console.log("LLM Processing Data: ", data);
   return data;
 }
 

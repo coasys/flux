@@ -20,7 +20,7 @@
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.10.0-rc7.fix.3"
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.1"
   },
   "keywords": [],
   "author": "",
