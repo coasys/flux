@@ -117,18 +117,20 @@ export default function TimelineBlock({
                     #{topic.name}
                   </button>
                 ))}
-                <button
-                  className={`${styles.tag} ${styles.vector}`}
-                  onClick={() => search("vector", data)}
-                >
-                  <j-icon
-                    name="flower2"
-                    color="color-success-500"
-                    size="sm"
-                    style={{ marginRight: 5 }}
-                  />
-                  Synergize
-                </button>
+                {!match && (
+                  <button
+                    className={`${styles.tag} ${styles.vector}`}
+                    onClick={() => search("vector", data)}
+                  >
+                    <j-icon
+                      name="flower2"
+                      color="color-success-500"
+                      size="sm"
+                      style={{ marginRight: 5 }}
+                    />
+                    Synergize
+                  </button>
+                )}
               </j-flex>
             )}
           </j-flex>
@@ -179,8 +181,11 @@ export default function TimelineBlock({
               <div className={styles.curveBottom}>
                 <CurveSVG />
               </div>
-              {data.matchIndex < data.length - 1 && collapseAfter && (
-                <div className={styles.expandButtonWrapper} style={{ marginTop: -20 }}>
+              {data.matchIndex < data.children.length - 1 && collapseAfter && (
+                <div
+                  className={styles.expandButtonWrapper}
+                  style={{ marginTop: groupType === "subgroup" ? -8 : -20 }}
+                >
                   <div className={styles.expandButton}>
                     <j-button onClick={() => setCollapseAfter(false)}>
                       See more
@@ -227,18 +232,20 @@ export default function TimelineBlock({
                     #{topic.name}
                   </button>
                 ))}
-                <button
-                  className={`${styles.tag} ${styles.vector}`}
-                  onClick={() => search("vector", data)}
-                >
-                  <j-icon
-                    name="flower2"
-                    color="color-success-500"
-                    size="sm"
-                    style={{ marginRight: 5 }}
-                  />
-                  Synergize
-                </button>
+                {!match && (
+                  <button
+                    className={`${styles.tag} ${styles.vector}`}
+                    onClick={() => search("vector", data)}
+                  >
+                    <j-icon
+                      name="flower2"
+                      color="color-success-500"
+                      size="sm"
+                      style={{ marginRight: 5 }}
+                    />
+                    Synergize
+                  </button>
+                )}
               </j-flex>
             )}
           </j-flex>
