@@ -24,7 +24,7 @@
     "@coasys/flux-webrtc": "*"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.10.0-rc7.local-ai.1",
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.3",
     "react": "*"
   }
 }

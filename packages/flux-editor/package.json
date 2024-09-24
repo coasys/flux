@@ -19,8 +19,8 @@
     "publish-package": "npm publish"
   },
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc7.local-ai.1",
-    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.1",
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.3",
+    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.3",
     "@coasys/flux-api": "*",
     "@coasys/flux-ui": "*",
     "@tiptap/core": "^2.0.3",
