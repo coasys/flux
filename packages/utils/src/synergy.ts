@@ -181,22 +181,26 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
   }, {
     input: `{ lastGroupings: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], lastMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
     output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`
-  }]
+  },]
 
   const client: Ad4mClient = await getAd4mClient();
 
   const tasks = await client.ai.tasks();
 
-  let task = tasks.find((t) => t.systemPrompt.includes("I'm passing you a JSON object with the following properties: 'lastGroupings'"));
+  let task = tasks.find((t) => t.name === "flux-synergy-task");
 
   console.log("Task: ", task);
 
   if (task) {
+    // console.log("Task: updating existing task");
     // task.promptExamples = examples;
     // task.systemPrompt = prompt;
     // await client.ai.updateTask(task.taskId, task);
+    // console.log("Task: ", task);
   } else {
-    task = await client.ai.addTask("llama", prompt, examples)
+    console.log("Task: creating new task");
+    task = await client.ai.addTask("flux-synergy-task", "llama", prompt, examples)
+    console.log("Task: ", task);
   }
 
   console.log("Task: calling prompt");
