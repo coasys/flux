@@ -3,6 +3,20 @@ import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import babel from "vite-plugin-babel-compiler";
+import fs from "fs-extra";
+import basicSsl from "@vitejs/plugin-basic-ssl";
+
+function copyNillionFileStore() {
+  return {
+    name: "copy-nillion-file-store",
+    async writeBundle() {
+      const src = "../views/nillion-file-store/dist";
+      const dest = "dist/@coasys/nillion-file-store";
+      await fs.copy(src, dest);
+      console.log(`Copied @coasys/nillion-file-store from ${src} to ${dest}`);
+    },
+  };
+}
 
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -105,17 +119,49 @@ export default ({ mode }) => {
           ],
         },
       }),
+      copyNillionFileStore(),
+      basicSsl(),
     ],
+    build: {
+      rollupOptions: {
+        external: ["@coasys/nillion-file-store", "@nillion/client-web"],
+      },
+    },
+    optimizeDeps: {
+      exclude: ["@coasys/nillion-file-store", "@nillion/client-web"],
+    },
     define: {
       "process.env": {},
     },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "@coasys/nillion-file-store": path.resolve(
+          __dirname,
+          "../node_modules/@coasys/nillion-file-store/dist/main.js"
+        ),
       },
     },
     server: {
       port: 3030,
+      proxy: {
+        "/nilchain-proxy": {
+          target: "http://65.109.222.111:26657",
+          rewrite: (path) => path.replace(/^\/nilchain-proxy/, ""),
+          changeOrigin: true,
+          secure: false,
+        },
+        "/icon.png": {
+          target: "https://i.ibb.co/GnqjPJP/icon.png",
+          rewrite: (path) => path.replace(/^\/icon.png/, ""),
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+      headers: {
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+      },
     },
   });
 };

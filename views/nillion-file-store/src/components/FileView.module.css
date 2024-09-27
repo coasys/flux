@@ -1,0 +1,32 @@
+.fileupload {
+  width: 100%;
+  max-width: 800px;
+  border: 1px solid var(--j-color-ui-500);
+  min-height: 300px;
+  border-radius: var(--j-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.fileupload:hover {
+  background-color: var(--j-color-ui-100);
+  border: 1px solid var(--j-color-ui-700);
+}
+
+.fileupload input[type="file"] {
+  display: none;
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--j-color-ui-100);
+  background-color: var(--j-color-ui-50);
+  padding: var(--j-space-400);
+  gap: var(--j-space-400);
+  border-radius: var(--j-border-radius);
+  margin-bottom: var(--j-space-500);
+}
