@@ -46,7 +46,7 @@ function getConfig() {
         endpoint: `${window.location.origin}/nilchain-proxy`, // see webpack.config.js proxy
         keys: [""],
         chainInfo: {
-          rpc: "http://65.109.222.111:26657",
+          rpc: "https://testnet-nillion-grpc.lavenderfive.com",
           rest: "https://testnet-nillion-api.lavenderfive.com",
           chainId: "nillion-chain-testnet-1",
           chainName: "nillion-chain-testnet-1",
