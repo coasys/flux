@@ -111,6 +111,11 @@ export default function QuoteView({
         setVariant("danger");
         setShowNotification(true);
       }
+      if (error.message.includes("values not found")) {
+        setNotificationText("Secret not found. This file may have expired.");
+        setVariant("danger");
+        setShowNotification(true);
+      }
       console.log("Error in handlePayAndRetrieve", error);
       resetState();
     } finally {
