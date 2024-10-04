@@ -309,7 +309,15 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     conversationTask.taskId,
     `{ previousSubgroups: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], newSubgroup: ${newSubgroupSummary} }`
   );
-  const { newConversationName, newConversationSummary } = JSON.parse(conversationResponse);
+  console.log("conversationResponse", conversationResponse);
+  let newConversationName, newConversationSummary = "";
+  try {
+    const parsed = JSON.parse(conversationResponse);
+    newConversationName = parsed.newConversationName;
+    newConversationSummary = parsed.newConversationSummary;
+  } catch (e) {
+    console.error("Parsing error", e);
+  }
 
   return {
     topics: tags,
