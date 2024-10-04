@@ -10,12 +10,6 @@ export default class Topic {
   })
   type: string;
 
-  // @SubjectProperty({
-  //   through: "rdf://description",
-  //   resolveLanguage: "literal",
-  // })
-  // desc: "";
-
   @SubjectProperty({
     through: "flux://topic",
     writable: true,

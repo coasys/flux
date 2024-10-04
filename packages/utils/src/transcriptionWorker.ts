@@ -3,7 +3,7 @@ import { pipeline } from "@xenova/transformers";
 let pipe;
 let currentModel = "";
 let transcribing = false;
-const transcriptionQueue = [];
+const transcriptionQueue = [] as any[];
 
 async function initializePipeline(model) {
   return new Promise((resolve: any) => {

@@ -1,40 +1,36 @@
+import { getProfile } from "@coasys/flux-api";
 import { getImage } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
+import styles from "./Avatar.module.scss";
 
-type AvatarProps = {
-  size: "" | "sm" | "xs" | "lg" | "xl" | "xxs" | "xxl";
+type Props = {
   did: string;
-  profile?: any;
+  size?: "sm" | "xs" | "lg" | "xl" | "xxs" | "xxl";
+  showName?: boolean;
+  style?: any;
 };
 
-export default function Avatar({ size = "sm", did, profile }: AvatarProps) {
+export default function Avatar({ did, size = "sm", showName = false, style }: Props) {
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
 
-  async function getProfileImage(url: string) {
-    try {
-      const src = await getImage(url);
-      setImage(src);
-    } finally {
-      setImage("");
-    }
+  async function getData() {
+    const { username, profileThumbnailPicture: picture } = await getProfile(did);
+    setName(username);
+    if (picture && picture.includes("base64")) setImage(picture);
+    else setImage((await getImage(picture)) || "");
   }
 
   useEffect(() => {
-    if (profile) {
-      const { profilePicture: url, username, givenName, familyName } = profile;
-      // set image
-      if (typeof url === "string" && url.includes("base64")) setImage(url);
-      else getProfileImage(url);
-      // set name
-      setName(givenName ? `${givenName} ${familyName}` : username);
-    }
-  }, [profile]);
+    getData();
+  }, []);
 
   return (
-    <j-flex gap="300" a="center">
-      <j-avatar size={size} src={image} hash={did} />
-      {name && <j-text nomargin>{name}</j-text>}
+    <j-flex gap="300" a="center" style={style}>
+      <div className={styles.image}>
+        <j-avatar size={size} src={image} hash={did} />
+      </div>
+      {showName && name && <j-text nomargin>{name}</j-text>}
     </j-flex>
   );
 }

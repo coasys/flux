@@ -18,7 +18,7 @@ import { Profile } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
 import Debug from "../Debug";
 import Transcriber from "../Transcriber";
-import styles from "./Channel.module.css";
+import styles from "./Channel.module.scss";
 
 type Props = {
   source: string;
@@ -36,12 +36,16 @@ export default function Channel({
   setModalOpen,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [muted, setMuted] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
-
-  const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: (profile: any) => {
-    return profileFormatter(profile?.perspective?.links || profile)
-  } });
+  const { profile } = useAgent<Profile>({
+    client: agentClient,
+    did: () => agent?.did,
+    formatter: (profile: any) => {
+      return profileFormatter(profile?.perspective?.links || profile);
+    },
+  });
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
@@ -80,8 +84,13 @@ export default function Channel({
   }, [agent]);
 
   return (
-    <section className={styles.outer} ref={wrapperEl}>
-      {currentView !== "@coasys/flux-webrtc-view" && (
+    <section
+      className={`${styles.outer} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+      ref={wrapperEl}
+    >
+      {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
+        currentView
+      ) && (
         <button
           className={styles.closeButton}
           onClick={() => setModalOpen(false)}
@@ -109,8 +118,13 @@ export default function Channel({
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
+            setMuted={setMuted}
           />
-          <Transcriber source={source} perspective={perspective} />
+          <Transcriber
+            source={source}
+            perspective={perspective}
+            muted={muted}
+          />
         </>
       )}
 

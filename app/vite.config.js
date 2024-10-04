@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import babel from "vite-plugin-babel-compiler";
+import worker from 'vite-plugin-worker';
 
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -17,6 +18,7 @@ export default ({ mode }) => {
               "@babel/plugin-proposal-decorators",
               { decoratorsBeforeExport: true },
             ],
+            "@babel/plugin-proposal-class-properties",
           ],
         },
       }),
@@ -39,6 +41,11 @@ export default ({ mode }) => {
           },
         },
       }),
+
+      worker({
+        inline: true,
+      }),
+
       VitePWA({
         registerType: "autoUpdate",
         devOptions: {
