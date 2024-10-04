@@ -1,6 +1,6 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
-import { processItem } from "@coasys/flux-utils";
+import { processItem, feedTranscription, startTranscribtion } from "@coasys/flux-utils";
 import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
@@ -52,8 +52,9 @@ export default function Transcriber({ source, perspective, muted }: Props) {
   const transcriptionWorker = useRef<Worker | null>(null);
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
-  const currentTransciptsId = useRef(null);
   const recognition = useRef(null);
+  const currentId = useRef(null);
+  const timeoutRef = useRef(null);
 
   const isChrome =
     /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -108,8 +109,8 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     }
   }
 
-  async function transcribe() {
-    const id = uuidv4();
+  async function transcribe(id) {
+    // const id = uuidv4();
     setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: false }]);
     // convert raw audio to float32Array for transcription
     const arrayBuffer = await audioChunks.current[0].arrayBuffer();
@@ -117,13 +118,15 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     const audioBuffer = await context.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
 
+    await feedTranscription(id, float32Array);
+
     // send formatted audio to transcription worker
-    transcriptionWorker.current?.postMessage({
-      id,
-      float32Array: float32Array,
-      model: selectedModelRef.current,
-      type: "transcribe",
-    });
+    // transcriptionWorker.current?.postMessage({
+    //   id,
+    //   float32Array: float32Array,
+    //   model: selectedModelRef.current,
+    //   type: "transcribe",
+    // });
     context.close();
   }
 
@@ -133,19 +136,53 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         audio: { echoCancellation: true, noiseSuppression: true },
       })
       .then(async (stream) => {
+        const id = await startTranscribtion((text) => {
+          if (interimTranscript.length === 0 && !currentId.current) {
+            const id = uuidv4();
+            currentId.current = id;
+            setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: true, text }]);
+          } else {
+            setTranscripts((ts) => {
+              const match = ts.find((t) => t.id === currentId.current);
+              match.text = match.text + text;
+              return [...ts];
+            });
+          }
+
+          setInterimTranscript((t) => t + text);
+
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+
+          timeoutRef.current = setTimeout(async () => {
+            console.log('30 seconds passed without new text');
+            setInterimTranscript((text) => {
+              currentId.current = null;
+              // @ts-ignore
+              messageRepo.create({
+                body: `<p>${text}</p>`,
+              }).then(async (message: any) => {
+                await processItem(perspective, source, { id: message.id, text });
+                setInterimTranscript('');
+              });
+
+              return "";
+            })
+          }, 10000);
+        });
         audioContext.current = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
-        // await audioContext.current.audioWorklet.addModule('/audio-processor.js');
-        // const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
-        // const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
-        // mediaStreamSource.connect(workletNode);
-        // console.log("some workletNode:", workletNode);
-        // workletNode.port.onmessage = (event) => {
-        //   const audioChunk = event.data;
-        //   // transcribe();
-        //   // sendAudioToBackend(audioChunk); // Send chunked audio to backend for processing
-        // };
-      // workletNode.connect(audioContext.current.destination);
+        await audioContext.current.audioWorklet.addModule('/audio-processor.js');
+        const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
+        const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
+        mediaStreamSource.connect(workletNode);
+        workletNode.port.onmessage = (event) => {
+          // console.log("some event:", event.type);
+          const audioChunk = event.data;
+          feedTranscription(id, audioChunk);
+        };
+        workletNode.connect(audioContext.current.destination);
 
         analyser.current = audioContext.current.createAnalyser();
         sourceNode.current =
@@ -157,7 +194,7 @@ export default function Transcriber({ source, perspective, muted }: Props) {
         mediaRecorder.current.ondataavailable = (event) => {
           audioChunks.current.push(event.data);
         };
-        mediaRecorder.current.onstop = transcribe;
+        // mediaRecorder.current.onstop = () => transcribe(id);
 
         listening.current = true;
         detectSpeech();

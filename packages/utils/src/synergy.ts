@@ -143,7 +143,7 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     Additionaly, for each tag I also want you to provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the tag is to the content of the 'newMessage' string.
 
     Finally return an array of objects for each of the tags you have identified for the 'newMessage' and nothing else. Each object should contain a 'name' property (string) for the name of the tag and a 'relevance' property (number) for its relevance score.
-    
+
     Make sure the response is in a format that can be parsed using JSON.parse(). i.e don't wrap it in code syntax and use double quotes around both keys and string values.
   `;
   const tagExamples = [
@@ -205,7 +205,7 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     I'm passing you a JSON object with 2 properties: 'previousMessages' (string array) and 'newMessage' (string).
 
     I want you to analyse the conversation and return a JSON object with 2 properties:
-    
+
     1. 'newSubgroupName': a 1 to 3 word title (string) for the conversation.
 
     2. 'newSubgroupSummary': a 1 to 3 sentence paragraph (string) summary of the conents of the conversation.
@@ -241,7 +241,7 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     I'm passing you a JSON object with 2 properties: 'previousSubgroups' (string array) and 'newSubgroup' (string).
 
     I want you to analyse the subgroups and return a JSON object with 2 properties:
-    
+
     1. 'newConversationName': a 1 to 3 word title (string) for the conversation.
 
     2. 'newConversationSummary': a 1 to 3 sentence paragraph (string) summary of the conents of the conversation.
@@ -284,19 +284,23 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
       conversationPrompt,
       conversationExamples
     ));
+    console.log("tagTask", tagTask);
   // tag, topic change, & sungroup processing
   const tagResponse = await client.ai.prompt(
     tagTask.taskId,
     `{ existingTags: [${allTopics.map((t) => t.name).join(", ")}], newMessage: ${newItem.text} }`
   );
+  console.log("tagResponse", tagResponse);
   const topicChangeResponse = await client.ai.prompt(
     topicChangeTask.taskId,
     `{ previousMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: ${newItem.text} }`
   );
+  console.log("topicChangeResponse", topicChangeResponse);
   const subgroupResponse = await client.ai.prompt(
     subgroupTask.taskId,
     `{ previousMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: ${newItem.text} }`
   );
+  console.log("subgroupResponse", subgroupResponse);
   const tags = JSON.parse(tagResponse);
   const changedSubject = JSON.parse(topicChangeResponse);
   const { newSubgroupName, newSubgroupSummary } = JSON.parse(subgroupResponse);
@@ -511,4 +515,22 @@ export async function processItem(perspective, channelId, item) {
     await saveEmbedding(perspective, conversation.id, conversationEmbedding);
     resolve();
   });
+}
+
+export async function startTranscribtion(callback: (text) => void) {
+  const client = await getAd4mClient();
+
+  const id = await client.ai.openTranscriptionStream("Whisper", callback);
+
+  return id;
+}
+
+export async function feedTranscription(id, chunks) {
+  const client = await getAd4mClient();
+  await client.ai.feedTranscriptionStream(id, Array.from(chunks));
+}
+
+export async function stopTranscription(id) {
+  const client = await getAd4mClient();
+  await client.ai.closeTranscriptionStream(id);
 }
