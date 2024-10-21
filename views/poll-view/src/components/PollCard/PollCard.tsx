@@ -1,10 +1,10 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import * as d3 from "d3";
 import { useMemo, useRef, useState } from "preact/hooks";
-import styles from "../Plugin.module.css";
-import Answer from "../subjects/Answer";
-import AnswerCard from "./AnswerCard";
-import PieChart from "./PieChart";
+import Answer from "../../models/Answer";
+import AnswerCard from "../AnswerCard";
+import PieChart from "../PieChart";
+import styles from "./PollCard.module.css";
 
 export default function PollCard(props: {
   perspective: any;

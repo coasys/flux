@@ -1,0 +1,15 @@
+.answer {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--j-space-400);
+}
+
+.index {
+  width: var(--j-size-md);
+  height: var(--j-size-md);
+  border-radius: var(--j-border-radius);
+  margin-right: var(--j-space-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

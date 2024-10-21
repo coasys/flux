@@ -1,12 +1,12 @@
-import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m";
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "preact/hooks";
-import Answer from "../subjects/Answer";
-import Poll from "../subjects/Poll";
-import Vote from "../subjects/Vote";
-import AnswerCard from "./AnswerCard";
-import PollCard from "./PollCard";
+import Answer from "../../models/Answer";
+import Poll from "../../models/Poll";
+import Vote from "../../models/Vote";
+import AnswerCard from "../AnswerCard";
+import PollCard from "../PollCard";
 
 type Props = {
   perspective: any;
@@ -45,10 +45,7 @@ export default function PollView({ perspective, source, agent }: Props) {
   const [answersError, setAnswersError] = useState("");
   const [newPollLoading, setNewPollLoading] = useState(false);
   const colorScale = useRef(
-    d3
-      .scaleSequential()
-      .domain([0, answers.length])
-      .interpolator(d3.interpolateViridis)
+    d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis)
   );
 
   function addAnswer() {
@@ -79,9 +76,7 @@ export default function PollView({ perspective, source, agent }: Props) {
     // validate
     setTitleError(title ? "" : "Required");
     const answersValid = !answersLocked || answers.length > 1;
-    setAnswersError(
-      answersValid ? "" : "At least 2 answers required for locked polls"
-    );
+    setAnswersError(answersValid ? "" : "At least 2 answers required for locked polls");
     if (title && answersValid) {
       setNewPollLoading(true);
       // create poll
@@ -159,7 +154,6 @@ export default function PollView({ perspective, source, agent }: Props) {
     });
   }
 
-
   // update modalOpen state when modal toggled shut
   useEffect(() => {
     const modal = document.querySelector("j-modal");
@@ -198,9 +192,7 @@ export default function PollView({ perspective, source, agent }: Props) {
             <j-input
               label="Title"
               value={title}
-              onChange={(e) =>
-                setTitle((e.target as HTMLTextAreaElement).value)
-              }
+              onChange={(e) => setTitle((e.target as HTMLTextAreaElement).value)}
               errortext={titleError}
               error={!!titleError}
             ></j-input>
@@ -210,17 +202,12 @@ export default function PollView({ perspective, source, agent }: Props) {
             <j-input
               label="Description (optional)"
               value={description}
-              onChange={(e) =>
-                setDescription((e.target as HTMLTextAreaElement).value)
-              }
+              onChange={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
             ></j-input>
           </j-box>
 
           <j-box pb="400">
-            <j-toggle
-              checked={!answersLocked}
-              onChange={() => setAnswersLocked(!answersLocked)}
-            >
+            <j-toggle checked={!answersLocked} onChange={() => setAnswersLocked(!answersLocked)}>
               Allow other users to add answers
             </j-toggle>
           </j-box>
@@ -230,9 +217,7 @@ export default function PollView({ perspective, source, agent }: Props) {
               <j-input
                 label="New Answer"
                 value={newAnswer}
-                onChange={(e) =>
-                  setNewAnswer((e.target as HTMLTextAreaElement).value)
-                }
+                onChange={(e) => setNewAnswer((e.target as HTMLTextAreaElement).value)}
                 errortext={answersError}
                 error={!!answersError}
                 style={{ width: "100%" }}
