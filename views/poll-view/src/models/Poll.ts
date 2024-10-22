@@ -1,4 +1,4 @@
-import { SDNAClass, SubjectCollection, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { SDNAClass, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "Poll",
@@ -25,14 +25,16 @@ export default class Poll {
   description: string;
 
   @SubjectProperty({
+    through: "flux://vote_type",
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  voteType: "single-choice" | "multiple-choice" | "weighted-choice";
+
+  @SubjectProperty({
     through: "flux://poll_answers_locked",
     writable: true,
     resolveLanguage: "literal",
   })
   answersLocked: boolean;
-
-  @SubjectCollection({
-    through: "flux://has_poll_answer",
-  })
-  answers: string[];
 }

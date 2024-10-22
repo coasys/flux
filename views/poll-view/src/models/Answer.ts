@@ -1,9 +1,4 @@
-import {
-  SDNAClass,
-  SubjectCollection,
-  SubjectFlag,
-  SubjectProperty,
-} from "@coasys/ad4m";
+import { SDNAClass, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "Answer",
@@ -21,9 +16,4 @@ export default class Answer {
     resolveLanguage: "literal",
   })
   text: string;
-
-  @SubjectCollection({
-    through: "flux://has_answer_vote",
-  })
-  votes: string[];
 }

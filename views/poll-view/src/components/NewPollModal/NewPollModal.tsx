@@ -1,9 +1,11 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { SubjectRepository } from "@coasys/flux-api";
 import * as d3 from "d3";
 import { useRef, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
 import Poll from "../../models/Poll";
 import AnswerCard from "../AnswerCard";
+import styles from "./NewPollModal.module.scss";
 
 type Props = {
   perspective: any;
@@ -12,20 +14,21 @@ type Props = {
   setOpen: (state: boolean) => void;
 };
 
+type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
+const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
+
 export default function PollView({ perspective, source, open, setOpen }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [answersLocked, setAnswersLocked] = useState(true);
   const [newAnswer, setNewAnswer] = useState("");
   const [answers, setAnswers] = useState<any[]>([]);
+  const [voteType, setVoteType] = useState<VoteTypes>(voteTypes[0]);
+  const [answersLocked, setAnswersLocked] = useState(true);
   const [titleError, setTitleError] = useState("");
   const [answersError, setAnswersError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const colorScale = useRef(d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis));
-
   const { repo: pollRepo } = useSubjects({ perspective, source, subject: Poll });
-  const { repo: answerRepo } = useSubjects({ perspective, source, subject: Answer });
 
   function addAnswer() {
     if (!newAnswer) setAnswersError("Required");
@@ -54,22 +57,20 @@ export default function PollView({ perspective, source, open, setOpen }: Props) 
       // create poll
       setLoading(true);
       // @ts-ignore
-      const poll = await pollRepo.create({ title, description, answersLocked });
+      const poll = (await pollRepo.create({ title, description, voteType, answersLocked })) as any;
+      const answerRepo = await new SubjectRepository(Answer, { perspective, source: poll.id });
       // create answers
-      Promise.all(
-        answers.map((answer) =>
-          answerRepo
-            // @ts-ignore
-            .create({ text: answer.text })
-            .then((expression) =>
-              // @ts-ignore
-              perspective.add({ source: poll.id, predicate: "flux://has_poll_answer", target: expression.id })
-            )
-        )
-      )
+      // @ts-ignore
+      Promise.all(answers.map((answer) => answerRepo.create({ text: answer.text })))
         .then(() => {
-          console.log("answers created!");
           setOpen(false);
+          setTitle("");
+          setDescription("");
+          setAnswers([]);
+          setVoteType(voteTypes[0]);
+          setAnswersLocked(true);
+          setTitleError("");
+          setAnswersError("");
         })
         .catch((error) => console.log("poll creation error: ", error));
     }
@@ -77,66 +78,74 @@ export default function PollView({ perspective, source, open, setOpen }: Props) 
 
   return (
     <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
-      <j-box p="500">
-        <j-box pb="500">
-          <j-text variant="heading-sm">New poll</j-text>
-        </j-box>
+      <j-box m="700">
+        <j-flex direction="column" gap="600" a="center">
+          <j-text variant="heading-lg">New poll</j-text>
 
-        <j-box pb="600">
-          <j-input
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle((e.target as HTMLTextAreaElement).value)}
-            errortext={titleError}
-            error={!!titleError}
-          />
-        </j-box>
-
-        <j-box pb="400">
-          <j-input
-            label="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
-          />
-        </j-box>
-
-        <j-box pb="400">
-          <j-toggle checked={!answersLocked} onChange={() => setAnswersLocked(!answersLocked)}>
-            Allow other users to add answers
-          </j-toggle>
-        </j-box>
-
-        <j-box pb="600">
-          <j-flex gap="500">
+          <j-flex direction="column" gap="500" style={{ alignSelf: "stretch" }}>
             <j-input
-              label="New Answer"
-              value={newAnswer}
-              onChange={(e) => setNewAnswer((e.target as HTMLTextAreaElement).value)}
-              errortext={answersError}
-              error={!!answersError}
-              style={{ width: "100%" }}
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle((e.target as HTMLTextAreaElement).value)}
+              errortext={titleError}
+              error={!!titleError}
             />
-            <j-button onClick={addAnswer} style={{ marginTop: 26 }}>
-              Add Answer
-            </j-button>
+
+            <j-input
+              label="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+            />
+
+            <j-flex gap="500">
+              <j-input
+                label="Answers"
+                value={newAnswer}
+                onChange={(e) => setNewAnswer((e.target as HTMLTextAreaElement).value)}
+                errortext={answersError}
+                error={!!answersError}
+                style={{ width: "100%" }}
+              />
+              <j-button onClick={addAnswer} style={{ marginTop: 26 }}>
+                Add Answer
+              </j-button>
+            </j-flex>
+
+            {answers.map((answer, index) => (
+              <AnswerCard
+                perspective={perspective}
+                answer={answer}
+                index={index}
+                color={colorScale.current(index)}
+                removeAnswer={removeAnswer}
+              />
+            ))}
+
+            <j-flex className={styles.outline} gap="400" direction="column">
+              <j-flex gap="300" a="center">
+                <j-icon name="gear" />
+                <j-text variant="heading-sm" nomargin>
+                  Settings
+                </j-text>
+              </j-flex>
+              <j-flex gap="600" a="center">
+                {voteTypes.map((type) => (
+                  <j-checkbox onChange={() => setVoteType(type)} checked={voteType === type} size="sm">
+                    <j-text nomargin>{type}</j-text>
+                    <j-icon slot="checkmark" size="xs" name="check"></j-icon>
+                  </j-checkbox>
+                ))}
+              </j-flex>
+              <j-toggle checked={!answersLocked} onChange={() => setAnswersLocked(!answersLocked)}>
+                Allow people to add their own answers
+              </j-toggle>
+            </j-flex>
           </j-flex>
-        </j-box>
 
-        <j-box pb="600">
-          {answers.map((answer, index) => (
-            <AnswerCard
-              perspective={perspective}
-              answer={answer}
-              index={index}
-              color={colorScale.current(index)}
-              removeAnswer={removeAnswer}
-            />
-          ))}
-        </j-box>
-
-        <j-button variant="primary" onClick={createPoll} loading={loading} disabled={loading}>
-          Create Poll
-        </j-button>
+          <j-button variant="primary" onClick={createPoll} loading={loading} disabled={loading}>
+            Create Poll
+          </j-button>
+        </j-flex>
       </j-box>
     </j-modal>
   );
