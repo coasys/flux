@@ -1,73 +1,56 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { SubjectRepository } from "@coasys/flux-api";
 import * as d3 from "d3";
-import { useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
+import Vote from "../../models/Vote";
 import AnswerCard from "../AnswerCard";
 import PieChart from "../PieChart";
-import styles from "./PollCard.module.css";
+import styles from "./PollCard.module.scss";
 
 export default function PollCard(props: {
   perspective: any;
+  agent: any;
   poll: any;
   index: number;
   deletePoll: (id: string) => void;
-  vote?: (answerId: string, voteId: string) => Promise<any>;
 }) {
-  const { perspective, poll, index, deletePoll, vote } = props;
-
-  const { entries: answers } = useSubjects({
-    perspective,
-    source: poll.id,
-    subject: Answer,
-  });
-
+  const { agent, perspective, poll, index, deletePoll } = props;
   const [totalVotes, setTotalVotes] = useState(0);
+  const [answersWithStats, setAnswersWithStats] = useState([]);
+  const [renderKey, setRenderKey] = useState(0);
 
-  const colorScale = useRef(
-    d3.scaleSequential().domain([0, poll.answers.length]).interpolator(d3.interpolateViridis)
-  );
+  const { entries: answers } = useSubjects({ perspective, source: poll.id, subject: Answer });
 
-  const answersData = useMemo(() => {
-    return answers.map((answer) => {
-      return { ...answer, totalVotes: Math.floor(Math.random() * 6) };
-    });
+  const colorScale = useMemo(() => {
+    return d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
   }, [answers]);
 
-  // todo: need to be able to collate all data from answers and votes
-  // useEffect(() => {
-  //   // build visualisation data
-  //   // count votes for each answer
-  //   console.log("useffect");
-  //   // console.log("answers: ", answers);
-  //   setTotalVotes(20);
-  //   // const newAnswers = [...answers];
-  //   // setAnswersData(newAnswers);
-  //   // setAnswersData(
-  //   //   answers.map((a) => {
-  //   //     return { ...a, totalVotes: Math.floor(Math.random() * 3) };
-  //   //   })
-  //   // );
-  //   // Promise.all(
-  //   //   answers.map(
-  //   //     (answer) =>
-  //   //       new Promise((resolve) => {
-  //   //         // const { entries: votes } = useSubjects({
-  //   //         //   perspective,
-  //   //         //   source: poll.id,
-  //   //         //   subject: Vote,
-  //   //         // });
-  //   //         resolve({ ...answer, totalVotes: Math.floor(Math.random() * 3) });
-  //   //       })
-  //   //   )
-  //   // )
-  //   //   .then((data) => {
-  //   //     setTotalVotes(
-  //   //       data.map((a: any) => a.totalVotes).reduce((a, b) => a + b, 0)
-  //   //     );
-  //   //     setAnswersData(data);
-  //   //   })
-  //   //   .catch((error) => console.log(error));
-  // }, [answers]);
+  async function buildAnswerData() {
+    let totalVotes = 0;
+    const newAnswers = await Promise.all(
+      answers.map(
+        (answer, i) =>
+          new Promise(async (resolve) => {
+            const votes = await new SubjectRepository(Vote, { perspective, source: answer.id }).getAllData();
+            totalVotes += votes.length;
+            resolve({ ...answer, index: i, color: colorScale(i), totalVotes: votes.length });
+          })
+      )
+    );
+    setTotalVotes(totalVotes);
+    setAnswersWithStats(
+      await newAnswers
+        .map((answer: any) => {
+          return { ...answer, percentage: parseFloat(((100 / totalVotes) * answer.totalVotes).toFixed(2)) };
+        })
+        .sort((a, b) => b.percentage - a.percentage)
+    );
+  }
+
+  useEffect(() => {
+    buildAnswerData();
+  }, [JSON.stringify(answers), renderKey]);
 
   return (
     <j-box p="600" className={styles.poll}>
@@ -78,20 +61,19 @@ export default function PollCard(props: {
           <PieChart
             type="multiple-choice"
             pollId={poll.id}
-            totalVotes={10}
+            totalVotes={totalVotes}
             totalPoints={0}
             totalUsers={3}
-            answers={answersData}
+            answers={answersWithStats}
           />
         </j-flex>
-        <j-flex gap="300" direction="column">
-          {answers.map((answer, index) => (
+        <j-flex gap="400" direction="column">
+          {answersWithStats.map((answer) => (
             <AnswerCard
+              agent={agent}
               perspective={perspective}
               answer={answer}
-              index={index}
-              color={colorScale.current(index)}
-              vote={vote}
+              rerender={() => setRenderKey((prev) => prev + 1)}
             />
           ))}
         </j-flex>

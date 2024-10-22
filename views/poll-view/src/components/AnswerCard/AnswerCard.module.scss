@@ -1,0 +1,22 @@
+.wrapper {
+  border: 1px solid var(--j-color-ui-200);
+  border-radius: var(--j-border-radius);
+  background-color: var(--app-channel-bg-color);
+  padding: var(--j-space-400);
+
+  .index {
+    width: var(--j-size-md);
+    height: var(--j-size-md);
+    border-radius: var(--j-border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .voters {
+    border: 1px solid var(--j-color-ui-200);
+    border-radius: var(--j-border-radius);
+    background-color: var(--j-color-ui-100);
+    padding: var(--j-space-300);
+  }
+}

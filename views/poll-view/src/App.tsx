@@ -1,7 +1,7 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import "@coasys/flux-ui/dist/main.d.ts";
-import styles from "./App.module.css";
+import styles from "./App.module.scss";
 import PollView from "./components/PollView";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 export default function App({ agent, perspective, source }: Props) {
   if (!perspective?.uuid || !agent) return "No perspective or agent client";
   return (
-    <div className={styles.appContainer}>
+    <div className={styles.wrapper}>
       <PollView agent={agent} perspective={perspective} source={source} />
     </div>
   );
