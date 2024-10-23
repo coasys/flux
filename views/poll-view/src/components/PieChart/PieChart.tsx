@@ -1,6 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable no-param-reassign */
-// import { pluralise } from "@src/Helpers";
 import * as d3 from "d3";
 import { useEffect } from "preact/hooks";
 
@@ -19,10 +16,7 @@ function PieChart(props: {
   const padding = 100;
   const arcWidth = 30;
   const circleRadius = (size - padding) / 2;
-  const colorScale = d3
-    .scaleSequential()
-    .domain([0, answers.length])
-    .interpolator(d3.interpolateViridis);
+  const colorScale = d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
 
   function findPercentage(d) {
     if (weighted) return +((d.data.totalPoints / totalPoints) * 100).toFixed(1);
@@ -166,7 +160,7 @@ function PieChart(props: {
       .style("fill", "white")
       .attr("x", size / 2)
       .attr("y", size / 2)
-      .text(weighted ? totalUsers : totalVotes.toFixed(0))
+      .text(totalUsers)
       .style("opacity", 0)
       .transition()
       .duration(2000)
@@ -181,7 +175,7 @@ function PieChart(props: {
       .style("fill", "white")
       .attr("x", size / 2)
       .attr("y", size / 2 + 25)
-      .text(`votes`) // pluralise(${weighted ? +totalUsers : +totalVotes.toFixed(0)})
+      .text(`vote${totalUsers === 1 ? "" : "s"}`)
       .style("opacity", 0)
       .transition()
       .duration(2000)

@@ -11,16 +11,9 @@ export default class Vote {
   type: string;
 
   @SubjectProperty({
-    through: "flux://value",
+    through: "flux://score",
     writable: true,
     resolveLanguage: "literal",
   })
-  value: null | number;
-
-  //   @SubjectProperty({
-  //     through: "flux://state",
-  //     writable: true,
-  //     resolveLanguage: "literal",
-  //   })
-  //   state: string;
+  score: null | number;
 }

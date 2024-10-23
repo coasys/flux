@@ -10,6 +10,7 @@ import styles from "./NewPollModal.module.scss";
 type Props = {
   perspective: any;
   source: string;
+  myDid: string;
   open: boolean;
   setOpen: (state: boolean) => void;
 };
@@ -17,7 +18,7 @@ type Props = {
 type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
 const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
 
-export default function PollView({ perspective, source, open, setOpen }: Props) {
+export default function PollView({ perspective, source, myDid, open, setOpen }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
@@ -48,36 +49,40 @@ export default function PollView({ perspective, source, open, setOpen }: Props) 
     setAnswers(newAnswers);
   }
 
+  function toggleOpen(open: boolean) {
+    setOpen(open);
+    if (!open) {
+      // reset state
+      setTitle("");
+      setDescription("");
+      setAnswers([]);
+      setVoteType(voteTypes[0]);
+      setAnswersLocked(true);
+      setTitleError("");
+      setAnswersError("");
+      setLoading(false);
+    }
+  }
+
   async function createPoll() {
-    // validate poll
     setTitleError(title ? "" : "Required");
     const answersValid = !answersLocked || answers.length > 1;
     setAnswersError(answersValid ? "" : "At least 2 answers required for locked polls");
     if (title && answersValid) {
-      // create poll
       setLoading(true);
       // @ts-ignore
       const poll = (await pollRepo.create({ title, description, voteType, answersLocked })) as any;
       const answerRepo = await new SubjectRepository(Answer, { perspective, source: poll.id });
-      // create answers
       // @ts-ignore
       Promise.all(answers.map((answer) => answerRepo.create({ text: answer.text })))
-        .then(() => {
-          setOpen(false);
-          setTitle("");
-          setDescription("");
-          setAnswers([]);
-          setVoteType(voteTypes[0]);
-          setAnswersLocked(true);
-          setTitleError("");
-          setAnswersError("");
-        })
-        .catch((error) => console.log("poll creation error: ", error));
+        .then(() => toggleOpen(false))
+        .catch(console.log);
     }
   }
 
   return (
-    <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
+    // @ts-ignore
+    <j-modal open={open} onToggle={(e) => toggleOpen(e.target.open)}>
       <j-box m="700">
         <j-flex direction="column" gap="600" a="center">
           <j-text variant="heading-lg">New poll</j-text>
@@ -114,10 +119,12 @@ export default function PollView({ perspective, source, open, setOpen }: Props) 
             {answers.map((answer, index) => (
               <AnswerCard
                 perspective={perspective}
+                myDid={myDid}
                 answer={answer}
                 index={index}
                 color={colorScale.current(index)}
                 removeAnswer={removeAnswer}
+                preview
               />
             ))}
 

@@ -1,37 +1,41 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import Vote from "../../models/Vote";
 import Avatar from "../Avatar";
 import styles from "./AnswerCard.module.scss";
 
 export default function AnswerCard(props: {
-  agent: any;
   perspective: any;
+  myDid: string;
   answer: any;
+  index: number;
+  color: string;
+  percentage?: number;
+  voteType?: string;
+  preview?: boolean;
+  vote?: (answerId: string, value?: number) => void;
   removeAnswer?: (index: number) => void;
-  rerender?: () => void;
 }) {
-  const { agent, perspective, answer, removeAnswer, rerender } = props;
-  const { index, color, percentage } = answer;
-  const { author, text } = answer;
-  const [userVoteId, setUserVoteId] = useState("");
-  const { entries: votes, repo: voteRepo } = useSubjects({ perspective, source: answer.id, subject: Vote });
-
-  function vote() {
-    if (userVoteId) voteRepo.remove(userVoteId).then(() => rerender());
-    // @ts-ignore
-    else voteRepo.create({ value: null }).then(() => rerender());
-  }
-
-  async function findUserVote() {
-    const { did } = await agent.me();
-    const match = votes.find((vote) => vote.author === did);
-    setUserVoteId(match?.id || "");
-  }
+  const { perspective, myDid, answer, index, color, percentage, voteType, preview, vote, removeAnswer } = props;
+  const { id, author, text, myPoints } = answer;
+  const [hasVoted, setHasVoted] = useState(false);
+  const [points, setPoints] = useState(myPoints);
+  const pointsRef = useRef(0);
+  const slidingRef = useRef(false);
+  const { entries: votes } = useSubjects({ perspective, source: answer.id, subject: Vote });
 
   useEffect(() => {
-    findUserVote();
-  }, [JSON.stringify(votes)]);
+    window.addEventListener("mouseup", () => {
+      if (slidingRef.current) {
+        slidingRef.current = false;
+        vote(id, pointsRef.current);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    setHasVoted(!!votes.find((vote) => vote.author === myDid));
+  }, [myDid, JSON.stringify(votes)]);
 
   return (
     <j-flex gap="400" direction="column" className={styles.wrapper}>
@@ -40,24 +44,59 @@ export default function AnswerCard(props: {
           <div className={styles.index} style={{ backgroundColor: color }}>
             {index + 1}
           </div>
-          <Avatar size="sm" did={author} showName />
+          <Avatar size="sm" did={preview ? myDid : author} showName />
         </j-flex>
 
         <j-flex gap="400" a="center">
-          <j-flex gap="400" a="center" className={styles.voters}>
-            {votes.map((vote, i) => (
-              <Avatar did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
-            ))}
-            {percentage}%
-          </j-flex>
-          {removeAnswer ? (
+          {preview ? (
             <j-button square>
               <j-icon name="trash" onClick={() => removeAnswer(index)}></j-icon>
             </j-button>
           ) : (
-            <j-checkbox onChange={vote} checked={!!userVoteId} size="sm">
-              <j-icon slot="checkmark" size="xs" name="check" />
-            </j-checkbox>
+            <>
+              <j-flex gap="300" a="center" className={styles.voters}>
+                {votes.length > 0 && (
+                  <j-flex a="center">
+                    {votes.map((vote, i) => (
+                      <Avatar did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
+                    ))}
+                  </j-flex>
+                )}
+                <j-text size="500" nomargin>
+                  {percentage}%
+                </j-text>
+              </j-flex>
+
+              {voteType === "weighted-choice" ? (
+                <j-flex gap="400" a="center">
+                  <input
+                    className={styles.slider}
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={points}
+                    onChange={(e) => {
+                      slidingRef.current = true;
+                      pointsRef.current = +e.target.value;
+                      setPoints(+e.target.value);
+                    }}
+                  />
+                  <j-input
+                    className={styles.input}
+                    value={points.toString()}
+                    onInput={(e: any) => {
+                      pointsRef.current = +e.target.value;
+                      setPoints(+e.target.value);
+                      vote(id, +e.target.value);
+                    }}
+                  />
+                </j-flex>
+              ) : (
+                <j-checkbox onChange={() => vote(id)} checked={hasVoted} size="sm">
+                  <j-icon slot="checkmark" size="xs" name="check" />
+                </j-checkbox>
+              )}
+            </>
           )}
         </j-flex>
       </j-flex>
