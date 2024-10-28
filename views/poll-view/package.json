@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "fluxapp": {
-    "name": "Poll",
+    "name": "Polls",
     "description": "Poll opinions in your neighbourhood",
     "icon": "pie-chart"
   },
