@@ -11,7 +11,6 @@ function PieChart(props: {
 }): JSX.Element {
   const { pollId, type, totalVotes, totalPoints, totalUsers, answers } = props;
   const id = pollId.split("literal://string:")[1];
-  const weighted = type === "weighted-choice";
   const size = 280;
   const padding = 100;
   const arcWidth = 30;
@@ -19,8 +18,9 @@ function PieChart(props: {
   const colorScale = d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
 
   function findPercentage(d) {
-    if (weighted) return +((d.data.totalPoints / totalPoints) * 100).toFixed(1);
-    return +((d.data.totalVotes / totalVotes) * 100).toFixed(1);
+    return type === "weighted-choice"
+      ? +((d.data.totalPoints / totalPoints) * 100).toFixed(1)
+      : +((d.data.totalVotes / totalVotes) * 100).toFixed(1);
   }
 
   useEffect(() => {
@@ -32,10 +32,7 @@ function PieChart(props: {
       .arc()
       .outerRadius(circleRadius)
       .innerRadius(circleRadius - arcWidth);
-    const pie = d3.pie().value((d) => {
-      if (weighted) return d.totalPoints;
-      return d.totalVotes;
-    });
+    const pie = d3.pie().value((d) => (type === "weighted-choice" ? d.totalPoints : d.totalVotes));
 
     const svg = d3
       .select(canvas.node())
@@ -65,15 +62,14 @@ function PieChart(props: {
         const originalEnd = d.endAngle;
         return (t) => {
           const currentAngle = d3.interpolate(pie.startAngle()(), pie.endAngle()())(t);
-          if (currentAngle < d.startAngle) {
-            return "";
-          }
+          if (currentAngle < d.startAngle) return "";
           d.endAngle = Math.min(currentAngle, originalEnd);
           return arc(d);
         };
       });
 
     if (!totalVotes) {
+      // render empty arc
       svg
         .append("path")
         .datum({ startAngle: 0, endAngle: 2 * Math.PI })
@@ -131,7 +127,7 @@ function PieChart(props: {
       .style("opacity", 1)
       .text((d) => {
         if (findPercentage(d) > 4) {
-          if (weighted) return d.data.totalPoints ? `${d.data.totalPoints / 100} ↑` : "";
+          if (type === "weighted-choice") return d.data.totalPoints ? `${d.data.totalPoints / 100} ↑` : "";
           return d.data.totalVotes ? `${d.data.totalVotes} ↑` : ""; // ↑⇧⇑⇪⬆
         }
         return "";

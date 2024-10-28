@@ -88,20 +88,18 @@ export default function PollCard(props: {
     const voteRepo = await new SubjectRepository(Vote, { perspective, source: answerId });
     const votes = await voteRepo.getAllData();
     const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-    let task;
     if (voteType === "single-choice") {
-      task = previousVote
-        ? voteRepo.remove(previousVote.id)
+      previousVote
+        ? await voteRepo.remove(previousVote.id)
         : // @ts-ignore
-          removePreviousVotes().then(() => voteRepo.create({ score: 100 }));
+          await removePreviousVotes().then(() => voteRepo.create({ score: 100 }));
     } else if (voteType === "multiple-choice") {
       // @ts-ignore
-      task = previousVote ? voteRepo.remove(previousVote.id) : voteRepo.create({ score: 100 });
+      previousVote ? await voteRepo.remove(previousVote.id) : await voteRepo.create({ score: 100 });
     } else if (voteType === "weighted-choice") {
       // @ts-ignore
-      task = previousVote ? voteRepo.update(previousVote.id, { score: value }) : voteRepo.create({ score: value });
+      previousVote ? await voteRepo.update(previousVote.id, { score: value }) : await voteRepo.create({ score: value });
     }
-    await task;
     buildAnswerData();
   }
 

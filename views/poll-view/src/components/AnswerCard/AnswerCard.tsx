@@ -50,7 +50,7 @@ export default function AnswerCard(props: {
         <j-flex gap="400" a="center">
           {preview ? (
             <j-button square>
-              <j-icon name="trash" onClick={() => removeAnswer(index)}></j-icon>
+              <j-icon name="trash" onClick={() => removeAnswer(index)} />
             </j-button>
           ) : (
             <>

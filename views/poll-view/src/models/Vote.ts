@@ -15,5 +15,5 @@ export default class Vote {
     writable: true,
     resolveLanguage: "literal",
   })
-  score: null | number;
+  score: number;
 }
