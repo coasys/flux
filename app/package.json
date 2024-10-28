@@ -33,6 +33,7 @@
     "@coasys/flux-synergy-demo-view": "*",
     "@coasys/flux-table-view": "*",
     "@coasys/flux-poll-view": "*",
+    "@coasys/flux-decision-tree-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
     "@coasys/flux-utils": "0.8.1",

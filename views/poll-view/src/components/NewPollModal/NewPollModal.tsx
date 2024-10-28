@@ -18,7 +18,7 @@ type Props = {
 type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
 const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
 
-export default function PollView({ perspective, source, myDid, open, setOpen }: Props) {
+export default function NewPollModal({ perspective, source, myDid, open, setOpen }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [newAnswer, setNewAnswer] = useState("");

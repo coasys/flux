@@ -9,6 +9,7 @@ const fetchFluxApp = async function (packageName: string) {
     "@coasys/flux-webrtc-view",
     "@coasys/flux-synergy-demo-view",
     "@coasys/flux-poll-view",
+    "@coasys/flux-decision-tree-view",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
 
@@ -37,6 +38,9 @@ const fetchFluxApp = async function (packageName: string) {
       }
       if (packageName === "@coasys/flux-poll-view") {
         module = await import("@coasys/flux-poll-view");
+      }
+      if (packageName === "@coasys/flux-decision-tree-view") {
+        module = await import("@coasys/flux-decision-tree-view");
       }
     } else {
       module = await import(
