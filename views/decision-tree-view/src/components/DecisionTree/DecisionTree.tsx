@@ -102,6 +102,23 @@ function DecisionTree(props: { treeId: string; type: string }): JSX.Element {
       })
       .attr("stroke", "#000");
 
+    // create node buttons
+    svg
+      .selectAll(".node")
+      .data(sankeyData.nodes)
+      .enter()
+      .append("rect")
+      .attr("class", "node")
+      .attr("x", (d) => d.x0)
+      .attr("y", (d) => d.y0)
+      .attr("height", (d) => d.y1 - d.y0)
+      .attr("width", sankey.nodeWidth())
+      .attr("fill", (d) => {
+        if (d.depth === 0) return "var(--j-color-primary-400)";
+        return "#69b3a2";
+      })
+      .attr("stroke", "#000");
+
     // create node labels
     svg
       .selectAll(".node-label")

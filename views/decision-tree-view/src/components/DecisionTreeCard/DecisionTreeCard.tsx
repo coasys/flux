@@ -57,7 +57,7 @@ export default function DecisionTreeCard(props: {
             </j-text>
           </j-flex>
         </j-flex>
-        <DecisionTree treeId={id} />
+        <DecisionTree treeId={id} type={voteType} />
       </j-flex>
     </j-box>
   );
