@@ -36,7 +36,6 @@ export default function Channel({
   setModalOpen,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
-  const [muted, setMuted] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
   const { profile } = useAgent<Profile>({
@@ -118,13 +117,14 @@ export default function Channel({
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
-            setMuted={setMuted}
           />
-          <Transcriber
-            source={source}
-            perspective={perspective}
-            muted={muted}
-          />
+          {webRTC.localState.settings.transcriber.on && (
+            <Transcriber
+              webRTC={webRTC}
+              source={source}
+              perspective={perspective}
+            />
+          )}
         </>
       )}
 

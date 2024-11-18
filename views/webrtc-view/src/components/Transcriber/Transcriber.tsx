@@ -1,63 +1,37 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
-import { processItem, feedTranscription, startTranscribtion } from "@coasys/flux-utils";
-import TranscriptionWorker from "@coasys/flux-utils/src/transcriptionWorker?worker&inline";
+import { WebRTC } from "@coasys/flux-react-web";
+import {
+  feedTranscription,
+  processItem,
+  startTranscription,
+  stopTranscription,
+} from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
-import styles from "./Transcriber.module.css";
-
-const defaultVolumeThreshold = 40; // 0 - 128
-const defaultSilenceTimeout = 3; // seconds
-const models = [
-  "Xenova/whisper-tiny",
-  "Xenova/whisper-base",
-  // "Xenova/whisper-small",
-  // "Xenova/whisper-medium",
-  // "distil-whisper/distil-medium",
-  // "distil-whisper/distil-large-v2",
-];
+import RecordingIcon from "../RecordingIcon/RecordingIcon";
+import styles from "./Transcriber.module.scss";
 
 type Props = {
   source: string;
   perspective: any;
-  muted: boolean;
+  webRTC: WebRTC;
 };
 
-export default function Transcriber({ source, perspective, muted }: Props) {
-  const [openAIKey, setOpenAIKey] = useState(
-    localStorage?.getItem("openAIKey") || ""
-  );
-  const [transcribeAudio, setTranscribeAudio] = useState(false);
+export default function Transcriber({ source, perspective, webRTC }: Props) {
+  const { audio, transcriber } = webRTC.localState.settings;
+  const { selectedModel, previewTimeout, messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
-  const [speechDetected, setSpeechDetected] = useState(false);
-  const [volumeThreshold, setVolumeThreshold] = useState(
-    defaultVolumeThreshold
-  );
-  const volumeThresholdRef = useRef(defaultVolumeThreshold);
-  const [silenceTimeout, setSilenceTimeout] = useState(defaultSilenceTimeout);
-  const silenceTimeoutRef = useRef(defaultSilenceTimeout);
-  const [secondsOfSilence, setSecondsOfSilence] = useState(0);
-  const silenceTimerRef = useRef(null);
-  const silenceInterval = useRef(null);
-  const [selectedModel, setSelectedModel] = useState(models[0]);
-  const selectedModelRef = useRef(models[0]);
-  const mediaRecorder = useRef(null);
-  const audioChunks = useRef([]);
+  // const [countDown, setCountDown] = useState(0);
+  // const countDownInterval = useRef(null);
   const audioContext = useRef(null);
   const analyser = useRef(null);
   const dataArray = useRef(null);
   const sourceNode = useRef(null);
-  const recording = useRef(false);
   const listening = useRef(false);
-  const transcriptionWorker = useRef<Worker | null>(null);
-  const [transcript, setTranscript] = useState("");
-  const [interimTranscript, setInterimTranscript] = useState("");
-  const recognition = useRef(null);
-  const currentId = useRef(null);
-  const timeoutRef = useRef(null);
-
-  const isChrome =
-    /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  const timeout = useRef(null);
+  const currentTranscript = useRef("");
+  const streamId = useRef("");
 
   const { repo: messageRepo } = useSubjects({
     perspective,
@@ -65,327 +39,224 @@ export default function Transcriber({ source, perspective, muted }: Props) {
     subject: Message,
   });
 
-  function detectSpeech() {
+  function renderVolume() {
     if (listening.current) {
-      // detect max audio value
       analyser.current.getByteTimeDomainData(dataArray.current);
       const maxValue = Math.max(...dataArray.current);
-      // update volume display
+      const percentage = ((maxValue - 128) / 128) * 100;
       const volume = document.getElementById("volume");
-      if (volume) volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
-      // if volume threshold reached
-      if (maxValue > 128 + volumeThresholdRef.current) {
-        // clear silence timeout & interval if present
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-          silenceTimerRef.current = null;
-          clearInterval(silenceInterval.current);
-          setSecondsOfSilence(0);
-        }
-        // start recording if not already started
-        if (!recording.current) {
-          audioChunks.current = [];
-          mediaRecorder.current.start();
-          recording.current = true;
-          setSpeechDetected(true);
-        }
-      } else if (recording.current && !silenceTimerRef.current) {
-        // start silence timeout
-        silenceTimerRef.current = setTimeout(() => {
-          mediaRecorder.current.stop();
-          recording.current = false;
-          silenceTimerRef.current = null;
-          setSpeechDetected(false);
-          clearInterval(silenceInterval.current);
-          setSecondsOfSilence(0);
-        }, silenceTimeoutRef.current * 1000);
-        // increment seconds of silence
-        setSecondsOfSilence(0);
-        silenceInterval.current = setInterval(() => {
-          setSecondsOfSilence((t) => t + 1);
-        }, 1000);
-      }
-      requestAnimationFrame(detectSpeech);
+      if (volume) volume.style.width = `${percentage < 3 ? 0 : percentage}%`;
+      requestAnimationFrame(renderVolume);
     }
   }
 
-  async function transcribe(id) {
-    // const id = uuidv4();
-    setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: false }]);
-    // convert raw audio to float32Array for transcription
-    const arrayBuffer = await audioChunks.current[0].arrayBuffer();
-    const context = new AudioContext({ sampleRate: 16000 });
-    const audioBuffer = await context.decodeAudioData(arrayBuffer);
-    const float32Array = audioBuffer.getChannelData(0);
+  async function handleTranscriptionText(text: string) {
+    // function fires every time a new chunk of text is sent back from the AI service
+    setTranscripts((ts) => {
+      const newTranscripts = [...ts];
+      // search for existing transcript
+      const match = newTranscripts.find(
+        (t) => t.id === currentTranscript.current
+      );
+      // if match found, update text
+      if (match) match.text = match.text + text;
+      else {
+        // otherwise initialise new transcript
+        currentTranscript.current = uuidv4();
+        newTranscripts.push({
+          id: currentTranscript.current,
+          timestamp: new Date(),
+          state: "transcribing",
+          text,
+        });
+      }
+      return newTranscripts;
+    });
 
-    await feedTranscription(id, float32Array);
+    // // restart countdown interval
+    // if (countDownInterval.current) {
+    //   clearInterval(countDownInterval.current);
+    //   countDownInterval.current = null;
+    // }
+    // setCountDown(messageTimeout);
+    // countDownInterval.current = setInterval(
+    //   () => setCountDown((t) => t - 1),
+    //   1000
+    // );
 
-    // send formatted audio to transcription worker
-    // transcriptionWorker.current?.postMessage({
-    //   id,
-    //   float32Array: float32Array,
-    //   model: selectedModelRef.current,
-    //   type: "transcribe",
-    // });
-    context.close();
+    // set up timeout to save transcript after messageTimeout has elapsed with no new text
+    if (timeout.current) clearTimeout(timeout.current);
+    timeout.current = setTimeout(async () => {
+      // reset countdown interval
+      // clearInterval(countDownInterval.current);
+      // countDownInterval.current = null;
+      // mark transcipt as saving
+      setTranscripts((ts) => {
+        const newTranscripts = [...ts];
+        const match = newTranscripts.find(
+          (t) => t.id === currentTranscript.current
+        );
+        if (match) match.state = "saving";
+        return newTranscripts;
+      });
+      // store id for outro transitions
+      const previousId = currentTranscript.current;
+      currentTranscript.current = null;
+      // save message
+      // @ts-ignore
+      const message = (await messageRepo.create({
+        body: `<p>${text}</p>`,
+      })) as any;
+      processItem(perspective, source, {
+        id: message.id,
+        text,
+      })
+        .then(() => {
+          // mark transcript as saved
+          setTranscripts((ts) => {
+            const newTranscripts = [...ts];
+            const match = newTranscripts.find((t) => t.id === previousId);
+            if (match) match.state = "saved";
+            return newTranscripts;
+          });
+          // trigger outro transitions
+          const transcriptCard = document.getElementById(
+            `transcript-${previousId}`
+          );
+          transcriptCard.classList.add(styles.slideLeft);
+          setTimeout(() => {
+            transcriptCard.classList.add(styles.hide);
+            setTimeout(() => {
+              setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+            }, 500);
+          }, 500);
+        })
+        .catch(console.log);
+    }, messageTimeout * 1000);
   }
 
   function startListening() {
+    listening.current = true;
     navigator.mediaDevices
       .getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
       })
       .then(async (stream) => {
-        const id = await startTranscribtion((text) => {
-          if (interimTranscript.length === 0 && !currentId.current) {
-            const id = uuidv4();
-            currentId.current = id;
-            setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: true, text }]);
-          } else {
-            setTranscripts((ts) => {
-              const match = ts.find((t) => t.id === currentId.current);
-              match.text = match.text + text;
-              return [...ts];
-            });
-          }
-
-          setInterimTranscript((t) => t + text);
-
-          if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-          }
-
-          timeoutRef.current = setTimeout(async () => {
-            console.log('30 seconds passed without new text');
-            setInterimTranscript((text) => {
-              currentId.current = null;
-              // @ts-ignore
-              messageRepo.create({
-                body: `<p>${text}</p>`,
-              }).then(async (message: any) => {
-                await processItem(perspective, source, { id: message.id, text });
-                setInterimTranscript('');
-              });
-
-              return "";
-            })
-          }, 10000);
-        });
+        streamId.current = await startTranscription(handleTranscriptionText);
+        // set up audio context & worklet node
         audioContext.current = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
-        await audioContext.current.audioWorklet.addModule('/audio-processor.js');
-        const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
-        const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
+        await audioContext.current.audioWorklet.addModule(
+          "/audio-processor.js"
+        );
+        const mediaStreamSource =
+          audioContext.current.createMediaStreamSource(stream);
+        const workletNode = new AudioWorkletNode(
+          audioContext.current,
+          "audio-processor"
+        );
         mediaStreamSource.connect(workletNode);
         workletNode.port.onmessage = (event) => {
-          // console.log("some event:", event.type);
-          const audioChunk = event.data;
-          feedTranscription(id, audioChunk);
+          if (listening.current)
+            feedTranscription(streamId.current, event.data);
         };
         workletNode.connect(audioContext.current.destination);
-
+        // set up analyser to render volume
         analyser.current = audioContext.current.createAnalyser();
         sourceNode.current =
           audioContext.current.createMediaStreamSource(stream);
         sourceNode.current.connect(analyser.current);
         analyser.current.fftSize = 2048;
         dataArray.current = new Uint8Array(analyser.current.fftSize);
-        mediaRecorder.current = new MediaRecorder(stream);
-        mediaRecorder.current.ondataavailable = (event) => {
-          audioChunks.current.push(event.data);
-        };
-        // mediaRecorder.current.onstop = () => transcribe(id);
-
-        listening.current = true;
-        detectSpeech();
+        renderVolume();
       });
   }
 
   function stopListening() {
     listening.current = false;
-    mediaRecorder.current?.stop();
     sourceNode.current?.disconnect();
     audioContext.current?.close();
-
-    // @ts-ignore
-    // if (
-    //   isChrome &&
-    //   (window.SpeechRecognition || window.webkitSpeechRecognition)
-    // ) {
-    //   recognition.current.stop();
-    // }
-  }
-
-  function incrementTimeout(value) {
-    const newValue = silenceTimeout + value;
-    if (newValue > 0 && newValue < 11) {
-      silenceTimeoutRef.current = newValue;
-      setSilenceTimeout(newValue);
-    }
+    streamId.current && stopTranscription(streamId.current);
   }
 
   useEffect(() => {
-    transcriptionWorker.current = new TranscriptionWorker();
-    transcriptionWorker.current.onmessage = async (e) => {
-      const { id, text } = e.data;
-
-      setTranscripts((ts) => {
-        const match = ts.find((t) => t.id === id);
-        match.text = text;
-        match.done = true;
-        return [...ts];
-      });
-      // @ts-ignore
-      const message = (await messageRepo.create({
-        body: `<p>${text}</p>`,
-      })) as any;
-      processItem(perspective, source, { id: message.id, text });
-    };
-    return () => {
-      transcriptionWorker.current?.terminate();
-    };
+    return () => stopListening();
   }, []);
 
   useEffect(() => {
-    if (transcribeAudio && !muted) startListening();
-    else if (listening.current) stopListening();
-  }, [transcribeAudio]);
-
-  useEffect(() => {
-    if (muted && listening.current) stopListening();
-    else if (transcribeAudio) startListening();
-  }, [muted]);
+    if (audio) startListening();
+    else stopListening();
+  }, [audio]);
 
   return (
     <div className={styles.wrapper}>
-      <j-flex a="center" gap="400">
-        <j-text nomargin>Transcribe audio</j-text>
-        <j-toggle
-          checked={transcribeAudio}
-          onChange={() => setTranscribeAudio(!transcribeAudio)}
-        >
-          {transcribeAudio ? "ON" : "OFF"}
-        </j-toggle>
-      </j-flex>
-      {transcribeAudio && (
-        <j-box mt="200">
-          <j-flex direction="column" gap="500">
-            <j-flex a="center" gap="400" wrap>
-              <j-text nomargin style={{ flexShrink: 0 }}>
-                AI model
-              </j-text>
-              <j-menu>
-                <j-menu-group collapsible title={selectedModel}>
-                  {models.map((model) => (
-                    <j-menu-item
-                      selected={model === selectedModel}
-                      onClick={() => {
-                        selectedModelRef.current = model;
-                        setSelectedModel(model);
-                      }}
-                    >
-                      {model}
-                    </j-menu-item>
-                  ))}
-                </j-menu-group>
-              </j-menu>
-            </j-flex>
-            <j-input
-              label="OpenAI key for topic parsing"
-              value={openAIKey}
-              placeholder="Required for topic parsing..."
-              onInput={(event) => {
-                const value = (event.target as HTMLInputElement).value;
-                setOpenAIKey(value);
-                localStorage?.setItem("openAIKey", value);
-              }}
-            />
-            <j-flex a="center" gap="400" wrap>
-              <j-text nomargin style={{ flexShrink: 0 }}>
-                Volume threshold to trigger recording
-              </j-text>
-              <div className={styles.volumeThreshold}>
-                <div id="volume" className={styles.volume} />
-                <div
-                  className={styles.sliderLine}
-                  style={{ left: `${(+volumeThreshold / 128) * 100}%` }}
-                />
-                <input
-                  className={styles.slider}
-                  type="range"
-                  min="0"
-                  max="128"
-                  value={volumeThreshold}
-                  onChange={(e) => {
-                    volumeThresholdRef.current = +e.target.value;
-                    setVolumeThreshold(+e.target.value);
-                  }}
-                />
-              </div>
-            </j-flex>
-            <j-flex a="center" gap="400" wrap>
-              <j-text nomargin>
-                Seconds of silence before recording stops
-              </j-text>
-              <j-flex a="center" gap="400">
-                <j-button size="xs" square onClick={() => incrementTimeout(-1)}>
-                  <j-icon name="caret-left-fill" />
-                </j-button>
-                <j-text nomargin color="color-white">
-                  {silenceTimeout}
-                </j-text>
-                <j-button size="xs" square onClick={() => incrementTimeout(1)}>
-                  <j-icon name="caret-right-fill" />
-                </j-button>
-              </j-flex>
-            </j-flex>
-            <j-flex a="center" gap="400">
-              <j-text nomargin>State:</j-text>
-              <j-text color="color-white" nomargin>
-                {muted
-                  ? "Muted"
-                  : speechDetected
-                    ? "Recording!"
-                    : "Listening for speech..."}
-              </j-text>
-              {secondsOfSilence > 0 && (
-                <j-text nomargin>
-                  (stopping in {silenceTimeout - secondsOfSilence}s)
-                </j-text>
-              )}
-            </j-flex>
-          </j-flex>
-        </j-box>
+      <j-text uppercase size="400" weight="800" color="primary-500">
+        Transcriber
+      </j-text>
+      {audio ? (
+        <j-flex gap="400" a="center">
+          <RecordingIcon size={30} style={{ flexShrink: 0 }} />
+          <j-text nomargin style={{ flexShrink: 0, marginRight: 20 }}>
+            Listening for speech...
+          </j-text>
+          <div className={styles.volumeThreshold}>
+            <div id="volume" className={styles.volume} />
+          </div>
+        </j-flex>
+      ) : (
+        <j-flex gap="400" a="center">
+          <j-icon name="mic-mute" />
+          <j-text nomargin style={{ flexShrink: 0, marginRight: 20 }}>
+            Audio muted
+          </j-text>
+        </j-flex>
       )}
       {transcripts.length > 0 && (
         <j-box mt="600">
           <j-flex direction="column" gap="400">
             {transcripts.map((transcript) => (
-              <j-flex
+              <div
                 key={transcript.id}
-                direction="column"
-                gap="300"
-                className={styles.text}
+                id={`transcript-${transcript.id}`}
+                className={styles.transcript}
               >
-                <j-timestamp
-                  value={transcript.timestamp}
-                  dateStyle="short"
-                  timeStyle="short"
-                />
-                {transcript.done ? (
+                <j-flex direction="column" gap="300">
+                  <j-timestamp
+                    value={transcript.timestamp}
+                    dateStyle="short"
+                    timeStyle="short"
+                  />
                   <j-text nomargin size="600">
                     {transcript.text}
                   </j-text>
-                ) : (
-                  <j-flex gap="400" a="center">
-                    {/* @ts-ignore */}
-                    <j-spinner size="xs" />
-                    <j-text nomargin size="600" color="primary-600">
-                      Transcribing audio...
-                    </j-text>
-                  </j-flex>
-                )}
-              </j-flex>
+                  {transcript.state === "transcribing" && (
+                    <j-flex gap="400" a="center">
+                      <j-spinner size="xs" />
+                      <j-text nomargin size="600" color="primary-600">
+                        Transcribing...
+                        {/* (saving message in {countDown}{" "}
+                        seconds...) */}
+                      </j-text>
+                    </j-flex>
+                  )}
+                  {transcript.state === "saving" && (
+                    <j-flex gap="400" a="center">
+                      <j-spinner size="xs" />
+                      <j-text nomargin size="600" color="primary-600">
+                        Saving message...
+                      </j-text>
+                    </j-flex>
+                  )}
+                  {transcript.state === "saved" && (
+                    <j-flex gap="400" a="center">
+                      <j-icon name="check-circle" color="success-600" />
+                      <j-text nomargin size="600" color="success-600">
+                        Saved
+                      </j-text>
+                    </j-flex>
+                  )}
+                </j-flex>
+              </div>
             ))}
           </j-flex>
         </j-box>
