@@ -1,14 +1,14 @@
 import {
-  PerspectiveProxy,
   Agent,
   Literal,
   NeighbourhoodProxy,
   PerspectiveExpression,
+  PerspectiveProxy,
 } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
-import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 import { getDefaultIceServers } from "@coasys/flux-utils";
+import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 
 function getExpressionData(data: any) {
   let parsedData;
@@ -60,10 +60,18 @@ export type Connection = {
   eventLog: EventLogItem[];
 };
 
+type Transcriber = {
+  on: boolean;
+  selectedModel: string;
+  previewTimeout: number;
+  messageTimeout: number;
+};
+
 export type Settings = {
   video: boolean | MediaTrackConstraints;
   audio: boolean | MediaTrackConstraints;
   screen: boolean;
+  transcriber: Transcriber;
 };
 
 export type IceServer = {
