@@ -91,12 +91,16 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // clearInterval(countDownInterval.current);
       // countDownInterval.current = null;
       // mark transcipt as saving
+      let fullText = "";
       setTranscripts((ts) => {
         const newTranscripts = [...ts];
         const match = newTranscripts.find(
           (t) => t.id === currentTranscript.current
         );
-        if (match) match.state = "saving";
+        if (match) {
+          fullText = match.text;
+          match.state = "saving";
+        }
         return newTranscripts;
       });
       // store id for outro transitions
@@ -105,11 +109,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // save message
       // @ts-ignore
       const message = (await messageRepo.create({
-        body: `<p>${text}</p>`,
+        body: `<p>${fullText}</p>`,
       })) as any;
       processItem(perspective, source, {
         id: message.id,
-        text,
+        text: fullText,
       })
         .then(() => {
           // mark transcript as saved

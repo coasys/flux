@@ -17,7 +17,9 @@ onmessage = async function (message) {
         return { ...item, score };
       })
     );
-    const filteredItems = itemsWithSimilarity.filter((item) => item.score > 0.8);
+    const filteredItems = itemsWithSimilarity.filter(
+      (item) => item.score > 0.2
+    );
     postMessage({ type: "similarity", items: filteredItems });
   }
 };
