@@ -8,7 +8,7 @@ const fetchFluxApp = async function (packageName: string) {
     "@coasys/flux-kanban-view",
     "@coasys/flux-webrtc-view",
     "@coasys/nillion-file-store",
-    "@coasys/flux-synergy-demo-view"
+    "@coasys/flux-synergy-demo-view",
     "@coasys/flux-poll-view",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
