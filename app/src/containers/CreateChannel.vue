@@ -145,9 +145,14 @@ export default defineComponent({
       const res = await getAllFluxApps();
 
       this.isLoading = false;
-      const filtered = res.filter((pkg) =>
-        semver.gte(pkg?.ad4mVersion || "0.0.0", "0.8.1")
-      );
+
+      const filtered = res.filter((pkg) => {
+        try {
+          return semver.gte(semver.coerce(pkg?.ad4mVersion || "0.0.0"), "0.8.1")
+        } catch (error) {
+          return false
+        }
+      });
 
       this.packages = filtered;
     } catch (error) {

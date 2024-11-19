@@ -132,10 +132,19 @@ export default defineComponent({
     this.isLoading = true;
     const res = await getAllFluxApps();
     this.isLoading = false;
-    const filtered = res.filter((pkg) =>
-        semver.gte(pkg.ad4mVersion || "0.0.0", dependencies["@coasys/ad4m"])
-      );
-      this.packages = filtered
+
+    const filtered = res.filter((pkg) => {
+      try {
+        return semver.gte(
+          semver.coerce(pkg.ad4mVersion || "0.0.0"),
+          semver.coerce(dependencies["@coasys/ad4m"])
+        )
+      } catch (error) {
+        return false
+      }
+    });
+
+    this.packages = filtered
   },
   async setup(props) {
     const route = useRoute();

@@ -9,6 +9,7 @@ const fetchFluxApp = async function (packageName: string) {
     "@coasys/flux-webrtc-view",
     "@coasys/nillion-file-store",
     "@coasys/flux-synergy-demo-view"
+    "@coasys/flux-poll-view",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
 
@@ -40,6 +41,9 @@ const fetchFluxApp = async function (packageName: string) {
           /* @vite-ignore */
           new URL("./@coasys/nillion-file-store/main.js", import.meta.url).href
         );
+      }
+      if (packageName === "@coasys/flux-poll-view") {
+        module = await import("@coasys/flux-poll-view");
       }
     } else {
       module = await import(
