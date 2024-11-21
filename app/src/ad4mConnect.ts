@@ -8,7 +8,7 @@ const ad4mConnect = Ad4mConnectUI({
   appIconPath: "https://i.ibb.co/QKPGNfn/icon-512.png",
   capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
   hosting: true,
-  mobile: true
+  mobile: true,
 });
 
 export { ad4mConnect };
