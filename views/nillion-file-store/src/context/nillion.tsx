@@ -62,7 +62,6 @@ export const NillionContextProvider = (props: NillionContextProviderProps) => {
       const defaultNodeKeySeed = `nillion-testnet-seed-${Math.floor(Math.random() * 10) + 1}`;
       var nodeKey = nil.NodeKey.from_seed(defaultNodeKeySeed);
 
-      nil.NillionClient.enable_remote_logging();
       const wasmclient = new nil.NillionClient(
         userKey,
         nodeKey,
