@@ -7,3 +7,4 @@ declare module "@coasys/flux-webrtc-view";
 declare module "@coasys/flux-kanban-view";
 declare module "@coasys/flux-table-view";
 declare module "@coasys/flux-synergy-demo-view";
+declare module "@coasys/flux-poll-view";
