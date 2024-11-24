@@ -16,7 +16,9 @@ type Props = {
 };
 
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
-  const [openAIKey, setOpenAIKey] = useState(localStorage?.getItem("openAIKey") || "");
+  const [openAIKey, setOpenAIKey] = useState(
+    localStorage?.getItem("openAIKey") || ""
+  );
   const [matches, setMatches] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<any>({});
@@ -44,7 +46,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   function entryTypeToSubjectClass(entryType: string) {
     if (entryType === "flux://conversation") return "Conversation";
-    else if (entryType === "flux://conversation_subgroup") return "ConversationSubgroup";
+    else if (entryType === "flux://conversation_subgroup")
+      return "ConversationSubgroup";
     else if (entryType === "flux://has_message") return "Message";
     else if (entryType === "flux://has_post") return "Post";
     else return "Unknown";
@@ -63,7 +66,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       new LinkQuery({ predicate: "ad4m://has_child", target: itemId })
     );
     return (
-      channels.find((c) => parentLinks.find((p) => p.data.source === c.id)) || { id: "unlinked" }
+      channels.find((c) => parentLinks.find((p) => p.data.source === c.id)) || {
+        id: "unlinked",
+      }
     );
   }
 
@@ -83,26 +88,25 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const channel = await findChannel(link.data.source, channels);
           const type = await findEntryType(link.data.source);
           // if it doesn't match the search filters return null
-          const wrongChannel = !filterSettings.includeChannel && channel.id === source;
+          const wrongChannel =
+            !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
           // otherwise grab the required data linked to the item
           const expression = await perspective.getExpression(link.data.target);
-          const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
+          const embedding = Float32Array.from(
+            Object.values(JSON.parse(expression.data).data)
+          );
           return { id: link.data.source, channel, type, embedding };
         })
       );
       // generate similarity score for items
       const embeddingWorker = new EmbeddingWorker();
       embeddingWorker.onmessage = async (message) => {
-        const { type, items } = message.data;
-        if (type === "similarity") {
-          resolveMatches(items);
-          worker.current?.terminate();
-        }
+        resolveMatches(message.data);
+        worker.current?.terminate();
       };
       embeddingWorker.postMessage({
-        type: "similarity",
         items: results.filter((i) => i !== null),
         sourceEmbedding,
       });
@@ -117,7 +121,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
       // grab all topic links
-      const topicLinks = await perspective.get(new LinkQuery({ predicate: "flux://has_tag" }));
+      const topicLinks = await perspective.get(
+        new LinkQuery({ predicate: "flux://has_tag" })
+      );
       const results = await Promise.all(
         topicLinks.map(async (t) => {
           const { data } = await perspective.getExpression(t.data.target);
@@ -132,7 +138,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const channel = await findChannel(expressionId, channels);
           const type = await findEntryType(expressionId);
           // if it doesn't match the search filters return null
-          const wrongChannel = !filterSettings.includeChannel && channel.id === source;
+          const wrongChannel =
+            !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
           return {
@@ -151,9 +158,11 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     const allowedTypes = [];
     const { grouping, itemType } = filterSettings;
     if (grouping === "Conversations") allowedTypes.push("Conversation");
-    else if (grouping === "Subgroups") allowedTypes.push("ConversationSubgroup");
+    else if (grouping === "Subgroups")
+      allowedTypes.push("ConversationSubgroup");
     else if (grouping === "Items") {
-      if (itemType === "All Types") allowedTypes.push("Message", "Post", "Task");
+      if (itemType === "All Types")
+        allowedTypes.push("Message", "Post", "Task");
       else if (itemType === "Messages") allowedTypes.push("Message");
       else if (itemType === "Posts") allowedTypes.push("Post");
       else if (itemType === "Tasks") allowedTypes.push("Task");
