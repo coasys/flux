@@ -5,7 +5,7 @@ import {
   ConversationSubgroup,
   Message,
   Post,
-  Relationship,
+  SemanticRelationship,
   SubjectRepository,
   Topic,
 } from "@coasys/flux-api";
@@ -126,7 +126,7 @@ async function findOrCreateTopic(perspective, allTopics, newTopic) {
 }
 
 async function linkTopic(perspective, itemId, topicId, relevance) {
-  const relationshipRepo = (await new SubjectRepository(Relationship, {
+  const relationshipRepo = (await new SubjectRepository(SemanticRelationship, {
     perspective,
     source: itemId,
   })) as any;
@@ -246,7 +246,7 @@ async function LLMProcessing(
 
     const response = await client.ai.prompt(
       task.taskId,
-      `{ previousSubgroups: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], previousMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t) => t.name).join(", ")}] }`
+      `{ previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}], previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}] }`
     );
     console.log("AI Response: ", response);
     const data = JSON.parse(response);
@@ -477,7 +477,7 @@ export function transformItem(type, item) {
 }
 
 export async function findRelationships(perspective, itemId) {
-  return await new SubjectRepository(Relationship, {
+  return await new SubjectRepository(SemanticRelationship, {
     perspective,
     source: itemId,
   }).getAllData();

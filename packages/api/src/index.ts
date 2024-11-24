@@ -18,7 +18,7 @@ import getProfile from "./getProfile";
 import joinCommunity from "./joinCommunity";
 import Message from "./message";
 import Post from "./post";
-import Relationship from "./relationship";
+import SemanticRelationship from "./semantic-relationship";
 import subscribeToLinks from "./subscribeToLinks";
 import subscribeToSyncState from "./subscribeToSyncState";
 import Topic from "./topic";
@@ -45,7 +45,7 @@ export {
   Me,
   Message,
   Post,
-  Relationship,
+  SemanticRelationship,
   SubjectRepository,
   subscribeToLinks,
   subscribeToSyncState,

@@ -132,7 +132,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           // get relationship data
           const relationshipProxy = await perspective.getSubjectProxy(
             t.data.source,
-            "Relationship"
+            "SemanticRelationship"
           );
           const expressionId = await relationshipProxy.expression;
           const channel = await findChannel(expressionId, channels);
