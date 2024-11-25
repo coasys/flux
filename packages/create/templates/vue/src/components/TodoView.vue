@@ -73,7 +73,7 @@ const { entries: todos, repo } = useSubjects({
 });
 
 const createTodo = () => {
-  repo
+  repo.value
     .create({ title: title.value })
     .then(() => {
       title.value = "";
@@ -82,10 +82,10 @@ const createTodo = () => {
 }
 
 const toggleTodo = ({ id, done }) => {
-  repo.update(id, { done }).catch(console.log);
+  repo.value.update(id, { done }).catch(console.log);
 }
 
 const deleteTodo = (id: string) => {
-  repo.remove(id).catch(console.log);
+  repo.value.remove(id).catch(console.log);
 }
 </script>
