@@ -24,7 +24,7 @@
       <j-flex gap="300" direction="column">
         <j-box v-for="todo in todos" bg="ui-50" p="400" radius="md">
           <j-flex j="between">
-            <div :class="{ done: styles.doneTodo }">
+            <div :class="{ [styles.doneTodo]: todo.done }">
               <j-checkbox
                 @change="toggleTodo({ id: todo.id, done: $event.target.checked })"
                 :checked="todo.done"
