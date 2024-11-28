@@ -13,14 +13,12 @@ export default class SemanticRelationship {
   @SubjectProperty({
     through: "flux://has_expression",
     writable: true,
-    resolveLanguage: "literal",
   })
   expression: string; // base url of expression
 
   @SubjectProperty({
     through: "flux://has_tag",
     writable: true,
-    resolveLanguage: "literal",
     required: false,
   })
   tag: string; // base url of semantic tag
