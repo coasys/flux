@@ -227,18 +227,10 @@ async function LLMProcessing(
     const client: Ad4mClient = await getAd4mClient();
     const tasks = await client.ai.tasks();
     let task = tasks.find((t) => t.name === "flux-synergy-task");
-    console.log("Task: ", task);
-    if (task) {
-      // console.log("Task: updating existing task");
-      // task.promptExamples = examples;
-      // task.systemPrompt = prompt;
-      // await client.ai.updateTask(task.taskId, task);
-      // console.log("Task: ", task);
-    } else {
-      console.log("Task: creating new task");
+    if (!task) {
       task = await client.ai.addTask(
         "flux-synergy-task",
-        "llama",
+        "default",
         prompt,
         examples
       );
