@@ -46,14 +46,14 @@ async function removeProcessedData(perspective, itemId) {
 
 export async function generateEmbedding(text: string) {
   const client = await getAd4mClient();
-  const embedding = await client.ai.embed("berd", text);
+  const embedding = await client.ai.embed("bert", text);
   return embedding;
 }
 
 async function saveEmbedding(perspective, itemId, embedding) {
   const { EMBEDDING_VECTOR_LANGUAGE } = languages;
   const embeddingExpression = await perspective.createExpression(
-    { model: "berd", data: embedding },
+    { model: "bert", data: embedding },
     EMBEDDING_VECTOR_LANGUAGE
   );
   return await perspective.add({
