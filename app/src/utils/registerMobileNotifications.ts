@@ -88,15 +88,13 @@ export async function registerNotification() {
   }
 
   let notifications = await client.runtime.notifications()
-  console.log("all notifications:", notifications)
-  let foundNotifications = notifications.filter(n => {
-    n.appName == APP_NAME && 
-    n.description == DESCRIPTION &&
+  let foundNotifications = notifications.filter(n => 
+    (n.appName == APP_NAME) && 
+    (n.description == DESCRIPTION) &&
     perspectiveIds.every(p => n.perspectiveIds.includes(p)) &&
     n.granted &&
-    n.webhookAuth == webhookAuth
-  })
-  console.log("matching notifications:", foundNotifications)
+    (n.webhookAuth == webhookAuth)
+  )
 
   if(foundNotifications.length > 1) {
     for(let i=1; i < foundNotifications.length; i++) {
