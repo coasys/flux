@@ -104,7 +104,7 @@ export async function registerNotification() {
     }
   }
 
-  if(foundNotifications.length == 0)
+  if(foundNotifications.length == 0) {
     await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth))
   }
 }
