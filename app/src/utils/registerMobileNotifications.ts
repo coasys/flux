@@ -88,6 +88,7 @@ export async function registerNotification() {
   }
 
   let notifications = await client.runtime.notifications()
+  console.log("all notifications:", notifications)
   let foundNotifications = notifications.filter(n => {
     n.appName == APP_NAME && 
     n.description == DESCRIPTION &&
@@ -95,6 +96,7 @@ export async function registerNotification() {
     n.granted &&
     n.webhookAuth == webhookAuth
   })
+  console.log("matching notifications:", foundNotifications)
 
   if(foundNotifications.length > 1) {
     for(let i=1; i < foundNotifications.length; i++) {
@@ -102,5 +104,7 @@ export async function registerNotification() {
     }
   }
 
-  await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth))
+  if(foundNotifications.length == 0)
+    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth))
+  }
 }
