@@ -9,20 +9,46 @@ import {
 import { Ad4mClient } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 
+const APP_NAME = "Flux"
+const DESCRIPTION = "Mobile push notifications for @-mentions"
+function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
+  return {
+    appName: APP_NAME,
+    description: DESCRIPTION,
+    appUrl: window.location.origin,
+    appIconPath: window.location.origin + "/icon.png",
+    trigger: `
+            agent_did(Did),
+            subject_class("Message", C),
+            instance(C, Base),
+            property_getter(C, Base, "body", Body),
+            literal_from_url(Body, JsonString, _),
+            json_property(JsonString, "data", MessageContent),
+            append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
+            string_includes(MessageContent, MentionString),
+            remove_html_tags(MessageContent, Description),
+            Title="You were mentioned".`,
+    perspectiveIds,
+    webhookUrl: "http://push-notifications.ad4m.dev:13000/notification",
+    webhookAuth,
+  }
+}
+
 export async function registerNotification() {
   const client: Ad4mClient = await getAd4mClient();
   const perspctives = await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
 
+  let notifications = await client.runtime.notifications()
+  let foundNotification = notifications.find(n => {
+    n.appName == APP_NAME && 
+    n.description == DESCRIPTION && 
+    n.perspectiveIds == perspectiveIds &&
+    n.granted
+  })
+
   if (Capacitor.isNativePlatform()) {
     console.log("Native platform detected");
-    const isNotificationRegistered = localStorage.getItem(
-      "notificationRegistered"
-    );
-    console.log("Notification registered:", isNotificationRegistered);
-    if (isNotificationRegistered) {
-      return;
-    }
     console.log("Requesting notification permission");
 
     const notificationPromise = new Promise<string>(async (resolve, reject) => {
@@ -52,6 +78,11 @@ export async function registerNotification() {
 
     const result: string = await notificationPromise;
 
+    if(foundNotification && foundNotification.webhookAuth == result) {
+      // our notification is already installed
+      return
+    }
+
     PushNotifications.addListener(
       "pushNotificationReceived",
       (notification: PushNotificationSchema) => {
@@ -66,52 +97,10 @@ export async function registerNotification() {
       }
     );
 
-    await client.runtime.requestInstallNotification({
-      appName: "Flux",
-      description: "Mobile push notifications for @-mentions",
-      appUrl: window.location.origin,
-      appIconPath: window.location.origin + "/icon.png",
-      trigger: `
-              agent_did(Did),
-              subject_class("Message", C),
-              instance(C, Base),
-              property_getter(C, Base, "body", Body),
-              literal_from_url(Body, JsonString, _),
-              json_property(JsonString, "data", MessageContent),
-              append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
-              string_includes(MessageContent, MentionString),
-              remove_html_tags(MessageContent, Description),
-              Title="You were mentioned".`,
-      perspectiveIds: perspectiveIds,
-      webhookUrl: "http://push-notifications.ad4m.dev:13000/notification",
-      webhookAuth: result,
-    });
+    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, result))
   } else {
-    const isNotificationRegistered = localStorage.getItem(
-      "notificationRegistered"
-    );
-    if (isNotificationRegistered !== "true") {
-      localStorage.setItem("notificationRegistered", "true");
-      await client.runtime.requestInstallNotification({
-        appName: "Flux",
-        description: "Messages with mentions",
-        appUrl: window.location.origin,
-        appIconPath: "/icon.png",
-        trigger: `
-                  agent_did(Did),
-                  subject_class("Message", C),
-                  instance(C, Base),
-                  property_getter(C, Base, "body", Body),
-                  literal_from_url(Body, JsonString, _),
-                  json_property(JsonString, "data", MessageContent),
-                  append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
-                  string_includes(MessageContent, MentionString),
-                  remove_html_tags(MessageContent, Description),
-                  Title="You were mentioned".`,
-        perspectiveIds: perspectiveIds,
-        webhookUrl: "http://140.82.10.81:13000/notification",
-        webhookAuth: "",
-      });
+    if (!foundNotification) {
+      await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, ""));
     }
   }
 }
