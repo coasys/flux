@@ -68,9 +68,9 @@ export async function registerNotification() {
 
     await client.runtime.requestInstallNotification({
       appName: "Flux",
-      description: "Messages with mentions",
+      description: "Mobile push notifications for @-mentions",
       appUrl: window.location.origin,
-      appIconPath: "/icon.png",
+      appIconPath: window.location.origin + "/icon.png",
       trigger: `
               agent_did(Did),
               subject_class("Message", C),
@@ -83,7 +83,7 @@ export async function registerNotification() {
               remove_html_tags(MessageContent, Description),
               Title="You were mentioned".`,
       perspectiveIds: perspectiveIds,
-      webhookUrl: "http://140.82.10.81:13000/notification",
+      webhookUrl: "http://push-notifications.ad4m.dev:13000/notification",
       webhookAuth: result,
     });
   } else {
