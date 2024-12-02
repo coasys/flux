@@ -39,13 +39,7 @@ export async function registerNotification() {
   const perspctives = await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
 
-  let notifications = await client.runtime.notifications()
-  let foundNotification = notifications.find(n => {
-    n.appName == APP_NAME && 
-    n.description == DESCRIPTION && 
-    n.perspectiveIds == perspectiveIds &&
-    n.granted
-  })
+  let webhookAuth = ""
 
   if (Capacitor.isNativePlatform()) {
     console.log("Native platform detected");
@@ -76,12 +70,7 @@ export async function registerNotification() {
       });
     });
 
-    const result: string = await notificationPromise;
-
-    if(foundNotification && foundNotification.webhookAuth == result) {
-      // our notification is already installed
-      return
-    }
+    webhookAuth = await notificationPromise;
 
     PushNotifications.addListener(
       "pushNotificationReceived",
@@ -96,11 +85,22 @@ export async function registerNotification() {
         console.log("Push action performed: " + JSON.stringify(notification));
       }
     );
+  }
 
-    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, result))
-  } else {
-    if (!foundNotification) {
-      await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, ""));
+  let notifications = await client.runtime.notifications()
+  let foundNotifications = notifications.filter(n => {
+    n.appName == APP_NAME && 
+    n.description == DESCRIPTION &&
+    perspectiveIds.every(p => n.perspectiveIds.includes(p)) &&
+    n.granted &&
+    n.webhookAuth == webhookAuth
+  })
+
+  if(foundNotifications.length > 1) {
+    for(let i=1; i < foundNotifications.length; i++) {
+      await client.runtime.removeNotification(foundNotifications[i].id)
     }
   }
+
+  await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth))
 }
