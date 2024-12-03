@@ -97,7 +97,7 @@ export default function TimelineBlock({
                 <h1>{data[`${groupType}Name`]}</h1>
               </j-flex>
               <button className={styles.caret} onClick={() => setShowChildren(!showChildren)}>
-                {showChildren ? <ChevronUpSVG /> : <ChevronDownSVG />}
+                {showChildren ? <ChevronDownSVG /> : <ChevronUpSVG />}
                 {children.length}
               </button>
             </j-flex>
