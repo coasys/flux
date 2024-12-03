@@ -16,9 +16,6 @@ type Props = {
 };
 
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
-  const [openAIKey, setOpenAIKey] = useState(
-    localStorage?.getItem("openAIKey") || ""
-  );
   const [matches, setMatches] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<any>({});
@@ -215,18 +212,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       <j-text uppercase size="500" weight="800" color="primary-500">
         Synergy Demo
       </j-text>
-      <j-box mb="400">
-        <j-input
-          label="OpenAI Key"
-          value={openAIKey}
-          placeholder="Required to process content..."
-          onInput={(event) => {
-            const value = (event.target as HTMLInputElement).value;
-            setOpenAIKey(value);
-            localStorage?.setItem("openAIKey", value);
-          }}
-        />
-      </j-box>
       <j-flex gap="400" wrap style={{ width: "100%" }}>
         All topics:
         {allTopics.map((t) => (
