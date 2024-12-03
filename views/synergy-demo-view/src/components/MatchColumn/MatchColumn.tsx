@@ -1,4 +1,4 @@
-import { groupingOptions, itemTypeOptions } from "../../utils";
+import { closeMenu, groupingOptions, itemTypeOptions } from "../../utils";
 import Match from "../Match";
 import styles from "./MatchColumn.module.scss";
 
@@ -26,27 +26,31 @@ export default function MatchColumn({
     <div className={styles.wrapper}>
       <j-flex direction="column" gap="400" className={styles.header}>
         <j-flex a="center" gap="400" wrap>
-          <div style={{ height: 42, zIndex: 15 }}>
-            <j-menu>
-              <j-menu-group collapsible title={grouping}>
-                {groupingOptions.map((option) => (
-                  <j-menu-item
-                    selected={grouping === option}
-                    onClick={() => setFilterSettings({ ...filterSettings, grouping: option })}
-                  >
-                    {option}
-                  </j-menu-item>
-                ))}
-              </j-menu-group>
-            </j-menu>
-          </div>
+          <j-menu style={{ height: 42, zIndex: 3 }}>
+            <j-menu-group collapsible title={grouping} id="grouping-menu">
+              {groupingOptions.map((option) => (
+                <j-menu-item
+                  selected={grouping === option}
+                  onClick={() => {
+                    setFilterSettings({ ...filterSettings, grouping: option });
+                    closeMenu("grouping-menu");
+                  }}
+                >
+                  {option}
+                </j-menu-item>
+              ))}
+            </j-menu-group>
+          </j-menu>
           {grouping === "Items" && (
-            <j-menu>
-              <j-menu-group collapsible title={itemType}>
+            <j-menu style={{ height: 42, zIndex: 3 }}>
+              <j-menu-group collapsible title={itemType} id="item-type-menu">
                 {itemTypeOptions.map((option) => (
                   <j-menu-item
                     selected={itemType === option}
-                    onClick={() => setFilterSettings({ ...filterSettings, itemType: option })}
+                    onClick={() => {
+                      setFilterSettings({ ...filterSettings, itemType: option });
+                      closeMenu("item-type-menu");
+                    }}
                   >
                     {option}
                   </j-menu-item>

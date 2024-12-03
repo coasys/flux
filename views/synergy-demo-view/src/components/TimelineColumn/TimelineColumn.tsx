@@ -2,7 +2,7 @@ import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message, Post } from "@coasys/flux-api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
-import { getConvoData, groupingOptions } from "../../utils";
+import { closeMenu, getConvoData, groupingOptions } from "../../utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 
@@ -56,17 +56,21 @@ export default function TimelineColumn({
     <div className={styles.wrapper}>
       <j-flex a="center" gap="400" className={styles.header}>
         <j-text nomargin>Zoom</j-text>
-        <div style={{ height: 42 }}>
-          <j-menu>
-            <j-menu-group collapsible title={zoom}>
-              {groupingOptions.map((option) => (
-                <j-menu-item selected={zoom === option} onClick={() => setZoom(option)}>
-                  {option}
-                </j-menu-item>
-              ))}
-            </j-menu-group>
-          </j-menu>
-        </div>
+        <j-menu style={{ height: 42, zIndex: 3 }}>
+          <j-menu-group collapsible title={zoom} id="zoom-menu">
+            {groupingOptions.map((option) => (
+              <j-menu-item
+                selected={zoom === option}
+                onClick={() => {
+                  setZoom(option);
+                  closeMenu("zoom-menu");
+                }}
+              >
+                {option}
+              </j-menu-item>
+            ))}
+          </j-menu-group>
+        </j-menu>
       </j-flex>
       <div className={styles.timeline}>
         <div className={styles.fades}>

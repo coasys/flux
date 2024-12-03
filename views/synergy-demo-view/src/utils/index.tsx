@@ -6,6 +6,12 @@ export const groupingOptions = ["Conversations", "Subgroups", "Items"];
 export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
 
 // helper functions
+export function closeMenu(menuId: string) {
+  const menu = document.getElementById(menuId);
+  const items = menu?.shadowRoot?.querySelector("details");
+  if (items) items.open = false;
+}
+
 export async function getConvoData(perspective, channelId, match?, setMatchIndex?) {
   const conversationRepo = await new SubjectRepository(Conversation, {
     perspective,
