@@ -99,7 +99,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         );
         if (match) {
           fullText = match.text;
-          match.state = "saving";
+          match.state = "processing";
         }
         return newTranscripts;
       });
@@ -243,11 +243,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                       </j-text>
                     </j-flex>
                   )}
-                  {transcript.state === "saving" && (
+                  {transcript.state === "processing" && (
                     <j-flex gap="400" a="center">
                       <j-spinner size="xs" />
                       <j-text nomargin size="600" color="primary-600">
-                        Saving message...
+                        Processing...
                       </j-text>
                     </j-flex>
                   )}
