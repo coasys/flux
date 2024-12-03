@@ -10,7 +10,6 @@ import {
   Topic,
 } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
-import OpenAI from "openai";
 
 async function removeEmbedding(perspective, itemId) {
   const embeddingLink = await perspective.get(
@@ -79,16 +78,11 @@ async function getConversationData(perspective, conversationRepo) {
     latestSubgroups = (await subgroupRepo.getAllData()) as any;
     if (latestSubgroups.length) {
       const latestSubgroup = latestSubgroups[latestSubgroups.length - 1] as any;
-      const subgroupItems = await getSubgroupItems(
-        perspective,
-        latestSubgroup.id
-      );
+      const subgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
       // calculate time since last item was created
-      const lastItemTimestamp =
-        subgroupItems[subgroupItems.length - 1].timestamp;
+      const lastItemTimestamp = subgroupItems[subgroupItems.length - 1].timestamp;
       const minsSinceLastItemCreated =
-        (new Date().getTime() - new Date(lastItemTimestamp).getTime()) /
-        (1000 * 60);
+        (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
       if (minsSinceLastItemCreated < 30) {
         // if less than 30 mins, consider the new item part of the latest conversation
         conversation = latestConversation;
@@ -137,13 +131,7 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   });
 }
 
-async function LLMProcessing(
-  newItem,
-  latestSubgroups,
-  latestSubgroupItems,
-  allTopics,
-  openAIKey?
-) {
+async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allTopics, openAIKey?) {
   console.log(
     "LLMProcessing: ",
     newItem,
@@ -152,106 +140,67 @@ async function LLMProcessing(
     allTopics,
     openAIKey
   );
-  if (openAIKey) {
-    const prompt = `
-      I'm passing you a JSON object with the following properties: 'lastGroupings' (string block broken up into sections by line breaks <br/>), 'lastMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
-      { lastGroupings: [${latestSubgroups.map((s) => s.summary).join(" <br/> ")}], lastMessages: [${latestSubgroupItems.map((si) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t) => t.name).join(", ")}] }
+
+  const prompt = `
+      I'm passing you a JSON object with the following properties: 'previousSubgroups' (string block broken up into sections by line breaks <br/>), 'previousMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
+      { previousSubgroups: [], previousMessages: [], newMessage: 'Some text', existingTopics: [] }
       Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
-      Secondly, compare the 'newMessage' with the content of 'lastMessages'. Consider the conversation as **related** if:
-      - The 'newMessage' discusses, contrasts, or expands upon topics present in 'lastMessages'.
-      - The 'newMessage' introduces new angles, comparisons, or opinions on the same topics discussed in 'lastMessages' (even if specific terms or phrases differ).
+      Secondly, compare the 'newMessage' with the content of 'previousMessages'. Consider the conversation as **related** if:
+      - The 'newMessage' discusses, contrasts, or expands upon topics present in 'previousMessages'.
+      - The 'newMessage' introduces new angles, comparisons, or opinions on the same topics discussed in 'previousMessages' (even if specific terms or phrases differ).
       Only consider the conversation as having **shifted to a new subject** if:
-      - The 'newMessage' introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in 'lastMessages'.
-      - The 'newMessage' does not logically connect or refer back to the themes in the 'lastMessages'.
-      If there are no items in the 'lastMessages' array, the conversation has by default shifted.
+      - The 'newMessage' introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in 'previousMessages'.
+      - The 'newMessage' does not logically connect or refer back to the themes in the 'previousMessages'.
+      If there are no items in the 'previousMessages' array, the conversation has by default shifted.
       After this analysis, return a new object with the following properties and nothing else:
       1. **'topics'**: an array of objects for each of the topics you have identified for the 'newMessage'. Each object should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
-      2. **'changedSubject'**: a boolean value that indicates whether the conversation has shifted to a new subject or not. The conversation should be considered as shifted only if there is no significant overlap between the topics in the 'newMessage' and the topics in the 'lastMessages'.
+      2. **'changedSubject'**: a boolean value that indicates whether the conversation has shifted to a new subject or not. The conversation should be considered as shifted only if there is no significant overlap between the topics in the 'newMessage' and the topics in the 'previousMessages'.
       3. **'newSubgroupName'**: a 1 to 3 word title (string) for the conversation describing its contents. If changedSubject is true, base the title solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
       4. **'newSubgroupSummary'**: a 1 to 3 sentence paragraph (string) summary of the conents of the conversation. If changedSubject is true, base the summary solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
-      5. **'newConversationName'**: a 1 to 3 word title (string) describing the contents of the lastGroupings plus the newSubgroupSummary. Don't reference previous conversations.
-      6. **'newConversationSummary'**: a 1 to 3 sentence paragraph (string) summary of the the lastGroupings plus the newSubgroupSummary. Don't reference previous conversations.
+      5. **'newConversationName'**: a 1 to 3 word title (string) describing the contents of the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
+      6. **'newConversationSummary'**: a 1 to 3 sentence paragraph (string) summary of the the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
       Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax.
     `;
-    const openai = new OpenAI({
-      apiKey: openAIKey, // localStorage?.getItem("openAIKey") || "",
-      dangerouslyAllowBrowser: true,
-    });
-    const result = await openai.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-4o",
-    });
-    console.log("Open AI response: ", result);
-    const data = JSON.parse(result.choices[0].message.content || "");
-    console.log("Parsed Open AI response: ", data);
-    return data;
-  } else {
-    const prompt = `
-  I'm passing you a JSON object with the following properties: 'previousSubgroups' (string block broken up into sections by line breaks <br/>), 'previousMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
-  { previousSubgroups: [], previousMessages: [], newMessage: 'Some text', existingTopics: [] }
-  Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
-  Secondly, compare the 'newMessage' with the content of 'previousMessages'. Consider the conversation as **related** if:
-  - The 'newMessage' discusses, contrasts, or expands upon topics present in 'previousMessages'.
-  - The 'newMessage' introduces new angles, comparisons, or opinions on the same topics discussed in 'previousMessages' (even if specific terms or phrases differ).
-  Only consider the conversation as having **shifted to a new subject** if:
-  - The 'newMessage' introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in 'previousMessages'.
-  - The 'newMessage' does not logically connect or refer back to the themes in the 'previousMessages'.
-  If there are no items in the 'previousMessages' array, the conversation has by default shifted.
-  After this analysis, return a new object with the following properties and nothing else:
-  1. **'topics'**: an array of objects for each of the topics you have identified for the 'newMessage'. Each object should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
-  2. **'changedSubject'**: a boolean value that indicates whether the conversation has shifted to a new subject or not. The conversation should be considered as shifted only if there is no significant overlap between the topics in the 'newMessage' and the topics in the 'previousMessages'.
-  3. **'newSubgroupName'**: a 1 to 3 word title (string) for the conversation describing its contents. If changedSubject is true, base the title solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
-  4. **'newSubgroupSummary'**: a 1 to 3 sentence paragraph (string) summary of the conents of the conversation. If changedSubject is true, base the summary solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
-  5. **'newConversationName'**: a 1 to 3 word title (string) describing the contents of the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
-  6. **'newConversationSummary'**: a 1 to 3 sentence paragraph (string) summary of the the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
-  Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax.
-`;
-    const examples = [
-      {
-        input: `{ previousSubgroups: [], previousMessages: [], newMessage: 'hello world', existingTopics: [greeting] }`,
-        output: `{"topics":[{"name":"greeting","relevance":100}],"changedSubject":true,"newSubgroupName":"Hello World","newSubgroupSummary":"The conversation starts with a simple greeting: 'hello world'.","newConversationName":"Hello World","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'."}`,
-      },
-      {
-        input: `{ previousSubgroups: [The conversation starts with a simple greeting: 'hello world'.], previousMessages: [<p>hello world</p><p></p>], newMessage: 'another hello 2', existingTopics: [greeting] }`,
-        output: `{"topics":[{"name":"hello","relevance":80},{"name":"greeting","relevance":70}],"changedSubject":false,"newSubgroupName":"More Greetings","newSubgroupSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries.","newConversationName":"Simple Greetings","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'. Following this, another greeting is exchanged, indicating the continuation of pleasantries."}`,
-      },
-      {
-        input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries.], previousMessages: [<p>hello world</p><p></p>, <p>another hello 2</p><p></p>], newMessage: 'game talk here', existingTopics: [greeting, hello] }`,
-        output: `{"topics":[{"name":"game","relevance":100},{"name":"talk","relevance":80}],"changedSubject":true,"newSubgroupName":"Game Talk","newSubgroupSummary":"The conversation introduces a new topic with a focus on discussing games.","newConversationName":"Exchange of Pleasantries and Game Talk","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation then introduces a new topic with a focus on discussing games."}`,
-      },
-      {
-        input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], previousMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
-        output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`,
-      },
-    ];
-    const client: Ad4mClient = await getAd4mClient();
-    const tasks = await client.ai.tasks();
-    let task = tasks.find((t) => t.name === "flux-synergy-task");
-    if (!task) {
-      task = await client.ai.addTask(
-        "flux-synergy-task",
-        "default",
-        prompt,
-        examples
-      );
-    }
-
-    const response = await client.ai.prompt(
-      task.taskId,
-      `{ previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}], previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}] }`
-    );
-    console.log("AI Response: ", response);
-    const data = JSON.parse(response);
-    console.log("parsed AI response: ", data);
-    if (!data.newConversationName) data.newConversationName = "";
-    if (!data.newConversationSummary) data.newConversationSummary = "";
-    if (!data.newSubgroupName) data.newSubgroupName = "";
-    if (!data.newSubgroupSummary) data.newSubgroupSummary = "";
-    if (!data.topics) data.topics = [];
-    if (!data.changedSubject) data.changedSubject = false;
-    console.log("checked data: ", data);
-    return data;
+  const examples = [
+    {
+      input: `{ previousSubgroups: [], previousMessages: [], newMessage: 'hello world', existingTopics: [greeting] }`,
+      output: `{"topics":[{"name":"greeting","relevance":100}],"changedSubject":true,"newSubgroupName":"Hello World","newSubgroupSummary":"The conversation starts with a simple greeting: 'hello world'.","newConversationName":"Hello World","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'."}`,
+    },
+    {
+      input: `{ previousSubgroups: [The conversation starts with a simple greeting: 'hello world'.], previousMessages: [<p>hello world</p><p></p>], newMessage: 'another hello 2', existingTopics: [greeting] }`,
+      output: `{"topics":[{"name":"hello","relevance":80},{"name":"greeting","relevance":70}],"changedSubject":false,"newSubgroupName":"More Greetings","newSubgroupSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries.","newConversationName":"Simple Greetings","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'. Following this, another greeting is exchanged, indicating the continuation of pleasantries."}`,
+    },
+    {
+      input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries.], previousMessages: [<p>hello world</p><p></p>, <p>another hello 2</p><p></p>], newMessage: 'game talk here', existingTopics: [greeting, hello] }`,
+      output: `{"topics":[{"name":"game","relevance":100},{"name":"talk","relevance":80}],"changedSubject":true,"newSubgroupName":"Game Talk","newSubgroupSummary":"The conversation introduces a new topic with a focus on discussing games.","newConversationName":"Exchange of Pleasantries and Game Talk","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation then introduces a new topic with a focus on discussing games."}`,
+    },
+    {
+      input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], previousMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
+      output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`,
+    },
+  ];
+  const client: Ad4mClient = await getAd4mClient();
+  const tasks = await client.ai.tasks();
+  let task = tasks.find((t) => t.name === "flux-synergy-task");
+  if (!task) {
+    task = await client.ai.addTask("flux-synergy-task", "default", prompt, examples);
   }
+
+  const response = await client.ai.prompt(
+    task.taskId,
+    `{ previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}], previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}], newMessage: '${newItem.text}', existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}] }`
+  );
+  console.log("AI Response: ", response);
+  const data = JSON.parse(response);
+  console.log("parsed AI response: ", data);
+  if (!data.newConversationName) data.newConversationName = "";
+  if (!data.newConversationSummary) data.newConversationSummary = "";
+  if (!data.newSubgroupName) data.newSubgroupName = "";
+  if (!data.newSubgroupSummary) data.newSubgroupSummary = "";
+  if (!data.topics) data.topics = [];
+  if (!data.changedSubject) data.changedSubject = false;
+  console.log("checked data: ", data);
+  return data;
 
   // // tag generation
   // const tagPrompt = `
@@ -550,8 +499,10 @@ export async function processItem(perspective, channelId, item) {
       perspective,
       source: channelId,
     });
-    const { conversations, latestSubgroups, latestSubgroupItems } =
-      await getConversationData(perspective, conversationRepo);
+    const { conversations, latestSubgroups, latestSubgroupItems } = await getConversationData(
+      perspective,
+      conversationRepo
+    );
     const conversation = conversations[conversations.length - 1];
     const allTopics = await getAllTopics(perspective);
     // generate new processed data with OpenAI
@@ -562,12 +513,7 @@ export async function processItem(perspective, channelId, item) {
       newSubgroupSummary,
       newConversationName,
       newConversationSummary,
-    } = await LLMProcessing(
-      item,
-      latestSubgroups,
-      latestSubgroupItems,
-      allTopics
-    );
+    } = await LLMProcessing(item, latestSubgroups, latestSubgroupItems, allTopics);
     // update conversation summary and title
     await conversationRepo.update(conversation.id, {
       conversationName: newConversationName,
@@ -613,48 +559,22 @@ export async function processItem(perspective, channelId, item) {
         (topic) =>
           new Promise(async (resolve: any) => {
             // find existing topic or create new one
-            const topicId = await findOrCreateTopic(
-              perspective,
-              allTopics,
-              topic.name
-            );
+            const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
             // link topic to new item
             await linkTopic(perspective, item.id, topicId, topic.relevance);
             // find conversation topics
-            const conversationRelationships = await findRelationships(
-              perspective,
-              conversation.id
-            );
-            const conversationTopics = await findTopics(
-              perspective,
-              conversationRelationships
-            );
+            const conversationRelationships = await findRelationships(perspective, conversation.id);
+            const conversationTopics = await findTopics(perspective, conversationRelationships);
             if (!conversationTopics.find((t) => t.name === topic.name)) {
               // link topic to conversation if not already linked
-              await linkTopic(
-                perspective,
-                conversation.id,
-                topicId,
-                topic.relevance
-              );
+              await linkTopic(perspective, conversation.id, topicId, topic.relevance);
             }
             // find subgroup topics
-            const subgroupRelationships = await findRelationships(
-              perspective,
-              subgroup.id
-            );
-            const subgroupTopics = await findTopics(
-              perspective,
-              subgroupRelationships
-            );
+            const subgroupRelationships = await findRelationships(perspective, subgroup.id);
+            const subgroupTopics = await findTopics(perspective, subgroupRelationships);
             if (!subgroupTopics.find((t) => t.name === topic.name)) {
               // link topic to subgroup if not already linked
-              await linkTopic(
-                perspective,
-                subgroup.id,
-                topicId,
-                topic.relevance
-              );
+              await linkTopic(perspective, subgroup.id, topicId, topic.relevance);
             }
             resolve();
           })
@@ -669,9 +589,7 @@ export async function processItem(perspective, channelId, item) {
     await saveEmbedding(perspective, subgroup.id, subgroupEmbedding);
     // generate & save updated embedding for conversation
     await removeEmbedding(perspective, conversation.id);
-    const conversationEmbedding = await generateEmbedding(
-      newConversationSummary
-    );
+    const conversationEmbedding = await generateEmbedding(newConversationSummary);
     await saveEmbedding(perspective, conversation.id, conversationEmbedding);
     resolve();
   });
