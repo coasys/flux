@@ -11,6 +11,8 @@ type Props = {
   perspective: any;
   channelId: string;
   selectedTopicId: string;
+  processingItems: string[];
+  setProcessingItems: (items: any) => void;
   search: (type: "topic" | "vector", id: string) => void;
 };
 
@@ -19,6 +21,8 @@ export default function TimelineColumn({
   perspective,
   channelId,
   selectedTopicId,
+  processingItems,
+  setProcessingItems,
   search,
 }: Props) {
   const [data, setData] = useState<any[]>([]);
@@ -45,7 +49,21 @@ export default function TimelineColumn({
     if (channelId) {
       getConvoData(perspective, channelId).then((conversationData) => {
         setData((prevItems) => {
-          if (!isEqual(prevItems, conversationData)) return conversationData;
+          if (!isEqual(prevItems, conversationData)) {
+            // remove completed items from the processing list
+            setProcessingItems((prevItems) => {
+              const itemsToRemove = [];
+              conversationData.forEach((convo) => {
+                convo.children?.forEach((group) => {
+                  group.children?.forEach((item) => {
+                    if (prevItems.includes(item.text)) itemsToRemove.push(item.text);
+                  });
+                });
+              });
+              return prevItems.filter((pi) => !itemsToRemove.includes(pi));
+            });
+            return conversationData;
+          }
           return prevItems;
         });
       });
@@ -92,6 +110,17 @@ export default function TimelineColumn({
               search={search}
             />
           ))}
+          {processingItems.length > 0 && (
+            <div style={{ marginLeft: 70 }}>
+              <j-flex a="center" gap="400">
+                <j-text size="600" nomargin>
+                  Processing {processingItems.length > 1 ? processingItems.length + " " : ""}item
+                  {processingItems.length > 1 ? "s" : ""}...
+                </j-text>
+                <j-spinner size="sm" />
+              </j-flex>
+            </div>
+          )}
         </div>
       </div>
     </div>

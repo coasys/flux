@@ -22,6 +22,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   const [searchItem, setSearchItem] = useState<any>({});
   const [searching, setSearching] = useState(false);
   const [searchType, setSearchType] = useState("");
+  const [processingItems, setProcessingItems] = useState<string[]>([]);
   const [filterSettings, setFilterSettings] = useState({
     grouping: "Conversations",
     itemType: "All Types",
@@ -224,6 +225,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           perspective={perspective}
           channelId={source}
           selectedTopicId={selectedTopic.id}
+          processingItems={processingItems}
+          setProcessingItems={setProcessingItems}
           search={search}
         />
         <div style={{ width: "33%" }}>
@@ -232,7 +235,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             source={source}
             agent={agent}
             currentView="@coasys/flux-synergy-demo-view"
-            setModalOpen={() => null}
+            setProcessingItems={setProcessingItems}
           />
         </div>
         <MatchColumn

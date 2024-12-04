@@ -25,7 +25,8 @@ type Props = {
   perspective: PerspectiveProxy;
   agent: AgentClient;
   currentView: string;
-  setModalOpen: (state: boolean) => void;
+  setModalOpen?: (state: boolean) => void;
+  setProcessingItems?: (items) => void;
 };
 
 export default function Channel({
@@ -34,6 +35,7 @@ export default function Channel({
   agent: agentClient,
   currentView,
   setModalOpen,
+  setProcessingItems,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
@@ -89,14 +91,15 @@ export default function Channel({
     >
       {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
         currentView
-      ) && (
-        <button
-          className={styles.closeButton}
-          onClick={() => setModalOpen(false)}
-        >
-          <j-icon name="x" color="color-white" />
-        </button>
-      )}
+      ) &&
+        setModalOpen && (
+          <button
+            className={styles.closeButton}
+            onClick={() => setModalOpen(false)}
+          >
+            <j-icon name="x" color="color-white" />
+          </button>
+        )}
       {!webRTC.hasJoined && (
         <JoinScreen
           webRTC={webRTC}
@@ -123,6 +126,7 @@ export default function Channel({
               webRTC={webRTC}
               source={source}
               perspective={perspective}
+              setProcessingItems={setProcessingItems}
             />
           )}
         </>

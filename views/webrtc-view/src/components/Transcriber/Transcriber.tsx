@@ -16,9 +16,15 @@ type Props = {
   source: string;
   perspective: any;
   webRTC: WebRTC;
+  setProcessingItems?: (itemIds) => void;
 };
 
-export default function Transcriber({ source, perspective, webRTC }: Props) {
+export default function Transcriber({
+  source,
+  perspective,
+  webRTC,
+  setProcessingItems,
+}: Props) {
   const { audio, transcriber } = webRTC.localState.settings;
   const { selectedModel, previewTimeout, messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -99,13 +105,26 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         );
         if (match) {
           fullText = match.text;
-          match.state = "processing";
+          if (setProcessingItems)
+            setProcessingItems((items) => [...items, `<p>${fullText}</p>`]);
+          match.state = "saved";
         }
         return newTranscripts;
       });
       // store id for outro transitions
       const previousId = currentTranscript.current;
       currentTranscript.current = null;
+      // trigger outro transitions
+      const transcriptCard = document.getElementById(
+        `transcript-${previousId}`
+      );
+      transcriptCard.classList.add(styles.slideLeft);
+      setTimeout(() => {
+        transcriptCard.classList.add(styles.hide);
+        setTimeout(() => {
+          setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+        }, 500);
+      }, 500);
       // save message
       // @ts-ignore
       const message = (await messageRepo.create({
@@ -114,28 +133,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       processItem(perspective, source, {
         id: message.id,
         text: fullText,
-      })
-        .then(() => {
-          // mark transcript as saved
-          setTranscripts((ts) => {
-            const newTranscripts = [...ts];
-            const match = newTranscripts.find((t) => t.id === previousId);
-            if (match) match.state = "saved";
-            return newTranscripts;
-          });
-          // trigger outro transitions
-          const transcriptCard = document.getElementById(
-            `transcript-${previousId}`
-          );
-          transcriptCard.classList.add(styles.slideLeft);
-          setTimeout(() => {
-            transcriptCard.classList.add(styles.hide);
-            setTimeout(() => {
-              setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
-            }, 500);
-          }, 500);
-        })
-        .catch(console.log);
+      });
     }, messageTimeout * 1000);
   }
 
@@ -240,14 +238,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                         Transcribing...
                         {/* (saving message in {countDown}{" "}
                         seconds...) */}
-                      </j-text>
-                    </j-flex>
-                  )}
-                  {transcript.state === "processing" && (
-                    <j-flex gap="400" a="center">
-                      <j-spinner size="xs" />
-                      <j-text nomargin size="600" color="primary-600">
-                        Processing...
                       </j-text>
                     </j-flex>
                   )}
