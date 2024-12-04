@@ -97,7 +97,13 @@ export default function TimelineBlock({
                 <h1>{data[`${groupType}Name`]}</h1>
               </j-flex>
               {children.length > 0 && (
-                <button className={styles.caret} onClick={() => setShowChildren(!showChildren)}>
+                <button
+                  className={styles.caret}
+                  onClick={() => {
+                    if (selectedItemId !== id) setSelectedItemId(null);
+                    setShowChildren(!showChildren);
+                  }}
+                >
                   {showChildren ? <ChevronDownSVG /> : <ChevronUpSVG />}
                   {children.length}
                 </button>
