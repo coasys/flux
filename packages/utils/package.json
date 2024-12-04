@@ -16,6 +16,7 @@
   "dependencies": {
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
+    "json5": "^2.2.3",
     "openai": "^4.55.5"
   },
   "peerDependencies": {
