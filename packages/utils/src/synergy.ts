@@ -10,7 +10,7 @@ import {
   Topic,
 } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
-import { parse } from "json5";
+import * as JSON5 from "json5";
 
 async function removeEmbedding(perspective, itemId) {
   const embeddingLink = await perspective.get(
@@ -208,7 +208,7 @@ async function LLMProcessing(
 
   let parsedData;
   try {
-    parsedData = parse(response);
+    parsedData = JSON5.parse(response);
   } catch (error) {
     console.error("Failed to parse LLM response:", error);
     if (!attemptKey || attemptKey < 5) {
