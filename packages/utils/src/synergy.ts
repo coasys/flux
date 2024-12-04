@@ -10,7 +10,8 @@ import {
   Topic,
 } from "@coasys/flux-api";
 import { languages } from "@coasys/flux-constants";
-import * as JSON5 from "json5";
+//@ts-ignore
+import JSON5 from "json5";
 
 async function removeEmbedding(perspective, itemId) {
   const embeddingLink = await perspective.get(
