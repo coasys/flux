@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubjects } from "@coasys/ad4m-vue-hooks";
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
 
 import Todo from "../subjects/Todo";
 
@@ -65,6 +65,10 @@ type Props = {
 const { perspective, source } = defineProps<Props>();
 
 const title = ref("")
+
+onMounted(async () => {
+  await perspective.ensureSDNASubjectClass(Todo);
+});
 
 const { entries: todos, repo } = useSubjects({
   perspective,
