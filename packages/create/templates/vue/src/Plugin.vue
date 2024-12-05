@@ -21,7 +21,7 @@ type Props = Partial<{
   source: string;
 }>
 
-const { perspective, agent } = defineProps<Props>();
+const { perspective, agent, source } = defineProps<Props>();
 
 const hasPerspective = computed(
   () => perspective?.uuid != null && agent != null
