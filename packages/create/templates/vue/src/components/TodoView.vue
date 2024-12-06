@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubjects } from "@coasys/ad4m-vue-hooks";
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 import Todo from "../subjects/Todo";
 
@@ -71,8 +71,8 @@ onMounted(async () => {
 });
 
 const { entries: todos, repo } = useSubjects({
-  perspective,
-  source,
+  perspective: computed(() => perspective),
+  source: computed(() => source),
   subject: Todo,
 });
 
