@@ -28,6 +28,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     itemType: "All Types",
     includeChannel: false,
   });
+  const [showMatchColumn, setShowMatchColumn] = useState(false);
   const worker = useRef<Worker | null>(null);
 
   async function findEmbedding(itemId) {
@@ -44,8 +45,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   function entryTypeToSubjectClass(entryType: string) {
     if (entryType === "flux://conversation") return "Conversation";
-    else if (entryType === "flux://conversation_subgroup")
-      return "ConversationSubgroup";
+    else if (entryType === "flux://conversation_subgroup") return "ConversationSubgroup";
     else if (entryType === "flux://has_message") return "Message";
     else if (entryType === "flux://has_post") return "Post";
     else return "Unknown";
@@ -86,15 +86,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const channel = await findChannel(link.data.source, channels);
           const type = await findEntryType(link.data.source);
           // if it doesn't match the search filters return null
-          const wrongChannel =
-            !filterSettings.includeChannel && channel.id === source;
+          const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
           // otherwise grab the required data linked to the item
           const expression = await perspective.getExpression(link.data.target);
-          const embedding = Float32Array.from(
-            Object.values(JSON.parse(expression.data).data)
-          );
+          const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
           return { id: link.data.source, channel, type, embedding };
         })
       );
@@ -119,9 +116,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
       // grab all topic links
-      const topicLinks = await perspective.get(
-        new LinkQuery({ predicate: "flux://has_tag" })
-      );
+      const topicLinks = await perspective.get(new LinkQuery({ predicate: "flux://has_tag" }));
       const results = await Promise.all(
         topicLinks.map(async (t) => {
           const { data } = await perspective.getExpression(t.data.target);
@@ -136,8 +131,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const channel = await findChannel(expressionId, channels);
           const type = await findEntryType(expressionId);
           // if it doesn't match the search filters return null
-          const wrongChannel =
-            !filterSettings.includeChannel && channel.id === source;
+          const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
           return {
@@ -156,11 +150,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     const allowedTypes = [];
     const { grouping, itemType } = filterSettings;
     if (grouping === "Conversations") allowedTypes.push("Conversation");
-    else if (grouping === "Subgroups")
-      allowedTypes.push("ConversationSubgroup");
+    else if (grouping === "Subgroups") allowedTypes.push("ConversationSubgroup");
     else if (grouping === "Items") {
-      if (itemType === "All Types")
-        allowedTypes.push("Message", "Post", "Task");
+      if (itemType === "All Types") allowedTypes.push("Message", "Post", "Task");
       else if (itemType === "Messages") allowedTypes.push("Message");
       else if (itemType === "Posts") allowedTypes.push("Post");
       else if (itemType === "Tasks") allowedTypes.push("Task");
@@ -171,6 +163,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   async function search(type: string, item: any) {
     setSearching(true);
     setMatches([]);
+    setShowMatchColumn(true);
     setSearchType(type);
     setSearchItem(item);
     setSelectedTopic(type === "topic" ? item : {});
@@ -220,16 +213,22 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         ))}
       </j-flex>
       <j-flex className={styles.content}>
-        <TimelineColumn
-          agent={agent}
-          perspective={perspective}
-          channelId={source}
-          selectedTopicId={selectedTopic.id}
-          processingItems={processingItems}
-          setProcessingItems={setProcessingItems}
-          search={search}
-        />
-        <div style={{ width: "33%" }}>
+        <div
+          style={{ width: showMatchColumn ? "33%" : "50%", transition: "width 0.5s ease-in-out" }}
+        >
+          <TimelineColumn
+            agent={agent}
+            perspective={perspective}
+            channelId={source}
+            selectedTopicId={selectedTopic.id}
+            processingItems={processingItems}
+            setProcessingItems={setProcessingItems}
+            search={search}
+          />
+        </div>
+        <div
+          style={{ width: showMatchColumn ? "33%" : "50%", transition: "width 0.5s ease-in-out" }}
+        >
           <WebRTCView
             perspective={perspective}
             source={source}
@@ -238,15 +237,25 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             setProcessingItems={setProcessingItems}
           />
         </div>
-        <MatchColumn
-          perspective={perspective}
-          agent={agent}
-          matches={matches}
-          selectedTopicId={selectedTopic.id}
-          filterSettings={filterSettings}
-          setFilterSettings={setFilterSettings}
-          matchText={matchText}
-        />
+        <div
+          style={{
+            width: showMatchColumn ? "33%" : "0%",
+            opacity: showMatchColumn ? "1" : "0",
+            pointerEvents: showMatchColumn ? "all" : "none",
+            transition: "all 0.5s ease-in-out",
+          }}
+        >
+          <MatchColumn
+            perspective={perspective}
+            agent={agent}
+            matches={matches}
+            selectedTopicId={selectedTopic.id}
+            filterSettings={filterSettings}
+            setFilterSettings={setFilterSettings}
+            matchText={matchText}
+            close={() => setShowMatchColumn(false)}
+          />
+        </div>
       </j-flex>
     </div>
   );

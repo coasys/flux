@@ -10,6 +10,7 @@ type Props = {
   filterSettings: any;
   setFilterSettings: (newSettings: any) => void;
   matchText: () => string;
+  close: () => void;
 };
 
 export default function MatchColumn({
@@ -20,6 +21,7 @@ export default function MatchColumn({
   filterSettings,
   setFilterSettings,
   matchText,
+  close,
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   return (
@@ -66,6 +68,9 @@ export default function MatchColumn({
           >
             Include Channel
           </j-checkbox>
+          <j-button size="sm" onClick={close} style={{ position: "absolute", right: 30 }}>
+            <j-icon name="x" />
+          </j-button>
         </j-flex>
         <h2>{matchText()}</h2>
       </j-flex>
