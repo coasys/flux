@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { ChevronDownSVG, ChevronUpSVG, CurveSVG } from "../../utils";
+import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../utils";
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
@@ -98,13 +98,13 @@ export default function TimelineBlock({
               </j-flex>
               {children.length > 0 && (
                 <button
-                  className={styles.caret}
+                  className={styles.showChildrenButton}
                   onClick={() => {
                     if (selectedItemId !== id) setSelectedItemId(null);
                     setShowChildren(!showChildren);
                   }}
                 >
-                  {showChildren ? <ChevronDownSVG /> : <ChevronUpSVG />}
+                  {showChildren ? <ChevronDownSVG /> : <ChevronRightSVG />}
                   {children.length}
                 </button>
               )}

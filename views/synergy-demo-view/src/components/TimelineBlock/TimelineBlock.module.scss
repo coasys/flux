@@ -213,19 +213,20 @@
       word-break: break-word;
       width: 100%;
 
-      .caret {
+      .showChildrenButton {
         all: unset;
         cursor: pointer;
         z-index: 2;
         display: flex;
+        align-items: center;
+        flex-shrink: 0;
         color: var(--j-color-ui-300);
         font-weight: 600;
 
         > svg {
-          width: 20px;
-          height: 20px;
-          margin-right: 10px;
-          flex-shrink: 0;
+          width: 18px;
+          height: 18px;
+          margin-right: 8px;
         }
       }
 
@@ -268,11 +269,12 @@
             > span {
               color: var(--j-color-ui-300);
               display: flex;
+              align-items: center;
 
               > svg {
-                width: 20px;
-                height: 20px;
-                margin-right: 7px;
+                width: 18px;
+                height: 18px;
+                margin-right: 8px;
               }
             }
           }
