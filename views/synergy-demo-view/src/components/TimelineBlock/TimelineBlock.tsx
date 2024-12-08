@@ -100,7 +100,7 @@ export default function TimelineBlock({
                 <button
                   className={styles.showChildrenButton}
                   onClick={() => {
-                    if (selectedItemId !== id) setSelectedItemId(null);
+                    if (!match && selectedItemId !== id) setSelectedItemId(null);
                     setShowChildren(!showChildren);
                   }}
                 >
