@@ -42,22 +42,22 @@
 
         <j-flex v-if="!isLoading" direction="column" gap="500">
           <div class="app-card" v-for="app in filteredPackages" :key="app.name">
-            <j-box pb="500">
-              <j-badge
-                size="sm"
-                v-if="app.pkg.startsWith('@fluxapp')"
-                variant="success"
-              >
-                Official App
-              </j-badge>
-            </j-box>
-            <j-flex a="center" j="between">
+            <j-flex a="center" direction="row" j="between" gap="500">
               <j-flex gap="500" a="center" j="center">
                 <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
                 <div>
-                  <j-text variant="heading-sm">
-                    {{ app.name }}
-                  </j-text>
+                  <j-flex gap="300">
+                    <j-text variant="heading-sm">
+                      {{ app.name }}
+                    </j-text>
+                    <j-badge
+                      size="sm"
+                      v-if="app.pkg.startsWith('@coasys')"
+                      variant="success"
+                    >
+                      Official App
+                    </j-badge>
+                  </j-flex>
                   <j-text nomargin>
                     {{ app.description }}
                   </j-text>
@@ -67,7 +67,7 @@
                 <j-button
                   :variant="
                     isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded'
-                      ? 'link'
+                      ? ''
                       : 'primary'
                   "
                   :loading="loadedPlugins[app.pkg] === 'loading'"
@@ -118,7 +118,11 @@ import {
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useSubjects, useSubject, usePerspective } from "@coasys/ad4m-vue-hooks";
+import {
+  useSubjects,
+  useSubject,
+  usePerspective,
+} from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import semver from "semver";
@@ -130,21 +134,27 @@ export default defineComponent({
   components: { ChannnelViewOptions },
   async created() {
     this.isLoading = true;
-    const res = await getAllFluxApps();
-    this.isLoading = false;
-
-    const filtered = res.filter((pkg) => {
-      try {
-        return semver.gte(
-          semver.coerce(pkg.ad4mVersion || "0.0.0"),
-          semver.coerce(dependencies["@coasys/ad4m"])
-        )
-      } catch (error) {
-        return false
-      }
-    });
-
-    this.packages = filtered
+    // Fetch apps from npm, use local apps if request fails
+    try {
+      const res = await getAllFluxApps();
+      this.isLoading = false;
+      const filtered = res.filter((pkg) => {
+        try {
+          return semver.gte(
+            semver.coerce(pkg?.ad4mVersion || "0.0.0"),
+            "0.8.1"
+          );
+        } catch (error) {
+          return false;
+        }
+      });
+      this.packages = filtered;
+    } catch (error) {
+      console.info("Flux is offline, using fallback apps");
+      const offlineApps = await getOfflineFluxApps();
+      this.packages = offlineApps;
+      this.isLoading = false;
+    }
   },
   async setup(props) {
     const route = useRoute();
