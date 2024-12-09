@@ -1,7 +1,8 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
 import { Picker } from "emoji-mart";
+import { css, html, LitElement } from "lit";
+import { customElement } from "lit/decorators.js";
+import sharedStyles from "../../shared/styles";
+import data from "./data.json";
 
 // TODO: Do we need this type  of generic component?
 
@@ -20,12 +21,7 @@ export default class Box extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     const picker = new Picker({
-      data: async () => {
-        // Sjekk emojimart docs
-        const response = await import("./data.json");
-
-        return response;
-      },
+      data,
       onEmojiSelect: (emoji) => {
         const event = new CustomEvent("change", {
           detail: emoji,
