@@ -117,14 +117,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return await new Promise(async (resolveMatches: any) => {
       // grab all topic links
       const topicLinks = await perspective.get(new LinkQuery({ predicate: "flux://has_tag" }));
+      const filteredLinks = topicLinks.filter((l) => l.data.target === topicId);
       const results = await Promise.all(
-        topicLinks.map(async (t) => {
-          const { data } = await perspective.getExpression(t.data.target);
-          // filter out other topics
-          if (!data.includes(topicId)) return null;
+        filteredLinks.map(async (link) => {
           // get relationship data
           const relationshipProxy = await perspective.getSubjectProxy(
-            t.data.source,
+            link.data.source,
             "SemanticRelationship"
           );
           const expressionId = await relationshipProxy.expression;
@@ -214,7 +212,10 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       </j-flex>
       <j-flex className={styles.content}>
         <div
-          style={{ width: showMatchColumn ? "33%" : "50%", transition: "width 0.5s ease-in-out" }}
+          style={{
+            width: showMatchColumn ? "33%" : "50%",
+            transition: "width 0.5s ease-in-out",
+          }}
         >
           <TimelineColumn
             agent={agent}
@@ -227,7 +228,10 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           />
         </div>
         <div
-          style={{ width: showMatchColumn ? "33%" : "50%", transition: "width 0.5s ease-in-out" }}
+          style={{
+            width: showMatchColumn ? "33%" : "50%",
+            transition: "width 0.5s ease-in-out",
+          }}
         >
           <WebRTCView
             perspective={perspective}
