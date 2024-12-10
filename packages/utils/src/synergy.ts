@@ -104,19 +104,17 @@ async function getConversationData(perspective, conversationRepo) {
   return { conversations, latestSubgroups, latestSubgroupItems };
 }
 
-async function findOrCreateTopic(perspective, allTopics, newTopic) {
+async function findOrCreateTopic(perspective, allTopics, topicName) {
   let topicId;
   // check if topic already exists
-  const match = allTopics.find((t) => t.name === newTopic);
+  const match = allTopics.find((t) => t.name === topicName);
   if (match) topicId = match.id;
   else {
     // create topic
-    const topicRepo = await new SubjectRepository(Topic, { perspective });
-    //@ts-ignore
-    const topicExpression = (await topicRepo.create({
-      topic: newTopic,
-    })) as any;
-    topicId = topicExpression.id;
+    const newTopic = new Topic(perspective);
+    newTopic.topic = topicName;
+    await newTopic.save();
+    topicId = newTopic.baseExpression;
   }
   return topicId;
 }
