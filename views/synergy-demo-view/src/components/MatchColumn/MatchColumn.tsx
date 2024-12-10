@@ -28,7 +28,7 @@ export default function MatchColumn({
     <div className={styles.wrapper}>
       <j-flex direction="column" gap="400" className={styles.header}>
         <j-flex a="center" gap="400" wrap>
-          <j-menu style={{ height: 42, zIndex: 3 }}>
+          <j-menu style={{ height: 42, zIndex: 20 }}>
             <j-menu-group collapsible title={grouping} id="grouping-menu">
               {groupingOptions.map((option) => (
                 <j-menu-item
