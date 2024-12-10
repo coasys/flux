@@ -12,7 +12,7 @@
           :selected="communityIsActive(uuid as string)"
           :online="false"
           :src="community.image || undefined"
-          :initials="community?.name?.charAt(0).toUpperCase()"
+          :initials="`${community?.name}`.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(uuid as string)"
         ></Avatar>
         <j-menu slot="content">
@@ -48,13 +48,12 @@
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
-import { useAppStore } from "@/store/app";
-import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
+import { useAppStore } from "@/store/app";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { useCommunities } from "@coasys/flux-vue";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: {

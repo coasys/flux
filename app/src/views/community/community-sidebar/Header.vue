@@ -52,7 +52,7 @@
     <div class="community-info">
       <Avatar
         size="xl"
-        :initials="community.name?.charAt(0).toUpperCase()"
+        :initials="`${community?.name}`.charAt(0).toUpperCase()"
         :src="community.image || null"
       ></Avatar>
       <div class="community-info-content">
@@ -93,17 +93,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useRoute } from "vue-router";
-import { Profile } from "@coasys/flux-types";
-import { mapActions } from "pinia";
-import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
+import { useAppStore } from "@/store/app";
+import { Ad4mClient } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useMe } from "@coasys/ad4m-vue-hooks";
-import { Ad4mClient } from "@coasys/ad4m";
+import { Profile } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
+import { mapActions } from "pinia";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
