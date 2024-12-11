@@ -99,7 +99,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           // otherwise grab the required data linked to the item
           const expression = await perspective.getExpression(link.data.target);
           const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
-          return { id: link.data.source, channel, type, embedding };
+          return { baseExpression: link.data.source, channel, type, embedding };
         })
       );
       // generate similarity score for items
