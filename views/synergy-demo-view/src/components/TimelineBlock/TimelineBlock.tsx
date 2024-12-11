@@ -63,10 +63,9 @@ export default function TimelineBlock({
 
   return (
     <div id={`timeline-block-${id}`} className={`${styles.block} ${styles[groupType]}`}>
-      <button
-        className={styles.button}
-        onClick={() => !match && setSelectedItemId(selected ? null : id)}
-      />
+      {!match && (
+        <button className={styles.button} onClick={() => setSelectedItemId(selected ? null : id)} />
+      )}
       {groupType === "conversation" && (
         <j-timestamp value={timestamp} relative className={styles.timestamp} />
       )}
@@ -122,6 +121,7 @@ export default function TimelineBlock({
                     className={`${styles.tag} ${selectedTopicId === topic.id && styles.focus}`}
                     onClick={() => search("topic", topic)}
                     disabled={!!match}
+                    style={{ cursor: !!match ? "default" : "pointer" }}
                   >
                     #{topic.name}
                   </button>
