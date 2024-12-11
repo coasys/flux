@@ -73,14 +73,15 @@ async function getConversationData(perspective, channelId) {
   if (conversations.length) {
     // gather up lastest conversation data
     const latestConversation = conversations[conversations.length - 1];
-    const subgroupRepo = await new SubjectRepository(ConversationSubgroup, {
-      perspective,
+    subgroups = await ConversationSubgroup.query(perspective, {
       source: latestConversation.baseExpression,
     });
-    subgroups = (await subgroupRepo.getAllData()) as any;
     if (subgroups.length) {
       const latestSubgroup = subgroups[subgroups.length - 1] as any;
-      const latestSubgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
+      const latestSubgroupItems = await getSubgroupItems(
+        perspective,
+        latestSubgroup.baseExpression
+      );
       // calculate time since last item was created
       const lastItemTimestamp = latestSubgroupItems[latestSubgroupItems.length - 1].timestamp;
       const minsSinceLastItemCreated =
@@ -361,36 +362,29 @@ export async function processItem(perspective, channelId, item) {
     if (newConversationSummary) conversation.summary = newConversationSummary;
     if (newConversationName || newConversationSummary) await conversation.update();
     // update subgroup summary and title
-    const subgroupRepo = await new SubjectRepository(ConversationSubgroup, {
-      perspective,
-      source: conversation.baseExpression,
-    });
     let subgroup;
     if (!changedSubject) {
       // if the subject of the conversation has stayed the same, stick with the exising subgroup
-      const lastSubgroup = subgroups[subgroups.length - 1];
-      subgroup = lastSubgroup;
-      await subgroupRepo.update(lastSubgroup.id, {
-        subgroupName: newSubgroupName,
-        summary: newSubgroupSummary,
-      });
+      subgroup = subgroups[subgroups.length - 1];
+      if (newSubgroupName) subgroup.subgroupName = newSubgroupName;
+      if (newSubgroupSummary) subgroup.summary = newSubgroupSummary;
+      if (newSubgroupName || newSubgroupSummary) await subgroup.update();
     } else {
       // otherwise create a new subgroup
-      // @ts-ignore
-      subgroup = (await subgroupRepo.create({
-        subgroupName: newSubgroupName,
-        summary: newSubgroupSummary,
-      })) as any;
+      subgroup = new ConversationSubgroup(perspective, null, conversation.baseExpression);
+      subgroup.subgroupName = newSubgroupName;
+      subgroup.summary = newSubgroupSummary;
+      await subgroup.save();
       // link subgroup to channel for use in search
       await perspective.add({
         source: channelId,
         predicate: "ad4m://has_child",
-        target: subgroup.id,
+        target: subgroup.baseExpression,
       });
     }
     // link new item to subgroup
     await perspective.add({
-      source: subgroup.id,
+      source: subgroup.baseExpression,
       predicate: "ad4m://has_child",
       target: item.id,
     });
@@ -414,11 +408,14 @@ export async function processItem(perspective, channelId, item) {
               await linkTopic(perspective, conversation.baseExpression, topicId, topic.relevance);
             }
             // find subgroup topics
-            const subgroupRelationships = await findRelationships(perspective, subgroup.id);
+            const subgroupRelationships = await findRelationships(
+              perspective,
+              subgroup.baseExpression
+            );
             const subgroupTopics = await findTopics(perspective, subgroupRelationships);
             if (!subgroupTopics.find((t) => t.name === topic.name)) {
               // link topic to subgroup if not already linked
-              await linkTopic(perspective, subgroup.id, topicId, topic.relevance);
+              await linkTopic(perspective, subgroup.baseExpression, topicId, topic.relevance);
             }
             resolve();
           })
@@ -429,9 +426,9 @@ export async function processItem(perspective, channelId, item) {
     const itemEmbedding = await generateEmbedding(item.text);
     await saveEmbedding(perspective, item.id, itemEmbedding);
     // generate & save updated embedding for subgroup
-    await removeEmbedding(perspective, subgroup.id);
+    await removeEmbedding(perspective, subgroup.baseExpression);
     const subgroupEmbedding = await generateEmbedding(newSubgroupSummary);
-    await saveEmbedding(perspective, subgroup.id, subgroupEmbedding);
+    await saveEmbedding(perspective, subgroup.baseExpression, subgroupEmbedding);
     // generate & save updated embedding for conversation
     await removeEmbedding(perspective, conversation.baseExpression);
     const conversationEmbedding = await generateEmbedding(newConversationSummary);
