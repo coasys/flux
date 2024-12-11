@@ -1,5 +1,5 @@
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import { findRelationships, findTopics, getSubgroupItems } from "@coasys/flux-utils";
+import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
+import { findTopics, getSubgroupItems } from "@coasys/flux-utils";
 
 // constants
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
@@ -27,10 +27,9 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
             setMatchIndex(conversationIndex);
             conversation.matchIndex = subgroupIndex;
           }
-          const subgroupRelationships = await findRelationships(
-            perspective,
-            subgroup.baseExpression
-          );
+          const subgroupRelationships = await SemanticRelationship.query(perspective, {
+            source: subgroup.baseExpression,
+          });
           const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
           subgroup.topics = await findTopics(perspective, subgroupRelationships);
@@ -39,7 +38,9 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           subgroup.participants = [];
           subgroup.children = await Promise.all(
             subgroupItems.map(async (item: any, itemIndex) => {
-              const itemRelationships = await findRelationships(perspective, item.baseExpression);
+              const itemRelationships = await SemanticRelationship.query(perspective, {
+                source: item.baseExpression,
+              });
               item.groupType = "item";
               if (match && item.baseExpression === match.baseExpression) {
                 setMatchIndex(conversationIndex);
@@ -62,10 +63,9 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           if (!conversation.participants.includes(p)) conversation.participants.push(p);
         });
       });
-      const conversationRelationships = await findRelationships(
-        perspective,
-        conversation.baseExpression
-      );
+      const conversationRelationships = await SemanticRelationship.query(perspective, {
+        source: conversation.baseExpression,
+      });
       conversation.topics = await findTopics(perspective, conversationRelationships);
       conversation.children = subgroupsWithData;
       return conversation;

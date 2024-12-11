@@ -21,7 +21,7 @@ async function removeEmbedding(perspective, itemId) {
 }
 
 async function removeTopics(perspective, itemId) {
-  const relationships = (await findRelationships(perspective, itemId)) as any;
+  const relationships = await SemanticRelationship.query(perspective, { source: itemId });
   return Promise.all(
     relationships.map(async (r) => {
       const itemRelationshipLink = await perspective.get(
@@ -264,10 +264,6 @@ export function transformItem(type, item) {
   return newItem;
 }
 
-export async function findRelationships(perspective, itemId) {
-  return await SemanticRelationship.query(perspective, { source: itemId });
-}
-
 export async function findTopics(perspective, relationships) {
   return await Promise.all(
     relationships.map(
@@ -336,7 +332,9 @@ export async function processItem(perspective, channelId, item) {
   console.log("processItem: ", item);
   return new Promise(async (resolve: any) => {
     // check for existing relationships & removed processed data if present (used for edits)
-    const relationships = await findRelationships(perspective, item.baseExpression);
+    const relationships = await SemanticRelationship.query(perspective, {
+      source: item.baseExpression,
+    });
     if (relationships.length) await removeProcessedData(perspective, item.baseExpression);
     // grab all the necissary conversation data
     const { conversation, subgroups, subgroupItems } = await getConversationData(
@@ -394,20 +392,18 @@ export async function processItem(perspective, channelId, item) {
             // link topic to new item
             await linkTopic(perspective, item.baseExpression, topicId, topic.relevance);
             // find conversation topics
-            const conversationRelationships = await findRelationships(
-              perspective,
-              conversation.baseExpression
-            );
+            const conversationRelationships = await SemanticRelationship.query(perspective, {
+              source: conversation.baseExpression,
+            });
             const conversationTopics = await findTopics(perspective, conversationRelationships);
             if (!conversationTopics.find((t) => t.name === topic.name)) {
               // link topic to conversation if not already linked
               await linkTopic(perspective, conversation.baseExpression, topicId, topic.relevance);
             }
             // find subgroup topics
-            const subgroupRelationships = await findRelationships(
-              perspective,
-              subgroup.baseExpression
-            );
+            const subgroupRelationships = await SemanticRelationship.query(perspective, {
+              source: subgroup.baseExpression,
+            });
             const subgroupTopics = await findTopics(perspective, subgroupRelationships);
             if (!subgroupTopics.find((t) => t.name === topic.name)) {
               // link topic to subgroup if not already linked
