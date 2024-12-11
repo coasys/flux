@@ -25,10 +25,10 @@ async function removeTopics(perspective, itemId) {
   return Promise.all(
     relationships.map(async (r) => {
       const itemRelationshipLink = await perspective.get(
-        new LinkQuery({ source: itemId, target: r.id })
+        new LinkQuery({ source: itemId, target: r.baseExpression })
       );
       const relationshipTagLink = await perspective.get(
-        new LinkQuery({ source: r.id, predicate: "flux://has_tag" })
+        new LinkQuery({ source: r.baseExpression, predicate: "flux://has_tag" })
       );
       const linksToRemove = [] as any[];
       if (itemRelationshipLink[0]) linksToRemove.push(itemRelationshipLink[0]);
@@ -107,7 +107,7 @@ async function findOrCreateTopic(perspective, allTopics, topicName) {
   let topicId;
   // check if topic already exists
   const match = allTopics.find((t) => t.name === topicName);
-  if (match) topicId = match.id;
+  if (match) topicId = match.baseExpression;
   else {
     // create topic
     const newTopic = new Topic(perspective);
@@ -118,16 +118,15 @@ async function findOrCreateTopic(perspective, allTopics, topicName) {
   return topicId;
 }
 
+// todo: refactor so source doesn't need to be passed to new SemanticRelationship as stored in expression property
 async function linkTopic(perspective, itemId, topicId, relevance) {
-  const relationshipRepo = (await new SubjectRepository(SemanticRelationship, {
-    perspective,
-    source: itemId,
-  })) as any;
-  return await relationshipRepo.create({
-    expression: itemId,
-    tag: topicId,
-    relevance,
-  });
+  const relationship = new SemanticRelationship(perspective, null, itemId);
+  // const relationship = new SemanticRelationship(perspective);
+  relationship.expression = itemId;
+  relationship.tag = topicId;
+  relationship.relevance = relevance;
+  await relationship.save();
+  return relationship;
 }
 
 async function LLMProcessing(
@@ -246,7 +245,7 @@ export function transformItem(type, item) {
   // used to transform message, post, or task expressions into a common format
   const newItem = {
     type,
-    id: item.id,
+    baseExpression: item.id,
     author: item.author,
     timestamp: item.timestamp,
     text: "",
@@ -266,20 +265,18 @@ export function transformItem(type, item) {
 }
 
 export async function findRelationships(perspective, itemId) {
-  return await new SubjectRepository(SemanticRelationship, {
-    perspective,
-    source: itemId,
-  }).getAllData();
+  return await SemanticRelationship.query(perspective, { source: itemId });
 }
 
 export async function findTopics(perspective, relationships) {
+  // console.log("findTopics: ", relationships);
   return await Promise.all(
     relationships.map(
       (r) =>
         new Promise(async (resolve) => {
           const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
           resolve({
-            id: r.tag,
+            baseExpression: r.tag,
             name: await topicProxy.topic,
             relevance: r.relevance,
           });
@@ -305,7 +302,7 @@ export async function getAllTopics(perspective) {
         resolve(
           await Promise.all(
             topics.map(async (t) => {
-              return { id: t.baseExpression, name: await t.topic };
+              return { baseExpression: t.baseExpression, name: await t.topic };
             })
           )
         );
@@ -340,8 +337,8 @@ export async function processItem(perspective, channelId, item) {
   console.log("processItem: ", item);
   return new Promise(async (resolve: any) => {
     // check for existing relationships & removed processed data if present (used for edits)
-    const relationships = await findRelationships(perspective, item.id);
-    if (relationships.length) await removeProcessedData(perspective, item.id);
+    const relationships = await findRelationships(perspective, item.baseExpression);
+    if (relationships.length) await removeProcessedData(perspective, item.baseExpression);
     // grab all the necissary conversation data
     const { conversation, subgroups, subgroupItems } = await getConversationData(
       perspective,
@@ -386,7 +383,7 @@ export async function processItem(perspective, channelId, item) {
     await perspective.add({
       source: subgroup.baseExpression,
       predicate: "ad4m://has_child",
-      target: item.id,
+      target: item.baseExpression,
     });
     // attach topics to new item, conversation, & subgroup (avoid duplicates on conversation & subgroup)
     await Promise.all(
@@ -396,7 +393,7 @@ export async function processItem(perspective, channelId, item) {
             // find existing topic or create new one
             const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
             // link topic to new item
-            await linkTopic(perspective, item.id, topicId, topic.relevance);
+            await linkTopic(perspective, item.baseExpression, topicId, topic.relevance);
             // find conversation topics
             const conversationRelationships = await findRelationships(
               perspective,
@@ -424,7 +421,7 @@ export async function processItem(perspective, channelId, item) {
     // todo: combine generate & save emebedding?
     // generate & save new embedding for item
     const itemEmbedding = await generateEmbedding(item.text);
-    await saveEmbedding(perspective, item.id, itemEmbedding);
+    await saveEmbedding(perspective, item.baseExpression, itemEmbedding);
     // generate & save updated embedding for subgroup
     await removeEmbedding(perspective, subgroup.baseExpression);
     const subgroupEmbedding = await generateEmbedding(newSubgroupSummary);

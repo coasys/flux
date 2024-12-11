@@ -66,7 +66,10 @@ export default function ChatView({
 
       // @ts-ignore
       const message = (await repo.create({ body: html })) as any;
-      await processItem(perspective, source, { id: message.id, text });
+      await processItem(perspective, source, {
+        baseExpression: message.id,
+        text,
+      });
 
       if (replyMessage) {
         perspective.addLinks([

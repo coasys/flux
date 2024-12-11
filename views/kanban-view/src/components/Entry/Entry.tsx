@@ -56,7 +56,10 @@ export default function Entry({
             ? value.split("task://")[1]
             : entry.status.split("task://")[1];
         const taskText = `Task: "${task}", Status: "${status}"`;
-        processItem(perspective, channelId, { id, text: taskText });
+        processItem(perspective, channelId, {
+          baseExpression: id,
+          text: taskText,
+        });
       }
     });
   }

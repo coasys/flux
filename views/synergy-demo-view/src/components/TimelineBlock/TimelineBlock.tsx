@@ -29,7 +29,17 @@ export default function TimelineBlock({
   setSelectedItemId,
   search,
 }: Props) {
-  const { id, groupType, timestamp, start, end, author, participants, topics, children } = data;
+  const {
+    baseExpression,
+    groupType,
+    timestamp,
+    start,
+    end,
+    author,
+    participants,
+    topics,
+    children,
+  } = data;
   const [showChildren, setShowChildren] = useState(data.matchIndex !== undefined);
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
@@ -37,7 +47,9 @@ export default function TimelineBlock({
 
   // mark as selected
   useEffect(() => {
-    setSelected(selectedItemId === id || (match && match.id === id));
+    setSelected(
+      selectedItemId === baseExpression || (match && match.baseExpression === baseExpression)
+    );
   }, [selectedItemId]);
 
   // expand or collapse children based on zoom level
@@ -62,9 +74,12 @@ export default function TimelineBlock({
   }, [selectedItemId]);
 
   return (
-    <div id={`timeline-block-${id}`} className={`${styles.block} ${styles[groupType]}`}>
+    <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles[groupType]}`}>
       {!match && (
-        <button className={styles.button} onClick={() => setSelectedItemId(selected ? null : id)} />
+        <button
+          className={styles.button}
+          onClick={() => setSelectedItemId(selected ? null : baseExpression)}
+        />
       )}
       {groupType === "conversation" && (
         <j-timestamp value={timestamp} relative className={styles.timestamp} />
@@ -90,7 +105,7 @@ export default function TimelineBlock({
           >
             <j-flex a="center" gap="400">
               <j-flex a="center" gap="400">
-                {match && match.id === id && (
+                {match && match.baseExpression === baseExpression && (
                   <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
                 )}
                 <h1>{data[`${groupType}Name`]}</h1>
@@ -99,7 +114,7 @@ export default function TimelineBlock({
                 <button
                   className={styles.showChildrenButton}
                   onClick={() => {
-                    if (!match && selectedItemId !== id) setSelectedItemId(null);
+                    if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
                     setShowChildren(!showChildren);
                   }}
                 >
@@ -118,7 +133,7 @@ export default function TimelineBlock({
               <j-flex gap="300" wrap style={{ marginTop: 5 }}>
                 {data.topics.map((topic) => (
                   <button
-                    className={`${styles.tag} ${selectedTopicId === topic.id && styles.focus}`}
+                    className={`${styles.tag} ${selectedTopicId === topic.baseExpression && styles.focus}`}
                     onClick={() => search("topic", topic)}
                     disabled={!!match}
                     style={{ cursor: !!match ? "default" : "pointer" }}
@@ -174,7 +189,7 @@ export default function TimelineBlock({
                 })
                 .map((child) => (
                   <TimelineBlock
-                    key={child.id}
+                    key={child.baseExpression}
                     agent={agent}
                     perspective={perspective}
                     data={child}
@@ -215,7 +230,7 @@ export default function TimelineBlock({
           a="center"
           className={`${styles.itemCard} ${selected && styles.selected}`}
         >
-          {match && match.id === id && (
+          {match && match.baseExpression === baseExpression && (
             <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
           )}
           <j-flex gap="300" direction="column">
@@ -235,7 +250,7 @@ export default function TimelineBlock({
               <j-flex gap="300" wrap style={{ marginTop: 10 }}>
                 {topics.map((topic) => (
                   <button
-                    className={`${styles.tag} ${selected && selectedTopicId === topic.id && styles.focus}`}
+                    className={`${styles.tag} ${selected && selectedTopicId === topic.baseExpression && styles.focus}`}
                     onClick={() => search("topic", topic)}
                   >
                     #{topic.name}

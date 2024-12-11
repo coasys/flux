@@ -1,9 +1,9 @@
-import { SDNAClass, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "SemanticRelationship",
 })
-export default class SemanticRelationship {
+export default class SemanticRelationship extends SubjectEntity {
   @SubjectFlag({
     through: "flux://entry_type",
     value: "flux://has_semantic_relationship",

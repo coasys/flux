@@ -59,7 +59,7 @@ export default function Match({ perspective, agent, match, index, selectedTopicI
             })
             .map((conversation: any) => (
               <TimelineBlock
-                key={conversation.id}
+                key={conversation.baseExpression}
                 agent={agent}
                 perspective={perspective}
                 data={conversation}

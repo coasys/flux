@@ -131,7 +131,7 @@ export default function Transcriber({
         body: `<p>${fullText}</p>`,
       })) as any;
       processItem(perspective, source, {
-        id: message.id,
+        baseExpression: message.id,
         text: fullText,
       });
     }, messageTimeout * 1000);

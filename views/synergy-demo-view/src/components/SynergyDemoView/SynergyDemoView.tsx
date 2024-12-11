@@ -133,7 +133,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
           return {
-            id: expressionId,
+            baseExpression: expressionId,
             channel,
             type,
             score: (await relationshipProxy.relevance) / 100,
@@ -171,8 +171,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }).getAllData()) as any;
     const newMatches =
       type === "topic"
-        ? await findTopicMatches(item.id, allowedTypes, channels)
-        : await findEmbeddingMatches(item.id, allowedTypes, channels);
+        ? await findTopicMatches(item.baseExpression, allowedTypes, channels)
+        : await findEmbeddingMatches(item.baseExpression, allowedTypes, channels);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);
@@ -193,7 +193,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   // update search results when filters change
   useEffect(() => {
-    if (searchItem.id) search(searchType, searchItem);
+    if (searchItem.baseExpression) search(searchType, searchItem);
   }, [filterSettings]);
 
   // reset matches when channel changes
@@ -221,7 +221,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             agent={agent}
             perspective={perspective}
             channelId={source}
-            selectedTopicId={selectedTopic.id}
+            selectedTopicId={selectedTopic.baseExpression}
             processingItems={processingItems}
             setProcessingItems={setProcessingItems}
             search={search}
@@ -253,7 +253,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             perspective={perspective}
             agent={agent}
             matches={matches}
-            selectedTopicId={selectedTopic.id}
+            selectedTopicId={selectedTopic.baseExpression}
             filterSettings={filterSettings}
             setFilterSettings={setFilterSettings}
             matchText={matchText}

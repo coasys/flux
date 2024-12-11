@@ -111,13 +111,13 @@ export default function CreatePost({
           image: imageReplaced ? data.image : undefined,
         });
         processItem(perspective, source, {
-          id: postId,
+          baseExpression: postId,
           text: data.title || data.body,
         });
       } else {
         newPost = await Post.create(data);
         processItem(perspective, source, {
-          id: newPost.id,
+          baseExpression: newPost.id,
           text: data.title || data.body,
         });
       }

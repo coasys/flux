@@ -1,4 +1,4 @@
-import { Conversation, ConversationSubgroup, SubjectRepository } from "@coasys/flux-api";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import { findRelationships, findTopics, getSubgroupItems } from "@coasys/flux-utils";
 
 // constants
@@ -13,38 +13,35 @@ export function closeMenu(menuId: string) {
 }
 
 export async function getConvoData(perspective, channelId, match?, setMatchIndex?) {
-  const conversationRepo = await new SubjectRepository(Conversation, {
-    perspective,
-    source: channelId,
-  });
-  const conversations = (await conversationRepo.getAllData()) as any;
+  const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
   return await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
-      if (match && conversation.id === match.id) setMatchIndex(conversationIndex);
-      const subgroupRepo = await new SubjectRepository(ConversationSubgroup, {
-        perspective,
-        source: conversation.id,
-      });
-      const subgroups = (await subgroupRepo.getAllData()) as any;
+      if (match && conversation.baseExpression === match.baseExpression)
+        setMatchIndex(conversationIndex);
+      const subgroups = (await ConversationSubgroup.query(perspective, {
+        source: conversation.baseExpression,
+      })) as any;
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
-          if (match && subgroup.id === match.id) {
+          if (match && subgroup.baseExpression === match.baseExpression) {
             setMatchIndex(conversationIndex);
             conversation.matchIndex = subgroupIndex;
           }
-          const subgroupRelationships = await findRelationships(perspective, subgroup.id);
-          const subgroupItems = await getSubgroupItems(perspective, subgroup.id);
+          const subgroupRelationships = await findRelationships(
+            perspective,
+            subgroup.baseExpression
+          );
+          const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
-          if (match && subgroup.id === match.id) conversation.matchIndex = conversationIndex;
           subgroup.topics = await findTopics(perspective, subgroupRelationships);
           subgroup.start = subgroupItems[0].timestamp;
           subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
           subgroup.participants = [];
           subgroup.children = await Promise.all(
             subgroupItems.map(async (item: any, itemIndex) => {
-              const itemRelationships = await findRelationships(perspective, item.id);
+              const itemRelationships = await findRelationships(perspective, item.baseExpression);
               item.groupType = "item";
-              if (match && item.id === match.id) {
+              if (match && item.baseExpression === match.baseExpression) {
                 setMatchIndex(conversationIndex);
                 conversation.matchIndex = subgroupIndex;
                 subgroup.matchIndex = itemIndex;
@@ -65,7 +62,10 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           if (!conversation.participants.includes(p)) conversation.participants.push(p);
         });
       });
-      const conversationRelationships = await findRelationships(perspective, conversation.id);
+      const conversationRelationships = await findRelationships(
+        perspective,
+        conversation.baseExpression
+      );
       conversation.topics = await findTopics(perspective, conversationRelationships);
       conversation.children = subgroupsWithData;
       return conversation;
