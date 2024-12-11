@@ -68,7 +68,7 @@ async function getConversationData(perspective, channelId) {
   // check for previous conversations in the channel
   const conversations = await Conversation.query(perspective, { source: channelId });
   let conversation;
-  let subgroups = [];
+  let subgroups = [] as any;
   let subgroupItems = [] as any[];
   if (conversations.length) {
     // gather up lastest conversation data
@@ -95,7 +95,7 @@ async function getConversationData(perspective, channelId) {
   }
   if (!conversation) {
     // initialise a new conversation
-    conversation = new Conversation(perspective, null, channelId);
+    conversation = new Conversation(perspective, undefined, channelId);
     conversation.conversationName = `Conversation ${conversations.length + 1}`;
     await conversation.save();
   }
@@ -120,7 +120,7 @@ async function findOrCreateTopic(perspective, allTopics, topicName) {
 
 // todo: refactor so source doesn't need to be passed to new SemanticRelationship as stored in expression property
 async function linkTopic(perspective, itemId, topicId, relevance) {
-  const relationship = new SemanticRelationship(perspective, null, itemId);
+  const relationship = new SemanticRelationship(perspective, undefined, itemId);
   // const relationship = new SemanticRelationship(perspective);
   relationship.expression = itemId;
   relationship.tag = topicId;
@@ -269,7 +269,6 @@ export async function findRelationships(perspective, itemId) {
 }
 
 export async function findTopics(perspective, relationships) {
-  // console.log("findTopics: ", relationships);
   return await Promise.all(
     relationships.map(
       (r) =>
@@ -368,7 +367,7 @@ export async function processItem(perspective, channelId, item) {
       if (newSubgroupName || newSubgroupSummary) await subgroup.update();
     } else {
       // otherwise create a new subgroup
-      subgroup = new ConversationSubgroup(perspective, null, conversation.baseExpression);
+      subgroup = new ConversationSubgroup(perspective, undefined, conversation.baseExpression);
       subgroup.subgroupName = newSubgroupName;
       subgroup.summary = newSubgroupSummary;
       await subgroup.save();

@@ -44,7 +44,7 @@ export default function MatchColumn({
             </j-menu-group>
           </j-menu>
           {grouping === "Items" && (
-            <j-menu style={{ height: 42, zIndex: 3 }}>
+            <j-menu style={{ height: 42, zIndex: 20 }}>
               <j-menu-group collapsible title={itemType} id="item-type-menu">
                 {itemTypeOptions.map((option) => (
                   <j-menu-item
