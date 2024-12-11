@@ -252,6 +252,8 @@ export default function TimelineBlock({
                   <button
                     className={`${styles.tag} ${selected && selectedTopicId === topic.baseExpression && styles.focus}`}
                     onClick={() => search("topic", topic)}
+                    disabled={!!match}
+                    style={{ cursor: !!match ? "default" : "pointer" }}
                   >
                     #{topic.name}
                   </button>
