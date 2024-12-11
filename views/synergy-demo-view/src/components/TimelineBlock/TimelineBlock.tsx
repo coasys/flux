@@ -121,6 +121,7 @@ export default function TimelineBlock({
                   <button
                     className={`${styles.tag} ${selectedTopicId === topic.id && styles.focus}`}
                     onClick={() => search("topic", topic)}
+                    disabled={!!match}
                   >
                     #{topic.name}
                   </button>
