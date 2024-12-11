@@ -64,44 +64,42 @@ async function saveEmbedding(perspective, itemId, embedding) {
   });
 }
 
-async function getConversationData(perspective, conversationRepo) {
+async function getConversationData(perspective, channelId) {
   // check for previous conversations in the channel
-  const conversations = (await conversationRepo.getAllData()) as any;
+  const conversations = await Conversation.query(perspective, { source: channelId });
   let conversation;
-  let latestSubgroups = [];
-  let latestSubgroupItems = [] as any[];
+  let subgroups = [];
+  let subgroupItems = [] as any[];
   if (conversations.length) {
     // gather up lastest conversation data
     const latestConversation = conversations[conversations.length - 1];
     const subgroupRepo = await new SubjectRepository(ConversationSubgroup, {
       perspective,
-      source: latestConversation.id,
+      source: latestConversation.baseExpression,
     });
-    latestSubgroups = (await subgroupRepo.getAllData()) as any;
-    if (latestSubgroups.length) {
-      const latestSubgroup = latestSubgroups[latestSubgroups.length - 1] as any;
-      const subgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
+    subgroups = (await subgroupRepo.getAllData()) as any;
+    if (subgroups.length) {
+      const latestSubgroup = subgroups[subgroups.length - 1] as any;
+      const latestSubgroupItems = await getSubgroupItems(perspective, latestSubgroup.id);
       // calculate time since last item was created
-      const lastItemTimestamp = subgroupItems[subgroupItems.length - 1].timestamp;
+      const lastItemTimestamp = latestSubgroupItems[latestSubgroupItems.length - 1].timestamp;
       const minsSinceLastItemCreated =
         (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
       if (minsSinceLastItemCreated < 30) {
         // if less than 30 mins, consider the new item part of the latest conversation
         conversation = latestConversation;
-        latestSubgroupItems = subgroupItems;
+        subgroupItems = latestSubgroupItems;
       }
     }
   }
   if (!conversation) {
     // initialise a new conversation
-    // @ts-ignore
-    conversation = await conversationRepo.create({
-      conversationName: `Conversation ${conversations.length + 1}`,
-    });
-    conversations.push(conversation);
+    conversation = new Conversation(perspective, null, channelId);
+    conversation.conversationName = `Conversation ${conversations.length + 1}`;
+    await conversation.save();
   }
 
-  return { conversations, latestSubgroups, latestSubgroupItems };
+  return { conversation, subgroups, subgroupItems };
 }
 
 async function findOrCreateTopic(perspective, allTopics, topicName) {
@@ -344,15 +342,10 @@ export async function processItem(perspective, channelId, item) {
     const relationships = await findRelationships(perspective, item.id);
     if (relationships.length) await removeProcessedData(perspective, item.id);
     // grab all the necissary conversation data
-    const conversationRepo = await new SubjectRepository(Conversation, {
+    const { conversation, subgroups, subgroupItems } = await getConversationData(
       perspective,
-      source: channelId,
-    });
-    const { conversations, latestSubgroups, latestSubgroupItems } = await getConversationData(
-      perspective,
-      conversationRepo
+      channelId
     );
-    const conversation = conversations[conversations.length - 1];
     const allTopics = await getAllTopics(perspective);
     // generate new processed data with OpenAI
     const {
@@ -362,21 +355,20 @@ export async function processItem(perspective, channelId, item) {
       newSubgroupSummary,
       newConversationName,
       newConversationSummary,
-    } = await LLMProcessing(item, latestSubgroups, latestSubgroupItems, allTopics);
+    } = await LLMProcessing(item, subgroups, subgroupItems, allTopics);
     // update conversation summary and title
-    await conversationRepo.update(conversation.id, {
-      conversationName: newConversationName,
-      summary: newConversationSummary,
-    });
+    if (newConversationName) conversation.conversationName = newConversationName;
+    if (newConversationSummary) conversation.summary = newConversationSummary;
+    if (newConversationName || newConversationSummary) await conversation.update();
     // update subgroup summary and title
     const subgroupRepo = await new SubjectRepository(ConversationSubgroup, {
       perspective,
-      source: conversation.id,
+      source: conversation.baseExpression,
     });
     let subgroup;
     if (!changedSubject) {
       // if the subject of the conversation has stayed the same, stick with the exising subgroup
-      const lastSubgroup = latestSubgroups[latestSubgroups.length - 1];
+      const lastSubgroup = subgroups[subgroups.length - 1];
       subgroup = lastSubgroup;
       await subgroupRepo.update(lastSubgroup.id, {
         subgroupName: newSubgroupName,
@@ -412,11 +404,14 @@ export async function processItem(perspective, channelId, item) {
             // link topic to new item
             await linkTopic(perspective, item.id, topicId, topic.relevance);
             // find conversation topics
-            const conversationRelationships = await findRelationships(perspective, conversation.id);
+            const conversationRelationships = await findRelationships(
+              perspective,
+              conversation.baseExpression
+            );
             const conversationTopics = await findTopics(perspective, conversationRelationships);
             if (!conversationTopics.find((t) => t.name === topic.name)) {
               // link topic to conversation if not already linked
-              await linkTopic(perspective, conversation.id, topicId, topic.relevance);
+              await linkTopic(perspective, conversation.baseExpression, topicId, topic.relevance);
             }
             // find subgroup topics
             const subgroupRelationships = await findRelationships(perspective, subgroup.id);
@@ -429,6 +424,7 @@ export async function processItem(perspective, channelId, item) {
           })
       )
     );
+    // todo: combine generate & save emebedding?
     // generate & save new embedding for item
     const itemEmbedding = await generateEmbedding(item.text);
     await saveEmbedding(perspective, item.id, itemEmbedding);
@@ -437,9 +433,9 @@ export async function processItem(perspective, channelId, item) {
     const subgroupEmbedding = await generateEmbedding(newSubgroupSummary);
     await saveEmbedding(perspective, subgroup.id, subgroupEmbedding);
     // generate & save updated embedding for conversation
-    await removeEmbedding(perspective, conversation.id);
+    await removeEmbedding(perspective, conversation.baseExpression);
     const conversationEmbedding = await generateEmbedding(newConversationSummary);
-    await saveEmbedding(perspective, conversation.id, conversationEmbedding);
+    await saveEmbedding(perspective, conversation.baseExpression, conversationEmbedding);
     resolve();
   });
 }
