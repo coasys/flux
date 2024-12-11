@@ -1,6 +1,13 @@
 import { LinkQuery } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Channel, SubjectRepository } from "@coasys/flux-api";
+import {
+  Channel,
+  Conversation,
+  ConversationSubgroup,
+  SemanticRelationship,
+  SubjectRepository,
+  Topic,
+} from "@coasys/flux-api";
 import { getAllTopics } from "@coasys/flux-utils";
 import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
@@ -198,6 +205,15 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   // reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
+
+  // temp: ensure SDNA classes
+  useEffect(() => {
+    perspective.ensureSDNASubjectClass(Conversation);
+    perspective.ensureSDNASubjectClass(ConversationSubgroup);
+    perspective.ensureSDNASubjectClass(Topic);
+    perspective.ensureSDNASubjectClass(SemanticRelationship);
+    console.log("SNDA classes ensured");
+  }, []);
 
   return (
     <div className={styles.wrapper}>
