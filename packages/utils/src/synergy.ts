@@ -45,19 +45,17 @@ async function removeProcessedData(perspective, itemId) {
   ]);
 }
 
-export async function generateEmbedding(text: string) {
+async function createEmbedding(perspective, text, itemId) {
+  // generate embedding
   const client = await getAd4mClient();
   const embedding = await client.ai.embed("bert", text);
-  return embedding;
-}
-
-async function saveEmbedding(perspective, itemId, embedding) {
+  // save embedding
   const { EMBEDDING_VECTOR_LANGUAGE } = languages;
   const embeddingExpression = await perspective.createExpression(
     { model: "bert", data: embedding },
     EMBEDDING_VECTOR_LANGUAGE
   );
-  return await perspective.add({
+  await perspective.add({
     source: itemId,
     predicate: "ad4m://embedding",
     target: embeddingExpression,
@@ -413,18 +411,14 @@ export async function processItem(perspective, channelId, item) {
           })
       )
     );
-    // todo: combine generate & save emebedding?
-    // generate & save new embedding for item
-    const itemEmbedding = await generateEmbedding(item.text);
-    await saveEmbedding(perspective, item.baseExpression, itemEmbedding);
-    // generate & save updated embedding for subgroup
-    await removeEmbedding(perspective, subgroup.baseExpression);
-    const subgroupEmbedding = await generateEmbedding(newSubgroupSummary);
-    await saveEmbedding(perspective, subgroup.baseExpression, subgroupEmbedding);
-    // generate & save updated embedding for conversation
+    //remove previous conversation & subgroup embeddings
     await removeEmbedding(perspective, conversation.baseExpression);
-    const conversationEmbedding = await generateEmbedding(newConversationSummary);
-    await saveEmbedding(perspective, conversation.baseExpression, conversationEmbedding);
+    await removeEmbedding(perspective, subgroup.baseExpression);
+    // create new embeddings
+    await createEmbedding(perspective, newConversationSummary, conversation.baseExpression);
+    await createEmbedding(perspective, newSubgroupSummary, subgroup.baseExpression);
+    await createEmbedding(perspective, item.text, item.baseExpression);
+
     resolve();
   });
 }
