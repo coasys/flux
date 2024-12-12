@@ -124,7 +124,6 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   relationship.tag = topicId;
   relationship.relevance = relevance;
   await relationship.save();
-  return relationship;
 }
 
 async function LLMProcessing(
@@ -389,9 +388,10 @@ export async function processItem(perspective, channelId, item) {
       target: item.baseExpression,
     });
     // attach topics to new item, conversation, & subgroup (avoid duplicates on conversation & subgroup)
+    const filteredTopics = topics.filter((topic: any) => topic && topic.name && topic.relevance);
     await Promise.all(
-      topics.map(
-        (topic) =>
+      filteredTopics.map(
+        (topic: any) =>
           new Promise(async (resolve: any) => {
             // find existing topic or create new one
             const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
