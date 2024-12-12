@@ -132,7 +132,8 @@ async function LLMProcessing(
   latestSubgroups,
   latestSubgroupItems,
   allTopics,
-  attemptKey?: number
+  attemptKey?: number,
+  errorMessage?: string
 ) {
   console.log(
     "LLMProcessing: ",
@@ -143,7 +144,7 @@ async function LLMProcessing(
     attemptKey
   );
 
-  const prompt = `
+  const taskPrompt = `
     I'm passing you a JSON object with the following properties: 'previousSubgroups' (string block broken up into sections by line breaks <br/>), 'previousMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
     { previousSubgroups: [], previousMessages: [], newMessage: 'Some text', existingTopics: [] }
     Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
@@ -186,19 +187,25 @@ async function LLMProcessing(
   const client: Ad4mClient = await getAd4mClient();
   const tasks = await client.ai.tasks();
   let task = tasks.find((t) => t.name === "flux-synergy-task");
-  if (!task) {
-    task = await client.ai.addTask("flux-synergy-task", "default", prompt, examples);
+  if (!task) task = await client.ai.addTask("flux-synergy-task", "default", taskPrompt, examples);
+
+  let prompt = `{
+    previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}],
+    previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}],
+    newMessage: '${newItem.text}',
+    existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}]
+  }`;
+
+  if (errorMessage) {
+    prompt += `
+      <br/><br/>
+      The last request to the model failed with the following error message: ${errorMessage}.
+      <br/><br/>
+      Please try to provide a valid JSON response that avoids this error.
+    `;
   }
 
-  const response = await client.ai.prompt(
-    task.taskId,
-    `{
-      previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}],
-      previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}],
-      newMessage: '${newItem.text}',
-      existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}]
-    }`
-  );
+  const response = await client.ai.prompt(task.taskId, prompt);
   console.log("LLM Response: ", response);
 
   let parsedData;
@@ -213,7 +220,8 @@ async function LLMProcessing(
         latestSubgroups,
         latestSubgroupItems,
         allTopics,
-        attemptKey ? attemptKey + 1 : 1
+        attemptKey ? attemptKey + 1 : 1,
+        error.message
       );
     } else {
       // give up and return empty data
