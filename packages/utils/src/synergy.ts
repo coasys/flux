@@ -1,39 +1,40 @@
-import { Ad4mClient, LinkQuery } from "@coasys/ad4m";
+import { Ad4mClient } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
   ConversationSubgroup,
+  Embedding,
   Message,
   Post,
   SemanticRelationship,
   SubjectRepository,
   Topic,
 } from "@coasys/flux-api";
-import { languages } from "@coasys/flux-constants";
 //@ts-ignore
 import JSON5 from "json5";
 
 async function removeEmbedding(perspective, itemId) {
-  const embeddingLink = await perspective.get(
-    new LinkQuery({ source: itemId, predicate: "ad4m://embedding" })
-  );
-  if (embeddingLink[0]) return perspective.remove(embeddingLink[0]);
+  const allRelationships = (await SemanticRelationship.query(perspective, {
+    source: itemId,
+  })) as any;
+  const embeddingRelationship = allRelationships.find((r) => !r.relevance);
+  if (embeddingRelationship) {
+    const embedding = new Embedding(perspective, embeddingRelationship.tag);
+    await embedding.delete();
+    await embeddingRelationship.delete();
+  }
 }
 
 async function removeTopics(perspective, itemId) {
-  const relationships = await SemanticRelationship.query(perspective, { source: itemId });
+  const allRelationships = (await SemanticRelationship.query(perspective, {
+    source: itemId,
+  })) as any;
+  const topicRelationships = allRelationships.filter((r) => r.relevance);
   return Promise.all(
-    relationships.map(async (r) => {
-      const itemRelationshipLink = await perspective.get(
-        new LinkQuery({ source: itemId, target: r.baseExpression })
-      );
-      const relationshipTagLink = await perspective.get(
-        new LinkQuery({ source: r.baseExpression, predicate: "flux://has_tag" })
-      );
-      const linksToRemove = [] as any[];
-      if (itemRelationshipLink[0]) linksToRemove.push(itemRelationshipLink[0]);
-      if (relationshipTagLink[0]) linksToRemove.push(relationshipTagLink[0]);
-      return await perspective.removeLinks(linksToRemove);
+    topicRelationships.map(async (topicRelationship) => {
+      const topic = new Embedding(perspective, topicRelationship.tag);
+      await topic.delete();
+      await topicRelationship.delete();
     })
   );
 }
@@ -45,21 +46,21 @@ async function removeProcessedData(perspective, itemId) {
   ]);
 }
 
+// todo: use embedding language instead of stringifying
 async function createEmbedding(perspective, text, itemId) {
   // generate embedding
   const client = await getAd4mClient();
-  const embedding = await client.ai.embed("bert", text);
-  // save embedding
-  const { EMBEDDING_VECTOR_LANGUAGE } = languages;
-  const embeddingExpression = await perspective.createExpression(
-    { model: "bert", data: embedding },
-    EMBEDDING_VECTOR_LANGUAGE
-  );
-  await perspective.add({
-    source: itemId,
-    predicate: "ad4m://embedding",
-    target: embeddingExpression,
-  });
+  const rawEmbedding = await client.ai.embed("bert", text);
+  // create embedding subject entity
+  const embedding = new Embedding(perspective, undefined, itemId);
+  embedding.model = "bert";
+  embedding.embedding = JSON.stringify(rawEmbedding);
+  await embedding.save();
+  // create semantic relationship subject entity
+  const relationship = new SemanticRelationship(perspective, undefined, itemId);
+  relationship.expression = itemId;
+  relationship.tag = embedding.baseExpression;
+  await relationship.save();
 }
 
 async function getConversationData(perspective, channelId) {
@@ -269,15 +270,20 @@ export function transformItem(type, item) {
   return newItem;
 }
 
-export async function findTopics(perspective, relationships) {
+export async function findTopics(perspective, itemId) {
+  const allRelationships = (await SemanticRelationship.query(perspective, {
+    source: itemId,
+  })) as any;
+  const topicRelationships = allRelationships.filter((r: any) => r.relevance);
   return await Promise.all(
-    relationships.map(
+    topicRelationships.map(
       (r) =>
         new Promise(async (resolve) => {
-          const topicProxy = await perspective.getSubjectProxy(r.tag, "Topic");
+          const topicEntity = new Topic(perspective, r.tag);
+          const topic = await topicEntity.get();
           resolve({
             baseExpression: r.tag,
-            name: await topicProxy.topic,
+            name: topic.topic,
             relevance: r.relevance,
           });
         })
@@ -393,26 +399,17 @@ export async function processItem(perspective, channelId, item) {
       filteredTopics.map(
         (topic: any) =>
           new Promise(async (resolve: any) => {
-            // find existing topic or create new one
+            // link new item topics
             const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
-            // link topic to new item
             await linkTopic(perspective, item.baseExpression, topicId, topic.relevance);
-            // find conversation topics
-            const conversationRelationships = await SemanticRelationship.query(perspective, {
-              source: conversation.baseExpression,
-            });
-            const conversationTopics = await findTopics(perspective, conversationRelationships);
+            // link new conversation topics
+            const conversationTopics = await findTopics(perspective, conversation.baseExpression);
             if (!conversationTopics.find((t) => t.name === topic.name)) {
-              // link topic to conversation if not already linked
               await linkTopic(perspective, conversation.baseExpression, topicId, topic.relevance);
             }
-            // find subgroup topics
-            const subgroupRelationships = await SemanticRelationship.query(perspective, {
-              source: subgroup.baseExpression,
-            });
-            const subgroupTopics = await findTopics(perspective, subgroupRelationships);
+            // link new subgroup topics
+            const subgroupTopics = await findTopics(perspective, subgroup.baseExpression);
             if (!subgroupTopics.find((t) => t.name === topic.name)) {
-              // link topic to subgroup if not already linked
               await linkTopic(perspective, subgroup.baseExpression, topicId, topic.relevance);
             }
             resolve();

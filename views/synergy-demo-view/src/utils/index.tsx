@@ -1,4 +1,4 @@
-import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import { findTopics, getSubgroupItems } from "@coasys/flux-utils";
 
 // constants
@@ -27,27 +27,21 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
             setMatchIndex(conversationIndex);
             conversation.matchIndex = subgroupIndex;
           }
-          const subgroupRelationships = await SemanticRelationship.query(perspective, {
-            source: subgroup.baseExpression,
-          });
           const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
-          subgroup.topics = await findTopics(perspective, subgroupRelationships);
+          subgroup.topics = await findTopics(perspective, subgroup.baseExpression);
           subgroup.start = subgroupItems[0].timestamp;
           subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
           subgroup.participants = [];
           subgroup.children = await Promise.all(
             subgroupItems.map(async (item: any, itemIndex) => {
-              const itemRelationships = await SemanticRelationship.query(perspective, {
-                source: item.baseExpression,
-              });
               item.groupType = "item";
               if (match && item.baseExpression === match.baseExpression) {
                 setMatchIndex(conversationIndex);
                 conversation.matchIndex = subgroupIndex;
                 subgroup.matchIndex = itemIndex;
               }
-              item.topics = await findTopics(perspective, itemRelationships);
+              item.topics = await findTopics(perspective, item.baseExpression);
               if (!subgroup.participants.find((p) => p === item.author))
                 subgroup.participants.push(item.author);
               return item;
@@ -63,10 +57,7 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           if (!conversation.participants.includes(p)) conversation.participants.push(p);
         });
       });
-      const conversationRelationships = await SemanticRelationship.query(perspective, {
-        source: conversation.baseExpression,
-      });
-      conversation.topics = await findTopics(perspective, conversationRelationships);
+      conversation.topics = await findTopics(perspective, conversation.baseExpression);
       conversation.children = subgroupsWithData;
       return conversation;
     })

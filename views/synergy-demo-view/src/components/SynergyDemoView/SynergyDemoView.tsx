@@ -4,6 +4,7 @@ import {
   Channel,
   Conversation,
   ConversationSubgroup,
+  Embedding,
   SemanticRelationship,
   SubjectRepository,
   Topic,
@@ -37,18 +38,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
   const worker = useRef<Worker | null>(null);
-
-  async function findEmbedding(itemId) {
-    const links = await perspective.get(
-      new LinkQuery({
-        source: itemId,
-        predicate: "ad4m://embedding",
-      })
-    );
-    if (!links.length) return null;
-    const expression = await perspective.getExpression(links[0].data.target);
-    return Float32Array.from(Object.values(JSON.parse(expression.data).data));
-  }
 
   function entryTypeToSubjectClass(entryType: string) {
     if (entryType === "flux://conversation") return "Conversation";
@@ -84,22 +73,38 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
     return await new Promise(async (resolveMatches: any) => {
-      const sourceEmbedding = await findEmbedding(itemId);
-      const embeddingLinks = await perspective.get(
-        new LinkQuery({ predicate: "ad4m://embedding" })
+      // grab all embedding relationships
+      const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter(
+        (r) => !r.relevance
       );
-      const results = await Promise.all(
-        embeddingLinks.map(async (link: any) => {
-          const channel = await findChannel(link.data.source, channels);
-          const type = await findEntryType(link.data.source);
+      // find the source embedding
+      const sourceEmbeddingRelationship = allEmbeddingRelationships.find(
+        (r) => r.expression === itemId
+      );
+      const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
+      const sourceEmbedding = await sourceEmbeddingEntity.get();
+      // loop through others & apply search filters
+      const embeddingRelationships = allEmbeddingRelationships.filter(
+        (r) => r.expression !== itemId
+      );
+      const otherValidEmbeddings = await Promise.all(
+        embeddingRelationships.map(async (relationship: any) => {
+          const { expression, tag } = relationship;
           // if it doesn't match the search filters return null
+          const channel = await findChannel(expression, channels);
+          const type = await findEntryType(expression);
           const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
-          // otherwise grab the required data linked to the item
-          const expression = await perspective.getExpression(link.data.target);
-          const embedding = Float32Array.from(Object.values(JSON.parse(expression.data).data));
-          return { baseExpression: link.data.source, channel, type, embedding };
+          // otherwise return the matching expression with its embedding
+          const embeddingEntity = new Embedding(perspective, tag);
+          const embedding = await embeddingEntity.get();
+          return {
+            baseExpression: expression,
+            channel,
+            type,
+            embedding: JSON.parse(embedding.embedding),
+          };
         })
       );
       // generate similarity score for items
@@ -109,8 +114,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         worker.current?.terminate();
       };
       embeddingWorker.postMessage({
-        items: results.filter((i) => i !== null),
-        sourceEmbedding,
+        items: otherValidEmbeddings.filter((i) => i !== null),
+        sourceEmbedding: JSON.parse(sourceEmbedding.embedding),
       });
     });
   }
@@ -122,32 +127,22 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
-      // grab all topic links
-      const topicLinks = await perspective.get(new LinkQuery({ predicate: "flux://has_tag" }));
-      const filteredLinks = topicLinks.filter((l) => l.data.target === topicId);
-      const results = await Promise.all(
-        filteredLinks.map(async (link) => {
-          // get relationship data
-          const relationshipProxy = await perspective.getSubjectProxy(
-            link.data.source,
-            "SemanticRelationship"
-          );
-          const expressionId = await relationshipProxy.expression;
-          const channel = await findChannel(expressionId, channels);
-          const type = await findEntryType(expressionId);
+      const allRelationships = await SemanticRelationship.all(perspective);
+      const topicRelationships = allRelationships.filter((r) => r.tag === topicId);
+      const matches = await Promise.all(
+        topicRelationships.map(async (relationship) => {
+          const { expression, relevance } = relationship;
           // if it doesn't match the search filters return null
+          const channel = await findChannel(expression, channels);
+          const type = await findEntryType(expression);
           const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
-          return {
-            baseExpression: expressionId,
-            channel,
-            type,
-            score: (await relationshipProxy.relevance) / 100,
-          };
+          // otherwise return the matching expression
+          return { baseExpression: expression, channel, type, score: relevance / 100 };
         })
       );
-      resolveMatches(results.filter((i) => i !== null));
+      resolveMatches(matches.filter((i) => i !== null));
     });
   }
 
@@ -211,6 +206,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     perspective.ensureSDNASubjectClass(Conversation);
     perspective.ensureSDNASubjectClass(ConversationSubgroup);
     perspective.ensureSDNASubjectClass(Topic);
+    perspective.ensureSDNASubjectClass(Embedding);
     perspective.ensureSDNASubjectClass(SemanticRelationship);
     console.log("SNDA classes ensured");
   }, []);

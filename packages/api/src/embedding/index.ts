@@ -1,11 +1,11 @@
-import { SDNAClass, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 import { languages } from "@coasys/flux-constants";
 const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 
 @SDNAClass({
   name: "Embedding",
 })
-export default class Embedding {
+export default class Embedding extends SubjectEntity {
   @SubjectFlag({
     through: "flux://entry_type",
     value: "flux://has_embedding",
@@ -15,7 +15,6 @@ export default class Embedding {
   @SubjectProperty({
     through: "flux://embedding",
     writable: true,
-    resolveLanguage: EMBEDDING_VECTOR_LANGUAGE,
   })
   embedding: any;
 
