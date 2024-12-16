@@ -1,0 +1,45 @@
+.wrapper {
+  border: 1px solid var(--j-color-ui-200);
+  border-radius: var(--j-border-radius);
+  background-color: var(--j-color-ui-50);
+  margin: var(--j-space-400) auto 0 auto;
+  padding: var(--j-space-500);
+  width: 100%;
+  max-width: 1000px;
+
+  .volumeThreshold {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    border-radius: 5px;
+    background-color: var(--j-color-ui-200);
+
+    .volume {
+      position: absolute;
+      height: 30px;
+      border-radius: 5px;
+      background-color: var(--j-color-primary-500);
+    }
+  }
+
+  .transcript {
+    border: 1px solid var(--j-color-ui-200);
+    border-radius: var(--j-border-radius);
+    padding: var(--j-space-400);
+    background-color: var(--j-color-ui-100);
+    width: 100%;
+    margin-left: 0;
+    opacity: 1;
+    max-height: 500px;
+    transition: all 1s;
+
+    &.slideLeft {
+      margin-left: -100%;
+      opacity: 0;
+    }
+
+    &.hide {
+      max-height: 0;
+    }
+  }
+}

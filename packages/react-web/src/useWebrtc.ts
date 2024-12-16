@@ -1,24 +1,24 @@
-import { useEffect, useState, useRef, useCallback } from "react";
 import {
+  getDefaultIceServers,
   getForVersion,
   setForVersion,
   throttle,
-  getDefaultIceServers,
 } from "@coasys/flux-utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { version } from "../package.json";
 
 import {
   Connection,
   Event,
-  Settings,
   EventLogItem,
-  WebRTCManager,
   IceServer,
+  Settings,
+  WebRTCManager,
 } from "@coasys/flux-webrtc";
 
-import { videoSettings } from "@coasys/flux-constants";
-import { PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { videoSettings } from "@coasys/flux-constants";
 
 const { defaultSettings, videoDimensions } = videoSettings;
 
@@ -75,6 +75,7 @@ export type WebRTC = {
   onToggleScreenShare: (enabled: boolean) => void;
   onChangeState: (newState: Peer["state"]) => void;
   onChangeIceServers: (servers: IceServer[]) => void;
+  updateTranscriptionSetting: (setting: string, value: any) => void;
 };
 
 export default function useWebRTC({
@@ -319,8 +320,7 @@ export default function useWebRTC({
    */
   async function onChangeCamera(deviceId: string) {
     const newSettings = {
-      audio: localState.settings.audio,
-      screen: localState.settings.screen,
+      ...localState.settings,
       video: { ...videoDimensions, deviceId: deviceId },
     };
 
@@ -349,9 +349,8 @@ export default function useWebRTC({
    */
   async function onChangeAudio(deviceId: string) {
     const newSettings = {
+      ...localState.settings,
       audio: { deviceId: deviceId },
-      screen: localState.settings.screen,
-      video: localState.settings.video,
     };
 
     if (localStream) {
@@ -381,8 +380,7 @@ export default function useWebRTC({
     );
 
     const newSettings = {
-      audio: localState.settings.audio,
-      screen: localState.settings.screen,
+      ...localState.settings,
       video: enabled
         ? {
             ...videoDimensions,
@@ -432,14 +430,13 @@ export default function useWebRTC({
     );
 
     const newSettings = {
+      ...localState.settings,
       audio: enabled
         ? {
             ...videoDimensions,
             deviceId: audioDeviceIdFromLocalStorage || undefined,
           }
         : false,
-      video: localState.settings.video,
-      screen: localState.settings.screen,
     };
 
     if (enabled) {
@@ -461,12 +458,26 @@ export default function useWebRTC({
   }
 
   /**
+   * Update transcription setting
+   */
+  async function updateTranscriptionSetting(setting: string, value: any) {
+    const newSettings = {
+      ...localState.settings,
+      transcriber: { ...localState.settings.transcriber, [setting]: value },
+    };
+    // Notify others of state change when toggling 'on' setting
+    if (setting === "on")
+      onChangeState({ ...localState, settings: newSettings });
+    // Otherwise just update local state
+    else setLocalState({ ...localState, settings: newSettings });
+  }
+
+  /**
    * Enable/disable screen share
    */
   async function onToggleScreenShare(enabled: boolean) {
     const newSettings = {
-      audio: localState.settings.audio,
-      video: localState.settings.video,
+      ...localState.settings,
       screen: enabled,
     };
 
@@ -647,5 +658,6 @@ export default function useWebRTC({
     onToggleScreenShare,
     onChangeState,
     onChangeIceServers,
+    updateTranscriptionSetting,
   };
 }

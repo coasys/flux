@@ -1,17 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal, LinkQuery } from "@coasys/ad4m";
+import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
 import { useAgent, useSubjects } from "@coasys/ad4m-react-hooks";
-import { Message, generateWCName } from "@coasys/flux-api";
-import { name } from "../../../package.json";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import MessageList from "../MessageList/MessageList";
+import { Message } from "@coasys/flux-api";
 import { community } from "@coasys/flux-constants";
-import { getPosition } from "../../utils/getPosition";
-
-import styles from "./ChatView.module.css";
 import { EntryType, Profile } from "@coasys/flux-types";
+import { processItem, profileFormatter } from "@coasys/flux-utils";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { getPosition } from "../../utils/getPosition";
 import Avatar from "../Avatar";
-import { profileFormatter } from "@coasys/flux-utils";
+import MessageList from "../MessageList/MessageList";
+import styles from "./ChatView.module.css";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -45,7 +43,7 @@ export default function ChatView({
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
     did: replyMessage?.author,
-    formatter: profileFormatter
+    formatter: profileFormatter,
   });
 
   const { repo } = useSubjects({
@@ -54,25 +52,25 @@ export default function ChatView({
     subject: Message,
   });
 
-  useEffect(() => {
-    // Reset reply and thread
-    setThreadSource(null);
-    setReplyMessage(null);
-  }, [perspective.uuid, source]);
-
   const { profile: threadProfile } = useAgent<Profile>({
     client: agent,
     did: threadSource?.author,
-    formatter: profileFormatter
+    formatter: profileFormatter,
   });
 
   async function submit() {
     try {
       const html = editor.current?.editor.getHTML();
+      const text = editor.current?.editor.getText();
       editor.current?.clear();
-      const message = await repo.create({
-        body: html,
+
+      // @ts-ignore
+      const message = (await repo.create({ body: html })) as any;
+      await processItem(perspective, source, {
+        baseExpression: message.id,
+        text,
       });
+
       if (replyMessage) {
         perspective.addLinks([
           {
@@ -89,7 +87,7 @@ export default function ChatView({
       }
       setReplyMessage(null);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -160,6 +158,12 @@ export default function ChatView({
     setPickerInfo(null);
   }
 
+  useEffect(() => {
+    // Reset reply and thread
+    setThreadSource(null);
+    setReplyMessage(null);
+  }, [perspective.uuid, source]);
+
   return (
     <div
       className={styles.wrapper}
@@ -176,7 +180,7 @@ export default function ChatView({
           zIndex: 999,
           ...getPosition(pickerInfo?.x, pickerInfo?.y, emojiPicker?.current),
         }}
-      ></j-emoji-picker>
+      />
 
       <div className={styles.inner}>
         <MessageList
@@ -195,7 +199,7 @@ export default function ChatView({
             <j-box py="300">
               <j-flex a="center" gap="400">
                 <j-button
-                  onclick={() => setReplyMessage(null)}
+                  onClick={() => setReplyMessage(null)}
                   size="xs"
                   circle
                   square
@@ -269,7 +273,7 @@ export default function ChatView({
                   className={styles.body}
                   nomargin
                   dangerouslySetInnerHTML={{ __html: threadProfile?.body }}
-                ></j-text>
+                />
               </j-flex>
               <j-button
                 onClick={onCloseThread}

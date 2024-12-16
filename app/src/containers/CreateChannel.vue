@@ -83,7 +83,7 @@
                     :loading="loadedPlugins[app.pkg] === 'loading'"
                     :variant="
                       isSelected(app) && loadedPlugins[app.pkg] === 'loaded'
-                        ? 'link'
+                        ? ''
                         : 'primary'
                     "
                     @click="() => toggleView(app)"
@@ -148,9 +148,12 @@ export default defineComponent({
 
       const filtered = res.filter((pkg) => {
         try {
-          return semver.gte(semver.coerce(pkg?.ad4mVersion || "0.0.0"), "0.8.1")
+          return semver.gte(
+            semver.coerce(pkg?.ad4mVersion || "0.0.0"),
+            "0.8.1"
+          );
         } catch (error) {
-          return false
+          return false;
         }
       });
 

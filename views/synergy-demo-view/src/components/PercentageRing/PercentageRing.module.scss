@@ -1,0 +1,22 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  svg {
+    width: inherit;
+    height: inherit;
+    transform: rotate(-90deg);
+
+    circle {
+      fill: transparent;
+      stroke-linecap: round;
+    }
+  }
+
+  p {
+    position: absolute;
+  }
+}

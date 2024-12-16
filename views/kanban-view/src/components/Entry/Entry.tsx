@@ -1,12 +1,13 @@
-import { useEffect, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@coasys/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject } from "@coasys/ad4m-react-hooks";
+import { processItem } from "@coasys/flux-utils";
+import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
-import styles from "./Entry.module.css";
 
 type Props = {
   perspective: PerspectiveProxy;
   id: string;
+  channelId: string;
   selectedClass: string;
   onUrlClick?: Function;
 };
@@ -14,6 +15,7 @@ type Props = {
 export default function Entry({
   perspective,
   id,
+  channelId,
   selectedClass,
   onUrlClick = () => {},
 }: Props) {
@@ -46,7 +48,20 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    repo.update(id, { [propName]: value });
+    await repo.update(id, { [propName]: value }).then(() => {
+      if (["name", "status"].includes(propName)) {
+        const task = propName === "name" ? value : entry.name;
+        const status =
+          propName === "status"
+            ? value.split("task://")[1]
+            : entry.status.split("task://")[1];
+        const taskText = `Task: "${task}", Status: "${status}"`;
+        processItem(perspective, channelId, {
+          baseExpression: id,
+          text: taskText,
+        });
+      }
+    });
   }
 
   if (entry) {

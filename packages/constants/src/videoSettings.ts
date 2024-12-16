@@ -1,4 +1,4 @@
-import { Settings, IceServer } from "utils/helpers/WebRTCManager";
+import { IceServer, Settings } from "utils/helpers/WebRTCManager";
 
 const frameRate = {
   min: 5,
@@ -26,6 +26,12 @@ export const defaultSettings = {
   audio: true,
   video: false,
   screen: false,
+  transcriber: {
+    on: false,
+    selectedModel: "Base",
+    previewTimeout: 0.4,
+    messageTimeout: 5,
+  },
 } as Settings;
 
 export const defaultIceServers = [

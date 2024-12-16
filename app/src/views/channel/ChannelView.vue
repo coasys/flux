@@ -188,6 +188,7 @@ import {
   Community,
   generateWCName,
   joinCommunity,
+  Topic,
 } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
@@ -215,6 +216,9 @@ export default defineComponent({
     const { perspectives } = usePerspectives(client);
 
     const { data } = usePerspective(client, () => props.communityId);
+
+    // ensure SNDA is working for topics
+    await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
     const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
@@ -341,12 +345,17 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      // if entering webrtc view close modal
-      if (value === "@coasys/flux-webrtc-view") this.webrtcModalOpen = false;
+      // if entering webrtc or synergy view, close modal
+      if (
+        ["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
+          value
+        )
+      )
+        this.webrtcModalOpen = false;
       else if (
         // if leaving webrtc view (& not small screen) open modal
         this.currentView === "@coasys/flux-webrtc-view" &&
-        window.screen.width > 900
+        window.innerWidth > 900
       )
         this.webrtcModalOpen = true;
       this.currentView = value;

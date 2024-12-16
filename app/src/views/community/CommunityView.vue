@@ -51,7 +51,7 @@
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <Avatar
-            :initials="community.name?.charAt(0)"
+            :initials="`${community?.name}`.charAt(0)"
             size="xxl"
             :url="community.thumbnail || null"
           ></Avatar>
@@ -92,29 +92,31 @@
         </j-flex>
       </div>
     </div>
-
   </sidebar-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
-import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
+import { defineComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
-import ChannelView from "@/views/channel/ChannelView.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
+import ChannelView from "@/views/channel/ChannelView.vue";
 
-import { Channel, Community } from "@coasys/flux-api";
-import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { mapActions } from "pinia";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useSubjects, usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { useCommunities } from "@coasys/flux-vue";
-import { usePerspective } from "@coasys/ad4m-vue-hooks";
+import { ModalsState } from "@/store/types";
 import { PerspectiveState } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import {
+  usePerspective,
+  usePerspectives,
+  useSubjects,
+} from "@coasys/ad4m-vue-hooks";
+import { Channel, Community } from "@coasys/flux-api";
+import { useCommunities } from "@coasys/flux-vue";
+import { mapActions } from "pinia";
 
 type LoadedChannels = {
   [channelId: string]: boolean;

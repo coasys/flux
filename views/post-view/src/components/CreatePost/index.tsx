@@ -1,12 +1,15 @@
-import { useRef, useState, useEffect, useMemo } from "preact/hooks";
-import Editor from "../Editor";
+import { Post as PostSubject, SubjectRepository } from "@coasys/flux-api";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  processItem,
+  resizeImage,
+} from "@coasys/flux-utils";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../FileUpload";
-import styles from "./index.module.css";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import PostImagePreview from "../PostImagePreview";
-import { SubjectRepository } from "@coasys/flux-api";
-import { Post as PostSubject } from "@coasys/flux-api";
+import styles from "./index.module.css";
 
 const initialState = {
   title: null,
@@ -107,8 +110,16 @@ export default function CreatePost({
           // if we send in null the property does not get updated
           image: imageReplaced ? data.image : undefined,
         });
+        processItem(perspective, source, {
+          baseExpression: postId,
+          text: data.title || data.body,
+        });
       } else {
         newPost = await Post.create(data);
+        processItem(perspective, source, {
+          baseExpression: newPost.id,
+          text: data.title || data.body,
+        });
       }
 
       onPublished(isEditing ? postId : newPost?.id);

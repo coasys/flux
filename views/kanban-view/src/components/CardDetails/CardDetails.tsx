@@ -1,17 +1,17 @@
-import { useState } from "preact/hooks";
-import { useSubject } from "@coasys/ad4m-react-hooks";
-import styles from "./CardDetails.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
+import { useSubject } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import Entry from "../Entry";
-import { useEffect } from "preact/hooks";
-import { Profile } from "@coasys/flux-types";
 import { getProfile } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import { useEffect, useState } from "preact/hooks";
 import { useAssociations } from "../../hooks/useAssociations";
+import Entry from "../Entry";
+import styles from "./CardDetails.module.css";
 
 type Props = {
   id: string;
   perspective: PerspectiveProxy;
+  channelId: string;
   selectedClass: string;
   agent: AgentClient;
   onDeleted: () => void;
@@ -23,6 +23,7 @@ export default function CardDetails({
   selectedClass,
   onDeleted = () => {},
   perspective,
+  channelId,
 }: Props) {
   const { entry, repo } = useSubject({
     perspective,
@@ -88,7 +89,8 @@ export default function CardDetails({
             id={id}
             perspective={perspective}
             selectedClass={selectedClass}
-          ></Entry>
+            channelId={channelId}
+          />
         </j-box>
 
         <j-box pb="500">

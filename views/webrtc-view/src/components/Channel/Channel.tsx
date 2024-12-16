@@ -18,14 +18,15 @@ import { Profile } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
 import Debug from "../Debug";
 import Transcriber from "../Transcriber";
-import styles from "./Channel.module.css";
+import styles from "./Channel.module.scss";
 
 type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
   currentView: string;
-  setModalOpen: (state: boolean) => void;
+  setModalOpen?: (state: boolean) => void;
+  setProcessingItems?: (items) => void;
 };
 
 export default function Channel({
@@ -34,14 +35,18 @@ export default function Channel({
   agent: agentClient,
   currentView,
   setModalOpen,
+  setProcessingItems,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
-
-  const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: (profile: any) => {
-    return profileFormatter(profile?.perspective?.links || profile)
-  } });
+  const { profile } = useAgent<Profile>({
+    client: agentClient,
+    did: () => agent?.did,
+    formatter: (profile: any) => {
+      return profileFormatter(profile?.perspective?.links || profile);
+    },
+  });
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
@@ -80,15 +85,21 @@ export default function Channel({
   }, [agent]);
 
   return (
-    <section className={styles.outer} ref={wrapperEl}>
-      {currentView !== "@coasys/flux-webrtc-view" && (
-        <button
-          className={styles.closeButton}
-          onClick={() => setModalOpen(false)}
-        >
-          <j-icon name="x" color="color-white" />
-        </button>
-      )}
+    <section
+      className={`${styles.outer} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+      ref={wrapperEl}
+    >
+      {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
+        currentView
+      ) &&
+        setModalOpen && (
+          <button
+            className={styles.closeButton}
+            onClick={() => setModalOpen(false)}
+          >
+            <j-icon name="x" color="color-white" />
+          </button>
+        )}
       {!webRTC.hasJoined && (
         <JoinScreen
           webRTC={webRTC}
@@ -110,7 +121,14 @@ export default function Channel({
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
           />
-          <Transcriber source={source} perspective={perspective} />
+          {webRTC.localState.settings.transcriber.on && (
+            <Transcriber
+              webRTC={webRTC}
+              source={source}
+              perspective={perspective}
+              setProcessingItems={setProcessingItems}
+            />
+          )}
         </>
       )}
 

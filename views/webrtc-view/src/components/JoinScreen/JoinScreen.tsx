@@ -4,7 +4,7 @@ import { useEffect, useRef } from "preact/hooks";
 
 import Avatar from "../Avatar";
 import Disclaimer from "../Disclaimer";
-import styles from "./JoinScreen.module.css";
+import styles from "./JoinScreen.module.scss";
 
 type Props = {
   webRTC: WebRTC;
@@ -31,23 +31,33 @@ export default function JoinScreen({
   }, [videoRef, webRTC.localStream]);
 
   return (
-    <j-flex a="center" direction="column">
+    <j-flex
+      a="center"
+      direction="column"
+      style={{
+        width:
+          currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
+      }}
+    >
       <h1>You haven't joined this room</h1>
 
       <j-text variant="body">Your microphone will be enabled.</j-text>
 
-      <j-box pt="200">
+      <j-box
+        pt="200"
+        style={{
+          width:
+            currentView === "@coasys/flux-synergy-demo-view"
+              ? "100%"
+              : undefined,
+        }}
+      >
         <div
-          className={styles.preview}
+          className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
           data-camera-enabled={!!webRTC.localState.settings.video}
           data-mirrored={true}
         >
-          <video
-            ref={videoRef}
-            className={styles.video}
-            autoPlay
-            playsInline
-          ></video>
+          <video ref={videoRef} className={styles.video} autoPlay playsInline />
 
           <div className={styles.details}>
             <div className={styles.avatar}>

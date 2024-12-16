@@ -3,3 +3,11 @@
   width: 100%;
   height: 100%;
 }
+
+:root j-menu-group::part(summary) {
+  margin: 5px 0;
+}
+
+:root j-menu-group::part(summary)::after {
+  top: 5px;
+}

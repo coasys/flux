@@ -17,9 +17,9 @@
   "main": "background.js",
   "dependencies": {
     "@babel/core": "*",
-    "@coasys/ad4m": "0.10.0-rc7",
-    "@coasys/ad4m-connect": "0.10.0-rc7",
-    "@coasys/ad4m-vue-hooks": "0.10.0-rc7",
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
+    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.4",
+    "@coasys/ad4m-vue-hooks": "0.10.0-rc7.local-ai.4",
     "@capacitor/android": "^6.0.0",
     "@capacitor/cli": "^6.0.0",
     "@capacitor/core": "^6.0.0",
@@ -36,7 +36,7 @@
     "@coasys/flux-poll-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.8.1",
+    "@coasys/flux-utils": "0.9.0",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "0.8.1-fix.1",
     "@coasys/nillion-file-store": "*",
@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.20.13",
+    "@babel/plugin-transform-class-properties": "^7.25.4",
     "@capacitor/assets": "^3.0.5",
     "@testing-library/vue": "^6.4.2",
     "@types/jest": "^29.5.12",
@@ -82,6 +83,7 @@
     "vite": "^4.3.5",
     "vite-plugin-babel-compiler": "^0.3.0",
     "vite-plugin-pwa": "^0.14.7",
+    "vite-plugin-worker": "^1.0.5",
     "vue-devtools": "^5.1.4"
   },
   "contributors": [

@@ -19,17 +19,17 @@
     "publish-package": "npm publish"
   },
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc5",
-    "@coasys/ad4m-connect": "0.10.0-prerelease-fix-2",
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
+    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.4",
     "@coasys/flux-api": "*",
     "@coasys/flux-ui": "*",
-    "@tiptap/core": "^2.0.3",
-    "@tiptap/extension-link": "^2.0.3",
-    "@tiptap/extension-mention": "^2.0.3",
-    "@tiptap/extension-placeholder": "^2.0.3",
-    "@tiptap/pm": "^2.0.3",
-    "@tiptap/starter-kit": "^2.0.3",
-    "@tiptap/suggestion": "^2.0.3",
+    "@tiptap/core": "^2.9.1",
+    "@tiptap/extension-link": "^2.9.1",
+    "@tiptap/extension-mention": "^2.9.1",
+    "@tiptap/extension-placeholder": "^2.9.1",
+    "@tiptap/pm": "^2.9.1",
+    "@tiptap/starter-kit": "^2.9.1",
+    "@tiptap/suggestion": "^2.9.1",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {

@@ -18,6 +18,7 @@ export default function MessageItem({
   onEmojiClick = () => {},
   onReplyClick = () => {},
   onThreadClick = () => {},
+  hideToolbar = false
 }: {
   perspective: PerspectiveProxy;
   showAvatar?: boolean;
@@ -28,6 +29,7 @@ export default function MessageItem({
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
+  hideToolbar?: boolean;
 }) {
   const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
 
@@ -161,7 +163,8 @@ export default function MessageItem({
           </j-box>
         )}
       </div>
-      <div className={styles.toolbar}>
+      {!hideToolbar && (
+        <div className={styles.toolbar}>
         <j-tooltip placement="top" title="Add reaction">
           <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
             <j-icon size="sm" name="emoji-smile"></j-icon>
@@ -187,7 +190,7 @@ export default function MessageItem({
             <j-icon size="sm" name="reply"></j-icon>
           </j-button>
         </j-tooltip>
-      </div>
+      </div>)}
     </div>
   );
 }

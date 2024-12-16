@@ -1,6 +1,8 @@
+export * from "./asyncFilter";
 export * from "./createNeighbourhoodMeta";
 export * from "./expressionHelpers";
 export * from "./formatString";
+export * from "./getDefaultIceServers";
 export * from "./getImage";
 export * from "./getNeighbourhoodMeta";
 export * from "./languageHelpers";
@@ -11,6 +13,5 @@ export * from "./prologHelpers";
 export * from "./retry";
 export * from "./scrollHelpers";
 export * from "./sleep";
-export * from "./asyncFilter";
+export * from "./synergy";
 export * from "./throttle";
-export * from "./getDefaultIceServers";

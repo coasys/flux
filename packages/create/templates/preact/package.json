@@ -32,10 +32,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc5",
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
     "@coasys/flux-api": "0.9.0",
     "@coasys/flux-container": "0.9.0",
-    "@coasys/ad4m-react-hooks": "0.10.0-rc5",
+    "@coasys/ad4m-react-hooks": "0.10.0-rc7.local-ai.4",
     "preact": "^10.13.1"
   },
   "devDependencies": {
