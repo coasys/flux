@@ -10,8 +10,8 @@ import {
   Topic,
 } from "@coasys/flux-api";
 import { getAllTopics } from "@coasys/flux-utils";
-import EmbeddingWorker from "@coasys/flux-utils/src/embeddingWorker?worker&inline";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
+import { cos_sim } from "@xenova/transformers";
 import { useEffect, useRef, useState } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
 import TimelineColumn from "../TimelineColumn";
@@ -82,12 +82,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         (r) => r.expression === itemId
       );
       const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
-      const sourceEmbedding = await sourceEmbeddingEntity.get();
+      const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
       // loop through others & apply search filters
       const embeddingRelationships = allEmbeddingRelationships.filter(
         (r) => r.expression !== itemId
       );
-      const otherValidEmbeddings = await Promise.all(
+      const matches = await Promise.all(
         embeddingRelationships.map(async (relationship: any) => {
           const { expression, tag } = relationship;
           // if it doesn't match the search filters return null
@@ -96,27 +96,14 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
           const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
-          // otherwise return the matching expression with its embedding
+          // otherwise return the matching expression with its similarity score
           const embeddingEntity = new Embedding(perspective, tag);
-          const embedding = await embeddingEntity.get();
-          return {
-            baseExpression: expression,
-            channel,
-            type,
-            embedding: JSON.parse(embedding.embedding),
-          };
+          const embedding = JSON.parse((await embeddingEntity.get()).embedding);
+          const score = await cos_sim(sourceEmbedding, embedding);
+          return { baseExpression: expression, channel, type, score };
         })
       );
-      // generate similarity score for items
-      const embeddingWorker = new EmbeddingWorker();
-      embeddingWorker.onmessage = async (message) => {
-        resolveMatches(message.data);
-        worker.current?.terminate();
-      };
-      embeddingWorker.postMessage({
-        items: otherValidEmbeddings.filter((i) => i !== null),
-        sourceEmbedding: JSON.parse(sourceEmbedding.embedding),
-      });
+      resolveMatches(matches.filter((item) => item && item.score > 0.2));
     });
   }
 
