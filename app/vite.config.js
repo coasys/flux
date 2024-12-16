@@ -89,8 +89,8 @@ export default ({ mode }) => {
               type: "image/png",
             },
             {
-              src: "images/icons/icon-96x96.png",
-              sizes: "96x96",
+              src: "images/icons/icon-92x92.png",
+              sizes: "92x92",
               type: "image/png",
             },
             {
@@ -109,13 +109,13 @@ export default ({ mode }) => {
               type: "image/png",
             },
             {
-              src: "images/icons/icon-192x192.png",
-              sizes: "192x192",
+              src: "images/icons/icon-196x196.png",
+              sizes: "196x196",
               type: "image/png",
             },
             {
-              src: "images/icons/icon-384x384.png",
-              sizes: "384x384",
+              src: "images/icons/icon-256x256.png",
+              sizes: "256x256",
               type: "image/png",
             },
             {
