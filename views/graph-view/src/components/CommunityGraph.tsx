@@ -104,7 +104,6 @@ export default function CommunityOverview({
   // Fetch initial snapshot
   useEffect(() => {
     fetchSnapShot(perspective, source).then(({ links, nodes }) => {
-      console.log(links, nodes);
       setNodes(nodes);
       setLinks(links);
     });

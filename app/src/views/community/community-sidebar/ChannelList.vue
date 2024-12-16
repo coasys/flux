@@ -255,7 +255,6 @@ export default defineComponent({
       return channelViewOptions.filter((o) => views.includes(o.type));
     },
     getIcon(view: ChannelView) {
-      console.log({ channelViewOptions, view, channels: this.channels });
       return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
