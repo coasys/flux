@@ -38,6 +38,7 @@ export default function DisplayValue({
   function onKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
+      onUpdate(e.target.value);
       setIsEditing(false);
     }
     if (e.key === "Escape") {
