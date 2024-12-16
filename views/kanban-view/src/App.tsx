@@ -1,6 +1,6 @@
 import styles from "./App.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import TodoView from "./components/Board";
+import Board from "./components/Board";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
@@ -14,11 +14,11 @@ export default function App({ agent, perspective, source }: Props) {
 
   return (
     <div className={styles.appContainer}>
-      <TodoView
+      <Board
         agent={agent}
         perspective={perspective}
         source={source}
-      ></TodoView>
+      />
     </div>
   );
 }
