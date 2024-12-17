@@ -202,6 +202,8 @@ async function LLMProcessing(
     console.log("LLM Prompt:", prompt)
     const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
+    response.replace("False", "false");
+    response.replace("True", "true");
     try {
       parsedData = JSON5.parse(response);
     } catch (error) {
