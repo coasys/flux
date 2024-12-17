@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "baseUrl": "/"
+  },
+  "include": ["./globals.d.ts", "src/**/*.ts"]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "my-first-vue-flux-plugin",
+  "version": "0.0.1",
+  "fluxplugin": {
+    "name": "Todos",
+    "description": "Work on a collaborative todo list",
+    "icon": "list-check"
+  },
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
+    "@coasys/ad4m-vue-hooks": "^0.10.0-rc7.local-ai.4",
+    "@coasys/flux-api": "0.10.0-rc7.local-ai.4",
+    "vue": "^3.5.12"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-decorators": "^7.21.0",
+    "@coasys/flux-container": "0.10.0-rc7.local-ai.4",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "vite": "^5.4.10",
+    "vite-plugin-css-injected-by-js": "^3.5.2"
+  }
+}

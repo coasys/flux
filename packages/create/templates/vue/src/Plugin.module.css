@@ -1,0 +1,28 @@
+.appContainer {
+  margin: 0 auto;
+  padding: var(--j-space-800);
+  width: 100%;
+  max-width: 800px;
+}
+
+.titleInput {
+  width: 100%;
+  font-size: var(--j-font-size-700);
+  height: var(--j-size-xl);
+  padding: 0;
+  color: var(--j-color-black);
+  background: transparent;
+  border: 0;
+}
+
+.titleInput::placeholder {
+  color: var(--j-color-ui-400);
+}
+
+.titleInput:focus {
+  outline: 0;
+}
+
+.doneTodo {
+  text-decoration: line-through;
+}
