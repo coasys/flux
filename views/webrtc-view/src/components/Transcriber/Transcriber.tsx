@@ -118,13 +118,16 @@ export default function Transcriber({
       const transcriptCard = document.getElementById(
         `transcript-${previousId}`
       );
-      transcriptCard.classList.add(styles.slideLeft);
-      setTimeout(() => {
-        transcriptCard.classList.add(styles.hide);
+      if(transcriptCard){
+        transcriptCard.classList.add(styles.slideLeft);
         setTimeout(() => {
-          setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+          transcriptCard.classList.add(styles.hide);
+          setTimeout(() => {
+            setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+          }, 500);
         }, 500);
-      }, 500);
+      }
+      
       // save message
       // @ts-ignore
       const message = (await messageRepo.create({
