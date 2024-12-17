@@ -1,4 +1,4 @@
-import { Ad4mClient } from "@coasys/ad4m";
+import { Ad4mClient, AITask } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
@@ -127,24 +127,10 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
-async function LLMProcessing(
-  newItem,
-  latestSubgroups,
-  latestSubgroupItems,
-  allTopics,
-  attemptKey?: number,
-  errorMessage?: string
-) {
-  console.log(
-    "LLMProcessing: ",
-    newItem,
-    latestSubgroups,
-    latestSubgroupItems,
-    allTopics,
-    attemptKey
-  );
-
+export async function ensureLLMTask(): Promise<AITask> {
   const taskPrompt = `
+    You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
+    So make sure to always (!) respond with valid JSON!!
     I'm passing you a JSON object with the following properties: 'previousSubgroups' (string block broken up into sections by line breaks <br/>), 'previousMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
     { previousSubgroups: [], previousMessages: [], newMessage: 'Some text', existingTopics: [] }
     Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
@@ -162,7 +148,10 @@ async function LLMProcessing(
     4. **'newSubgroupSummary'**: a 1 to 3 sentence paragraph (string) summary of the conents of the conversation. If changedSubject is true, base the summary solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
     5. **'newConversationName'**: a 1 to 3 word title (string) describing the contents of the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
     6. **'newConversationSummary'**: a 1 to 3 sentence paragraph (string) summary of the the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
-    Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax.
+    Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax, don't append text outside of quotes, don't use the assign operator ("=").
+    If you make a mistake and we can't parse you're output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
+    So if you see that field, take extra care about that specific mistake and don't make it again!
+    Don't talk about the errors in the summaries or topics.
   `;
 
   const examples = [
@@ -188,63 +177,63 @@ async function LLMProcessing(
   const tasks = await client.ai.tasks();
   let task = tasks.find((t) => t.name === "flux-synergy-task");
   if (!task) task = await client.ai.addTask("flux-synergy-task", "default", taskPrompt, examples);
+  return task
+}
 
-  let prompt = `{
-    previousSubgroups: [${latestSubgroups.map((s: any) => s.summary).join(" <br/> ")}],
-    previousMessages: [${latestSubgroupItems.map((si: any) => si.text).join(", ")}],
-    newMessage: '${newItem.text}',
-    existingTopics: [${allTopics.map((t: any) => t.name).join(", ")}]
-  }`;
-
-  if (errorMessage) {
-    prompt += `
-      <br/><br/>
-      The last request to the model failed with the following error message: ${errorMessage}.
-      <br/><br/>
-      Please try to provide a valid JSON response that avoids this error.
-    `;
-  }
-
-  const response = await client.ai.prompt(task.taskId, prompt);
-  console.log("LLM Response: ", response);
-
-  let parsedData;
-  try {
-    parsedData = JSON5.parse(response);
-  } catch (error) {
-    console.error("Failed to parse LLM response:", error);
-    if (!attemptKey || attemptKey < 5) {
-      // retry up to 5 times if LLM fails to produce valid JSON
-      return await LLMProcessing(
-        newItem,
-        latestSubgroups,
-        latestSubgroupItems,
-        allTopics,
-        attemptKey ? attemptKey + 1 : 1,
-        error.message
-      );
-    } else {
-      // give up and return empty data
-      console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
-      return {
-        topics: [],
-        changedSubject: false,
-        newSubgroupName: "",
-        newSubgroupSummary: "",
-        newConversationName: "",
-        newConversationSummary: "",
-      };
-    }
-  }
-
-  return {
-    topics: parsedData.topics || [],
-    changedSubject: parsedData.changedSubject || false,
-    newSubgroupName: parsedData.newSubgroupName || "",
-    newSubgroupSummary: parsedData.newSubgroupSummary || "",
-    newConversationName: parsedData.newConversationName || "",
-    newConversationSummary: parsedData.newConversationSummary || "",
+async function LLMProcessing(
+  newItem,
+  latestSubgroups,
+  latestSubgroupItems,
+  allTopics,
+) {
+  let prompt = {
+    previousSubgroups: [latestSubgroups.map((s: any) => s.summary).join(" <br/> ")],
+    previousMessages: [latestSubgroupItems.map((si: any) => si.text).join(", ")],
+    newMessage: newItem.text,
+    existingTopics: [allTopics.map((t: any) => t.name).join(", ")]
   };
+
+  const task = await ensureLLMTask();
+  const client: Ad4mClient = await getAd4mClient();
+  let parsedData;
+  let attempts = 0
+  while(!parsedData && attempts < 5) {
+    attempts += 1
+    console.log("LLM Prompt:", prompt)
+    const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
+    console.log("LLM Response: ", response);
+    response.replace("False", "false");
+    response.replace("True", "true");
+    try {
+      parsedData = JSON5.parse(response);
+    } catch (error) {
+      console.error("LLM response parse error:", error)
+      //@ts-ignore
+      prompt.jsonParseError = error;
+    }  
+  }
+
+  if(parsedData){
+    return {
+      topics: parsedData.topics || [],
+      changedSubject: parsedData.changedSubject || false,
+      newSubgroupName: parsedData.newSubgroupName || "",
+      newSubgroupSummary: parsedData.newSubgroupSummary || "",
+      newConversationName: parsedData.newConversationName || "",
+      newConversationSummary: parsedData.newConversationSummary || "",
+    };
+  } else {
+    // give up and return empty data
+    console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
+    return {
+      topics: [],
+      changedSubject: false,
+      newSubgroupName: "",
+      newSubgroupSummary: "",
+      newConversationName: "",
+      newConversationSummary: "",
+    };
+  }
 }
 
 export function transformItem(type, item) {

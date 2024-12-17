@@ -30,8 +30,10 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
           subgroup.topics = await findTopics(perspective, subgroup.baseExpression);
-          subgroup.start = subgroupItems[0].timestamp;
-          subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
+          if(subgroupItems.length) {
+            subgroup.start = subgroupItems[0].timestamp;
+            subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
+          }
           subgroup.participants = [];
           subgroup.children = await Promise.all(
             subgroupItems.map(async (item: any, itemIndex) => {

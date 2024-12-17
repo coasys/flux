@@ -1379,14 +1379,6 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/flux-utils@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@coasys/flux-utils/-/flux-utils-0.9.0.tgz#995d52dd5a50be7b18f2b2ce0fb363f0cde3386e"
-  integrity sha512-JDKYX7mvDbJQVZL9kM60dMUX/e1w0mhPLdhfeBiUwKXCAGUyKWg9q5Mvx30e/A4YzXSAVFRsDZzVngthg7EUOw==
-  dependencies:
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-types" "*"
-
 "@coasys/flux-vue@*":
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/@coasys/flux-vue/-/flux-vue-0.7.6.tgz#8acd77dafd7ed914eb1ec609df72534dcdc90e74"
