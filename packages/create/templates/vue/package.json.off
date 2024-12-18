@@ -32,9 +32,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/ad4m-vue-hooks": "^0.10.0-rc7.local-ai.4",
-    "@coasys/flux-api": "0.10.0-rc7.local-ai.4",
+    "@coasys/ad4m": "0.10.0-rc11",
+    "@coasys/ad4m-vue-hooks": "^0.10.0-rc11",
+    "@coasys/flux-api": "0.10.0-rc11",
     "vue": "^3.5.12"
   },
   "devDependencies": {
@@ -43,6 +43,7 @@
     "@coasys/flux-container": "0.10.0-rc7.local-ai.4",
     "@vitejs/plugin-vue": "^5.1.4",
     "vite": "^5.4.10",
-    "vite-plugin-css-injected-by-js": "^3.5.2"
+    "vite-plugin-css-injected-by-js": "^3.5.2",
+    "vite-plugin-babel-compiler": "0.4.0"
   }
 }
