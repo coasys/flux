@@ -65,7 +65,9 @@ async function createEmbedding(perspective, text, itemId) {
 
 async function getConversationData(perspective, channelId) {
   // check for previous conversations in the channel
-  const conversations = await Conversation.query(perspective, { source: channelId });
+  const conversations = await Conversation.query(perspective, {
+    source: channelId,
+  });
   let conversation;
   let subgroups = [] as any;
   let subgroupItems = [] as any[];
@@ -94,9 +96,10 @@ async function getConversationData(perspective, channelId) {
   }
   if (!conversation) {
     // initialise a new conversation
-    conversation = new Conversation(perspective, undefined, channelId);
-    conversation.conversationName = `Conversation ${conversations.length + 1}`;
-    await conversation.save();
+    const newConversation = new Conversation(perspective, undefined, channelId);
+    newConversation.conversationName = `Conversation ${conversations.length + 1}`;
+    await newConversation.save();
+    conversation = await newConversation.get();
   }
 
   return { conversation, subgroups, subgroupItems };
@@ -177,29 +180,24 @@ export async function ensureLLMTask(): Promise<AITask> {
   const tasks = await client.ai.tasks();
   let task = tasks.find((t) => t.name === "flux-synergy-task");
   if (!task) task = await client.ai.addTask("flux-synergy-task", "default", taskPrompt, examples);
-  return task
+  return task;
 }
 
-async function LLMProcessing(
-  newItem,
-  latestSubgroups,
-  latestSubgroupItems,
-  allTopics,
-) {
+async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allTopics) {
   let prompt = {
     previousSubgroups: [latestSubgroups.map((s: any) => s.summary).join(" <br/> ")],
     previousMessages: [latestSubgroupItems.map((si: any) => si.text).join(", ")],
     newMessage: newItem.text,
-    existingTopics: [allTopics.map((t: any) => t.name).join(", ")]
+    existingTopics: [allTopics.map((t: any) => t.name).join(", ")],
   };
 
   const task = await ensureLLMTask();
   const client: Ad4mClient = await getAd4mClient();
   let parsedData;
-  let attempts = 0
-  while(!parsedData && attempts < 5) {
-    attempts += 1
-    console.log("LLM Prompt:", prompt)
+  let attempts = 0;
+  while (!parsedData && attempts < 5) {
+    attempts += 1;
+    console.log("LLM Prompt:", prompt);
     const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
     response.replace("False", "false");
@@ -207,13 +205,13 @@ async function LLMProcessing(
     try {
       parsedData = JSON5.parse(response);
     } catch (error) {
-      console.error("LLM response parse error:", error)
+      console.error("LLM response parse error:", error);
       //@ts-ignore
       prompt.jsonParseError = error;
-    }  
+    }
   }
 
-  if(parsedData){
+  if (parsedData) {
     return {
       topics: parsedData.topics || [],
       changedSubject: parsedData.changedSubject || false,
