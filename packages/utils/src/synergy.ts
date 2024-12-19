@@ -236,27 +236,8 @@ export async function findTopics(perspective, itemId) {
 
 export async function getAllTopics(perspective) {
   // gather up all existing topics in the neighbourhood
-  // const topics = await perspective.getAllSubjectInstances("Topic");
-  // return await Promise.all(
-  //   topics.map(async (t) => {
-  //     return { id: t.baseExpression, name: await t.topic };
-  //   })
-  // );
-
-  // temp workaround while getAllSubjectInstances broken if < 2 results
-  return await new Promise((resolve) => {
-    perspective
-      .getAllSubjectInstances("Topic")
-      .then(async (topics) => {
-        resolve(
-          await Promise.all(
-            topics.map(async (t) => {
-              return { baseExpression: t.baseExpression, name: await t.topic };
-            })
-          )
-        );
-      })
-      .catch(() => resolve([]));
+  return (await Topic.query(perspective)).map((topic: any) => {
+    return { baseExpression: topic.baseExpression, name: topic.topic };
   });
 }
 
