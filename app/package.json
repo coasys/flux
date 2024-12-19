@@ -18,7 +18,7 @@
   "dependencies": {
     "@babel/core": "*",
     "@coasys/ad4m": "0.10.0-rc12",
-    "@coasys/ad4m-connect": "0.10.0-rc12",
+    "@coasys/ad4m-connect": "0.10.0-rc12.fix",
     "@coasys/ad4m-vue-hooks": "0.10.0-rc12",
     "@capacitor/android": "^6.0.0",
     "@capacitor/cli": "^6.0.0",
