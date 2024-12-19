@@ -16,6 +16,7 @@
   "dependencies": {
     "@coasys/flux-constants": "workspace:*",
     "@coasys/flux-types": "workspace:*",
+    "@coasys/flux-api": "workspace:*",
     "json5": "^2.2.3",
     "openai": "^4.55.5"
   },

@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { createLiteralObject } from "@coasys/flux-utils";
 import { profile } from "@coasys/flux-constants";
 import { WebLink } from "@coasys/flux-types";

@@ -1,5 +1,5 @@
 import { version } from "../package.json";
-import { getForVersion } from "@coasys/flux-utils";
+import { getForVersion } from "./localStorage";
 import { videoSettings } from "@coasys/flux-constants";
 import { IceServer } from "@coasys/flux-webrtc";
 
