@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { ifDefined } from "lit-html/directives/if-defined.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import sharedStyles from "../../shared/styles";
 
 const styles = css`
@@ -185,9 +185,7 @@ class Input extends LitElement {
   validate() {
     const valid = this.renderRoot.querySelector("input").checkValidity();
 
-    const message =
-      this.errorText ||
-      this.renderRoot.querySelector("input").validationMessage;
+    const message = this.errorText || this.renderRoot.querySelector("input").validationMessage;
 
     if (!valid) {
       this.error = true;
@@ -215,11 +213,7 @@ class Input extends LitElement {
     return html`
       <div part="base">
         ${this.label &&
-        html`
-          <j-text tag="label" variant="label" part="label"
-            >${this.label}
-          </j-text>
-        `}
+        html` <j-text tag="label" variant="label" part="label">${this.label} </j-text> `}
         <div part="input-wrapper">
           <slot part="start" name="start"></slot>
           <input
@@ -252,8 +246,8 @@ class Input extends LitElement {
             ? html`<div part="error-text">${this.errorText}</div>`
             : null
           : this.helpText
-          ? html`<div part="help-text">${this.helpText}</div>`
-          : null}
+            ? html`<div part="help-text">${this.helpText}</div>`
+            : null}
       </div>
     `;
   }
