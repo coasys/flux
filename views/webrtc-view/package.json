@@ -50,9 +50,9 @@
   "description": "",
   "dependencies": {
     "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-container": "*",
-    "@coasys/flux-webrtc": "*",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-container": "workspace:*",
+    "@coasys/flux-webrtc": "workspace:*",
+    "@coasys/flux-utils": "workspace:*",
     "@coasys/ad4m-react-hooks": "0.10.0-rc7.local-ai.4",
     "@types/simple-peer": "^9.11.8",
     "@xenova/transformers": "^2.17.2",

@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/ad4m-connect": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-api": "*",
-    "@coasys/flux-ui": "*",
+    "@coasys/ad4m-connect": "0.10.0-rc11.fix2",
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-ui": "workspace:*",
     "@tiptap/core": "^2.9.1",
     "@tiptap/extension-link": "^2.9.1",
     "@tiptap/extension-mention": "^2.9.1",

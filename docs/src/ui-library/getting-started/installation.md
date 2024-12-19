@@ -8,8 +8,8 @@ You can install the Flux UI components like this:
 npm install @coasys/flux-ui
 ```
 
-```bash [yarn]
-yarn add @coasys/flux-ui
+```bash [pnpm]
+pnpm add @coasys/flux-ui
 ```
 
 ```html [cdn]

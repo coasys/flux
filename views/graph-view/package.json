@@ -37,7 +37,7 @@
   "dependencies": {
     "3d-force-graph": "^1.70.19",
     "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-container": "*",
+    "@coasys/flux-container": "workspace:*",
     "preact": "^10.11.3",
     "three-spritetext": "^1.6.5"
   },

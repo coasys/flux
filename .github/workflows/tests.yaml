@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Node.js, NPM & Yarn
+      - name: Install Node.js, NPM & pnpm
         uses: actions/setup-node@v2
         with:
           node-version: 18.16.0
       - name: Install modules
-        run: yarn install
+        run: pnpm install
     # - name: Run lint
-    #   run: yarn run lint
+    #   run: pnpm run lint
     # - name: Run tests
-    #   run: yarn run test
+    #   run: pnpm run test

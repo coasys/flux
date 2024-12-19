@@ -37,11 +37,11 @@
   "license": "ISC",
   "dependencies": {
     "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-api": "*",
-    "@coasys/flux-comment-section": "*",
-    "@coasys/flux-editor": "*",
-    "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-comment-section": "workspace:*",
+    "@coasys/flux-editor": "workspace:*",
+    "@coasys/flux-ui": "workspace:*",
+    "@coasys/flux-utils": "workspace:*",
     "@coasys/ad4m-react-hooks": "0.10.0-rc7.local-ai.4",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",
@@ -55,7 +55,7 @@
     "tippy.js": "^6.3.1"
   },
   "devDependencies": {
-    "@coasys/flux-container": "*",
+    "@coasys/flux-container": "workspace:*",
     "@preact/preset-vite": "^2.5.0",
     "@types/react": "^17.0.2",
     "np": "^7.5.0",

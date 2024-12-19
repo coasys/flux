@@ -1,32 +1,14 @@
 {
   "name": "flux-monorepo",
   "version": "0.8.1",
-  "workspaces": {
-    "packages": [
-      "packages/**/*",
-      "views/**/*",
-      "app",
-      "docs"
-    ],
-    "nohoist": [
-      "**/electron",
-      "**/electron/**",
-      "**/electron-squirrel-startup",
-      "**/electron-squirrel-startup/**",
-      "**/@electron-forge",
-      "**/@electron-forge/**"
-    ]
-  },
   "scripts": {
     "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "publish-package": "turbo run publish-package",
-    "lint": "turbo run lint",
-    "postinstall": "patch-package"
+    "lint": "turbo run lint"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
-    "patch-package": "*",
     "prettier": "latest",
     "turbo": "latest"
   },
@@ -37,5 +19,5 @@
   "dependencies": {
     "graphql": "^15.7.2"
   },
-  "packageManager": "yarn@1.22.1"
+  "packageManager": "pnpm@9.12.2"
 }

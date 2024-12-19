@@ -17,10 +17,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@coasys/flux-api": "*",
-    "@coasys/flux-constants": "*",
-    "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-constants": "workspace:*",
+    "@coasys/flux-types": "workspace:*",
+    "@coasys/flux-utils": "workspace:*",
     "@coasys/flux-webrtc": "*"
   },
   "peerDependencies": {

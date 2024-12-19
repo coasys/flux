@@ -14,8 +14,8 @@ Dependencies:
 Make sure to install the dependencies:
 
 ```bash
-# yarn
-yarn install
+# pnpm
+pnpm install
 
 # npm
 npm install
@@ -24,8 +24,8 @@ npm install
 ## Development
 
 ```bash
-# yarn
-yarn dev
+# pnpm
+pnpm dev
 
 # npm
 npm dev
@@ -36,8 +36,8 @@ npm dev
 Build the application for production:
 
 ```bash
-# yarn
-yarn build
+# pnpm
+pnpm build
 
 # npm
 npm build

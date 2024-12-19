@@ -11,7 +11,7 @@ This project requires AD4M! The easiest way to have an AD4M runtime operating, i
 ### Compiles and hot-reloads for development
 
 ```
-yarn run dev
+pnpm run dev
 ```
 
 Any PR's will also trigger netlify to make a new deployment of your new branch, the URL for this branch will be included as a comment on your PR.
@@ -28,11 +28,11 @@ These DNA's come bundled with the builtin languages, links above are provided fo
 ### Compiles and minifies for production
 
 ```
-yarn run build
+pnpm run build
 ```
 
 ### Lints and fixes files
 
 ```
-yarn run lint
+pnpm run lint
 ```

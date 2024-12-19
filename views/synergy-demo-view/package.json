@@ -35,9 +35,9 @@
   "description": "",
   "dependencies": {
     "@coasys/ad4m": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-utils": "0.9.1",
+    "@coasys/flux-utils": "workspace:*",
     "@coasys/ad4m-react-hooks": "0.10.0-rc7.local-ai.4",
-    "@coasys/flux-api": "*",
+    "@coasys/flux-api": "workspace:*",
     "@coasys/flux-webrtc-view": "0.8.1-fix.2",
     "preact": "^10.13.1"
   },

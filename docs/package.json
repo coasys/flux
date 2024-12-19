@@ -5,13 +5,13 @@
   "type": "module",
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
-    "start": "yarn dev",
+    "start": "pnpm dev",
     "build": "vitepress build",
     "dev": "vitepress dev"
   },
   "dependencies": {
-    "@coasys/flux-container": "*",
-    "@coasys/flux-ui": "*",
+    "@coasys/flux-container": "workspace:*",
+    "@coasys/flux-ui": "workspace:*",
     "eventsource-parser": "^1.0.0",
     "vitepress": "1.0.0-alpha.75"
   },
