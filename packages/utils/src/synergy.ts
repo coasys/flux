@@ -283,11 +283,10 @@ export async function getSubgroupItems(perspective, subgroupId) {
 }
 
 export async function processItem(perspective, channelId, item, existingItem?: boolean) {
-  // todo: check if LLM is enabled
-  // const client = await getAd4mClient();
-  // const modelStatus = await client.ai.getModels();
-  const usingLLM = true;
-  console.log("process item with LLM: ", usingLLM);
+  // check if LLM is enabled
+  const client = await getAd4mClient();
+  const defaultLLM = await client.ai.getDefaultModel("LLM");
+  console.log("process item with LLM: ", !!defaultLLM);
   return new Promise(async (resolve: any) => {
     // check for existing relationships & removed processed data if present (used for edits & unprocessed items)
     const relationships = await SemanticRelationship.query(perspective, {
@@ -355,7 +354,7 @@ export async function processItem(perspective, channelId, item, existingItem?: b
         target: item.baseExpression,
       });
     }
-    if (!usingLLM) resolve();
+    if (!defaultLLM) resolve();
     else {
       // mark items as processing by adding an empty semantic relationship
       const relationship = new SemanticRelationship(perspective, undefined, item.baseExpression);
@@ -393,7 +392,7 @@ export async function processItem(perspective, channelId, item, existingItem?: b
         });
         // remove link to old subgroup if present
         if (linkExpression) await perspective.remove(linkExpression);
-        // add item link to new subgroup
+        // add link to new subgroup
         await perspective.add({
           source: newSubgroup.baseExpression,
           predicate: "ad4m://has_child",

@@ -59,15 +59,14 @@ export default function TimelineColumn({
     setProcessing(false);
   }
 
-  // todo: check if LLM is enabled
-  async function checkLLM() {
+  async function checkIfUsingLLM() {
     const client = await getAd4mClient();
-    const modelStatus = await client.ai.getModels();
-    setUsingLLM(true);
+    const defaultLLM = await client.ai.getDefaultModel("LLM");
+    setUsingLLM(!!defaultLLM);
   }
 
   useEffect(() => {
-    checkLLM();
+    checkIfUsingLLM();
   }, []);
 
   useEffect(() => {
