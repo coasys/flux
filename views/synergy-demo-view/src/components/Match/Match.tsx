@@ -20,9 +20,9 @@ export default function Match({ perspective, agent, match, index, selectedTopicI
   const [collapseAfter, setCollapseAfter] = useState(true);
 
   useEffect(() => {
-    getConvoData(perspective, channel.id, match, setMatchIndex).then((conversationData) => {
+    getConvoData(perspective, channel.id, match, setMatchIndex).then(({ conversations }) => {
       setData((prevItems) => {
-        if (!isEqual(prevItems, conversationData)) return conversationData;
+        if (!isEqual(prevItems, conversations)) return conversations;
         return prevItems;
       });
     });

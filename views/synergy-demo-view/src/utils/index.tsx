@@ -1,5 +1,6 @@
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
 import { findTopics, getSubgroupItems } from "@coasys/flux-utils";
+import { LinkQuery, PerspectiveProxy, Agent } from "@coasys/ad4m";
 
 // constants
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
@@ -12,9 +13,30 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
+export async function findItemState(perspective, item) {
+  // find the items vector embedding semantic relationship
+  const relationships = await SemanticRelationship.query(perspective, {
+    source: item.baseExpression,
+  });
+  const relationship = relationships.find((r: any) => !r.relevance) as any;
+  // if no relationship present, return unprocessed
+  if (!relationship) return "unprocessed";
+  // if a relationship is present and is linked to a vector embedding, return processed
+  else if (relationship.tag) return "processed";
+  else {
+    // if a relationship is present but not linked to a vector embedding, return the authors did so we know who is processing it
+    const links = await perspective.get(
+      new LinkQuery({ source: item.baseExpression, target: relationship.baseExpression })
+    );
+    return links[0].author;
+  }
+}
+
 export async function getConvoData(perspective, channelId, match?, setMatchIndex?) {
+  const processingItems = [];
+  const unprocessedItems = [];
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-  return await Promise.all(
+  const conversationsWidthdata = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
         setMatchIndex(conversationIndex);
@@ -30,7 +52,7 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
           const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
           subgroup.topics = await findTopics(perspective, subgroup.baseExpression);
-          if(subgroupItems.length) {
+          if (subgroupItems.length) {
             subgroup.start = subgroupItems[0].timestamp;
             subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
           }
@@ -46,6 +68,12 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
               item.topics = await findTopics(perspective, item.baseExpression);
               if (!subgroup.participants.find((p) => p === item.author))
                 subgroup.participants.push(item.author);
+              if (!match) {
+                // find items state: unprocessed, processing, processed
+                item.state = await findItemState(perspective, item);
+                if (item.state === "unprocessed") unprocessedItems.push(item);
+                else if (item.state !== "processed") processingItems.push(item);
+              }
               return item;
             })
           );
@@ -64,6 +92,7 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
       return conversation;
     })
   );
+  return { conversations: conversationsWidthdata, processingItems, unprocessedItems };
 }
 
 // svgs

@@ -2,17 +2,17 @@ import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message, Post } from "@coasys/flux-api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
-import { closeMenu, getConvoData, groupingOptions } from "../../utils";
+import { closeMenu, getConvoData, groupingOptions, findItemState } from "../../utils";
+import { processItem } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 type Props = {
   agent: any;
   perspective: any;
   channelId: string;
   selectedTopicId: string;
-  processingItems: string[];
-  setProcessingItems: (items: any) => void;
   search: (type: "topic" | "vector", id: string) => void;
 };
 
@@ -21,13 +21,15 @@ export default function TimelineColumn({
   perspective,
   channelId,
   selectedTopicId,
-  processingItems,
-  setProcessingItems,
   search,
 }: Props) {
   const [data, setData] = useState<any[]>([]);
+  const [processingItems, setProcessingItems] = useState<any[]>([]);
+  const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
+  const [processing, setProcessing] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
+  const [usingLLM, setUsingLLM] = useState(false);
 
   const { entries: messages } = useSubjects({
     perspective,
@@ -45,25 +47,36 @@ export default function TimelineColumn({
     subject: "Task",
   });
 
+  async function processItems() {
+    setProcessing(true);
+    // mark items as processing (or do one at a time? to avoid errors if processing fails)
+    for (const item of unprocessedItems) {
+      // check if item still needs processing first incase someone has started
+      const state = await findItemState(perspective, item);
+      if (state !== "unprocessed") continue;
+      await processItem(perspective, channelId, item, true);
+    }
+    setProcessing(false);
+  }
+
+  // todo: check if LLM is enabled
+  async function checkLLM() {
+    const client = await getAd4mClient();
+    const modelStatus = await client.ai.getModels();
+    setUsingLLM(true);
+  }
+
+  useEffect(() => {
+    checkLLM();
+  }, []);
+
   useEffect(() => {
     if (channelId) {
-      getConvoData(perspective, channelId).then((conversationData) => {
+      getConvoData(perspective, channelId).then((convoData) => {
+        setProcessingItems(convoData.processingItems);
+        setUnprocessedItems(convoData.unprocessedItems);
         setData((prevItems) => {
-          if (!isEqual(prevItems, conversationData)) {
-            // remove completed items from the processing list
-            setProcessingItems((prevItems) => {
-              const itemsToRemove = [];
-              conversationData.forEach((convo) => {
-                convo.children?.forEach((group) => {
-                  group.children?.forEach((item) => {
-                    if (prevItems.includes(item.text)) itemsToRemove.push(item.text);
-                  });
-                });
-              });
-              return prevItems.filter((pi) => !itemsToRemove.includes(pi));
-            });
-            return conversationData;
-          }
+          if (!isEqual(prevItems, convoData.conversations)) return convoData.conversations;
           return prevItems;
         });
       });
@@ -72,23 +85,51 @@ export default function TimelineColumn({
 
   return (
     <div className={styles.wrapper}>
-      <j-flex a="center" gap="400" className={styles.header}>
-        <j-text nomargin>Zoom</j-text>
-        <j-menu style={{ height: 42, zIndex: 3 }}>
-          <j-menu-group collapsible title={zoom} id="zoom-menu">
-            {groupingOptions.map((option) => (
-              <j-menu-item
-                selected={zoom === option}
-                onClick={() => {
-                  setZoom(option);
-                  closeMenu("zoom-menu");
-                }}
-              >
-                {option}
-              </j-menu-item>
-            ))}
-          </j-menu-group>
-        </j-menu>
+      <j-flex a="center" j="between" className={styles.header}>
+        <j-flex a="center" gap="400">
+          <j-text nomargin>Zoom</j-text>
+          <j-menu style={{ height: 42, zIndex: 3 }}>
+            <j-menu-group collapsible title={zoom} id="zoom-menu">
+              {groupingOptions.map((option) => (
+                <j-menu-item
+                  selected={zoom === option}
+                  onClick={() => {
+                    setZoom(option);
+                    closeMenu("zoom-menu");
+                  }}
+                >
+                  {option}
+                </j-menu-item>
+              ))}
+            </j-menu-group>
+          </j-menu>
+        </j-flex>
+        {(processingItems.length > 0 || unprocessedItems.length > 0) && (
+          <j-flex a="center" gap="400">
+            {processingItems.length > 0 && (
+              <j-badge variant="success">
+                {processingItems.length} item{processingItems.length > 1 ? "s" : ""} processing...
+              </j-badge>
+            )}
+            {unprocessedItems.length > 0 && (
+              <>
+                <j-badge variant="warning">
+                  {unprocessedItems.length} unprocessed item{unprocessedItems.length > 1 ? "s" : ""}
+                </j-badge>
+                {usingLLM && (
+                  <j-button
+                    size="sm"
+                    onClick={processItems}
+                    loading={processing}
+                    disabled={processing}
+                  >
+                    Process
+                  </j-button>
+                )}
+              </>
+            )}
+          </j-flex>
+        )}
       </j-flex>
       <div className={styles.timeline}>
         <div className={styles.fades}>
@@ -110,17 +151,6 @@ export default function TimelineColumn({
               search={search}
             />
           ))}
-          {processingItems.length > 0 && (
-            <div style={{ marginLeft: 70 }}>
-              <j-flex a="center" gap="400">
-                <j-text size="600" nomargin>
-                  Processing {processingItems.length > 1 ? processingItems.length + " " : ""}item
-                  {processingItems.length > 1 ? "s" : ""}...
-                </j-text>
-                <j-spinner size="sm" />
-              </j-flex>
-            </div>
-          )}
         </div>
       </div>
     </div>
