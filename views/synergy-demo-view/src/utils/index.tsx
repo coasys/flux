@@ -13,11 +13,9 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
-export async function findItemState(perspective, item) {
+export async function findItemState(perspective, itemId) {
   // find the items vector embedding semantic relationship
-  const relationships = await SemanticRelationship.query(perspective, {
-    source: item.baseExpression,
-  });
+  const relationships = await SemanticRelationship.query(perspective, { source: itemId });
   const relationship = relationships.find((r: any) => !r.relevance) as any;
   // if no relationship present, return unprocessed
   if (!relationship) return "unprocessed";
@@ -26,7 +24,7 @@ export async function findItemState(perspective, item) {
   else {
     // if a relationship is present but not linked to a vector embedding, return the authors did so we know who is processing it
     const links = await perspective.get(
-      new LinkQuery({ source: item.baseExpression, target: relationship.baseExpression })
+      new LinkQuery({ source: itemId, target: relationship.baseExpression })
     );
     return links[0].author;
   }
@@ -68,12 +66,9 @@ export async function getConvoData(perspective, channelId, match?, setMatchIndex
               item.topics = await findTopics(perspective, item.baseExpression);
               if (!subgroup.participants.find((p) => p === item.author))
                 subgroup.participants.push(item.author);
-              if (!match) {
-                // find items state: unprocessed, processing, processed
-                item.state = await findItemState(perspective, item);
-                if (item.state === "unprocessed") unprocessedItems.push(item);
-                else if (item.state !== "processed") processingItems.push(item);
-              }
+              item.state = await findItemState(perspective, item.baseExpression);
+              if (item.state === "unprocessed") unprocessedItems.push(item);
+              else if (item.state !== "processed") processingItems.push(item);
               return item;
             })
           );
