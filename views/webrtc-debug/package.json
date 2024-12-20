@@ -1,6 +1,6 @@
 {
   "name": "flux-webrtc-debug-view",
-  "version": "1.0.0",
+  "version": "0.10.0-rc13",
   "description": "WebRTC-debugger for flux",
   "fluxapp": {
     "name": "DebugRTC",
@@ -43,10 +43,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@coasys/flux-container": "*",
-    "@coasys/flux-utils": "0.9.1",
-    "@coasys/flux-webrtc": "*",
-    "@coasys/ad4m-react-hooks": "0.10.0-rc7.local-ai.4",
+    "@coasys/flux-container": "0.10.0-rc13",
+    "@coasys/flux-utils": "0.10.0-rc13",
+    "@coasys/flux-webrtc": "0.10.0-rc13",
+    "@coasys/ad4m-react-hooks": "0.10.0-rc13",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
     "emoji-picker-element": "^1.14.0",
