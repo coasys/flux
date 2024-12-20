@@ -1,7 +1,4 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { Message, Post } from "@coasys/flux-api";
-import { isEqual } from "lodash";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useRef } from "preact/hooks";
 import { closeMenu, getConvoData, groupingOptions, findItemState } from "../../utils";
 import { processItem } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
@@ -23,36 +20,27 @@ export default function TimelineColumn({
   selectedTopicId,
   search,
 }: Props) {
-  const [data, setData] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<any[]>([]);
   const [processingItems, setProcessingItems] = useState<any[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
   const [processing, setProcessing] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
   const [usingLLM, setUsingLLM] = useState(false);
+  const timeout = useRef<any>(null);
 
-  const { entries: messages } = useSubjects({
-    perspective,
-    source: channelId,
-    subject: Message,
-  });
-  const { entries: posts } = useSubjects({
-    perspective,
-    source: channelId,
-    subject: Post,
-  });
-  const { entries: tasks } = useSubjects({
-    perspective,
-    source: channelId,
-    subject: "Task",
-  });
+  async function getData() {
+    const data = await getConvoData(perspective, channelId);
+    setProcessingItems(data.processingItems);
+    setUnprocessedItems(data.unprocessedItems);
+    setConversations(data.conversations);
+  }
 
   async function processItems() {
     setProcessing(true);
-    // mark items as processing (or do one at a time? to avoid errors if processing fails)
     for (const item of unprocessedItems) {
       // check if item still needs processing first incase someone has started
-      const state = await findItemState(perspective, item);
+      const state = await findItemState(perspective, item.baseExpression);
       if (state !== "unprocessed") continue;
       await processItem(perspective, channelId, item, true);
     }
@@ -66,21 +54,13 @@ export default function TimelineColumn({
   }
 
   useEffect(() => {
+    perspective.addListener("link-added", () => {
+      if (timeout.current) clearTimeout(timeout.current);
+      timeout.current = setTimeout(getData, 1000);
+    });
     checkIfUsingLLM();
+    getData();
   }, []);
-
-  useEffect(() => {
-    if (channelId) {
-      getConvoData(perspective, channelId).then((convoData) => {
-        setProcessingItems(convoData.processingItems);
-        setUnprocessedItems(convoData.unprocessedItems);
-        setData((prevItems) => {
-          if (!isEqual(prevItems, convoData.conversations)) return convoData.conversations;
-          return prevItems;
-        });
-      });
-    }
-  }, [channelId, JSON.stringify(messages), JSON.stringify(posts), JSON.stringify(tasks)]);
 
   return (
     <div className={styles.wrapper}>
@@ -107,13 +87,15 @@ export default function TimelineColumn({
           <j-flex a="center" gap="400">
             {processingItems.length > 0 && (
               <j-badge variant="success">
-                {processingItems.length} item{processingItems.length > 1 ? "s" : ""} processing...
+                {processingItems.length} item
+                {processingItems.length > 1 ? "s" : ""} processing...
               </j-badge>
             )}
             {unprocessedItems.length > 0 && (
               <>
                 <j-badge variant="warning">
-                  {unprocessedItems.length} unprocessed item{unprocessedItems.length > 1 ? "s" : ""}
+                  {unprocessedItems.length} unprocessed item
+                  {unprocessedItems.length > 1 ? "s" : ""}
                 </j-badge>
                 {usingLLM && (
                   <j-button
@@ -137,7 +119,7 @@ export default function TimelineColumn({
           <div className={styles.line} />
         </div>
         <div id="timeline-0" className={styles.items}>
-          {data.map((conversation: any) => (
+          {conversations.map((conversation: any) => (
             <TimelineBlock
               agent={agent}
               perspective={perspective}
