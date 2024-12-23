@@ -34,6 +34,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
   const processingItems = [];
   const unprocessedItems = [];
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
+
   const conversationsWithData = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
