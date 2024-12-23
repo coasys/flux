@@ -34,9 +34,25 @@ export async function getConversationData(perspective, channelId, match?, setMat
   const processingItems = [];
   const unprocessedItems = [];
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-
+  // find & attach timestamp to converations
+  const conversationsWithTimestamps = await Promise.all(
+    conversations.map(
+      (c) =>
+        new Promise(async (resolve) => {
+          const entryLinks = await perspective.get(
+            new LinkQuery({
+              source: c.baseExpression,
+              predicate: "flux://entry_type",
+              target: "flux://conversation",
+            })
+          );
+          c.timestamp = entryLinks[0].timestamp;
+          resolve(c);
+        })
+    )
+  );
   const conversationsWithData = await Promise.all(
-    conversations.map(async (conversation, conversationIndex) => {
+    conversationsWithTimestamps.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
         setMatchIndex(conversationIndex);
       const subgroups = (await ConversationSubgroup.query(perspective, {
