@@ -31,12 +31,17 @@ async function removeTopics(perspective, itemId) {
   })) as any;
   const topicRelationships = allRelationships.filter((r) => r.relevance);
   return Promise.all(
-    topicRelationships.map(async (topicRelationship) => {
-      const topic = new Embedding(perspective, topicRelationship.tag);
-      await topic.delete();
-      await topicRelationship.delete();
+    topicRelationships.map(async (topicRelationship) => new Promise(async (resolve: any) => {
+      try {
+        const topic = new Topic(perspective, topicRelationship.tag);
+        await topic.delete();
+        await topicRelationship.delete();
+        resolve()
+      } catch (error) {
+        resolve();
+      }
     })
-  );
+  ));
 }
 
 async function removeProcessedData(perspective, itemId) {

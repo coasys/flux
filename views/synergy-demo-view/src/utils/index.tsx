@@ -1,6 +1,6 @@
 import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
 import { findTopics, getSubgroupItems } from "@coasys/flux-utils";
-import { LinkQuery, PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { LinkQuery } from "@coasys/ad4m";
 
 // constants
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
