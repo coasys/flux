@@ -1,4 +1,4 @@
-import { Ad4mClient, AITask } from "@coasys/ad4m";
+import { Ad4mClient, AITask, LinkQuery } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
@@ -282,30 +282,55 @@ export async function processItem(perspective, channelId, item, existingItem?: b
       source: channelId,
     });
     if (conversations.length) {
-      const latestConversation = conversations[conversations.length - 1];
-      subgroups = await ConversationSubgroup.query(perspective, {
-        source: latestConversation.baseExpression,
-      });
-      const latestSubgroup = subgroups[subgroups.length - 1] as any;
-      const latestSubgroupItems = await getSubgroupItems(
-        perspective,
-        latestSubgroup.baseExpression
-      );
-      // calculate time since last item was created
-      const lastItemTimestamp = latestSubgroupItems[latestSubgroupItems.length - 1].timestamp;
-      const minsSinceLastItemCreated =
-        (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
-      if (minsSinceLastItemCreated < 30 || existingItem) {
-        // if less than 30 mins, consider the new item part of the latest conversation
-        conversation = latestConversation;
-        subgroupItems = latestSubgroupItems;
+      if (existingItem) {
+        // find the conversation & subgroup of the existing item
+        const allConversations = await Conversation.all(perspective);
+        const allSubgroups = await ConversationSubgroup.all(perspective);
+        const itemLinks = await perspective.get(
+          new LinkQuery({
+            predicate: "ad4m://has_child",
+            target: item.baseExpression,
+          })
+        );
+        const subgroup = allSubgroups.find((s) =>
+          itemLinks.find((link) => link.data.source === s.baseExpression)
+        );
+        const subgroupLinks = await perspective.get(
+          new LinkQuery({
+            predicate: "ad4m://has_child",
+            target: subgroup.baseExpression,
+          })
+        );
+        conversation = allConversations.find((c) =>
+          subgroupLinks.find((link) => link.data.source === c.baseExpression)
+        );
+        subgroups = [subgroup];
+      } else {
+        // find the latest conversation & subgroup (if last item created less than 30 mins ago)
+        const latestConversation = conversations[conversations.length - 1];
+        subgroups = await ConversationSubgroup.query(perspective, {
+          source: latestConversation.baseExpression,
+        });
+        const latestSubgroup = subgroups[subgroups.length - 1] as any;
+        const latestSubgroupItems = await getSubgroupItems(
+          perspective,
+          latestSubgroup.baseExpression
+        );
+        // calculate time since last item was created
+        const lastItemTimestamp = latestSubgroupItems[latestSubgroupItems.length - 1].timestamp;
+        const minsSinceLastItemCreated =
+          (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
+        if (minsSinceLastItemCreated < 30 || existingItem) {
+          // if less than 30 mins, consider the new item part of the latest conversation
+          conversation = latestConversation;
+          subgroupItems = latestSubgroupItems;
+        }
       }
     }
     if (!conversation) {
       // create new conversation
       const newConversation = new Conversation(perspective, undefined, channelId);
       newConversation.conversationName = `Conversation ${conversations.length + 1}`;
-      // newConversation.summary = "Waiting to be processed...";
       await newConversation.save();
       conversation = await newConversation.get();
       // create new subgroup
@@ -315,7 +340,6 @@ export async function processItem(perspective, channelId, item, existingItem?: b
         conversation.baseExpression
       );
       newSubgroup.subgroupName = "Subgroup 1";
-      // newSubgroup.summary = "Waiting to be processed...";
       await newSubgroup.save();
       subgroups = [newSubgroup];
       // link subgroup to channel for use in search
@@ -350,41 +374,43 @@ export async function processItem(perspective, channelId, item, existingItem?: b
         newConversationName,
         newConversationSummary,
       } = await LLMProcessing(item, subgroups, subgroupItems, allTopics);
-      // update conversation summary and title
-      if (newConversationName) conversation.conversationName = newConversationName;
-      if (newConversationSummary) conversation.summary = newConversationSummary;
-      if (newConversationName || newConversationSummary) await conversation.update();
-      // update subgroup summary and title
-      if (changedSubject && subgroup.summary && !existingItem) {
-        // if the conversation has shifted to a new subject, create a new subgroup
-        const newSubgroup = new ConversationSubgroup(
-          perspective,
-          undefined,
-          conversation.baseExpression
-        );
-        newSubgroup.subgroupName = newSubgroupName;
-        newSubgroup.summary = newSubgroupSummary;
-        await newSubgroup.save();
-        // link subgroup to channel for use in search
-        await perspective.add({
-          source: channelId,
-          predicate: "ad4m://has_child",
-          target: newSubgroup.baseExpression,
-        });
-        // remove link to old subgroup if present
-        if (linkExpression) await perspective.remove(linkExpression);
-        // add link to new subgroup
-        await perspective.add({
-          source: newSubgroup.baseExpression,
-          predicate: "ad4m://has_child",
-          target: item.baseExpression,
-        });
-        subgroup = newSubgroup;
-      } else {
-        // if the subject of the conversation has stayed the same, stick with the exising subgroup
-        if (newSubgroupName) subgroup.subgroupName = newSubgroupName;
-        if (newSubgroupSummary) subgroup.summary = newSubgroupSummary;
-        if (newSubgroupName || newSubgroupSummary) await subgroup.update();
+      if (!existingItem) {
+        // update conversation summary and title
+        if (newConversationName) conversation.conversationName = newConversationName;
+        if (newConversationSummary) conversation.summary = newConversationSummary;
+        if (newConversationName || newConversationSummary) await conversation.update();
+        // update subgroup summary and title
+        if (changedSubject && subgroup.summary) {
+          // if the conversation has shifted to a new subject, create a new subgroup
+          const newSubgroup = new ConversationSubgroup(
+            perspective,
+            undefined,
+            conversation.baseExpression
+          );
+          newSubgroup.subgroupName = newSubgroupName;
+          newSubgroup.summary = newSubgroupSummary;
+          await newSubgroup.save();
+          // link subgroup to channel for use in search
+          await perspective.add({
+            source: channelId,
+            predicate: "ad4m://has_child",
+            target: newSubgroup.baseExpression,
+          });
+          // remove link to old subgroup if present
+          if (linkExpression) await perspective.remove(linkExpression);
+          // add link to new subgroup
+          await perspective.add({
+            source: newSubgroup.baseExpression,
+            predicate: "ad4m://has_child",
+            target: item.baseExpression,
+          });
+          subgroup = newSubgroup;
+        } else {
+          // if the subject of the conversation has stayed the same, stick with the exising subgroup
+          if (newSubgroupName) subgroup.subgroupName = newSubgroupName;
+          if (newSubgroupSummary) subgroup.summary = newSubgroupSummary;
+          if (newSubgroupName || newSubgroupSummary) await subgroup.update();
+        }
       }
       // attach topics to new item, conversation, & subgroup (avoid duplicates on conversation & subgroup)
       const filteredTopics = topics.filter((topic: any) => topic && topic.name && topic.relevance);
@@ -412,10 +438,12 @@ export async function processItem(perspective, channelId, item, existingItem?: b
       // update embeddings
       await removeEmbedding(perspective, item.baseExpression);
       await createEmbedding(perspective, item.text, item.baseExpression);
-      await removeEmbedding(perspective, conversation.baseExpression);
-      await createEmbedding(perspective, newConversationSummary, conversation.baseExpression);
-      await removeEmbedding(perspective, subgroup.baseExpression);
-      await createEmbedding(perspective, newSubgroupSummary, subgroup.baseExpression);
+      if (!existingItem) {
+        await removeEmbedding(perspective, conversation.baseExpression);
+        await createEmbedding(perspective, newConversationSummary, conversation.baseExpression);
+        await removeEmbedding(perspective, subgroup.baseExpression);
+        await createEmbedding(perspective, newSubgroupSummary, subgroup.baseExpression);
+      }
 
       resolve();
     }

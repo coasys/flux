@@ -14,7 +14,7 @@ export function closeMenu(menuId: string) {
 }
 
 export async function findItemState(perspective, itemId) {
-  // find the items vector embedding semantic relationship
+  // find the semantic relationship linking the item to its vector embedding
   const relationships = await SemanticRelationship.query(perspective, { source: itemId });
   const relationship = relationships.find((r: any) => !r.relevance) as any;
   // if no relationship present, return unprocessed
@@ -30,7 +30,7 @@ export async function findItemState(perspective, itemId) {
   }
 }
 
-export async function getConvoData(perspective, channelId, match?, setMatchIndex?) {
+export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
   const processingItems = [];
   const unprocessedItems = [];
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;

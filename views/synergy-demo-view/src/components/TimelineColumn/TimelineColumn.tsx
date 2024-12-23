@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConvoData, groupingOptions, findItemState } from "../../utils";
+import { closeMenu, getConversationData, groupingOptions, findItemState } from "../../utils";
 import { processItem } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
@@ -30,7 +30,7 @@ export default function TimelineColumn({
   const timeout = useRef<any>(null);
 
   async function getData() {
-    const data = await getConvoData(perspective, channelId);
+    const data = await getConversationData(perspective, channelId);
     setProcessingItems(data.processingItems);
     setUnprocessedItems(data.unprocessedItems);
     setConversations(data.conversations);
