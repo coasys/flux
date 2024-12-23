@@ -34,7 +34,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
   const processingItems = [];
   const unprocessedItems = [];
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-  const conversationsWidthdata = await Promise.all(
+  const conversationsWithData = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
         setMatchIndex(conversationIndex);
@@ -87,7 +87,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
       return conversation;
     })
   );
-  return { conversations: conversationsWidthdata, processingItems, unprocessedItems };
+  return { conversations: conversationsWithData, processingItems, unprocessedItems };
 }
 
 // svgs
