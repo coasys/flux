@@ -31,17 +31,20 @@ async function removeTopics(perspective, itemId) {
   })) as any;
   const topicRelationships = allRelationships.filter((r) => r.relevance);
   return Promise.all(
-    topicRelationships.map(async (topicRelationship) => new Promise(async (resolve: any) => {
-      try {
-        const topic = new Topic(perspective, topicRelationship.tag);
-        await topic.delete();
-        await topicRelationship.delete();
-        resolve()
-      } catch (error) {
-        resolve();
-      }
-    })
-  ));
+    topicRelationships.map(
+      async (topicRelationship) =>
+        new Promise(async (resolve: any) => {
+          try {
+            const topic = new Topic(perspective, topicRelationship.tag);
+            await topic.delete();
+            await topicRelationship.delete();
+            resolve();
+          } catch (error) {
+            resolve();
+          }
+        })
+    )
+  );
 }
 
 async function removeProcessedData(perspective, itemId) {
@@ -234,7 +237,7 @@ export async function findTopics(perspective, itemId) {
               baseExpression: r.tag,
               name: topic.topic,
               relevance: r.relevance,
-            })
+            });
           } catch (error) {
             resolve(null);
           }
@@ -327,13 +330,15 @@ export async function processItem(perspective, channelId, item, existingItem?: b
           latestSubgroup.baseExpression
         );
         // calculate time since last item was created
-        const lastItemTimestamp = latestSubgroupItems[latestSubgroupItems.length - 1].timestamp;
-        const minsSinceLastItemCreated =
-          (new Date().getTime() - new Date(lastItemTimestamp).getTime()) / (1000 * 60);
-        if (minsSinceLastItemCreated < 30 || existingItem) {
-          // if less than 30 mins, consider the new item part of the latest conversation
-          conversation = latestConversation;
-          subgroupItems = latestSubgroupItems;
+        const lastItem = latestSubgroupItems[latestSubgroupItems.length - 1];
+        if (lastItem) {
+          const minsSinceLastItemCreated =
+            (new Date().getTime() - new Date(lastItem.timestamp).getTime()) / (1000 * 60);
+          if (minsSinceLastItemCreated < 30) {
+            // if less than 30 mins, consider the new item part of the latest conversation
+            conversation = latestConversation;
+            subgroupItems = latestSubgroupItems;
+          }
         }
       }
     }
