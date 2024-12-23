@@ -218,20 +218,25 @@ export async function findTopics(perspective, itemId) {
     source: itemId,
   })) as any;
   const topicRelationships = allRelationships.filter((r: any) => r.relevance);
-  return await Promise.all(
+  const topics = await Promise.all(
     topicRelationships.map(
       (r) =>
         new Promise(async (resolve) => {
-          const topicEntity = new Topic(perspective, r.tag);
-          const topic = await topicEntity.get();
-          resolve({
-            baseExpression: r.tag,
-            name: topic.topic,
-            relevance: r.relevance,
-          });
+          try {
+            const topicEntity = new Topic(perspective, r.tag);
+            const topic = await topicEntity.get();
+            resolve({
+              baseExpression: r.tag,
+              name: topic.topic,
+              relevance: r.relevance,
+            })
+          } catch (error) {
+            resolve(null);
+          }
         })
     )
   );
+  return topics.filter((t) => t);
 }
 
 export async function getAllTopics(perspective) {
