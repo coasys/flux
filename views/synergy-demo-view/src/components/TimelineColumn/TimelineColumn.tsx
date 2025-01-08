@@ -53,13 +53,17 @@ export default function TimelineColumn({
     setUsingLLM(!!defaultLLM);
   }
 
+  function linkAddedListener() {
+    if (timeout.current) clearTimeout(timeout.current);
+    timeout.current = setTimeout(getData, 1000);
+  }
+
   useEffect(() => {
-    perspective.addListener("link-added", () => {
-      if (timeout.current) clearTimeout(timeout.current);
-      timeout.current = setTimeout(getData, 1000);
-    });
+    perspective.addListener("link-added", linkAddedListener);
     checkIfUsingLLM();
     getData();
+
+    return () => perspective.removeListener("link-added", linkAddedListener);
   }, []);
 
   return (
