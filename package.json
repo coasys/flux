@@ -30,6 +30,9 @@
     "prettier": "latest",
     "turbo": "latest"
   },
+  "resolutions": {
+    "@coasys/ad4m": "0.10.0-rc13"
+  },
   "engines": {
     "node": ">=18.16.0"
   },
