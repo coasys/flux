@@ -55,7 +55,7 @@ export default function TimelineColumn({
 
   function linkAddedListener() {
     if (timeout.current) clearTimeout(timeout.current);
-    timeout.current = setTimeout(getData, 1000);
+    timeout.current = setTimeout(getData, 2000);
   }
 
   useEffect(() => {
