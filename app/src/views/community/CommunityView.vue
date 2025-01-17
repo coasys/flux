@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import SidebarLayout from "@/layout/SidebarLayout.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -107,7 +107,7 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
-import { PerspectiveState } from "@coasys/ad4m";
+import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   usePerspective,
@@ -117,6 +117,10 @@ import {
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
+import {
+  addSynergySignalHandler,
+  removeSynergySignalHandler,
+} from "@coasys/flux-utils";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -143,6 +147,21 @@ export default defineComponent({
     const { entries: channels } = useSubjects({
       perspective: () => data.value.perspective,
       subject: Channel,
+    });
+
+    // add synergy signal handler for each perspective (used to check if agents capable of processing conversation data)
+    watch(
+      () => data.value.perspective,
+      async (newPerspective: PerspectiveProxy | null) => {
+        if (newPerspective) await addSynergySignalHandler(newPerspective);
+      },
+      { immediate: true }
+    );
+
+    // remove synergy signal handler when component unmounts
+    onUnmounted(() => {
+      if (data.value.perspective)
+        removeSynergySignalHandler(data.value.perspective);
     });
 
     return {

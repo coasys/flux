@@ -1,4 +1,11 @@
-import { Ad4mClient, AITask, LinkQuery } from "@coasys/ad4m";
+import {
+  Ad4mClient,
+  AITask,
+  LinkQuery,
+  PerspectiveExpression,
+  NeighbourhoodProxy,
+  PerspectiveProxy,
+} from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
@@ -12,6 +19,8 @@ import {
 } from "@coasys/flux-api";
 //@ts-ignore
 import JSON5 from "json5";
+import { useRef } from "preact/hooks";
+import { v4 as uuidv4 } from "uuid";
 
 async function removeEmbedding(perspective, itemId) {
   const allSemanticRelationships = (await SemanticRelationship.query(perspective, {
@@ -68,21 +77,6 @@ async function createEmbedding(perspective, text, itemId) {
   await relationship.save();
 }
 
-async function findOrCreateTopic(perspective, allTopics, topicName) {
-  let topicId;
-  // check if topic already exists
-  const match = allTopics.find((t) => t.name === topicName);
-  if (match) topicId = match.baseExpression;
-  else {
-    // create topic
-    const newTopic = new Topic(perspective);
-    newTopic.topic = topicName;
-    await newTopic.save();
-    topicId = newTopic.baseExpression;
-  }
-  return topicId;
-}
-
 async function linkTopic(perspective, itemId, topicId, relevance) {
   const relationship = new SemanticRelationship(perspective, undefined, itemId);
   relationship.expression = itemId;
@@ -91,49 +85,306 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
+// todo: need to update last subgroup summary if any of the new processed items will be included in that grouping
 export async function ensureLLMTask(): Promise<AITask> {
   const taskPrompt = `
     You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
     So make sure to always (!) respond with valid JSON!!
-    I'm passing you a JSON object with the following properties: 'previousSubgroups' (string block broken up into sections by line breaks <br/>), 'previousMessages' (string array), 'newMessage' (string), and 'existingTopics' (string array).
-    { previousSubgroups: [], previousMessages: [], newMessage: 'Some text', existingTopics: [] }
-    Firstly, analyze the 'newMessage' string and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the 'newMessage' string. If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (e.g., if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic). For each topic, provide a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the 'newMessage' string.
-    Secondly, compare the 'newMessage' with the content of 'previousMessages'. Consider the conversation as **related** if:
-    - The 'newMessage' discusses, contrasts, or expands upon topics present in 'previousMessages'.
-    - The 'newMessage' introduces new angles, comparisons, or opinions on the same topics discussed in 'previousMessages' (even if specific terms or phrases differ).
+
+    I'm passing you a JSON object with the following properties:
+    1. 'existingTopics' (String array of all existing topic names)
+    2. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string), a 'text' property (string), and a 'timestamp' property (string).)
+    3. 'subgroupSummaries' (String array of all subgroup summaries)
+
+    Firstly, analyze the 'text' property of each unprocessedItem and identify between 1 (min) and 5 (max) topics (each a single word string in lowercase) that are relevant to the content of the text.
+    If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
+    For each topic, generate a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the text.
+    The output of this analysis will be an updated version of the 'unprocessedItems' array called 'itemsWithTopics', which removes the 'text' and 'timestamp' properties and adds a new 'topics' property for each unprocessed item.
+    The 'topics' property should be an array of objects: one for each of the topics you have identified for the 'text'.
+    Each of these objects should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
+
+    Secondly, analyze the the last summary in 'subgroupSummaries' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
+    Consider the conversation as **related** if:
+    - The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
+    - The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
     Only consider the conversation as having **shifted to a new subject** if:
-    - The 'newMessage' introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in 'previousMessages'.
-    - The 'newMessage' does not logically connect or refer back to the themes in the 'previousMessages'.
-    If there are no items in the 'previousMessages' array, the conversation has by default shifted.
-    After this analysis, return a new object with the following properties and nothing else:
-    1. **'topics'**: an array of objects for each of the topics you have identified for the 'newMessage'. Each object should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
-    2. **'changedSubject'**: a boolean value that indicates whether the conversation has shifted to a new subject or not. The conversation should be considered as shifted only if there is no significant overlap between the topics in the 'newMessage' and the topics in the 'previousMessages'.
-    3. **'newSubgroupName'**: a 1 to 3 word title (string) for the conversation describing its contents. If changedSubject is true, base the title solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
-    4. **'newSubgroupSummary'**: a 1 to 3 sentence paragraph (string) summary of the conents of the conversation. If changedSubject is true, base the summary solely on the new message, otherwise base it on both the new message and the last messages. Don't reference previous conversations.
-    5. **'newConversationName'**: a 1 to 3 word title (string) describing the contents of the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
-    6. **'newConversationSummary'**: a 1 to 3 sentence paragraph (string) summary of the the previousSubgroups plus the newSubgroupSummary. Don't reference previous conversations.
-    Make sure the response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax, don't append text outside of quotes, don't use the assign operator ("=").
-    If you make a mistake and we can't parse you're output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
+    - The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
+    - The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
+    If the 'subgroupSummaries' array is empty, the conversation has by default shifted.
+    If the last summary in 'subgroupSummaries' array is unrelated to the text in the first unprocessed item, the conversation has also shifted.
+    In every case where the conversation has shifted, generate a new subgroup including the following properties:
+    1. 'name': a 1 to 3 word title (string) describing the contents of the subgroup.
+    2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
+    3. 'timestamp': a timestamp string (in the same format as the timestamps on each unprocessed item) that is 1 millisecond earlier than the first item within the subgroup.
+    The output of this analysis will be an object array called 'subgroups', which includes all the subgroups identified in the conversation.
+    Each subgroup object will have the 'name', 'summary', and 'timestamp' properties described above.
+
+    Thirdly, analyse all the summaries in the original 'subgroupSummaries' array and the summaries in the new 'subgroups' array, and use this info to generate a new 'conversationData' object with the following properties:
+    1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
+    2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
+
+    Finally return a JSON object with the following properties generated from the analysis:
+    1. 'conversationData': the 'conversationData' object described above.
+    2. 'itemsWithTopics': the 'itemsWithTopics' array described above.
+    3. 'subgroups': the 'subgroups' array described above.
+
+    Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
+    If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
     So if you see that field, take extra care about that specific mistake and don't make it again!
     Don't talk about the errors in the summaries or topics.
   `;
 
   const examples = [
     {
-      input: `{ previousSubgroups: [], previousMessages: [], newMessage: 'hello world', existingTopics: [greeting] }`,
-      output: `{"topics":[{"name":"greeting","relevance":100}],"changedSubject":true,"newSubgroupName":"Hello World","newSubgroupSummary":"The conversation starts with a simple greeting: 'hello world'.","newConversationName":"Hello World","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'."}`,
+      input: `{
+        "existingTopics": ["coding", "help"],
+        "unprocessedItems": [
+          {
+            "id": "msg-1",
+            "text": "I'm exploring a new Vue.js project",
+            "timestamp": "2025-01-10T10:00:00.000Z"
+          },
+          {
+            "id": "msg-2",
+            "text": "Need help setting up TypeScript",
+            "timestamp": "2025-01-10T10:01:00.000Z"
+          }
+        ],
+        "subgroupSummaries": []
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Vue Setup",
+          "summary": "Discusses initial steps in a Vue project and TypeScript configuration."
+        },
+        "itemsWithTopics": [
+          {
+            "id": "msg-1",
+            "topics": [
+              { "name": "coding", "relevance": 85 }
+            ]
+          },
+          {
+            "id": "msg-2",
+            "topics": [
+              { "name": "help", "relevance": 90 },
+              { "name": "coding", "relevance": 70 }
+            ]
+          }
+        ],
+        "subgroups": [
+          {
+            "name": "Initial Setup",
+            "summary": "Covers starting a Vue project and requesting TypeScript assistance.",
+            "timestamp": "2025-01-10T09:59:59.999Z"
+          }
+        ]
+      }`,
     },
     {
-      input: `{ previousSubgroups: [The conversation starts with a simple greeting: 'hello world'.], previousMessages: [<p>hello world</p><p></p>], newMessage: 'another hello 2', existingTopics: [greeting] }`,
-      output: `{"topics":[{"name":"hello","relevance":80},{"name":"greeting","relevance":70}],"changedSubject":false,"newSubgroupName":"More Greetings","newSubgroupSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries.","newConversationName":"Simple Greetings","newConversationSummary":"The conversation starts with a simple greeting: 'hello world'. Following this, another greeting is exchanged, indicating the continuation of pleasantries."}`,
+      input: `{
+        "existingTopics": ["cooking", "recipe"],
+        "unprocessedItems": [
+          {
+            "id": "msg-1",
+            "text": "I'm making a chicken curry today",
+            "timestamp": "2025-01-10T11:00:00.000Z"
+          },
+          {
+            "id": "msg-2",
+            "text": "I need a good spice blend for flavor",
+            "timestamp": "2025-01-10T11:05:00.000Z"
+          }
+        ],
+        "subgroupSummaries": [
+          "We previously discussed favorite curry methods."
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Curry Tips",
+          "summary": "Continues discussing chicken curry preparation and spice blends."
+        },
+        "itemsWithTopics": [
+          {
+            "id": "msg-1",
+            "topics": [
+              { "name": "cooking", "relevance": 90 }
+            ]
+          },
+          {
+            "id": "msg-2",
+            "topics": [
+              { "name": "cooking", "relevance": 85 },
+              { "name": "recipe", "relevance": 75 }
+            ]
+          }
+        ],
+        "subgroups": []
+      }`,
     },
     {
-      input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries.], previousMessages: [<p>hello world</p><p></p>, <p>another hello 2</p><p></p>], newMessage: 'game talk here', existingTopics: [greeting, hello] }`,
-      output: `{"topics":[{"name":"game","relevance":100},{"name":"talk","relevance":80}],"changedSubject":true,"newSubgroupName":"Game Talk","newSubgroupSummary":"The conversation introduces a new topic with a focus on discussing games.","newConversationName":"Exchange of Pleasantries and Game Talk","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation then introduces a new topic with a focus on discussing games."}`,
+      input: `{
+        "existingTopics": ["music", "lessons", "practice"],
+        "unprocessedItems": [
+          {
+            "id": "msg-1",
+            "text": "Continuing my piano exercises",
+            "timestamp": "2025-01-10T12:00:00.000Z"
+          },
+          {
+            "id": "msg-2",
+            "text": "Scales and chords are getting easier",
+            "timestamp": "2025-01-10T12:02:00.000Z"
+          },
+          {
+            "id": "msg-3",
+            "text": "Now I'm considering a shift to guitar",
+            "timestamp": "2025-01-10T12:03:00.000Z"
+          },
+          {
+            "id": "msg-4",
+            "text": "Barre chords seem tough to master",
+            "timestamp": "2025-01-10T12:04:00.000Z"
+          }
+        ],
+        "subgroupSummaries": [
+          "A discussion on chord progressions for piano.",
+          "Notes on daily practice routines."
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Instrument Focus",
+          "summary": "Begins with piano exercises and transitions into learning guitar techniques."
+        },
+        "itemsWithTopics": [
+          {
+            "id": "msg-1",
+            "topics": [
+              { "name": "practice", "relevance": 85 },
+              { "name": "music", "relevance": 75 }
+            ]
+          },
+          {
+            "id": "msg-2",
+            "topics": [
+              { "name": "music", "relevance": 80 },
+              { "name": "practice", "relevance": 70 }
+            ]
+          },
+          {
+            "id": "msg-3",
+            "topics": [
+              { "name": "music", "relevance": 90 }
+            ]
+          },
+          {
+            "id": "msg-4",
+            "topics": [
+              { "name": "music", "relevance": 85 },
+              { "name": "lessons", "relevance": 60 }
+            ]
+          }
+        ],
+        "subgroups": [
+          {
+            "name": "Guitar Move",
+            "summary": "Explores transitioning from piano to learning guitar chords.",
+            "timestamp": "2025-01-10T12:02:59.999Z"
+          }
+        ]
+      }`,
     },
     {
-      input: `{ previousSubgroups: [The conversation continues with another greeting, showing the ongoing exchange of pleasantries. <br/> The conversation introduces a new topic with a focus on discussing games.], previousMessages: [<p>game talk here</p><p></p>], newMessage: 'dota 2 is the biggest esport game there is', existingTopics: [greeting, hello, game, talk] }`,
-      output: `{"topics":[{"name":"game","relevance":90},{"name":"esport","relevance":85},{"name":"dota","relevance":100}],"changedSubject":false,"newSubgroupName":"Dota 2 Discussion","newSubgroupSummary":"The conversation continues with a focus on Dota 2, highlighting its prominence in the esports scene.","newConversationName":"Games and Esports","newConversationSummary":"The conversation continues with another greeting, showing the ongoing exchange of pleasantries. The conversation introduces a new topic with a focus on discussing games. The latest discussion centers on Dota 2, highlighting its significance in the world of esports."}`,
+      input: `{
+        "existingTopics": ["gaming", "strategy", "multiplayer"],
+        "unprocessedItems": [
+          {
+            "id": "msg-1",
+            "text": "I'm trying new tactics in a real-time strategy game",
+            "timestamp": "2025-01-10T13:00:00.000Z"
+          },
+          {
+            "id": "msg-2",
+            "text": "Multiplayer matches can be stressful",
+            "timestamp": "2025-01-10T13:01:00.000Z"
+          },
+          {
+            "id": "msg-3",
+            "text": "Switching gears to a solo RPG for a break",
+            "timestamp": "2025-01-10T13:02:00.000Z"
+          },
+          {
+            "id": "msg-4",
+            "text": "Next, I want to try a puzzle platformer",
+            "timestamp": "2025-01-10T13:03:00.000Z"
+          },
+          {
+            "id": "msg-5",
+            "text": "Co-op mode in platformers is fun too",
+            "timestamp": "2025-01-10T13:04:00.000Z"
+          }
+        ],
+        "subgroupSummaries": [
+          "A previous note on game reviews.",
+          "Summary of an intense strategy tournament.",
+          "Discussion about team-based gaming experiences."
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Varied Gaming",
+          "summary": "Covers real-time strategies, solo RPGs, and transitioning to puzzle platformers."
+        },
+        "itemsWithTopics": [
+          {
+            "id": "msg-1",
+            "topics": [
+              { "name": "strategy", "relevance": 90 },
+              { "name": "gaming", "relevance": 70 }
+            ]
+          },
+          {
+            "id": "msg-2",
+            "topics": [
+              { "name": "multiplayer", "relevance": 85 },
+              { "name": "gaming", "relevance": 65 }
+            ]
+          },
+          {
+            "id": "msg-3",
+            "topics": [
+              { "name": "gaming", "relevance": 80 }
+            ]
+          },
+          {
+            "id": "msg-4",
+            "topics": [
+              { "name": "gaming", "relevance": 75 }
+            ]
+          },
+          {
+            "id": "msg-5",
+            "topics": [
+              { "name": "multiplayer", "relevance": 70 },
+              { "name": "gaming", "relevance": 60 }
+            ]
+          }
+        ],
+        "subgroups": [
+          {
+            "name": "Solo RPG",
+            "summary": "Moves away from strategy towards a single-player role-playing experience.",
+            "timestamp": "2025-01-10T13:01:59.999Z"
+          },
+          {
+            "name": "Puzzle Platforming",
+            "summary": "Shifts focus to platformer gameplay, including co-op elements.",
+            "timestamp": "2025-01-10T13:02:59.999Z"
+          }
+        ]
+      }`,
     },
   ];
 
@@ -144,16 +395,17 @@ export async function ensureLLMTask(): Promise<AITask> {
   return task;
 }
 
-async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allTopics) {
-  let prompt = {
-    previousSubgroups: [latestSubgroups.map((s: any) => s.summary).join(" <br/> ")],
-    previousMessages: [latestSubgroupItems.map((si: any) => si.text).join(", ")],
-    newMessage: newItem.text,
-    existingTopics: [allTopics.map((t: any) => t.name).join(", ")],
-  };
-
+async function LLMProcessing(unprocessedItems, subgroups, existingTopics) {
   const task = await ensureLLMTask();
   const client: Ad4mClient = await getAd4mClient();
+  let prompt = {
+    existingTopics: existingTopics.map((t: any) => t.name),
+    unprocessedItems: unprocessedItems.map((item: any) => {
+      return { id: item.baseExpression, text: item.text, timestamp: item.timestamp };
+    }),
+    subgroupSummaries: subgroups.map((s: any) => s.summary),
+  };
+  // attempt LLM task up to 5 times before giving up
   let parsedData;
   let attempts = 0;
   while (!parsedData && attempts < 5) {
@@ -161,9 +413,8 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
     console.log("LLM Prompt:", prompt);
     const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
-    response.replace("False", "false");
-    response.replace("True", "true");
     try {
+      // todo: include check here to ensure all expected properties are present in the response
       parsedData = JSON5.parse(response);
     } catch (error) {
       console.error("LLM response parse error:", error);
@@ -174,29 +425,23 @@ async function LLMProcessing(newItem, latestSubgroups, latestSubgroupItems, allT
 
   if (parsedData) {
     return {
-      topics: parsedData.topics || [],
-      changedSubject: parsedData.changedSubject || false,
-      newSubgroupName: parsedData.newSubgroupName || "",
-      newSubgroupSummary: parsedData.newSubgroupSummary || "",
-      newConversationName: parsedData.newConversationName || "",
-      newConversationSummary: parsedData.newConversationSummary || "",
+      conversationData: parsedData.conversationData,
+      itemsWithTopics: parsedData.itemsWithTopics,
+      subgroups: parsedData.subgroups,
     };
   } else {
     // give up and return empty data
     console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
     return {
-      topics: [],
-      changedSubject: false,
-      newSubgroupName: "",
-      newSubgroupSummary: "",
-      newConversationName: "",
-      newConversationSummary: "",
+      conversationData: { name: "", summary: "" },
+      itemsWithTopics: [],
+      subgroups: [],
     };
   }
 }
 
 export function transformItem(type, item) {
-  // used to transform message, post, or task expressions into a common format
+  // used to transform message, post, or task subject entities into a common format
   const newItem = {
     type,
     baseExpression: item.id,
@@ -273,12 +518,6 @@ export async function getSubgroupItems(perspective, subgroupId) {
   });
 }
 
-async function removeProcessedDataIfPresent(perspective, itemId) {
-  // check if there are existing semantic relationships on the item & remove if present (used for edits & unprocessed items)
-  const relationships = await SemanticRelationship.query(perspective, { source: itemId });
-  if (relationships.length) await removeProcessedData(perspective, itemId);
-}
-
 // todo: use raw prolog query here so subject classes don't need to be hard coded
 async function getConversationItems(perspective, conversationId) {
   // gather up all the items in the conversation
@@ -298,242 +537,306 @@ async function getConversationItems(perspective, conversationId) {
   return orderedItems;
 }
 
-async function linkItemToConversation(perspective, channelId, itemId) {
-  let conversation;
-  const conversations = await Conversation.query(perspective, { source: channelId });
-  if (conversations.length) {
-    // if existing conversations found & last item in last conversation less than 30 mins old, use that conversation
-    const lastConversation = conversations[conversations.length - 1];
-    const conversationItems = await getConversationItems(perspective, lastConversation.baseExpression);
-    if (conversationItems.length) {
-      const lastItem = conversationItems[conversationItems.length - 1];
-      const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
-      const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
-      if (minsSinceLastItemCreated < 30) conversation = lastConversation;
-    }
-  }
-  if (!conversation) {
-    // create a new conversation
-    const newConversation = new Conversation(perspective, undefined, channelId);
-    newConversation.conversationName = `Conversation ${conversations.length + 1}`;
-    await newConversation.save();
-    conversation = await newConversation.get();
-  }
-  // link item to conversation
-  await perspective.add({
-    source: conversation.baseExpression,
-    predicate: "ad4m://has_child",
-    target: itemId,
-  });
-}
-
-async function getDefaultLLM() {
+export async function getDefaultLLM() {
   const client = await getAd4mClient();
   return await client.ai.getDefaultModel("LLM");
 }
 
-const processingQueue = [] as any[];
-let isProcessing = false;
+async function findUnprocessedItems(perspective: any, channelId: string) {
+  // gather up all the items in the channel
+  const messages = await new SubjectRepository(Message, { perspective, source: channelId }).getAllData();
+  const posts = await new SubjectRepository(Post, { perspective, source: channelId }).getAllData();
+  const tasks = await new SubjectRepository("Task", { perspective, source: channelId }).getAllData();
+  // transform items into common format
+  const transformedItems = [
+    ...messages.map((message) => transformItem("Message", message)),
+    ...posts.map((post) => transformItem("Post", post)),
+    ...tasks.map((task) => transformItem("Task", task)),
+  ];
+  // remove processed items
+  const unprocessedItems = await Promise.all(
+    transformedItems.filter(async (item) => {
+      // grab all parent links for the item
+      const parentLinks = await perspective.get(
+        new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
+      );
+      // unprocessed items should only have a single parent link to the channel (where as processed items will also have a parent link to the conversation)
+      return parentLinks.length === 1;
+    })
+  );
+  return unprocessedItems;
+}
 
-// async function maybeProcessNext() {
-//   if (isProcessing || !processingQueue.length) return;
-//   isProcessing = true;
+async function findItemsAuthor(perspective: any, channelId: string, itemId: string) {
+  // find the link connecting the item to the channel
+  const itemChannelLinks = await perspective.get(
+    new LinkQuery({ source: channelId, predicate: "ad4m://has_child", target: itemId })
+  );
+  // return the author of the links did
+  return itemChannelLinks[0].author;
+}
 
-//   const next = processingQueue.shift();
-//   try {
-//     await processItemOld(next.perspective, next.channelId, next.item, next.existingItem);
-//   } finally {
-//     isProcessing = false;
-//     // Attempt to process the next in queue
-//     maybeProcessNext();
-//   }
-// }
+async function isMe(did: string) {
+  // checks if the did is mine
+  const client = await getAd4mClient();
+  const me = await client.agent.me();
+  return did === me.did;
+}
 
-export async function processItem(perspective, channelId, item, existingItem?: boolean) {
-  return new Promise(async (resolve: any) => {
-    await removeProcessedDataIfPresent(perspective, item.baseExpression);
-    await linkItemToConversation(perspective, channelId, item.baseExpression);
-    // if no default LLM, end processing here
-    if (!(await getDefaultLLM())) resolve();
-    else {
-      await createEmbedding(perspective, item.text, item.baseExpression);
-      // check if responsible for LLM task...
+const recievedSignals = useRef<any[]>([]);
+let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+
+async function onSignalReceived(expression: PerspectiveExpression, neighbourhood: NeighbourhoodProxy) {
+  const link = expression.data.links[0];
+  const { author, data } = link;
+  const { predicate, target } = data;
+
+  if (predicate === "can-you-process-items") {
+    const defaultLLM = await getDefaultLLM();
+    if (defaultLLM) {
+      await neighbourhood.sendSignalU(author, { links: [{ source: "", predicate: "i-can-process-items", target }] });
     }
+    // todo: respond if can't process items too?
+    // await neighbourhood.sendSignalU(author, {
+    //   links: [
+    //     {
+    //       source: "", // channelId (not necissary?)
+    //       predicate: `i-${defaultLLM ? "can" : "cant"}-process-items`,
+    //       target,
+    //     },
+    //   ],
+    // });
+  }
+
+  if (predicate === "i-can-process-items") recievedSignals.current.push(link);
+
+  // // is this necissary (might be slightly quicker than waiting for timeout...)
+  // if (predicate === "i-cant-process-items") {
+  // }
+}
+
+export async function addSynergySignalHandler(perspective: PerspectiveProxy) {
+  const neighbourhood = await perspective.getNeighbourhoodProxy();
+  signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood);
+  neighbourhood.addSignalHandler(signalHandler);
+}
+
+export async function removeSynergySignalHandler(perspective: PerspectiveProxy) {
+  if (signalHandler) {
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    neighbourhood.removeSignalHandler(signalHandler);
+    signalHandler = null;
+  }
+}
+
+async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid: string): Promise<boolean> {
+  return new Promise(async (resolve) => {
+    // generate a uuid to ensure responce matches request
+    const signalUuid = uuidv4();
+    // signal the agent to check they are online and have AI enabled
+    await neighbourhood.sendSignalU(agentsDid, {
+      links: [{ source: "", predicate: "can-you-process-items", target: signalUuid }],
+    });
+    // wait 2 seconds for a responce
+    setTimeout(() => {
+      const affirmationRecieved = !!recievedSignals.current.find((signal: any) => signal.data.target === signalUuid);
+      resolve(affirmationRecieved);
+    }, 2000);
   });
 }
 
-export async function processItemOld(perspective, channelId, item, existingItem?: boolean) {
-  // check if LLM is enabled
-  const client = await getAd4mClient();
-  const defaultLLM = await client.ai.getDefaultModel("LLM");
-  console.log("process item with LLM: ", !!defaultLLM);
-  return new Promise(async (resolve: any) => {
-    // check for existing relationships & remove processed data if present (used for edits & unprocessed items)
-    const relationships = await SemanticRelationship.query(perspective, {
-      source: item.baseExpression,
-    });
-    if (relationships.length) await removeProcessedData(perspective, item.baseExpression);
-    // find the last conversation & subgroup or create new ones
-    let conversation;
-    let subgroups = [] as any;
-    let subgroupItems = [] as any[];
-    const conversations = await Conversation.query(perspective, {
-      source: channelId,
-    });
-    if (conversations.length) {
-      if (existingItem) {
-        // todo: use raw prolog query here
-        // find the conversation & subgroup of the existing item
-        const allConversations = await Conversation.all(perspective);
-        const allSubgroups = await ConversationSubgroup.all(perspective);
-        const itemLinks = await perspective.get(
-          new LinkQuery({
-            predicate: "ad4m://has_child",
-            target: item.baseExpression,
-          })
-        );
-        const subgroup = allSubgroups.find((s) => itemLinks.find((link) => link.data.source === s.baseExpression));
-        const subgroupLinks = await perspective.get(
-          new LinkQuery({
-            predicate: "ad4m://has_child",
-            target: subgroup.baseExpression,
-          })
-        );
-        conversation = allConversations.find((c) =>
-          subgroupLinks.find((link) => link.data.source === c.baseExpression)
-        );
-        subgroups = [subgroup];
-      } else {
-        // find the latest conversation & subgroup (if last item created less than 30 mins ago)
-        const latestConversation = conversations[conversations.length - 1];
-        subgroups = await ConversationSubgroup.query(perspective, {
-          source: latestConversation.baseExpression,
-        });
-        const latestSubgroup = subgroups[subgroups.length - 1] as any;
-        const latestSubgroupItems = await getSubgroupItems(perspective, latestSubgroup.baseExpression);
-        // calculate time since last item was created
-        const lastItem = latestSubgroupItems[latestSubgroupItems.length - 1];
-        if (lastItem) {
-          const minsSinceLastItemCreated =
-            (new Date().getTime() - new Date(lastItem.timestamp).getTime()) / (1000 * 60);
-          if (minsSinceLastItemCreated < 30) {
-            // if less than 30 mins, consider the new item part of the latest conversation
-            conversation = latestConversation;
-            subgroupItems = latestSubgroupItems;
-          }
-        }
-      }
+async function responsibleForProcessing(
+  perspective: PerspectiveProxy,
+  neighbourhood: NeighbourhoodProxy,
+  channelId: string,
+  unprocessedItems: any[],
+  increment = 0
+): Promise<boolean> {
+  // todo: store these consts in channel settings
+  const minNumberOfItemsToProcess = 5;
+  const numberOfItemsDelay = 3;
+  // check if enough unprocessed items are present to run the processing task (increment used so we can keep checking the next item until the limit is reached)
+  const enoughUnprocessedItems = unprocessedItems.length >= minNumberOfItemsToProcess + numberOfItemsDelay + increment;
+  if (!enoughUnprocessedItems) return false;
+  else {
+    // find the author of the nth item
+    const nthItem = unprocessedItems[minNumberOfItemsToProcess + increment - 1];
+    const author = await findItemsAuthor(perspective, channelId, nthItem.baseExpression);
+    // if we are the author, we are responsible for processing
+    if (await isMe(author)) return true;
+    else {
+      // if not, signal the author to check if they can process the items
+      const authorCanProcessItems = await agentCanProcessItems(neighbourhood, author);
+      // if they can, we aren't responsible for processing
+      if (authorCanProcessItems) return false;
+      // if they can't, re-run the check on the next item
+      else
+        return await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems, increment + 1);
     }
-    if (!conversation) {
-      // create new conversation
-      const newConversation = new Conversation(perspective, undefined, channelId);
-      newConversation.conversationName = `Conversation ${conversations.length + 1}`;
-      await newConversation.save();
-      conversation = await newConversation.get();
-      // create new subgroup
+  }
+}
+
+async function findOrCreateNewConversation(perspective: PerspectiveProxy, channelId: string) {
+  const conversations = await Conversation.query(perspective, { source: channelId });
+  if (conversations.length) {
+    // if existing conversations found & last item in last conversation less than 30 mins old, use that conversation
+    const lastConversation = conversations[conversations.length - 1];
+    const lastConversationItems = await getConversationItems(perspective, lastConversation.baseExpression);
+    if (lastConversationItems.length) {
+      const lastItem = lastConversationItems[lastConversationItems.length - 1];
+      const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
+      const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
+      if (minsSinceLastItemCreated < 30) return lastConversation;
+    }
+  }
+  // otherwise create a new conversation
+  const newConversation = new Conversation(perspective, undefined, channelId);
+  newConversation.conversationName = `Conversation ${conversations.length + 1}`;
+  await newConversation.save();
+  return await newConversation.get();
+}
+
+// todo:
+// + gather up save, update, and link creating tasks (after conversation creation) and run all in promise all at the end (but some need baseExpressions of created subject classes)
+// + update last of previous subgroups if processed items are present before the first new subgroup (new title, summary, vector embedding, and new topics)
+// + mark items as processing so visible in UI and other agents know not to process them (add new signal in responsibleForProcessing check?)
+async function processItemsAndAddToConversation(perspective, channelId, unprocessedItems) {
+  const conversation: any = await findOrCreateNewConversation(perspective, channelId);
+  // gather up all new perspective links so they can be commited in a single transaction at the end of the function
+  const newLinks = [] as any;
+  // prepare links connecting items to conversation
+  newLinks.push(
+    ...unprocessedItems.map((item) => ({
+      source: conversation.baseExpression,
+      predicate: "ad4m://has_child",
+      target: item.baseExpression,
+    }))
+  );
+  // run LLM processing
+  const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
+  const existingTopics = await getAllTopics(perspective);
+  const { conversationData, itemsWithTopics, subgroups } = await LLMProcessing(
+    unprocessedItems,
+    previousSubgroups,
+    existingTopics
+  );
+  // update conversation text
+  conversation.conversationName = conversationData.name;
+  conversation.summary = conversationData.summary;
+  await conversation.update();
+  // gather up new topics from processed items (avoiding duplicates)
+  const newTopicsToCreate = itemsWithTopics
+    .flatMap((item) => item.topics)
+    .reduce((acc, topic) => {
+      const exists = existingTopics.some((t) => t.name === topic.name) || acc.some((t) => t.name === topic.name);
+      if (!exists) acc.push(topic);
+      return acc;
+    }, []);
+  // create new topics
+  const newTopics = await Promise.all(
+    newTopicsToCreate.map(async (topic) => {
+      // create topic
+      const newTopic = new Topic(perspective);
+      newTopic.topic = topic.name;
+      await newTopic.save();
+      // link topic to conversation
+      await linkTopic(perspective, conversation.baseExpression, newTopic.baseExpression, topic.relevance);
+      return newTopic.get();
+    })
+  );
+  // create new subgroups
+  const newSubgroups = await Promise.all(
+    subgroups.map(async (subgroup) => {
+      // create subgroup
       const newSubgroup = new ConversationSubgroup(perspective, undefined, conversation.baseExpression);
-      newSubgroup.subgroupName = "Subgroup 1";
+      newSubgroup.subgroupName = subgroup.name;
+      newSubgroup.summary = subgroup.summary;
+      newSubgroup.positionTimestamp = subgroup.timestamp;
       await newSubgroup.save();
-      subgroups = [newSubgroup];
-      // link subgroup to channel for use in search
-      await perspective.add({
-        source: channelId,
-        predicate: "ad4m://has_child",
-        target: newSubgroup.baseExpression,
-      });
-    }
-    // attach unprocessed item to subgroup (unless existingItem)
-    let subgroup = subgroups[subgroups.length - 1];
-    let linkExpression;
-    if (!existingItem) {
-      linkExpression = await perspective.add({
-        source: subgroup.baseExpression,
-        predicate: "ad4m://has_child",
-        target: item.baseExpression,
-      });
-    }
+      // prepare link connecting subgroup to channel
+      newLinks.push({ source: channelId, predicate: "ad4m://has_child", target: newSubgroup.baseExpression });
+      return newSubgroup.get();
+    })
+  );
+  // link topics to items & groups
+  await Promise.all(
+    itemsWithTopics.map(
+      (item: any) =>
+        new Promise(async (resolve: any) => {
+          // find the items subgroup
+          let itemsSubgroup = previousSubgroups[previousSubgroups.length - 1];
+          // todo: just fetch the item before using the timestamp and 1ms gap?
+          const newSubgroupsBeforeItem = subgroups.filter(
+            (s) => new Date(s.timestamp).getTime() < new Date(item.timestamp).getTime()
+          );
+          if (newSubgroupsBeforeItem.length) {
+            const lastNewSubgroup = newSubgroupsBeforeItem[newSubgroupsBeforeItem.length - 1];
+            itemsSubgroup = newSubgroups.find((s) => s.name === lastNewSubgroup.name);
+          }
+          // loop through each of the items topics, link them to the item & subgroup
+          await Promise.all(
+            item.topics.map(
+              (topic: any) =>
+                new Promise(async (resolve2: any) => {
+                  // find topic entity
+                  const topicEntity =
+                    newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
+                  // link topic to item
+                  await linkTopic(
+                    perspective,
+                    conversation.baseExpression,
+                    topicEntity.baseExpression,
+                    topic.relevance
+                  );
+                  // link topic to last subgroup (if not already linked)
+                  const subgroupTopics = await findTopics(perspective, itemsSubgroup.baseExpression);
+                  if (!subgroupTopics.find((t) => t.name === topic.name)) {
+                    await linkTopic(
+                      perspective,
+                      itemsSubgroup.baseExpression,
+                      topicEntity.baseExpression,
+                      topic.relevance
+                    );
+                  }
+                  resolve2();
+                })
+            )
+          );
+          resolve();
+        })
+    )
+  );
+  // create vector embeddings for each item
+  await Promise.all(unprocessedItems.map((item) => createEmbedding(perspective, item.text, item.baseExpression)));
+  // create vector embeddings for each new subgroup (todo: include last subgroup if processed items before first new subgroup)
+  await Promise.all(
+    newSubgroups.map((subgroup) => createEmbedding(perspective, subgroup.summary, subgroup.baseExpression))
+  );
+  // create new vector embedding for conversation
+  await removeEmbedding(perspective, conversation.baseExpression);
+  await createEmbedding(perspective, conversationData.summary, conversation.baseExpression);
+  // batch commit all new links (currently only "ad4m://has_child" links)
+  await perspective.addLinks(newLinks);
+}
+
+// todo: needs to run every time a new item appears in a channel (not just every time you create a new item)
+export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
+  return new Promise(async (resolve: any) => {
+    // only attempt processing if default LLM is set
+    const defaultLLM = await getDefaultLLM();
     if (!defaultLLM) resolve();
     else {
-      // mark items as processing by adding an empty semantic relationship
-      const relationship = new SemanticRelationship(perspective, undefined, item.baseExpression);
-      await relationship.save();
-      // run LLM processing
-      const allTopics = await getAllTopics(perspective);
-      const {
-        topics,
-        changedSubject,
-        newSubgroupName,
-        newSubgroupSummary,
-        newConversationName,
-        newConversationSummary,
-      } = await LLMProcessing(item, subgroups, subgroupItems, allTopics);
-      if (!existingItem) {
-        // update conversation summary and title
-        if (newConversationName) conversation.conversationName = newConversationName;
-        if (newConversationSummary) conversation.summary = newConversationSummary;
-        if (newConversationName || newConversationSummary) await conversation.update();
-        // update subgroup summary and title
-        if (changedSubject && subgroup.summary) {
-          // if the conversation has shifted to a new subject, create a new subgroup
-          const newSubgroup = new ConversationSubgroup(perspective, undefined, conversation.baseExpression);
-          newSubgroup.subgroupName = newSubgroupName;
-          newSubgroup.summary = newSubgroupSummary;
-          await newSubgroup.save();
-          // link subgroup to channel for use in search
-          await perspective.add({
-            source: channelId,
-            predicate: "ad4m://has_child",
-            target: newSubgroup.baseExpression,
-          });
-          // remove link to old subgroup if present
-          if (linkExpression) await perspective.remove(linkExpression);
-          // add link to new subgroup
-          await perspective.add({
-            source: newSubgroup.baseExpression,
-            predicate: "ad4m://has_child",
-            target: item.baseExpression,
-          });
-          subgroup = newSubgroup;
-        } else {
-          // if the subject of the conversation has stayed the same, stick with the exising subgroup
-          if (newSubgroupName) subgroup.subgroupName = newSubgroupName;
-          if (newSubgroupSummary) subgroup.summary = newSubgroupSummary;
-          if (newSubgroupName || newSubgroupSummary) await subgroup.update();
-        }
-      }
-      // attach topics to new item, conversation, & subgroup (avoid duplicates on conversation & subgroup)
-      const filteredTopics = topics.filter((topic: any) => topic && topic.name && topic.relevance);
-      await Promise.all(
-        filteredTopics.map(
-          (topic: any) =>
-            new Promise(async (resolve2: any) => {
-              // link new item topics
-              const topicId = await findOrCreateTopic(perspective, allTopics, topic.name);
-              await linkTopic(perspective, item.baseExpression, topicId, topic.relevance);
-              // link new conversation topics
-              const conversationTopics = await findTopics(perspective, conversation.baseExpression);
-              if (!conversationTopics.find((t) => t.name === topic.name)) {
-                await linkTopic(perspective, conversation.baseExpression, topicId, topic.relevance);
-              }
-              // link new subgroup topics
-              const subgroupTopics = await findTopics(perspective, subgroup.baseExpression);
-              if (!subgroupTopics.find((t) => t.name === topic.name)) {
-                await linkTopic(perspective, subgroup.baseExpression, topicId, topic.relevance);
-              }
-              resolve2();
-            })
-        )
+      // check if we are responsible for processing
+      const unprocessedItems = await findUnprocessedItems(perspective, channelId);
+      const neighbourhood = await perspective.getNeighbourhoodProxy();
+      const responsible: boolean = await responsibleForProcessing(
+        perspective,
+        neighbourhood,
+        channelId,
+        unprocessedItems
       );
-      // update embeddings
-      await removeEmbedding(perspective, item.baseExpression);
-      await createEmbedding(perspective, item.text, item.baseExpression);
-      if (!existingItem) {
-        await removeEmbedding(perspective, conversation.baseExpression);
-        await createEmbedding(perspective, newConversationSummary, conversation.baseExpression);
-        await removeEmbedding(perspective, subgroup.baseExpression);
-        await createEmbedding(perspective, newSubgroupSummary, subgroup.baseExpression);
-      }
-
+      // if we are responsible, process items & add to conversation
+      if (responsible) await processItemsAndAddToConversation(perspective, channelId, unprocessedItems);
       resolve();
     }
   });
