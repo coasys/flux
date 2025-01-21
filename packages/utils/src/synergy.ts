@@ -365,7 +365,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   const newLinks = [] as any;
   // gather up data for LLM processing
   const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
-  const lastSubgroup = previousSubgroups[previousSubgroups.length - 1];
+  const lastSubgroup = previousSubgroups[previousSubgroups.length - 1] as any;
   const lastSubgroupTopics = lastSubgroup ? await findTopics(perspective, lastSubgroup.baseExpression) : [];
   const lastSubgroupWithTopics = lastSubgroup ? { ...lastSubgroup, topics: lastSubgroupTopics } : null;
   const existingTopics = await getAllTopics(perspective);
@@ -407,7 +407,6 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
     allReturnedTopics.map(async (topic) => {
       // skip topics already linked to the conversation
       if (conversationTopics.find((t) => t.name === topic.name)) return;
-
       // find topic entity to get baseExpression
       const topicEntity =
         newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
@@ -416,16 +415,20 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
     })
   );
   // update currentSubgroup if new data returned from LLM
-  const currentSubgroupEntity = previousSubgroups[previousSubgroups.length - 1] as any;
   if (currentSubgroup) {
-    currentSubgroupEntity.subgroupName = currentSubgroup.name;
-    currentSubgroupEntity.summary = currentSubgroup.summary;
+    lastSubgroup.subgroupName = currentSubgroup.name;
+    lastSubgroup.summary = currentSubgroup.summary;
+    await lastSubgroup.update();
     // link currentSubgroup topics
     await Promise.all(
       currentSubgroup.topics.map(async (topic) => {
+        // skip topics already linked to the subgroup
+        if (lastSubgroupTopics.find((t) => t.name === topic.name)) return;
+        // find topic entity to get baseExpression
         const topicEntity =
           newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
-        await linkTopic(perspective, currentSubgroupEntity.baseExpression, topicEntity.baseExpression, topic.relevance);
+
+        await linkTopic(perspective, lastSubgroup.baseExpression, topicEntity.baseExpression, topic.relevance);
       })
     );
   }
