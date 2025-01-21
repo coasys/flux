@@ -33,32 +33,6 @@ async function removeEmbedding(perspective, itemId) {
   }
 }
 
-async function removeTopics(perspective, itemId) {
-  const allRelationships = (await SemanticRelationship.query(perspective, {
-    source: itemId,
-  })) as any;
-  const topicRelationships = allRelationships.filter((r) => r.relevance);
-  return Promise.all(
-    topicRelationships.map(
-      async (topicRelationship) =>
-        new Promise(async (resolve: any) => {
-          try {
-            const topic = new Topic(perspective, topicRelationship.tag);
-            await topic.delete();
-            await topicRelationship.delete();
-            resolve();
-          } catch (error) {
-            resolve();
-          }
-        })
-    )
-  );
-}
-
-async function removeProcessedData(perspective, itemId) {
-  return await Promise.all([removeEmbedding(perspective, itemId), removeTopics(perspective, itemId)]);
-}
-
 // todo: use embedding language instead of stringifying
 async function createEmbedding(perspective, text, itemId) {
   // generate embedding
@@ -137,183 +111,175 @@ export async function ensureLLMTask(): Promise<AITask> {
 
   const examples = [
     {
-      input: 
-`{
-  "existingTopics": [],
-  "previousSubgroups": [],
-  "currentSubgroup": null,
-  "unprocessedItems": [
-    { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
-    { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
-    { "id": "3", "text": "Recent measurements suggest there may be discrepancies in the Hubble constant values." },
-    { "id": "4", "text": "These discrepancies might point to unknown physics beyond our current models." },
-    { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this." }
-  ]
-}`,
-      output: 
-`{
-  "conversationData": {
-    "name": "Cosmic Expansion",
-    "summary": "The conversation explores the expansion of the universe, the role of dark energy, discrepancies in the Hubble constant, and potential modifications to general relativity."
-  },
-  "currentSubgroup": null,
-  "newSubgroup": {
-    "name": "Cosmic Expansion",
-    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
-    "firstItemId": "1",
-    "topics": [
-      { "name": "universe", "relevance": 100 },
-      { "name": "expansion", "relevance": 100 },
-      { "name": "darkenergy", "relevance": 90 },
-      { "name": "hubble", "relevance": 80 },
-      { "name": "relativity", "relevance": 70 }
-    ]
-  }
-}`,
+      input: `{
+        "existingTopics": [],
+        "previousSubgroups": [],
+        "currentSubgroup": null,
+        "unprocessedItems": [
+          { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
+          { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
+          { "id": "3", "text": "Recent measurements suggest there may be discrepancies in the Hubble constant values." },
+          { "id": "4", "text": "These discrepancies might point to unknown physics beyond our current models." },
+          { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this." }
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Cosmic Expansion",
+          "summary": "The conversation explores the expansion of the universe, the role of dark energy, discrepancies in the Hubble constant, and potential modifications to general relativity."
+        },
+        "currentSubgroup": null,
+        "newSubgroup": {
+          "name": "Cosmic Expansion",
+          "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+          "firstItemId": "1",
+          "topics": [
+            { "name": "universe", "relevance": 100 },
+            { "name": "expansion", "relevance": 100 },
+            { "name": "darkenergy", "relevance": 90 },
+            { "name": "hubble", "relevance": 80 },
+            { "name": "relativity", "relevance": 70 }
+          ]
+        }
+      }`,
     },
     {
-      input: 
-`{
-  "existingTopics": ["universe", "expansion", "darkenergy", "hubble", "relativity"],
-  "previousSubgroups": [
-    {
-      "name": "Cosmic Expansion",
-      "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity."
-    }
-  ],
-  "currentSubgroup": {
-    "name": "Cosmic Expansion",
-    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
-    "topics": ["universe", "expansion", "darkenergy", "hubble", "relativity"]
-  },
-  "unprocessedItems": [
-    { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant." },
-    { "id": "7", "text": "Its measurements are among the most precise but still leave room for debate about the true value." },
-    { "id": "8", "text": "By the way, a great way to bring out flavors in vegetables is to roast them with a mix of olive oil, garlic, and herbs." },
-    { "id": "9", "text": "Caramelization from roasting adds depth to vegetables like carrots and Brussels sprouts." },
-    { "id": "10", "text": "And don’t forget to season generously with salt and pepper before baking!" }
-  ]
-}`,
-      output: 
-`{
-  "conversationData": {
-    "name": "Universe and Cooking",
-    "summary": "The conversation explores the universe's expansion, including precise measurements of the Hubble constant, and transitions into tips for roasting vegetables to enhance their flavor."
-  },
-  "currentSubgroup": {
-    "name": "Cosmic Expansion",
-    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
-    "topics": [
-      { "name": "universe", "relevance": 100 },
-      { "name": "expansion", "relevance": 100 },
-      { "name": "darkenergy", "relevance": 90 },
-      { "name": "hubble", "relevance": 80 },
-      { "name": "relativity", "relevance": 70 }
-    ]
-  },
-  "newSubgroup": {
-    "name": "Vegetable Roasting",
-    "summary": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
-    "firstItemId": "8",
-    "topics": [
-      { "name": "cooking", "relevance": 100 },
-      { "name": "vegetables", "relevance": 100 },
-      { "name": "roasting", "relevance": 90 },
-    ]
-  }
-}`,
+      input: `{
+        "existingTopics": ["universe", "expansion", "darkenergy", "hubble", "relativity"],
+        "previousSubgroups": [
+          {
+            "name": "Cosmic Expansion",
+            "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity."
+          }
+        ],
+        "currentSubgroup": {
+          "name": "Cosmic Expansion",
+          "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+          "topics": ["universe", "expansion", "darkenergy", "hubble", "relativity"]
+        },
+        "unprocessedItems": [
+          { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant." },
+          { "id": "7", "text": "Its measurements are among the most precise but still leave room for debate about the true value." },
+          { "id": "8", "text": "By the way, a great way to bring out flavors in vegetables is to roast them with a mix of olive oil, garlic, and herbs." },
+          { "id": "9", "text": "Caramelization from roasting adds depth to vegetables like carrots and Brussels sprouts." },
+          { "id": "10", "text": "And don’t forget to season generously with salt and pepper before baking!" }
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Universe and Cooking",
+          "summary": "The conversation explores the universe's expansion, including precise measurements of the Hubble constant, and transitions into tips for roasting vegetables to enhance their flavor."
+        },
+        "currentSubgroup": {
+          "name": "Cosmic Expansion",
+          "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
+          "topics": [
+            { "name": "universe", "relevance": 100 },
+            { "name": "expansion", "relevance": 100 },
+            { "name": "darkenergy", "relevance": 90 },
+            { "name": "hubble", "relevance": 80 },
+            { "name": "relativity", "relevance": 70 }
+          ]
+        },
+        "newSubgroup": {
+          "name": "Vegetable Roasting",
+          "summary": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
+          "firstItemId": "8",
+          "topics": [
+            { "name": "cooking", "relevance": 100 },
+            { "name": "vegetables", "relevance": 100 },
+            { "name": "roasting", "relevance": 90 },
+          ]
+        }
+      }`,
     },
     {
-      input: 
-`{
-  "existingTopics": ["technology", "privacy", "data", "ethics"],
-  "previousSubgroups": [
-    {
-      "name": "Tech and Privacy",
-      "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
-    }
-  ],
-  "currentSubgroup": {
-    "name": "Tech and Privacy",
-    "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
-    "topics": ["technology", "privacy", "data", "ethics"]
-  },
-  "unprocessedItems": [
-    { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust." },
-    { "id": "7", "text": "However, balancing innovation and privacy often creates challenges for developers." },
-    { "id": "8", "text": "On another note, effective team collaboration relies heavily on clear communication and shared goals." },
-    { "id": "9", "text": "Tools like Slack and Trello have made remote work more efficient by streamlining communication." },
-    { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity." }
-  ]
-}`,
-      output: 
-`{
-  "conversationData": {
-    "name": "Tech and Collaboration",
-    "summary": "The conversation discusses privacy-first approaches and challenges in technology, then transitions into effective team collaboration and tools that enhance productivity."
-  },
-  "currentSubgroup": {
-    "name": "Tech and Privacy",
-    "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
-    "topics": [
-      { "name": "technology", "relevance": 100 },
-      { "name": "privacy", "relevance": 100 },
-      { "name": "data", "relevance": 80 }
-    ]
-  },
-  "newSubgroup": {
-    "name": "Team Collaboration",
-    "summary": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
-    "firstItemId": "8",
-    "topics": [
-      { "name": "collaboration", "relevance": 100 },
-      { "name": "productivity", "relevance": 90 },
-      { "name": "tools", "relevance": 80 }
-    ]
-  }
-}`,
+      input: `{
+        "existingTopics": ["technology", "privacy", "data", "ethics"],
+        "previousSubgroups": [
+          {
+            "name": "Tech and Privacy",
+            "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
+          }
+        ],
+        "currentSubgroup": {
+          "name": "Tech and Privacy",
+          "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
+          "topics": ["technology", "privacy", "data", "ethics"]
+        },
+        "unprocessedItems": [
+          { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust." },
+          { "id": "7", "text": "However, balancing innovation and privacy often creates challenges for developers." },
+          { "id": "8", "text": "On another note, effective team collaboration relies heavily on clear communication and shared goals." },
+          { "id": "9", "text": "Tools like Slack and Trello have made remote work more efficient by streamlining communication." },
+          { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity." }
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Tech and Collaboration",
+          "summary": "The conversation discusses privacy-first approaches and challenges in technology, then transitions into effective team collaboration and tools that enhance productivity."
+        },
+        "currentSubgroup": {
+          "name": "Tech and Privacy",
+          "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
+          "topics": [
+            { "name": "technology", "relevance": 100 },
+            { "name": "privacy", "relevance": 100 },
+            { "name": "data", "relevance": 80 }
+          ]
+        },
+        "newSubgroup": {
+          "name": "Team Collaboration",
+          "summary": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
+          "firstItemId": "8",
+          "topics": [
+            { "name": "collaboration", "relevance": 100 },
+            { "name": "productivity", "relevance": 90 },
+            { "name": "tools", "relevance": 80 }
+          ]
+        }
+      }`,
     },
     {
-      input: 
-`{
-  "existingTopics": ["fitness", "health", "nutrition"],
-  "previousSubgroups": [
-    {
-      "name": "Fitness and Nutrition",
-      "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
-    }
-  ],
-  "currentSubgroup": {
-    "name": "Fitness and Nutrition",
-    "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health.",
-    "topics": ["fitness", "health", "nutrition"]
-  },
-  "unprocessedItems": [
-    { "id": "6", "text": "A well-rounded fitness routine includes both cardio and strength training." },
-    { "id": "7", "text": "Proper hydration is also essential for maximizing workout performance." },
-    { "id": "8", "text": "Speaking of hydration, the mineral content in water can affect recovery times." },
-    { "id": "9", "text": "For example, electrolyte-rich water helps replenish what is lost through sweat." },
-    { "id": "10", "text": "This shows how nutrition and hydration are deeply connected to fitness results." }
-  ]
-}`,
-      output: 
-`{
-  "conversationData": {
-    "name": "Fitness and Nutrition",
-    "summary": "The conversation emphasizes the importance of balanced nutrition and hydration in supporting fitness, with a focus on how mineral content in water and electrolyte replenishment enhance recovery and performance."
-  },
-  "currentSubgroup": {
-    "name": "Fitness and Nutrition",
-    "summary": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance.",
-    "topics": [
-      { "name": "fitness", "relevance": 100 },
-      { "name": "health", "relevance": 90 },
-      { "name": "nutrition", "relevance": 100 },
-      { "name": "hydration", "relevance": 80 }
-    ]
-  },
-  "newSubgroup": null
-}`,
+      input: `{
+        "existingTopics": ["fitness", "health", "nutrition"],
+        "previousSubgroups": [
+          {
+            "name": "Fitness and Nutrition",
+            "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
+          }
+        ],
+        "currentSubgroup": {
+          "name": "Fitness and Nutrition",
+          "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health.",
+          "topics": ["fitness", "health", "nutrition"]
+        },
+        "unprocessedItems": [
+          { "id": "6", "text": "A well-rounded fitness routine includes both cardio and strength training." },
+          { "id": "7", "text": "Proper hydration is also essential for maximizing workout performance." },
+          { "id": "8", "text": "Speaking of hydration, the mineral content in water can affect recovery times." },
+          { "id": "9", "text": "For example, electrolyte-rich water helps replenish what is lost through sweat." },
+          { "id": "10", "text": "This shows how nutrition and hydration are deeply connected to fitness results." }
+        ]
+      }`,
+      output: `{
+        "conversationData": {
+          "name": "Fitness and Nutrition",
+          "summary": "The conversation emphasizes the importance of balanced nutrition and hydration in supporting fitness, with a focus on how mineral content in water and electrolyte replenishment enhance recovery and performance."
+        },
+        "currentSubgroup": {
+          "name": "Fitness and Nutrition",
+          "summary": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance.",
+          "topics": [
+            { "name": "fitness", "relevance": 100 },
+            { "name": "health", "relevance": 90 },
+            { "name": "nutrition", "relevance": 100 },
+            { "name": "hydration", "relevance": 80 }
+          ]
+        },
+        "newSubgroup": null
+      }`,
     },
   ];
 
@@ -324,15 +290,18 @@ export async function ensureLLMTask(): Promise<AITask> {
   return task;
 }
 
-async function LLMProcessing(unprocessedItems, subgroups, existingTopics) {
+async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, existingTopics) {
   const task = await ensureLLMTask();
   const client: Ad4mClient = await getAd4mClient();
   let prompt = {
     existingTopics: existingTopics.map((t: any) => t.name),
-    unprocessedItems: unprocessedItems.map((item: any) => {
-      return { id: item.baseExpression, text: item.text, timestamp: item.timestamp };
+    previousSubgroups: subgroups.map((s: any) => {
+      return { name: s.subgroupName, summary: s.summary };
     }),
-    subgroupSummaries: subgroups.map((s: any) => s.summary),
+    currentSubgroup,
+    unprocessedItems: unprocessedItems.map((item: any) => {
+      return { id: item.baseExpression, text: item.text };
+    }),
   };
   // attempt LLM task up to 5 times before giving up
   let parsedData;
@@ -355,16 +324,16 @@ async function LLMProcessing(unprocessedItems, subgroups, existingTopics) {
   if (parsedData) {
     return {
       conversationData: parsedData.conversationData,
-      itemsWithTopics: parsedData.itemsWithTopics,
-      subgroups: parsedData.subgroups,
+      currentSubgroup: parsedData.currentSubgroup,
+      newSubgroup: parsedData.newSubgroup,
     };
   } else {
     // give up and return empty data
     console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
     return {
       conversationData: { name: "", summary: "" },
-      itemsWithTopics: [],
-      subgroups: [],
+      currentSubgroup: { name: "", summary: "", topics: [] },
+      newSubgroup: { name: "", summary: "", topics: [] },
     };
   }
 }
@@ -611,9 +580,9 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
 }
 
 // todo:
-// + gather up save, update, and link creating tasks (after conversation creation) and run all in promise all at the end (but some need baseExpressions of created subject classes)
-// + update last of previous subgroups if processed items are present before the first new subgroup (new title, summary, vector embedding, and new topics)
-// + mark items as processing so visible in UI and other agents know not to process them (add new signal in responsibleForProcessing check?)
+// + gather up save, update, and link creating tasks (after conversation creation) and run all in Promise.all() at function end (be aware that some need baseExpressions of previously created subject classes)
+// + let other agents know when you have started & finished processing (add new signal in responsibleForProcessing check?)
+// + mark individual items as processing in UI
 let processing = false;
 async function processItemsAndAddToConversation(perspective, channelId, unprocessedItems) {
   processing = true;
@@ -628,28 +597,33 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
       target: item.baseExpression,
     }))
   );
-  // run LLM processing
+  // gather up data for LLM processing
   const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
+  const lastSubgroup = previousSubgroups[previousSubgroups.length - 1];
+  const lastSubgroupTopics = lastSubgroup ? await findTopics(perspective, lastSubgroup.baseExpression) : [];
+  const lastSubgroupWithTopics = lastSubgroup ? { ...lastSubgroup, topics: lastSubgroupTopics } : null;
   const existingTopics = await getAllTopics(perspective);
-  const { conversationData, itemsWithTopics, subgroups } = await LLMProcessing(
+  // run LLM processing
+  const { conversationData, currentSubgroup, newSubgroup } = await LLMProcessing(
     unprocessedItems,
     previousSubgroups,
+    lastSubgroupWithTopics,
     existingTopics
   );
   // update conversation text
   conversation.conversationName = conversationData.name;
   conversation.summary = conversationData.summary;
   await conversation.update();
-  // gather up topics from processed items (avoiding duplicates)
-  const allReturnedTopics = itemsWithTopics
-    .flatMap((item) => item.topics)
-    .reduce((acc, topic) => {
-      const exists = acc.some((t) => t.name === topic.name);
-      if (!exists) acc.push(topic);
-      return acc;
-    }, []);
-  // filter out existing topics
-  const newTopicsToCreate = allReturnedTopics.filter((topic) => !existingTopics.some((t) => t.name === topic.name));
+  // gather up topics returned from LLM
+  const allReturnedTopics = [];
+  if (currentSubgroup) allReturnedTopics.push(...currentSubgroup.topics);
+  if (newSubgroup) allReturnedTopics.push(...newSubgroup.topics);
+  // filter out duplicates & existing topics
+  const newTopicsToCreate = allReturnedTopics.reduce((acc, topic) => {
+    const unique = !acc.some((t) => t.name === topic.name) && !existingTopics.some((t) => t.name === topic.name);
+    if (unique) acc.push(topic);
+    return acc;
+  }, []);
   // create new topics and store them in newTopics array for later use
   const newTopics = await Promise.all(
     newTopicsToCreate.map(async (topic: any) => {
@@ -661,15 +635,15 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
       return { baseExpression: newTopicEntity.baseExpression, name: topic.name };
     })
   );
-  // link all returned topics to channel
+  // link all returned topics to conversation
   const conversationTopics = await findTopics(perspective, conversation.baseExpression);
   await Promise.all(
     allReturnedTopics.map(
       (topic) =>
         new Promise(async (resolve: any) => {
-          // skip topics already linked to the channel
+          // skip topics already linked to the conversation
           if (!conversationTopics.find((t) => t.name === topic.name)) {
-            // find topic entity in newTopics or existingTopics arrays so we can get its baseExpression (not returned from LLM)
+            // find the topic entity from newTopics or existingTopics arrays so we access its baseExpression (not returned from LLM)
             const topicEntity =
               newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
             await linkTopic(perspective, conversation.baseExpression, topicEntity.baseExpression, topic.relevance);
@@ -678,103 +652,93 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
         })
     )
   );
-  // create new subgroups
-  const newSubgroups = await Promise.all(
-    subgroups.map(async (subgroup) => {
-      // create subgroup
-      const newSubgroup = new ConversationSubgroup(perspective, undefined, conversation.baseExpression);
-      newSubgroup.subgroupName = subgroup.name;
-      newSubgroup.summary = subgroup.summary;
-      newSubgroup.positionTimestamp = subgroup.timestamp;
-      await newSubgroup.save();
-      // prepare link connecting subgroup to channel
-      newLinks.push({ source: channelId, predicate: "ad4m://has_child", target: newSubgroup.baseExpression });
-      return newSubgroup.get();
-    })
-  );
-  // gather up subgroup topics (avoiding duplicates)
-  const subgroupsWithTopics = [] as any;
-  // link topics to items & groups
+  // update currentSubgroup if new data returned from LLM
+  const currentSubgroupEntity = previousSubgroups[previousSubgroups.length - 1] as any;
+  if (currentSubgroup) {
+    currentSubgroupEntity.subgroupName = currentSubgroup.name;
+    currentSubgroupEntity.summary = currentSubgroup.summary;
+    // link currentSubgroup topics
+    await Promise.all(
+      currentSubgroup.topics.map(
+        (topic) =>
+          new Promise(async (resolve: any) => {
+            const topicEntity =
+              newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
+            await linkTopic(
+              perspective,
+              currentSubgroupEntity.baseExpression,
+              topicEntity.baseExpression,
+              topic.relevance
+            );
+            resolve();
+          })
+      )
+    );
+  }
+  // create new subgroup if returned from LLM
+  let newSubgroupEntity;
+  if (newSubgroup) {
+    newSubgroupEntity = new ConversationSubgroup(perspective, undefined, conversation.baseExpression);
+    newSubgroupEntity.subgroupName = newSubgroup.name;
+    newSubgroupEntity.summary = newSubgroup.summary;
+    await newSubgroupEntity.save();
+    newSubgroupEntity = await newSubgroupEntity.get();
+    // prepare link connecting subgroup to conversation
+    newLinks.push({
+      source: conversation.baseExpression,
+      predicate: "ad4m://has_child",
+      target: newSubgroupEntity.baseExpression,
+    });
+    // link new subgroup topics
+    await Promise.all(
+      newSubgroup.topics.map(
+        (topic) =>
+          new Promise(async (resolve: any) => {
+            const topicEntity =
+              newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
+            await linkTopic(perspective, newSubgroupEntity.baseExpression, topicEntity.baseExpression, topic.relevance);
+            resolve();
+          })
+      )
+    );
+  }
+  // link items to subgroups
+  const indexOfFirstItemInNewSubgroup =
+    newSubgroup && unprocessedItems.findIndex((item) => item.id === newSubgroup.firstItemId);
   await Promise.all(
-    itemsWithTopics.map(
-      (item: any) =>
+    unprocessedItems.map(
+      (item, itemIndex) =>
         new Promise(async (resolve: any) => {
           // find the items subgroup
-          let itemsSubgroup = previousSubgroups[previousSubgroups.length - 1];
-          const newSubgroupsBeforeItem = newSubgroups.filter(
-            (s) => new Date(s.positionTimestamp).getTime() < new Date(item.timestamp).getTime()
-          );
-          if (newSubgroupsBeforeItem.length) {
-            itemsSubgroup = newSubgroupsBeforeItem[newSubgroupsBeforeItem.length - 1];
-          }
-          // loop through each of the items topics, link them to the item & subgroup
-          await Promise.all(
-            item.topics.map(
-              (topic: any) =>
-                new Promise(async (resolve2: any) => {
-                  // find topic entity
-                  const topicEntity =
-                    newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
-                  // link topic to item
-                  await linkTopic(perspective, item.id, topicEntity.baseExpression, topic.relevance);
-                  // instead of linking the topic to the subgroup here, store subgroups & topics to be added later (avoiding duplicates)
-                  let subgroupWithTopics = subgroupsWithTopics.find(
-                    (s) => s.baseExpression === itemsSubgroup.baseExpression
-                  );
-                  if (!subgroupWithTopics) {
-                    // if subgroup not found, create new subgroup with topic
-                    subgroupsWithTopics.push({
-                      baseExpression: itemsSubgroup.baseExpression,
-                      topics: [{ ...topicEntity, relevance: topic.relevance }],
-                    });
-                  } else if (!subgroupWithTopics.topics.find((t) => t.name === topic.name)) {
-                    // otherwise, if  add topic to existing subgroup
-                    subgroupWithTopics.topics.push({ ...topicEntity, relevance: topic.relevance });
-                  }
-                  resolve2();
-                })
-            )
-          );
+          let itemsSubgroup = currentSubgroupEntity;
+          if (newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup) itemsSubgroup = newSubgroupEntity;
+          // prepare links connecting item to subgroup
+          newLinks.push({
+            source: itemsSubgroup.baseExpression,
+            predicate: "ad4m://has_child",
+            target: item.baseExpression,
+          });
           resolve();
         })
     )
   );
-  // link topics to subgroups
-  await Promise.all(
-    subgroupsWithTopics.map(
-      (subgroup: any) =>
-        new Promise(async (resolve: any) => {
-          const subgroupTopics = await findTopics(perspective, subgroup.baseExpression);
-          await Promise.all(
-            subgroup.topics.map(
-              (topic) =>
-                new Promise((resolve2: any) => {
-                  if (!subgroupTopics.find((t) => t.name === topic.name)) {
-                    linkTopic(perspective, subgroup.baseExpression, topic.baseExpression, topic.relevance);
-                  }
-                  resolve2();
-                })
-            )
-          );
-          resolve();
-        })
-    )
-  );
-  // create vector embeddings for each item
+  // create vector embeddings for each unprocessed item
   await Promise.all(unprocessedItems.map((item) => createEmbedding(perspective, item.text, item.baseExpression)));
-  // create vector embeddings for each new subgroup (todo: include last subgroup if processed items before first new subgroup)
-  await Promise.all(
-    newSubgroups.map((subgroup) => createEmbedding(perspective, subgroup.summary, subgroup.baseExpression))
-  );
-  // create new vector embedding for conversation
+  // update vector embedding for conversation
   await removeEmbedding(perspective, conversation.baseExpression);
   await createEmbedding(perspective, conversationData.summary, conversation.baseExpression);
+  // update vector embedding for currentSubgroup if returned from LLM
+  if (currentSubgroup) {
+    await removeEmbedding(perspective, currentSubgroupEntity.baseExpression);
+    await createEmbedding(perspective, currentSubgroup.summary, currentSubgroupEntity.baseExpression);
+  }
+  // create vector embedding for new subgroup if returned from LLM
+  if (newSubgroup) await createEmbedding(perspective, newSubgroup.summary, newSubgroupEntity.baseExpression);
   // batch commit all new links (currently only "ad4m://has_child" links)
   await perspective.addLinks(newLinks);
   processing = false;
 }
 
-// todo: needs to run every time a new item appears in a channel (not just every time you create a new item)
 export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
   console.log("runProcessingCheck");
   return new Promise(async (resolve: any) => {
