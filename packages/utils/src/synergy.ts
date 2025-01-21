@@ -479,7 +479,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
 export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
   console.log("runProcessingCheck");
   // only attempt processing if default LLM is set
-  if (await getDefaultLLM()) return;
+  if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
   const channelItems = await getSynergyItems(perspective, channelId);
