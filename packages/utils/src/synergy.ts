@@ -140,29 +140,28 @@ export function transformItem(type, item) {
 }
 
 export async function findTopics(perspective, itemId) {
-  const allRelationships = (await SemanticRelationship.query(perspective, {
+  const allRelationships = await SemanticRelationship.query(perspective, {
     source: itemId,
-  })) as any;
-  const topicRelationships = allRelationships.filter((r: any) => r.relevance);
-  const topics = await Promise.all(
-    topicRelationships.map(
-      (r) =>
-        new Promise(async (resolve) => {
-          try {
-            const topicEntity = new Topic(perspective, r.tag);
-            const topic = await topicEntity.get();
-            resolve({
-              baseExpression: r.tag,
-              name: topic.topic,
-              relevance: r.relevance,
-            });
-          } catch (error) {
-            resolve(null);
-          }
-        })
-    )
-  );
-  return topics.filter((t) => t);
+  }) as any;
+
+  const topics = [];
+  for (const rel of allRelationships) {
+    if (!rel.relevance) continue;
+    
+    try {
+      const topicEntity = new Topic(perspective, rel.tag);
+      const topic = await topicEntity.get();
+      topics.push({
+        baseExpression: rel.tag,
+        name: topic.topic,
+        relevance: rel.relevance
+      });
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return topics;
 }
 
 export async function getAllTopics(perspective) {
@@ -206,17 +205,13 @@ export async function getDefaultLLM() {
 }
 
 export async function findUnprocessedItems(perspective: any, items: any[]) {
-  return (
-    await Promise.all(
-      items.map(async (item) => {
-        const parentLinks = await perspective.get(
-          new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
-        );
-        // unprocessed items should only have a single parent link to the channel (where as processed items will also have a parent link to the conversation)
-        return parentLinks.length === 1 ? item : null;
-      })
-    )
-  ).filter(Boolean);
+  const results = await Promise.all(items.map(async item => {
+    const links = await perspective.get(
+      new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
+    );
+    return links.length === 1 ? item : null;
+  }));
+  return results.filter(Boolean);
 }
 
 async function findItemsAuthor(perspective: any, channelId: string, itemId: string) {
