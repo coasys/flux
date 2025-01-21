@@ -1,5 +1,5 @@
 import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
-import { findTopics, getSubgroupItems } from "@coasys/flux-utils";
+import { findTopics, getSynergyItems, findUnprocessedItems } from "@coasys/flux-utils";
 import { LinkQuery } from "@coasys/ad4m";
 
 // constants
@@ -13,27 +13,13 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
-export async function findItemState(perspective, itemId) {
-  // find the semantic relationship linking the item to its vector embedding
-  const relationships = await SemanticRelationship.query(perspective, { source: itemId });
-  const relationship = relationships.find((r: any) => !r.relevance) as any;
-  // if no relationship present, return unprocessed
-  if (!relationship) return "unprocessed";
-  // if a relationship is present and is linked to a vector embedding, return processed
-  else if (relationship.tag) return "processed";
-  else {
-    // if a relationship is present but not linked to a vector embedding, return the authors did so we know who is processing it
-    const links = await perspective.get(
-      new LinkQuery({ source: itemId, target: relationship.baseExpression })
-    );
-    return links[0].author;
-  }
-}
-
 export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
-  const processingItems = [];
-  const unprocessedItems = [];
-  const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
+  // gather up unprocessed items
+  const channelItems = await getSynergyItems(perspective, channelId);
+  const unprocessedItems = await findUnprocessedItems(perspective, channelItems);
+  const conversations = (await Conversation.query(perspective, {
+    source: channelId,
+  })) as any;
   // find & attach timestamp to converations
   const conversationsWithTimestamps = await Promise.all(
     conversations.map(
@@ -58,15 +44,25 @@ export async function getConversationData(perspective, channelId, match?, setMat
       const subgroups = (await ConversationSubgroup.query(perspective, {
         source: conversation.baseExpression,
       })) as any;
+      const conversationItems = await getSynergyItems(perspective, conversation.baseExpression);
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
           if (match && subgroup.baseExpression === match.baseExpression) {
             setMatchIndex(conversationIndex);
             conversation.matchIndex = subgroupIndex;
           }
-          const subgroupItems = await getSubgroupItems(perspective, subgroup.baseExpression);
           subgroup.groupType = "subgroup";
           subgroup.topics = await findTopics(perspective, subgroup.baseExpression);
+          const nextSubgroup = subgroups[subgroupIndex + 1];
+          const subgroupItems = conversationItems.filter(
+            (item) =>
+              // item after subgroup start
+              new Date(item.timestamp).getTime() > new Date(subgroup.positionTimestamp).getTime() &&
+              // either no subgroup after or item before next subgroup
+              (!nextSubgroup ||
+                new Date(item.timestamp).getTime() <
+                  new Date(nextSubgroup.positionTimestamp).getTime())
+          );
           if (subgroupItems.length) {
             subgroup.start = subgroupItems[0].timestamp;
             subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
@@ -83,9 +79,6 @@ export async function getConversationData(perspective, channelId, match?, setMat
               item.topics = await findTopics(perspective, item.baseExpression);
               if (!subgroup.participants.find((p) => p === item.author))
                 subgroup.participants.push(item.author);
-              item.state = await findItemState(perspective, item.baseExpression);
-              if (item.state === "unprocessed") unprocessedItems.push(item);
-              else if (item.state !== "processed") processingItems.push(item);
               return item;
             })
           );
@@ -104,7 +97,10 @@ export async function getConversationData(perspective, channelId, match?, setMat
       return conversation;
     })
   );
-  return { conversations: conversationsWithData, processingItems, unprocessedItems };
+  return {
+    conversations: conversationsWithData,
+    unprocessedItems,
+  };
 }
 
 // svgs

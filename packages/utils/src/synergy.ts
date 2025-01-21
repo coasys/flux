@@ -19,7 +19,6 @@ import {
 } from "@coasys/flux-api";
 //@ts-ignore
 import JSON5 from "json5";
-import { useRef } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 
 async function removeEmbedding(perspective, itemId) {
@@ -85,7 +84,10 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
-// todo: need to update last subgroup summary if any of the new processed items will be included in that grouping
+// todo:
+// + need to update last subgroup summary if any of the new processed items will be included in that grouping
+// + improve topic generation (to often uses existing topic that aren't very relevant instead of creating new ones)
+// + improve subgroup splicing (works ok but sometimes splitting conversation in the wrong place)
 export async function ensureLLMTask(): Promise<AITask> {
   const taskPrompt = `
     You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -96,12 +98,13 @@ export async function ensureLLMTask(): Promise<AITask> {
     2. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string), a 'text' property (string), and a 'timestamp' property (string).)
     3. 'subgroupSummaries' (String array of all subgroup summaries)
 
-    Firstly, analyze the 'text' property of each unprocessedItem and identify between 1 (min) and 5 (max) topics (each a single word string in lowercase) that are relevant to the content of the text.
+    Firstly, analyze the 'text' property of each unprocessedItem and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the text.
     If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
     For each topic, generate a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the text.
-    The output of this analysis will be an updated version of the 'unprocessedItems' array called 'itemsWithTopics', which removes the 'text' and 'timestamp' properties and adds a new 'topics' property for each unprocessed item.
+    The output of this analysis will be an updated version of the 'unprocessedItems' array called 'itemsWithTopics', which removes the 'text' property and adds a new 'topics' property for each unprocessed item.
     The 'topics' property should be an array of objects: one for each of the topics you have identified for the 'text'.
-    Each of these objects should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
+    Each of these topic objects should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
+    Make sure each item has at least 1 topic and no more than 5 topics!
 
     Secondly, analyze the the last summary in 'subgroupSummaries' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
     Consider the conversation as **related** if:
@@ -160,12 +163,14 @@ export async function ensureLLMTask(): Promise<AITask> {
         "itemsWithTopics": [
           {
             "id": "msg-1",
+            "timestamp": "2025-01-10T10:00:00.000Z",
             "topics": [
               { "name": "coding", "relevance": 85 }
             ]
           },
           {
             "id": "msg-2",
+            "timestamp": "2025-01-10T10:01:00.000Z",
             "topics": [
               { "name": "help", "relevance": 90 },
               { "name": "coding", "relevance": 70 }
@@ -208,12 +213,14 @@ export async function ensureLLMTask(): Promise<AITask> {
         "itemsWithTopics": [
           {
             "id": "msg-1",
+            "timestamp": "2025-01-10T11:00:00.000Z",
             "topics": [
               { "name": "cooking", "relevance": 90 }
             ]
           },
           {
             "id": "msg-2",
+            "timestamp": "2025-01-10T11:05:00.000Z",
             "topics": [
               { "name": "cooking", "relevance": 85 },
               { "name": "recipe", "relevance": 75 }
@@ -261,6 +268,7 @@ export async function ensureLLMTask(): Promise<AITask> {
         "itemsWithTopics": [
           {
             "id": "msg-1",
+            "timestamp": "2025-01-10T12:00:00.000Z",
             "topics": [
               { "name": "practice", "relevance": 85 },
               { "name": "music", "relevance": 75 }
@@ -268,6 +276,7 @@ export async function ensureLLMTask(): Promise<AITask> {
           },
           {
             "id": "msg-2",
+            "timestamp": "2025-01-10T12:02:00.000Z",
             "topics": [
               { "name": "music", "relevance": 80 },
               { "name": "practice", "relevance": 70 }
@@ -275,12 +284,14 @@ export async function ensureLLMTask(): Promise<AITask> {
           },
           {
             "id": "msg-3",
+            "timestamp": "2025-01-10T12:03:00.000Z",
             "topics": [
               { "name": "music", "relevance": 90 }
             ]
           },
           {
             "id": "msg-4",
+            "timestamp": "2025-01-10T12:04:00.000Z",
             "topics": [
               { "name": "music", "relevance": 85 },
               { "name": "lessons", "relevance": 60 }
@@ -340,6 +351,7 @@ export async function ensureLLMTask(): Promise<AITask> {
         "itemsWithTopics": [
           {
             "id": "msg-1",
+            "timestamp": "2025-01-10T13:00:00.000Z",
             "topics": [
               { "name": "strategy", "relevance": 90 },
               { "name": "gaming", "relevance": 70 }
@@ -347,6 +359,7 @@ export async function ensureLLMTask(): Promise<AITask> {
           },
           {
             "id": "msg-2",
+            "timestamp": "2025-01-10T13:01:00.000Z",
             "topics": [
               { "name": "multiplayer", "relevance": 85 },
               { "name": "gaming", "relevance": 65 }
@@ -354,18 +367,21 @@ export async function ensureLLMTask(): Promise<AITask> {
           },
           {
             "id": "msg-3",
+            "timestamp": "2025-01-10T13:02:00.000Z",
             "topics": [
               { "name": "gaming", "relevance": 80 }
             ]
           },
           {
             "id": "msg-4",
+            "timestamp": "2025-01-10T13:03:00.000Z",
             "topics": [
               { "name": "gaming", "relevance": 75 }
             ]
           },
           {
             "id": "msg-5",
+            "timestamp": "2025-01-10T13:04:00.000Z",
             "topics": [
               { "name": "multiplayer", "relevance": 70 },
               { "name": "gaming", "relevance": 60 }
@@ -496,34 +512,21 @@ export async function getAllTopics(perspective) {
   });
 }
 
-export async function getSubgroupItems(perspective, subgroupId) {
+// todo: use raw prolog query here so subject classes don't need to be hard coded
+export async function getSynergyItems(perspective, parentId) {
+  // parentId used so we can get items linked to a channel (unprocessed) or conversation
   const messages = await new SubjectRepository(Message, {
     perspective,
-    source: subgroupId,
+    source: parentId,
   }).getAllData();
   const posts = await new SubjectRepository(Post, {
     perspective,
-    source: subgroupId,
+    source: parentId,
   }).getAllData();
   const tasks = await new SubjectRepository("Task", {
     perspective,
-    source: subgroupId,
+    source: parentId,
   }).getAllData();
-  return [
-    ...messages.map((message) => transformItem("Message", message)),
-    ...posts.map((post) => transformItem("Post", post)),
-    ...tasks.map((task) => transformItem("Task", task)),
-  ].sort((a, b) => {
-    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-  });
-}
-
-// todo: use raw prolog query here so subject classes don't need to be hard coded
-async function getConversationItems(perspective, conversationId) {
-  // gather up all the items in the conversation
-  const messages = await new SubjectRepository(Message, { perspective, source: conversationId }).getAllData();
-  const posts = await new SubjectRepository(Post, { perspective, source: conversationId }).getAllData();
-  const tasks = await new SubjectRepository("Task", { perspective, source: conversationId }).getAllData();
   // transform items into common format
   const transformedItems = [
     ...messages.map((message) => transformItem("Message", message)),
@@ -542,29 +545,18 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-async function findUnprocessedItems(perspective: any, channelId: string) {
-  // gather up all the items in the channel
-  const messages = await new SubjectRepository(Message, { perspective, source: channelId }).getAllData();
-  const posts = await new SubjectRepository(Post, { perspective, source: channelId }).getAllData();
-  const tasks = await new SubjectRepository("Task", { perspective, source: channelId }).getAllData();
-  // transform items into common format
-  const transformedItems = [
-    ...messages.map((message) => transformItem("Message", message)),
-    ...posts.map((post) => transformItem("Post", post)),
-    ...tasks.map((task) => transformItem("Task", task)),
-  ];
-  // remove processed items
-  const unprocessedItems = await Promise.all(
-    transformedItems.filter(async (item) => {
-      // grab all parent links for the item
-      const parentLinks = await perspective.get(
-        new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
-      );
-      // unprocessed items should only have a single parent link to the channel (where as processed items will also have a parent link to the conversation)
-      return parentLinks.length === 1;
-    })
-  );
-  return unprocessedItems;
+export async function findUnprocessedItems(perspective: any, items: any[]) {
+  return (
+    await Promise.all(
+      items.map(async (item) => {
+        const parentLinks = await perspective.get(
+          new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
+        );
+        // unprocessed items should only have a single parent link to the channel (where as processed items will also have a parent link to the conversation)
+        return parentLinks.length === 1 ? item : null;
+      })
+    )
+  ).filter(Boolean);
 }
 
 async function findItemsAuthor(perspective: any, channelId: string, itemId: string) {
@@ -583,7 +575,7 @@ async function isMe(did: string) {
   return did === me.did;
 }
 
-const recievedSignals = useRef<any[]>([]);
+let receivedSignals: any[] = [];
 let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
 
 async function onSignalReceived(expression: PerspectiveExpression, neighbourhood: NeighbourhoodProxy) {
@@ -608,7 +600,10 @@ async function onSignalReceived(expression: PerspectiveExpression, neighbourhood
     // });
   }
 
-  if (predicate === "i-can-process-items") recievedSignals.current.push(link);
+  if (predicate === "i-can-process-items") {
+    console.log("Signal recieved: remote agent can process items!");
+    receivedSignals.push(link);
+  }
 
   // // is this necissary (might be slightly quicker than waiting for timeout...)
   // if (predicate === "i-cant-process-items") {
@@ -639,11 +634,14 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
     });
     // wait 2 seconds for a responce
     setTimeout(() => {
-      const affirmationRecieved = !!recievedSignals.current.find((signal: any) => signal.data.target === signalUuid);
+      const affirmationRecieved = !!receivedSignals.find((signal: any) => signal.data.target === signalUuid);
       resolve(affirmationRecieved);
     }, 2000);
   });
 }
+// todo: store these consts in channel settings
+const minNumberOfItemsToProcess = 5;
+const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
   perspective: PerspectiveProxy,
@@ -652,26 +650,29 @@ async function responsibleForProcessing(
   unprocessedItems: any[],
   increment = 0
 ): Promise<boolean> {
-  // todo: store these consts in channel settings
-  const minNumberOfItemsToProcess = 5;
-  const numberOfItemsDelay = 3;
   // check if enough unprocessed items are present to run the processing task (increment used so we can keep checking the next item until the limit is reached)
   const enoughUnprocessedItems = unprocessedItems.length >= minNumberOfItemsToProcess + numberOfItemsDelay + increment;
-  if (!enoughUnprocessedItems) return false;
-  else {
+  if (!enoughUnprocessedItems) {
+    console.log("not enough items to process");
+    return false;
+  } else {
     // find the author of the nth item
     const nthItem = unprocessedItems[minNumberOfItemsToProcess + increment - 1];
     const author = await findItemsAuthor(perspective, channelId, nthItem.baseExpression);
     // if we are the author, we are responsible for processing
-    if (await isMe(author)) return true;
-    else {
+    if (await isMe(author)) {
+      console.log("we are the author of the nth item!");
+      return true;
+    } else {
       // if not, signal the author to check if they can process the items
       const authorCanProcessItems = await agentCanProcessItems(neighbourhood, author);
+      console.log("author can process items:", authorCanProcessItems);
       // if they can, we aren't responsible for processing
       if (authorCanProcessItems) return false;
-      // if they can't, re-run the check on the next item
-      else
+      else {
+        // if they can't, re-run the check on the next item
         return await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems, increment + 1);
+      }
     }
   }
 }
@@ -681,7 +682,7 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   if (conversations.length) {
     // if existing conversations found & last item in last conversation less than 30 mins old, use that conversation
     const lastConversation = conversations[conversations.length - 1];
-    const lastConversationItems = await getConversationItems(perspective, lastConversation.baseExpression);
+    const lastConversationItems = await getSynergyItems(perspective, lastConversation.baseExpression);
     if (lastConversationItems.length) {
       const lastItem = lastConversationItems[lastConversationItems.length - 1];
       const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
@@ -691,7 +692,7 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   }
   // otherwise create a new conversation
   const newConversation = new Conversation(perspective, undefined, channelId);
-  newConversation.conversationName = `Conversation ${conversations.length + 1}`;
+  newConversation.conversationName = "Generating conversation...";
   await newConversation.save();
   return await newConversation.get();
 }
@@ -700,7 +701,9 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
 // + gather up save, update, and link creating tasks (after conversation creation) and run all in promise all at the end (but some need baseExpressions of created subject classes)
 // + update last of previous subgroups if processed items are present before the first new subgroup (new title, summary, vector embedding, and new topics)
 // + mark items as processing so visible in UI and other agents know not to process them (add new signal in responsibleForProcessing check?)
+let processing = false;
 async function processItemsAndAddToConversation(perspective, channelId, unprocessedItems) {
+  processing = true;
   const conversation: any = await findOrCreateNewConversation(perspective, channelId);
   // gather up all new perspective links so they can be commited in a single transaction at the end of the function
   const newLinks = [] as any;
@@ -715,6 +718,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   // run LLM processing
   const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
   const existingTopics = await getAllTopics(perspective);
+  console.log("existingTopics: ", existingTopics);
   const { conversationData, itemsWithTopics, subgroups } = await LLMProcessing(
     unprocessedItems,
     previousSubgroups,
@@ -724,25 +728,43 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   conversation.conversationName = conversationData.name;
   conversation.summary = conversationData.summary;
   await conversation.update();
-  // gather up new topics from processed items (avoiding duplicates)
-  const newTopicsToCreate = itemsWithTopics
+  // gather up topics from processed items (avoiding duplicates)
+  const allReturnedTopics = itemsWithTopics
     .flatMap((item) => item.topics)
     .reduce((acc, topic) => {
-      const exists = existingTopics.some((t) => t.name === topic.name) || acc.some((t) => t.name === topic.name);
+      const exists = acc.some((t) => t.name === topic.name);
       if (!exists) acc.push(topic);
       return acc;
     }, []);
-  // create new topics
+  // filter out existing topics
+  const newTopicsToCreate = allReturnedTopics.filter((topic) => !existingTopics.some((t) => t.name === topic.name));
+  // create new topics and store them in newTopics array for later use
   const newTopics = await Promise.all(
-    newTopicsToCreate.map(async (topic) => {
+    newTopicsToCreate.map(async (topic: any) => {
       // create topic
       const newTopic = new Topic(perspective);
       newTopic.topic = topic.name;
       await newTopic.save();
-      // link topic to conversation
-      await linkTopic(perspective, conversation.baseExpression, newTopic.baseExpression, topic.relevance);
-      return newTopic.get();
+      const newTopicEntity = await newTopic.get();
+      return { baseExpression: newTopicEntity.baseExpression, name: topic.name };
     })
+  );
+  // link all returned topics to channel
+  const conversationTopics = await findTopics(perspective, conversation.baseExpression);
+  await Promise.all(
+    allReturnedTopics.map(
+      (topic) =>
+        new Promise(async (resolve: any) => {
+          // skip topics already linked to the channel
+          if (!conversationTopics.find((t) => t.name === topic.name)) {
+            // find topic entity in newTopics or existingTopics arrays so we can get its baseExpression (not returned from LLM)
+            const topicEntity =
+              newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
+            await linkTopic(perspective, conversation.baseExpression, topicEntity.baseExpression, topic.relevance);
+          }
+          resolve();
+        })
+    )
   );
   // create new subgroups
   const newSubgroups = await Promise.all(
@@ -758,6 +780,8 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
       return newSubgroup.get();
     })
   );
+  // gather up subgroup topics (avoiding duplicates)
+  const subgroupsWithTopics = [] as any;
   // link topics to items & groups
   await Promise.all(
     itemsWithTopics.map(
@@ -765,13 +789,11 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
         new Promise(async (resolve: any) => {
           // find the items subgroup
           let itemsSubgroup = previousSubgroups[previousSubgroups.length - 1];
-          // todo: just fetch the item before using the timestamp and 1ms gap?
-          const newSubgroupsBeforeItem = subgroups.filter(
-            (s) => new Date(s.timestamp).getTime() < new Date(item.timestamp).getTime()
+          const newSubgroupsBeforeItem = newSubgroups.filter(
+            (s) => new Date(s.positionTimestamp).getTime() < new Date(item.timestamp).getTime()
           );
           if (newSubgroupsBeforeItem.length) {
-            const lastNewSubgroup = newSubgroupsBeforeItem[newSubgroupsBeforeItem.length - 1];
-            itemsSubgroup = newSubgroups.find((s) => s.name === lastNewSubgroup.name);
+            itemsSubgroup = newSubgroupsBeforeItem[newSubgroupsBeforeItem.length - 1];
           }
           // loop through each of the items topics, link them to the item & subgroup
           await Promise.all(
@@ -782,21 +804,41 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
                   const topicEntity =
                     newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
                   // link topic to item
-                  await linkTopic(
-                    perspective,
-                    conversation.baseExpression,
-                    topicEntity.baseExpression,
-                    topic.relevance
+                  await linkTopic(perspective, item.id, topicEntity.baseExpression, topic.relevance);
+                  // instead of linking the topic to the subgroup here, store subgroups & topics to be added later (avoiding duplicates)
+                  let subgroupWithTopics = subgroupsWithTopics.find(
+                    (s) => s.baseExpression === itemsSubgroup.baseExpression
                   );
-                  // link topic to last subgroup (if not already linked)
-                  const subgroupTopics = await findTopics(perspective, itemsSubgroup.baseExpression);
+                  if (!subgroupWithTopics) {
+                    // if subgroup not found, create new subgroup with topic
+                    subgroupsWithTopics.push({
+                      baseExpression: itemsSubgroup.baseExpression,
+                      topics: [{ ...topicEntity, relevance: topic.relevance }],
+                    });
+                  } else if (!subgroupWithTopics.topics.find((t) => t.name === topic.name)) {
+                    // otherwise, if  add topic to existing subgroup
+                    subgroupWithTopics.topics.push({ ...topicEntity, relevance: topic.relevance });
+                  }
+                  resolve2();
+                })
+            )
+          );
+          resolve();
+        })
+    )
+  );
+  // link topics to subgroups
+  await Promise.all(
+    subgroupsWithTopics.map(
+      (subgroup: any) =>
+        new Promise(async (resolve: any) => {
+          const subgroupTopics = await findTopics(perspective, subgroup.baseExpression);
+          await Promise.all(
+            subgroup.topics.map(
+              (topic) =>
+                new Promise((resolve2: any) => {
                   if (!subgroupTopics.find((t) => t.name === topic.name)) {
-                    await linkTopic(
-                      perspective,
-                      itemsSubgroup.baseExpression,
-                      topicEntity.baseExpression,
-                      topic.relevance
-                    );
+                    linkTopic(perspective, subgroup.baseExpression, topic.baseExpression, topic.relevance);
                   }
                   resolve2();
                 })
@@ -817,17 +859,20 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   await createEmbedding(perspective, conversationData.summary, conversation.baseExpression);
   // batch commit all new links (currently only "ad4m://has_child" links)
   await perspective.addLinks(newLinks);
+  processing = false;
 }
 
 // todo: needs to run every time a new item appears in a channel (not just every time you create a new item)
 export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
+  console.log("runProcessingCheck");
   return new Promise(async (resolve: any) => {
     // only attempt processing if default LLM is set
     const defaultLLM = await getDefaultLLM();
     if (!defaultLLM) resolve();
     else {
       // check if we are responsible for processing
-      const unprocessedItems = await findUnprocessedItems(perspective, channelId);
+      const channelItems = await getSynergyItems(perspective, channelId);
+      const unprocessedItems = await findUnprocessedItems(perspective, channelItems);
       const neighbourhood = await perspective.getNeighbourhoodProxy();
       const responsible: boolean = await responsibleForProcessing(
         perspective,
@@ -835,8 +880,10 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
         channelId,
         unprocessedItems
       );
-      // if we are responsible, process items & add to conversation
-      if (responsible) await processItemsAndAddToConversation(perspective, channelId, unprocessedItems);
+      console.log("responsible for processing", responsible);
+      // if we are responsible, process items (minus delay) & add to conversation
+      if (responsible && !processing)
+        await processItemsAndAddToConversation(perspective, channelId, unprocessedItems.slice(0, -numberOfItemsDelay));
       resolve();
     }
   });

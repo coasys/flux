@@ -65,6 +65,22 @@ $line-offset: 92px;
         margin-left: $line-offset;
         background-color: var(--j-color-primary-200);
       }
+
+      .itemCard {
+        display: flex;
+        margin-bottom: 20px;
+        width: 100%;
+        border: 1px solid var(--j-color-ui-300);
+        border-radius: var(--j-border-radius);
+        padding: var(--j-space-400);
+        background-color: var(--j-color-ui-100);
+      }
+
+      .itemText {
+        p {
+          margin: 0;
+        }
+      }
     }
   }
 }

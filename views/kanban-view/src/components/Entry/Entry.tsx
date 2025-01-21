@@ -1,6 +1,5 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject } from "@coasys/ad4m-react-hooks";
-import { processItem } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
@@ -56,10 +55,10 @@ export default function Entry({
             ? value.split("task://")[1]
             : entry.status.split("task://")[1];
         const taskText = `Task: "${task}", Status: "${status}"`;
-        processItem(perspective, channelId, {
-          baseExpression: id,
-          text: taskText,
-        });
+        // processItem(perspective, channelId, {
+        //   baseExpression: id,
+        //   text: taskText,
+        // });
       }
     });
   }

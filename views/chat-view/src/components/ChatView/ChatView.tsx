@@ -4,7 +4,7 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
 import { community } from "@coasys/flux-constants";
 import { EntryType, Profile } from "@coasys/flux-types";
-import { processItem, profileFormatter } from "@coasys/flux-utils";
+import { profileFormatter } from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { getPosition } from "../../utils/getPosition";
 import Avatar from "../Avatar";
@@ -66,10 +66,6 @@ export default function ChatView({
 
       // @ts-ignore
       const message = (await repo.create({ body: html })) as any;
-      await processItem(perspective, source, {
-        baseExpression: message.id,
-        text,
-      });
 
       if (replyMessage) {
         perspective.addLinks([
