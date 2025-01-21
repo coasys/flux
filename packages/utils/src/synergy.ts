@@ -91,19 +91,30 @@ export async function ensureLLMTask(): Promise<AITask> {
 
     I'm passing you a JSON object with the following properties:
     1. 'existingTopics' (String array of all existing topic names)
-    2. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
-    3. 'subgroupSummaries' (String array of all subgroup summaries)
+    2. 'previousSubgroups' (Object array of all previous subgroup summaries and names)
+    3. 'currentSubgroup' (Object with name, summary and topics of the currently active subgroup)
+    3. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
 
-    Firstly, analyze the last summary in 'subgroupSummaries' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
+    Main point of this is sorting the new messages into the flow of the conversation, either all in the current subgroup,
+    or if necessary creating a new subgroup.
+
+    I want you to respond with a JSON object with these properties:
+    1. 'conversationData' (Object with 'name' and 'summary' properties. Updated summary of the whole conversation taking all subgroup titles and summaries (old and new) into account).
+    2. 'currentSubgroup' (Undefined or Object with 'name', 'summary' and 'topics' of the current subgroup after including new items)
+    3. 'newSubgroup' (Undefined or an object with 'name', 'summary', 'topics' and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
+
+    Firstly, analyze the 'summary' of the 'currentSubgroup' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
     Consider the conversation as **related** if:
     - The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
     - The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
     Only consider the conversation as having **shifted to a new subject** if:
     - The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
     - The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
-    If the 'subgroupSummaries' array is empty, consider the conversation as having immediately shifted.
-    If the last summary in 'subgroupSummaries' array is unrelated to the text in the first unprocessed item, the conversation has also shifted.
-    In every case where the conversation has shifted, generate a new subgroup including the following properties:
+    - The following messages actually reflect the acceptence of that topic shift.
+
+    If 'previousSubgroups' is emtpy, always create a 'newSubgroup' (the conversation has just begun).
+
+    In case where the conversation has shifted, also generate a 'newSubgroup' including the following properties:
     1. 'name': a 1 to 3 word title (string) describing the contents of the subgroup.
     2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
     3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
@@ -114,19 +125,9 @@ export async function ensureLLMTask(): Promise<AITask> {
     a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
     The output of this analysis will be a new 'subgroups' array conatining all of new subgroup objects you have generated.
 
-    Secondly, if the first subgroup generated above comes after the first unprocessed item, we need to generate a new 'lastSubgroupData' object with the following properties:
+    Finally, analyse all the summaries in the original 'previousSubgroups' array and the new summaries you've created, and use this info to generate a new 'conversationData' object with the following properties:
     1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
     2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
-    3. 'topics': an array of between 1 and 5 topic objects indicating topics that are relevant to the contents of the conversation.
-
-    Thirdly, analyse all the summaries in the original 'subgroupSummaries' array and the summaries in the new 'subgroups' array, and use this info to generate a new 'conversationData' object with the following properties:
-    1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
-    2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
-
-    Finally return a JSON object with the following properties generated from the analysis:
-    1. 'subgroups': the 'subgroups' array described above.
-    2. 'lastSubgroupData': 
-    3. 'conversationData': the 'conversationData' object described above. 
 
     Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
     If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
@@ -136,268 +137,183 @@ export async function ensureLLMTask(): Promise<AITask> {
 
   const examples = [
     {
-      input: `{
-        "existingTopics": ["coding", "help"],
-        "unprocessedItems": [
-          {
-            "id": "msg-1",
-            "text": "I'm exploring a new Vue.js project",
-            "timestamp": "2025-01-10T10:00:00.000Z"
-          },
-          {
-            "id": "msg-2",
-            "text": "Need help setting up TypeScript",
-            "timestamp": "2025-01-10T10:01:00.000Z"
-          }
-        ],
-        "subgroupSummaries": []
-      }`,
-      output: `{
-        "conversationData": {
-          "name": "Vue Setup",
-          "summary": "Discusses initial steps in a Vue project and TypeScript configuration."
-        },
-        "itemsWithTopics": [
-          {
-            "id": "msg-1",
-            "timestamp": "2025-01-10T10:00:00.000Z",
-            "topics": [
-              { "name": "coding", "relevance": 85 }
-            ]
-          },
-          {
-            "id": "msg-2",
-            "timestamp": "2025-01-10T10:01:00.000Z",
-            "topics": [
-              { "name": "help", "relevance": 90 },
-              { "name": "coding", "relevance": 70 }
-            ]
-          }
-        ],
-        "subgroups": [
-          {
-            "name": "Initial Setup",
-            "summary": "Covers starting a Vue project and requesting TypeScript assistance.",
-            "timestamp": "2025-01-10T09:59:59.999Z"
-          }
-        ]
-      }`,
+      input: 
+`{
+  "existingTopics": [],
+  "previousSubgroups": [],
+  "currentSubgroup": null,
+  "unprocessedItems": [
+    { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
+    { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
+    { "id": "3", "text": "Recent measurements suggest there may be discrepancies in the Hubble constant values." },
+    { "id": "4", "text": "These discrepancies might point to unknown physics beyond our current models." },
+    { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this." }
+  ]
+}`,
+      output: 
+`{
+  "conversationData": {
+    "name": "Cosmic Expansion",
+    "summary": "The conversation explores the expansion of the universe, the role of dark energy, discrepancies in the Hubble constant, and potential modifications to general relativity."
+  },
+  "currentSubgroup": null,
+  "newSubgroup": {
+    "name": "Cosmic Expansion",
+    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+    "firstItemId": "1",
+    "topics": [
+      { "name": "universe", "relevance": 100 },
+      { "name": "expansion", "relevance": 100 },
+      { "name": "darkenergy", "relevance": 90 },
+      { "name": "hubble", "relevance": 80 },
+      { "name": "relativity", "relevance": 70 }
+    ]
+  }
+}`,
     },
     {
-      input: `{
-        "existingTopics": ["cooking", "recipe"],
-        "unprocessedItems": [
-          {
-            "id": "msg-1",
-            "text": "I'm making a chicken curry today",
-            "timestamp": "2025-01-10T11:00:00.000Z"
-          },
-          {
-            "id": "msg-2",
-            "text": "I need a good spice blend for flavor",
-            "timestamp": "2025-01-10T11:05:00.000Z"
-          }
-        ],
-        "subgroupSummaries": [
-          "We previously discussed favorite curry methods."
-        ]
-      }`,
-      output: `{
-        "conversationData": {
-          "name": "Curry Tips",
-          "summary": "Continues discussing chicken curry preparation and spice blends."
-        },
-        "itemsWithTopics": [
-          {
-            "id": "msg-1",
-            "timestamp": "2025-01-10T11:00:00.000Z",
-            "topics": [
-              { "name": "cooking", "relevance": 90 }
-            ]
-          },
-          {
-            "id": "msg-2",
-            "timestamp": "2025-01-10T11:05:00.000Z",
-            "topics": [
-              { "name": "cooking", "relevance": 85 },
-              { "name": "recipe", "relevance": 75 }
-            ]
-          }
-        ],
-        "subgroups": []
-      }`,
+      input: 
+`{
+  "existingTopics": ["universe", "expansion", "darkenergy", "hubble", "relativity"],
+  "previousSubgroups": [
+    {
+      "name": "Cosmic Expansion",
+      "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity."
+    }
+  ],
+  "currentSubgroup": {
+    "name": "Cosmic Expansion",
+    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+    "topics": ["universe", "expansion", "darkenergy", "hubble", "relativity"]
+  },
+  "unprocessedItems": [
+    { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant." },
+    { "id": "7", "text": "Its measurements are among the most precise but still leave room for debate about the true value." },
+    { "id": "8", "text": "By the way, a great way to bring out flavors in vegetables is to roast them with a mix of olive oil, garlic, and herbs." },
+    { "id": "9", "text": "Caramelization from roasting adds depth to vegetables like carrots and Brussels sprouts." },
+    { "id": "10", "text": "And don’t forget to season generously with salt and pepper before baking!" }
+  ]
+}`,
+      output: 
+`{
+  "conversationData": {
+    "name": "Universe and Cooking",
+    "summary": "The conversation explores the universe's expansion, including precise measurements of the Hubble constant, and transitions into tips for roasting vegetables to enhance their flavor."
+  },
+  "currentSubgroup": {
+    "name": "Cosmic Expansion",
+    "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
+    "topics": [
+      { "name": "universe", "relevance": 100 },
+      { "name": "expansion", "relevance": 100 },
+      { "name": "darkenergy", "relevance": 90 },
+      { "name": "hubble", "relevance": 80 },
+      { "name": "relativity", "relevance": 70 }
+    ]
+  },
+  "newSubgroup": {
+    "name": "Vegetable Roasting",
+    "summary": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
+    "firstItemId": "8",
+    "topics": [
+      { "name": "cooking", "relevance": 100 },
+      { "name": "vegetables", "relevance": 100 },
+      { "name": "roasting", "relevance": 90 },
+    ]
+  }
+}`,
     },
     {
-      input: `{
-        "existingTopics": ["music", "lessons", "practice"],
-        "unprocessedItems": [
-          {
-            "id": "msg-1",
-            "text": "Continuing my piano exercises",
-            "timestamp": "2025-01-10T12:00:00.000Z"
-          },
-          {
-            "id": "msg-2",
-            "text": "Scales and chords are getting easier",
-            "timestamp": "2025-01-10T12:02:00.000Z"
-          },
-          {
-            "id": "msg-3",
-            "text": "Now I'm considering a shift to guitar",
-            "timestamp": "2025-01-10T12:03:00.000Z"
-          },
-          {
-            "id": "msg-4",
-            "text": "Barre chords seem tough to master",
-            "timestamp": "2025-01-10T12:04:00.000Z"
-          }
-        ],
-        "subgroupSummaries": [
-          "A discussion on chord progressions for piano.",
-          "Notes on daily practice routines."
-        ]
-      }`,
-      output: `{
-        "conversationData": {
-          "name": "Instrument Focus",
-          "summary": "Begins with piano exercises and transitions into learning guitar techniques."
-        },
-        "itemsWithTopics": [
-          {
-            "id": "msg-1",
-            "timestamp": "2025-01-10T12:00:00.000Z",
-            "topics": [
-              { "name": "practice", "relevance": 85 },
-              { "name": "music", "relevance": 75 }
-            ]
-          },
-          {
-            "id": "msg-2",
-            "timestamp": "2025-01-10T12:02:00.000Z",
-            "topics": [
-              { "name": "music", "relevance": 80 },
-              { "name": "practice", "relevance": 70 }
-            ]
-          },
-          {
-            "id": "msg-3",
-            "timestamp": "2025-01-10T12:03:00.000Z",
-            "topics": [
-              { "name": "music", "relevance": 90 }
-            ]
-          },
-          {
-            "id": "msg-4",
-            "timestamp": "2025-01-10T12:04:00.000Z",
-            "topics": [
-              { "name": "music", "relevance": 85 },
-              { "name": "lessons", "relevance": 60 }
-            ]
-          }
-        ],
-        "subgroups": [
-          {
-            "name": "Guitar Move",
-            "summary": "Explores transitioning from piano to learning guitar chords.",
-            "timestamp": "2025-01-10T12:02:59.999Z"
-          }
-        ]
-      }`,
+      input: 
+`{
+  "existingTopics": ["technology", "privacy", "data", "ethics"],
+  "previousSubgroups": [
+    {
+      "name": "Tech and Privacy",
+      "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
+    }
+  ],
+  "currentSubgroup": {
+    "name": "Tech and Privacy",
+    "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
+    "topics": ["technology", "privacy", "data", "ethics"]
+  },
+  "unprocessedItems": [
+    { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust." },
+    { "id": "7", "text": "However, balancing innovation and privacy often creates challenges for developers." },
+    { "id": "8", "text": "On another note, effective team collaboration relies heavily on clear communication and shared goals." },
+    { "id": "9", "text": "Tools like Slack and Trello have made remote work more efficient by streamlining communication." },
+    { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity." }
+  ]
+}`,
+      output: 
+`{
+  "conversationData": {
+    "name": "Tech and Collaboration",
+    "summary": "The conversation discusses privacy-first approaches and challenges in technology, then transitions into effective team collaboration and tools that enhance productivity."
+  },
+  "currentSubgroup": {
+    "name": "Tech and Privacy",
+    "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
+    "topics": [
+      { "name": "technology", "relevance": 100 },
+      { "name": "privacy", "relevance": 100 },
+      { "name": "data", "relevance": 80 }
+    ]
+  },
+  "newSubgroup": {
+    "name": "Team Collaboration",
+    "summary": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
+    "firstItemId": "8",
+    "topics": [
+      { "name": "collaboration", "relevance": 100 },
+      { "name": "productivity", "relevance": 90 },
+      { "name": "tools", "relevance": 80 }
+    ]
+  }
+}`,
     },
     {
-      input: `{
-        "existingTopics": ["gaming", "strategy", "multiplayer"],
-        "unprocessedItems": [
-          {
-            "id": "msg-1",
-            "text": "I'm trying new tactics in a real-time strategy game",
-            "timestamp": "2025-01-10T13:00:00.000Z"
-          },
-          {
-            "id": "msg-2",
-            "text": "Multiplayer matches can be stressful",
-            "timestamp": "2025-01-10T13:01:00.000Z"
-          },
-          {
-            "id": "msg-3",
-            "text": "Switching gears to a solo RPG for a break",
-            "timestamp": "2025-01-10T13:02:00.000Z"
-          },
-          {
-            "id": "msg-4",
-            "text": "Next, I want to try a puzzle platformer",
-            "timestamp": "2025-01-10T13:03:00.000Z"
-          },
-          {
-            "id": "msg-5",
-            "text": "Co-op mode in platformers is fun too",
-            "timestamp": "2025-01-10T13:04:00.000Z"
-          }
-        ],
-        "subgroupSummaries": [
-          "A previous note on game reviews.",
-          "Summary of an intense strategy tournament.",
-          "Discussion about team-based gaming experiences."
-        ]
-      }`,
-      output: `{
-        "conversationData": {
-          "name": "Varied Gaming",
-          "summary": "Covers real-time strategies, solo RPGs, and transitioning to puzzle platformers."
-        },
-        "itemsWithTopics": [
-          {
-            "id": "msg-1",
-            "timestamp": "2025-01-10T13:00:00.000Z",
-            "topics": [
-              { "name": "strategy", "relevance": 90 },
-              { "name": "gaming", "relevance": 70 }
-            ]
-          },
-          {
-            "id": "msg-2",
-            "timestamp": "2025-01-10T13:01:00.000Z",
-            "topics": [
-              { "name": "multiplayer", "relevance": 85 },
-              { "name": "gaming", "relevance": 65 }
-            ]
-          },
-          {
-            "id": "msg-3",
-            "timestamp": "2025-01-10T13:02:00.000Z",
-            "topics": [
-              { "name": "gaming", "relevance": 80 }
-            ]
-          },
-          {
-            "id": "msg-4",
-            "timestamp": "2025-01-10T13:03:00.000Z",
-            "topics": [
-              { "name": "gaming", "relevance": 75 }
-            ]
-          },
-          {
-            "id": "msg-5",
-            "timestamp": "2025-01-10T13:04:00.000Z",
-            "topics": [
-              { "name": "multiplayer", "relevance": 70 },
-              { "name": "gaming", "relevance": 60 }
-            ]
-          }
-        ],
-        "subgroups": [
-          {
-            "name": "Solo RPG",
-            "summary": "Moves away from strategy towards a single-player role-playing experience.",
-            "timestamp": "2025-01-10T13:01:59.999Z"
-          },
-          {
-            "name": "Puzzle Platforming",
-            "summary": "Shifts focus to platformer gameplay, including co-op elements.",
-            "timestamp": "2025-01-10T13:02:59.999Z"
-          }
-        ]
-      }`,
+      input: 
+`{
+  "existingTopics": ["fitness", "health", "nutrition"],
+  "previousSubgroups": [
+    {
+      "name": "Fitness and Nutrition",
+      "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
+    }
+  ],
+  "currentSubgroup": {
+    "name": "Fitness and Nutrition",
+    "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health.",
+    "topics": ["fitness", "health", "nutrition"]
+  },
+  "unprocessedItems": [
+    { "id": "6", "text": "A well-rounded fitness routine includes both cardio and strength training." },
+    { "id": "7", "text": "Proper hydration is also essential for maximizing workout performance." },
+    { "id": "8", "text": "Speaking of hydration, the mineral content in water can affect recovery times." },
+    { "id": "9", "text": "For example, electrolyte-rich water helps replenish what is lost through sweat." },
+    { "id": "10", "text": "This shows how nutrition and hydration are deeply connected to fitness results." }
+  ]
+}`,
+      output: 
+`{
+  "conversationData": {
+    "name": "Fitness and Nutrition",
+    "summary": "The conversation emphasizes the importance of balanced nutrition and hydration in supporting fitness, with a focus on how mineral content in water and electrolyte replenishment enhance recovery and performance."
+  },
+  "currentSubgroup": {
+    "name": "Fitness and Nutrition",
+    "summary": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance.",
+    "topics": [
+      { "name": "fitness", "relevance": 100 },
+      { "name": "health", "relevance": 90 },
+      { "name": "nutrition", "relevance": 100 },
+      { "name": "hydration", "relevance": 80 }
+    ]
+  },
+  "newSubgroup": null
+}`,
     },
   ];
 
