@@ -359,14 +359,6 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   const conversation: any = await findOrCreateNewConversation(perspective, channelId);
   // gather up all new perspective links so they can be commited in a single transaction at the end of the function
   const newLinks = [] as any;
-  // prepare links connecting items to conversation
-  newLinks.push(
-    ...unprocessedItems.map((item) => ({
-      source: conversation.baseExpression,
-      predicate: "ad4m://has_child",
-      target: item.baseExpression,
-    }))
-  );
   // gather up data for LLM processing
   const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
   const lastSubgroup = previousSubgroups[previousSubgroups.length - 1];
@@ -441,12 +433,6 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
     newSubgroupEntity.summary = newSubgroup.summary;
     await newSubgroupEntity.save();
     newSubgroupEntity = await newSubgroupEntity.get();
-    // prepare link connecting subgroup to conversation
-    newLinks.push({
-      source: conversation.baseExpression,
-      predicate: "ad4m://has_child",
-      target: newSubgroupEntity.baseExpression,
-    });
     // link new subgroup topics
     await Promise.all(
       newSubgroup.topics.map(async (topic) => {
