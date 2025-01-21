@@ -453,8 +453,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   const indexOfFirstItemInNewSubgroup =
     newSubgroup && unprocessedItems.findIndex((item) => item.id === newSubgroup.firstItemId);
   for (const [itemIndex, item] of unprocessedItems.entries()) {
-    const itemsSubgroup =
-      newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : currentSubgroupEntity;
+    const itemsSubgroup = newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : lastSubgroup;
 
     newLinks.push({
       source: itemsSubgroup.baseExpression,
@@ -469,8 +468,8 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   await createEmbedding(perspective, conversationData.summary, conversation.baseExpression);
   // update vector embedding for currentSubgroup if returned from LLM
   if (currentSubgroup) {
-    await removeEmbedding(perspective, currentSubgroupEntity.baseExpression);
-    await createEmbedding(perspective, currentSubgroup.summary, currentSubgroupEntity.baseExpression);
+    await removeEmbedding(perspective, lastSubgroup.baseExpression);
+    await createEmbedding(perspective, currentSubgroup.summary, lastSubgroup.baseExpression);
   }
   // create vector embedding for new subgroup if returned from LLM
   if (newSubgroup) await createEmbedding(perspective, newSubgroup.summary, newSubgroupEntity.baseExpression);
