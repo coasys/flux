@@ -84,10 +84,6 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
-// todo:
-// + need to update last subgroup summary if any of the new processed items will be included in that grouping
-// + improve topic generation (to often uses existing topic that aren't very relevant instead of creating new ones)
-// + improve subgroup splicing (works ok but sometimes splitting conversation in the wrong place)
 export async function ensureLLMTask(): Promise<AITask> {
   const taskPrompt = `
     You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -95,41 +91,42 @@ export async function ensureLLMTask(): Promise<AITask> {
 
     I'm passing you a JSON object with the following properties:
     1. 'existingTopics' (String array of all existing topic names)
-    2. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string), a 'text' property (string), and a 'timestamp' property (string).)
+    2. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
     3. 'subgroupSummaries' (String array of all subgroup summaries)
 
-    Firstly, analyze the 'text' property of each unprocessedItem and identify between 1 and 5 topics (each a single word string in lowercase) that are relevant to the content of the text.
-    If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
-    For each topic, generate a relevance score between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the text.
-    The output of this analysis will be an updated version of the 'unprocessedItems' array called 'itemsWithTopics', which removes the 'text' property and adds a new 'topics' property for each unprocessed item.
-    The 'topics' property should be an array of objects: one for each of the topics you have identified for the 'text'.
-    Each of these topic objects should contain a 'name' property (string) for the name of the topic and a 'relevance' property (number) for its relevance score.
-    Make sure each item has at least 1 topic and no more than 5 topics!
-
-    Secondly, analyze the the last summary in 'subgroupSummaries' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
+    Firstly, analyze the last summary in 'subgroupSummaries' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
     Consider the conversation as **related** if:
     - The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
     - The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
     Only consider the conversation as having **shifted to a new subject** if:
     - The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
     - The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
-    If the 'subgroupSummaries' array is empty, the conversation has by default shifted.
+    If the 'subgroupSummaries' array is empty, consider the conversation as having immediately shifted.
     If the last summary in 'subgroupSummaries' array is unrelated to the text in the first unprocessed item, the conversation has also shifted.
     In every case where the conversation has shifted, generate a new subgroup including the following properties:
     1. 'name': a 1 to 3 word title (string) describing the contents of the subgroup.
     2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
-    3. 'timestamp': a timestamp string (in the same format as the timestamps on each unprocessed item) that is 1 millisecond earlier than the first item within the subgroup.
-    The output of this analysis will be an object array called 'subgroups', which includes all the subgroups identified in the conversation.
-    Each subgroup object will have the 'name', 'summary', and 'timestamp' properties described above.
+    3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
+    4. 'topics': an array of between 1 and 5 topic objects indicating topics that are relevant to the contents of the subgroup (a bit like hashtags).
+    Each topic object should including a 'name' property (a single word string in lowercase) for the name of the topic
+    and a 'relevance' property (number) between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the text.
+    If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating 
+    a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
+    The output of this analysis will be a new 'subgroups' array conatining all of new subgroup objects you have generated.
+
+    Secondly, if the first subgroup generated above comes after the first unprocessed item, we need to generate a new 'lastSubgroupData' object with the following properties:
+    1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
+    2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
+    3. 'topics': an array of between 1 and 5 topic objects indicating topics that are relevant to the contents of the conversation.
 
     Thirdly, analyse all the summaries in the original 'subgroupSummaries' array and the summaries in the new 'subgroups' array, and use this info to generate a new 'conversationData' object with the following properties:
     1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
     2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
 
     Finally return a JSON object with the following properties generated from the analysis:
-    1. 'conversationData': the 'conversationData' object described above.
-    2. 'itemsWithTopics': the 'itemsWithTopics' array described above.
-    3. 'subgroups': the 'subgroups' array described above.
+    1. 'subgroups': the 'subgroups' array described above.
+    2. 'lastSubgroupData': 
+    3. 'conversationData': the 'conversationData' object described above. 
 
     Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
     If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
