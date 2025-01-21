@@ -451,7 +451,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   }
   // link items to subgroups
   const indexOfFirstItemInNewSubgroup =
-    newSubgroup && unprocessedItems.findIndex((item) => item.id === newSubgroup.firstItemId);
+    newSubgroup && unprocessedItems.findIndex((item) => item.baseExpression === newSubgroup.firstItemId);
   for (const [itemIndex, item] of unprocessedItems.entries()) {
     const itemsSubgroup = newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : lastSubgroup;
 
