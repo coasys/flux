@@ -636,7 +636,7 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
     setTimeout(() => {
       const affirmationRecieved = !!receivedSignals.find((signal: any) => signal.data.target === signalUuid);
       resolve(affirmationRecieved);
-    }, 2000);
+    }, 3000);
   });
 }
 // todo: store these consts in channel settings
@@ -718,7 +718,6 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   // run LLM processing
   const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
   const existingTopics = await getAllTopics(perspective);
-  console.log("existingTopics: ", existingTopics);
   const { conversationData, itemsWithTopics, subgroups } = await LLMProcessing(
     unprocessedItems,
     previousSubgroups,

@@ -153,15 +153,18 @@ export default defineComponent({
     watch(
       () => data.value.perspective,
       async (newPerspective: PerspectiveProxy | null) => {
-        if (newPerspective) await addSynergySignalHandler(newPerspective);
+        if (newPerspective) {
+          await removeSynergySignalHandler(newPerspective);
+          await addSynergySignalHandler(newPerspective);
+        }
       },
       { immediate: true }
     );
 
     // remove synergy signal handler when component unmounts
-    onUnmounted(() => {
+    onUnmounted(async () => {
       if (data.value.perspective)
-        removeSynergySignalHandler(data.value.perspective);
+        await removeSynergySignalHandler(data.value.perspective);
     });
 
     return {
