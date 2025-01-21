@@ -20,7 +20,7 @@ import {
 //@ts-ignore
 import JSON5 from "json5";
 import { v4 as uuidv4 } from "uuid";
-import { synergyGroupingPrompt, synergyGroupingExamples } from "./synergy-prompts"
+import { synergyGroupingPrompt, synergyGroupingExamples } from "./synergy-prompts";
 import { sleep } from "./sleep";
 
 async function removeEmbedding(perspective, itemId) {
@@ -64,7 +64,8 @@ export async function ensureLLMTask(): Promise<AITask> {
   const client: Ad4mClient = await getAd4mClient();
   const tasks = await client.ai.tasks();
   let task = tasks.find((t) => t.name === "flux-synergy-task");
-  if (!task) task = await client.ai.addTask("flux-synergy-task", "default", synergyGroupingPrompt, synergyGroupingExamples);
+  if (!task)
+    task = await client.ai.addTask("flux-synergy-task", "default", synergyGroupingPrompt, synergyGroupingExamples);
   return task;
 }
 
@@ -140,21 +141,21 @@ export function transformItem(type, item) {
 }
 
 export async function findTopics(perspective, itemId) {
-  const allRelationships = await SemanticRelationship.query(perspective, {
+  const allRelationships = (await SemanticRelationship.query(perspective, {
     source: itemId,
-  }) as any;
+  })) as any;
 
   const topics = [];
   for (const rel of allRelationships) {
     if (!rel.relevance) continue;
-    
+
     try {
       const topicEntity = new Topic(perspective, rel.tag);
       const topic = await topicEntity.get();
       topics.push({
         baseExpression: rel.tag,
         name: topic.topic,
-        relevance: rel.relevance
+        relevance: rel.relevance,
       });
     } catch (error) {
       continue;
@@ -205,12 +206,14 @@ export async function getDefaultLLM() {
 }
 
 export async function findUnprocessedItems(perspective: any, items: any[]) {
-  const results = await Promise.all(items.map(async item => {
-    const links = await perspective.get(
-      new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
-    );
-    return links.length === 1 ? item : null;
-  }));
+  const results = await Promise.all(
+    items.map(async (item) => {
+      const links = await perspective.get(
+        new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
+      );
+      return links.length === 1 ? item : null;
+    })
+  );
   return results.filter(Boolean);
 }
 
@@ -286,7 +289,7 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
   });
 
   await sleep(3000);
-  return receivedSignals.some(s => s.data.target === signalUuid);
+  return receivedSignals.some((s) => s.data.target === signalUuid);
 }
 // todo: store these consts in channel settings
 const minNumberOfItemsToProcess = 5;
@@ -408,12 +411,11 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
     allReturnedTopics.map(async (topic) => {
       // skip topics already linked to the conversation
       if (conversationTopics.find((t) => t.name === topic.name)) return;
-      
+
       // find topic entity to get baseExpression
-      const topicEntity = 
-        newTopics.find((t) => t.name === topic.name) || 
-        existingTopics.find((t) => t.name === topic.name);
-        
+      const topicEntity =
+        newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
+
       await linkTopic(perspective, conversation.baseExpression, topicEntity.baseExpression, topic.relevance);
     })
   );
@@ -427,12 +429,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
       currentSubgroup.topics.map(async (topic) => {
         const topicEntity =
           newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
-        await linkTopic(
-          perspective,
-          currentSubgroupEntity.baseExpression,
-          topicEntity.baseExpression,
-          topic.relevance
-        );
+        await linkTopic(perspective, currentSubgroupEntity.baseExpression, topicEntity.baseExpression, topic.relevance);
       })
     );
   }
@@ -453,7 +450,7 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
     // link new subgroup topics
     await Promise.all(
       newSubgroup.topics.map(async (topic) => {
-        const topicEntity = 
+        const topicEntity =
           newTopics.find((t) => t.name === topic.name) || existingTopics.find((t) => t.name === topic.name);
         await linkTopic(perspective, newSubgroupEntity.baseExpression, topicEntity.baseExpression, topic.relevance);
       })
@@ -463,13 +460,12 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   const indexOfFirstItemInNewSubgroup =
     newSubgroup && unprocessedItems.findIndex((item) => item.id === newSubgroup.firstItemId);
   for (const [itemIndex, item] of unprocessedItems.entries()) {
-    const itemsSubgroup = (newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup) 
-      ? newSubgroupEntity 
-      : currentSubgroupEntity;
+    const itemsSubgroup =
+      newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : currentSubgroupEntity;
 
     newLinks.push({
       source: itemsSubgroup.baseExpression,
-      predicate: "ad4m://has_child", 
+      predicate: "ad4m://has_child",
       target: item.baseExpression,
     });
   }
@@ -493,18 +489,13 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
 export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
   console.log("runProcessingCheck");
   // only attempt processing if default LLM is set
-  if (await getDefaultLLM()) return
+  if (await getDefaultLLM()) return;
 
   // check if we are responsible for processing
   const channelItems = await getSynergyItems(perspective, channelId);
   const unprocessedItems = await findUnprocessedItems(perspective, channelItems);
   const neighbourhood = await perspective.getNeighbourhoodProxy();
-  const responsible: boolean = await responsibleForProcessing(
-    perspective,
-    neighbourhood,
-    channelId,
-    unprocessedItems
-  );
+  const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   console.log("responsible for processing", responsible);
   // if we are responsible, process items (minus delay) & add to conversation
   if (responsible && !processing)
