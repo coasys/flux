@@ -25,12 +25,4 @@ export default class ConversationSubgroup extends SubjectEntity {
     required: false,
   })
   summary: string;
-
-  @SubjectProperty({
-    through: "flux://has_position_timestamp",
-    writable: true,
-    resolveLanguage: "literal",
-    required: false,
-  })
-  positionTimestamp: string;
 }
