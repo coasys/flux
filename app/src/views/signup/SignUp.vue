@@ -74,7 +74,6 @@ import SignUpCarousel from "./SignUpCarousel.vue";
 import { createProfile, getAd4mProfile } from "@coasys/flux-api";
 import { useMe } from "@coasys/ad4m-vue-hooks";
 import { profileFormatter } from "@coasys/flux-utils";
-import { registerNotification } from "../../utils/registerMobileNotifications";
 
 export default defineComponent({
   name: "SignUp",
@@ -202,8 +201,6 @@ export default defineComponent({
       })
         .then(() => {
           this.$router.push("/");
-
-          registerNotification();
         })
         .finally(() => {
           this.isCreatingUser = false;

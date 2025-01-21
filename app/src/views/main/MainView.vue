@@ -194,7 +194,6 @@ import { Ad4mClient, LinkExpression, Literal, PerspectiveProxy } from "@coasys/a
 import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
-import { registerNotification } from "../../utils/registerMobileNotifications";
 import { ad4mConnect } from "@/ad4mConnect";
 import { ensureLLMTask } from "@coasys/flux-utils";
 
@@ -248,7 +247,6 @@ export default defineComponent({
     CommunitySettings,
   },
   async mounted() {
-    registerNotification();
     ensureLLMTask();
     
     ad4mConnect.addEventListener("authstatechange", async (e) => {

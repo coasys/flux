@@ -117,6 +117,7 @@ import {
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
+import { registerNotification } from "../../utils/registerMobileNotifications";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -132,6 +133,7 @@ export default defineComponent({
     Hourglass,
   },
   async setup() {
+    registerNotification();
     const route = useRoute();
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
