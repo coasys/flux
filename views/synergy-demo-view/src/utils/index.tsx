@@ -44,7 +44,6 @@ export async function getConversationData(perspective, channelId, match?, setMat
       const subgroups = (await ConversationSubgroup.query(perspective, {
         source: conversation.baseExpression,
       })) as any;
-      const conversationItems = await getSynergyItems(perspective, conversation.baseExpression);
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
           if (match && subgroup.baseExpression === match.baseExpression) {
@@ -53,16 +52,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
           }
           subgroup.groupType = "subgroup";
           subgroup.topics = await findTopics(perspective, subgroup.baseExpression);
-          const nextSubgroup = subgroups[subgroupIndex + 1];
-          const subgroupItems = conversationItems.filter(
-            (item) =>
-              // item after subgroup start
-              new Date(item.timestamp).getTime() > new Date(subgroup.positionTimestamp).getTime() &&
-              // either no subgroup after or item before next subgroup
-              (!nextSubgroup ||
-                new Date(item.timestamp).getTime() <
-                  new Date(nextSubgroup.positionTimestamp).getTime())
-          );
+          const subgroupItems = await getSynergyItems(perspective, subgroup.baseExpression);
           if (subgroupItems.length) {
             subgroup.start = subgroupItems[0].timestamp;
             subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
