@@ -332,11 +332,15 @@ async function responsibleForProcessing(
 async function findOrCreateNewConversation(perspective: PerspectiveProxy, channelId: string) {
   const conversations = await Conversation.query(perspective, { source: channelId });
   if (conversations.length) {
-    // if existing conversations found & last item in last conversation less than 30 mins old, use that conversation
+    // if existing conversations found & last item in last conversation subgroup less than 30 mins old, use that conversation
     const lastConversation = conversations[conversations.length - 1];
-    const lastConversationItems = await getSynergyItems(perspective, lastConversation.baseExpression);
-    if (lastConversationItems.length) {
-      const lastItem = lastConversationItems[lastConversationItems.length - 1];
+    const conversationSubgroups = await ConversationSubgroup.query(perspective, {
+      source: lastConversation.baseExpression,
+    });
+    const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as any;
+    const lastSubgroupItems = await getSynergyItems(perspective, lastSubgroup.baseExpression);
+    if (lastSubgroupItems.length) {
+      const lastItem = lastSubgroupItems[lastSubgroupItems.length - 1];
       const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
       const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
       if (minsSinceLastItemCreated < 30) return lastConversation;
