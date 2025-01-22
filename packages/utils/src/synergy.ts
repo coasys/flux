@@ -22,6 +22,7 @@ import JSON5 from "json5";
 import { v4 as uuidv4 } from "uuid";
 import { synergyGroupingPrompt, synergyGroupingExamples } from "./synergy-prompts";
 import { sleep } from "./sleep";
+import { TopicWithRelevance } from "@coasys/flux-api/src/topic";
 
 async function removeEmbedding(perspective, itemId) {
   const allSemanticRelationships = (await SemanticRelationship.query(perspective, {
@@ -140,12 +141,12 @@ export function transformItem(type, item) {
   return newItem;
 }
 
-export async function findTopics(perspective, itemId) {
+export async function findTopics(perspective, itemId): Promise<TopicWithRelevance[]> {
   const allRelationships = (await SemanticRelationship.query(perspective, {
     source: itemId,
   })) as any;
 
-  const topics = [];
+  const topics: TopicWithRelevance[] = [];
   for (const rel of allRelationships) {
     if (!rel.relevance) continue;
 
@@ -358,7 +359,7 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
 // + let other agents know when you have started & finished processing (add new signal in responsibleForProcessing check?)
 // + mark individual items as processing in UI
 let processing = false;
-async function processItemsAndAddToConversation(perspective, channelId, unprocessedItems) {
+async function processItemsAndAddToConversation(perspective, channelId, ) {
   processing = true;
   const conversation: any = await findOrCreateNewConversation(perspective, channelId);
   // gather up all new perspective links so they can be commited in a single transaction at the end of the function
