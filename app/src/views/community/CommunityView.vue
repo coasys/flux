@@ -117,10 +117,6 @@ import {
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
-import {
-  addSynergySignalHandler,
-  removeSynergySignalHandler,
-} from "@coasys/flux-utils";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -147,24 +143,6 @@ export default defineComponent({
     const { entries: channels } = useSubjects({
       perspective: () => data.value.perspective,
       subject: Channel,
-    });
-
-    // add synergy signal handler for each perspective (used to check if agents capable of processing conversation data)
-    watch(
-      () => data.value.perspective,
-      async (newPerspective: PerspectiveProxy | null) => {
-        if (newPerspective) {
-          await removeSynergySignalHandler(newPerspective);
-          await addSynergySignalHandler(newPerspective);
-        }
-      },
-      { immediate: true }
-    );
-
-    // remove synergy signal handler when component unmounts
-    onUnmounted(async () => {
-      if (data.value.perspective)
-        await removeSynergySignalHandler(data.value.perspective);
     });
 
     return {

@@ -205,15 +205,14 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-export async function findUnprocessedItems(perspective: any, items: any[], conversations: any[]) {
-  const conversationIds = conversations.map((c) => c.baseExpression);
+export async function findUnprocessedItems(perspective: any, items: any[], allSubgroupIds: string[]) {
   const results = await Promise.all(
     items.map(async (item) => {
       const links = await perspective.get(
         new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
       );
       // if the item has a parent link to a conversation we know it has been processed
-      const isProcessed = links.some((link) => conversationIds.includes(link.data.source));
+      const isProcessed = links.some((link) => allSubgroupIds.includes(link.data.source));
       return isProcessed ? null : item;
     })
   );
@@ -238,42 +237,48 @@ async function isMe(did: string) {
 
 let receivedSignals: any[] = [];
 let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+export const itemsBeingProcessed = [] as any[];
 
-async function onSignalReceived(expression: PerspectiveExpression, neighbourhood: NeighbourhoodProxy) {
+async function onSignalReceived(
+  expression: PerspectiveExpression,
+  neighbourhood: NeighbourhoodProxy,
+  setProcessing: any
+) {
   const link = expression.data.links[0];
   const { author, data } = link;
-  const { predicate, target } = data;
+  const { source, predicate, target } = data;
 
   if (predicate === "can-you-process-items") {
     const defaultLLM = await getDefaultLLM();
-    if (defaultLLM) {
-      await neighbourhood.sendSignalU(author, { links: [{ source: "", predicate: "i-can-process-items", target }] });
-    }
-    // todo: respond if can't process items too?
-    // await neighbourhood.sendSignalU(author, {
-    //   links: [
-    //     {
-    //       source: "", // channelId (not necissary?)
-    //       predicate: `i-${defaultLLM ? "can" : "cant"}-process-items`,
-    //       target,
-    //     },
-    //   ],
-    // });
+    console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
+    if (defaultLLM)
+      await neighbourhood.sendSignalU(author, {
+        links: [{ source: "", predicate: "i-can-process-items", target }],
+      });
   }
 
   if (predicate === "i-can-process-items") {
-    console.log("Signal recieved: remote agent can process items!");
+    console.log(`Signal recieved: remote agent ${author} can process items!`);
     receivedSignals.push(link);
   }
 
-  // // is this necissary (might be slightly quicker than waiting for timeout...)
-  // if (predicate === "i-cant-process-items") {
-  // }
+  if (predicate === "processing-items-started") {
+    const items = JSON.parse(target);
+    console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
+    processing = true;
+    setProcessing({ author, channel: source, items });
+  }
+
+  if (predicate === "processing-items-finished") {
+    console.log(`Signal recieved: ${author} finished processing items`);
+    processing = false;
+    setProcessing(null);
+  }
 }
 
-export async function addSynergySignalHandler(perspective: PerspectiveProxy) {
+export async function addSynergySignalHandler(perspective: PerspectiveProxy, setProcessing: any) {
   const neighbourhood = await perspective.getNeighbourhoodProxy();
-  signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood);
+  signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood, setProcessing);
   neighbourhood.addSignalHandler(signalHandler);
 }
 
@@ -361,13 +366,28 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
 // + let other agents know when you have started & finished processing (add new signal in responsibleForProcessing check?)
 // + mark individual items as processing in UI
 let processing = false;
-async function processItemsAndAddToConversation(perspective, channelId, unprocessedItems) {
+async function processItemsAndAddToConversation(
+  perspective,
+  neighbourhood,
+  channelId,
+  unprocessedItems,
+  setProcessing
+) {
+  // update processing items state
   processing = true;
-  const conversation: any = await findOrCreateNewConversation(perspective, channelId);
+  const itemIds = JSON.stringify(unprocessedItems.map((item) => item.baseExpression));
+  setProcessing({ author: "me", channel: channelId, items: itemIds });
+  // notify other agents that we are processing
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: channelId, predicate: "processing-items-started", target: itemIds }],
+  });
   // gather up all new perspective links so they can be commited in a single transaction at the end of the function
   const newLinks = [] as any;
   // gather up data for LLM processing
-  const previousSubgroups = await ConversationSubgroup.query(perspective, { source: conversation.baseExpression });
+  const conversation: any = await findOrCreateNewConversation(perspective, channelId);
+  const previousSubgroups = await ConversationSubgroup.query(perspective, {
+    source: conversation.baseExpression,
+  });
   const lastSubgroup = previousSubgroups[previousSubgroups.length - 1] as any;
   const lastSubgroupTopics = lastSubgroup ? await findTopics(perspective, lastSubgroup.baseExpression) : [];
   const lastSubgroupWithTopics = lastSubgroup ? { ...lastSubgroup, topics: lastSubgroupTopics } : null;
@@ -478,10 +498,28 @@ async function processItemsAndAddToConversation(perspective, channelId, unproces
   if (newSubgroup) await createEmbedding(perspective, newSubgroup.summary, newSubgroupEntity.baseExpression);
   // batch commit all new links (currently only "ad4m://has_child" links)
   await perspective.addLinks(newLinks);
+  // update processing items state
   processing = false;
+  setProcessing(null);
+  // notify other agents
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: channelId, predicate: "processing-items-finished", target: "" }],
+  });
 }
 
-export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string) {
+export async function findAllChannelSubgroupIds(
+  perspective: PerspectiveProxy,
+  conversations: Conversation[]
+): Promise<string[]> {
+  const subgroups = await Promise.all(
+    conversations.map((conversation) =>
+      ConversationSubgroup.query(perspective, { source: conversation.baseExpression })
+    )
+  );
+  return [...new Set(subgroups.flat().map((subgroup) => subgroup.baseExpression))];
+}
+
+export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string, setProcessing: any) {
   console.log("runProcessingCheck");
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
@@ -489,13 +527,20 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
   // check if we are responsible for processing
   const channelItems = await getSynergyItems(perspective, channelId);
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, conversations);
+  const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
+  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   console.log("responsible for processing", responsible);
   // if we are responsible, process items (minus delay) & add to conversation
   if (responsible && !processing)
-    await processItemsAndAddToConversation(perspective, channelId, unprocessedItems.slice(0, -numberOfItemsDelay));
+    await processItemsAndAddToConversation(
+      perspective,
+      neighbourhood,
+      channelId,
+      unprocessedItems.slice(0, -numberOfItemsDelay),
+      setProcessing
+    );
 }
 
 export async function startTranscription(callback: (text) => void) {

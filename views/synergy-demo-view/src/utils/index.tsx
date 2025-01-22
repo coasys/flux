@@ -1,5 +1,10 @@
-import { Conversation, ConversationSubgroup, SemanticRelationship } from "@coasys/flux-api";
-import { findTopics, getSynergyItems, findUnprocessedItems } from "@coasys/flux-utils";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import {
+  findTopics,
+  getSynergyItems,
+  findUnprocessedItems,
+  findAllChannelSubgroupIds,
+} from "@coasys/flux-utils";
 import { LinkQuery } from "@coasys/ad4m";
 
 // constants
@@ -17,7 +22,8 @@ export async function getConversationData(perspective, channelId, match?, setMat
   // gather up unprocessed items
   const channelItems = await getSynergyItems(perspective, channelId);
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, conversations);
+  const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
+  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   // find & attach timestamp to converations
   const conversationsWithTimestamps = await Promise.all(
     conversations.map(

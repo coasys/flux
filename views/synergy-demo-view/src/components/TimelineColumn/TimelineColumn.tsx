@@ -1,9 +1,13 @@
 import { useEffect, useState, useRef } from "preact/hooks";
 import { closeMenu, getConversationData, groupingOptions } from "../../utils";
-import { runProcessingCheck, getSynergyItems } from "@coasys/flux-utils";
+import {
+  runProcessingCheck,
+  getSynergyItems,
+  itemsBeingProcessed,
+  addSynergySignalHandler,
+} from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Avatar from "../Avatar";
 
 type Props = {
@@ -23,17 +27,16 @@ export default function TimelineColumn({
 }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
-  const [processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
-  const [usingLLM, setUsingLLM] = useState(false);
   const timeout = useRef<any>(null);
   const totalConversationItems = useRef(0);
 
   async function runProcessingCheckIfNewItems() {
     const conversationItems = await getSynergyItems(perspective, channelId);
     if (conversationItems.length > totalConversationItems.current)
-      runProcessingCheck(perspective, channelId);
+      runProcessingCheck(perspective, channelId, setProcessing);
     totalConversationItems.current = conversationItems.length;
   }
 
@@ -43,25 +46,24 @@ export default function TimelineColumn({
     setUnprocessedItems(data.unprocessedItems);
     setConversations(data.conversations);
   }
-
-  async function checkIfUsingLLM() {
-    const client = await getAd4mClient();
-    const defaultLLM = await client.ai.getDefaultModel("LLM");
-    setUsingLLM(!!defaultLLM);
-  }
-
   function linkAddedListener() {
     if (timeout.current) clearTimeout(timeout.current);
     timeout.current = setTimeout(getData, 2000);
   }
 
   useEffect(() => {
+    // add signal listener
+    addSynergySignalHandler(perspective, setProcessing);
+    // add listener for new links
     perspective.addListener("link-added", linkAddedListener);
-    checkIfUsingLLM();
     getData();
 
     return () => perspective.removeListener("link-added", linkAddedListener);
   }, []);
+
+  useEffect(() => {
+    setProcessing(itemsBeingProcessed.find((item) => item.channelId === channelId) || null);
+  }, [itemsBeingProcessed]);
 
   return (
     <div className={styles.wrapper}>
@@ -110,6 +112,12 @@ export default function TimelineColumn({
               <j-text uppercase size="400" weight="800" color="primary-500">
                 Unprocessed Items
               </j-text>
+              {processing && (
+                <j-flex a="center">
+                  <j-text nomargin>{processing.items.length} items being processed by</j-text>
+                  <Avatar did={processing.author} showName />
+                </j-flex>
+              )}
               {unprocessedItems.map((item) => (
                 <j-flex gap="400" a="center" className={styles.itemCard}>
                   <j-flex gap="300" direction="column">
@@ -118,6 +126,9 @@ export default function TimelineColumn({
                       <j-flex gap="400" a="center" wrap>
                         <Avatar did={item.author} showName />
                       </j-flex>
+                      {processing && processing.items.includes(item.baseExpression) && (
+                        <j-badge variant="success">Processing...</j-badge>
+                      )}
                     </j-flex>
                     <j-text
                       nomargin
