@@ -16,10 +16,8 @@ export function closeMenu(menuId: string) {
 export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
   // gather up unprocessed items
   const channelItems = await getSynergyItems(perspective, channelId);
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems);
-  const conversations = (await Conversation.query(perspective, {
-    source: channelId,
-  })) as any;
+  const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
+  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, conversations);
   // find & attach timestamp to converations
   const conversationsWithTimestamps = await Promise.all(
     conversations.map(

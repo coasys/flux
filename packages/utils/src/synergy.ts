@@ -205,13 +205,16 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-export async function findUnprocessedItems(perspective: any, items: any[]) {
+export async function findUnprocessedItems(perspective: any, items: any[], conversations: any[]) {
+  const conversationIds = conversations.map((c) => c.baseExpression);
   const results = await Promise.all(
     items.map(async (item) => {
       const links = await perspective.get(
         new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
       );
-      return links.length === 1 ? item : null;
+      // if the item has a parent link to a conversation we know it has been processed
+      const isProcessed = links.some((link) => conversationIds.includes(link.data.source));
+      return isProcessed ? null : item;
     })
   );
   return results.filter(Boolean);
@@ -485,7 +488,8 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
 
   // check if we are responsible for processing
   const channelItems = await getSynergyItems(perspective, channelId);
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems);
+  const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
+  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, conversations);
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   console.log("responsible for processing", responsible);
