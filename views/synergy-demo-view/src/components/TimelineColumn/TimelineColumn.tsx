@@ -1,11 +1,6 @@
 import { useEffect, useState, useRef } from "preact/hooks";
 import { closeMenu, getConversationData, groupingOptions } from "../../utils";
-import {
-  runProcessingCheck,
-  getSynergyItems,
-  itemsBeingProcessed,
-  addSynergySignalHandler,
-} from "@coasys/flux-utils";
+import { runProcessingCheck, getSynergyItems, addSynergySignalHandler } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
@@ -61,10 +56,6 @@ export default function TimelineColumn({
     return () => perspective.removeListener("link-added", linkAddedListener);
   }, []);
 
-  useEffect(() => {
-    setProcessing(itemsBeingProcessed.find((item) => item.channelId === channelId) || null);
-  }, [itemsBeingProcessed]);
-
   return (
     <div className={styles.wrapper}>
       <j-flex a="center" j="between" className={styles.header}>
@@ -110,13 +101,15 @@ export default function TimelineColumn({
           {unprocessedItems.length > 0 && (
             <div style={{ marginLeft: 70 }}>
               <j-text uppercase size="400" weight="800" color="primary-500">
-                Unprocessed Items
+                {unprocessedItems.length} Unprocessed Items
               </j-text>
               {processing && (
-                <j-flex a="center">
-                  <j-text nomargin>{processing.items.length} items being processed by</j-text>
-                  <Avatar did={processing.author} showName />
-                </j-flex>
+                <j-box mb="500">
+                  <j-flex a="center" gap="300">
+                    <j-text nomargin>{processing.items.length} items being processed by</j-text>
+                    <Avatar did={processing.author} showName />
+                  </j-flex>
+                </j-box>
               )}
               {unprocessedItems.map((item) => (
                 <j-flex gap="400" a="center" className={styles.itemCard}>

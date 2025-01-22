@@ -237,7 +237,6 @@ async function isMe(did: string) {
 
 let receivedSignals: any[] = [];
 let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
-export const itemsBeingProcessed = [] as any[];
 
 async function onSignalReceived(
   expression: PerspectiveExpression,
