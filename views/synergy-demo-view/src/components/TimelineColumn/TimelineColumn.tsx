@@ -108,6 +108,7 @@ export default function TimelineColumn({
                   <j-flex a="center" gap="300">
                     <j-text nomargin>{processing.items.length} items being processed by</j-text>
                     <Avatar did={processing.author} showName />
+                    <j-spinner size="xs" />
                   </j-flex>
                 </j-box>
               )}

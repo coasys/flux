@@ -374,11 +374,13 @@ async function processItemsAndAddToConversation(
 ) {
   // update processing items state
   processing = true;
-  const itemIds = JSON.stringify(unprocessedItems.map((item) => item.baseExpression));
-  setProcessing({ author: "me", channel: channelId, items: itemIds });
+  const itemIds = unprocessedItems.map((item) => item.baseExpression);
+  const client = await getAd4mClient();
+  const me = await client.agent.me();
+  setProcessing({ author: me.did, channel: channelId, items: itemIds });
   // notify other agents that we are processing
   await neighbourhood.sendBroadcastU({
-    links: [{ source: channelId, predicate: "processing-items-started", target: itemIds }],
+    links: [{ source: channelId, predicate: "processing-items-started", target: JSON.stringify(itemIds) }],
   });
   // gather up all new perspective links so they can be commited in a single transaction at the end of the function
   const newLinks = [] as any;
