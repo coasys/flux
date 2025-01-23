@@ -20,7 +20,7 @@ import {
 //@ts-ignore
 import JSON5 from "json5";
 import { v4 as uuidv4 } from "uuid";
-import { synergyGroupingPrompt, synergyGroupingExamples, synergyTasks } from "./synergy-prompts";
+import { synergyGroupingPrompt, synergyGroupingExamples, synergyTasks, FluxLLMTask } from "./synergy-prompts";
 import { sleep } from "./sleep";
 
 async function removeEmbedding(perspective, itemId) {
@@ -60,65 +60,61 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
-export async function ensureLLMTasks(): Promise<{
-  name: string,
-  prompt: string,
-  exmaples: {input: string, output: string}[],
-  id: string
-}> {
+async function ensureLLMTask(task: FluxLLMTask): Promise<FluxLLMTask> {
   const client: Ad4mClient = await getAd4mClient();
   const registeredTasks = await client.ai.tasks();
-  const tasks = JSON.parse(JSON.stringify(synergyTasks));
-
-  for (let t of tasks) {
-    let existingTask = registeredTasks.find((r) => r.name === t.name);
-    if (!existingTask) {
-      existingTask = await client.ai.addTask(
-        t.name,
-        "default", 
-        t.prompt,
-        t.examples
-      );
-    }
-    t.id = existingTask!.taskId
+  let existingTask = registeredTasks.find((r) => r.name === task.name);
+  if (!existingTask) {
+    existingTask = await client.ai.addTask(
+      task.name,
+      "default", 
+      task.prompt,
+      task.examples
+    );
   }
-  return tasks;
+  task.id = existingTask!.taskId
+
+  return task
+}
+export async function ensureLLMTasks(): Promise<{
+  grouping: FluxLLMTask;
+  topics: FluxLLMTask;
+  conversation: FluxLLMTask;
+}> {
+  return {
+    grouping: await ensureLLMTask(synergyTasks.grouping),
+    topics: await ensureLLMTask(synergyTasks.topics),
+    conversation: await ensureLLMTask(synergyTasks.conversation),
+  };
 }
 
-async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, existingTopics) {
-  const task = await ensureLLMTask();
+async function LLMTaskWithExpectedOutputs(task: FluxLLMTask, prompt: object): Promise<object> {
   const client: Ad4mClient = await getAd4mClient();
-  let prompt = {
-    existingTopics: existingTopics.map((t: any) => t.name),
-    previousSubgroups: subgroups.map((s: any) => {
-      return { name: s.subgroupName, summary: s.summary };
-    }),
-    currentSubgroup,
-    unprocessedItems: unprocessedItems.map((item: any) => {
-      return { id: item.baseExpression, text: item.text };
-    }),
-  };
-  // attempt LLM task up to 5 times before giving up
   let data;
   let attempts = 0;
+
+  // attempt LLM task up to 5 times before giving up
   while (!data && attempts < 5) {
     attempts += 1;
     console.log("LLM Prompt:", prompt);
-    const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
+    const response = await client.ai.prompt(task.id!, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
     try {
       const parsedData = JSON5.parse(response);
       // ensure all expected properties are present
       const missingProperties = [];
-      if (!("conversationData" in parsedData)) missingProperties.push("conversationData");
-      if (!("currentSubgroup" in parsedData)) missingProperties.push("currentSubgroup");
-      if (!("newSubgroup" in parsedData)) missingProperties.push("newSubgroup");
+      
+      if(task.expectedOutputs) {
+        for (const property of task.expectedOutputs) {
+          if (!(property in parsedData)) missingProperties.push(property);
+        }
+      }
+
+      if(task.expectArray) {
+        if (!Array.isArray(parsedData)) missingProperties.push("expected output to be an array");
+      }
+
       if (missingProperties.length) throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
-      // ensure either currentSubgroup or newSubgroup is present
-      if (!parsedData.currentSubgroup && !parsedData.newSubgroup)
-        throw new Error(
-          "Either currentSubgroup or newSubgroup must be present. Both were missing in the last response."
-        );
       // the parsed data looks good
       data = parsedData;
     } catch (error) {
@@ -127,6 +123,36 @@ async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, exist
       prompt.jsonParseError = error;
     }
   }
+
+  if (!data) {
+    console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
+  } 
+
+  return data
+}
+
+async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, existingTopics) {
+  const { grouping, topics, conversation } = await ensureLLMTasks();
+  const client: Ad4mClient = await getAd4mClient();
+
+  // Update group / new sub-group
+  let prompt = {
+    existingTopics: existingTopics.map((t: any) => t.name),
+    previousSubgroups: subgroups.map((s: any) => {
+      return { name: s.subgroupName, summary: s.summary };
+    }),
+    
+  };
+
+  let groupingOutput = await LLMTaskWithExpectedOutputs(grouping, {
+    group: currentSubgroup,
+    unprocessedItems: unprocessedItems.map((item: any) => {
+      return { id: item.baseExpression, text: item.text }
+    }),
+  });
+
+
+  // TODO: rework this into processItemsAndAddToConversation
 
   if (data) {
     return {

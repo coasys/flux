@@ -255,20 +255,32 @@ export const synergyTopicsExamples = [
   },
 ];
 
-export const synergyTasks = [
-  {
+export class FluxLLMTask {
+    name: string;
+    prompt: string;
+    examples: {input: string, output: string}[];
+    expectedOutputs?: string[];
+    expectArray?: boolean;
+    id?: string;
+}
+
+export const synergyTasks = {
+  grouping: {
     name: "Flux grouping task" + VERSION,
     prompt: synergyGroupingPrompt,
     examples: synergyGroupingExamples,
-  },
-  {
+    expectedOutputs: ["group", "newGroup"],
+  } as FluxLLMTask,
+  topics: {
     name: "Flux topics task" + VERSION,
     prompt: synergyTopicsPrompt,
     examples: synergyTopicsExamples,
-  },
-  {
+    expectedArray: true,
+  } as FluxLLMTask,
+  conversation: {
     name: "Flux conversation task" + VERSION,
     prompt: synergyConversationPrompt,
     examples: synergyConversationExamples,
-  },
-];
+    expectedOutputs: ["n", "s"],
+  } as FluxLLMTask,
+};
