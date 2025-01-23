@@ -196,7 +196,7 @@ import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
 import { ad4mConnect } from "@/ad4mConnect";
-import { ensureLLMTask } from "@coasys/flux-utils";
+import { ensureLLMTasks } from "@coasys/flux-utils";
 
 
 export default defineComponent({
@@ -249,7 +249,7 @@ export default defineComponent({
   },
   async mounted() {
     registerNotification();
-    ensureLLMTask();
+    ensureLLMTasks();
     
     ad4mConnect.addEventListener("authstatechange", async (e) => {
       let oldState = this.oldAuthState;
