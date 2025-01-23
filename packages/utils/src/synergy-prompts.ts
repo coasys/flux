@@ -11,11 +11,6 @@ I'm passing you a JSON object with the following properties:
 Main point of this is sorting the new messages into the flow of the conversation, either all in the current subgroup,
 or if necessary creating a new subgroup.
 
-I want you to respond with a JSON object with these properties:
-1. 'conversationData' (Object with 'name' and 'summary' properties. Updated summary of the whole conversation taking all subgroup titles and summaries (old and new) into account).
-2. 'currentSubgroup' (Undefined or Object with 'name', 'summary' and 'topics' of the current subgroup after including new items)
-3. 'newSubgroup' (Undefined or an object with 'name', 'summary', 'topics' and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
-
 Firstly, analyze the 'summary' of the 'currentSubgroup' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
 Consider the conversation as **related** if:
 - The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
@@ -42,7 +37,13 @@ Finally, analyse all the summaries in the original 'previousSubgroups' array and
 1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
 2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
 
+I want you to respond with a JSON object with these properties:
+1. 'conversationData' (Object with 'name' and 'summary' properties. Updated summary of the whole conversation taking all subgroup titles and summaries (old and new) into account).
+2. 'currentSubgroup' (Undefined or Object with 'name', 'summary' and 'topics' of the current subgroup after including new items)
+3. 'newSubgroup' (Undefined or an object with 'name', 'summary', 'topics' and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
+
 Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
+Include exactly the mentioned properties above. Nothing else, and don't miss any property!
 If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
 So if you see that field, take extra care about that specific mistake and don't make it again!
 Don't talk about the errors in the summaries or topics.
