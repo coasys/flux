@@ -83,22 +83,28 @@ async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, exist
     }),
   };
   // attempt LLM task up to 5 times before giving up
-  let parsedData;
+  let data;
   let attempts = 0;
-  while (!parsedData && attempts < 5) {
+  while (!data && attempts < 5) {
     attempts += 1;
     console.log("LLM Prompt:", prompt);
     const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
     try {
-      const JSON5Parse = JSON5.parse(response);
+      const parsedData = JSON5.parse(response);
       // ensure all expected properties are present
       const missingProperties = [];
-      if (!("conversationData" in JSON5Parse)) missingProperties.push("conversationData");
-      if (!("currentSubgroup" in JSON5Parse)) missingProperties.push("currentSubgroup");
-      if (!("newSubgroup" in JSON5Parse)) missingProperties.push("newSubgroup");
-      if (!missingProperties.length) parsedData = JSON5Parse;
-      else throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
+      if (!("conversationData" in parsedData)) missingProperties.push("conversationData");
+      if (!("currentSubgroup" in parsedData)) missingProperties.push("currentSubgroup");
+      if (!("newSubgroup" in parsedData)) missingProperties.push("newSubgroup");
+      if (missingProperties.length) throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
+      // ensure either currentSubgroup or newSubgroup is present
+      if (!parsedData.currentSubgroup && !parsedData.newSubgroup)
+        throw new Error(
+          "Either currentSubgroup or newSubgroup must be present. Both were missing in the last response."
+        );
+      // the parsed data looks good
+      data = parsedData;
     } catch (error) {
       console.error("LLM response parse error:", error);
       //@ts-ignore
@@ -106,20 +112,16 @@ async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, exist
     }
   }
 
-  if (parsedData) {
+  if (data) {
     return {
-      conversationData: parsedData.conversationData,
-      currentSubgroup: parsedData.currentSubgroup,
-      newSubgroup: parsedData.newSubgroup,
+      conversationData: data.conversationData,
+      currentSubgroup: data.currentSubgroup,
+      newSubgroup: data.newSubgroup,
     };
   } else {
     // give up and return empty data
     console.error("Failed to parse LLM response after 5 attempts. Returning empty data.");
-    return {
-      conversationData: { name: "", summary: "" },
-      currentSubgroup: { name: "", summary: "", topics: [] },
-      newSubgroup: { name: "", summary: "", topics: [] },
-    };
+    return { conversationData: null, currentSubgroup: null, newSubgroup: null };
   }
 }
 
@@ -350,13 +352,15 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
     const conversationSubgroups = await ConversationSubgroup.query(perspective, {
       source: lastConversation.baseExpression,
     });
-    const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as any;
-    const lastSubgroupItems = await getSynergyItems(perspective, lastSubgroup.baseExpression);
-    if (lastSubgroupItems.length) {
-      const lastItem = lastSubgroupItems[lastSubgroupItems.length - 1];
-      const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
-      const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
-      if (minsSinceLastItemCreated < 30) return lastConversation;
+    if (conversationSubgroups.length) {
+      const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as any;
+      const lastSubgroupItems = await getSynergyItems(perspective, lastSubgroup.baseExpression);
+      if (lastSubgroupItems.length) {
+        const lastItem = lastSubgroupItems[lastSubgroupItems.length - 1];
+        const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
+        const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
+        if (minsSinceLastItemCreated < 30) return lastConversation;
+      }
     }
   }
   // otherwise create a new conversation
@@ -406,6 +410,8 @@ async function processItemsAndAddToConversation(
     lastSubgroupWithTopics,
     existingTopics
   );
+  // prevent updates if nothing returned from LLM
+  if (!conversationData) return;
   // update conversation text
   conversation.conversationName = conversationData.name;
   conversation.summary = conversationData.summary;
@@ -484,12 +490,7 @@ async function processItemsAndAddToConversation(
     newSubgroup && unprocessedItems.findIndex((item) => item.baseExpression === newSubgroup.firstItemId);
   for (const [itemIndex, item] of unprocessedItems.entries()) {
     const itemsSubgroup = newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : lastSubgroup;
-
-    newLinks.push({
-      source: itemsSubgroup.baseExpression,
-      predicate: "ad4m://has_child",
-      target: item.baseExpression,
-    });
+    newLinks.push({ source: itemsSubgroup.baseExpression, predicate: "ad4m://has_child", target: item.baseExpression });
   }
   // create vector embeddings for each unprocessed item
   await Promise.all(unprocessedItems.map((item) => createEmbedding(perspective, item.text, item.baseExpression)));
