@@ -1,17 +1,65 @@
+export const synergyConversationPrompt = `
+You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
+So make sure to always (!) respond with valid JSON!!
+
+I'm passing you a JSON array consisting of object with the following properties:
+1. 'n' (name)
+2. 's' (summary)
+
+These are describing sub-groups of a conversation.
+I want you to give me a title and summary of the whole conversation, in the same format of { "n": "The Name/Title", "s": "This is a more descriptive summary..."}.
+
+Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
+Include exactly the mentioned properties above. Nothing else, and don't miss any property!
+If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
+So if you see that field, take extra care about that specific mistake and don't make it again!
+Don't talk about the errors in the summaries or topics.
+`
+
+export const synergyConversationExamples = [{
+    input: `[
+        {
+            "n": "Tech and Privacy",
+            "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
+        },
+        {
+            "n": "AI in Healthcare",
+            "s": "Exploration of the applications of artificial intelligence in healthcare, including diagnostics and patient management."
+        },
+        {
+            "n": "Future of Work",
+            "s": "Conversation about how remote work and automation are shaping the future of employment."
+        }
+    ]`,
+    output: `{
+        "n": "Technology and Society",
+        "s": "The conversation examines the impact of technology on privacy, healthcare, and the future of work, highlighting ethical considerations and societal changes."
+    }`,
+  }];
+  
+
 export const synergyGroupingPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
 So make sure to always (!) respond with valid JSON!!
 
-I'm passing you a JSON object with the following properties:
-1. 'existingTopics' (String array of all existing topic names)
-2. 'previousSubgroups' (Object array of all previous subgroup summaries and names)
-3. 'currentSubgroup' (Object with name, summary and topics of the currently active subgroup)
-3. 'unprocessedItems' (Object array of all unprocessed items. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
+I'm passing you a JSON object with two properties:
+1. 'group' (Object with "n" (name), and "s" (summary))
+2. 'unprocessedItems' (Object array of new messages. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
 
-Main point of this is sorting the new messages into the flow of the conversation, either all in the current subgroup,
-or if necessary creating a new subgroup.
+Your task is to process the new messages into the ongoing conversation. 
+This includes 2 aspects:
+1. Updating the name and summary of the existing group
+2. Detecting if and when (with which new item) the conversation has shifted so much that we need to create a new group.
 
-Firstly, analyze the 'summary' of the 'currentSubgroup' and the 'text' property of each unprocessedItem to identify if the conversation has shifted to a new subject or not.
+I want you to respond with (only!) a JSON object with these properties:
+1. 'group' (Object with 'name' and 'summary'of the current subgroup after including new items)
+3. 'newGroup' (only present in the case of subject shift. object with 'n' (name), 's' (summary), and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
+
+In case where the conversation has shifted, generate a 'newSubgroup' including the following properties:
+1. 'n': name - a 1 to 3 word title (string) describing the contents of the subgroup.
+2. 's': summary a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
+3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
+
 Consider the conversation as **related** if:
 - The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
 - The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
@@ -20,27 +68,8 @@ Only consider the conversation as having **shifted to a new subject** if:
 - The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
 - The following messages actually reflect the acceptence of that topic shift.
 
-If 'previousSubgroups' is emtpy, always create a 'newSubgroup' (the conversation has just begun).
-
-In case where the conversation has shifted, also generate a 'newSubgroup' including the following properties:
-1. 'name': a 1 to 3 word title (string) describing the contents of the subgroup.
-2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
-3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
-4. 'topics': an array of between 1 and 5 topic objects indicating topics that are relevant to the contents of the subgroup (a bit like hashtags).
-Each topic object should including a 'name' property (a single word string in lowercase) for the name of the topic
-and a 'relevance' property (number) between 0 and 100 (0 being irrelevant and 100 being highly relevant) that indicates how relevant the topic is to the content of the text.
-If any of the topics you choose are similar to topics listed in the 'existingTopics' array, use the existing topic instead of creating 
-a new one (i.e. if one of the new topics you picked was 'foods' and you find an existing topic 'food', use 'food' instead of creating a new topic that is just a plural version of the existing topic).
-The output of this analysis will be a new 'subgroups' array conatining all of new subgroup objects you have generated.
-
-Finally, analyse all the summaries in the original 'previousSubgroups' array and the new summaries you've created, and use this info to generate a new 'conversationData' object with the following properties:
-1. 'name': a 1 to 3 word title (string) describing the contents of the conversation.
-2. 'summary': a 1 to 3 sentence paragraph (string) summary of the contents of the conversation.
-
-I want you to respond with a JSON object with these properties:
-1. 'conversationData' (Object with 'name' and 'summary' properties. Updated summary of the whole conversation taking all subgroup titles and summaries (old and new) into account).
-2. 'currentSubgroup' (Undefined or Object with 'name', 'summary' and 'topics' of the current subgroup after including new items)
-3. 'newSubgroup' (Undefined or an object with 'name', 'summary', 'topics' and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
+If the given "group" is empty or not present, it means we have just started a new conversation and don't have a group yet.
+In that case, always create a "newGroup" with all the items ("firstItemId" being the id of the first unprocessedItem).
 
 Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
 Include exactly the mentioned properties above. Nothing else, and don't miss any property!
@@ -51,9 +80,7 @@ Don't talk about the errors in the summaries or topics.
 
 export const synergyGroupingExamples = [{
   input: `{
-    "existingTopics": [],
-    "previousSubgroups": [],
-    "currentSubgroup": null,
+    "group": null,
     "unprocessedItems": [
       { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
       { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
@@ -63,38 +90,19 @@ export const synergyGroupingExamples = [{
     ]
   }`,
   output: `{
-    "conversationData": {
-      "name": "Cosmic Expansion",
-      "summary": "The conversation explores the expansion of the universe, the role of dark energy, discrepancies in the Hubble constant, and potential modifications to general relativity."
-    },
-    "currentSubgroup": null,
-    "newSubgroup": {
-      "name": "Cosmic Expansion",
-      "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
-      "firstItemId": "1",
-      "topics": [
-        { "name": "universe", "relevance": 100 },
-        { "name": "expansion", "relevance": 100 },
-        { "name": "darkenergy", "relevance": 90 },
-        { "name": "hubble", "relevance": 80 },
-        { "name": "relativity", "relevance": 70 }
-      ]
+    "group": null,
+    "newGroup": {
+      "n": "Cosmic Expansion",
+      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+      "firstItemId": "1"
     }
   }`,
 },
 {
   input: `{
-    "existingTopics": ["universe", "expansion", "darkenergy", "hubble", "relativity"],
-    "previousSubgroups": [
-      {
-        "name": "Cosmic Expansion",
-        "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity."
-      }
-    ],
-    "currentSubgroup": {
-      "name": "Cosmic Expansion",
-      "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
-      "topics": ["universe", "expansion", "darkenergy", "hubble", "relativity"]
+    "group": {
+      "n": "Cosmic Expansion",
+      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
     },
     "unprocessedItems": [
       { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant." },
@@ -105,46 +113,22 @@ export const synergyGroupingExamples = [{
     ]
   }`,
   output: `{
-    "conversationData": {
-      "name": "Universe and Cooking",
-      "summary": "The conversation explores the universe's expansion, including precise measurements of the Hubble constant, and transitions into tips for roasting vegetables to enhance their flavor."
+    "group": {
+      "n": "Cosmic Expansion",
+      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
     },
-    "currentSubgroup": {
-      "name": "Cosmic Expansion",
-      "summary": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
-      "topics": [
-        { "name": "universe", "relevance": 100 },
-        { "name": "expansion", "relevance": 100 },
-        { "name": "darkenergy", "relevance": 90 },
-        { "name": "hubble", "relevance": 80 },
-        { "name": "relativity", "relevance": 70 }
-      ]
-    },
-    "newSubgroup": {
-      "name": "Vegetable Roasting",
-      "summary": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
+    "newGroup": {
+      "n": "Vegetable Roasting",
+      "s": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
       "firstItemId": "8",
-      "topics": [
-        { "name": "cooking", "relevance": 100 },
-        { "name": "vegetables", "relevance": 100 },
-        { "name": "roasting", "relevance": 90 },
-      ]
     }
   }`,
 },
 {
   input: `{
-    "existingTopics": ["technology", "privacy", "data", "ethics"],
-    "previousSubgroups": [
-      {
-        "name": "Tech and Privacy",
-        "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
-      }
-    ],
-    "currentSubgroup": {
-      "name": "Tech and Privacy",
-      "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
-      "topics": ["technology", "privacy", "data", "ethics"]
+    "group": {
+      "n": "Tech and Privacy",
+      "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
     },
     "unprocessedItems": [
       { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust." },
@@ -155,44 +139,22 @@ export const synergyGroupingExamples = [{
     ]
   }`,
   output: `{
-    "conversationData": {
-      "name": "Tech and Collaboration",
-      "summary": "The conversation discusses privacy-first approaches and challenges in technology, then transitions into effective team collaboration and tools that enhance productivity."
+    "group": {
+      "n": "Tech and Privacy",
+      "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
     },
-    "currentSubgroup": {
-      "name": "Tech and Privacy",
-      "summary": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
-      "topics": [
-        { "name": "technology", "relevance": 100 },
-        { "name": "privacy", "relevance": 100 },
-        { "name": "data", "relevance": 80 }
-      ]
-    },
-    "newSubgroup": {
-      "name": "Team Collaboration",
-      "summary": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
-      "firstItemId": "8",
-      "topics": [
-        { "name": "collaboration", "relevance": 100 },
-        { "name": "productivity", "relevance": 90 },
-        { "name": "tools", "relevance": 80 }
-      ]
+    "newGroup": {
+      "n": "Team Collaboration",
+      "s": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
+      "firstItemId": "8"
     }
   }`,
 },
 {
   input: `{
-    "existingTopics": ["fitness", "health", "nutrition"],
-    "previousSubgroups": [
-      {
-        "name": "Fitness and Nutrition",
-        "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
-      }
-    ],
-    "currentSubgroup": {
-      "name": "Fitness and Nutrition",
-      "summary": "Discussion about the importance of balanced nutrition in supporting fitness and overall health.",
-      "topics": ["fitness", "health", "nutrition"]
+    "group": {
+      "n": "Fitness and Nutrition",
+      "s": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
     },
     "unprocessedItems": [
       { "id": "6", "text": "A well-rounded fitness routine includes both cardio and strength training." },
@@ -203,21 +165,88 @@ export const synergyGroupingExamples = [{
     ]
   }`,
   output: `{
-    "conversationData": {
-      "name": "Fitness and Nutrition",
-      "summary": "The conversation emphasizes the importance of balanced nutrition and hydration in supporting fitness, with a focus on how mineral content in water and electrolyte replenishment enhance recovery and performance."
-    },
-    "currentSubgroup": {
-      "name": "Fitness and Nutrition",
-      "summary": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance.",
-      "topics": [
-        { "name": "fitness", "relevance": 100 },
-        { "name": "health", "relevance": 90 },
-        { "name": "nutrition", "relevance": 100 },
-        { "name": "hydration", "relevance": 80 }
-      ]
+    "group": {
+      "n": "Fitness and Nutrition",
+      "s": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance."
     },
     "newSubgroup": null
   }`,
 },
 ];
+
+
+export const synergyTopicsPrompt = `
+You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
+So make sure to always (!) respond with valid JSON!!
+
+I'm passing you a JSON object with the following properties:
+1. 'topics' (Array of Objects like {n: "<topic name>", rel: 80})
+2. 'messages' (Array of strings)
+
+Your task is to update the list of topics, given the list of messages.
+Return a maximum of 5 topics.
+If you consider introducing a new topic, first check if we already have that topic in the list.
+If a new topic is almost the same as an existing topic, keep the existing topic.
+
+For each topic, give a relevance score between 0 and 100.
+You might want to update the relevance score of existing topics.
+
+Respond with one JSON array, consisting of topic objects (with properties "name" and "rel"), like so:
+
+[ { "n": "universe", "rel": 90 }, { "n": "expansion", "rel": 100 }]
+
+Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
+Include exactly the mentioned properties above. Nothing else, and don't miss any property!
+If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
+So if you see that field, take extra care about that specific mistake and don't make it again!
+Don't talk about the errors in the summaries or topics.
+`
+
+export const synergyTopicsExamples = [{
+    input: `{
+    "topics": [
+        { "n": "universe", "rel": 90 },
+        { "n": "expansion", "rel": 100 },
+        { "n": "darkenergy", "rel": 90 },
+        { "n": "hubble", "rel": 80 },
+        
+    ],
+    "messages": [
+        "The universe is constantly expanding, but scientists are still debating the exact rate.",
+        "Dark energy is thought to play a significant role in driving the expansion of the universe.",
+        "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
+        "These discrepancies might point to unknown physics beyond our current models.",
+        "For instance, some theories suggest modifications to general relativity could explain this."
+      ]
+    }`,
+    output: `[
+        { "n": "universe", "rel": 100 },
+        { "n": "expansion", "rel": 100 },
+        { "n": "darkenergy", "rel": 90 },
+        { "n": "hubble", "rel": 80 },
+        { "n": "relativity", "rel": 70 }
+    ]`,
+  },
+  {
+    input: `{
+        "topics": [
+            { "n": "fitness", "rel": 80 },
+            { "n": "nutrition", "rel": 70 }
+        ],
+        "messages": [
+            "Hydration is a key factor in maintaining fitness performance.",
+            "Electrolytes in water support muscle function and recovery.",
+            "A balanced diet is essential for recovery and energy levels.",
+            "Strength training complements cardio for a well-rounded fitness routine.",
+            "Proper hydration prevents cramps and fatigue during workouts."
+        ]
+    }`,
+    output: `[
+        { "n": "fitness", "rel": 90 },
+        { "n": "nutrition", "rel": 80 },
+        { "n": "hydration", "rel": 85 },
+        { "n": "recovery", "rel": 75 },
+        { "n": "electrolytes", "rel": 70 }
+    ]`,
+  }
+  ];
