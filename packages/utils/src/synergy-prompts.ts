@@ -1,3 +1,5 @@
+const VERSION=1;
+
 export const synergyConversationPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
 So make sure to always (!) respond with valid JSON!!
@@ -250,3 +252,21 @@ export const synergyTopicsExamples = [{
     ]`,
   }
   ];
+
+  export const synergyTasks = [
+    {
+        name: "Flux grouping task" + VERSION,
+        prompt: synergyGroupingPrompt,
+        examples: synergyGroupingExamples,
+    },
+    {
+        name: "Flux topics task" + VERSION,
+        prompt: synergyTopicsPrompt,
+        examples: synergyTopicsExamples,
+    },
+    {
+        name: "Flux conversation task" + VERSION,
+        prompt: synergyConversationPrompt,
+        examples: synergyConversationExamples,
+    }
+]
