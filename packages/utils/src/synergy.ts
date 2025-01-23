@@ -91,8 +91,14 @@ async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, exist
     const response = await client.ai.prompt(task.taskId, JSON.stringify(prompt));
     console.log("LLM Response: ", response);
     try {
-      // todo: include check here to ensure all expected properties are present in the response
-      parsedData = JSON5.parse(response);
+      const JSON5Parse = JSON5.parse(response);
+      // ensure all expected properties are present
+      const missingProperties = [];
+      if (!("conversationData" in JSON5Parse)) missingProperties.push("conversationData");
+      if (!("currentSubgroup" in JSON5Parse)) missingProperties.push("currentSubgroup");
+      if (!("newSubgroup" in JSON5Parse)) missingProperties.push("newSubgroup");
+      if (!missingProperties.length) parsedData = JSON5Parse;
+      else throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
     } catch (error) {
       console.error("LLM response parse error:", error);
       //@ts-ignore
