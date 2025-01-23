@@ -113,7 +113,7 @@ export default function TimelineColumn({
                 </j-box>
               )}
               {unprocessedItems.map((item) => (
-                <j-flex gap="400" a="center" className={styles.itemCard}>
+                <j-flex key={item.baseExpression} gap="400" a="center" className={styles.itemCard}>
                   <j-flex gap="300" direction="column">
                     <j-flex gap="400" a="center">
                       <j-icon name={item.icon} color="ui-400" size="lg" />
