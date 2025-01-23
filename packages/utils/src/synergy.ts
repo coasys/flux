@@ -20,7 +20,7 @@ import {
 //@ts-ignore
 import JSON5 from "json5";
 import { v4 as uuidv4 } from "uuid";
-import { synergyGroupingPrompt, synergyGroupingExamples } from "./synergy-prompts";
+import { synergyGroupingPrompt, synergyGroupingExamples, synergyTasks } from "./synergy-prompts";
 import { sleep } from "./sleep";
 
 async function removeEmbedding(perspective, itemId) {
@@ -60,13 +60,29 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
   await relationship.save();
 }
 
-export async function ensureLLMTask(): Promise<AITask> {
+export async function ensureLLMTasks(): Promise<{
+  name: string,
+  prompt: string,
+  exmaples: {input: string, output: string}[],
+  id: string
+}> {
   const client: Ad4mClient = await getAd4mClient();
-  const tasks = await client.ai.tasks();
-  const taskName = "flux-synergy-task-2";
-  let task = tasks.find((t) => t.name === taskName);
-  if (!task) task = await client.ai.addTask(taskName, "default", synergyGroupingPrompt, synergyGroupingExamples);
-  return task;
+  const registeredTasks = await client.ai.tasks();
+  const tasks = JSON.parse(JSON.stringify(synergyTasks));
+
+  for (let t of tasks) {
+    let existingTask = registeredTasks.find((r) => r.name === t.name);
+    if (!existingTask) {
+      existingTask = await client.ai.addTask(
+        t.name,
+        "default", 
+        t.prompt,
+        t.examples
+      );
+    }
+    t.id = existingTask!.taskId
+  }
+  return tasks;
 }
 
 async function LLMProcessing(unprocessedItems, subgroups, currentSubgroup, existingTopics) {
