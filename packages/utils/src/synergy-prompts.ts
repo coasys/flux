@@ -1,4 +1,4 @@
-const VERSION=1;
+const VERSION = 1;
 
 export const synergyConversationPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -16,9 +16,10 @@ Include exactly the mentioned properties above. Nothing else, and don't miss any
 If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
 So if you see that field, take extra care about that specific mistake and don't make it again!
 Don't talk about the errors in the summaries or topics.
-`
+`;
 
-export const synergyConversationExamples = [{
+export const synergyConversationExamples = [
+  {
     input: `[
         {
             "n": "Tech and Privacy",
@@ -37,8 +38,8 @@ export const synergyConversationExamples = [{
         "n": "Technology and Society",
         "s": "The conversation examines the impact of technology on privacy, healthcare, and the future of work, highlighting ethical considerations and societal changes."
     }`,
-  }];
-  
+  },
+];
 
 export const synergyGroupingPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -54,10 +55,10 @@ This includes 2 aspects:
 2. Detecting if and when (with which new item) the conversation has shifted so much that we need to create a new group.
 
 I want you to respond with (only!) a JSON object with these properties:
-1. 'group' (Object with 'name' and 'summary'of the current subgroup after including new items)
-3. 'newGroup' (only present in the case of subject shift. object with 'n' (name), 's' (summary), and 'firstItemId' of the new subgroupd spawned by a shift of the conversation in the new itmes)
+1. 'group' (Object with 'name' and 'summary' of the current subgroup after including new items)
+3. 'newGroup' (only present in the case of subject shift. object with 'n' (name), 's' (summary), and 'firstItemId' of the new subgroup spawned by a shift of the conversation in the new items)
 
-In case where the conversation has shifted, generate a 'newSubgroup' including the following properties:
+In case where the conversation has shifted, generate a 'newGroup' including the following properties:
 1. 'n': name - a 1 to 3 word title (string) describing the contents of the subgroup.
 2. 's': summary a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
 3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
@@ -68,7 +69,7 @@ Consider the conversation as **related** if:
 Only consider the conversation as having **shifted to a new subject** if:
 - The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
 - The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
-- The following messages actually reflect the acceptence of that topic shift.
+- The following messages actually reflect the acceptance of that topic shift.
 
 If the given "group" is empty or not present, it means we have just started a new conversation and don't have a group yet.
 In that case, always create a "newGroup" with all the items ("firstItemId" being the id of the first unprocessedItem).
@@ -80,8 +81,9 @@ So if you see that field, take extra care about that specific mistake and don't 
 Don't talk about the errors in the summaries or topics.
 `;
 
-export const synergyGroupingExamples = [{
-  input: `{
+export const synergyGroupingExamples = [
+  {
+    input: `{
     "group": null,
     "unprocessedItems": [
       { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
@@ -91,7 +93,7 @@ export const synergyGroupingExamples = [{
       { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this." }
     ]
   }`,
-  output: `{
+    output: `{
     "group": null,
     "newGroup": {
       "n": "Cosmic Expansion",
@@ -99,9 +101,9 @@ export const synergyGroupingExamples = [{
       "firstItemId": "1"
     }
   }`,
-},
-{
-  input: `{
+  },
+  {
+    input: `{
     "group": {
       "n": "Cosmic Expansion",
       "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
@@ -114,7 +116,7 @@ export const synergyGroupingExamples = [{
       { "id": "10", "text": "And don’t forget to season generously with salt and pepper before baking!" }
     ]
   }`,
-  output: `{
+    output: `{
     "group": {
       "n": "Cosmic Expansion",
       "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
@@ -125,9 +127,9 @@ export const synergyGroupingExamples = [{
       "firstItemId": "8",
     }
   }`,
-},
-{
-  input: `{
+  },
+  {
+    input: `{
     "group": {
       "n": "Tech and Privacy",
       "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
@@ -140,7 +142,7 @@ export const synergyGroupingExamples = [{
       { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity." }
     ]
   }`,
-  output: `{
+    output: `{
     "group": {
       "n": "Tech and Privacy",
       "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
@@ -151,9 +153,9 @@ export const synergyGroupingExamples = [{
       "firstItemId": "8"
     }
   }`,
-},
-{
-  input: `{
+  },
+  {
+    input: `{
     "group": {
       "n": "Fitness and Nutrition",
       "s": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
@@ -166,16 +168,15 @@ export const synergyGroupingExamples = [{
       { "id": "10", "text": "This shows how nutrition and hydration are deeply connected to fitness results." }
     ]
   }`,
-  output: `{
+    output: `{
     "group": {
       "n": "Fitness and Nutrition",
       "s": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance."
     },
     "newSubgroup": null
   }`,
-},
+  },
 ];
-
 
 export const synergyTopicsPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -202,9 +203,10 @@ Include exactly the mentioned properties above. Nothing else, and don't miss any
 If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
 So if you see that field, take extra care about that specific mistake and don't make it again!
 Don't talk about the errors in the summaries or topics.
-`
+`;
 
-export const synergyTopicsExamples = [{
+export const synergyTopicsExamples = [
+  {
     input: `{
     "topics": [
         { "n": "universe", "rel": 90 },
@@ -250,23 +252,23 @@ export const synergyTopicsExamples = [{
         { "n": "recovery", "rel": 75 },
         { "n": "electrolytes", "rel": 70 }
     ]`,
-  }
-  ];
+  },
+];
 
-  export const synergyTasks = [
-    {
-        name: "Flux grouping task" + VERSION,
-        prompt: synergyGroupingPrompt,
-        examples: synergyGroupingExamples,
-    },
-    {
-        name: "Flux topics task" + VERSION,
-        prompt: synergyTopicsPrompt,
-        examples: synergyTopicsExamples,
-    },
-    {
-        name: "Flux conversation task" + VERSION,
-        prompt: synergyConversationPrompt,
-        examples: synergyConversationExamples,
-    }
-]
+export const synergyTasks = [
+  {
+    name: "Flux grouping task" + VERSION,
+    prompt: synergyGroupingPrompt,
+    examples: synergyGroupingExamples,
+  },
+  {
+    name: "Flux topics task" + VERSION,
+    prompt: synergyTopicsPrompt,
+    examples: synergyTopicsExamples,
+  },
+  {
+    name: "Flux conversation task" + VERSION,
+    prompt: synergyConversationPrompt,
+    examples: synergyConversationExamples,
+  },
+];
