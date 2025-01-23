@@ -63,7 +63,7 @@ async function linkTopic(perspective, itemId, topicId, relevance) {
 export async function ensureLLMTask(): Promise<AITask> {
   const client: Ad4mClient = await getAd4mClient();
   const tasks = await client.ai.tasks();
-  let task = tasks.find((t) => t.name === "flux-synergy-task");
+  let task = tasks.find((t) => t.name === "flux-synergy-task-2");
   if (!task)
     task = await client.ai.addTask("flux-synergy-task", "default", synergyGroupingPrompt, synergyGroupingExamples);
   return task;
