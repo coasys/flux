@@ -260,6 +260,7 @@ export class FluxLLMTask {
     prompt: string;
     examples: {input: string, output: string}[];
     expectedOutputs?: string[];
+    expectedOneOf?: string[];
     expectArray?: boolean;
     id?: string;
 }
@@ -269,7 +270,7 @@ export const synergyTasks = {
     name: "Flux grouping task" + VERSION,
     prompt: synergyGroupingPrompt,
     examples: synergyGroupingExamples,
-    expectedOutputs: ["group", "newGroup"],
+    expectedOneOf: ["group", "newGroup"],
   } as FluxLLMTask,
   topics: {
     name: "Flux topics task" + VERSION,

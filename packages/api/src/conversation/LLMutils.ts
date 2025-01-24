@@ -54,7 +54,17 @@ export async function LLMTaskWithExpectedOutputs(
         
         if(task.expectedOutputs) {
             for (const property of task.expectedOutputs) {
-            if (!(property in parsedData)) missingProperties.push(property);
+                if (!(property in parsedData)) missingProperties.push(property);
+            }
+        }
+
+        if(task.expectedOneOf) {
+            let foundOne = false;
+            for (const property of task.expectedOutputs) {
+                if (property in parsedData) foundOne = true;
+            }
+            if(!foundOne) {
+                missingProperties.push("expected one of: " + task.expectedOneOf)
             }
         }
 
