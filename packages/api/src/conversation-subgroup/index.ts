@@ -1,7 +1,7 @@
 import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 import { findTopics } from "@coasys/flux-utils/src/synergy";
 import Topic, { TopicWithRelevance } from "../topic";
-import { SemanticRelationship } from "../semantic-relationship"
+import SemanticRelationship from "../semantic-relationship"
 
 @SDNAClass({
   name: "ConversationSubgroup",
