@@ -1250,20 +1250,7 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.2.tgz#a28a46630af1677f3e9c73f0e6921431d5340152"
   integrity sha512-AmRIX6QvFemItlY7/69ARkIAqitRQqJ2qwgZmD1KqgFb78pH+XFXm1guvS/a8CuOOm/IqZ4ddDbl20yxtBqzGA==
 
-"@coasys/ad4m-connect@*":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.0.tgz#069e0a9729c7046cfc0eec44717564a7c86e3247"
-  integrity sha512-NmrJSp7/mKtxvgelffkA4eVrtxUBaM9VusV7xE2FcpEpzAqTAcRK/4dzLEdAdZ9T2JxGBF7xlw+YwrRBKdNxrA==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
-    auto-bind "^5.0.1"
-    electron "^20.0.3"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
-    lit "^2.3.1"
-
-"@coasys/ad4m-connect@0.10.1-rc3":
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1-rc3":
   version "0.10.1-rc3"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.1-rc3.tgz#fcd248cba776f9ebeeca84a4d0e905345d00f443"
   integrity sha512-J/8dFfxc/yBYAd6LmBsvP9pzGIpJHES9/hLkMHbN1I9bmRLqU/ficnWYKN8ZSnLjH3HAeqskW2NJuzURfc08VQ==
