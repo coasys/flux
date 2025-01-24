@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@coasys/ad4m-connect";
+import { AIClient } from "@coasys/ad4m";
 import Embedding from "../embedding";
 import SemanticRelationship from "../semantic-relationship";
 
@@ -15,10 +15,9 @@ export async function removeEmbedding(perspective, itemId) {
   }
   
 // todo: use embedding language instead of stringifying
-export async function createEmbedding(perspective, text, itemId) {
+export async function createEmbedding(perspective, text, itemId, ai: AIClient) {
     // generate embedding
-    const client = await getAd4mClient();
-    const rawEmbedding = await client.ai.embed("bert", text);
+    const rawEmbedding = await ai.embed("bert", text);
     // create embedding subject entity
     const embedding = new Embedding(perspective, undefined, itemId);
     embedding.model = "bert";

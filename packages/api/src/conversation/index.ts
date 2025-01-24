@@ -49,31 +49,39 @@ export default class Conversation extends SubjectEntity {
     return allTopics.flat();
   }
 
-  private static async detectNewGroup(
+  private async detectNewGroup(
       currentSubgroup: ConversationSubgroup|null, 
       unprocessedItems: { baseExpression: string, text: string}[]
   ): Promise<{
       group: { n: string, s: string }, 
       newGroup?: { n: string, s: string, firstItemId: string}, 
     }> {
-    const { grouping } = await ensureLLMTasks();
-    return await LLMTaskWithExpectedOutputs(grouping, {
-      group: currentSubgroup,
-      unprocessedItems: unprocessedItems.map((item) => {
-        return { id: item.baseExpression, text: item.text }
-      }),
-    });
+    const { grouping } = await ensureLLMTasks(this.perspective.ai);
+    return await LLMTaskWithExpectedOutputs(
+      grouping, 
+      {
+        group: currentSubgroup,
+        unprocessedItems: unprocessedItems.map((item) => {
+          return { id: item.baseExpression, text: item.text }
+        }),
+      },
+      this.perspective.ai
+    );
   }
 
-  private static async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
-    const { topics } = await ensureLLMTasks();
+  private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
+    const { topics } = await ensureLLMTasks(this.perspective.ai);
     let currentTopics = await group.topicsWithRelevance()
-    let currentNewTopics = await LLMTaskWithExpectedOutputs(topics, {
-      topics: currentTopics.map(t => { 
-        return { n: t.name, rel: t.relevance }
-      }),
-      messages: newMessages
-    });
+    let currentNewTopics = await LLMTaskWithExpectedOutputs(
+      topics, 
+      {
+        topics: currentTopics.map(t => { 
+          return { n: t.name, rel: t.relevance }
+        }),
+        messages: newMessages
+      },
+      this.perspective.ai
+    );
 
     for (const topic of currentNewTopics) {
       await group.setTopicWithRelevance(topic.n, topic.rel, isNewGroup);
@@ -94,7 +102,7 @@ export default class Conversation extends SubjectEntity {
   
     // ============== LLM group detection ===============================
     // Have LLM sort new messages into old group or detect subject change
-    const { group, newGroup } = await Conversation.detectNewGroup(currentSubgroup, unprocessedItems)
+    const { group, newGroup } = await this.detectNewGroup(currentSubgroup, unprocessedItems)
 
     // create new subgroup if returned from LLM
     let newSubgroupEntity;
@@ -131,10 +139,10 @@ export default class Conversation extends SubjectEntity {
     // ============== LLM topic list updating ===============================
     // Get update topic lists from LLM and save results
     if(currentSubgroup) {
-      await Conversation.updateGroupTopics(currentSubgroup, currentNewMessages);
+      await this.updateGroupTopics(currentSubgroup, currentNewMessages);
     }
     if(newGroup) {
-      await Conversation.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
+      await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
     }
 
     // ============== LLM conversation updating ===============================
@@ -157,8 +165,8 @@ export default class Conversation extends SubjectEntity {
       promptArray.push({n: newGroup.n, s: newGroup.s})
     }
 
-    const { conversation } = await ensureLLMTasks();
-    let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray);
+    const { conversation } = await ensureLLMTasks(this.perspective.ai);
+    let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray, this.perspective.ai);
     
     // ------------ saving all new data ------------------
 

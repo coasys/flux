@@ -1250,10 +1250,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.2.tgz#a28a46630af1677f3e9c73f0e6921431d5340152"
   integrity sha512-AmRIX6QvFemItlY7/69ARkIAqitRQqJ2qwgZmD1KqgFb78pH+XFXm1guvS/a8CuOOm/IqZ4ddDbl20yxtBqzGA==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1-rc3":
-  version "0.10.1-rc3"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.1-rc3.tgz#fcd248cba776f9ebeeca84a4d0e905345d00f443"
-  integrity sha512-J/8dFfxc/yBYAd6LmBsvP9pzGIpJHES9/hLkMHbN1I9bmRLqU/ficnWYKN8ZSnLjH3HAeqskW2NJuzURfc08VQ==
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1-rc3", "@coasys/ad4m-connect@0.10.1-rc5":
+  version "0.10.1-rc5"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.1-rc5.tgz#624fb0fe3fd07de80765eb96498a604426952e43"
+  integrity sha512-7qQpuhygqYUBaXPQeVUTVZZJuTuHmpYA0Dmr04LUc54y9T5Du16INQvC4NXRsAV68eTpCYHocd0F6Cx89s+JtA==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1282,10 +1282,10 @@
     "@coasys/ad4m" "*"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.10.1-rc3":
-  version "0.10.1-rc3"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.1-rc3.tgz#2463e60dfef219745848d62020f43671b292982a"
-  integrity sha512-BvQG1bARX9fe0NspXzNacyZ0R5YNJgT9UP9j4g2R09ahtuOk6mNvf/IoQM2pLjjTr2pJ9GU1BFAvD+YiGuS5uQ==
+"@coasys/ad4m@*", "@coasys/ad4m@0.10.1-rc3", "@coasys/ad4m@0.10.1-rc5":
+  version "0.10.1-rc5"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.1-rc5.tgz#cbe833bd579bb4ccc995a294605ee1f3ba19fa08"
+  integrity sha512-S5cZ5pJv7xreoNQ6UMSKfIChkJZf+dh+ZJMPbCni8P5LQ/Am2Np1fvu1jJxOTmLiuvzGrcc7+ErgWY6zUTlo1Q==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"

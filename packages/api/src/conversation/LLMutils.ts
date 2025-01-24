@@ -1,15 +1,13 @@
-import { Ad4mClient } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { AIClient } from "@coasys/ad4m";
 //@ts-ignore
 import JSON5 from "json5";
 import { synergyTasks, FluxLLMTask } from "./synergy-prompts";
 
-async function ensureLLMTask(task: FluxLLMTask): Promise<FluxLLMTask> {
-    const client: Ad4mClient = await getAd4mClient();
-    const registeredTasks = await client.ai.tasks();
+async function ensureLLMTask(task: FluxLLMTask, ai: AIClient): Promise<FluxLLMTask> {
+    const registeredTasks = await ai.tasks();
     let existingTask = registeredTasks.find((r) => r.name === task.name);
     if (!existingTask) {
-        existingTask = await client.ai.addTask(
+        existingTask = await ai.addTask(
         task.name,
         "default", 
         task.prompt,
@@ -21,23 +19,23 @@ async function ensureLLMTask(task: FluxLLMTask): Promise<FluxLLMTask> {
     return task
 }
 
-export async function ensureLLMTasks(): Promise<{
+export async function ensureLLMTasks(ai: AIClient): Promise<{
     grouping: FluxLLMTask;
     topics: FluxLLMTask;
     conversation: FluxLLMTask;
 }> {
     return {
-        grouping: await ensureLLMTask(synergyTasks.grouping),
-        topics: await ensureLLMTask(synergyTasks.topics),
-        conversation: await ensureLLMTask(synergyTasks.conversation),
+        grouping: await ensureLLMTask(synergyTasks.grouping, ai),
+        topics: await ensureLLMTask(synergyTasks.topics, ai),
+        conversation: await ensureLLMTask(synergyTasks.conversation, ai),
     };
 }
 
 export async function LLMTaskWithExpectedOutputs(
     task: FluxLLMTask,
-    prompt: object
+    prompt: object,
+    ai: AIClient,
 ): Promise<any|any[]> {
-    const client: Ad4mClient = await getAd4mClient();
     let data;
     let attempts = 0;
 
@@ -45,7 +43,7 @@ export async function LLMTaskWithExpectedOutputs(
     while (!data && attempts < 5) {
         attempts += 1;
         console.log("LLM Prompt:", prompt);
-        const response = await client.ai.prompt(task.id!, JSON.stringify(prompt));
+        const response = await ai.prompt(task.id!, JSON.stringify(prompt));
         console.log("LLM Response: ", response);
         try {
             const parsedData = JSON5.parse(response);
