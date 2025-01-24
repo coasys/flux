@@ -1,5 +1,4 @@
 import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
-import { findTopics } from "@coasys/flux-utils/src/synergy";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship"
 
@@ -30,15 +29,50 @@ export default class ConversationSubgroup extends SubjectEntity {
   summary: string;
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    return findTopics(this.perspective, this.baseExpression)
+    const allRelationships = (await SemanticRelationship.query(this.perspective, {
+      source: this.baseExpression,
+    })) as any;
+  
+    const topics: TopicWithRelevance[] = [];
+    for (const rel of allRelationships) {
+      if (!rel.relevance) continue;
+  
+      try {
+        const topicEntity = new Topic(this.perspective, rel.tag);
+        const topic = await topicEntity.get();
+        topics.push({
+          baseExpression: rel.tag,
+          name: topic.topic,
+          relevance: rel.relevance,
+        });
+      } catch (error) {
+        continue;
+      }
+    }
+  
+    return topics;
   }
 
-  async addTopicWithRelevance(topicName: string, relevance: number) {
+  async semanticRelationships(): Promise<SemanticRelationship[]> {
+    return await SemanticRelationship.query(this.perspective, {
+      source: this.baseExpression,
+    }) as SemanticRelationship[]
+  }
+
+  async setTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
     let topic = await Topic.byName(this.perspective, topicName);
-    const relationship = new SemanticRelationship(this.perspective);
-    relationship.expression = this.baseExpression;
-    relationship.tag = topic.baseExpression;
-    relationship.relevance = relevance;
-    await relationship.save();
+    let allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships()
+    let existingTopicRelationship = allSemanticRelationships.find(sr => sr.tag == topic.baseExpression)
+
+    if(existingTopicRelationship) {
+      existingTopicRelationship.relevance = relevance;
+      await existingTopicRelationship.save()
+    } else {
+      const relationship = new SemanticRelationship(this.perspective);
+      relationship.expression = this.baseExpression;
+      relationship.tag = topic.baseExpression;
+      relationship.relevance = relevance;
+      await relationship.save();
+    }
   }
 }

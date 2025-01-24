@@ -1,7 +1,8 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { Link, SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
-import { findTopics, getAllTopics } from "@coasys/flux-utils/src/synergy";
-import Topic, { TopicWithRelevance } from "../topic";
+import { TopicWithRelevance } from "../topic";
+import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
+import { createEmbedding, removeEmbedding } from "./util";
 
 @SDNAClass({
   name: "Conversation",
@@ -30,7 +31,14 @@ export default class Conversation extends SubjectEntity {
   summary: string;
 
   async subgroups(): Promise<ConversationSubgroup[]> {
-    return await ConversationSubgroup.query(this.perspective, { source: this.baseExpression }) as ConversationSubgroup[];
+    const subgroups = await ConversationSubgroup.query(this.perspective, { source: this.baseExpression }) as ConversationSubgroup[];
+
+    // Sort subgroups by timestamp
+    const sortedSubgroups = subgroups.sort((a, b) => {
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(); 
+    });
+
+    return sortedSubgroups
   }
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
@@ -41,64 +49,77 @@ export default class Conversation extends SubjectEntity {
     return allTopics.flat();
   }
 
-  async processNewExpressions(unprocessedItems) {
-    // gather up data for LLM processing
-    const previousSubgroups = await this.subgroups();
-    const lastSubgroup = previousSubgroups[previousSubgroups.length - 1] as any;
-    const lastSubgroupTopics = await lastSubgroup?.topicsWithRelevance()
-    const lastSubgroupWithTopics = lastSubgroup ? { ...lastSubgroup, topics: lastSubgroupTopics } : null;
-    const existingTopics = await Topic.query(this.perspective) as Topic[];
+  private static async detectNewGroup(
+      currentSubgroup: ConversationSubgroup|null, 
+      unprocessedItems: { baseExpression: string, text: string}[]
+  ): Promise<{
+      group: { n: string, s: string }, 
+      newGroup?: { n: string, s: string, firstItemId: string}, 
+    }> {
+    const { grouping } = await ensureLLMTasks();
+    return await LLMTaskWithExpectedOutputs(grouping, {
+      group: currentSubgroup,
+      unprocessedItems: unprocessedItems.map((item) => {
+        return { id: item.baseExpression, text: item.text }
+      }),
+    });
+  }
 
-    // run LLM processing
-    const { conversationData, currentSubgroup, newSubgroup } = await LLMProcessing(
-      unprocessedItems,
-      previousSubgroups,
-      lastSubgroupWithTopics,
-      existingTopics
-    );
+  private static async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
+    const { topics } = await ensureLLMTasks();
+    let currentTopics = await group.topicsWithRelevance()
+    let currentNewTopics = await LLMTaskWithExpectedOutputs(topics, {
+      topics: currentTopics.map(t => { 
+        return { n: t.name, rel: t.relevance }
+      }),
+      messages: newMessages
+    });
 
-    // update conversation text
-    this.conversationName = conversationData.name;
-    this.summary = conversationData.summary;
-    await this.update();
-
-    // gather up topics returned from LLM
-    //const allReturnedTopics = [];
-    //if (currentSubgroup) allReturnedTopics.push(...currentSubgroup.topics);
-    //if (newSubgroup) allReturnedTopics.push(...newSubgroup.topics);
-    //await Topic.ensureTopics(this.perspective, allReturnedTopics);
-
-    // update currentSubgroup if new data returned from LLM
-    if (currentSubgroup) {
-      lastSubgroup.subgroupName = currentSubgroup.name;
-      lastSubgroup.summary = currentSubgroup.summary;
-      for (const topic of currentSubgroup.topics) {
-        // skip topics already linked to the subgroup
-        if (lastSubgroupTopics.find((t) => t.name === topic.name)) continue;
-        await lastSubgroup.addTopicWithRelevance(topic.name, topic.relevance);
-      }
+    for (const topic of currentNewTopics) {
+      await group.setTopicWithRelevance(topic.n, topic.rel, isNewGroup);
     }
+  }
 
+  private async createNewGroup(newGroup: {n: string, s: string}) {
+    let newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
+    newSubgroupEntity.subgroupName = newGroup.n;
+    newSubgroupEntity.summary = newGroup.s;
+    await newSubgroupEntity.save();
+    return await newSubgroupEntity.get();
+  }
+
+  async processNewExpressions(unprocessedItems) {
+    const subgroups = await this.subgroups();
+    const currentSubgroup: ConversationSubgroup|null = subgroups.length ? subgroups[subgroups.length - 1] : null;
+  
+    // ============== LLM group detection ===============================
+    // Have LLM sort new messages into old group or detect subject change
+    const { group, newGroup } = await Conversation.detectNewGroup(currentSubgroup, unprocessedItems)
 
     // create new subgroup if returned from LLM
     let newSubgroupEntity;
-    if (newSubgroup) {
-      newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
-      newSubgroupEntity.subgroupName = newSubgroup.name;
-      newSubgroupEntity.summary = newSubgroup.summary;
-      await newSubgroupEntity.save();
-      newSubgroupEntity = await newSubgroupEntity.get();
-      for (const topic of newSubgroup.topics) {
-        await newSubgroupEntity.addTopicWithRelevance(topic.name, topic.relevance);
-      }
+    let indexOfFirstItemInNewSubgroup;
+    if (newGroup) {
+      newSubgroupEntity = await this.createNewGroup(newGroup)
+      indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex((item) => item.baseExpression === newGroup.firstItemId);
     }
 
-    
-    // link items to subgroups
-    const indexOfFirstItemInNewSubgroup =
-      newSubgroup && unprocessedItems.findIndex((item) => item.baseExpression === newSubgroup.firstItemId);
+    // Sort items into current and/or new group
+    const newLinks: Link[] = [];
+    const currentNewMessages: string[] = [];
+    const newGroupMessages: string[] = [];
     for (const [itemIndex, item] of unprocessedItems.entries()) {
-      const itemsSubgroup = newSubgroup && itemIndex >= indexOfFirstItemInNewSubgroup ? newSubgroupEntity : lastSubgroup;
+      let itemsSubgroup
+      if(
+          (newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) ||
+          !currentSubgroup
+       ) {
+        itemsSubgroup = newSubgroupEntity
+        newGroupMessages.push(item.text)
+      } else {
+        itemsSubgroup = currentSubgroup
+        currentNewMessages.push(item.text)
+      }
 
       newLinks.push({
         source: itemsSubgroup.baseExpression,
@@ -106,20 +127,70 @@ export default class Conversation extends SubjectEntity {
         target: item.baseExpression,
       });
     }
+
+    // ============== LLM topic list updating ===============================
+    // Get update topic lists from LLM and save results
+    if(currentSubgroup) {
+      await Conversation.updateGroupTopics(currentSubgroup, currentNewMessages);
+    }
+    if(newGroup) {
+      await Conversation.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
+    }
+
+    // ============== LLM conversation updating ===============================
+    // Gather list of all sub-group name and info as it is now after this processing
+
+    // update current group info in the array
+    if(currentSubgroup && group) {
+      currentSubgroup.subgroupName = group.n
+      currentSubgroup.summary = group.s
+      subgroups[subgroups.length-1]=currentSubgroup
+    }
+    
+    // create array with property names for the prompt
+    const promptArray = subgroups.map(g => {
+      return { n: g.subgroupName, s: g.summary }
+    })
+
+    // Add new group if one was detected
+    if(newGroup) {
+      promptArray.push({n: newGroup.n, s: newGroup.s})
+    }
+
+    const { conversation } = await ensureLLMTasks();
+    let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray);
+    
+    // ------------ saving all new data ------------------
+
+    // Save conversation info
+    this.conversationName = newConversationInfo.n;
+    this.summary = newConversationInfo.s;
+    await this.update();
+
+    // Save current group
+    if(currentSubgroup) {
+      await currentSubgroup.update()
+    }
+
     // create vector embeddings for each unprocessed item
-    await Promise.all(unprocessedItems.map((item) => createEmbedding(perspective, item.text, item.baseExpression)));
+    await Promise.all(unprocessedItems.map((item) => createEmbedding(this.perspective, item.text, item.baseExpression)));
+
     // update vector embedding for conversation
-    await removeEmbedding(perspective, conversation.baseExpression);
-    await createEmbedding(perspective, conversationData.summary, conversation.baseExpression);
+    await removeEmbedding(this.perspective, this.baseExpression);
+    await createEmbedding(this.perspective, this.summary, this.baseExpression);
+
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
-      await removeEmbedding(perspective, lastSubgroup.baseExpression);
-      await createEmbedding(perspective, currentSubgroup.summary, lastSubgroup.baseExpression);
+      await removeEmbedding(this.perspective, currentSubgroup.baseExpression);
+      await createEmbedding(this.perspective, currentSubgroup.summary, currentSubgroup.baseExpression);
     }
     // create vector embedding for new subgroup if returned from LLM
-    if (newSubgroup) await createEmbedding(perspective, newSubgroup.summary, newSubgroupEntity.baseExpression);
+    if (newSubgroupEntity) {
+      await createEmbedding(this.perspective, newSubgroupEntity.summary, newSubgroupEntity.baseExpression);
+    }
+
     // batch commit all new links (currently only "ad4m://has_child" links)
-    await perspective.addLinks(newLinks);
-    processing = false;
+    // i.e. sorting messages into current and/or new sub-group
+    await this.perspective.addLinks(newLinks);
   }
 }
