@@ -48,37 +48,37 @@ export async function LLMTaskWithExpectedOutputs(
         const response = await client.ai.prompt(task.id!, JSON.stringify(prompt));
         console.log("LLM Response: ", response);
         try {
-        const parsedData = JSON5.parse(response);
-        // ensure all expected properties are present
-        const missingProperties = [];
-        
-        if(task.expectedOutputs) {
-            for (const property of task.expectedOutputs) {
-                if (!(property in parsedData)) missingProperties.push(property);
+            const parsedData = JSON5.parse(response);
+            // ensure all expected properties are present
+            const missingProperties = [];
+            
+            if(task.expectedOutputs) {
+                for (const property of task.expectedOutputs) {
+                    if (!(property in parsedData)) missingProperties.push(property);
+                }
             }
-        }
 
-        if(task.expectedOneOf) {
-            let foundOne = false;
-            for (const property of task.expectedOutputs) {
-                if (property in parsedData) foundOne = true;
+            if(task.expectedOneOf) {
+                let foundOne = false;
+                for (const property of task.expectedOutputs) {
+                    if (property in parsedData) foundOne = true;
+                }
+                if(!foundOne) {
+                    missingProperties.push("expected one of: " + task.expectedOneOf)
+                }
             }
-            if(!foundOne) {
-                missingProperties.push("expected one of: " + task.expectedOneOf)
+
+            if(task.expectArray) {
+                if (!Array.isArray(parsedData)) missingProperties.push("expected output to be an array");
             }
-        }
 
-        if(task.expectArray) {
-            if (!Array.isArray(parsedData)) missingProperties.push("expected output to be an array");
-        }
-
-        if (missingProperties.length) throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
-        // the parsed data looks good
-        data = parsedData;
+            if (missingProperties.length) throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
+            // the parsed data looks good
+            data = parsedData;
         } catch (error) {
-        console.error("LLM response parse error:", error);
-        //@ts-ignore
-        prompt.jsonParseError = error;
+            console.error("LLM response parse error:", error);
+            //@ts-ignore
+            prompt.jsonParseError = error;
         }
     }
 
