@@ -62,7 +62,7 @@ export default class Conversation extends SubjectEntity {
       {
         group: currentSubgroup,
         unprocessedItems: unprocessedItems.map((item) => {
-          return { id: item.baseExpression, text: item.text }
+          return { id: item.baseExpression, text: item.text.replace(/<[^>]*>/g, '') }
         }),
       },
       this.perspective.ai
