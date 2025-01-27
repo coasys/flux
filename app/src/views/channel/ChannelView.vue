@@ -279,7 +279,7 @@ export default defineComponent({
           this.currentView = val[0]?.pkg;
         }
 
-        console.log(JSON.stringify(val));
+        //console.log(JSON.stringify(val));
 
         // Add new views
         val?.forEach(async (app: App) => {
@@ -289,12 +289,12 @@ export default defineComponent({
             const module = await fetchFluxApp(app.pkg);
             if (module?.default) {
               await customElements.define(wcName, module.default);
-              console.log("fetched the new app");
+              //console.log("fetched the new app");
 
               this.wcNames[app.pkg] = wcName;
             }
           } else {
-            console.log("this should update", app.pkg, wcName, this.wcNames);
+            //console.log("this should update", app.pkg, wcName, this.wcNames);
             this.wcNames[app.pkg] = wcName;
           }
         });
