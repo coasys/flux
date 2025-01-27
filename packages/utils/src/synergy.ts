@@ -1,9 +1,4 @@
-import {
-  LinkQuery,
-  PerspectiveExpression,
-  NeighbourhoodProxy,
-  PerspectiveProxy,
-} from "@coasys/ad4m";
+import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
@@ -238,7 +233,7 @@ async function responsibleForProcessing(
 }
 
 async function findOrCreateNewConversation(perspective: PerspectiveProxy, channelId: string): Promise<Conversation> {
-  const conversations = await Conversation.query(perspective, { source: channelId }) as Conversation[];
+  const conversations = (await Conversation.query(perspective, { source: channelId })) as Conversation[];
   if (conversations.length) {
     // if existing conversations found & last item in last conversation subgroup less than 30 mins old, use that conversation
     const lastConversation = conversations[conversations.length - 1];
@@ -293,8 +288,9 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
   if (responsible && !processing) {
     const client = await getAd4mClient();
     const me = await client.agent.me();
-    const itemIds = unprocessedItems.map((item) => item.baseExpression);
-    processing = true
+    const itemsToProcess = unprocessedItems.slice(0, -numberOfItemsDelay);
+    const itemIds = itemsToProcess.map((item) => item.baseExpression);
+    processing = true;
     setProcessing({ author: me.did, channel: channelId, items: itemIds });
     // notify other agents that we are processing
     await neighbourhood.sendBroadcastU({
@@ -303,9 +299,9 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
 
     const conversation = await findOrCreateNewConversation(perspective, channelId);
     try {
-      await conversation.processNewExpressions(unprocessedItems)
-    } catch(e) {
-      console.log("Error processing items into conversation:" + e)
+      await conversation.processNewExpressions(itemsToProcess);
+    } catch (e) {
+      console.log("Error processing items into conversation:" + e);
     }
 
     // update processing items state
@@ -315,7 +311,6 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
     await neighbourhood.sendBroadcastU({
       links: [{ source: channelId, predicate: "processing-items-finished", target: "" }],
     });
-
   }
 }
 
