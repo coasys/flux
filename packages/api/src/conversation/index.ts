@@ -84,7 +84,7 @@ export default class Conversation extends SubjectEntity {
     );
 
     for (const topic of currentNewTopics) {
-      await group.setTopicWithRelevance(topic.n, topic.rel, isNewGroup);
+      await group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup);
     }
   }
 
