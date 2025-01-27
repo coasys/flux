@@ -237,9 +237,7 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   if (conversations.length) {
     // if existing conversations found & last item in last conversation subgroup less than 30 mins old, use that conversation
     const lastConversation = conversations[conversations.length - 1];
-    const conversationSubgroups = await ConversationSubgroup.query(perspective, {
-      source: lastConversation.baseExpression,
-    });
+    const conversationSubgroups = await lastConversation.subgroups();
     if (conversationSubgroups.length) {
       const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as any;
       const lastSubgroupItems = await getSynergyItems(perspective, lastSubgroup.baseExpression);
