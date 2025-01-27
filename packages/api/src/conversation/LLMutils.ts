@@ -72,7 +72,7 @@ export async function LLMTaskWithExpectedOutputs(
     } catch (error) {
       console.error("LLM response parse error:", error);
       //@ts-ignore
-      prompt.jsonParseError = error;
+      prompt.jsonParseError = error.message;
     }
   }
 
