@@ -1,4 +1,4 @@
-const VERSION = 1;
+const VERSION = 2;
 
 export const synergyConversationPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
@@ -181,6 +181,7 @@ export const synergyGroupingExamples = [
 export const synergyTopicsPrompt = `
 You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
 So make sure to always (!) respond with valid JSON!!
+Do NOT explain yourself. If you're unsure, just give your best answer, in the requested JSON format.
 
 I'm passing you a JSON object with the following properties:
 1. 'topics' (Array of Objects like {n: "<topic name>", rel: 80})
@@ -198,7 +199,7 @@ Respond with one JSON array, consisting of topic objects (with properties "name"
 
 [ { "n": "universe", "rel": 90 }, { "n": "expansion", "rel": 100 }]
 
-Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
+Make sure your response is valid JSON and can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
 Include exactly the mentioned properties above. Nothing else, and don't miss any property!
 If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
 So if you see that field, take extra care about that specific mistake and don't make it again!
@@ -251,6 +252,26 @@ export const synergyTopicsExamples = [
         { "n": "hydration", "rel": 85 },
         { "n": "recovery", "rel": 75 },
         { "n": "electrolytes", "rel": 70 }
+    ]`,
+  },
+  {
+    input: `{
+        "topics": [],
+        "messages": [
+          "<p>1</p>",
+          "<p>2</p>",
+          "<p>3</p>",
+          "<p>4</p>",
+          "<p>5</p>",
+          "<p>6</p>",
+          "<p>7</p>",
+          "<p>8</p>",
+          "<p>9</p>"
+        ]
+    }`,
+    output: `[
+        { "n": "counting", "rel": 90 },
+        { "n": "test", "rel": 50 },
     ]`,
   },
 ];

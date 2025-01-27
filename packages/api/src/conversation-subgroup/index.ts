@@ -59,7 +59,7 @@ export default class ConversationSubgroup extends SubjectEntity {
     }) as SemanticRelationship[]
   }
 
-  async setTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
+  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
     let topic = await Topic.byName(this.perspective, topicName);
     let allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships()
     let existingTopicRelationship = allSemanticRelationships.find(sr => sr.tag == topic.baseExpression)

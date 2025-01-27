@@ -84,7 +84,7 @@ export default class Conversation extends SubjectEntity {
     );
 
     for (const topic of currentNewTopics) {
-      await group.setTopicWithRelevance(topic.n, topic.rel, isNewGroup);
+      await group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup);
     }
   }
 
@@ -181,20 +181,20 @@ export default class Conversation extends SubjectEntity {
     }
 
     // create vector embeddings for each unprocessed item
-    await Promise.all(unprocessedItems.map((item) => createEmbedding(this.perspective, item.text, item.baseExpression)));
+    await Promise.all(unprocessedItems.map((item) => createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai)));
 
     // update vector embedding for conversation
     await removeEmbedding(this.perspective, this.baseExpression);
-    await createEmbedding(this.perspective, this.summary, this.baseExpression);
+    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai);
 
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
       await removeEmbedding(this.perspective, currentSubgroup.baseExpression);
-      await createEmbedding(this.perspective, currentSubgroup.summary, currentSubgroup.baseExpression);
+      await createEmbedding(this.perspective, currentSubgroup.summary, currentSubgroup.baseExpression, this.perspective.ai);
     }
     // create vector embedding for new subgroup if returned from LLM
     if (newSubgroupEntity) {
-      await createEmbedding(this.perspective, newSubgroupEntity.summary, newSubgroupEntity.baseExpression);
+      await createEmbedding(this.perspective, newSubgroupEntity.summary, newSubgroupEntity.baseExpression, this.perspective.ai);
     }
 
     // batch commit all new links (currently only "ad4m://has_child" links)
