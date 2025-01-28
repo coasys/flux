@@ -28,12 +28,19 @@ export default class ConversationSubgroup extends SubjectEntity {
   })
   summary: string;
 
+  async semanticRelationships(): Promise<SemanticRelationship[]> {
+    const allSemanticRelationships = (await SemanticRelationship.all(this.perspective)) as any;
+    const subgroupSemanticRelationships = allSemanticRelationships.filter(
+      (rel) => rel.expression == this.baseExpression
+    );
+    return subgroupSemanticRelationships;
+  }
+
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    const allRelationships = (await SemanticRelationship.all(this.perspective)) as any;
-    const subgroupRelationships = allRelationships.filter((rel) => rel.expression == this.baseExpression);
+    const subgroupSemanticRelationships = await this.semanticRelationships();
 
     const topics: TopicWithRelevance[] = [];
-    for (const rel of subgroupRelationships) {
+    for (const rel of subgroupSemanticRelationships) {
       if (!rel.relevance) continue;
 
       try {
@@ -52,20 +59,14 @@ export default class ConversationSubgroup extends SubjectEntity {
     return topics;
   }
 
-  async semanticRelationships(): Promise<SemanticRelationship[]> {
-    return (await SemanticRelationship.query(this.perspective, {
-      source: this.baseExpression,
-    })) as SemanticRelationship[];
-  }
-
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
-    let topic = await Topic.byName(this.perspective, topicName);
-    let allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships();
-    let existingTopicRelationship = allSemanticRelationships.find((sr) => sr.tag == topic.baseExpression);
+    const topic = await Topic.byName(this.perspective, topicName);
+    const allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships();
+    const existingTopicRelationship = allSemanticRelationships.find((sr) => sr.tag == topic.baseExpression);
 
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
-      await existingTopicRelationship.save();
+      await existingTopicRelationship.update();
     } else {
       const relationship = new SemanticRelationship(this.perspective);
       relationship.expression = this.baseExpression;
