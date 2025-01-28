@@ -1,6 +1,6 @@
 import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
-import SemanticRelationship from "../semantic-relationship"
+import SemanticRelationship from "../semantic-relationship";
 
 @SDNAClass({
   name: "ConversationSubgroup",
@@ -29,14 +29,13 @@ export default class ConversationSubgroup extends SubjectEntity {
   summary: string;
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    const allRelationships = (await SemanticRelationship.query(this.perspective, {
-      source: this.baseExpression,
-    })) as any;
-  
+    const allRelationships = (await SemanticRelationship.all(this.perspective)) as any;
+    const subgroupRelationships = allRelationships.filter((rel) => rel.expression == this.baseExpression);
+
     const topics: TopicWithRelevance[] = [];
-    for (const rel of allRelationships) {
+    for (const rel of subgroupRelationships) {
       if (!rel.relevance) continue;
-  
+
       try {
         const topicEntity = new Topic(this.perspective, rel.tag);
         const topic = await topicEntity.get();
@@ -49,24 +48,24 @@ export default class ConversationSubgroup extends SubjectEntity {
         continue;
       }
     }
-  
+
     return topics;
   }
 
   async semanticRelationships(): Promise<SemanticRelationship[]> {
-    return await SemanticRelationship.query(this.perspective, {
+    return (await SemanticRelationship.query(this.perspective, {
       source: this.baseExpression,
-    }) as SemanticRelationship[]
+    })) as SemanticRelationship[];
   }
 
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
     let topic = await Topic.byName(this.perspective, topicName);
-    let allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships()
-    let existingTopicRelationship = allSemanticRelationships.find(sr => sr.tag == topic.baseExpression)
+    let allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships();
+    let existingTopicRelationship = allSemanticRelationships.find((sr) => sr.tag == topic.baseExpression);
 
-    if(existingTopicRelationship) {
+    if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
-      await existingTopicRelationship.save()
+      await existingTopicRelationship.save();
     } else {
       const relationship = new SemanticRelationship(this.perspective);
       relationship.expression = this.baseExpression;
