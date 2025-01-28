@@ -1,6 +1,7 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
+import Conversation from "../conversation";
 
 @SDNAClass({
   name: "ConversationSubgroup",
@@ -27,6 +28,17 @@ export default class ConversationSubgroup extends SubjectEntity {
     required: false,
   })
   summary: string;
+
+  async parentConversation(): Promise<Conversation> {
+    const allConversations = (await Conversation.all(this.perspective)) as Conversation[];
+    const parentLinks = await this.perspective.get(
+      new LinkQuery({ predicate: "ad4m://has_child", target: this.baseExpression })
+    );
+    const parentConversation = allConversations.find((c) =>
+      parentLinks.find((p) => p.data.source === c.baseExpression)
+    );
+    return parentConversation;
+  }
 
   async semanticRelationships(): Promise<SemanticRelationship[]> {
     const allSemanticRelationships = (await SemanticRelationship.all(this.perspective)) as any;
