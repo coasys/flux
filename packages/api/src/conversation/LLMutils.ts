@@ -40,8 +40,46 @@ export async function LLMTaskWithExpectedOutputs(
     console.log(`LLM Prompt for ${task.name}`, prompt);
     const response = await ai.prompt(task.id!, JSON.stringify(prompt));
     console.log(`LLM Response for ${task.name}`, response);
+
     try {
-      const parsedData = JSON5.parse(response);
+
+      // Clean up common LLM mistakes before parsing
+      let cleanResponse = response;
+      
+      // Remove any # comments that the LLM might add
+      cleanResponse = cleanResponse.replace(/#.*$/gm, '');
+      
+      // Remove any ```json or ``` markers
+      cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      
+      // Remove any trailing commas before closing brackets/braces
+      cleanResponse = cleanResponse.replace(/,(\s*[}\]])/g, '$1');
+      
+      // Remove any text outside of the JSON structure, but keep nested structures intact
+      cleanResponse = cleanResponse.replace(/^[\s\S]*?(\{|\[)/, '$1');
+      
+      // Count opening and closing characters
+      const openBraces = (cleanResponse.match(/\{/g) || []).length;
+      const closeBraces = (cleanResponse.match(/\}/g) || []).length;
+      const openBrackets = (cleanResponse.match(/\[/g) || []).length;
+      const closeBrackets = (cleanResponse.match(/\]/g) || []).length;
+      
+      // Add missing closing characters in the correct order
+      if (openBraces > closeBraces || openBrackets > closeBrackets) {
+        // First, clean up any trailing content but preserve existing closing characters
+        cleanResponse = cleanResponse.replace(/([}\]])([\s\S]*?)$/, '$1');
+        
+        // Then add any missing closing characters
+        if (openBrackets > closeBrackets) {
+          cleanResponse += ']'.repeat(openBrackets - closeBrackets);
+        }
+        if (openBraces > closeBraces) {
+          cleanResponse += '}'.repeat(openBraces - closeBraces);
+        }
+      }
+
+      console.log(`Sanitzied extracted JSON to parse: ${cleanResponse}`)
+      const parsedData = JSON5.parse(cleanResponse);
       // ensure all expected properties are present
       const missingProperties = [];
 
@@ -72,7 +110,7 @@ export async function LLMTaskWithExpectedOutputs(
     } catch (error) {
       console.error("LLM response parse error:", error);
       //@ts-ignore
-      prompt.jsonParseError = error;
+      prompt.jsonParseError = error.message;
     }
   }
 

@@ -62,7 +62,7 @@ export default class Conversation extends SubjectEntity {
       {
         group: currentSubgroup,
         unprocessedItems: unprocessedItems.map((item) => {
-          return { id: item.baseExpression, text: item.text }
+          return { id: item.baseExpression, text: item.text.replace(/<[^>]*>/g, '') }
         }),
       },
       this.perspective.ai
@@ -102,7 +102,17 @@ export default class Conversation extends SubjectEntity {
   
     // ============== LLM group detection ===============================
     // Have LLM sort new messages into old group or detect subject change
-    const { group, newGroup } = await this.detectNewGroup(currentSubgroup, unprocessedItems)
+    let { group, newGroup } = await this.detectNewGroup(currentSubgroup, unprocessedItems)
+
+    // Handle case where the conversation is empty (no group yet)
+    // but LLM returns data in group and not in newGroup
+    if(!currentSubgroup && group && !newGroup) {
+      newGroup = {
+        ...group,
+        firstItemId: unprocessedItems[0].id
+      }
+      group = null;
+    }
 
     // create new subgroup if returned from LLM
     let newSubgroupEntity;
