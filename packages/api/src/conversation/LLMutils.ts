@@ -56,7 +56,7 @@ export async function LLMTaskWithExpectedOutputs(
       if (task.expectArray) {
         // Try to find a valid JSON array first if we expect an array
         arrayMatch = cleanResponse.match(/(\[[\s\S]*\])/);
-        if(arrayMatch.length)
+        if(arrayMatch?.length)
           cleanResponse = arrayMatch[1];
         else {
           throw "expected output to be an array"
@@ -64,7 +64,7 @@ export async function LLMTaskWithExpectedOutputs(
       } else {
         // Try to find a valid JSON object first if we don't expect an array
         objectMatch = cleanResponse.match(/(\{[\s\S]*\})/);
-        if(objectMatch.length)
+        if(objectMatch?.length)
           cleanResponse = objectMatch[1];
         else {
           "expected output to be an object"
