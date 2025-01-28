@@ -1,6 +1,7 @@
-import { closeMenu, groupingOptions, itemTypeOptions } from "../../utils";
+import { closeMenu, groupingOptions, itemTypeOptions, ChevronDownSVG } from "../../utils";
 import Match from "../Match";
 import styles from "./MatchColumn.module.scss";
+import { useState } from "preact/hooks";
 
 type Props = {
   perspective: any;
@@ -24,6 +25,8 @@ export default function MatchColumn({
   close,
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
+  const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
+
   return (
     <div className={styles.wrapper}>
       <j-flex direction="column" gap="400" className={styles.header}>
@@ -75,7 +78,7 @@ export default function MatchColumn({
         <h2>{matchText()}</h2>
       </j-flex>
       <j-flex direction="column" gap="400" className={styles.results}>
-        {matches.map((match, index) => (
+        {matches.slice(0, numberOfMatchesDisplayed).map((match, index) => (
           <Match
             key={index}
             perspective={perspective}
@@ -85,6 +88,17 @@ export default function MatchColumn({
             selectedTopicId={selectedTopicId}
           />
         ))}
+        {matches.length > numberOfMatchesDisplayed && (
+          <j-button
+            className={styles.showMoreButton}
+            onClick={() => setNumberOfMatchesDisplayed((prev) => prev + 5)}
+          >
+            See more
+            <span>
+              <ChevronDownSVG /> {matches.length - numberOfMatchesDisplayed}
+            </span>
+          </j-button>
+        )}
       </j-flex>
     </div>
   );
