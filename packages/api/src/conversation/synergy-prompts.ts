@@ -297,7 +297,7 @@ export const synergyTasks = {
     name: `Flux Topics Task (v${VERSION})`,
     prompt: synergyTopicsPrompt,
     examples: synergyTopicsExamples,
-    expectedArray: true,
+    expectArray: true,
   } as FluxLLMTask,
   conversation: {
     name: `Flux Conversation Task (v${VERSION})`,
