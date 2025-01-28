@@ -45,36 +45,29 @@ export async function LLMTaskWithExpectedOutputs(
 
       // Clean up common LLM mistakes before parsing
       let cleanResponse = response;
-      
       // Remove any # comments that the LLM might add
       cleanResponse = cleanResponse.replace(/#.*$/gm, '');
-      
       // Remove any ```json or ``` markers
       cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      
       // Remove any trailing commas before closing brackets/braces
       cleanResponse = cleanResponse.replace(/,(\s*[}\]])/g, '$1');
-      
-      // Remove any text outside of the JSON structure, but keep nested structures intact
-      cleanResponse = cleanResponse.replace(/^[\s\S]*?(\{|\[)/, '$1');
-      
-      // Count opening and closing characters
-      const openBraces = (cleanResponse.match(/\{/g) || []).length;
-      const closeBraces = (cleanResponse.match(/\}/g) || []).length;
-      const openBrackets = (cleanResponse.match(/\[/g) || []).length;
-      const closeBrackets = (cleanResponse.match(/\]/g) || []).length;
-      
-      // Add missing closing characters in the correct order
-      if (openBraces > closeBraces || openBrackets > closeBrackets) {
-        // First, clean up any trailing content but preserve existing closing characters
-        cleanResponse = cleanResponse.replace(/([}\]])([\s\S]*?)$/, '$1');
-        
-        // Then add any missing closing characters
-        if (openBrackets > closeBrackets) {
-          cleanResponse += ']'.repeat(openBrackets - closeBrackets);
+      // Remove any content after a valid JSON structure
+      let arrayMatch, objectMatch;
+      if (task.expectArray) {
+        // Try to find a valid JSON array first if we expect an array
+        arrayMatch = cleanResponse.match(/(\[[\s\S]*\])/);
+        if(arrayMatch?.length)
+          cleanResponse = arrayMatch[1];
+        else {
+          throw "expected output to be an array"
         }
-        if (openBraces > closeBraces) {
-          cleanResponse += '}'.repeat(openBraces - closeBraces);
+      } else {
+        // Try to find a valid JSON object first if we don't expect an array
+        objectMatch = cleanResponse.match(/(\{[\s\S]*\})/);
+        if(objectMatch?.length)
+          cleanResponse = objectMatch[1];
+        else {
+          "expected output to be an object"
         }
       }
 
