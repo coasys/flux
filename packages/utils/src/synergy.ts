@@ -239,14 +239,24 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
     const lastConversation = conversations[conversations.length - 1];
     const conversationSubgroups = await lastConversation.subgroups();
     if (conversationSubgroups.length) {
-      const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as any;
+      const lastSubgroup = conversationSubgroups[conversationSubgroups.length - 1] as ConversationSubgroup;
       const lastSubgroupItems = await getSynergyItems(perspective, lastSubgroup.baseExpression);
       if (lastSubgroupItems.length) {
         const lastItem = lastSubgroupItems[lastSubgroupItems.length - 1];
         const timeSinceLastItemCreated = new Date().getTime() - new Date(lastItem.timestamp).getTime();
         const minsSinceLastItemCreated = timeSinceLastItemCreated / (1000 * 60);
         if (minsSinceLastItemCreated < 30) return lastConversation;
+      } else {
+        // existing conversation with an existing but empty last group
+        // this should not happen
+        // but if this is the case, we will just take the timestamp of that group
+        const timeSinceLastSubgroupCreated = new Date().getTime() - new Date(lastSubgroup.timestamp).getTime();
+        const minsSinceLastSubgroupCreated = timeSinceLastSubgroupCreated / (1000 * 60);
+        if (minsSinceLastSubgroupCreated < 30) return lastConversation
       }
+    } else {
+      // empty conversation, use it
+      return lastConversation
     }
   }
   // otherwise create a new conversation

@@ -57,10 +57,16 @@ export default class Conversation extends SubjectEntity {
       newGroup?: { n: string, s: string, firstItemId: string}, 
     }> {
     const { grouping } = await ensureLLMTasks(this.perspective.ai);
+    let inputGroup;
+    if(currentSubgroup) {
+      inputGroup = {}
+      inputGroup.n = currentSubgroup.subgroupName
+      inputGroup.s = currentSubgroup.summary
+    }
     return await LLMTaskWithExpectedOutputs(
       grouping, 
       {
-        group: currentSubgroup,
+        group: inputGroup,
         unprocessedItems: unprocessedItems.map((item) => {
           return { id: item.baseExpression, text: item.text.replace(/<[^>]*>/g, '') }
         }),
