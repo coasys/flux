@@ -195,7 +195,8 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
   return receivedSignals.some((s) => s.data.target === signalUuid);
 }
 // todo: store these consts in channel settings
-const minNumberOfItemsToProcess = 5;
+const minItemsToProcess = 5;
+const maxItemsToProcess = 20;
 const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
@@ -206,13 +207,13 @@ async function responsibleForProcessing(
   increment = 0
 ): Promise<boolean> {
   // check if enough unprocessed items are present to run the processing task (increment used so we can keep checking the next item until the limit is reached)
-  const enoughUnprocessedItems = unprocessedItems.length >= minNumberOfItemsToProcess + numberOfItemsDelay + increment;
+  const enoughUnprocessedItems = unprocessedItems.length >= minItemsToProcess + numberOfItemsDelay + increment;
   if (!enoughUnprocessedItems) {
     console.log("not enough items to process");
     return false;
   } else {
     // find the author of the nth item
-    const nthItem = unprocessedItems[minNumberOfItemsToProcess + increment - 1];
+    const nthItem = unprocessedItems[minItemsToProcess + increment - 1];
     const author = await findItemsAuthor(perspective, channelId, nthItem.baseExpression);
     // if we are the author, we are responsible for processing
     if (await isMe(author)) {
@@ -252,11 +253,11 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
         // but if this is the case, we will just take the timestamp of that group
         const timeSinceLastSubgroupCreated = new Date().getTime() - new Date(lastSubgroup.timestamp).getTime();
         const minsSinceLastSubgroupCreated = timeSinceLastSubgroupCreated / (1000 * 60);
-        if (minsSinceLastSubgroupCreated < 30) return lastConversation
+        if (minsSinceLastSubgroupCreated < 30) return lastConversation;
       }
     } else {
       // empty conversation, use it
-      return lastConversation
+      return lastConversation;
     }
   }
   // otherwise create a new conversation
@@ -292,11 +293,12 @@ export async function runProcessingCheck(perspective: PerspectiveProxy, channelI
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   console.log("responsible for processing", responsible);
-  // if we are responsible, process items (minus delay) & add to conversation
+  // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
     const client = await getAd4mClient();
     const me = await client.agent.me();
-    const itemsToProcess = unprocessedItems.slice(0, -numberOfItemsDelay);
+    const numberOfItemsToProcess = Math.min(maxItemsToProcess, unprocessedItems.length - numberOfItemsDelay);
+    const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
     const itemIds = itemsToProcess.map((item) => item.baseExpression);
     processing = true;
     setProcessing({ author: me.did, channel: channelId, items: itemIds });
