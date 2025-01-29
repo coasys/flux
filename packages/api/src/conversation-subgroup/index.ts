@@ -41,11 +41,9 @@ export default class ConversationSubgroup extends SubjectEntity {
   }
 
   async semanticRelationships(): Promise<SemanticRelationship[]> {
-    const allSemanticRelationships = (await SemanticRelationship.all(this.perspective)) as any;
-    const subgroupSemanticRelationships = allSemanticRelationships.filter(
-      (rel) => rel.expression == this.baseExpression
-    );
-    return subgroupSemanticRelationships;
+    return await SemanticRelationship.query(this.perspective, {
+      where: { expression: this.baseExpression }
+    }) as SemanticRelationship[]
   }
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {

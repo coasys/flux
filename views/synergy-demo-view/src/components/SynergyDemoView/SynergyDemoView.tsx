@@ -79,14 +79,11 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
     return await new Promise(async (resolveMatches: any) => {
-      // grab all embedding relationships
-      const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter(
-        (r) => !r.relevance
-      );
-      // find the source embedding
-      const sourceEmbeddingRelationship = allEmbeddingRelationships.find(
-        (r) => r.expression === itemId
-      );
+      const embeddingRelationships = await SemanticRelationship.query(perspective, {
+        where: { expression: itemId }
+      }) as SemanticRelationship[];
+        
+
       const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
       const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
       // loop through others & apply search filters
