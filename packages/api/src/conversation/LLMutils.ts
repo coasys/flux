@@ -45,6 +45,8 @@ export async function LLMTaskWithExpectedOutputs(
 
       // Clean up common LLM mistakes before parsing
       let cleanResponse = response;
+      // Remove any <think> blocks that the LLM might add
+      cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
       // Remove any # comments that the LLM might add
       cleanResponse = cleanResponse.replace(/#.*$/gm, '');
       // Remove any ```json or ``` markers
