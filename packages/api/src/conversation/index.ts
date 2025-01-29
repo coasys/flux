@@ -134,24 +134,24 @@ export default class Conversation extends SubjectEntity {
   
     // ============== LLM group detection ===============================
     // Have LLM sort new messages into old group or detect subject change
-    let { group, newGroup } = await this.detectNewGroup(currentSubgroup, unprocessedItems)
+    let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems)
 
     // Handle case where the conversation is empty (no group yet)
     // but LLM returns data in group and not in newGroup
-    if(!currentSubgroup && group && !newGroup) {
-      newGroup = {
-        ...group,
+    if(!currentSubgroup && detectResult.group && !detectResult.newGroup) {
+      detectResult.newGroup = {
+        ...detectResult.group,
         firstItemId: unprocessedItems[0].id
       }
-      group = null;
+      detectResult.group = null;
     }
 
     // create new subgroup if returned from LLM
     let newSubgroupEntity;
     let indexOfFirstItemInNewSubgroup;
-    if (newGroup) {
-      newSubgroupEntity = await this.createNewGroup(newGroup)
-      indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex((item) => item.baseExpression === newGroup.firstItemId);
+    if (detectResult.newGroup) {
+      newSubgroupEntity = await this.createNewGroup(detectResult.newGroup)
+      indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex((item) => item.baseExpression === detectResult.newGroup.firstItemId);
     }
 
     // Sort items into current and/or new group
@@ -161,7 +161,7 @@ export default class Conversation extends SubjectEntity {
     for (const [itemIndex, item] of unprocessedItems.entries()) {
       let itemsSubgroup
       if(
-          (newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) ||
+          (detectResult.newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) ||
           !currentSubgroup
        ) {
         itemsSubgroup = newSubgroupEntity
@@ -183,7 +183,7 @@ export default class Conversation extends SubjectEntity {
     if(currentSubgroup) {
       await this.updateGroupTopics(currentSubgroup, currentNewMessages);
     }
-    if(newGroup) {
+    if(detectResult.newGroup) {
       await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
     }
 
@@ -191,9 +191,9 @@ export default class Conversation extends SubjectEntity {
     // Gather list of all sub-group name and info as it is now after this processing
 
     // update current group info in the array
-    if(currentSubgroup && group) {
-      currentSubgroup.subgroupName = group.n
-      currentSubgroup.summary = group.s
+    if(currentSubgroup && detectResult.group) {
+      currentSubgroup.subgroupName = detectResult.group.n
+      currentSubgroup.summary = detectResult.group.s
       subgroups[subgroups.length-1]=currentSubgroup
     }
     
@@ -203,8 +203,8 @@ export default class Conversation extends SubjectEntity {
     })
 
     // Add new group if one was detected
-    if(newGroup) {
-      promptArray.push({n: newGroup.n, s: newGroup.s})
+    if(detectResult.newGroup) {
+      promptArray.push({n: detectResult.newGroup.n, s: detectResult.newGroup.s})
     }
 
     const { conversation } = await ensureLLMTasks(this.perspective.ai);
