@@ -57,22 +57,48 @@ export default class Conversation extends SubjectEntity {
       newGroup?: { n: string, s: string, firstItemId: string}, 
     }> {
     const { grouping } = await ensureLLMTasks(this.perspective.ai);
+    
     let inputGroup;
     if(currentSubgroup) {
       inputGroup = {}
       inputGroup.n = currentSubgroup.subgroupName
       inputGroup.s = currentSubgroup.summary
     }
-    return await LLMTaskWithExpectedOutputs(
+
+    let idToBaseExpression = {};
+    let nextId = 0;
+    for (const item of unprocessedItems) {
+      idToBaseExpression[nextId] = item.baseExpression;
+      nextId++;
+    }
+    const result = await LLMTaskWithExpectedOutputs(
       grouping, 
       {
         group: inputGroup,
-        unprocessedItems: unprocessedItems.map((item) => {
-          return { id: item.baseExpression, text: item.text.replace(/<[^>]*>/g, '') }
+        unprocessedItems: unprocessedItems.map((item, index) => {
+          return { id: index, text: item.text.replace(/<[^>]*>/g, '') }
         }),
       },
       this.perspective.ai
     );
+
+    // Error correct firstItemId
+    if(result.newGroup) {
+      // If we have an empty conversation we always take all messages
+      if(!currentSubgroup)
+        result.newGroup.firstItemId = 0
+      else {
+        // map index back to item ID
+        result.newGroup.firstItemId = idToBaseExpression[result.newGroup.firstItemId]
+
+        // if couldn't find it in map, the LLM might have returned the content of the message
+        if(!result.newGroup.firstItemId) {
+          result.newGroup.firstItemId = unprocessedItems.findIndex(item => item.text == result.newGroup.firstItemId)
+        }
+      }
+    }
+
+    return result
   }
 
   private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
