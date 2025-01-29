@@ -1,7 +1,7 @@
 import { closeMenu, groupingOptions, itemTypeOptions, ChevronDownSVG } from "../../utils";
 import Match from "../Match";
 import styles from "./MatchColumn.module.scss";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 type Props = {
   perspective: any;
@@ -26,6 +26,8 @@ export default function MatchColumn({
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
+
+  useEffect(() => setNumberOfMatchesDisplayed(5), [matches]);
 
   return (
     <div className={styles.wrapper}>
