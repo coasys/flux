@@ -1,4 +1,4 @@
-import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy } from "@coasys/ad4m";
+import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   Conversation,
@@ -12,29 +12,6 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
 import { TopicWithRelevance } from "@coasys/flux-api/src/topic";
-
-export function transformItem(type, item) {
-  // used to transform message, post, or task subject entities into a common format
-  const newItem = {
-    type,
-    baseExpression: item.id,
-    author: item.author,
-    timestamp: item.timestamp,
-    text: "",
-    icon: "question",
-  };
-  if (type === "Message") {
-    newItem.text = item.body;
-    newItem.icon = "chat";
-  } else if (type === "Post") {
-    newItem.text = item.title || item.body;
-    newItem.icon = "postcard";
-  } else if (type === "Task") {
-    newItem.text = item.name;
-    newItem.icon = "kanban";
-  }
-  return newItem;
-}
 
 export async function findTopics(perspective, itemId): Promise<TopicWithRelevance[]> {
   const allRelationships = (await SemanticRelationship.query(perspective, {
@@ -70,30 +47,57 @@ export async function getAllTopics(perspective) {
 
 // todo: use raw prolog query here so subject classes don't need to be hard coded
 export async function getSynergyItems(perspective, parentId) {
-  // parentId used so we can get items linked to a channel (unprocessed) or conversation
-  const messages = await new SubjectRepository(Message, {
-    perspective,
-    source: parentId,
-  }).getAllData();
-  const posts = await new SubjectRepository(Post, {
-    perspective,
-    source: parentId,
-  }).getAllData();
-  const tasks = await new SubjectRepository("Task", {
-    perspective,
-    source: parentId,
-  }).getAllData();
-  // transform items into common format
-  const transformedItems = [
-    ...messages.map((message) => transformItem("Message", message)),
-    ...posts.map((post) => transformItem("Post", post)),
-    ...tasks.map((task) => transformItem("Task", task)),
-  ];
-  // order items by timestamp
-  const orderedItems = transformedItems.sort((a, b) => {
+  // Get all child items of parentId, with timestamp and author
+  // if we can get a Text either as
+  // - "body" property through Message class
+  // - "title" property through Post class, or
+  // - "name" propoerty through Task class
+  const items: {
+    Item: string,
+    Timestamp: number, //unix milliseconds
+    Author: string,
+    Text: string,
+    Type: string, //"Message", "Post", "Task"
+  }[] = await perspective.infer(`
+    link("${parentId}", "ad4m://has_child", Item, Timestamp, Author),
+    (
+      Type = "Message",
+      subject_class("Message", TaskClass),
+      instance(MessageClass, Item), 
+      property_getter(MessageClass, Item, "body", Text)
+      ;
+      Type = "Post",
+      subject_class("Post", TaskClass),
+      instance(PostClass, Item), 
+      property_getter(PostClass, Item, "title", Text)
+      ;
+      Type = "Task",
+      subject_class("Task", TaskClass),
+      instance(TaskClass, Item), 
+      property_getter(TaskClass, Item, "name", Text)
+    ).
+    `)
+
+  if(!items) return []
+
+  const icons = {
+    "Message": "chat",
+    "Post": "postcard",
+    "Task": "kanban"
+  };
+
+  return items.map(item => {
+    return {
+      type: item.Type,
+      baseExpression: item.Item,
+      author: item.Author,
+      timestamp: new Date(item.Timestamp).toISOString(),
+      text: Literal.fromUrl(item.Text).get().data,
+      icon: icons[item.Type] ? icons[item.Type] : "question"
+    }
+  }).sort((a, b) => {
     return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
   });
-  return orderedItems;
 }
 
 export async function getDefaultLLM() {
