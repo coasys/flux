@@ -284,13 +284,17 @@ export async function findAllChannelSubgroupIds(
 }
 
 let processing = false;
-export async function runProcessingCheck(perspective: PerspectiveProxy, channelId: string, setProcessing: any) {
+export async function runProcessingCheck(
+  perspective: PerspectiveProxy, 
+  channelId: string, 
+  channelItems: any[],
+  setProcessing: any
+) {
   console.log("runProcessingCheck");
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
-  const channelItems = await getSynergyItems(perspective, channelId);
   const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
   const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
   const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);

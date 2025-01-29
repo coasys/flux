@@ -29,10 +29,10 @@ export default function TimelineColumn({
   const totalConversationItems = useRef(0);
 
   async function runProcessingCheckIfNewItems() {
-    const conversationItems = await getSynergyItems(perspective, channelId);
-    if (conversationItems.length > totalConversationItems.current)
-      runProcessingCheck(perspective, channelId, setProcessing);
-    totalConversationItems.current = conversationItems.length;
+    const channelItems = await getSynergyItems(perspective, channelId);
+    if (channelItems.length > totalConversationItems.current)
+      runProcessingCheck(perspective, channelId, channelItems, setProcessing);
+    totalConversationItems.current = channelItems.length;
   }
 
   async function getData() {
