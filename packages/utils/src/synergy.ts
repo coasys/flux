@@ -45,8 +45,15 @@ export async function getAllTopics(perspective) {
   });
 }
 
-// todo: use raw prolog query here so subject classes don't need to be hard coded
-export async function getSynergyItems(perspective, parentId) {
+class SynergyItem {
+  type: string;
+  baseExpression: string;
+  author: string;
+  timestamp: string;
+  text: string;
+  icon: string;
+}
+export async function getSynergyItems(perspective, parentId): Promise<SynergyItem[]> {
   // Get all child items of parentId, with timestamp and author
   // if we can get a Text either as
   // - "body" property through Message class
