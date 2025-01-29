@@ -5,7 +5,18 @@ import {
   findUnprocessedItems,
   findAllChannelSubgroupIds,
 } from "@coasys/flux-utils";
-import { LinkQuery } from "@coasys/ad4m";
+
+type GroupData = {
+  groupType: "conversation" | "subgroup" | "item";
+  children: any[];
+  participants: string[];
+  topics: any[];
+  matchIndex?: number;
+};
+
+type ConversationData = Conversation & GroupData;
+
+type SubgroupData = ConversationSubgroup & GroupData & { start: string; end: string };
 
 // constants
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
@@ -21,14 +32,16 @@ export function closeMenu(menuId: string) {
 export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
   // gather up unprocessed items
   const channelItems = await getSynergyItems(perspective, channelId);
-  const conversations = (await Conversation.query(perspective, { source: channelId })) as Conversation[];
+  const conversations = (await Conversation.query(perspective, {
+    source: channelId,
+  })) as ConversationData[];
   const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
   const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   const conversationsWithData = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
         setMatchIndex(conversationIndex);
-      const subgroups = await conversation.subgroups()
+      const subgroups = (await conversation.subgroups()) as SubgroupData[];
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
           if (match && subgroup.baseExpression === match.baseExpression) {
@@ -36,7 +49,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
             conversation.matchIndex = subgroupIndex;
           }
           subgroup.groupType = "subgroup";
-          subgroup.topics = await subgroup.topicsWithRelevance()
+          subgroup.topics = await subgroup.topicsWithRelevance();
           const subgroupItems = await getSynergyItems(perspective, subgroup.baseExpression);
           if (subgroupItems.length) {
             subgroup.start = subgroupItems[0].timestamp;
@@ -67,7 +80,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
           if (!conversation.participants.includes(p)) conversation.participants.push(p);
         });
       });
-      conversation.topics = await conversation.topicsWithRelevance()
+      conversation.topics = await conversation.topicsWithRelevance();
       conversation.children = subgroupsWithData;
       return conversation;
     })
