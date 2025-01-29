@@ -248,7 +248,7 @@ export default function TimelineBlock({
             />
             {selected && (
               <j-flex gap="300" wrap style={{ marginTop: 10 }}>
-                {topics.map((topic) => (
+                {/* {topics.map((topic) => (
                   <button
                     className={`${styles.tag} ${selected && selectedTopicId === topic.baseExpression && styles.focus}`}
                     onClick={() => search("topic", topic)}
@@ -257,7 +257,7 @@ export default function TimelineBlock({
                   >
                     #{topic.name}
                   </button>
-                ))}
+                ))} */}
                 {!match && (
                   <button
                     className={`${styles.tag} ${styles.vector}`}

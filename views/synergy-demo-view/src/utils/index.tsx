@@ -1,6 +1,5 @@
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import {
-  findTopics,
   getSynergyItems,
   findUnprocessedItems,
   findAllChannelSubgroupIds,
@@ -64,7 +63,6 @@ export async function getConversationData(perspective, channelId, match?, setMat
                 conversation.matchIndex = subgroupIndex;
                 subgroup.matchIndex = itemIndex;
               }
-              item.topics = await findTopics(perspective, item.baseExpression);
               if (!subgroup.participants.find((p) => p === item.author))
                 subgroup.participants.push(item.author);
               return item;

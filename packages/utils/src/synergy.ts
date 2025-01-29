@@ -1,42 +1,8 @@
 import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  Conversation,
-  ConversationSubgroup,
-  Message,
-  Post,
-  SemanticRelationship,
-  SubjectRepository,
-  Topic,
-} from "@coasys/flux-api";
+import { Conversation, ConversationSubgroup, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
-import { TopicWithRelevance } from "@coasys/flux-api/src/topic";
-
-export async function findTopics(perspective, itemId): Promise<TopicWithRelevance[]> {
-  const allRelationships = (await SemanticRelationship.query(perspective, {
-    source: itemId,
-  })) as any;
-
-  const topics: TopicWithRelevance[] = [];
-  for (const rel of allRelationships) {
-    if (!rel.relevance) continue;
-
-    try {
-      const topicEntity = new Topic(perspective, rel.tag);
-      const topic = await topicEntity.get();
-      topics.push({
-        baseExpression: rel.tag,
-        name: topic.topic,
-        relevance: rel.relevance,
-      });
-    } catch (error) {
-      continue;
-    }
-  }
-
-  return topics;
-}
 
 export async function getAllTopics(perspective) {
   // gather up all existing topics in the neighbourhood
@@ -60,11 +26,11 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
   // - "title" property through Post class, or
   // - "name" propoerty through Task class
   const items: {
-    Item: string,
-    Timestamp: number, //unix milliseconds
-    Author: string,
-    Text: string,
-    Type: string, //"Message", "Post", "Task"
+    Item: string;
+    Timestamp: number; //unix milliseconds
+    Author: string;
+    Text: string;
+    Type: string; //"Message", "Post", "Task"
   }[] = await perspective.infer(`
     link("${parentId}", "ad4m://has_child", Item, Timestamp, Author),
     (
@@ -83,28 +49,30 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
       instance(TaskClass, Item), 
       property_getter(TaskClass, Item, "name", Text)
     ).
-    `)
+    `);
 
-  if(!items) return []
+  if (!items) return [];
 
   const icons = {
-    "Message": "chat",
-    "Post": "postcard",
-    "Task": "kanban"
+    Message: "chat",
+    Post: "postcard",
+    Task: "kanban",
   };
 
-  return items.map(item => {
-    return {
-      type: item.Type,
-      baseExpression: item.Item,
-      author: item.Author,
-      timestamp: new Date(item.Timestamp).toISOString(),
-      text: Literal.fromUrl(item.Text).get().data,
-      icon: icons[item.Type] ? icons[item.Type] : "question"
-    }
-  }).sort((a, b) => {
-    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-  });
+  return items
+    .map((item) => {
+      return {
+        type: item.Type,
+        baseExpression: item.Item,
+        author: item.Author,
+        timestamp: new Date(item.Timestamp).toISOString(),
+        text: Literal.fromUrl(item.Text).get().data,
+        icon: icons[item.Type] ? icons[item.Type] : "question",
+      };
+    })
+    .sort((a, b) => {
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    });
 }
 
 export async function getDefaultLLM() {
@@ -292,8 +260,8 @@ export async function findAllChannelSubgroupIds(
 
 let processing = false;
 export async function runProcessingCheck(
-  perspective: PerspectiveProxy, 
-  channelId: string, 
+  perspective: PerspectiveProxy,
+  channelId: string,
   channelItems: any[],
   setProcessing: any
 ) {
