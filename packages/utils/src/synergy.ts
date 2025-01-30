@@ -32,7 +32,14 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
     Text: string;
     Type: string; //"Message", "Post", "Task"
   }[] = await perspective.infer(`
-    link("${parentId}", "ad4m://has_child", Item, Timestamp, Author),
+    triple("${parentId}", "ad4m://has_child", Item),
+    findall(
+      [Timestamp, Author], 
+      link(_, "ad4m://has_child", Item, Timestamp, Author),
+      AllData
+      ), 
+    sort(AllData, SortedData),
+    SortedData = [[Timestamp, Author]|_],
     (
       Type = "Message",
       subject_class("Message", TaskClass),
@@ -61,18 +68,13 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
 
   return items
     .map((item) => {
-      // Since author and timestamp from above prolog query pertains to the link
-      // linking this expression into the parentID, it is not neccessarily the
-      // author for the expression.
-      // But the textExpression (the body) must be the correct author
       let textExpression = Literal.fromUrl(item.Text).get() as Expression
       console.log("item:", item)
-      console.log("textExpression:", textExpression)
       return {
         type: item.Type,
         baseExpression: item.Item,
-        author: textExpression.author,
-        timestamp: textExpression.timestamp,
+        author: item.Author,
+        timestamp: new Date(item.Timestamp).toISOString(),
         text: textExpression.data,
         icon: icons[item.Type] ? icons[item.Type] : "question",
       };
