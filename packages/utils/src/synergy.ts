@@ -69,7 +69,6 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
   return items
     .map((item) => {
       let textExpression = Literal.fromUrl(item.Text).get() as Expression
-      console.log("item:", item)
       return {
         type: item.Type,
         baseExpression: item.Item,
