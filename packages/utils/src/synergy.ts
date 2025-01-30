@@ -79,6 +79,9 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
         icon: icons[item.Type] ? icons[item.Type] : "question",
       };
     })
+    .filter((item, index, self) => 
+      self.findIndex(i => i.baseExpression === item.baseExpression) === index
+    )
     .sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
