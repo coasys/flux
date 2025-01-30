@@ -1,4 +1,4 @@
-import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal } from "@coasys/ad4m";
+import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal, Expression } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, ConversationSubgroup, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
@@ -61,12 +61,19 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
 
   return items
     .map((item) => {
+      // Since author and timestamp from above prolog query pertains to the link
+      // linking this expression into the parentID, it is not neccessarily the
+      // author for the expression.
+      // But the textExpression (the body) must be the correct author
+      let textExpression = Literal.fromUrl(item.Text).get() as Expression
+      console.log("item:", item)
+      console.log("textExpression:", textExpression)
       return {
         type: item.Type,
         baseExpression: item.Item,
-        author: item.Author,
-        timestamp: new Date(item.Timestamp).toISOString(),
-        text: Literal.fromUrl(item.Text).get().data,
+        author: textExpression.author,
+        timestamp: textExpression.timestamp,
+        text: textExpression.data,
         icon: icons[item.Type] ? icons[item.Type] : "question",
       };
     })
