@@ -182,7 +182,7 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
 }
 // todo: store these consts in channel settings
 const minItemsToProcess = 5;
-const maxItemsToProcess = 20;
+const maxItemsToProcess = 10;
 const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
