@@ -25,8 +25,11 @@ export default function TimelineColumn({
   const [processing, setProcessing] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
+  const [firstRun, setFirstRun] = useState(true);
   const timeout = useRef<any>(null);
   const totalConversationItems = useRef(0);
+  const processingRef = useRef(true);
+  const gettingDataRef = useRef(false);
 
   async function runProcessingCheckIfNewItems() {
     const channelItems = await getSynergyItems(perspective, channelId);
@@ -36,14 +39,20 @@ export default function TimelineColumn({
   }
 
   async function getData() {
-    runProcessingCheckIfNewItems();
-    const data = await getConversationData(perspective, channelId);
-    setUnprocessedItems(data.unprocessedItems);
-    setConversations(data.conversations);
+    if (!gettingDataRef.current) {
+      gettingDataRef.current = true;
+      runProcessingCheckIfNewItems();
+      const data = await getConversationData(perspective, channelId);
+      setUnprocessedItems(data.unprocessedItems);
+      setConversations(data.conversations);
+      gettingDataRef.current = false;
+    }
   }
   function linkAddedListener() {
-    if (timeout.current) clearTimeout(timeout.current);
-    timeout.current = setTimeout(getData, 2000);
+    if (!processingRef.current) {
+      if (timeout.current) clearTimeout(timeout.current);
+      timeout.current = setTimeout(getData, 2000);
+    }
   }
 
   useEffect(() => {
@@ -51,10 +60,15 @@ export default function TimelineColumn({
     addSynergySignalHandler(perspective, setProcessing);
     // add listener for new links
     perspective.addListener("link-added", linkAddedListener);
-    getData();
 
     return () => perspective.removeListener("link-added", linkAddedListener);
   }, []);
+
+  useEffect(() => {
+    processingRef.current = !!processing;
+    if (!processing || firstRun) getData();
+    if (firstRun) setFirstRun(false);
+  }, [processing]);
 
   return (
     <div className={styles.wrapper}>
