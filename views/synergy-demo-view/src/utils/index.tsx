@@ -1,16 +1,12 @@
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import {
-  getSynergyItems,
-  findUnprocessedItems,
-  findAllChannelSubgroupIds,
-} from "@coasys/flux-utils";
+import { getSynergyItems, findUnprocessedItems, findAllChannelSubgroupIds } from "@coasys/flux-utils";
 
 type GroupData = {
+  matchIndex?: number;
   groupType: "conversation" | "subgroup" | "item";
-  children: any[];
+  totalChildren: number;
   participants: string[];
   topics: any[];
-  matchIndex?: number;
 };
 
 type ConversationData = Conversation & GroupData;
@@ -28,6 +24,16 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
+export async function getConversations(perspective, channelId, match?, setMatchIndex?) {
+  const conversations = (await Conversation.query(perspective, {
+    source: channelId,
+  })) as ConversationData[];
+  conversations.forEach((conversation, conversationIndex) => {
+    if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
+  });
+  return conversations;
+}
+
 export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
   // gather up unprocessed items
   const channelItems = await getSynergyItems(perspective, channelId);
@@ -38,8 +44,7 @@ export async function getConversationData(perspective, channelId, match?, setMat
   const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   const conversationsWithData = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
-      if (match && conversation.baseExpression === match.baseExpression)
-        setMatchIndex(conversationIndex);
+      if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
       const conversationParticipants = new Set<string>();
       const uniqueTopicsByName = new Map();
       const subgroups = (await conversation.subgroups()) as SubgroupData[];
@@ -122,13 +127,7 @@ export function ChevronRightSVG() {
 
 export function CurveSVG() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="38"
-      height="60"
-      version="1.1"
-      viewBox="0 0 10.054 15.875"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="60" version="1.1" viewBox="0 0 10.054 15.875">
       <g transform="translate(-3.39 -5.533)">
         <path
           fill="none"

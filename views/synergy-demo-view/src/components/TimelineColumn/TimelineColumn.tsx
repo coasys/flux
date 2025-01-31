@@ -1,7 +1,14 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversationData, groupingOptions } from "../../utils";
-import { runProcessingCheck, getSynergyItems, addSynergySignalHandler } from "@coasys/flux-utils";
-import TimelineBlock from "../TimelineBlock";
+import { closeMenu, getConversations, groupingOptions } from "../../utils";
+import {
+  runProcessingCheck,
+  getSynergyItems,
+  addSynergySignalHandler,
+  findUnprocessedItems,
+  findAllChannelSubgroupIds,
+} from "@coasys/flux-utils";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import ConversationBlock from "../ConversationBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
 
@@ -13,62 +20,76 @@ type Props = {
   search: (type: "topic" | "vector", id: string) => void;
 };
 
-export default function TimelineColumn({
-  agent,
-  perspective,
-  channelId,
-  selectedTopicId,
-  search,
-}: Props) {
+export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
   const [processing, setProcessing] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
-  const [firstRun, setFirstRun] = useState(true);
-  const timeout = useRef<any>(null);
-  const totalConversationItems = useRef(0);
-  const processingRef = useRef(true);
-  const gettingDataRef = useRef(false);
+  // const [firstRun, setFirstRun] = useState(true);
+  // const timeout = useRef<any>(null);
+  // const totalConversationItems = useRef(0);
+  // const processingRef = useRef(true);
+  // const gettingDataRef = useRef(false);
 
-  async function runProcessingCheckIfNewItems() {
+  async function getConversationData() {
+    const newConversations = await getConversations(perspective, channelId);
+    setConversations(newConversations);
+  }
+
+  async function getUnprocessedItems() {
     const channelItems = await getSynergyItems(perspective, channelId);
-    if (channelItems.length > totalConversationItems.current)
-      runProcessingCheck(perspective, channelId, channelItems, setProcessing);
-    totalConversationItems.current = channelItems.length;
-  }
-
-  async function getData() {
-    if (!gettingDataRef.current) {
-      gettingDataRef.current = true;
-      runProcessingCheckIfNewItems();
-      const data = await getConversationData(perspective, channelId);
-      setUnprocessedItems(data.unprocessedItems);
-      setConversations(data.conversations);
-      gettingDataRef.current = false;
-    }
-  }
-  function linkAddedListener() {
-    if (!processingRef.current) {
-      if (timeout.current) clearTimeout(timeout.current);
-      timeout.current = setTimeout(getData, 2000);
-    }
+    const conversations = (await Conversation.query(perspective, {
+      source: channelId,
+    })) as Conversation[];
+    const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
+    const newUnprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
+    setUnprocessedItems(newUnprocessedItems);
   }
 
   useEffect(() => {
-    // add signal listener
-    addSynergySignalHandler(perspective, setProcessing);
-    // add listener for new links
-    perspective.addListener("link-added", linkAddedListener);
-
-    return () => perspective.removeListener("link-added", linkAddedListener);
+    getConversationData();
   }, []);
 
-  useEffect(() => {
-    processingRef.current = !!processing;
-    if (!processing || firstRun) getData();
-    if (firstRun) setFirstRun(false);
-  }, [processing]);
+  // async function runProcessingCheckIfNewItems() {
+  //   const channelItems = await getSynergyItems(perspective, channelId);
+  //   if (channelItems.length > totalConversationItems.current)
+  //     runProcessingCheck(perspective, channelId, channelItems, setProcessing);
+  //   totalConversationItems.current = channelItems.length;
+  // }
+
+  // async function getData() {
+  //   if (!gettingDataRef.current) {
+  //     gettingDataRef.current = true;
+  //     runProcessingCheckIfNewItems();
+  //     const data = await getConversations(perspective, channelId);
+  //     setUnprocessedItems(data.unprocessedItems);
+  //     setConversations(data.conversations);
+  //     gettingDataRef.current = false;
+  //   }
+  // }
+
+  // function linkAddedListener() {
+  //   if (!processingRef.current) {
+  //     if (timeout.current) clearTimeout(timeout.current);
+  //     timeout.current = setTimeout(getData, 2000);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   // add signal listener
+  //   addSynergySignalHandler(perspective, setProcessing);
+  //   // add listener for new links
+  //   perspective.addListener("link-added", linkAddedListener);
+
+  //   return () => perspective.removeListener("link-added", linkAddedListener);
+  // }, []);
+
+  // useEffect(() => {
+  //   processingRef.current = !!processing;
+  //   if (!processing || firstRun) getData();
+  //   if (firstRun) setFirstRun(false);
+  // }, [processing]);
 
   return (
     <div className={styles.wrapper}>
@@ -100,10 +121,10 @@ export default function TimelineColumn({
         </div>
         <div id="timeline-0" className={styles.items}>
           {conversations.map((conversation: any) => (
-            <TimelineBlock
+            <ConversationBlock
               agent={agent}
               perspective={perspective}
-              data={conversation}
+              conversation={conversation}
               index={0}
               zoom={zoom}
               selectedTopicId={selectedTopicId}
@@ -111,6 +132,17 @@ export default function TimelineColumn({
               setSelectedItemId={setSelectedItemId}
               search={search}
             />
+            // <TimelineBlock
+            //   agent={agent}
+            //   perspective={perspective}
+            //   data={conversation}
+            //   index={0}
+            //   zoom={zoom}
+            //   selectedTopicId={selectedTopicId}
+            //   selectedItemId={selectedItemId}
+            //   setSelectedItemId={setSelectedItemId}
+            //   search={search}
+            // />
           ))}
           {unprocessedItems.length > 0 && (
             <div style={{ marginLeft: 70 }}>
