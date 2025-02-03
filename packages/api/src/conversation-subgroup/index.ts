@@ -1,4 +1,4 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery } from "@coasys/ad4m";
+import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery, Literal } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
 import Conversation from "../conversation";
@@ -47,26 +47,44 @@ export default class ConversationSubgroup extends SubjectEntity {
   }
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    const subgroupSemanticRelationships = await this.semanticRelationships();
+    // query prolog to find the totalSubgroups count and participant dids for the conversation
+    const result = await this.perspective.infer(`
+        findall([TopicInstance, TopicName, Relevance], (
+          % SemanticRelationships of this group
+          subject_class("SemanticRelationship", SR),
+          instance(SR, SRInstance),
+          property_getter(SR, SRInstance, "expression", "${this.baseExpression}"),
+          property_getter(SR, SRInstance, "relevance", Relevance),
+          property_getter(SR, SRInstance, "tag", TopicInstance),
+
+          subject_class("Topic", T),
+          instance(T, TopicInstance),
+          property_getter(T, TopicInstance, "topic", TopicName),
+        ), TopicRelevanceList).
+    `);
+
+    console.log("topicsWithRelevance prolog result:", result);
+
+    let topicRelevanceList = result[0]?.TopicRelevanceList;
+    if (!topicRelevanceList) {
+      return [];
+    }
 
     const topics: TopicWithRelevance[] = [];
-    for (const rel of subgroupSemanticRelationships) {
-      if (!rel.relevance) continue;
-
+    for (const [topicInstance, topicName, relevance] of topicRelevanceList) {
       try {
-        const topicEntity = new Topic(this.perspective, rel.tag);
-        const topic = await topicEntity.get();
         topics.push({
-          baseExpression: rel.tag,
-          name: topic.topic,
-          relevance: rel.relevance,
+          baseExpression: topicInstance,
+          name: Literal.fromUrl(topicName).get().data,
+          relevance: Literal.fromUrl(relevance).get().data,
         });
       } catch (error) {
         continue;
       }
     }
 
-    return topics;
+    console.log("topicsWithRelevance objects:", topics);
+    return topics
   }
 
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
