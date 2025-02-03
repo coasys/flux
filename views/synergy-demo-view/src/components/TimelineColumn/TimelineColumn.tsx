@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversations, groupingOptions } from "../../utils";
+import { closeMenu, getConversations, groupingOptions, GroupData } from "../../utils";
 import {
   runProcessingCheck,
   getSynergyItems,
@@ -8,7 +8,7 @@ import {
   findAllChannelSubgroupIds,
 } from "@coasys/flux-utils";
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import GroupBlock from "../GroupBlock";
+import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
 
@@ -19,6 +19,8 @@ type Props = {
   selectedTopicId: string;
   search: (type: "topic" | "vector", id: string) => void;
 };
+
+type ConversationData = Conversation & GroupData;
 
 export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -32,8 +34,11 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   // const processingRef = useRef(true);
   // const gettingDataRef = useRef(false);
 
-  async function getConversationData() {
-    const newConversations = await getConversations(perspective, channelId);
+  async function getConversations() {
+    const newConversations = (await Conversation.query(perspective, { source: channelId })) as ConversationData[];
+    // newConversations.forEach((conversation, conversationIndex) => {
+    //   if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
+    // });
     setConversations(newConversations);
   }
 
@@ -48,7 +53,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   }
 
   useEffect(() => {
-    getConversationData();
+    getConversations();
   }, []);
 
   // async function runProcessingCheckIfNewItems() {
@@ -121,10 +126,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
         </div>
         <div id="timeline-0" className={styles.items}>
           {conversations.map((conversation: any) => (
-            <GroupBlock
+            <TimelineBlock
               agent={agent}
               perspective={perspective}
-              type="conversation"
+              blockType="conversation"
               data={conversation}
               index={0}
               zoom={zoom}

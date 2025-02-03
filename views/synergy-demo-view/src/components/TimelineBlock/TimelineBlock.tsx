@@ -3,10 +3,13 @@ import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../u
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
+import { Literal } from "@coasys/ad4m";
+import { getSynergyItems } from "@coasys/flux-utils";
 
 type Props = {
   agent: any;
   perspective: any;
+  blockType: "conversation" | "subgroup" | "item";
   data: any;
   index: number;
   selectedTopicId: string;
@@ -14,13 +17,14 @@ type Props = {
   zoom?: string;
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
-  search?: (type: "topic" | "vector", id: string) => void;
+  search?: (blockType: "topic" | "vector", id: string) => void;
 };
 
 export default function TimelineBlock({
   agent,
   perspective,
   data,
+  blockType,
   index,
   zoom,
   match,
@@ -29,35 +33,254 @@ export default function TimelineBlock({
   setSelectedItemId,
   search,
 }: Props) {
-  const {
-    baseExpression,
-    groupType,
-    timestamp,
-    start,
-    end,
-    author,
-    participants,
-    topics,
-    children,
-  } = data;
+  const { baseExpression, summary, timestamp, start, end, author, matchIndex } = data;
+  const [totalChildren, setTotalChildren] = useState(0);
+  const [participants, setParticipants] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [children, setChildren] = useState([]);
   const [showChildren, setShowChildren] = useState(data.matchIndex !== undefined);
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
 
+  async function getConversationStats() {
+    // find the total subgroup count and participants in the conversation
+    const result = await perspective.infer(`
+      findall([SubgroupCount, SortedAuthors], (
+        % 1. Gather all subgroups and count
+        findall(Subgroup, (
+          subject_class("ConversationSubgroup", CS),
+          instance(CS, Subgroup),
+          triple("${baseExpression}", "ad4m://has_child", Subgroup)
+        ), SubgroupList),
+        length(SubgroupList, SubgroupCount),
+  
+        % 2. Gather and deduplicate authors
+        findall(Author, (
+          member(S, SubgroupList),
+          triple(S, "ad4m://has_child", Item),
+          link(_, "ad4m://has_child", Item, _, Author)
+        ), AuthorList),
+        sort(AuthorList, SortedAuthors)
+      ), [Stats]).
+    `);
+
+    const stats = result[0]?.Stats;
+    if (stats) {
+      const [totalChildren, allParticipants] = stats;
+      setTotalChildren(totalChildren);
+      setParticipants(allParticipants);
+    }
+  }
+
+  async function getSubgroupStats() {
+    // find the total item count and participants in the subgroup
+    const result = await perspective.infer(`
+      findall([ItemCount, SortedAuthors], (
+        % 1. Gather all items in the subgroup
+        findall(Item, (
+          triple("${baseExpression}", "ad4m://has_child", Item),
+          % Ensure item is not a SemanticRelationship
+          (
+            subject_class("Message", MC),
+            instance(MC, Item)
+            ;
+            subject_class("Post", PC),
+            instance(PC, Item)
+            ;
+            subject_class("Task", TC),
+            instance(TC, Item)
+          )
+        ), AllItems),
+
+        % 2. Deduplicate items
+        sort(AllItems, UniqueItems),
+        length(UniqueItems, ItemCount),
+
+        % 3. For each item, gather its authors
+        findall(Author, (
+          member(I, UniqueItems),
+          link(_, "ad4m://has_child", I, _, Author)
+        ), AuthorList),
+
+        % 4. Remove duplicates among authors
+        sort(AuthorList, SortedAuthors)
+      ), [Stats]).
+    `);
+
+    const stats = result[0]?.Stats;
+    if (stats) {
+      const [totalItems, allParticipants] = stats;
+      setTotalChildren(totalItems);
+      setParticipants(allParticipants);
+    }
+  }
+
+  async function getConversationTopics() {
+    // find the conversations topics
+    const result = await perspective.infer(`
+      % Get all topics and sort in one step
+      findall(TopicList, (
+        % First get all topic pairs
+        findall([TopicBase, TopicName], (
+          % 1. Gather subgroups
+          findall(Subgroup, (
+            subject_class("ConversationSubgroup", CS),
+            instance(CS, Subgroup),
+            triple("${baseExpression}", "ad4m://has_child", Subgroup)
+          ), SubgroupList),
+  
+          % 2. Get topics from relationships
+          member(S, SubgroupList),
+          subject_class("SemanticRelationship", SR),
+          instance(SR, Relationship),
+          triple(Relationship, "flux://has_expression", S),
+          triple(Relationship, "flux://has_tag", TopicBase),
+          
+          % 3. Get topic names
+          subject_class("Topic", T),
+          instance(T, TopicBase),
+          property_getter(T, TopicBase, "topic", TopicName)
+        ), AllTopics),
+        
+        % Remove duplicates
+        sort(AllTopics, TopicList)
+      ), [Topics]).
+    `);
+
+    const topics =
+      result[0]?.Topics?.map(([baseExpression, name]) => ({
+        baseExpression,
+        name: Literal.fromUrl(name).get().data,
+      })) || [];
+
+    setTopics(topics);
+  }
+
+  async function getSubgroupTopics() {
+    // find the subgroups topics
+    const result = await perspective.infer(`
+      % Collect and deduplicate topic data for this specific subgroup
+      findall(TopicList, (
+        findall([TopicBase, TopicName], (
+          % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's baseExpression
+          subject_class("SemanticRelationship", SR),
+          instance(SR, Relationship),
+          triple(Relationship, "flux://has_expression", "${baseExpression}"),
+          
+          % 2. Retrieve the Topic base
+          triple(Relationship, "flux://has_tag", TopicBase),
+          
+          % 3. Get the topic class & name
+          subject_class("Topic", T),
+          instance(T, TopicBase),
+          property_getter(T, TopicBase, "topic", TopicName)
+        ), UnsortedTopics),
+  
+        % 4. Deduplicate via sort
+        sort(UnsortedTopics, TopicList)
+      ), [Topics]).
+    `);
+
+    const topics =
+      result[0]?.Topics?.map(([baseExpression, name]) => ({
+        baseExpression,
+        name: Literal.fromUrl(name).get().data,
+      })) || [];
+
+    setTopics(topics);
+  }
+
+  async function getSubgroups() {
+    // find all subgroups in the conversation (include timestamps for the first and last item in each subgroup)
+    const result = await perspective.infer(`
+      findall(SubgroupInfo, (
+        % 1. Identify all subgroups of the conversation
+        subject_class("ConversationSubgroup", CS),
+        instance(CS, Subgroup),
+        triple("${baseExpression}", "ad4m://has_child", Subgroup),
+  
+        % 2. Retrieve subgroup properties
+        property_getter(CS, Subgroup, "subgroupName", SubgroupName),
+        property_getter(CS, Subgroup, "summary", Summary),
+  
+        % 3. Collect all link timestamps for items in this subgroup
+        findall(Timestamp, link(Subgroup, "ad4m://has_child", _, Timestamp, _), Timestamps),
+        (
+          % 4. Derive start and end from earliest & latest timestamps
+          Timestamps = []
+          -> StartTime = 0, EndTime = 0
+          ; sort(Timestamps, Sorted),
+            Sorted = [StartTime|_],
+            reverse(Sorted, [EndTime|_])
+        ),
+  
+        % 5. Build a single structure for each subgroup
+        SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
+      ), Subgroups).
+    `);
+
+    // convert raw prolog output into a friendlier JS array
+    const newSubgroups = (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
+      baseExpression,
+      subgroupName: Literal.fromUrl(subgroupName).get().data,
+      summary: Literal.fromUrl(summary).get().data,
+      start: parseInt(start, 10),
+      end: parseInt(end, 10),
+    }));
+
+    setChildren(newSubgroups);
+  }
+
+  async function getItems() {
+    const newItems = await getSynergyItems(perspective, baseExpression);
+    newItems.forEach((item: any) => {
+      item.blockType = "item";
+    });
+    setChildren(newItems);
+  }
+
+  function onGroupClick() {
+    setSelectedItemId(selected ? null : baseExpression);
+    if (!selected) {
+      if (blockType === "conversation") getConversationTopics();
+      if (blockType === "subgroup") getSubgroupTopics();
+    }
+  }
+
+  function toggleShowChildren() {
+    if (!match) {
+      if (!showChildren) {
+        if (blockType === "conversation") getSubgroups();
+        if (blockType === "subgroup") getItems();
+      }
+      if (selectedItemId !== baseExpression) setSelectedItemId(null);
+    }
+    setShowChildren(!showChildren);
+  }
+
+  useEffect(() => {
+    if (blockType === "conversation") {
+      getConversationStats();
+      if (showChildren) getSubgroups();
+    }
+    if (blockType === "subgroup") {
+      getSubgroupStats();
+      if (showChildren) getItems();
+    }
+  }, [showChildren]);
+
   // mark as selected
   useEffect(() => {
-    setSelected(
-      selectedItemId === baseExpression || (match && match.baseExpression === baseExpression)
-    );
+    setSelected(selectedItemId === baseExpression || (match && match.baseExpression === baseExpression));
   }, [selectedItemId]);
 
   // expand or collapse children based on zoom level
   useEffect(() => {
     if (zoom) {
       if (zoom === "Conversations") setShowChildren(false);
-      else if (zoom === "Subgroups") setShowChildren(groupType === "conversation");
-      else if (groupType !== "item") setShowChildren(true);
+      else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");
+      else if (blockType !== "item") setShowChildren(true);
     }
   }, [zoom]);
 
@@ -74,56 +297,36 @@ export default function TimelineBlock({
   }, [selectedItemId]);
 
   return (
-    <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles[groupType]}`}>
-      {!match && (
-        <button
-          className={styles.button}
-          onClick={() => setSelectedItemId(selected ? null : baseExpression)}
-        />
-      )}
-      {groupType === "conversation" && (
-        <j-timestamp value={timestamp} relative className={styles.timestamp} />
-      )}
-      {groupType === "subgroup" && (
+    <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles[blockType]}`}>
+      {!match && <button className={styles.groupButton} onClick={onGroupClick} />}
+      {blockType === "conversation" && <j-timestamp value={timestamp} relative className={styles.timestamp} />}
+      {blockType === "subgroup" && (
         <span className={styles.timestamp}>
           {((new Date(end).getTime() - new Date(start).getTime()) / 1000 / 60).toFixed(1)} mins
         </span>
       )}
-      {groupType === "item" && (
-        <j-timestamp value={timestamp} timeStyle="short" className={styles.timestamp} />
-      )}
       <div className={styles.position}>
         {!showChildren && <div className={`${styles.node} ${selected && styles.selected}`} />}
-        <div className={`${styles.line} ${showChildren && styles.showChildren}`} />
+        <div className={styles.line} />
       </div>
-      {["conversation", "subgroup"].includes(groupType) && (
+      {["conversation", "subgroup"].includes(blockType) && (
         <j-flex direction="column" gap="300" className={styles.content}>
-          <j-flex
-            direction="column"
-            gap="300"
-            className={`${styles.card} ${selected && styles.selected}`}
-          >
+          <j-flex direction="column" gap="300" className={`${styles.card} ${selected && styles.selected}`}>
             <j-flex a="center" gap="400">
               <j-flex a="center" gap="400">
                 {match && match.baseExpression === baseExpression && (
                   <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
                 )}
-                <h1>{data[`${groupType}Name`]}</h1>
+                <h1>{data[`${blockType}Name`]}</h1>
               </j-flex>
-              {children.length > 0 && (
-                <button
-                  className={styles.showChildrenButton}
-                  onClick={() => {
-                    if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
-                    setShowChildren(!showChildren);
-                  }}
-                >
+              {totalChildren > 0 && (
+                <button className={styles.showChildrenButton} onClick={toggleShowChildren}>
                   {showChildren ? <ChevronDownSVG /> : <ChevronRightSVG />}
-                  {children.length}
+                  {totalChildren}
                 </button>
               )}
             </j-flex>
-            <p className={styles.summary}>{data.summary}</p>
+            <p className={styles.summary}>{summary}</p>
             <j-flex className={styles.participants}>
               {participants.map((p, i) => (
                 <Avatar did={p} style={{ marginLeft: i > 0 ? -10 : 0 }} />
@@ -131,7 +334,7 @@ export default function TimelineBlock({
             </j-flex>
             {selected && (
               <j-flex gap="300" wrap style={{ marginTop: 5 }}>
-                {data.topics.map((topic) => (
+                {topics.map((topic) => (
                   <button
                     className={`${styles.tag} ${selectedTopicId === topic.baseExpression && styles.focus}`}
                     onClick={() => search("topic", topic)}
@@ -142,32 +345,24 @@ export default function TimelineBlock({
                   </button>
                 ))}
                 {!match && (
-                  <button
-                    className={`${styles.tag} ${styles.vector}`}
-                    onClick={() => search("vector", data)}
-                  >
-                    <j-icon
-                      name="flower2"
-                      color="color-success-500"
-                      size="sm"
-                      style={{ marginRight: 5 }}
-                    />
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", data)}>
+                    <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>
                 )}
               </j-flex>
             )}
           </j-flex>
-          {children.length > 0 && showChildren && (
+          {totalChildren > 0 && showChildren && (
             <div className={styles.children}>
-              {data.matchIndex > 0 && collapseBefore && (
+              {matchIndex > 0 && collapseBefore && (
                 <>
                   <div className={styles.expandButtonWrapper} style={{ marginTop: 6 }}>
                     <div className={styles.expandButton}>
                       <j-button onClick={() => setCollapseBefore(false)}>
                         See more
                         <span>
-                          <ChevronUpSVG /> {data.matchIndex}
+                          <ChevronUpSVG /> {matchIndex}
                         </span>
                       </j-button>
                     </div>
@@ -180,10 +375,10 @@ export default function TimelineBlock({
               </div>
               {children
                 .filter((child: any, i) => {
-                  if (match && data.matchIndex !== undefined) {
-                    if (collapseBefore && collapseAfter) return i === data.matchIndex;
-                    else if (collapseBefore) return i >= data.matchIndex;
-                    else if (collapseAfter) return i <= data.matchIndex;
+                  if (match && matchIndex !== undefined) {
+                    if (collapseBefore && collapseAfter) return i === matchIndex;
+                    else if (collapseBefore) return i >= matchIndex;
+                    else if (collapseAfter) return i <= matchIndex;
                   }
                   return child;
                 })
@@ -192,6 +387,7 @@ export default function TimelineBlock({
                     key={child.baseExpression}
                     agent={agent}
                     perspective={perspective}
+                    blockType={blockType === "conversation" ? "subgroup" : "item"}
                     data={child}
                     index={index}
                     match={match}
@@ -205,16 +401,13 @@ export default function TimelineBlock({
               <div className={styles.curveBottom}>
                 <CurveSVG />
               </div>
-              {data.matchIndex < data.children.length - 1 && collapseAfter && (
-                <div
-                  className={styles.expandButtonWrapper}
-                  style={{ marginTop: groupType === "subgroup" ? -8 : -20 }}
-                >
+              {matchIndex < children.length - 1 && collapseAfter && (
+                <div className={styles.expandButtonWrapper} style={{ marginTop: -20 }}>
                   <div className={styles.expandButton}>
                     <j-button onClick={() => setCollapseAfter(false)}>
                       See more
                       <span>
-                        <ChevronDownSVG /> {data.children.length - data.matchIndex - 1}
+                        <ChevronDownSVG /> {children.length - matchIndex - 1}
                       </span>
                     </j-button>
                   </div>
@@ -224,12 +417,8 @@ export default function TimelineBlock({
           )}
         </j-flex>
       )}
-      {groupType === "item" && (
-        <j-flex
-          gap="400"
-          a="center"
-          className={`${styles.itemCard} ${selected && styles.selected}`}
-        >
+      {blockType === "item" && (
+        <j-flex gap="400" a="center" className={`${styles.itemCard} ${selected && styles.selected}`}>
           {match && match.baseExpression === baseExpression && (
             <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
           )}
@@ -259,16 +448,8 @@ export default function TimelineBlock({
                   </button>
                 ))} */}
                 {!match && (
-                  <button
-                    className={`${styles.tag} ${styles.vector}`}
-                    onClick={() => search("vector", data)}
-                  >
-                    <j-icon
-                      name="flower2"
-                      color="color-success-500"
-                      size="sm"
-                      style={{ marginRight: 5 }}
-                    />
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", data)}>
+                    <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>
                 )}

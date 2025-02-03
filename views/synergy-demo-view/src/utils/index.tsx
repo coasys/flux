@@ -1,7 +1,7 @@
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import { getSynergyItems, findUnprocessedItems, findAllChannelSubgroupIds } from "@coasys/flux-utils";
 
-type GroupData = {
+export type GroupData = {
   matchIndex?: number;
   groupType: "conversation" | "subgroup" | "item";
   totalChildren: number;
@@ -24,15 +24,15 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
-export async function getConversations(perspective, channelId, match?, setMatchIndex?) {
-  const conversations = (await Conversation.query(perspective, {
-    source: channelId,
-  })) as ConversationData[];
-  conversations.forEach((conversation, conversationIndex) => {
-    if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
-  });
-  return conversations;
-}
+// export async function getConversations(perspective, channelId, match?, setMatchIndex?) {
+//   const conversations = (await Conversation.query(perspective, {
+//     source: channelId,
+//   })) as ConversationData[];
+//   conversations.forEach((conversation, conversationIndex) => {
+//     if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
+//   });
+//   return conversations;
+// }
 
 export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
   // gather up unprocessed items
