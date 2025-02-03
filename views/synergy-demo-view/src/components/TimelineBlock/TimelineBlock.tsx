@@ -33,7 +33,7 @@ export default function TimelineBlock({
   setSelectedItemId,
   search,
 }: Props) {
-  const { baseExpression, summary, timestamp, start, end, author, matchIndex } = data;
+  const { baseExpression, name, summary, timestamp, start, end, author, matchIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [topics, setTopics] = useState([]);
@@ -223,7 +223,7 @@ export default function TimelineBlock({
     // convert raw prolog output into a friendlier JS array
     const newSubgroups = (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
       baseExpression,
-      subgroupName: Literal.fromUrl(subgroupName).get().data,
+      name: Literal.fromUrl(subgroupName).get().data,
       summary: Literal.fromUrl(summary).get().data,
       start: parseInt(start, 10),
       end: parseInt(end, 10),
@@ -259,6 +259,7 @@ export default function TimelineBlock({
     setShowChildren(!showChildren);
   }
 
+  // get data when expanding children
   useEffect(() => {
     if (blockType === "conversation") {
       getConversationStats();
@@ -317,7 +318,7 @@ export default function TimelineBlock({
                 {match && match.baseExpression === baseExpression && (
                   <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
                 )}
-                <h1>{data[`${blockType}Name`]}</h1>
+                <h1>{name}</h1>
               </j-flex>
               {totalChildren > 0 && (
                 <button className={styles.showChildrenButton} onClick={toggleShowChildren}>

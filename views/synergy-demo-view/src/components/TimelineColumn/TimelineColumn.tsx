@@ -11,6 +11,7 @@ import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
+import { Literal } from "@coasys/ad4m";
 
 type Props = {
   agent: any;
@@ -35,10 +36,34 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   // const gettingDataRef = useRef(false);
 
   async function getConversations() {
-    const newConversations = (await Conversation.query(perspective, { source: channelId })) as ConversationData[];
-    // newConversations.forEach((conversation, conversationIndex) => {
-    //   if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
-    // });
+    const result = await perspective.infer(`
+      findall(ConversationInfo, (
+        % 1. Identify all conversations in the channel
+        subject_class("Conversation", CC),
+        instance(CC, Conversation),
+        
+        % 2. Get timestamp from link
+        link("${channelId}", "ad4m://has_child", Conversation, Timestamp, _),
+  
+        % 3. Retrieve conversation properties
+        property_getter(CC, Conversation, "conversationName", ConversationName),
+        property_getter(CC, Conversation, "summary", Summary),
+  
+        % 4. Build a single structure for each conversation
+        ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
+      ), Conversations).
+    `);
+
+    // Convert raw Prolog output into a simpler JS array
+    const newConversations = (result[0]?.Conversations || []).map(
+      ([baseExpression, conversationName, summary, timestamp]) => ({
+        baseExpression,
+        name: Literal.fromUrl(conversationName).get().data,
+        summary: Literal.fromUrl(summary).get().data,
+        timestamp: parseInt(timestamp, 10),
+      })
+    );
+
     setConversations(newConversations);
   }
 
@@ -138,17 +163,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               setSelectedItemId={setSelectedItemId}
               search={search}
             />
-            // <TimelineBlock
-            //   agent={agent}
-            //   perspective={perspective}
-            //   data={conversation}
-            //   index={0}
-            //   zoom={zoom}
-            //   selectedTopicId={selectedTopicId}
-            //   selectedItemId={selectedItemId}
-            //   setSelectedItemId={setSelectedItemId}
-            //   search={search}
-            // />
           ))}
           {unprocessedItems.length > 0 && (
             <div style={{ marginLeft: 70 }}>
