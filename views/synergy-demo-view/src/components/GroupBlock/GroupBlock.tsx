@@ -2,21 +2,14 @@ import { useEffect, useState } from "preact/hooks";
 import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../utils";
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
-import styles from "./ConversationBlock.module.scss";
-import { Topic } from "@coasys/flux-api";
-import {
-  LinkQuery,
-  PerspectiveExpression,
-  NeighbourhoodProxy,
-  PerspectiveProxy,
-  Literal,
-  Expression,
-} from "@coasys/ad4m";
+import styles from "./GroupBlock.module.scss";
+import { Literal } from "@coasys/ad4m";
 
 type Props = {
   agent: any;
   perspective: any;
-  conversation: any;
+  type: "conversation" | "subgroup";
+  data: any;
   index: number;
   selectedTopicId: string;
   match?: any;
@@ -26,10 +19,11 @@ type Props = {
   search?: (type: "topic" | "vector", id: string) => void;
 };
 
-export default function ConversationBlock({
+export default function GroupBlock({
   agent,
   perspective,
-  conversation,
+  data,
+  type,
   index,
   zoom,
   match,
@@ -38,16 +32,19 @@ export default function ConversationBlock({
   setSelectedItemId,
   search,
 }: Props) {
-  const { baseExpression, conversationName, summary, timestamp, matchIndex } = conversation;
+  const { baseExpression, conversationName, summary, timestamp, matchIndex } = data;
   const [totalSubgroups, setTotalSubgroups] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [topics, setTopics] = useState([]);
   const [subgroups, setSubgroups] = useState([]);
-  const [showSubgroups, setShowSubgroups] = useState(conversation.matchIndex !== undefined);
+  const [showChildren, setShowChildren] = useState(data.matchIndex !== undefined);
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
 
+  // todo: adapt component to work with subgroups as well...
+
+  // todo: getStats()
   async function getConversationStats() {
     // query prolog to find the totalSubgroups count and participant dids for the conversation
     const result = await perspective.infer(`
@@ -128,6 +125,7 @@ export default function ConversationBlock({
 
   useEffect(() => {
     getConversationStats();
+    if (showChildren) getSubgroups();
   }, []);
 
   // mark as selected
@@ -137,7 +135,7 @@ export default function ConversationBlock({
 
   // expand or collapse children based on zoom level
   useEffect(() => {
-    setShowSubgroups(zoom !== "Conversations");
+    setShowChildren(zoom !== "Conversations");
   }, [zoom]);
 
   // scroll to matching item
@@ -154,11 +152,11 @@ export default function ConversationBlock({
 
   return (
     <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles.conversation}`}>
-      {!match && <button className={styles.conversationButton} onClick={onConversationClick} />}
+      {!match && <button className={styles.groupButton} onClick={onConversationClick} />}
       <j-timestamp value={timestamp} relative className={styles.timestamp} />
       <div className={styles.position}>
-        {!showSubgroups && <div className={`${styles.node} ${selected && styles.selected}`} />}
-        <div className={`${styles.line} ${showSubgroups && styles.showSubgroups}`} />
+        {!showChildren && <div className={`${styles.node} ${selected && styles.selected}`} />}
+        <div className={styles.line} />
       </div>
       <j-flex direction="column" gap="300" className={styles.content}>
         <j-flex direction="column" gap="300" className={`${styles.card} ${selected && styles.selected}`}>
@@ -167,17 +165,17 @@ export default function ConversationBlock({
               {match && match.baseExpression === baseExpression && (
                 <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
               )}
-              <h1>{conversationName}</h1>
+              <h1>{data[`${type}Name`]}</h1>
             </j-flex>
             {totalSubgroups > 0 && (
               <button
                 className={styles.showChildrenButton}
                 onClick={() => {
                   if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
-                  setShowSubgroups(!showSubgroups);
+                  setShowChildren(!showChildren);
                 }}
               >
-                {showSubgroups ? <ChevronDownSVG /> : <ChevronRightSVG />}
+                {showChildren ? <ChevronDownSVG /> : <ChevronRightSVG />}
                 {totalSubgroups}
               </button>
             )}
@@ -201,7 +199,7 @@ export default function ConversationBlock({
                 </button>
               ))}
               {!match && (
-                <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", conversation)}>
+                <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", data)}>
                   <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                   Synergize
                 </button>
@@ -209,7 +207,7 @@ export default function ConversationBlock({
             </j-flex>
           )}
         </j-flex>
-        {totalSubgroups > 0 && showSubgroups && (
+        {totalSubgroups > 0 && showChildren && (
           <div className={styles.children}>
             {matchIndex > 0 && collapseBefore && (
               <>

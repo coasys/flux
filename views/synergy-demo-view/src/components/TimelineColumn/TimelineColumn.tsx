@@ -8,7 +8,7 @@ import {
   findAllChannelSubgroupIds,
 } from "@coasys/flux-utils";
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import ConversationBlock from "../ConversationBlock";
+import GroupBlock from "../GroupBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
 
@@ -121,10 +121,11 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
         </div>
         <div id="timeline-0" className={styles.items}>
           {conversations.map((conversation: any) => (
-            <ConversationBlock
+            <GroupBlock
               agent={agent}
               perspective={perspective}
-              conversation={conversation}
+              type="conversation"
+              data={conversation}
               index={0}
               zoom={zoom}
               selectedTopicId={selectedTopicId}
