@@ -402,7 +402,7 @@ export default function TimelineBlock({
                   if (onMatchTree) {
                     // skip if below match
                     if (zoom === "Conversations") return true;
-                    if (zoom === "Subgroups") return blockType === "subgroup";
+                    if (zoom === "Subgroups" && blockType === "subgroup") return true;
                     // skip if collapsed
                     if (collapseBefore && collapseAfter) return i === matchIndex;
                     else if (collapseBefore) return i >= matchIndex;
