@@ -300,9 +300,15 @@ export default function TimelineBlock({
     }
   }, [zoom]);
 
-  // mark as selected
+  // mark as selected & get topics if match
   useEffect(() => {
-    setSelected(selectedItemId === baseExpression || (match && match.baseExpression === baseExpression));
+    const isSelected = selectedItemId === baseExpression;
+    const isMatch = match?.baseExpression === baseExpression;
+    setSelected(isSelected || isMatch);
+    if (isMatch) {
+      if (blockType === "conversation") getConversationTopics();
+      if (blockType === "subgroup") getSubgroupTopics();
+    }
   }, [selectedItemId]);
 
   // scroll to matching item
