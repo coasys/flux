@@ -56,6 +56,12 @@ $line-offset: 92px;
     z-index: 5;
     padding: 40px 0 10px 60px;
 
+    &.hidden {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+    }
+
     .line {
       height: 50px;
       width: 6px;

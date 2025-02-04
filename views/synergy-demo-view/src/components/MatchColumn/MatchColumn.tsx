@@ -67,9 +67,7 @@ export default function MatchColumn({
           )}
           <j-checkbox
             checked={includeChannel}
-            onChange={() =>
-              setFilterSettings({ ...filterSettings, includeChannel: !includeChannel })
-            }
+            onChange={() => setFilterSettings({ ...filterSettings, includeChannel: !includeChannel })}
           >
             Include Channel
           </j-checkbox>
@@ -87,14 +85,12 @@ export default function MatchColumn({
             agent={agent}
             match={match}
             index={index}
+            grouping={grouping}
             selectedTopicId={selectedTopicId}
           />
         ))}
         {matches.length > numberOfMatchesDisplayed && (
-          <j-button
-            className={styles.showMoreButton}
-            onClick={() => setNumberOfMatchesDisplayed((prev) => prev + 5)}
-          >
+          <j-button className={styles.showMoreButton} onClick={() => setNumberOfMatchesDisplayed((prev) => prev + 5)}>
             See more
             <span>
               <ChevronDownSVG /> {matches.length - numberOfMatchesDisplayed}

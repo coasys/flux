@@ -11,13 +11,17 @@ type Props = {
   perspective: any;
   blockType: "conversation" | "subgroup" | "item";
   data: any;
-  index: number;
+  timelineIndex: number;
   selectedTopicId: string;
   match?: any;
+  matchIndexes?: any;
+  setMatchIndexes?: (indexes: any) => void;
   zoom?: string;
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
   search?: (blockType: "topic" | "vector", id: string) => void;
+  setMatchLoading?: (loading: boolean) => void;
+  matchLoading: boolean;
 };
 
 export default function TimelineBlock({
@@ -25,23 +29,32 @@ export default function TimelineBlock({
   perspective,
   data,
   blockType,
-  index,
+  timelineIndex,
   zoom,
   match,
+  matchIndexes,
+  setMatchIndexes,
   selectedTopicId,
   selectedItemId,
   setSelectedItemId,
   search,
+  setMatchLoading,
+  matchLoading,
 }: Props) {
-  const { baseExpression, name, summary, timestamp, start, end, author, matchIndex } = data;
+  const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
   const [participants, setParticipants] = useState([]);
   const [topics, setTopics] = useState([]);
   const [children, setChildren] = useState([]);
-  const [showChildren, setShowChildren] = useState(data.matchIndex !== undefined);
+  const [showChildren, setShowChildren] = useState(false);
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
+  const matchIndex = match ? (blockType === "conversation" ? matchIndexes.subgroup : matchIndexes.item) : null;
+  const onMatchTree = match
+    ? (blockType === "conversation" && index === matchIndexes.conversation) ||
+      (blockType === "subgroup" && parentIndex === matchIndexes.conversation && index === matchIndexes.subgroup)
+    : false;
 
   async function getConversationStats() {
     // find the total subgroup count and participants in the conversation
@@ -229,67 +242,74 @@ export default function TimelineBlock({
       end: parseInt(end, 10),
     }));
 
+    if (match) {
+      newSubgroups.forEach((subgroup, subgroupIndex) => {
+        if (subgroup.baseExpression === match.baseExpression) {
+          setMatchIndexes({ conversation: index, subgroup: subgroupIndex, item: undefined });
+          setMatchLoading(false);
+        }
+      });
+    }
+
     setChildren(newSubgroups);
   }
 
   async function getItems() {
     const newItems = await getSynergyItems(perspective, baseExpression);
-    newItems.forEach((item: any) => {
+    newItems.forEach((item: any, itemIndex) => {
       item.blockType = "item";
+      if (match && item.baseExpression === match.baseExpression) {
+        setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
+        setMatchLoading(false);
+      }
     });
     setChildren(newItems);
   }
 
   function onGroupClick() {
-    setSelectedItemId(selected ? null : baseExpression);
+    if (!match) setSelectedItemId(selected ? null : baseExpression);
     if (!selected) {
       if (blockType === "conversation") getConversationTopics();
       if (blockType === "subgroup") getSubgroupTopics();
     }
   }
 
-  function toggleShowChildren() {
-    if (!match) {
-      if (!showChildren) {
-        if (blockType === "conversation") getSubgroups();
-        if (blockType === "subgroup") getItems();
-      }
-      if (selectedItemId !== baseExpression) setSelectedItemId(null);
-    }
-    setShowChildren(!showChildren);
-  }
+  // get stats on first load
+  useEffect(() => {
+    if (blockType === "conversation") getConversationStats();
+    if (blockType === "subgroup") getSubgroupStats();
+  }, []);
 
   // get data when expanding children
   useEffect(() => {
-    if (blockType === "conversation") {
-      getConversationStats();
-      if (showChildren) getSubgroups();
-    }
-    if (blockType === "subgroup") {
-      getSubgroupStats();
-      if (showChildren) getItems();
+    if (showChildren) {
+      if (blockType === "conversation") getSubgroups();
+      if (blockType === "subgroup") getItems();
+      // deselect if not a match and not the currently selected item
+      if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
     }
   }, [showChildren]);
+
+  // expand or collapse children based on zoom level
+  useEffect(() => {
+    // only fire on matches while loading
+    if (!match || matchLoading) {
+      if (zoom === "Conversations") setShowChildren(false);
+      else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");
+      else setShowChildren(true);
+    }
+  }, [zoom]);
 
   // mark as selected
   useEffect(() => {
     setSelected(selectedItemId === baseExpression || (match && match.baseExpression === baseExpression));
   }, [selectedItemId]);
 
-  // expand or collapse children based on zoom level
-  useEffect(() => {
-    if (zoom) {
-      if (zoom === "Conversations") setShowChildren(false);
-      else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");
-      else if (blockType !== "item") setShowChildren(true);
-    }
-  }, [zoom]);
-
   // scroll to matching item
   useEffect(() => {
     if (selectedItemId) {
       const item = document.getElementById(`timeline-block-${selectedItemId}`);
-      const timeline = document.getElementById(`timeline-${index}`);
+      const timeline = document.getElementById(`timeline-${timelineIndex}`);
       timeline.scrollBy({
         top: item?.getBoundingClientRect().top - 550,
         behavior: "smooth",
@@ -306,6 +326,7 @@ export default function TimelineBlock({
           {((new Date(end).getTime() - new Date(start).getTime()) / 1000 / 60).toFixed(1)} mins
         </span>
       )}
+      {blockType === "item" && <j-timestamp value={timestamp} timeStyle="short" className={styles.timestamp} />}
       <div className={styles.position}>
         {!showChildren && <div className={`${styles.node} ${selected && styles.selected}`} />}
         <div className={styles.line} />
@@ -321,7 +342,7 @@ export default function TimelineBlock({
                 <h1>{name}</h1>
               </j-flex>
               {totalChildren > 0 && (
-                <button className={styles.showChildrenButton} onClick={toggleShowChildren}>
+                <button className={styles.showChildrenButton} onClick={() => setShowChildren(!showChildren)}>
                   {showChildren ? <ChevronDownSVG /> : <ChevronRightSVG />}
                   {totalChildren}
                 </button>
@@ -356,7 +377,7 @@ export default function TimelineBlock({
           </j-flex>
           {totalChildren > 0 && showChildren && (
             <div className={styles.children}>
-              {matchIndex > 0 && collapseBefore && (
+              {onMatchTree && collapseBefore && matchIndex > 0 && (
                 <>
                   <div className={styles.expandButtonWrapper} style={{ marginTop: 6 }}>
                     <div className={styles.expandButton}>
@@ -376,12 +397,18 @@ export default function TimelineBlock({
               </div>
               {children
                 .filter((child: any, i) => {
-                  if (match && matchIndex !== undefined) {
+                  child.parentIndex = index;
+                  child.index = i;
+                  if (onMatchTree) {
+                    // skip if below match
+                    if (zoom === "Conversations") return true;
+                    if (zoom === "Subgroups") return blockType === "subgroup";
+                    // skip if collapsed
                     if (collapseBefore && collapseAfter) return i === matchIndex;
                     else if (collapseBefore) return i >= matchIndex;
                     else if (collapseAfter) return i <= matchIndex;
                   }
-                  return child;
+                  return true;
                 })
                 .map((child) => (
                   <TimelineBlock
@@ -390,20 +417,24 @@ export default function TimelineBlock({
                     perspective={perspective}
                     blockType={blockType === "conversation" ? "subgroup" : "item"}
                     data={child}
-                    index={index}
+                    timelineIndex={timelineIndex}
                     match={match}
+                    matchIndexes={matchIndexes}
+                    setMatchIndexes={setMatchIndexes}
                     zoom={zoom}
                     selectedTopicId={selectedTopicId}
                     selectedItemId={selectedItemId}
                     setSelectedItemId={setSelectedItemId}
                     search={search}
+                    setMatchLoading={setMatchLoading}
+                    matchLoading={matchLoading}
                   />
                 ))}
               <div className={styles.curveBottom}>
                 <CurveSVG />
               </div>
-              {matchIndex < children.length - 1 && collapseAfter && (
-                <div className={styles.expandButtonWrapper} style={{ marginTop: -20 }}>
+              {onMatchTree && collapseAfter && matchIndex < children.length - 1 && (
+                <div className={styles.expandButtonWrapper} style={{ marginTop: blockType === "subgroup" ? -8 : -20 }}>
                   <div className={styles.expandButton}>
                     <j-button onClick={() => setCollapseAfter(false)}>
                       See more

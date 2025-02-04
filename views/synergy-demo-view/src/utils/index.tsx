@@ -1,8 +1,9 @@
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 import { getSynergyItems, findUnprocessedItems, findAllChannelSubgroupIds } from "@coasys/flux-utils";
+import { Literal } from "@coasys/ad4m";
 
 export type GroupData = {
-  matchIndex?: number;
+  matchIndexes?: number;
   groupType: "conversation" | "subgroup" | "item";
   totalChildren: number;
   participants: string[];
@@ -24,17 +25,39 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
-// export async function getConversations(perspective, channelId, match?, setMatchIndex?) {
-//   const conversations = (await Conversation.query(perspective, {
-//     source: channelId,
-//   })) as ConversationData[];
-//   conversations.forEach((conversation, conversationIndex) => {
-//     if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
-//   });
-//   return conversations;
-// }
+export async function getConversations(perspective, channelId) {
+  const result = await perspective.infer(`
+    findall(ConversationInfo, (
+      % 1. Identify all conversations in the channel
+      subject_class("Conversation", CC),
+      instance(CC, Conversation),
+      
+      % 2. Get timestamp from link
+      link("${channelId}", "ad4m://has_child", Conversation, Timestamp, _),
 
-export async function getConversationData(perspective, channelId, match?, setMatchIndex?) {
+      % 3. Retrieve conversation properties
+      property_getter(CC, Conversation, "conversationName", ConversationName),
+      property_getter(CC, Conversation, "summary", Summary),
+
+      % 4. Build a single structure for each conversation
+      ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
+    ), Conversations).
+  `);
+
+  // Convert raw Prolog output into a simpler JS array
+  const conversations = (result[0]?.Conversations || []).map(
+    ([baseExpression, conversationName, summary, timestamp]) => ({
+      baseExpression,
+      name: Literal.fromUrl(conversationName).get().data,
+      summary: Literal.fromUrl(summary).get().data,
+      timestamp: parseInt(timestamp, 10),
+    })
+  );
+
+  return conversations;
+}
+
+export async function getConversationData(perspective, channelId, match?, setMatchIndexes?) {
   // gather up unprocessed items
   const channelItems = await getSynergyItems(perspective, channelId);
   const conversations = (await Conversation.query(perspective, {
@@ -44,15 +67,15 @@ export async function getConversationData(perspective, channelId, match?, setMat
   const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   const conversationsWithData = await Promise.all(
     conversations.map(async (conversation, conversationIndex) => {
-      if (match && conversation.baseExpression === match.baseExpression) setMatchIndex(conversationIndex);
+      if (match && conversation.baseExpression === match.baseExpression) setMatchIndexes(conversationIndex);
       const conversationParticipants = new Set<string>();
       const uniqueTopicsByName = new Map();
       const subgroups = (await conversation.subgroups()) as SubgroupData[];
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
           if (match && subgroup.baseExpression === match.baseExpression) {
-            setMatchIndex(conversationIndex);
-            conversation.matchIndex = subgroupIndex;
+            setMatchIndexes(conversationIndex);
+            conversation.matchIndexes = subgroupIndex;
           }
           subgroup.groupType = "subgroup";
           subgroup.topics = await subgroup.topicsWithRelevance();
@@ -66,9 +89,9 @@ export async function getConversationData(perspective, channelId, match?, setMat
           subgroup.children = subgroupItems.map((item: any, itemIndex) => {
             item.groupType = "item";
             if (match && item.baseExpression === match.baseExpression) {
-              setMatchIndex(conversationIndex);
-              conversation.matchIndex = subgroupIndex;
-              subgroup.matchIndex = itemIndex;
+              setMatchIndexes(conversationIndex);
+              conversation.matchIndexes = subgroupIndex;
+              subgroup.matchIndexes = itemIndex;
             }
             subgroupParticipants.add(item.author);
             conversationParticipants.add(item.author);
