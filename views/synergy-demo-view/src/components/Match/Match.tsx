@@ -14,7 +14,7 @@ type Props = {
 
 export default function Match({ perspective, agent, match, index, grouping, selectedTopicId }: Props) {
   const { channel } = match;
-  const [matchLoading, setMatchLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
   const [matchIndexes, setMatchIndexes] = useState({ conversation: undefined, subgroup: undefined, item: undefined });
   const [collapseBefore, setCollapseBefore] = useState(true);
@@ -25,7 +25,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
     newConversations.forEach((conversation, conversationIndex) => {
       if (conversation.baseExpression === match.baseExpression) {
         setMatchIndexes((prev) => ({ ...prev, conversation: conversationIndex }));
-        setMatchLoading(false);
+        setLoading(false);
       }
     });
     setConversations(newConversations);
@@ -43,7 +43,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
         <div className={styles.line} />
       </div>
       <h2 className={styles.channelName}>{channel.name}</h2>
-      {matchLoading && (
+      {loading && (
         <div style={{ marginLeft: 130, marginBottom: -14 }}>
           <j-flex gap="500" a="center">
             <j-text nomargin>Loading match...</j-text>
@@ -52,7 +52,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
         </div>
       )}
       {conversations.length > 0 && (
-        <div id={`timeline-${index + 1}`} className={`${styles.items} ${matchLoading && styles.hidden}`}>
+        <div id={`timeline-${index + 1}`} className={`${styles.items} ${loading && styles.hidden}`}>
           {matchIndexes.conversation !== undefined && matchIndexes.conversation > 0 && collapseBefore && (
             <div className={styles.expandButtonWrapper} style={{ marginBottom: 20 }}>
               <div className={styles.expandButton}>
@@ -88,8 +88,8 @@ export default function Match({ perspective, agent, match, index, grouping, sele
                 matchIndexes={matchIndexes}
                 setMatchIndexes={setMatchIndexes}
                 selectedTopicId={selectedTopicId}
-                matchLoading={matchLoading}
-                setMatchLoading={setMatchLoading}
+                loading={loading}
+                setLoading={setLoading}
               />
             ))}
           {matchIndexes.conversation !== undefined &&

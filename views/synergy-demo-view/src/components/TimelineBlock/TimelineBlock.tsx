@@ -20,8 +20,8 @@ type Props = {
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
   search?: (blockType: "topic" | "vector", id: string) => void;
-  setMatchLoading?: (loading: boolean) => void;
-  matchLoading: boolean;
+  setLoading?: (loading: boolean) => void;
+  loading?: boolean;
 };
 
 export default function TimelineBlock({
@@ -38,8 +38,8 @@ export default function TimelineBlock({
   selectedItemId,
   setSelectedItemId,
   search,
-  setMatchLoading,
-  matchLoading,
+  setLoading,
+  loading,
 }: Props) {
   const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
@@ -246,7 +246,7 @@ export default function TimelineBlock({
       newSubgroups.forEach((subgroup, subgroupIndex) => {
         if (subgroup.baseExpression === match.baseExpression) {
           setMatchIndexes({ conversation: index, subgroup: subgroupIndex, item: undefined });
-          setMatchLoading(false);
+          setLoading(false);
         }
       });
     }
@@ -260,7 +260,7 @@ export default function TimelineBlock({
       item.blockType = "item";
       if (match && item.baseExpression === match.baseExpression) {
         setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
-        setMatchLoading(false);
+        setLoading(false);
       }
     });
     setChildren(newItems);
@@ -293,7 +293,7 @@ export default function TimelineBlock({
   // expand or collapse children based on zoom level
   useEffect(() => {
     // only fire on matches while loading
-    if (!match || matchLoading) {
+    if (!match || loading) {
       if (zoom === "Conversations") setShowChildren(false);
       else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");
       else setShowChildren(true);
@@ -432,8 +432,8 @@ export default function TimelineBlock({
                     selectedItemId={selectedItemId}
                     setSelectedItemId={setSelectedItemId}
                     search={search}
-                    setMatchLoading={setMatchLoading}
-                    matchLoading={matchLoading}
+                    setLoading={setLoading}
+                    loading={loading}
                   />
                 ))}
               <div className={styles.curveBottom}>

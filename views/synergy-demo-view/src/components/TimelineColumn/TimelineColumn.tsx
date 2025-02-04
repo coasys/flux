@@ -129,7 +129,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               blockType="conversation"
               data={conversation}
               timelineIndex={0}
-              index={conversationIndex}
               zoom={zoom}
               selectedTopicId={selectedTopicId}
               selectedItemId={selectedItemId}
