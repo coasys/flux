@@ -204,6 +204,8 @@ export default function TimelineBlock({
     setTopics(topics);
   }
 
+  // todo: start and end times different to deploy preview and not matching timestamps on fetched items
+  // need to use item logic from getSubgroupStats()
   async function getSubgroups() {
     // find all subgroups in the conversation (include timestamps for the first and last item in each subgroup)
     const result = await perspective.infer(`
@@ -282,17 +284,18 @@ export default function TimelineBlock({
 
   // get data when expanding children
   useEffect(() => {
+    // false on first load. updated when zoom useEffect below fires and later when children are expanded by user
     if (showChildren) {
       if (blockType === "conversation") getSubgroups();
       if (blockType === "subgroup") getItems();
-      // deselect if not a match and not the currently selected item
+      // deselects block when clicked on if not a match and not the currently selected item
       if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
     }
   }, [showChildren]);
 
   // expand or collapse children based on zoom level
   useEffect(() => {
-    // only fire on matches while loading
+    // if a match and loading has finished at the level above, stop further expansion
     if (!match || loading) {
       if (zoom === "Conversations") setShowChildren(false);
       else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");

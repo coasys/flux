@@ -12,6 +12,12 @@ type Props = {
   selectedTopicId: string;
 };
 
+// todo:
+// + possible future improvement: find the full match path (conversation > subgroup > item) with a prolog query here
+//   (including each items properties and the number of items above and below) as a first step. Only then fetch
+//   other items as expanded by the user. This would avoid the current need to fetch the full timeline tree (in a
+//   distributed fashion - subject oriented programming) before identifying the path and then collapsing all the other data
+
 export default function Match({ perspective, agent, match, index, grouping, selectedTopicId }: Props) {
   const { channel } = match;
   const [loading, setLoading] = useState(true);
@@ -22,8 +28,10 @@ export default function Match({ perspective, agent, match, index, grouping, sele
 
   async function getData() {
     const newConversations = await getConversations(perspective, channel.id);
+    // find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
       if (conversation.baseExpression === match.baseExpression) {
+        // store the conversations index & mark loading true to prevent further loading of children
         setMatchIndexes((prev) => ({ ...prev, conversation: conversationIndex }));
         setLoading(false);
       }
