@@ -46,9 +46,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   }
 
   async function findEntryType(itemId) {
-    const entryTypeLink = await perspective.get(
-      new LinkQuery({ source: itemId, predicate: "flux://entry_type" })
-    );
+    const entryTypeLink = await perspective.get(new LinkQuery({ source: itemId, predicate: "flux://entry_type" }));
     if (!entryTypeLink[0]) return "Task";
     else return entryTypeToSubjectClass(entryTypeLink[0].data.target);
   }
@@ -62,9 +60,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       const parentConversation = await subgroup.parentConversation();
       rootItemId = parentConversation.baseExpression;
     }
-    const parentLinks = await perspective.get(
-      new LinkQuery({ predicate: "ad4m://has_child", target: rootItemId })
-    );
+    const parentLinks = await perspective.get(new LinkQuery({ predicate: "ad4m://has_child", target: rootItemId }));
     return (
       channels.find((c) => parentLinks.find((p) => p.data.source === c.id)) || {
         id: "unlinked",
@@ -72,27 +68,17 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     );
   }
 
-  async function findEmbeddingMatches(
-    itemId: string,
-    allowedTypes: string[],
-    channels: any[]
-  ): Promise<any[]> {
+  async function findEmbeddingMatches(itemId: string, allowedTypes: string[], channels: any[]): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
     return await new Promise(async (resolveMatches: any) => {
       // grab all embedding relationships
-      const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter(
-        (r) => !r.relevance
-      );
+      const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter((r) => !r.relevance);
       // find the source embedding
-      const sourceEmbeddingRelationship = allEmbeddingRelationships.find(
-        (r) => r.expression === itemId
-      );
+      const sourceEmbeddingRelationship = allEmbeddingRelationships.find((r) => r.expression === itemId);
       const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
       const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
       // loop through others & apply search filters
-      const embeddingRelationships = allEmbeddingRelationships.filter(
-        (r) => r.expression !== itemId
-      );
+      const embeddingRelationships = allEmbeddingRelationships.filter((r) => r.expression !== itemId);
       const matches = await Promise.all(
         embeddingRelationships.map(async (relationship: any) => {
           const { expression, tag } = relationship;
@@ -113,11 +99,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     });
   }
 
-  async function findTopicMatches(
-    topicId: string,
-    allowedTypes: string[],
-    channels: any[]
-  ): Promise<any[]> {
+  async function findTopicMatches(topicId: string, allowedTypes: string[], channels: any[]): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
       const topicRelationships = (await SemanticRelationship.query(perspective, {
