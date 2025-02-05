@@ -28,13 +28,13 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const [processing, setProcessing] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
-  // const [firstRun, setFirstRun] = useState(true);
-  // const timeout = useRef<any>(null);
-  // const totalConversationItems = useRef(0);
-  // const processingRef = useRef(true);
-  // const gettingDataRef = useRef(false);
+  const [firstRun, setFirstRun] = useState(true);
+  const timeout = useRef<any>(null);
+  const totalConversationItems = useRef(0);
+  const processingRef = useRef(true);
+  const gettingDataRef = useRef(false);
 
-  async function getData() {
+  async function getDataNew() {
     const newConversations = await getConversations(perspective, channelId);
     setConversations(newConversations);
   }
@@ -49,49 +49,51 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     setUnprocessedItems(newUnprocessedItems);
   }
 
-  useEffect(() => {
-    getData();
-  }, []);
-
-  // async function runProcessingCheckIfNewItems() {
-  //   const channelItems = await getSynergyItems(perspective, channelId);
-  //   if (channelItems.length > totalConversationItems.current)
-  //     runProcessingCheck(perspective, channelId, channelItems, setProcessing);
-  //   totalConversationItems.current = channelItems.length;
-  // }
-
-  // async function getData() {
-  //   if (!gettingDataRef.current) {
-  //     gettingDataRef.current = true;
-  //     runProcessingCheckIfNewItems();
-  //     const data = await getConversations(perspective, channelId);
-  //     setUnprocessedItems(data.unprocessedItems);
-  //     setConversations(data.conversations);
-  //     gettingDataRef.current = false;
-  //   }
-  // }
-
-  // function linkAddedListener() {
-  //   if (!processingRef.current) {
-  //     if (timeout.current) clearTimeout(timeout.current);
-  //     timeout.current = setTimeout(getData, 2000);
-  //   }
-  // }
-
   // useEffect(() => {
-  //   // add signal listener
-  //   addSynergySignalHandler(perspective, setProcessing);
-  //   // add listener for new links
-  //   perspective.addListener("link-added", linkAddedListener);
-
-  //   return () => perspective.removeListener("link-added", linkAddedListener);
+  //   getDataNew();
   // }, []);
 
-  // useEffect(() => {
-  //   processingRef.current = !!processing;
-  //   if (!processing || firstRun) getData();
-  //   if (firstRun) setFirstRun(false);
-  // }, [processing]);
+  async function runProcessingCheckIfNewItems() {
+    const channelItems = await getSynergyItems(perspective, channelId);
+    if (channelItems.length > totalConversationItems.current)
+      runProcessingCheck(perspective, channelId, channelItems, setProcessing);
+    totalConversationItems.current = channelItems.length;
+  }
+
+  async function getData() {
+    if (!gettingDataRef.current) {
+      gettingDataRef.current = true;
+      runProcessingCheckIfNewItems();
+      await getDataNew();
+      await getUnprocessedItems();
+      // const data = await getConversations(perspective, channelId);
+      // setUnprocessedItems(data.unprocessedItems);
+      // setConversations(data.conversations);
+      gettingDataRef.current = false;
+    }
+  }
+
+  function linkAddedListener() {
+    if (!processingRef.current) {
+      if (timeout.current) clearTimeout(timeout.current);
+      timeout.current = setTimeout(getData, 2000);
+    }
+  }
+
+  useEffect(() => {
+    // add signal listener
+    addSynergySignalHandler(perspective, setProcessing);
+    // add listener for new links
+    perspective.addListener("link-added", linkAddedListener);
+
+    return () => perspective.removeListener("link-added", linkAddedListener);
+  }, []);
+
+  useEffect(() => {
+    processingRef.current = !!processing;
+    if (!processing || firstRun) getData();
+    if (firstRun) setFirstRun(false);
+  }, [processing]);
 
   return (
     <div className={styles.wrapper}>
