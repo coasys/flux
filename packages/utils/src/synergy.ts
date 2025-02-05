@@ -1,4 +1,4 @@
-import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal } from "@coasys/ad4m";
+import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal, Expression } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, ConversationSubgroup, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
@@ -32,7 +32,14 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
     Text: string;
     Type: string; //"Message", "Post", "Task"
   }[] = await perspective.infer(`
-    link("${parentId}", "ad4m://has_child", Item, Timestamp, Author),
+    triple("${parentId}", "ad4m://has_child", Item),
+    findall(
+      [Timestamp, Author], 
+      link(_, "ad4m://has_child", Item, Timestamp, Author),
+      AllData
+      ), 
+    sort(AllData, SortedData),
+    SortedData = [[Timestamp, Author]|_],
     (
       Type = "Message",
       subject_class("Message", TaskClass),
@@ -61,15 +68,19 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
 
   return items
     .map((item) => {
+      let textExpression = Literal.fromUrl(item.Text).get() as Expression
       return {
         type: item.Type,
         baseExpression: item.Item,
         author: item.Author,
         timestamp: new Date(item.Timestamp).toISOString(),
-        text: Literal.fromUrl(item.Text).get().data,
+        text: textExpression.data,
         icon: icons[item.Type] ? icons[item.Type] : "question",
       };
     })
+    .filter((item, index, self) => 
+      self.findIndex(i => i.baseExpression === item.baseExpression) === index
+    )
     .sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
@@ -175,7 +186,7 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
 }
 // todo: store these consts in channel settings
 const minItemsToProcess = 5;
-const maxItemsToProcess = 20;
+const maxItemsToProcess = 10;
 const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(

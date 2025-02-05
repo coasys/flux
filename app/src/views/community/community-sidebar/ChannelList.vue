@@ -110,7 +110,7 @@ export default defineComponent({
       required: true,
     },
     perspective: {
-      type: PerspectiveProxy,
+      type: Object, // PerspectiveProxy,
       required: true,
     },
   },

@@ -41,9 +41,9 @@ export default class ConversationSubgroup extends SubjectEntity {
   }
 
   async semanticRelationships(): Promise<SemanticRelationship[]> {
-    return await SemanticRelationship.query(this.perspective, {
-      where: { expression: this.baseExpression }
-    }) as SemanticRelationship[]
+    return (await SemanticRelationship.query(this.perspective, {
+      where: { expression: this.baseExpression },
+    })) as SemanticRelationship[];
   }
 
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
@@ -71,8 +71,11 @@ export default class ConversationSubgroup extends SubjectEntity {
 
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
     const topic = await Topic.byName(this.perspective, topicName);
-    const allSemanticRelationships = isNewGroup ? [] : await this.semanticRelationships();
-    const existingTopicRelationship = allSemanticRelationships.find((sr) => sr.tag == topic.baseExpression);
+    const existingTopicRelationship = isNewGroup
+      ? null
+      : await SemanticRelationship.query(this.perspective, {
+          where: { expression: this.baseExpression, tag: topic.baseExpression },
+        })[0];
 
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;

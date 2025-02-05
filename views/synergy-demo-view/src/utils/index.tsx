@@ -40,6 +40,8 @@ export async function getConversationData(perspective, channelId, match?, setMat
     conversations.map(async (conversation, conversationIndex) => {
       if (match && conversation.baseExpression === match.baseExpression)
         setMatchIndex(conversationIndex);
+      const conversationParticipants = new Set<string>();
+      const uniqueTopicsByName = new Map();
       const subgroups = (await conversation.subgroups()) as SubgroupData[];
       const subgroupsWithData = await Promise.all(
         subgroups.map(async (subgroup, subgroupIndex) => {
@@ -49,36 +51,31 @@ export async function getConversationData(perspective, channelId, match?, setMat
           }
           subgroup.groupType = "subgroup";
           subgroup.topics = await subgroup.topicsWithRelevance();
+          subgroup.topics.forEach((topic) => uniqueTopicsByName.set(topic.name, topic));
           const subgroupItems = await getSynergyItems(perspective, subgroup.baseExpression);
           if (subgroupItems.length) {
             subgroup.start = subgroupItems[0].timestamp;
             subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
           }
-          subgroup.participants = [];
-          subgroup.children = await Promise.all(
-            subgroupItems.map(async (item: any, itemIndex) => {
-              item.groupType = "item";
-              if (match && item.baseExpression === match.baseExpression) {
-                setMatchIndex(conversationIndex);
-                conversation.matchIndex = subgroupIndex;
-                subgroup.matchIndex = itemIndex;
-              }
-              if (!subgroup.participants.find((p) => p === item.author))
-                subgroup.participants.push(item.author);
-              return item;
-            })
-          );
+          const subgroupParticipants = new Set<string>();
+          subgroup.children = subgroupItems.map((item: any, itemIndex) => {
+            item.groupType = "item";
+            if (match && item.baseExpression === match.baseExpression) {
+              setMatchIndex(conversationIndex);
+              conversation.matchIndex = subgroupIndex;
+              subgroup.matchIndex = itemIndex;
+            }
+            subgroupParticipants.add(item.author);
+            conversationParticipants.add(item.author);
+            return item;
+          });
+          subgroup.participants = [...subgroupParticipants];
           return subgroup;
         })
       );
       conversation.groupType = "conversation";
-      conversation.participants = [];
-      subgroupsWithData.forEach((subgroup) => {
-        subgroup.participants.forEach((p) => {
-          if (!conversation.participants.includes(p)) conversation.participants.push(p);
-        });
-      });
-      conversation.topics = await conversation.topicsWithRelevance();
+      conversation.participants = [...conversationParticipants];
+      conversation.topics = [...uniqueTopicsByName.values()];
       conversation.children = subgroupsWithData;
       return conversation;
     })

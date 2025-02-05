@@ -79,11 +79,14 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
     return await new Promise(async (resolveMatches: any) => {
-      const embeddingRelationships = await SemanticRelationship.query(perspective, {
-        where: { expression: itemId }
-      }) as SemanticRelationship[];
-        
-
+      // grab all embedding relationships
+      const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter(
+        (r) => !r.relevance
+      );
+      // find the source embedding
+      const sourceEmbeddingRelationship = allEmbeddingRelationships.find(
+        (r) => r.expression === itemId
+      );
       const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
       const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
       // loop through others & apply search filters
@@ -117,8 +120,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
-      const allRelationships = await SemanticRelationship.all(perspective);
-      const topicRelationships = allRelationships.filter((r) => r.tag === topicId);
+      const topicRelationships = (await SemanticRelationship.query(perspective, {
+        where: { tag: topicId },
+      })) as SemanticRelationship[];
       const matches = await Promise.all(
         topicRelationships.map(async (relationship) => {
           const { expression, relevance } = relationship;
