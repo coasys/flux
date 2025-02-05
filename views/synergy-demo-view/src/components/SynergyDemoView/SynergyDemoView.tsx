@@ -37,41 +37,176 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
 
-  async function findEmbeddingMatches(itemId: string, allowedTypes: string[]): Promise<any[]> {
-    // searches for items in the neighbourhood that match the search filters & have similar embedding scores
-    // return await new Promise(async (resolveMatches: any) => {
-    //   const channels = (await new SubjectRepository(Channel, {
-    //     perspective,
-    //   }).getAllData()) as any;
-    //   // const channelIds = await getChannelIds();
-    //   // grab all embedding relationships
-    //   const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter((r) => !r.relevance);
-    //   // find the source embedding
-    //   const sourceEmbeddingRelationship = allEmbeddingRelationships.find((r) => r.expression === itemId);
-    //   const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
-    //   const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
-    //   // loop through others & apply search filters
-    //   const embeddingRelationships = allEmbeddingRelationships.filter((r) => r.expression !== itemId);
-    //   const matches = await Promise.all(
-    //     embeddingRelationships.map(async (relationship: any) => {
-    //       const { expression, tag } = relationship;
-    //       // if it doesn't match the search filters return null
-    //       const type = await findEntryType(expression);
-    //       const channel = await findChannelOld(expression, type, channels);
-    //       const wrongChannel = !filterSettings.includeChannel && channel.id === source;
-    //       const wrongType = !allowedTypes.includes(type);
-    //       if (wrongChannel || wrongType) return null;
-    //       // otherwise return the matching expression with its similarity score
-    //       const embeddingEntity = new Embedding(perspective, tag);
-    //       const embedding = JSON.parse((await embeddingEntity.get()).embedding);
-    //       const score = await cos_sim(sourceEmbedding, embedding);
-    //       return { baseExpression: expression, channel, type, score };
-    //     })
-    //   );
-    //   resolveMatches(matches.filter((item) => item && item.score > 0.2));
-    // });
+  async function getSourceEmbeddings(itemId) {
+    const result = await perspective.infer(`
+      % 1. Find SemanticRelationship for this item
+      subject_class("SemanticRelationship", SR),
+      instance(SR, Relationship),
+      property_getter(SR, Relationship, "expression", "${itemId}"),
+
+      % 2. Get Embedding ID from relationship
+      triple(Relationship, "flux://has_tag", EmbeddingId),
+
+      % 3. Get Embedding data
+      subject_class("Embedding", E),
+      instance(E, EmbeddingId),
+      property_getter(E, EmbeddingId, "embedding", Embedding).
+    `);
+    return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : null;
+  }
+
+  // for conversations & items channel linked directly, for subgroups channel linked to parent conversation
+
+  async function getAllConversationEmbeddings() {
+    const result = await perspective.infer(`
+      findall([ItemId, Embedding, ChannelId, ChannelName], (
+        % 1. Find all Conversations
+        subject_class("Conversation", Conversation),
+        instance(Conversation, ItemId),
+    
+        % 2. Find Channel that owns this Conversation
+        subject_class("Channel", CH),
+        instance(CH, ChannelId),
+        triple(ChannelId, "ad4m://has_child", ItemId),
+        property_getter(CH, ChannelId, "name", ChannelName),
+    
+        % 3. Find SemanticRelationship for this Conversation
+        subject_class("SemanticRelationship", SR),
+        instance(SR, SemanticRelationship),
+        property_getter(SR, SemanticRelationship, "expression", ItemId),
+    
+        % 4. Get Embedding ID from relationship
+        triple(SemanticRelationship, "flux://has_tag", EmbeddingId),
+    
+        % 5. Finally get Embedding data
+        subject_class("Embedding", E),
+        instance(E, EmbeddingId),
+        property_getter(E, EmbeddingId, "embedding", Embedding)
+      ), Embeddings).
+    `);
+
+    return (result[0]?.Embeddings || []).map(([itemId, embedding, channelId, channelName]) => ({
+      itemId,
+      type: "Conversation",
+      embedding: JSON.parse(embedding),
+      channelId,
+      channelName: Literal.fromUrl(channelName).get().data,
+    }));
+  }
+
+  async function getAllSubgroupEmbeddings() {
+    // find...
+    const result = await perspective.infer(`
+      findall([ItemId, Embedding, ChannelId, ChannelName], (
+        % 1. Find all Subgroups
+        subject_class("ConversationSubgroup", Subgroup),
+        instance(Subgroup, ItemId),
+    
+        % 2. Find the parent Conversation
+        subject_class("Conversation", CC),
+        instance(CC, Conversation),
+        triple(Conversation, "ad4m://has_child", ItemId),
+    
+        % 3. Find Channel that owns Conversation
+        subject_class("Channel", CH),
+        instance(CH, ChannelId),
+        triple(ChannelId, "ad4m://has_child", Conversation),
+        property_getter(CH, ChannelId, "name", ChannelName),
+    
+        % 4. Find SemanticRelationship for this Subgroup
+        subject_class("SemanticRelationship", SR),
+        instance(SR, SemanticRelationship),
+        property_getter(SR, SemanticRelationship, "expression", ItemId),
+    
+        % 5. Get Embedding ID and data
+        triple(SemanticRelationship, "flux://has_tag", EmbeddingId),
+        subject_class("Embedding", E),
+        instance(E, EmbeddingId),
+        property_getter(E, EmbeddingId, "embedding", Embedding)
+      ), Embeddings).
+    `);
+
+    return (result[0]?.Embeddings || []).map(([itemId, embedding, channelId, channelName]) => ({
+      itemId,
+      type: "Subgroup",
+      embedding: JSON.parse(embedding),
+      channelId,
+      channelName: Literal.fromUrl(channelName).get().data,
+    }));
+  }
+
+  async function getAllItemEmbeddings() {
     return [];
   }
+
+  async function getItemEmbeddings(itemType: string) {
+    // "Message" | "Post" | "Task"
+    return [];
+  }
+
+  async function findEmbeddingMatches(itemId: string, allowedTypes: string[]) {
+    console.log("findEmbeddingMatches", itemId);
+    // searches for items in the neighbourhood that match the search filters & have similar embedding scores
+    const sourceEmbedding = await getSourceEmbeddings(itemId);
+    let allEmbeddings = [];
+    const { grouping, itemType } = filterSettings;
+    if (grouping === "Conversations") allEmbeddings = await getAllConversationEmbeddings();
+    if (grouping === "Subgroups") allEmbeddings = await getAllSubgroupEmbeddings();
+    if (grouping === "Items") {
+      if (itemType === "All Types")
+        allEmbeddings = await getAllItemEmbeddings(); // "Message", "Post", "Task"
+      else allEmbeddings = await getItemEmbeddings(itemType); // "Message" || "Post" || "Task"
+    }
+    console.log("allEmbeddings", allEmbeddings);
+    const matches = await Promise.all(
+      allEmbeddings.map(async (e: any) => {
+        const { type, embedding, channelId, channelName } = e;
+        // filter out results that don't match the search filters
+        const isSourceItem = e.itemId === itemId;
+        const wrongChannel = !filterSettings.includeChannel && channelId === source;
+        if (isSourceItem || wrongChannel) return null;
+        // generate a similarity score for the embedding
+        const score = await cos_sim(sourceEmbedding, embedding);
+        return { baseExpression: e.itemId, channel: { id: channelId, name: channelName }, type, score };
+      })
+    );
+    return matches.filter((item) => item && item.score > 0.2);
+  }
+
+  // async function findEmbeddingMatches(itemId: string, allowedTypes: string[]): Promise<any[]> {
+  //   // searches for items in the neighbourhood that match the search filters & have similar embedding scores
+  //   return await new Promise(async (resolveMatches: any) => {
+  //     const channels = (await new SubjectRepository(Channel, {
+  //       perspective,
+  //     }).getAllData()) as any;
+  //     // const channelIds = await getChannelIds();
+  //     // grab all embedding relationships
+  //     const allEmbeddingRelationships = (await SemanticRelationship.all(perspective)).filter((r) => !r.relevance);
+  //     // find the source embedding
+  //     const sourceEmbeddingRelationship = allEmbeddingRelationships.find((r) => r.expression === itemId);
+  //     const sourceEmbeddingEntity = new Embedding(perspective, sourceEmbeddingRelationship.tag);
+  //     const sourceEmbedding = JSON.parse((await sourceEmbeddingEntity.get()).embedding);
+  //     // loop through others & apply search filters
+  //     const embeddingRelationships = allEmbeddingRelationships.filter((r) => r.expression !== itemId);
+  //     const matches = await Promise.all(
+  //       embeddingRelationships.map(async (relationship: any) => {
+  //         const { expression, tag } = relationship;
+  //         // if it doesn't match the search filters return null
+  //         const type = await findEntryType(expression);
+  //         const channel = await findChannelOld(expression, type, channels);
+  //         const wrongChannel = !filterSettings.includeChannel && channel.id === source;
+  //         const wrongType = !allowedTypes.includes(type);
+  //         if (wrongChannel || wrongType) return null;
+  //         // otherwise return the matching expression with its similarity score
+  //         const embeddingEntity = new Embedding(perspective, tag);
+  //         const embedding = JSON.parse((await embeddingEntity.get()).embedding);
+  //         const score = await cos_sim(sourceEmbedding, embedding);
+  //         return { baseExpression: expression, channel, type, score };
+  //       })
+  //     );
+  //     resolveMatches(matches.filter((item) => item && item.score > 0.2));
+  //   });
+  // }
 
   function topicMatchQuery(type: "Conversation" | "Subgroup", topicId: string) {
     // same prolog query required for conversation & subgroup topic matches, except for the type
@@ -124,16 +259,16 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   async function getSubgroupTopicMatches(topicId) {
     const result = await perspective.infer(topicMatchQuery("Subgroup", topicId));
-    // convert prolog response to JS
-    const results = (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
+    return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
+      // convert prolog response to JS
       baseExpression,
       type: "ConversationSubgroup",
       relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
       channelId,
       channelName: Literal.fromUrl(channelName).get().data,
     }));
-    return results;
   }
+
   // searches for items in the neighbourhood that match the search filters & are linked to the same topic
   async function findTopicMatches(itemId: string, topicId: string) {
     // update grouping if set to Items (no longer works with topics)
@@ -183,6 +318,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       type === "topic"
         ? await findTopicMatches(itemId, topic.baseExpression)
         : await findEmbeddingMatches(itemId, allowedTypes);
+    console.log("newMatches", newMatches);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);

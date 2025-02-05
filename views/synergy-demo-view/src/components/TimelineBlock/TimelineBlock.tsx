@@ -376,7 +376,7 @@ export default function TimelineBlock({
                   </button>
                 ))}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", data)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", baseExpression)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>
