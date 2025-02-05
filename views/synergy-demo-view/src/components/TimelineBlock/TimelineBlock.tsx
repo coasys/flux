@@ -19,7 +19,7 @@ type Props = {
   zoom?: string;
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
-  search?: (blockType: "topic" | "vector", id: string) => void;
+  search?: (type: "topic" | "vector", itemId: string, topic?: any) => void;
   setLoading?: (loading: boolean) => void;
   loading?: boolean;
 };
@@ -368,7 +368,7 @@ export default function TimelineBlock({
                 {topics.map((topic) => (
                   <button
                     className={`${styles.tag} ${selectedTopicId === topic.baseExpression && styles.focus}`}
-                    onClick={() => search("topic", topic)}
+                    onClick={() => search("topic", baseExpression, topic)}
                     disabled={!!match}
                     style={{ cursor: !!match ? "default" : "pointer" }}
                   >
@@ -489,7 +489,7 @@ export default function TimelineBlock({
                   </button>
                 ))} */}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", data)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", baseExpression)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>

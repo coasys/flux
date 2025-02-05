@@ -8,6 +8,7 @@ type Props = {
   agent: any;
   matches: any;
   selectedTopicId: string;
+  searchType: string;
   filterSettings: any;
   setFilterSettings: (newSettings: any) => void;
   matchText: () => string;
@@ -19,6 +20,7 @@ export default function MatchColumn({
   agent,
   matches,
   selectedTopicId,
+  searchType,
   filterSettings,
   setFilterSettings,
   matchText,
@@ -26,6 +28,7 @@ export default function MatchColumn({
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
+  const filteredGroupingOptions = searchType === "topic" ? ["Conversations", "Subgroups"] : groupingOptions;
 
   useEffect(() => setNumberOfMatchesDisplayed(5), [matches]);
 
@@ -35,7 +38,7 @@ export default function MatchColumn({
         <j-flex a="center" gap="400" wrap>
           <j-menu style={{ height: 42, zIndex: 20 }}>
             <j-menu-group collapsible title={grouping} id="grouping-menu">
-              {groupingOptions.map((option) => (
+              {filteredGroupingOptions.map((option) => (
                 <j-menu-item
                   selected={grouping === option}
                   onClick={() => {
