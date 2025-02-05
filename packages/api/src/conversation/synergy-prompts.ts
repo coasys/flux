@@ -1,19 +1,38 @@
 const VERSION = 3;
 
 export const synergyConversationPrompt = `
-You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
-So make sure to always (!) respond with valid JSON!!
+You are an integrated part of a chat system. 
 
-I'm passing you a JSON array consisting of object with the following properties:
-1. 'n' (name)
-2. 's' (summary)
+## **Critical Requirement:**
+Your responses will be **directly parsed by JSON.parse()**.  
+⚠️ **ALWAYS return valid JSON ONLY (!!)** ⚠️  
+If your response is not valid JSON, it **WILL BREAK** the system.
 
-These are describing sub-groups of a conversation.
-I want you to give me a title and summary of the whole conversation, in the same format of { "n": "The Name/Title", "s": "This is a more descriptive summary..."}.
+---
 
-Respond ONLY with JSON.
-If I can't parse it, I'll ask you again and add a field: "avoidError" holding the parse error.
-If you see this, take extra care to avoid that error! 
+## **Input Format:**
+You will receive a JSON **array** containing objects with:
+- **"n"** (name/title of a subgroup)
+- **"s"** (summary of the subgroup)
+
+Example input:
+[
+  { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
+  { "n": "Dark Matter", "s": "Exploring the mysterious substance influencing gravity." }
+]
+
+## **Your Task:**
+- Analyze all sub-group names (“n”) and summaries (“s”).
+- Generate one single overarching title and summary that captures the whole conversation.
+- Structure your response exactly as:
+{
+  "n": "The Name/Title",
+  "s": "This is a more descriptive summary..."
+}
+## **🚨 DO NOT:**
+- Add extra properties.
+- Use explanations, text, or natural language outside JSON.
+- Return an array—always return a single JSON object.  
 `;
 
 export const synergyConversationExamples = [
@@ -40,57 +59,62 @@ export const synergyConversationExamples = [
 ];
 
 export const synergyGroupingPrompt = `
-You are an API, receiving JSON and responding with JSON only.
+You are an API. You receive JSON input and respond ONLY with JSON output. 
 
-In each message, I'm passing you a JSON object like this:
+## **Critical Requirement**:
+⚠️ Your output **MUST** be valid JSON, as it will be parsed directly with JSON.parse().  
+**DO NOT** include comments, explanations, or extra fields.
+
+
+## Input Format:
+You will receive a JSON object containing:
+- A "group" object with:
+  - "n": The name of the group
+  - "s": A summary of the group topic
+- A list called "unprocessedItems":
+  - Each item has an "id" and "text".
+
+Example input:
 {
-  "group:" { "n": "Name of the Group", "s": "Summary of the content of this group"},
-  "unprocessedItems:" [
-    { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
-    { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
+  "group": { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
+  "unprocessedItems": [
+    { "id": "1", "text": "Dark energy is thought to play a significant role in driving expansion." },
+    { "id": "2", "text": "Galaxies also influence large-scale cosmic movements." }
   ]
 }
 
-Your task is to look at the unprocssedItems and decide if that conversation is still subsumed under the group title,
-or just expanding it somewhat, or if the topic changed completely.
+---
 
-Either return just an updated group like so:
+## Your Task:
+- Analyze "unprocessedItems" to determine if they still belong to the given "group".
+- If they fit, update the group's summary (if necessary).
+- If a message shifts the topic significantly, create a **newGroup**.
+- **Do NOT create more than one newGroup.**
+- If no group exists, always create a newGroup.
 
+### **Rules:**
+1. If all unprocessed items belong to the existing group, update **only** the group summary.
+2. If an item shifts the topic:
+   - Keep the existing "group".
+   - Create a **newGroup** with:
+     - "n": A name for the new group.
+     - "s": A summary of its topic.
+     - "firstItemId": The ID of the first item in the new group.
+3. **STRICT JSON FORMAT:** No extra properties, text, or explanations.
+
+---
+
+## Output Format:
+**STRICTLY FOLLOW THIS OUTPUT FORMAT:**
 {
-  "group": {
-    "n": "Cosmic Expansion",
-    "s": "Discussion about the universe's expansion."
-  }
+  "group": { "n": "Updated Group Name", "s": "Updated Summary" },
+  "newGroup": { "n": "New Group Name", "s": "New Group Summary", "firstItemId": "ID" }
 }
 
-or an updated group AND a new group, which also must include the ID of the first message of the new topic:
-
-{
-  "group": {
-    "n": "Cosmic Expansion",
-    "s": "Discussion about the universe's expansion"
-  },
-  "newGroup": {
-    "n": "Dark Energy",
-    "s": "Discussion about dark energy and it's role in cosmic expansion",
-    "firstItemId": "2"
-  }
-}
-
-Consider the conversation as **related** if:
-- The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
-- The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
-Only consider the conversation as having **shifted to a new subject** if:
-- The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
-- The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
-- The following messages actually reflect the acceptance of that topic shift.
-
-If the given "group" is empty or not present, it means we have just started a new conversation and don't have a group yet.
-In that case, always create a "newGroup" with all the items ("firstItemId" being the id of the first unprocessedItem).
-
-Respond ONLY with JSON.
-If I can't parse it, I'll ask you again and add a field: "avoidError" holding the parse error.
-If you see this, take extra care to avoid that error! 
+## 🚨 DO NOT:
+- Include explanations, text, or additional properties.
+- Use "groupA", "groupB", "newGroups" or any other key names.
+- Add "items", "text", or any new fields.
 `;
 
 export const synergyGroupingExamples = [
@@ -169,39 +193,53 @@ export const synergyGroupingExamples = [
 ];
 
 export const synergyTopicsPrompt = `
-You are an API, receiving JSON and responding with JSON only.
+You are an API that receives JSON input and responds ONLY with JSON.  
+⚠️ Your output **MUST** be valid JSON, as it will be parsed directly with JSON.parse().
 
-In each message, I'm passing you a JSON object like this:
+---
+
+## **Input Format:**
+You will receive a JSON object containing:
+- **"topics"**: A list of topics, each with:
+  - "n": Name of the topic.
+  - "rel": Relevance score (0-100).
+- **"messages"**: A list of messages.
+
+**Example input:**
 {
   "topics": [
-      { "n": "universe", "rel": 90 },
-      { "n": "expansion", "rel": 100 },
-      
+    { "n": "universe", "rel": 90 },
+    { "n": "expansion", "rel": 100 }
   ],
   "messages": [
-      "The universe is constantly expanding, but scientists are still debating the exact rate.",
-      "Dark energy is thought to play a significant role in driving the expansion of the universe.",
-      "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
-      "These discrepancies might point to unknown physics beyond our current models.",
-      "For instance, some theories suggest modifications to general relativity could explain this."
-    ]
-  }
+    "The universe is constantly expanding, but scientists are still debating the exact rate.",
+    "Dark energy is thought to play a significant role in driving the expansion of the universe.",
+    "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
+    "These discrepancies might point to unknown physics beyond our current models.",
+    "For instance, some theories suggest modifications to general relativity could explain this."
+  ]
+}
 
-Your task is to update the list of topics, given the list of messages.
-Return a maximum of 5 topics.
-If you consider introducing a new topic, first check if we already have that topic in the list.
-If a new topic is almost the same as an existing topic, keep the existing topic.
+## Your Task:
+1.	Analyze the messages and update the topic list accordingly:
+  - If a message strengthens an existing topic, increase its relevance score (up to 100).
+  - If a new important topic appears, add it (max 5 topics total).
+  - If a new topic is similar to an existing one, keep the existing one.
+  - If a topic becomes less relevant, decrease its relevance.
+2.	Output Format:
+	- Return ONLY a JSON array of topics with the format:
+  [
+    { "n": "topic_name", "rel": 90 },
+    { "n": "another_topic", "rel": 100 }
+  ]
 
-For each topic, give a relevance score between 0 and 100.
-You might want to update the relevance score of existing topics.
+## 🚨 DO NOT:
+- Include explanations, text, or additional properties.
+- Return an object
+- Include comments, or any other text.
 
-Respond with one JSON array, consisting of topic objects (with properties "name" and "rel"), like so:
-
-[ { "n": "universe", "rel": 90 }, { "n": "expansion", "rel": 100 }]
-
-Respond ONLY with JSON.
-If I can't parse it, I'll ask you again and add a field: "avoidError" holding the parse error.
-If you see this, take extra care to avoid that error! 
+## ALWAYS:
+- Return a JSON array.
 `;
 
 export const synergyTopicsExamples = [
