@@ -1,21 +1,38 @@
-const VERSION = 2;
+const VERSION = 3;
 
 export const synergyConversationPrompt = `
-You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
-So make sure to always (!) respond with valid JSON!!
+You are an integrated part of a chat system. 
 
-I'm passing you a JSON array consisting of object with the following properties:
-1. 'n' (name)
-2. 's' (summary)
+## **Critical Requirement:**
+Your responses will be **directly parsed by JSON.parse()**.  
+⚠️ **ALWAYS return valid JSON ONLY (!!)** ⚠️  
+If your response is not valid JSON, it **WILL BREAK** the system.
 
-These are describing sub-groups of a conversation.
-I want you to give me a title and summary of the whole conversation, in the same format of { "n": "The Name/Title", "s": "This is a more descriptive summary..."}.
+---
 
-Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
-Include exactly the mentioned properties above. Nothing else, and don't miss any property!
-If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
-So if you see that field, take extra care about that specific mistake and don't make it again!
-Don't talk about the errors in the summaries or topics.
+## **Input Format:**
+You will receive a JSON **array** containing objects with:
+- **"n"** (name/title of a subgroup)
+- **"s"** (summary of the subgroup)
+
+Example input:
+[
+  { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
+  { "n": "Dark Matter", "s": "Exploring the mysterious substance influencing gravity." }
+]
+
+## **Your Task:**
+- Analyze all sub-group names (“n”) and summaries (“s”).
+- Generate one single overarching title and summary that captures the whole conversation.
+- Structure your response exactly as:
+{
+  "n": "The Name/Title",
+  "s": "This is a more descriptive summary..."
+}
+## **🚨 DO NOT:**
+- Add extra properties.
+- Use explanations, text, or natural language outside JSON.
+- Return an array—always return a single JSON object.  
 `;
 
 export const synergyConversationExamples = [
@@ -42,43 +59,62 @@ export const synergyConversationExamples = [
 ];
 
 export const synergyGroupingPrompt = `
-You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
-So make sure to always (!) respond with valid JSON!!
+You are an API. You receive JSON input and respond ONLY with JSON output. 
 
-I'm passing you a JSON object with two properties:
-1. 'group' (Object with "n" (name), and "s" (summary))
-2. 'unprocessedItems' (Object array of new messages. Each unprocessed item is a javascript object with an 'id' property (string) and a 'text' property (string))
+## **Critical Requirement**:
+⚠️ Your output **MUST** be valid JSON, as it will be parsed directly with JSON.parse().  
+**DO NOT** include comments, explanations, or extra fields.
 
-Your task is to process the new messages into the ongoing conversation. 
-This includes 2 aspects:
-1. Updating the name and summary of the existing group
-2. Detecting if and when (with which new item) the conversation has shifted so much that we need to create a new group.
 
-I want you to respond with (only!) a JSON object with these properties:
-1. 'group' (Object with 'name' and 'summary' of the current subgroup after including new items)
-3. 'newGroup' (only present in the case of subject shift. object with 'n' (name), 's' (summary), and 'firstItemId' of the new subgroup spawned by a shift of the conversation in the new items)
+## Input Format:
+You will receive a JSON object containing:
+- A "group" object with:
+  - "n": The name of the group
+  - "s": A summary of the group topic
+- A list called "unprocessedItems":
+  - Each item has an "id" and "text".
 
-In case where the conversation has shifted, generate a 'newGroup' including the following properties:
-1. 'n': name - a 1 to 3 word title (string) describing the contents of the subgroup.
-2. 's': summary a 1 to 3 sentence paragraph (string) summary of the contents of the subgroup.
-3. 'firstItemId': the 'id' of the first unprocessed item in the subgroup.
+Example input:
+{
+  "group": { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
+  "unprocessedItems": [
+    { "id": "1", "text": "Dark energy is thought to play a significant role in driving expansion." },
+    { "id": "2", "text": "Galaxies also influence large-scale cosmic movements." }
+  ]
+}
 
-Consider the conversation as **related** if:
-- The text in an unprocessed item discusses, contrasts, or expands upon themes present in the last unprocessed item.
-- The text in an unprocessed item introduces new angles, comparisons, or opinions on the same topics discussed in the last unprocessed item (even if specific terms or phrases differ).
-Only consider the conversation as having **shifted to a new subject** if:
-- The text in an unprocessed item introduces entirely new topics, concepts, or themes that are not directly related to any topics discussed or implied in the last unprocessed item.
-- The text in an unprocessed item does not logically connect or refer back to the themes in the last unprocessed item.
-- The following messages actually reflect the acceptance of that topic shift.
+---
 
-If the given "group" is empty or not present, it means we have just started a new conversation and don't have a group yet.
-In that case, always create a "newGroup" with all the items ("firstItemId" being the id of the first unprocessedItem).
+## Your Task:
+- Analyze "unprocessedItems" to determine if they still belong to the given "group".
+- If they fit, update the group's summary (if necessary).
+- If a message shifts the topic significantly, create a **newGroup**.
+- **Do NOT create more than one newGroup.**
+- If no group exists, always create a newGroup.
 
-Make sure your response is in a format that can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
-Include exactly the mentioned properties above. Nothing else, and don't miss any property!
-If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
-So if you see that field, take extra care about that specific mistake and don't make it again!
-Don't talk about the errors in the summaries or topics.
+### **Rules:**
+1. If all unprocessed items belong to the existing group, update **only** the group summary.
+2. If an item shifts the topic:
+   - Keep the existing "group".
+   - Create a **newGroup** with:
+     - "n": A name for the new group.
+     - "s": A summary of its topic.
+     - "firstItemId": The ID of the first item in the new group.
+3. **STRICT JSON FORMAT:** No extra properties, text, or explanations.
+
+---
+
+## Output Format:
+**STRICTLY FOLLOW THIS OUTPUT FORMAT:**
+{
+  "group": { "n": "Updated Group Name", "s": "Updated Summary" },
+  "newGroup": { "n": "New Group Name", "s": "New Group Summary", "firstItemId": "ID" }
+}
+
+## 🚨 DO NOT:
+- Include explanations, text, or additional properties.
+- Use "groupA", "groupB", "newGroups" or any other key names.
+- Add "items", "text", or any new fields.
 `;
 
 export const synergyGroupingExamples = [
@@ -154,56 +190,56 @@ export const synergyGroupingExamples = [
     }
   }`,
   },
-  {
-    input: `{
-    "group": {
-      "n": "Fitness and Nutrition",
-      "s": "Discussion about the importance of balanced nutrition in supporting fitness and overall health."
-    },
-    "unprocessedItems": [
-      { "id": "6", "text": "A well-rounded fitness routine includes both cardio and strength training." },
-      { "id": "7", "text": "Proper hydration is also essential for maximizing workout performance." },
-      { "id": "8", "text": "Speaking of hydration, the mineral content in water can affect recovery times." },
-      { "id": "9", "text": "For example, electrolyte-rich water helps replenish what is lost through sweat." },
-      { "id": "10", "text": "This shows how nutrition and hydration are deeply connected to fitness results." }
-    ]
-  }`,
-    output: `{
-    "group": {
-      "n": "Fitness and Nutrition",
-      "s": "Discussion about the importance of balanced nutrition, hydration, and how the mineral content in water contributes to fitness recovery and performance."
-    },
-    "newSubgroup": null
-  }`,
-  },
 ];
 
 export const synergyTopicsPrompt = `
-You are here as an integrated part of a chat system - you're answers will be directly parsed by JSON.parse().
-So make sure to always (!) respond with valid JSON!!
-Do NOT explain yourself. If you're unsure, just give your best answer, in the requested JSON format.
+You are an API that receives JSON input and responds ONLY with JSON.  
+⚠️ Your output **MUST** be valid JSON, as it will be parsed directly with JSON.parse().
 
-I'm passing you a JSON object with the following properties:
-1. 'topics' (Array of Objects like {n: "<topic name>", rel: 80})
-2. 'messages' (Array of strings)
+---
 
-Your task is to update the list of topics, given the list of messages.
-Return a maximum of 5 topics.
-If you consider introducing a new topic, first check if we already have that topic in the list.
-If a new topic is almost the same as an existing topic, keep the existing topic.
+## **Input Format:**
+You will receive a JSON object containing:
+- **"topics"**: A list of topics, each with:
+  - "n": Name of the topic.
+  - "rel": Relevance score (0-100).
+- **"messages"**: A list of messages.
 
-For each topic, give a relevance score between 0 and 100.
-You might want to update the relevance score of existing topics.
+**Example input:**
+{
+  "topics": [
+    { "n": "universe", "rel": 90 },
+    { "n": "expansion", "rel": 100 }
+  ],
+  "messages": [
+    "The universe is constantly expanding, but scientists are still debating the exact rate.",
+    "Dark energy is thought to play a significant role in driving the expansion of the universe.",
+    "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
+    "These discrepancies might point to unknown physics beyond our current models.",
+    "For instance, some theories suggest modifications to general relativity could explain this."
+  ]
+}
 
-Respond with one JSON array, consisting of topic objects (with properties "name" and "rel"), like so:
+## Your Task:
+1.	Analyze the messages and update the topic list accordingly:
+  - If a message strengthens an existing topic, increase its relevance score (up to 100).
+  - If a new important topic appears, add it (max 5 topics total).
+  - If a new topic is similar to an existing one, keep the existing one.
+  - If a topic becomes less relevant, decrease its relevance.
+2.	Output Format:
+	- Return ONLY a JSON array of topics with the format:
+  [
+    { "n": "topic_name", "rel": 90 },
+    { "n": "another_topic", "rel": 100 }
+  ]
 
-[ { "n": "universe", "rel": 90 }, { "n": "expansion", "rel": 100 }]
+## 🚨 DO NOT:
+- Include explanations, text, or additional properties.
+- Return an object
+- Include comments, or any other text.
 
-Make sure your response is valid JSON and can be parsed using JSON.parse(). Don't wrap it in code syntax. Don't append text outside of quotes. And don't use the assign operator ("=").
-Include exactly the mentioned properties above. Nothing else, and don't miss any property!
-If you make a mistake and I can't parse your output, I will give you the same input again, plus another field "jsonParseError" holding the error we got from JSON.parse().
-So if you see that field, take extra care about that specific mistake and don't make it again!
-Don't talk about the errors in the summaries or topics.
+## ALWAYS:
+- Return a JSON array.
 `;
 
 export const synergyTopicsExamples = [
@@ -252,26 +288,6 @@ export const synergyTopicsExamples = [
         { "n": "hydration", "rel": 85 },
         { "n": "recovery", "rel": 75 },
         { "n": "electrolytes", "rel": 70 }
-    ]`,
-  },
-  {
-    input: `{
-        "topics": [],
-        "messages": [
-          "<p>1</p>",
-          "<p>2</p>",
-          "<p>3</p>",
-          "<p>4</p>",
-          "<p>5</p>",
-          "<p>6</p>",
-          "<p>7</p>",
-          "<p>8</p>",
-          "<p>9</p>"
-        ]
-    }`,
-    output: `[
-        { "n": "counting", "rel": 90 },
-        { "n": "test", "rel": 50 },
     ]`,
   },
 ];

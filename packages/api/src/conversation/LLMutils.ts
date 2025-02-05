@@ -34,6 +34,9 @@ export async function LLMTaskWithExpectedOutputs(
   let data;
   let attempts = 0;
 
+  if((prompt as any).avoidError)
+    delete (prompt as any).avoidError
+
   // attempt LLM task up to 5 times before giving up
   while (!data && attempts < 5) {
     attempts += 1;
@@ -104,8 +107,10 @@ export async function LLMTaskWithExpectedOutputs(
       data = parsedData;
     } catch (error) {
       console.error("LLM response parse error:", error);
-      //@ts-ignore
-      prompt.jsonParseError = error.message;
+      if(error.message)
+        (prompt as any).avoidError = error.message;
+      else
+        (prompt as any).avoidError = error;
     }
   }
 
