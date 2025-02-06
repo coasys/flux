@@ -96,6 +96,7 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
+// todo: replace with new query in TimelineColumn
 export async function findUnprocessedItems(perspective: any, items: any[], allSubgroupIds: string[]) {
   const results = await Promise.all(
     items.map(async (item) => {
@@ -278,7 +279,7 @@ let processing = false;
 export async function runProcessingCheck(
   perspective: PerspectiveProxy,
   channelId: string,
-  channelItems: any[],
+  unprocessedItems: any[],
   setProcessing: any
 ) {
   console.log("runProcessingCheck");
@@ -286,9 +287,6 @@ export async function runProcessingCheck(
   if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
-  const conversations = (await Conversation.query(perspective, { source: channelId })) as any;
-  const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   console.log("responsible for processing", responsible);

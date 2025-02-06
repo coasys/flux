@@ -26,19 +26,14 @@ type ConversationData = Conversation & GroupData;
 export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
-  const [processing, setProcessing] = useState<any>(null);
+  const [processingData, setProcessingData] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
   const [firstRun, setFirstRun] = useState(true);
   const timeout = useRef<any>(null);
-  const totalConversationItems = useRef(0);
-  const processingRef = useRef(true);
-  const gettingDataRef = useRef(false);
-
-  async function getConversationData() {
-    const newConversations = await getConversations(perspective, channelId);
-    setConversations(newConversations);
-  }
+  const totalItems = useRef(0);
+  const processing = useRef(true);
+  const gettingData = useRef(false);
 
   async function getUnprocessedItems() {
     // addapted from getSynergyItems in synergy.tx to exclude items already connected to subgroups
@@ -93,31 +88,57 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       icon: icons[type] ? icons[type] : "question",
     }));
 
-    setUnprocessedItems(formattedItems);
+    return formattedItems;
   }
 
-  // useEffect(() => {
-  //   getDataNew();
-  // }, []);
+  async function getTotalItemCount() {
+    const result = await perspective.infer(`
+      findall(Count, (
+        findall(Item, (
+          % 1. Get items linked to channel
+          triple("${channelId}", "ad4m://has_child", Item),
+          
+          % 2. Check item is of valid type
+          (
+            subject_class("Message", MC),
+            instance(MC, Item)
+            ;
+            subject_class("Post", PC),
+            instance(PC, Item)
+            ;
+            subject_class("Task", TC),
+            instance(TC, Item)
+          )
+        ), Items),
+        
+        % 3. Get length of valid items
+        length(Items, Count)
+      ), [TotalCount]).
+    `);
 
-  // async function runProcessingCheckIfNewItems() {
-  //   const channelItems = await getSynergyItems(perspective, channelId);
-  //   if (channelItems.length > totalConversationItems.current)
-  //     runProcessingCheck(perspective, channelId, channelItems, setProcessing);
-  //   totalConversationItems.current = channelItems.length;
-  // }
+    return result[0]?.TotalCount || 0;
+  }
 
   async function getData() {
-    if (!gettingDataRef.current) {
-      gettingDataRef.current = true;
-      // runProcessingCheckIfNewItems();
-      await Promise.all([getConversationData(), getUnprocessedItems()]);
-      gettingDataRef.current = false;
+    if (!gettingData.current) {
+      gettingData.current = true;
+      const [newConversations, newUnproccessedItems] = await Promise.all([
+        getConversations(perspective, channelId),
+        getUnprocessedItems(),
+      ]);
+      setConversations(newConversations);
+      setUnprocessedItems(newUnproccessedItems);
+      gettingData.current = false;
+      // after fetching new data, run processing check if new items have been added
+      const newTotalItems = await getTotalItemCount();
+      if (newTotalItems > totalItems.current)
+        runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      totalItems.current = newTotalItems;
     }
   }
 
   function linkAddedListener() {
-    if (!processingRef.current) {
+    if (!processing.current) {
       if (timeout.current) clearTimeout(timeout.current);
       timeout.current = setTimeout(getData, 2000);
     }
@@ -125,7 +146,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
 
   useEffect(() => {
     // add signal listener
-    addSynergySignalHandler(perspective, setProcessing);
+    addSynergySignalHandler(perspective, setProcessingData);
     // add listener for new links
     perspective.addListener("link-added", linkAddedListener);
 
@@ -133,10 +154,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   }, []);
 
   useEffect(() => {
-    processingRef.current = !!processing;
-    if (!processing || firstRun) getData();
+    processing.current = !!processingData;
+    if (!processingData || firstRun) getData();
     if (firstRun) setFirstRun(false);
-  }, [processing]);
+  }, [processingData]);
 
   return (
     <div className={styles.wrapper}>
@@ -186,11 +207,11 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               <j-text uppercase size="400" weight="800" color="primary-500">
                 {unprocessedItems.length} Unprocessed Items
               </j-text>
-              {processing && (
+              {processingData && (
                 <j-box mb="500">
                   <j-flex a="center" gap="300">
-                    <j-text nomargin>{processing.items.length} items being processed by</j-text>
-                    <Avatar did={processing.author} showName />
+                    <j-text nomargin>{processingData.items.length} items being processed by</j-text>
+                    <Avatar did={processingData.author} showName />
                     <j-spinner size="xs" />
                   </j-flex>
                 </j-box>
@@ -204,7 +225,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                         <Avatar did={item.author} showName />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
-                      {processing && processing.items.includes(item.baseExpression) && (
+                      {processingData && processingData.items.includes(item.baseExpression) && (
                         <j-badge variant="success">Processing...</j-badge>
                       )}
                     </j-flex>
