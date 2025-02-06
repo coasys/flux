@@ -17,6 +17,7 @@ type Props = {
   matchIndexes?: any;
   setMatchIndexes?: (indexes: any) => void;
   zoom?: string;
+  refreshTrigger?: number;
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
   search?: (type: "topic" | "vector", itemId: string, topic?: any) => void;
@@ -31,6 +32,7 @@ export default function TimelineBlock({
   blockType,
   timelineIndex,
   zoom,
+  refreshTrigger,
   match,
   matchIndexes,
   setMatchIndexes,
@@ -281,7 +283,7 @@ export default function TimelineBlock({
   useEffect(() => {
     if (blockType === "conversation") getConversationStats();
     if (blockType === "subgroup") getSubgroupStats();
-  }, []);
+  }, [refreshTrigger]);
 
   // get data when expanding children
   useEffect(() => {
@@ -292,7 +294,7 @@ export default function TimelineBlock({
       // deselects block when clicked on if not a match and not the currently selected item
       if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
     }
-  }, [showChildren]);
+  }, [showChildren, refreshTrigger]);
 
   // expand or collapse children based on zoom level
   useEffect(() => {
@@ -432,6 +434,7 @@ export default function TimelineBlock({
                     matchIndexes={matchIndexes}
                     setMatchIndexes={setMatchIndexes}
                     zoom={zoom}
+                    refreshTrigger={refreshTrigger}
                     selectedTopicId={selectedTopicId}
                     selectedItemId={selectedItemId}
                     setSelectedItemId={setSelectedItemId}

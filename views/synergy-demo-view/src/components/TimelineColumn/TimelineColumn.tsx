@@ -21,6 +21,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
   const [firstRun, setFirstRun] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const timeout = useRef<any>(null);
   const totalItems = useRef(0);
   const processing = useRef(true);
@@ -72,7 +73,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
 
     const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
     const formattedItems = (result[0]?.Items || []).map(([itemId, author, timestamp, type, text]) => ({
-      itemId,
+      baseExpression: itemId,
       author,
       timestamp,
       text: Literal.fromUrl(text).get().data,
@@ -119,6 +120,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       ]);
       setConversations(newConversations);
       setUnprocessedItems(newUnproccessedItems);
+      setRefreshTrigger((prev) => prev + 1);
       gettingData.current = false;
       // after fetching new data, run processing check if new items have been added
       const newTotalItems = await getTotalItemCount();
@@ -179,14 +181,16 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
           <div className={styles.line} />
         </div>
         <div id="timeline-0" className={styles.items}>
-          {conversations.map((conversation: any, conversationIndex) => (
+          {conversations.map((conversation: any) => (
             <TimelineBlock
+              key={conversation.baseExpression}
               agent={agent}
               perspective={perspective}
               blockType="conversation"
               data={conversation}
               timelineIndex={0}
               zoom={zoom}
+              refreshTrigger={refreshTrigger}
               selectedTopicId={selectedTopicId}
               selectedItemId={selectedItemId}
               setSelectedItemId={setSelectedItemId}
