@@ -1,4 +1,11 @@
-import { LinkQuery, PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal, Expression } from "@coasys/ad4m";
+import {
+  LinkQuery,
+  PerspectiveExpression,
+  NeighbourhoodProxy,
+  PerspectiveProxy,
+  Literal,
+  Expression,
+} from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, ConversationSubgroup, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
@@ -42,12 +49,12 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
     SortedData = [[Timestamp, Author]|_],
     (
       Type = "Message",
-      subject_class("Message", TaskClass),
+      subject_class("Message", MessageClass),
       instance(MessageClass, Item), 
       property_getter(MessageClass, Item, "body", Text)
       ;
       Type = "Post",
-      subject_class("Post", TaskClass),
+      subject_class("Post", PostClass),
       instance(PostClass, Item), 
       property_getter(PostClass, Item, "title", Text)
       ;
@@ -68,7 +75,7 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
 
   return items
     .map((item) => {
-      let textExpression = Literal.fromUrl(item.Text).get() as Expression
+      let textExpression = Literal.fromUrl(item.Text).get() as Expression;
       return {
         type: item.Type,
         baseExpression: item.Item,
@@ -78,9 +85,7 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
         icon: icons[item.Type] ? icons[item.Type] : "question",
       };
     })
-    .filter((item, index, self) => 
-      self.findIndex(i => i.baseExpression === item.baseExpression) === index
-    )
+    .filter((item, index, self) => self.findIndex((i) => i.baseExpression === item.baseExpression) === index)
     .sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
@@ -97,7 +102,7 @@ export async function findUnprocessedItems(perspective: any, items: any[], allSu
       const links = await perspective.get(
         new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
       );
-      // if the item has a parent link to a conversation we know it has been processed
+      // if the item has a parent link to a subgroup we know it has been processed
       const isProcessed = links.some((link) => allSubgroupIds.includes(link.data.source));
       return isProcessed ? null : item;
     })
