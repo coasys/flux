@@ -170,6 +170,7 @@ export default function TimelineBlock({
     setTopics(topics);
   }
 
+  // todo: check why deduplication is needed for subgroup topics
   async function getSubgroupTopics() {
     // find the subgroups topics
     const result = await perspective.infer(`

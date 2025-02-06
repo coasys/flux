@@ -55,8 +55,6 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : null;
   }
 
-  // for conversations & items channel linked directly, for subgroups channel linked to parent conversation
-
   async function getAllConversationEmbeddings() {
     const result = await perspective.infer(`
       findall([ItemId, Embedding, ChannelId, ChannelName], (
@@ -135,10 +133,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }));
   }
 
+  // todo
   async function getAllItemEmbeddings() {
     return [];
   }
 
+  // todo
   async function getItemEmbeddings(itemType: string) {
     // "Message" | "Post" | "Task"
     return [];

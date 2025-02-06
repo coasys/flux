@@ -1,4 +1,4 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery } from "@coasys/ad4m";
+import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery, Literal } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
 import Conversation from "../conversation";
@@ -46,27 +46,39 @@ export default class ConversationSubgroup extends SubjectEntity {
     })) as SemanticRelationship[];
   }
 
+  // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    const subgroupSemanticRelationships = await this.semanticRelationships();
+    const result = await this.perspective.infer(`
+      findall(TopicList, (
+        % First get all topic triples
+        findall([TopicBase, TopicName, Relevance], (
+          % 1. Find semantic relationships where expression = this subgroup
+          subject_class("SemanticRelationship", SR),
+          instance(SR, Relationship),
+          triple(Relationship, "flux://has_expression", "${this.baseExpression}"),
+          
+          % 2. Get topic and relevance
+          triple(Relationship, "flux://has_tag", TopicBase),
+          property_getter(SR, Relationship, "relevance", Relevance),
+          
+          % 3. Get topic name
+          subject_class("Topic", T),
+          instance(T, TopicBase),
+          property_getter(T, TopicBase, "topic", TopicName)
+        ), UnsortedTopics),
+        
+        % 4. Remove duplicates via sort
+        sort(UnsortedTopics, TopicList)
+      ), [Topics]).
+    `);
 
-    const topics: TopicWithRelevance[] = [];
-    for (const rel of subgroupSemanticRelationships) {
-      if (!rel.relevance) continue;
-
-      try {
-        const topicEntity = new Topic(this.perspective, rel.tag);
-        const topic = await topicEntity.get();
-        topics.push({
-          baseExpression: rel.tag,
-          name: topic.topic,
-          relevance: rel.relevance,
-        });
-      } catch (error) {
-        continue;
-      }
-    }
-
-    return topics;
+    return (
+      result[0]?.Topics?.map(([base, name, relevance]) => ({
+        baseExpression: base,
+        name: Literal.fromUrl(name).get().data,
+        relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
+      })) || []
+    );
   }
 
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {

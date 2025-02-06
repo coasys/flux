@@ -1,13 +1,6 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversations, groupingOptions, GroupData } from "../../utils";
-import {
-  runProcessingCheck,
-  getSynergyItems,
-  addSynergySignalHandler,
-  findUnprocessedItems,
-  findAllChannelSubgroupIds,
-} from "@coasys/flux-utils";
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import { closeMenu, getConversations, groupingOptions } from "../../utils";
+import { runProcessingCheck, addSynergySignalHandler } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
@@ -20,8 +13,6 @@ type Props = {
   selectedTopicId: string;
   search: (type: "topic" | "vector", id: string) => void;
 };
-
-type ConversationData = Conversation & GroupData;
 
 export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);

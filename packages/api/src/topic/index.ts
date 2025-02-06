@@ -6,7 +6,6 @@ export class TopicWithRelevance {
   relevance: number;
 }
 
-
 @SDNAClass({
   name: "Topic",
 })
@@ -26,7 +25,7 @@ export default class Topic extends SubjectEntity {
 
   static async ensureTopics(perspective, topics: string[]): Promise<Topic[]> {
     // Get existing topics
-    const existingTopics = await Topic.query(perspective) as Topic[];
+    const existingTopics = (await Topic.query(perspective)) as Topic[];
     const newTopicsToCreate = topics.reduce((acc, topic) => {
       const unique = !acc.some((t) => t.topic === topic) && !existingTopics.some((t) => t.topic === topic);
       if (unique) acc.push(topic);
@@ -41,13 +40,12 @@ export default class Topic extends SubjectEntity {
       await newTopic.save();
       newTopics.push(await newTopic.get());
     }
-    return newTopics
+    return newTopics;
   }
 
   static async byName(perspective, topicName: string): Promise<Topic> {
-    const existingTopics = await Topic.query(perspective) as Topic[];
-    const existingTopic = existingTopics.find(topic => topic.topic === topicName);
-    if (existingTopic) return existingTopic;
+    const topicMatches = (await Topic.query(perspective, { where: { name: topicName } })) as Topic[];
+    if (topicMatches[0]) return topicMatches[0];
 
     const newTopic = new Topic(perspective);
     newTopic.topic = topicName;

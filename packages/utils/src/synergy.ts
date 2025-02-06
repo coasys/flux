@@ -226,7 +226,8 @@ export async function getConversationIds(perspective: PerspectiveProxy, channelI
     findall(ConversationId, (
       % 1. Find all conversations in the channel
       subject_class("Conversation", ConversationClass),
-      instance(ConversationClass, ConversationId)
+      instance(ConversationClass, ConversationId),
+      triple("${channelId}", "ad4m://has_child", SubgroupId)
     ), ConversationIds).
   `);
 
