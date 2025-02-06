@@ -1,18 +1,4 @@
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import { getSynergyItems, findUnprocessedItems, findAllChannelSubgroupIds } from "@coasys/flux-utils";
 import { Literal } from "@coasys/ad4m";
-
-export type GroupData = {
-  matchIndexes?: number;
-  groupType: "conversation" | "subgroup" | "item";
-  totalChildren: number;
-  participants: string[];
-  topics: any[];
-};
-
-type ConversationData = Conversation & GroupData;
-
-type SubgroupData = ConversationSubgroup & GroupData & { start: string; end: string };
 
 // constants
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
@@ -55,63 +41,6 @@ export async function getConversations(perspective, channelId) {
   );
 
   return conversations;
-}
-
-export async function getConversationData(perspective, channelId, match?, setMatchIndexes?) {
-  // gather up unprocessed items
-  const channelItems = await getSynergyItems(perspective, channelId);
-  const conversations = (await Conversation.query(perspective, {
-    source: channelId,
-  })) as ConversationData[];
-  const allSubgroupIds = await findAllChannelSubgroupIds(perspective, conversations);
-  const unprocessedItems = await findUnprocessedItems(perspective, channelItems, allSubgroupIds);
-  const conversationsWithData = await Promise.all(
-    conversations.map(async (conversation, conversationIndex) => {
-      if (match && conversation.baseExpression === match.baseExpression) setMatchIndexes(conversationIndex);
-      const conversationParticipants = new Set<string>();
-      const uniqueTopicsByName = new Map();
-      const subgroups = (await conversation.subgroups()) as SubgroupData[];
-      const subgroupsWithData = await Promise.all(
-        subgroups.map(async (subgroup, subgroupIndex) => {
-          if (match && subgroup.baseExpression === match.baseExpression) {
-            setMatchIndexes(conversationIndex);
-            conversation.matchIndexes = subgroupIndex;
-          }
-          subgroup.groupType = "subgroup";
-          subgroup.topics = await subgroup.topicsWithRelevance();
-          subgroup.topics.forEach((topic) => uniqueTopicsByName.set(topic.name, topic));
-          const subgroupItems = await getSynergyItems(perspective, subgroup.baseExpression);
-          if (subgroupItems.length) {
-            subgroup.start = subgroupItems[0].timestamp;
-            subgroup.end = subgroupItems[subgroupItems.length - 1].timestamp;
-          }
-          const subgroupParticipants = new Set<string>();
-          subgroup.children = subgroupItems.map((item: any, itemIndex) => {
-            item.groupType = "item";
-            if (match && item.baseExpression === match.baseExpression) {
-              setMatchIndexes(conversationIndex);
-              conversation.matchIndexes = subgroupIndex;
-              subgroup.matchIndexes = itemIndex;
-            }
-            subgroupParticipants.add(item.author);
-            conversationParticipants.add(item.author);
-            return item;
-          });
-          subgroup.participants = [...subgroupParticipants];
-          return subgroup;
-        })
-      );
-      conversation.groupType = "conversation";
-      conversation.participants = [...conversationParticipants];
-      conversation.topics = [...uniqueTopicsByName.values()];
-      conversation.children = subgroupsWithData;
-      return conversation;
-    })
-  );
-  return {
-    conversations: conversationsWithData,
-    unprocessedItems,
-  };
 }
 
 // svgs
