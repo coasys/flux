@@ -1,14 +1,6 @@
-import { LinkQuery, Literal } from "@coasys/ad4m";
+import { Literal } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import {
-  Channel,
-  Conversation,
-  ConversationSubgroup,
-  Embedding,
-  SemanticRelationship,
-  SubjectRepository,
-  Topic,
-} from "@coasys/flux-api";
+import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
 import { getAllTopics } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
