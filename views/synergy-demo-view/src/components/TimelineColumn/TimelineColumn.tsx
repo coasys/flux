@@ -47,19 +47,19 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
           [Timestamp, Author], 
           link(_, "ad4m://has_child", ItemId, Timestamp, Author),
           AllData
-        ), 
+        ),
         sort(AllData, SortedData),
         SortedData = [[Timestamp, Author]|_],
       
         % 4. Check item type and get text
         (
           Type = "Message",
-          subject_class("Message", TaskClass),
+          subject_class("Message", MessageClass),
           instance(MessageClass, ItemId), 
           property_getter(MessageClass, ItemId, "body", Text)
           ;
           Type = "Post",
-          subject_class("Post", TaskClass),
+          subject_class("Post", PostClass),
           instance(PostClass, ItemId), 
           property_getter(PostClass, ItemId, "title", Text)
           ;
