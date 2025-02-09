@@ -5,22 +5,33 @@ import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
 import { Literal } from "@coasys/ad4m";
 import { getSynergyItems } from "@coasys/flux-utils";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import {
+  SynergyGroup,
+  SynergyItem,
+  SynergyMatch,
+  SynergyTopic,
+  BlockType,
+  SearchType,
+  MatchIndexes,
+  GroupingOption,
+} from "@coasys/flux-utils";
 
 type Props = {
-  agent: any;
+  agent: AgentClient;
   perspective: any;
-  blockType: "conversation" | "subgroup" | "item";
+  blockType: BlockType;
   data: any;
   timelineIndex: number;
   selectedTopicId: string;
-  match?: any;
-  matchIndexes?: any;
-  setMatchIndexes?: (indexes: any) => void;
-  zoom?: string;
+  match?: SynergyMatch;
+  matchIndexes?: MatchIndexes;
+  setMatchIndexes?: (indexes: MatchIndexes) => void;
+  zoom?: GroupingOption;
   refreshTrigger?: number;
   selectedItemId?: string;
   setSelectedItemId?: (id: string) => void;
-  search?: (type: "topic" | "vector", itemId: string, topic?: any) => void;
+  search?: (type: SearchType, itemId: string, topic?: SynergyTopic) => void;
   setLoading?: (loading: boolean) => void;
   loading?: boolean;
 };
@@ -45,9 +56,9 @@ export default function TimelineBlock({
 }: Props) {
   const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
-  const [participants, setParticipants] = useState([]);
-  const [topics, setTopics] = useState([]);
-  const [children, setChildren] = useState([]);
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [topics, setTopics] = useState<SynergyTopic[]>([]);
+  const [children, setChildren] = useState<SynergyGroup[] | SynergyItem[]>([]);
   const [showChildren, setShowChildren] = useState(false);
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
@@ -163,11 +174,13 @@ export default function TimelineBlock({
       ), [Topics]).
     `);
 
-    const topics =
-      result[0]?.Topics?.map(([baseExpression, name]) => ({
-        baseExpression,
-        name: Literal.fromUrl(name).get().data,
-      })) || [];
+    const topics: SynergyTopic[] =
+      result[0]?.Topics?.map(
+        ([baseExpression, name]): SynergyTopic => ({
+          baseExpression,
+          name: Literal.fromUrl(name).get().data,
+        })
+      ) || [];
 
     setTopics(topics);
   }
@@ -198,11 +211,13 @@ export default function TimelineBlock({
       ), [Topics]).
     `);
 
-    const topics =
-      result[0]?.Topics?.map(([baseExpression, name]) => ({
-        baseExpression,
-        name: Literal.fromUrl(name).get().data,
-      })) || [];
+    const topics: SynergyTopic[] =
+      result[0]?.Topics?.map(
+        ([baseExpression, name]): SynergyTopic => ({
+          baseExpression,
+          name: Literal.fromUrl(name).get().data,
+        })
+      ) || [];
 
     setTopics(topics);
   }

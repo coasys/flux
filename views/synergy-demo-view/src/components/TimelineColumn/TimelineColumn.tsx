@@ -1,25 +1,35 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversations, groupingOptions } from "../../utils";
-import { runProcessingCheck, addSynergySignalHandler } from "@coasys/flux-utils";
+import { closeMenu, getConversations } from "../../utils";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import {
+  runProcessingCheck,
+  addSynergySignalHandler,
+  groupingOptions,
+  ProcessingData,
+  SynergyGroup,
+  SynergyItem,
+  SearchType,
+  GroupingOption,
+} from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
 import Avatar from "../Avatar";
 import { Literal } from "@coasys/ad4m";
 
 type Props = {
-  agent: any;
+  agent: AgentClient;
   perspective: any;
   channelId: string;
   selectedTopicId: string;
-  search: (type: "topic" | "vector", id: string) => void;
+  search: (type: SearchType, id: string) => void;
 };
 
 export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
-  const [conversations, setConversations] = useState<any[]>([]);
-  const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
-  const [processingData, setProcessingData] = useState<any>(null);
-  const [selectedItemId, setSelectedItemId] = useState<any>(null);
-  const [zoom, setZoom] = useState(groupingOptions[0]);
+  const [conversations, setConversations] = useState<SynergyGroup[]>([]);
+  const [unprocessedItems, setUnprocessedItems] = useState<SynergyItem[]>([]);
+  const [processingData, setProcessingData] = useState<ProcessingData | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [zoom, setZoom] = useState<GroupingOption>(groupingOptions[0]);
   const [firstRun, setFirstRun] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const timeout = useRef<any>(null);
@@ -75,7 +85,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     const formattedItems = (result[0]?.Items || []).map(([itemId, author, timestamp, type, text]) => ({
       baseExpression: itemId,
       author,
-      timestamp,
+      timestamp: new Date(timestamp).toISOString(),
       text: Literal.fromUrl(text).get().data,
       icon: icons[type] ? icons[type] : "question",
     }));
@@ -207,6 +217,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                   <j-flex a="center" gap="300">
                     <j-text nomargin>{processingData.items.length} items being processed by</j-text>
                     <Avatar did={processingData.author} showName />
+                    {/* @ts-ignore */}
                     <j-spinner size="xs" />
                   </j-flex>
                 </j-box>

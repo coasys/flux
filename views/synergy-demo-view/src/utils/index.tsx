@@ -1,8 +1,5 @@
 import { Literal } from "@coasys/ad4m";
-
-// constants
-export const groupingOptions = ["Conversations", "Subgroups", "Items"];
-export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
+import { SynergyGroup } from "@coasys/flux-utils";
 
 // helper functions
 export function closeMenu(menuId: string) {
@@ -11,7 +8,7 @@ export function closeMenu(menuId: string) {
   if (items) items.open = false;
 }
 
-export async function getConversations(perspective, channelId) {
+export async function getConversations(perspective, channelId): Promise<SynergyGroup[]> {
   const result = await perspective.infer(`
     findall(ConversationInfo, (
       % 1. Identify all conversations in the channel
@@ -30,17 +27,12 @@ export async function getConversations(perspective, channelId) {
     ), Conversations).
   `);
 
-  // Convert raw Prolog output into a simpler JS array
-  const conversations = (result[0]?.Conversations || []).map(
-    ([baseExpression, conversationName, summary, timestamp]) => ({
-      baseExpression,
-      name: Literal.fromUrl(conversationName).get().data,
-      summary: Literal.fromUrl(summary).get().data,
-      timestamp: parseInt(timestamp, 10),
-    })
-  );
-
-  return conversations;
+  return (result[0]?.Conversations || []).map(([baseExpression, conversationName, summary, timestamp]) => ({
+    baseExpression,
+    name: Literal.fromUrl(conversationName).get().data,
+    summary: Literal.fromUrl(summary).get().data,
+    timestamp: new Date(timestamp).toISOString(),
+  }));
 }
 
 // svgs

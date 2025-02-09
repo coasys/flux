@@ -8,22 +8,20 @@ import { useEffect, useState } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
 import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
+import { SynergyMatch, SynergyTopic, ItemType, SearchType, FilterSettings } from "@coasys/flux-utils";
 
 type Props = { perspective: any; source: string; agent: AgentClient };
-type Grouping = "Conversations" | "Subgroups" | "Items";
-type ItemType = "All Types" | "Message" | "Post" | "Task";
-type SearchType = "" | "vector" | "topic";
 
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
-  const [matches, setMatches] = useState<any[]>([]);
-  const [allTopics, setAllTopics] = useState<any[]>([]);
-  const [selectedTopic, setSelectedTopic] = useState<any>({});
-  const [searchItemId, setSearchItemId] = useState<any>("");
+  const [matches, setMatches] = useState<SynergyMatch[]>([]);
+  const [allTopics, setAllTopics] = useState<SynergyTopic[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
+  const [searchItemId, setSearchItemId] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchType, setSearchType] = useState<SearchType>("");
-  const [filterSettings, setFilterSettings] = useState({
-    grouping: "Conversations" as Grouping,
-    itemType: "All Types" as ItemType,
+  const [filterSettings, setFilterSettings] = useState<FilterSettings>({
+    grouping: "Conversations",
+    itemType: "All Types",
     includeChannel: false,
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
@@ -46,7 +44,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : null;
   }
 
-  async function getAllConversationEmbeddings() {
+  async function getAllConversationEmbeddings(): Promise<SynergyMatch[]> {
     const result = await perspective.infer(`
       findall([ItemId, Embedding, ChannelId, ChannelName], (
         % 1. Find all Conversations
@@ -74,8 +72,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       ), Embeddings).
     `);
 
-    return (result[0]?.Embeddings || []).map(([itemId, embedding, channelId, channelName]) => ({
-      itemId,
+    return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
+      baseExpression,
       type: "Conversation",
       embedding: JSON.parse(embedding),
       channelId,
@@ -83,7 +81,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }));
   }
 
-  async function getAllSubgroupEmbeddings() {
+  async function getAllSubgroupEmbeddings(): Promise<SynergyMatch[]> {
     const result = await perspective.infer(`
       findall([ItemId, Embedding, ChannelId, ChannelName], (
         % 1. Find all Subgroups
@@ -114,8 +112,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       ), Embeddings).
     `);
 
-    return (result[0]?.Embeddings || []).map(([itemId, embedding, channelId, channelName]) => ({
-      itemId,
+    return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
+      baseExpression,
       type: "Subgroup",
       embedding: JSON.parse(embedding),
       channelId,
@@ -123,7 +121,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }));
   }
 
-  async function getAllItemEmbeddings() {
+  async function getAllItemEmbeddings(): Promise<SynergyMatch[]> {
     const result = await perspective.infer(`
       findall([ItemId, Type, Embedding, ChannelId, ChannelName], (
         % 1. Find all items of valid type
@@ -160,8 +158,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       ), Embeddings).
     `);
 
-    return (result[0]?.Embeddings || []).map(([itemId, type, embedding, channelId, channelName]) => ({
-      itemId,
+    return (result[0]?.Embeddings || []).map(([baseExpression, type, embedding, channelId, channelName]) => ({
+      baseExpression,
       type,
       embedding: JSON.parse(embedding),
       channelId,
@@ -169,7 +167,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }));
   }
 
-  async function getItemEmbeddings(itemType: "Message" | "Post" | "Task") {
+  async function getItemEmbeddings(itemType: ItemType): Promise<SynergyMatch[]> {
     const result = await perspective.infer(`
       findall([ItemId, Embedding, ChannelId, ChannelName], (
         % 1. Find all items of valid type
@@ -195,8 +193,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       ), Embeddings).
     `);
 
-    return (result[0]?.Embeddings || []).map(([itemId, embedding, channelId, channelName]) => ({
-      itemId,
+    return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
+      baseExpression,
       type: itemType,
       embedding: JSON.parse(embedding),
       channelId,
@@ -204,7 +202,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }));
   }
 
-  async function findEmbeddingMatches(itemId: string) {
+  async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
     const sourceEmbedding = await getSourceEmbeddings(itemId);
     let allEmbeddings = [];
@@ -217,20 +215,20 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     }
     const matches = await Promise.all(
       allEmbeddings.map(async (e: any) => {
-        const { type, embedding, channelId, channelName } = e;
+        const { baseExpression, type, embedding, channelId, channelName } = e;
         // filter out results that don't match the search filters
-        const isSourceItem = e.itemId === itemId;
+        const isSourceItem = baseExpression === itemId;
         const wrongChannel = !filterSettings.includeChannel && channelId === source;
         if (isSourceItem || wrongChannel) return null;
         // generate a similarity score for the embedding
         const score = await cos_sim(sourceEmbedding, embedding);
-        return { baseExpression: e.itemId, channel: { id: channelId, name: channelName }, type, score };
+        return { baseExpression, channelId, channelName, type, score };
       })
     );
     return matches.filter((item) => item && item.score > 0.2);
   }
 
-  function topicMatchQuery(type: "Conversation" | "Subgroup", topicId: string) {
+  function topicMatchQuery(type: "Conversation" | "Subgroup", topicId: string): string {
     // same prolog query required for conversation & subgroup topic matches, except for the type
     return `
       findall([${type}, Relevance, Channel, ChannelName], (
@@ -259,7 +257,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     `;
   }
 
-  async function getConversationTopicMatches(topicId) {
+  async function getConversationTopicMatches(topicId): Promise<SynergyMatch[]> {
     const result = await perspective.infer(topicMatchQuery("Conversation", topicId));
     // remove duplicate conversations
     const rows = result[0]?.Matches || [];
@@ -279,7 +277,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return Object.values(dedupMap);
   }
 
-  async function getSubgroupTopicMatches(topicId) {
+  async function getSubgroupTopicMatches(topicId): Promise<SynergyMatch[]> {
     const result = await perspective.infer(topicMatchQuery("Subgroup", topicId));
     return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
       // convert prolog response to JS
@@ -292,7 +290,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   }
 
   // searches for items in the neighbourhood that match the search filters & are linked to the same topic
-  async function findTopicMatches(itemId: string, topicId: string) {
+  async function findTopicMatches(itemId: string, topicId: string): Promise<SynergyMatch[]> {
     // update grouping if set to Items (no longer works with topics)
     const { grouping } = filterSettings;
     let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
@@ -308,28 +306,27 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
       const isSourceItem = baseExpression === itemId;
       const wrongChannel = !filterSettings.includeChannel && channelId === source;
       if (isSourceItem || wrongChannel) return null;
-      return { baseExpression, channel: { id: channelId, name: channelName }, type, score: relevance / 100 };
+      return { baseExpression, channelId, channelName, type, score: relevance / 100 };
     });
 
     return filteredMatches.filter((i) => i !== null);
   }
 
-  async function search(type: "vector" | "topic", itemId: string, topic?: any) {
+  async function search(type: SearchType, itemId: string, topic?: SynergyTopic) {
     setSearching(true);
     setMatches([]);
     setShowMatchColumn(true);
     setSearchType(type);
     setSearchItemId(itemId);
-    setSelectedTopic(type === "topic" ? topic : {});
+    setSelectedTopic(type === "topic" ? topic : null);
     const newMatches =
       type === "topic" ? await findTopicMatches(itemId, topic.baseExpression) : await findEmbeddingMatches(itemId);
-    console.log("newMatches", newMatches);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);
   }
 
-  function matchText() {
+  function matchText(): string {
     if (!searchType) return "";
     if (searching) return "Searching for matches...";
     if (matches.length === 0)
@@ -339,7 +336,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
 
   // get all topic tags on page load
   useEffect(() => {
-    getAllTopics(perspective).then((topics: any[]) => setAllTopics(topics));
+    getAllTopics(perspective).then((topics: SynergyTopic[]) => setAllTopics(topics));
   }, []);
 
   // update search results when filters change
@@ -382,7 +379,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             agent={agent}
             perspective={perspective}
             channelId={source}
-            selectedTopicId={selectedTopic.baseExpression}
+            selectedTopicId={selectedTopic?.baseExpression || ""}
             search={search}
           />
         </div>
@@ -411,7 +408,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             perspective={perspective}
             agent={agent}
             matches={matches}
-            selectedTopicId={selectedTopic.baseExpression}
+            selectedTopicId={selectedTopic?.baseExpression || ""}
             searchType={searchType}
             filterSettings={filterSettings}
             setFilterSettings={setFilterSettings}

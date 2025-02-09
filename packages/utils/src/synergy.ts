@@ -1,15 +1,59 @@
-import {
-  LinkQuery,
-  PerspectiveExpression,
-  NeighbourhoodProxy,
-  PerspectiveProxy,
-  Literal,
-  Expression,
-} from "@coasys/ad4m";
+import { PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal, Expression } from "@coasys/ad4m";
+// @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { Conversation, ConversationSubgroup, Topic } from "@coasys/flux-api";
+import { Conversation, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
+
+export const groupingOptions = ["Conversations", "Subgroups", "Items"];
+export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
+
+export type GroupingOption = (typeof groupingOptions)[number];
+export type ItemTypeOption = (typeof itemTypeOptions)[number];
+export type ItemType = "Message" | "Post" | "Task";
+export type SearchType = "" | "vector" | "topic";
+export type BlockType = "conversation" | "subgroup" | "item";
+export type FilterSettings = { grouping: GroupingOption; itemType: "All Types" | ItemType; includeChannel: boolean };
+export type MatchIndexes = { conversation: number | undefined; subgroup: number | undefined; item: number | undefined };
+export type ProcessingData = { author: string; channelId: string; items: string[] };
+export type Link = { source: string; predicate: string; target: string };
+export type LinkExpression = { author: string; data: Link };
+
+export class SynergyGroup {
+  // used for conversations & subgroups
+  baseExpression: string;
+  name: string;
+  summary: string;
+  timestamp: string;
+  index?: number;
+}
+
+export class SynergyItem {
+  // used for items: messages, posts, & tasks
+  baseExpression: string;
+  author: string;
+  type: ItemType;
+  icon: string;
+  timestamp: string;
+  text: string;
+  index?: number;
+  blockType?: string;
+}
+
+export class SynergyMatch {
+  baseExpression: string;
+  channelId: string;
+  channelName: string;
+  type: string;
+  score?: number;
+  relevance?: number;
+  embedding?: number[];
+}
+
+export class SynergyTopic {
+  baseExpression: string;
+  name: string;
+}
 
 export async function getAllTopics(perspective) {
   // gather up all existing topics in the neighbourhood
@@ -18,14 +62,6 @@ export async function getAllTopics(perspective) {
   });
 }
 
-class SynergyItem {
-  type: string;
-  baseExpression: string;
-  author: string;
-  timestamp: string;
-  text: string;
-  icon: string;
-}
 export async function getSynergyItems(perspective, parentId): Promise<SynergyItem[]> {
   // Get all child items of parentId, with timestamp and author
   // if we can get a Text either as
@@ -67,17 +103,13 @@ export async function getSynergyItems(perspective, parentId): Promise<SynergyIte
 
   if (!items) return [];
 
-  const icons = {
-    Message: "chat",
-    Post: "postcard",
-    Task: "kanban",
-  };
+  const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
 
   return items
     .map((item) => {
       let textExpression = Literal.fromUrl(item.Text).get() as Expression;
       return {
-        type: item.Type,
+        type: item.Type as ItemType,
         baseExpression: item.Item,
         author: item.Author,
         timestamp: new Date(item.Timestamp).toISOString(),
@@ -96,36 +128,21 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-// todo: replace with new query in TimelineColumn
-export async function findUnprocessedItems(perspective: any, items: any[], allSubgroupIds: string[]) {
-  const results = await Promise.all(
-    items.map(async (item) => {
-      const links = await perspective.get(
-        new LinkQuery({ predicate: "ad4m://has_child", target: item.baseExpression })
-      );
-      // if the item has a parent link to a subgroup we know it has been processed
-      const isProcessed = links.some((link) => allSubgroupIds.includes(link.data.source));
-      return isProcessed ? null : item;
-    })
-  );
-  return results.filter(Boolean);
-}
-
-async function isMe(did: string) {
+async function isMe(did: string): Promise<boolean> {
   // checks if the did is mine
   const client = await getAd4mClient();
   const me = await client.agent.me();
   return did === me.did;
 }
 
-let receivedSignals: any[] = [];
+let receivedSignals: LinkExpression[] = [];
 let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
 
 async function onSignalReceived(
   expression: PerspectiveExpression,
   neighbourhood: NeighbourhoodProxy,
-  setProcessingData: any
-) {
+  setProcessingData: (data: ProcessingData | null) => void
+): Promise<void> {
   const link = expression.data.links[0];
   const { author, data } = link;
   const { source, predicate, target } = data;
@@ -148,7 +165,7 @@ async function onSignalReceived(
     const items = JSON.parse(target);
     console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
     processing = true;
-    setProcessingData({ author, channel: source, items });
+    setProcessingData({ author, channelId: source, items });
   }
 
   if (predicate === "processing-items-finished") {
@@ -158,13 +175,16 @@ async function onSignalReceived(
   }
 }
 
-export async function addSynergySignalHandler(perspective: PerspectiveProxy, setProcessingData: any) {
+export async function addSynergySignalHandler(
+  perspective: PerspectiveProxy,
+  setProcessingData: (data: ProcessingData | null) => void
+): Promise<void> {
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood, setProcessingData);
   neighbourhood.addSignalHandler(signalHandler);
 }
 
-export async function removeSynergySignalHandler(perspective: PerspectiveProxy) {
+export async function removeSynergySignalHandler(perspective: PerspectiveProxy): Promise<void> {
   if (signalHandler) {
     const neighbourhood = await perspective.getNeighbourhoodProxy();
     neighbourhood.removeSignalHandler(signalHandler);
@@ -220,8 +240,8 @@ async function responsibleForProcessing(
   }
 }
 
-export async function getConversationIds(perspective: PerspectiveProxy, channelId: string) {
-  // todo: sort by timestamp?
+// todo: sort by timestamp?
+export async function getConversationIds(perspective: PerspectiveProxy, channelId: string): Promise<string[]> {
   const result = await perspective.infer(`
     findall(ConversationId, (
       % 1. Find all conversations in the channel
@@ -234,8 +254,8 @@ export async function getConversationIds(perspective: PerspectiveProxy, channelI
   return result[0]?.ConversationIds || [];
 }
 
-export async function getSubgroupIds(perspective: PerspectiveProxy, conversationId: string) {
-  // todo: sort by timestamp?
+// todo: sort by timestamp?
+export async function getSubgroupIds(perspective: PerspectiveProxy, conversationId: string): Promise<string[]> {
   const result = await perspective.infer(`
     findall(SubgroupId, (
       % 1. Find all conversations in the channel
@@ -248,7 +268,10 @@ export async function getSubgroupIds(perspective: PerspectiveProxy, conversation
   return result[0]?.SubgroupIds || [];
 }
 
-export async function getLastSubgroupItemsTimestamp(perspective: PerspectiveProxy, subgroupId: string) {
+export async function getLastSubgroupItemsTimestamp(
+  perspective: PerspectiveProxy,
+  subgroupId: string
+): Promise<number | null> {
   const result = await perspective.infer(`
     findall(LastTimestamp, (
       % 1. Get all valid items and their timestamps
@@ -280,7 +303,10 @@ export async function getLastSubgroupItemsTimestamp(perspective: PerspectiveProx
   return result[0]?.FinalTimestamp || null;
 }
 
-export async function getLastSubgroupsTimestamp(perspective: PerspectiveProxy, subgroupId: string) {
+export async function getLastSubgroupsTimestamp(
+  perspective: PerspectiveProxy,
+  subgroupId: string
+): Promise<number | null> {
   const result = await perspective.infer(`
     findall(Timestamp, (
       % 1. Get subgroup timestamp directly from link
@@ -291,7 +317,7 @@ export async function getLastSubgroupsTimestamp(perspective: PerspectiveProxy, s
   return result[0]?.SubgroupTimestamp || null;
 }
 
-function minsSinceCreated(createdAt: number) {
+function minsSinceCreated(createdAt: number): number {
   const millisecondsSinceCreated = new Date().getTime() - new Date(createdAt).getTime();
   return millisecondsSinceCreated / (1000 * 60);
 }
@@ -321,33 +347,21 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   return conversation.get();
 }
 
-export async function findAllChannelSubgroupIds(
-  perspective: PerspectiveProxy,
-  conversations: Conversation[]
-): Promise<string[]> {
-  const subgroups = await Promise.all(
-    conversations.map((conversation) =>
-      ConversationSubgroup.query(perspective, { source: conversation.baseExpression })
-    )
-  );
-  return [...new Set(subgroups.flat().map((subgroup) => subgroup.baseExpression))];
-}
-
 let processing = false;
 export async function runProcessingCheck(
   perspective: PerspectiveProxy,
   channelId: string,
   unprocessedItems: any[],
-  setProcessingData: any
-) {
-  console.log("runProcessingCheck");
+  setProcessingData: (data: ProcessingData | null) => void
+): Promise<void> {
+  console.log("Run processing check");
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
-  console.log("responsible for processing", responsible);
+  console.log("Responsible for processing:", responsible);
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
     const client = await getAd4mClient();
@@ -356,7 +370,7 @@ export async function runProcessingCheck(
     const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
     const itemIds = itemsToProcess.map((item) => item.baseExpression);
     processing = true;
-    setProcessingData({ author: me.did, channel: channelId, items: itemIds });
+    setProcessingData({ author: me.did, channelId, items: itemIds });
     // notify other agents that we are processing
     await neighbourhood.sendBroadcastU({
       links: [{ source: channelId, predicate: "processing-items-started", target: JSON.stringify(itemIds) }],

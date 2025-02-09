@@ -2,7 +2,7 @@ import { AIClient } from "@coasys/ad4m";
 import Embedding from "../embedding";
 import SemanticRelationship from "../semantic-relationship";
 
-async function findEmbeddingSRId(perspective, itemId) {
+async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
   const result = await perspective.infer(`
     findall(Relationship, (
       % 1. Find SemanticRelationship connected to item
@@ -20,7 +20,7 @@ async function findEmbeddingSRId(perspective, itemId) {
   return result[0]?.Result || null;
 }
 
-export async function removeEmbedding(perspective, itemId) {
+export async function removeEmbedding(perspective, itemId): Promise<void> {
   const embeddingSRId = await findEmbeddingSRId(perspective, itemId);
   if (embeddingSRId) {
     const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId).get();
@@ -31,7 +31,7 @@ export async function removeEmbedding(perspective, itemId) {
 }
 
 // todo: use embedding language instead of stringifying
-export async function createEmbedding(perspective, text, itemId, ai: AIClient) {
+export async function createEmbedding(perspective, text, itemId, ai: AIClient): Promise<void> {
   // generate embedding
   const rawEmbedding = await ai.embed("bert", text);
   // create embedding subject entity

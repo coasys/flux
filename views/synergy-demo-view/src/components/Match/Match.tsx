@@ -1,14 +1,16 @@
 import { useEffect, useState } from "preact/hooks";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { ChevronDownSVG, ChevronUpSVG, getConversations } from "../../utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./Match.module.scss";
+import { SynergyGroup, SynergyMatch, GroupingOption, MatchIndexes } from "@coasys/flux-utils";
 
 type Props = {
   perspective: any;
-  agent: any;
-  match: any;
+  agent: AgentClient;
+  match: SynergyMatch;
   index: number;
-  grouping: string;
+  grouping: GroupingOption;
   selectedTopicId: string;
 };
 
@@ -19,15 +21,19 @@ type Props = {
 //   distributed fashion - subject oriented programming) before identifying the path and then collapsing all the other data
 
 export default function Match({ perspective, agent, match, index, grouping, selectedTopicId }: Props) {
-  const { channel } = match;
+  const { channelId, channelName } = match;
   const [loading, setLoading] = useState(true);
-  const [conversations, setConversations] = useState([]);
-  const [matchIndexes, setMatchIndexes] = useState({ conversation: undefined, subgroup: undefined, item: undefined });
+  const [conversations, setConversations] = useState<SynergyGroup[]>([]);
+  const [matchIndexes, setMatchIndexes] = useState<MatchIndexes>({
+    conversation: undefined,
+    subgroup: undefined,
+    item: undefined,
+  });
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
 
   async function getData() {
-    const newConversations = await getConversations(perspective, channel.id);
+    const newConversations = await getConversations(perspective, channelId);
     // find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
       if (conversation.baseExpression === match.baseExpression) {
@@ -50,11 +56,12 @@ export default function Match({ perspective, agent, match, index, grouping, sele
         <div className={styles.fadeBottom} />
         <div className={styles.line} />
       </div>
-      <h2 className={styles.channelName}>{channel.name}</h2>
+      <h2 className={styles.channelName}>{channelName}</h2>
       {loading && (
         <div style={{ marginLeft: 130, marginBottom: -14 }}>
           <j-flex gap="500" a="center">
             <j-text nomargin>Loading match...</j-text>
+            {/* @ts-ignore */}
             <j-spinner size="xs" />
           </j-flex>
         </div>
@@ -74,7 +81,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
             </div>
           )}
           {conversations
-            .filter((conversation: any, i: number) => {
+            .filter((conversation, i) => {
               conversation.index = i;
               if (matchIndexes.conversation !== undefined) {
                 if (collapseBefore && collapseAfter) return i === matchIndexes.conversation;
@@ -83,7 +90,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
               }
               return true;
             })
-            .map((conversation: any) => (
+            .map((conversation) => (
               <TimelineBlock
                 key={conversation.baseExpression}
                 agent={agent}

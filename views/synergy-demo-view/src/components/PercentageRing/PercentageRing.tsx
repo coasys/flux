@@ -1,10 +1,6 @@
 import styles from "./PercentageRing.module.scss";
 
-type Props = {
-  ringSize: number;
-  fontSize: number;
-  score: number;
-};
+type Props = { ringSize: number; fontSize: number; score: number };
 
 export default function PercentageRing({ ringSize, fontSize, score }: Props) {
   const radius = ringSize / 2 - 10;
