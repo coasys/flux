@@ -222,32 +222,50 @@ export default function TimelineBlock({
     setTopics(topics);
   }
 
-  // todo: start and end times different to deploy preview and not matching timestamps on fetched items
-  // need to use item logic from getSubgroupStats()
   async function getSubgroups() {
     // find all subgroups in the conversation (include timestamps for the first and last item in each subgroup)
     const result = await perspective.infer(`
       findall(SubgroupInfo, (
-        % 1. Identify all subgroups of the conversation
+        % 1. Identify all subgroups in the conversation
         subject_class("ConversationSubgroup", CS),
         instance(CS, Subgroup),
         triple("${baseExpression}", "ad4m://has_child", Subgroup),
-  
+    
         % 2. Retrieve subgroup properties
         property_getter(CS, Subgroup, "subgroupName", SubgroupName),
         property_getter(CS, Subgroup, "summary", Summary),
-  
-        % 3. Collect all link timestamps for items in this subgroup
-        findall(Timestamp, link(Subgroup, "ad4m://has_child", _, Timestamp, _), Timestamps),
+    
+        % 3. Collect timestamps for valid items only
+        findall(Timestamp, (
+          triple(Subgroup, "ad4m://has_child", Item),
+          
+          % Check item is valid type
+          (
+            subject_class("Message", MC),
+            instance(MC, Item)
+            ;
+            subject_class("Post", PC),
+            instance(PC, Item)
+            ;
+            subject_class("Task", TC),
+            instance(TC, Item)
+          ),
+          
+          % Get items timestamp from link to channel
+          link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
+          subject_class("Channel", CH),
+          instance(CH, ChannelId)
+        ), Timestamps),
+    
+        % 4. Derive start and end from earliest & latest timestamps
         (
-          % 4. Derive start and end from earliest & latest timestamps
           Timestamps = []
           -> StartTime = 0, EndTime = 0
           ; sort(Timestamps, Sorted),
             Sorted = [StartTime|_],
             reverse(Sorted, [EndTime|_])
         ),
-  
+    
         % 5. Build a single structure for each subgroup
         SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
       ), Subgroups).
