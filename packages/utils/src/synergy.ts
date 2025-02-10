@@ -62,67 +62,6 @@ export async function getAllTopics(perspective) {
   });
 }
 
-export async function getSynergyItems(perspective, parentId): Promise<SynergyItem[]> {
-  // Get all child items of parentId, with timestamp and author
-  // if we can get a Text either as
-  // - "body" property through Message class
-  // - "title" property through Post class, or
-  // - "name" propoerty through Task class
-  const items: {
-    Item: string;
-    Timestamp: number; //unix milliseconds
-    Author: string;
-    Text: string;
-    Type: string; //"Message", "Post", "Task"
-  }[] = await perspective.infer(`
-    triple("${parentId}", "ad4m://has_child", Item),
-    findall(
-      [Timestamp, Author], 
-      link(_, "ad4m://has_child", Item, Timestamp, Author),
-      AllData
-      ), 
-    sort(AllData, SortedData),
-    SortedData = [[Timestamp, Author]|_],
-    (
-      Type = "Message",
-      subject_class("Message", MessageClass),
-      instance(MessageClass, Item), 
-      property_getter(MessageClass, Item, "body", Text)
-      ;
-      Type = "Post",
-      subject_class("Post", PostClass),
-      instance(PostClass, Item), 
-      property_getter(PostClass, Item, "title", Text)
-      ;
-      Type = "Task",
-      subject_class("Task", TaskClass),
-      instance(TaskClass, Item), 
-      property_getter(TaskClass, Item, "name", Text)
-    ).
-    `);
-
-  if (!items) return [];
-
-  const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
-
-  return items
-    .map((item) => {
-      let textExpression = Literal.fromUrl(item.Text).get() as Expression;
-      return {
-        type: item.Type as ItemType,
-        baseExpression: item.Item,
-        author: item.Author,
-        timestamp: new Date(item.Timestamp).toISOString(),
-        text: textExpression.data,
-        icon: icons[item.Type] ? icons[item.Type] : "question",
-      };
-    })
-    .filter((item, index, self) => self.findIndex((i) => i.baseExpression === item.baseExpression) === index)
-    .sort((a, b) => {
-      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    });
-}
-
 export async function getDefaultLLM() {
   const client = await getAd4mClient();
   return await client.ai.getDefaultModel("LLM");

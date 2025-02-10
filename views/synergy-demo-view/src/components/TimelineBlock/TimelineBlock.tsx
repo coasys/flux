@@ -3,8 +3,7 @@ import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../u
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
-import { Literal } from "@coasys/ad4m";
-import { getSynergyItems } from "@coasys/flux-utils";
+import { LinkQuery, Literal } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import {
   SynergyGroup,
@@ -292,16 +291,75 @@ export default function TimelineBlock({
     setChildren(newSubgroups);
   }
 
+  async function removeDuplicateItems(itemIds: string[]) {
+    // used to remove duplicate items from the subgroup if added multiple times due to network errors causing mutiple agents to process the same data
+    const allLinks = await Promise.all(
+      itemIds.map((itemId) =>
+        perspective.get(new LinkQuery({ source: baseExpression, predicate: "ad4m://has_child", target: itemId }))
+      )
+    );
+    // flatten link arrays and remove first link from each group
+    const linksToRemove = allLinks.flat().filter((_, index, array) => index % array.length !== 0);
+    await perspective.removeLinks(linksToRemove);
+  }
+
   async function getItems() {
-    const newItems = await getSynergyItems(perspective, baseExpression);
-    newItems.forEach((item: any, itemIndex) => {
-      item.blockType = "item";
-      if (match && item.baseExpression === match.baseExpression) {
-        setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
-        setLoading(false);
+    const result = await perspective.infer(`
+      findall([Item, Timestamp, Author, Type, Text], (
+        % 1. Get item linked to subgroup
+        triple("${baseExpression}", "ad4m://has_child", Item),
+  
+        % 2. Get timestamp and author from earliest link
+        findall([T, A], link(_, "ad4m://has_child", Item, T, A), AllData),
+        sort(AllData, SortedData),
+        SortedData = [[Timestamp, Author]|_],
+  
+        % 3. Check item type and get text content
+        (
+          Type = "Message",
+          subject_class("Message", MC),
+          instance(MC, Item), 
+          property_getter(MC, Item, "body", Text)
+          ;
+          Type = "Post",
+          subject_class("Post", PC),
+          instance(PC, Item), 
+          property_getter(PC, Item, "title", Text)
+          ;
+          Type = "Task",
+          subject_class("Task", TC),
+          instance(TC, Item), 
+          property_getter(TC, Item, "name", Text)
+        )
+      ), Items).
+    `);
+
+    const uniqueItems = new Map();
+    const duplicateItems: string[] = [];
+
+    const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
+    (result[0]?.Items || []).forEach(([baseExpression, timestamp, author, type, text], itemIndex) => {
+      // store duplicates for link cleanup
+      if (uniqueItems.has(baseExpression)) duplicateItems.push(baseExpression);
+      else {
+        uniqueItems.set(baseExpression, {
+          baseExpression,
+          type,
+          timestamp: new Date(timestamp).toISOString(),
+          author,
+          text: Literal.fromUrl(text).get().data,
+          icon: icons[type] || "question",
+        });
+        // set match indexes and stop loading if match found
+        if (match && baseExpression === match.baseExpression) {
+          setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
+          setLoading(false);
+        }
       }
     });
-    setChildren(newItems);
+
+    setChildren(Array.from(uniqueItems.values()));
+    if (duplicateItems.length) removeDuplicateItems(duplicateItems);
   }
 
   function onGroupClick() {
