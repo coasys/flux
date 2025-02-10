@@ -292,15 +292,19 @@ export default function TimelineBlock({
   }
 
   async function removeDuplicateItems(itemIds: string[]) {
-    // used to remove duplicate items from the subgroup if added multiple times due to network errors causing mutiple agents to process the same data
-    const allLinks = await Promise.all(
-      itemIds.map((itemId) =>
-        perspective.get(new LinkQuery({ source: baseExpression, predicate: "ad4m://has_child", target: itemId }))
-      )
+    // used to remove duplicate items from the subgroup if added multiple times due to network errors
+    console.log("Removing duplicate items from subgroup", itemIds);
+    const duplicateLinks = await Promise.all(
+      itemIds.map(async (itemId) => {
+        // grab all links connecting the item to the subgroup
+        const links = await perspective.get(
+          new LinkQuery({ source: baseExpression, predicate: "ad4m://has_child", target: itemId })
+        );
+        // remove all except the first link
+        return links.slice(1);
+      })
     );
-    // flatten link arrays and remove first link from each group
-    const linksToRemove = allLinks.flat().filter((_, index, array) => index % array.length !== 0);
-    await perspective.removeLinks(linksToRemove);
+    await perspective.removeLinks(duplicateLinks.flat());
   }
 
   async function getItems() {
