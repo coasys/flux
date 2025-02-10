@@ -93,9 +93,9 @@ export default function TimelineBlock({
 
     const stats = result[0]?.Stats;
     if (stats) {
-      const [totalChildren, allParticipants] = stats;
-      setTotalChildren(totalChildren);
-      setParticipants(allParticipants);
+      const [totalSubgroups, conversationParticipants] = stats;
+      setTotalChildren(totalSubgroups);
+      setParticipants(conversationParticipants);
     }
   }
 
@@ -136,9 +136,9 @@ export default function TimelineBlock({
 
     const stats = result[0]?.Stats;
     if (stats) {
-      const [totalItems, allParticipants] = stats;
+      const [totalItems, subgroupParticipants] = stats;
       setTotalChildren(totalItems);
-      setParticipants(allParticipants);
+      setParticipants(subgroupParticipants);
     }
   }
 
