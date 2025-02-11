@@ -339,12 +339,12 @@ export default function TimelineBlock({
     `);
 
     const uniqueItems = new Map();
-    const duplicateItems: string[] = [];
+    const duplicates = new Set<string>();
 
     const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
     (result[0]?.Items || []).forEach(([baseExpression, timestamp, author, type, text], itemIndex) => {
       // store duplicates for link cleanup
-      if (uniqueItems.has(baseExpression)) duplicateItems.push(baseExpression);
+      if (uniqueItems.has(baseExpression)) duplicates.add(baseExpression);
       else {
         uniqueItems.set(baseExpression, {
           baseExpression,
@@ -363,6 +363,9 @@ export default function TimelineBlock({
     });
 
     setChildren(Array.from(uniqueItems.values()));
+  
+    // remove duplicates if found
+    const duplicateItems = Array.from(duplicates);
     if (duplicateItems.length) removeDuplicateItems(duplicateItems);
   }
 
