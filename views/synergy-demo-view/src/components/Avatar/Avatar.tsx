@@ -16,9 +16,9 @@ export default function Avatar({ did, size = "sm", showName = false, style }: Pr
 
   async function getData() {
     const { username, profileThumbnailPicture: picture } = await getProfile(did);
-    setName(username);
     if (picture && picture.includes("base64")) setImage(picture);
     else setImage((await getImage(picture)) || "");
+    setName(username);
   }
 
   useEffect(() => {
