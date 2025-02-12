@@ -27,7 +27,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const timeout = useRef(null);
   const streamId = useRef(null);
   const transcriptId = useRef("");
-  const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  const isChrome =
+    /Chrome/.test(navigator.userAgent) &&
+    /Google Inc/.test(navigator.vendor) &&
+    !/Edg|Edge|OPR|Opera|Brave/.test(navigator.userAgent);
 
   const { repo: messageRepo } = useSubjects({ perspective, source, subject: Message });
 
