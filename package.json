@@ -31,7 +31,8 @@
     "turbo": "latest"
   },
   "resolutions": {
-    "@coasys/ad4m": "0.10.1-rc1"
+    "@coasys/ad4m": "0.10.1-rc7",
+    "@coasys/ad4m-connect": "0.10.1-rc7"
   },
   "engines": {
     "node": ">=18.16.0"

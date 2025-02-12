@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversationData, groupingOptions, findItemState } from "../../utils";
-import { processItem } from "@coasys/flux-utils";
+import { closeMenu, getConversationData, groupingOptions } from "../../utils";
+import { runProcessingCheck, getSynergyItems, addSynergySignalHandler } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import Avatar from "../Avatar";
 
 type Props = {
   agent: any;
@@ -21,50 +21,54 @@ export default function TimelineColumn({
   search,
 }: Props) {
   const [conversations, setConversations] = useState<any[]>([]);
-  const [processingItems, setProcessingItems] = useState<any[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<any[]>([]);
-  const [processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState<any>(null);
   const [selectedItemId, setSelectedItemId] = useState<any>(null);
   const [zoom, setZoom] = useState(groupingOptions[0]);
-  const [usingLLM, setUsingLLM] = useState(false);
+  const [firstRun, setFirstRun] = useState(true);
   const timeout = useRef<any>(null);
+  const totalConversationItems = useRef(0);
+  const processingRef = useRef(true);
+  const gettingDataRef = useRef(false);
+
+  async function runProcessingCheckIfNewItems() {
+    const channelItems = await getSynergyItems(perspective, channelId);
+    if (channelItems.length > totalConversationItems.current)
+      runProcessingCheck(perspective, channelId, channelItems, setProcessing);
+    totalConversationItems.current = channelItems.length;
+  }
 
   async function getData() {
-    const data = await getConversationData(perspective, channelId);
-    setProcessingItems(data.processingItems);
-    setUnprocessedItems(data.unprocessedItems);
-    setConversations(data.conversations);
-  }
-
-  async function processItems() {
-    setProcessing(true);
-    for (const item of unprocessedItems) {
-      // check if item still needs processing first incase someone has started
-      const state = await findItemState(perspective, item.baseExpression);
-      if (state !== "unprocessed") continue;
-      await processItem(perspective, channelId, item, true);
+    if (!gettingDataRef.current) {
+      gettingDataRef.current = true;
+      runProcessingCheckIfNewItems();
+      const data = await getConversationData(perspective, channelId);
+      setUnprocessedItems(data.unprocessedItems);
+      setConversations(data.conversations);
+      gettingDataRef.current = false;
     }
-    setProcessing(false);
   }
-
-  async function checkIfUsingLLM() {
-    const client = await getAd4mClient();
-    const defaultLLM = await client.ai.getDefaultModel("LLM");
-    setUsingLLM(!!defaultLLM);
-  }
-
   function linkAddedListener() {
-    if (timeout.current) clearTimeout(timeout.current);
-    timeout.current = setTimeout(getData, 2000);
+    if (!processingRef.current) {
+      if (timeout.current) clearTimeout(timeout.current);
+      timeout.current = setTimeout(getData, 2000);
+    }
   }
 
   useEffect(() => {
+    // add signal listener
+    addSynergySignalHandler(perspective, setProcessing);
+    // add listener for new links
     perspective.addListener("link-added", linkAddedListener);
-    checkIfUsingLLM();
-    getData();
 
     return () => perspective.removeListener("link-added", linkAddedListener);
   }, []);
+
+  useEffect(() => {
+    processingRef.current = !!processing;
+    if (!processing || firstRun) getData();
+    if (firstRun) setFirstRun(false);
+  }, [processing]);
 
   return (
     <div className={styles.wrapper}>
@@ -87,34 +91,6 @@ export default function TimelineColumn({
             </j-menu-group>
           </j-menu>
         </j-flex>
-        {(processingItems.length > 0 || unprocessedItems.length > 0) && (
-          <j-flex a="center" gap="400">
-            {processingItems.length > 0 && (
-              <j-badge variant="success">
-                {processingItems.length} item
-                {processingItems.length > 1 ? "s" : ""} processing...
-              </j-badge>
-            )}
-            {unprocessedItems.length > 0 && (
-              <>
-                <j-badge variant="warning">
-                  {unprocessedItems.length} unprocessed item
-                  {unprocessedItems.length > 1 ? "s" : ""}
-                </j-badge>
-                {usingLLM && (
-                  <j-button
-                    size="sm"
-                    onClick={processItems}
-                    loading={processing}
-                    disabled={processing}
-                  >
-                    Process
-                  </j-button>
-                )}
-              </>
-            )}
-          </j-flex>
-        )}
       </j-flex>
       <div className={styles.timeline}>
         <div className={styles.fades}>
@@ -136,6 +112,43 @@ export default function TimelineColumn({
               search={search}
             />
           ))}
+          {unprocessedItems.length > 0 && (
+            <div style={{ marginLeft: 70 }}>
+              <j-text uppercase size="400" weight="800" color="primary-500">
+                {unprocessedItems.length} Unprocessed Items
+              </j-text>
+              {processing && (
+                <j-box mb="500">
+                  <j-flex a="center" gap="300">
+                    <j-text nomargin>{processing.items.length} items being processed by</j-text>
+                    <Avatar did={processing.author} showName />
+                    <j-spinner size="xs" />
+                  </j-flex>
+                </j-box>
+              )}
+              {unprocessedItems.map((item) => (
+                <j-flex key={item.baseExpression} gap="400" a="center" className={styles.itemCard}>
+                  <j-flex gap="300" direction="column">
+                    <j-flex gap="400" a="center">
+                      <j-icon name={item.icon} color="ui-400" size="lg" />
+                      <j-flex gap="400" a="center" wrap>
+                        <Avatar did={item.author} showName />
+                      </j-flex>
+                      {processing && processing.items.includes(item.baseExpression) && (
+                        <j-badge variant="success">Processing...</j-badge>
+                      )}
+                    </j-flex>
+                    <j-text
+                      nomargin
+                      dangerouslySetInnerHTML={{ __html: item.text }}
+                      className={styles.itemText}
+                      color="color-white"
+                    />
+                  </j-flex>
+                </j-flex>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

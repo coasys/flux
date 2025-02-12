@@ -50,7 +50,7 @@ export function useSubjects<SubjectClass>(props: Props<SubjectClass>) {
   const getData = useCallback(() => {
     if (source) {
       setIsLoading(true);
-      console.log(`fetching data from remote`, source, query, cacheKey);
+      // console.log(`fetching data from remote`, source, query, cacheKey);
       Repo.getAllData(source, query)
         .then((newEntries) => {
           setError(undefined);

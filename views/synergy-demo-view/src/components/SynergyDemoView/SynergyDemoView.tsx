@@ -53,9 +53,17 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     else return entryTypeToSubjectClass(entryTypeLink[0].data.target);
   }
 
-  async function findChannel(itemId, channels) {
+  async function findChannel(itemId, type, channels) {
+    // find the root item linked to the channel
+    let rootItemId = itemId;
+    if (type === "ConversationSubgroup") {
+      // in the case of subgroups (which aren't diretcly linked to the channel) the root item is the parent conversation
+      const subgroup = await new ConversationSubgroup(perspective, itemId);
+      const parentConversation = await subgroup.parentConversation();
+      rootItemId = parentConversation.baseExpression;
+    }
     const parentLinks = await perspective.get(
-      new LinkQuery({ predicate: "ad4m://has_child", target: itemId })
+      new LinkQuery({ predicate: "ad4m://has_child", target: rootItemId })
     );
     return (
       channels.find((c) => parentLinks.find((p) => p.data.source === c.id)) || {
@@ -89,8 +97,8 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         embeddingRelationships.map(async (relationship: any) => {
           const { expression, tag } = relationship;
           // if it doesn't match the search filters return null
-          const channel = await findChannel(expression, channels);
           const type = await findEntryType(expression);
+          const channel = await findChannel(expression, type, channels);
           const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;
@@ -112,14 +120,15 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   ): Promise<any[]> {
     // searches for items in the neighbourhood that match the search filters & are linked to the same topic
     return await new Promise(async (resolveMatches: any) => {
-      const allRelationships = await SemanticRelationship.all(perspective);
-      const topicRelationships = allRelationships.filter((r) => r.tag === topicId);
+      const topicRelationships = (await SemanticRelationship.query(perspective, {
+        where: { tag: topicId },
+      })) as SemanticRelationship[];
       const matches = await Promise.all(
         topicRelationships.map(async (relationship) => {
           const { expression, relevance } = relationship;
           // if it doesn't match the search filters return null
-          const channel = await findChannel(expression, channels);
           const type = await findEntryType(expression);
+          const channel = await findChannel(expression, type, channels);
           const wrongChannel = !filterSettings.includeChannel && channel.id === source;
           const wrongType = !allowedTypes.includes(type);
           if (wrongChannel || wrongType) return null;

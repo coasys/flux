@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import SidebarLayout from "@/layout/SidebarLayout.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -107,7 +107,7 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
-import { PerspectiveState } from "@coasys/ad4m";
+import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   usePerspective,

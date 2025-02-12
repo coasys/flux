@@ -1,12 +1,7 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
-import {
-  feedTranscription,
-  processItem,
-  startTranscription,
-  stopTranscription,
-} from "@coasys/flux-utils";
+import { feedTranscription, startTranscription, stopTranscription } from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import RecordingIcon from "../RecordingIcon/RecordingIcon";
@@ -119,10 +114,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       const message = (await messageRepo.create({
         body: `<p>${fullText}</p>`,
       })) as any;
-      processItem(perspective, source, {
-        baseExpression: message.id,
-        text: fullText,
-      });
+      // processItem(perspective, source, {
+      //   baseExpression: message.id,
+      //   text: fullText,
+      // });
     }, messageTimeout * 1000);
   }
 

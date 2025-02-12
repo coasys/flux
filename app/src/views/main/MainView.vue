@@ -190,14 +190,22 @@ import { EntryType } from "@coasys/flux-types";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
-import { Ad4mClient, LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
-import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
+import {
+  Ad4mClient,
+  LinkExpression,
+  Literal,
+  PerspectiveProxy,
+} from "@coasys/ad4m";
+import {
+  useSubject,
+  usePerspective,
+  usePerspectives,
+} from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
 import { ad4mConnect } from "@/ad4mConnect";
-import { ensureLLMTask } from "@coasys/flux-utils";
-
+import { ensureLLMTasks } from "@coasys/flux-api/src/conversation/LLMutils";
 
 export default defineComponent({
   name: "MainAppView",
@@ -218,11 +226,13 @@ export default defineComponent({
     setTimeout(async () => {
       if (data.value.perspective) {
         // @ts-ignore
-        await client.runtime.addNotificationTriggeredCallback((notification: any) => {
-          console.log("notification", notification);
-        });
+        await client.runtime.addNotificationTriggeredCallback(
+          (notification: any) => {
+            console.log("notification", notification);
+          }
+        );
       }
-    }, 1000)
+    }, 1000);
 
     return {
       client,
@@ -234,7 +244,7 @@ export default defineComponent({
       isInit: ref(false),
       hasCopied: ref(false),
       data,
-      oldAuthState: ref(ad4mConnect.authState)
+      oldAuthState: ref(ad4mConnect.authState),
     };
   },
   components: {
@@ -249,12 +259,15 @@ export default defineComponent({
   },
   async mounted() {
     registerNotification();
-    ensureLLMTask();
-    
+    ensureLLMTasks(this.client.ai);
+
     ad4mConnect.addEventListener("authstatechange", async (e) => {
       let oldState = this.oldAuthState;
       this.oldAuthState = ad4mConnect.authState;
-      if (ad4mConnect.authState === "authenticated" && oldState !== "authenticated") {
+      if (
+        ad4mConnect.authState === "authenticated" &&
+        oldState !== "authenticated"
+      ) {
         window.location.reload();
       }
     });
