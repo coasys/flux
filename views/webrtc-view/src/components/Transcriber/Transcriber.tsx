@@ -11,11 +11,9 @@ type Props = { source: string; perspective: any; webRTC: WebRTC };
 
 export default function Transcriber({ source, perspective, webRTC }: Props) {
   const { audio, transcriber } = webRTC.localState.settings;
-  const { selectedModel, previewTimeout, messageTimeout } = transcriber;
+  const { messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [useRemoteService, setUseRemoteService] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [interimTranscript, setInterimTranscript] = useState("");
   // const [countDown, setCountDown] = useState(0);
   // const countDownInterval = useRef(null);
   const usingRemoteService = useRef(false);
@@ -137,6 +135,8 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       historyIndex = (historyIndex + 1) % volumeHistorySamplesPerSecond;
     }, volumeCheckIntervalDuration);
 
+    let transcript = "";
+    let interimTranscript = "";
     let accumulatedText = "";
     recognition.current.onresult = (event) => {
       let interim = "";
@@ -172,9 +172,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // accumulate final text
       if (final) {
         accumulatedText += final;
-        setTranscript(accumulatedText);
+        transcript = accumulatedText;
       }
-      setInterimTranscript(interim);
+      interimTranscript = interim;
 
       // reset silence timeout
       if (timeout.current) clearTimeout(timeout.current);
@@ -185,8 +185,8 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           if (accumulatedText.length > 0) {
             await saveMessage();
             accumulatedText = "";
-            setTranscript("");
-            setInterimTranscript("");
+            transcript = "";
+            interimTranscript = "";
             transcriptId.current = null;
           }
         }, silenceTimeout * 1000);
