@@ -27,6 +27,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const timeout = useRef(null);
   const streamId = useRef(null);
   const transcriptId = useRef("");
+  const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
 
   const { repo: messageRepo } = useSubjects({ perspective, source, subject: Message });
@@ -111,14 +112,29 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   }
 
   function startRemoteTranscription() {
-    const secondsOfSilence = 2;
-    // @ts-ignore
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const silenceTimeout = 2; // seconds of silence before transcription saved
+    const volumeThreshold = 20; // volume theshold percentage below which transcription is ignored
+    const volumeCheckIntervalDuration = 100; // milliseconds between each volume check
+    const historyLength = 1; // seconds of volume history to store
+    const volumeHistorySamplesPerSecond = (historyLength * 1000) / volumeCheckIntervalDuration;
+    const volumeHistory = new Array(volumeHistorySamplesPerSecond).fill(0);
+    let historyIndex = 0;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     recognition.current = new SpeechRecognition();
     recognition.current.continuous = true;
     recognition.current.interimResults = true;
-    let accumulatedText = "";
 
+    // only detect speech when volume is above threshold
+    volumeCheckInterval.current = setInterval(() => {
+      analyser.current.getByteTimeDomainData(dataArray.current);
+      const maxValue = Math.max(...dataArray.current);
+      const percentage = ((maxValue - 128) / 128) * 100;
+      // store last second of volume data for check in onresult function below
+      volumeHistory[historyIndex] = percentage;
+      historyIndex = (historyIndex + 1) % volumeHistorySamplesPerSecond;
+    }, volumeCheckIntervalDuration);
+
+    let accumulatedText = "";
     recognition.current.onresult = (event) => {
       let interim = "";
       let final = "";
@@ -128,6 +144,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         if (result.isFinal) {
           final += result[0].transcript;
         } else {
+          // check if user was speaking in the last second
+          const userWasSpeaking = volumeHistory.some((vol) => vol > volumeThreshold);
+          if (!userWasSpeaking) continue;
+
           interim += result[0].transcript;
           if (!transcriptId.current) {
             const id = uuidv4();
@@ -166,7 +186,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
             setInterimTranscript("");
             transcriptId.current = null;
           }
-        }, secondsOfSilence * 1000);
+        }, silenceTimeout * 1000);
       }
     };
 
@@ -215,6 +235,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     sourceNode.current?.disconnect();
     audioContext.current?.close();
     recognition.current?.stop();
+    clearInterval(volumeCheckInterval.current);
     if (streamId.current) {
       stopTranscription(streamId.current);
       streamId.current = null;
