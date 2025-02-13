@@ -196,7 +196,7 @@ export async function getConversationIds(perspective: PerspectiveProxy, channelI
       % 1. Find all conversations in the channel
       subject_class("Conversation", ConversationClass),
       instance(ConversationClass, ConversationId),
-      triple("${channelId}", "ad4m://has_child", SubgroupId)
+      triple("${channelId}", "ad4m://has_child", ConversationId)
     ), ConversationIds).
   `);
 
@@ -207,7 +207,7 @@ export async function getConversationIds(perspective: PerspectiveProxy, channelI
 export async function getSubgroupIds(perspective: PerspectiveProxy, conversationId: string): Promise<string[]> {
   const result = await perspective.infer(`
     findall(SubgroupId, (
-      % 1. Find all conversations in the channel
+      % 1. Find all subgroups in the conversation
       subject_class("ConversationSubgroup", SubgroupClass),
       instance(SubgroupClass, SubgroupId),
       triple("${conversationId}", "ad4m://has_child", SubgroupId)
@@ -279,21 +279,22 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
     const lastConversationId = conversationIds[conversationIds.length - 1];
     const subgroupIds = await getSubgroupIds(perspective, lastConversationId);
     // error case: if conversation found but no subgroups added yet, reuse the conversation
-    if (!subgroupIds.length) return new Conversation(perspective, lastConversationId).get();
+    if (!subgroupIds.length) return await new Conversation(perspective, lastConversationId).get();
     // get the timestamp of the last item in the last subgroup
     const lastSubgroupId = subgroupIds[subgroupIds.length - 1];
     let timestamp = await getLastSubgroupItemsTimestamp(perspective, lastSubgroupId);
     // error case: if subgroup found but no items added yet, use the timestamp of the subgroup
     if (!timestamp) timestamp = await getLastSubgroupsTimestamp(perspective, lastSubgroupId);
     // if recent activity found, reuse conversation
-    if (timestamp && minsSinceCreated(timestamp) < 30) return new Conversation(perspective, lastConversationId).get();
+    if (timestamp && minsSinceCreated(timestamp) < 30)
+      return await new Conversation(perspective, lastConversationId).get();
   }
   // if no conversations found, create a new conversation
   const conversation = new Conversation(perspective, undefined, channelId);
   conversation.conversationName = "Generating conversation...";
   conversation.summary = "Content will appear when processing is complete";
   await conversation.save();
-  return conversation.get();
+  return await conversation.get();
 }
 
 let processing = false;
