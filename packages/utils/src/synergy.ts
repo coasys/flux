@@ -55,6 +55,16 @@ export class SynergyTopic {
   name: string;
 }
 
+export function detectBrowser(): string {
+  if (typeof (window as any).InstallTrigger !== "undefined") return "firefox";
+  if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) return "safari";
+  if (navigator.userAgent.includes("Edg")) return "edge";
+  if ((navigator as any)?.brave?.isBrave) return "brave";
+  // check chrome last as edge & brave are chromium based so would pass as chrome with the following logic
+  if ((window as any).chrome && navigator.vendor === "Google Inc.") return "chrome";
+  return "unknown";
+}
+
 export async function getAllTopics(perspective) {
   // gather up all existing topics in the neighbourhood
   return (await Topic.query(perspective)).map((topic: any) => {

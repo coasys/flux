@@ -1,7 +1,7 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
-import { feedTranscription, startTranscription, stopTranscription } from "@coasys/flux-utils";
+import { feedTranscription, startTranscription, stopTranscription, detectBrowser } from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import RecordingIcon from "../RecordingIcon/RecordingIcon";
@@ -27,10 +27,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const timeout = useRef(null);
   const streamId = useRef(null);
   const transcriptId = useRef("");
-  const isChrome =
-    /Chrome/.test(navigator.userAgent) &&
-    /Google Inc/.test(navigator.vendor) &&
-    !/Edg|Edge|OPR|Opera|Brave/.test(navigator.userAgent);
+  const browser = detectBrowser();
 
   const { repo: messageRepo } = useSubjects({ perspective, source, subject: Message });
 
@@ -249,10 +246,12 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           <j-text nomargin uppercase size="400" weight="800" color="primary-500">
             Transcriber
           </j-text>
-          {isChrome && (
+          {browser === "chrome" ? (
             <j-checkbox checked={useRemoteService} onChange={() => setUseRemoteService(!useRemoteService)}>
-              Use remote service
+              Use Google transcription
             </j-checkbox>
+          ) : (
+            <j-text>Google transcription available in Chrome</j-text>
           )}
         </j-flex>
       </j-box>
