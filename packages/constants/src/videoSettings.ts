@@ -27,7 +27,7 @@ export const defaultSettings = {
   video: false,
   screen: false,
   transcriber: {
-    on: false,
+    on: true,
     selectedModel: "Base",
     previewTimeout: 0.4,
     messageTimeout: 5,
