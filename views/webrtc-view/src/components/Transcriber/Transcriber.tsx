@@ -55,23 +55,25 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       }
       return newTranscripts;
     });
-    // store id for outro transitions
-    const previousId = transcriptId.current;
-    transcriptId.current = null;
-    // trigger outro transitions
-    const transcriptCard = document.getElementById(`transcript-${previousId}`);
-    if (transcriptCard) {
-      transcriptCard.classList.add(styles.slideLeft);
-      setTimeout(() => {
-        transcriptCard.classList.add(styles.hide);
+    if (text) {
+      // store id for outro transitions
+      const previousId = transcriptId.current;
+      transcriptId.current = null;
+      // trigger outro transitions
+      const transcriptCard = document.getElementById(`transcript-${previousId}`);
+      if (transcriptCard) {
+        transcriptCard.classList.add(styles.slideLeft);
         setTimeout(() => {
-          setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+          transcriptCard.classList.add(styles.hide);
+          setTimeout(() => {
+            setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+          }, 500);
         }, 500);
-      }, 500);
+      }
+      // save message
+      // @ts-ignore
+      await messageRepo.create({ body: `<p>${text}</p>` });
     }
-    // save message
-    // @ts-ignore
-    await messageRepo.create({ body: `<p>${text}</p>` });
   }
 
   async function handleTranscriptionText(text: string) {
@@ -144,7 +146,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         if (result.isFinal) {
           final += result[0].transcript;
         } else {
-          // check if user was speaking in the last second
+          // check if user was speaking in the volume history
           const userWasSpeaking = volumeHistory.some((vol) => vol > volumeThreshold);
           if (!userWasSpeaking) continue;
 
