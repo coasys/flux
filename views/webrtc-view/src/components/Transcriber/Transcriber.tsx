@@ -18,6 +18,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const [interimTranscript, setInterimTranscript] = useState("");
   // const [countDown, setCountDown] = useState(0);
   // const countDownInterval = useRef(null);
+  const usingRemoteService = useRef(false);
   const audioContext = useRef(null);
   const analyser = useRef(null);
   const dataArray = useRef(null);
@@ -196,6 +197,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       console.error("Speech recognition error:", event.error);
     };
 
+    recognition.current.onend = () => {
+      // restart if ended due to timeout (not user toggling to local service)
+      if (usingRemoteService.current) recognition.current.start();
+    };
+
     recognition.current.start();
   }
 
@@ -270,7 +276,13 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
             Transcriber
           </j-text>
           {browser === "chrome" ? (
-            <j-checkbox checked={useRemoteService} onChange={() => setUseRemoteService(!useRemoteService)}>
+            <j-checkbox
+              checked={useRemoteService}
+              onChange={() => {
+                usingRemoteService.current = !usingRemoteService.current;
+                setUseRemoteService(!useRemoteService);
+              }}
+            >
               Use Google transcription
             </j-checkbox>
           ) : (
