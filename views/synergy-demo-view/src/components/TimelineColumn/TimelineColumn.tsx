@@ -141,10 +141,13 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   }
 
   function linkAddedListener() {
-    if (!processing.current) {
-      if (timeout.current) clearTimeout(timeout.current);
-      timeout.current = setTimeout(getData, 2000);
-    }
+    if (timeout.current) clearTimeout(timeout.current);
+    timeout.current = setTimeout(async () => {
+      // if processing, only update unprocessed items
+      if (processing.current) setUnprocessedItems(await getUnprocessedItems());
+      // otherwise update all data
+      else getData();
+    }, 2000);
   }
 
   useEffect(() => {
