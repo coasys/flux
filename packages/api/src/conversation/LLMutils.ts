@@ -28,20 +28,27 @@ export async function ensureLLMTasks(ai: AIClient): Promise<{
 
 export async function LLMTaskWithExpectedOutputs(
   task: FluxLLMTask,
-  prompt: object,
+  prompt: any,
   ai: AIClient
 ): Promise<any | any[]> {
   let data;
   let attempts = 0;
 
-  if((prompt as any).avoidError)
-    delete (prompt as any).avoidError
+  let error = null;
 
   // attempt LLM task up to 5 times before giving up
   while (!data && attempts < 5) {
     attempts += 1;
-    console.log(`LLM Prompt for ${task.name}`, prompt);
-    const response = await ai.prompt(task.id!, JSON.stringify(prompt));
+    let promptString;
+    if(typeof prompt === "object")
+      promptString = JSON.stringify(prompt);
+    else
+      promptString = prompt;
+    if(error)
+      promptString += `\n\nRemember to avoid the following error: ${error}`;
+
+    console.log(`LLM Prompt for ${task.name}`, promptString);
+    const response = await ai.prompt(task.id!, promptString);
     console.log(`LLM Response for ${task.name}`, response);
 
     try {
@@ -105,12 +112,12 @@ export async function LLMTaskWithExpectedOutputs(
         throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
       // the parsed data looks good
       data = parsedData;
-    } catch (error) {
-      console.error("LLM response parse error:", error);
-      if(error.message)
-        (prompt as any).avoidError = error.message;
+    } catch (e) {
+      console.error("LLM response parse error:", e);
+      if(e.message)
+        error = e.message;
       else
-        (prompt as any).avoidError = error;
+        error =e
     }
   }
 

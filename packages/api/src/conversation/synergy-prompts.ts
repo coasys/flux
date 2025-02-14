@@ -1,4 +1,4 @@
-const VERSION = 3;
+const VERSION = 4;
 
 export const synergyConversationPrompt = `
 You are an integrated part of a chat system. 
@@ -11,46 +11,51 @@ If your response is not valid JSON, it **WILL BREAK** the system.
 ---
 
 ## **Input Format:**
-You will receive a JSON **array** containing objects with:
-- **"n"** (name/title of a subgroup)
-- **"s"** (summary of the subgroup)
+You will receive a list of existing conversation sub-groups - that is: their names and summaries.
+I will provide these as clear-text with the name in one line and the summary in the next line.
+There will be an empty line between each sub-group.
 
 Example input:
-[
-  { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
-  { "n": "Dark Matter", "s": "Exploring the mysterious substance influencing gravity." }
-]
+Cosmic Expansion
+Discussion about the universe's expansion.
+
+Dark Matter
+Exploring the mysterious substance influencing gravity.
+
+---
 
 ## **Your Task:**
 - Analyze all sub-group names (“n”) and summaries (“s”).
 - Generate one single overarching title and summary that captures the whole conversation.
-- Structure your response exactly as:
+- Structure your response as ONE JSON object:
+
+Example output:
 {
   "n": "The Name/Title",
   "s": "This is a more descriptive summary..."
 }
+
 ## **🚨 DO NOT:**
 - Add extra properties.
 - Use explanations, text, or natural language outside JSON.
-- Return an array—always return a single JSON object.  
+- Return anything else than a single JSON object.
+
+## ALWAYS:
+- Return ONE single JSON object.
+- With the properties "n" and "s".
 `;
 
 export const synergyConversationExamples = [
   {
-    input: `[
-        {
-            "n": "Tech and Privacy",
-            "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection."
-        },
-        {
-            "n": "AI in Healthcare",
-            "s": "Exploration of the applications of artificial intelligence in healthcare, including diagnostics and patient management."
-        },
-        {
-            "n": "Future of Work",
-            "s": "Conversation about how remote work and automation are shaping the future of employment."
-        }
-    ]`,
+    input: `
+Tech and Privacy
+Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.
+
+AI in Healthcare
+Exploration of the applications of artificial intelligence in healthcare, including diagnostics and patient management.
+
+Future of Work
+Conversation about how remote work and automation are shaping the future of employment`,
     output: `{
         "n": "Technology and Society",
         "s": "The conversation examines the impact of technology on privacy, healthcare, and the future of work, highlighting ethical considerations and societal changes."
@@ -199,26 +204,21 @@ You are an API that receives JSON input and responds ONLY with JSON.
 ---
 
 ## **Input Format:**
-You will receive a JSON object containing:
-- **"topics"**: A list of topics, each with:
-  - "n": Name of the topic.
-  - "rel": Relevance score (0-100).
-- **"messages"**: A list of messages.
+You will receive a list of topics, each with a name and a relevance score in parentheses.
+At the end, after the list and an additional linebreak, you will also receive a list of new messages.
+If there are no topics yet, you will receive "<no topics yet>".
 
-**Example input:**
-{
-  "topics": [
-    { "n": "universe", "rel": 90 },
-    { "n": "expansion", "rel": 100 }
-  ],
-  "messages": [
-    "The universe is constantly expanding, but scientists are still debating the exact rate.",
-    "Dark energy is thought to play a significant role in driving the expansion of the universe.",
-    "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
-    "These discrepancies might point to unknown physics beyond our current models.",
-    "For instance, some theories suggest modifications to general relativity could explain this."
-  ]
-}
+Example input:
+universe (90)
+expansion (100)
+
+messages:
+The universe is constantly expanding, but scientists are still debating the exact rate.
+Dark energy is thought to play a significant role in driving the expansion of the universe.
+Recent measurements suggest there may be discrepancies in the Hubble constant values.
+These discrepancies might point to unknown physics beyond our current models.
+For instance, some theories suggest modifications to general relativity could explain this.
+
 
 ## Your Task:
 1.	Analyze the messages and update the topic list accordingly:
@@ -228,67 +228,61 @@ You will receive a JSON object containing:
   - If a topic becomes less relevant, decrease its relevance.
 2.	Output Format:
 	- Return ONLY a JSON array of topics with the format:
-  [
-    { "n": "topic_name", "rel": 90 },
-    { "n": "another_topic", "rel": 100 }
-  ]
 
-## 🚨 DO NOT:
-- Include explanations, text, or additional properties.
-- Return an object
-- Include comments, or any other text.
+## Example output:
+[
+  { "n": "topic_name", "rel": 90 },
+  { "n": "another_topic", "rel": 100 }
+]
+
+## 🚨 Caution:
+- DO NOT: Include explanations, text, or additional properties.
+- DO NOT: Return an object.
+- DO NOT: Include comments, or any other text.
+- DO NOT: Include the "messages" property in the output.
 
 ## ALWAYS:
-- Return a JSON array.
+- Return ONLY a JSON array of topic objects (with the properties "n" and "rel").
 `;
 
 export const synergyTopicsExamples = [
   {
-    input: `{
-    "topics": [
-        { "n": "universe", "rel": 90 },
-        { "n": "expansion", "rel": 100 },
-        { "n": "darkenergy", "rel": 90 },
-        { "n": "hubble", "rel": 80 },
-        
-    ],
-    "messages": [
-        "The universe is constantly expanding, but scientists are still debating the exact rate.",
-        "Dark energy is thought to play a significant role in driving the expansion of the universe.",
-        "Recent measurements suggest there may be discrepancies in the Hubble constant values.",
-        "These discrepancies might point to unknown physics beyond our current models.",
-        "For instance, some theories suggest modifications to general relativity could explain this."
-      ]
-    }`,
+    input: `
+universe (90)
+expansion (100)
+
+messages:
+The universe is constantly expanding, but scientists are still debating the exact rate.
+Dark energy is thought to play a significant role in driving the expansion of the universe.
+Recent measurements suggest there may be discrepancies in the Hubble constant values.
+These discrepancies might point to unknown physics beyond our current models.
+For instance, some theories suggest modifications to general relativity could explain this.`,
     output: `[
-        { "n": "universe", "rel": 100 },
-        { "n": "expansion", "rel": 100 },
-        { "n": "darkenergy", "rel": 90 },
-        { "n": "hubble", "rel": 80 },
-        { "n": "relativity", "rel": 70 }
+{ "n": "universe", "rel": 100 },
+{ "n": "expansion", "rel": 100 },
+{ "n": "darkenergy", "rel": 90 },
+{ "n": "hubble", "rel": 80 },
+{ "n": "relativity", "rel": 70 }
     ]`,
   },
   {
-    input: `{
-        "topics": [
-            { "n": "fitness", "rel": 80 },
-            { "n": "nutrition", "rel": 70 }
-        ],
-        "messages": [
-            "Hydration is a key factor in maintaining fitness performance.",
-            "Electrolytes in water support muscle function and recovery.",
-            "A balanced diet is essential for recovery and energy levels.",
-            "Strength training complements cardio for a well-rounded fitness routine.",
-            "Proper hydration prevents cramps and fatigue during workouts."
-        ]
-    }`,
+    input: `
+fitness (80)
+nutrition (70)
+
+messages:
+Hydration is a key factor in maintaining fitness performance.
+Electrolytes in water support muscle function and recovery.
+A balanced diet is essential for recovery and energy levels.
+Strength training complements cardio for a well-rounded fitness routine.
+Proper hydration prevents cramps and fatigue during workouts.`,
     output: `[
-        { "n": "fitness", "rel": 90 },
-        { "n": "nutrition", "rel": 80 },
-        { "n": "hydration", "rel": 85 },
-        { "n": "recovery", "rel": 75 },
-        { "n": "electrolytes", "rel": 70 }
-    ]`,
+{ "n": "fitness", "rel": 90 },
+{ "n": "nutrition", "rel": 80 },
+{ "n": "hydration", "rel": 85 },
+{ "n": "recovery", "rel": 75 },
+{ "n": "electrolytes", "rel": 70 }
+]`,
   },
 ];
 
