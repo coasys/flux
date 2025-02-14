@@ -129,6 +129,18 @@ export default class Conversation extends SubjectEntity {
     // Have LLM sort new messages into old group or detect subject change
     let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
 
+    // Handle case where group is present but properties are not set
+    if (detectResult.group && !(detectResult.group.n?.length>0) && !(detectResult.group.s?.length>0)) {
+      detectResult.group = null;
+    }
+
+    // Handle case where newGroup is present but properties are not set
+    if (detectResult.newGroup && !(detectResult.newGroup.n?.length>0) && !(detectResult.newGroup.s?.length>0)) {
+      detectResult.newGroup = null;
+    }
+
+    // Handle case where group and newGroup are present but properties are not set
+
     // Handle case where the conversation is empty (no group yet) but LLM returns data in group and not in newGroup
     if (!currentSubgroup && detectResult.group && !detectResult.newGroup) {
       detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].id };
