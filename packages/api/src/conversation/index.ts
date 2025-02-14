@@ -97,18 +97,14 @@ export default class Conversation extends SubjectEntity {
   private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
     const { topics } = await ensureLLMTasks(this.perspective.ai);
     let currentTopics = (await group.topicsWithRelevance()) as any;
-    let prompt
-    if(currentTopics.length)
-      prompt = currentTopics.map((t) => {
-        return `${t.name} (${t.relevance})`;
-      }).join("\n");
-    else
-      prompt = "<no topics yet>";
-    prompt += "\n\nmessages:\n" + newMessages.map(m => { return m.replace(/<[^>]*>/g, "") }).join("\n");
-
     let currentNewTopics = await LLMTaskWithExpectedOutputs(
       topics,
-      prompt,
+      {
+        topics: currentTopics.map((t) => {
+          return { n: t.name, rel: t.relevance };
+        }),
+        messages: newMessages,
+      },
       this.perspective.ai
     );
 
@@ -192,12 +188,8 @@ export default class Conversation extends SubjectEntity {
     // Add new group if one was detected
     if (detectResult.newGroup) promptArray.push({ n: detectResult.newGroup.n, s: detectResult.newGroup.s });
 
-    let promptString = promptArray.map((p) => {
-      return `${p.n}\n${p.s}`;
-    }).join("\n\n");
-
     const { conversation } = await ensureLLMTasks(this.perspective.ai);
-    let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptString, this.perspective.ai);
+    let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray, this.perspective.ai);
 
     // ------------ saving all new data ------------------
 
