@@ -228,78 +228,15 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
     return matches.filter((item) => item && item.score > 0.2);
   }
 
-  function topicMatchQuery(type: "Conversation" | "Subgroup", topicId: string): string {
-    // same prolog query required for conversation & subgroup topic matches, except for the type
-    return `
-      findall([${type}, Relevance, Channel, ChannelName], (
-        % 1. Find SemanticRelationships that have tag = topicId
-        subject_class("SemanticRelationship", SR),
-        instance(SR, Relationship),
-        triple(Relationship, "flux://has_tag", "${topicId}"),
-  
-        % 2. Grab the subgroup and relevance
-        property_getter(SR, Relationship, "expression", Subgroup),
-        property_getter(SR, Relationship, "relevance", Relevance),
-  
-        % 3. Find the parent Conversation that owns this Subgroup
-        subject_class("Conversation", CC),
-        instance(CC, Conversation),
-        triple(Conversation, "ad4m://has_child", Subgroup),
-  
-        % 4. Find the Channel that owns this Conversation
-        subject_class("Channel", CH),
-        instance(CH, Channel),
-        triple(Channel, "ad4m://has_child", Conversation),
-  
-        % 5. Grab the Channel's name property
-        property_getter(CH, Channel, "name", ChannelName)
-      ), Matches).
-    `;
-  }
-
-  async function getConversationTopicMatches(topicId): Promise<SynergyMatch[]> {
-    const result = await perspective.infer(topicMatchQuery("Conversation", topicId));
-    // remove duplicate conversations
-    const rows = result[0]?.Matches || [];
-    const dedupMap: Record<string, any> = {};
-    for (const [baseExpression, relevance, channelId, channelName] of rows) {
-      if (!dedupMap[baseExpression]) {
-        // convert prolog response to JS
-        dedupMap[baseExpression] = {
-          baseExpression,
-          type: "Conversation",
-          relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
-          channelId,
-          channelName: Literal.fromUrl(channelName).get().data,
-        };
-      }
-    }
-    return Object.values(dedupMap);
-  }
-
-  async function getSubgroupTopicMatches(topicId): Promise<SynergyMatch[]> {
-    const result = await perspective.infer(topicMatchQuery("Subgroup", topicId));
-    return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
-      // convert prolog response to JS
-      baseExpression,
-      type: "ConversationSubgroup",
-      relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
-      channelId,
-      channelName: Literal.fromUrl(channelName).get().data,
-    }));
-  }
-
-  // searches for items in the neighbourhood that match the search filters & are linked to the same topic
   async function findTopicMatches(itemId: string, topicId: string): Promise<SynergyMatch[]> {
     // update grouping if set to Items (no longer works with topics)
     const { grouping } = filterSettings;
     let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
     if (grouping === "Items") setFilterSettings((prev) => ({ ...prev, grouping: "Conversations" }));
     // find matches
+    const topic = new Topic(perspective, topicId);
     const matches =
-      currentGrouping === "Conversations"
-        ? await getConversationTopicMatches(topicId)
-        : await getSubgroupTopicMatches(topicId);
+      currentGrouping === "Conversations" ? await topic.linkedConversations() : await topic.linkedSubgroups();
     // filter out results that don't match the search filters
     const filteredMatches = matches.map((relationship) => {
       const { baseExpression, type, channelId, channelName, relevance } = relationship;
