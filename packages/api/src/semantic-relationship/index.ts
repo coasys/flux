@@ -29,22 +29,35 @@ export default class SemanticRelationship extends SubjectEntity {
   })
   relevance: number; // 0 - 100
 
+  channelFromItem = `
+    % Find Channel that owns this Item
+    subject_class("Channel", CH),
+    instance(CH, ChannelId),
+    triple(ChannelId, "ad4m://has_child", ItemId),
+    property_getter(CH, ChannelId, "name", ChannelName),
+  `;
+
+  semanticRelationshipForItem = `
+    % Find SemanticRelationship for Item
+    subject_class("SemanticRelationship", SR),
+    instance(SR, SemanticRelationship),
+    property_getter(SR, SemanticRelationship, "expression", ItemId),
+  `;
+
+  emeddingFromSemanticRelationship = `
+    % Get Embedding from SemanticRelationship
+    property_getter(SR, SemanticRelationship, "tag", EmbeddingId),
+    subject_class("Embedding", E),
+    instance(E, EmbeddingId),
+    property_getter(E, EmbeddingId, "embedding", Embedding)
+  `;
+
   async itemEmbedding(itemId: string): Promise<number[]> {
     // get the embedding of a specific item
     try {
       const result = await this.perspective.infer(`
-        % 1. Find SemanticRelationship for this item
-        subject_class("SemanticRelationship", SR),
-        instance(SR, Relationship),
-        property_getter(SR, Relationship, "expression", "${itemId}"),
-
-        % 2. Get Embedding ID from relationship
-        triple(Relationship, "flux://has_tag", EmbeddingId),
-
-        % 3. Get Embedding data
-        subject_class("Embedding", E),
-        instance(E, EmbeddingId),
-        property_getter(E, EmbeddingId, "embedding", Embedding).
+        ${this.semanticRelationshipForItem.replace("ItemId", `"${itemId}"`)}
+        ${this.emeddingFromSemanticRelationship}.
       `);
       return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : [];
     } catch (error) {
@@ -61,25 +74,10 @@ export default class SemanticRelationship extends SubjectEntity {
           % 1. Find all Conversations
           subject_class("Conversation", Conversation),
           instance(Conversation, ItemId),
-      
-          % 2. Find Channel that owns this Conversation
-          subject_class("Channel", CH),
-          instance(CH, ChannelId),
-          triple(ChannelId, "ad4m://has_child", ItemId),
-          property_getter(CH, ChannelId, "name", ChannelName),
-      
-          % 3. Find SemanticRelationship for this Conversation
-          subject_class("SemanticRelationship", SR),
-          instance(SR, SemanticRelationship),
-          property_getter(SR, SemanticRelationship, "expression", ItemId),
-      
-          % 4. Get Embedding ID from relationship
-          triple(SemanticRelationship, "flux://has_tag", EmbeddingId),
-      
-          % 5. Finally get Embedding data
-          subject_class("Embedding", E),
-          instance(E, EmbeddingId),
-          property_getter(E, EmbeddingId, "embedding", Embedding)
+
+          ${this.channelFromItem}
+          ${this.semanticRelationshipForItem}
+          ${this.emeddingFromSemanticRelationship}
         ), Embeddings).
       `);
 
@@ -104,28 +102,15 @@ export default class SemanticRelationship extends SubjectEntity {
           % 1. Find all Subgroups
           subject_class("ConversationSubgroup", Subgroup),
           instance(Subgroup, ItemId),
-      
+
           % 2. Find the parent Conversation
           subject_class("Conversation", CC),
           instance(CC, Conversation),
           triple(Conversation, "ad4m://has_child", ItemId),
-      
-          % 3. Find Channel that owns Conversation
-          subject_class("Channel", CH),
-          instance(CH, ChannelId),
-          triple(ChannelId, "ad4m://has_child", Conversation),
-          property_getter(CH, ChannelId, "name", ChannelName),
-      
-          % 4. Find SemanticRelationship for this Subgroup
-          subject_class("SemanticRelationship", SR),
-          instance(SR, SemanticRelationship),
-          property_getter(SR, SemanticRelationship, "expression", ItemId),
-      
-          % 5. Get Embedding ID and data
-          triple(SemanticRelationship, "flux://has_tag", EmbeddingId),
-          subject_class("Embedding", E),
-          instance(E, EmbeddingId),
-          property_getter(E, EmbeddingId, "embedding", Embedding)
+
+          ${this.channelFromItem.replace("ItemId", "Conversation")}
+          ${this.semanticRelationshipForItem}
+          ${this.emeddingFromSemanticRelationship}
         ), Embeddings).
       `);
 
@@ -161,23 +146,10 @@ export default class SemanticRelationship extends SubjectEntity {
             subject_class("Task", TC),
             instance(TC, ItemId)
           ),
-    
-          % 2. Find Channel that owns this Item
-          subject_class("Channel", CH),
-          instance(CH, ChannelId),
-          triple(ChannelId, "ad4m://has_child", ItemId),
-          property_getter(CH, ChannelId, "name", ChannelName),
-    
-          % 3. Find SemanticRelationship for this Item
-          subject_class("SemanticRelationship", SR),
-          instance(SR, Relationship),
-          property_getter(SR, Relationship, "expression", ItemId),
-    
-          % 4. Get Embedding data
-          property_getter(SR, Relationship, "tag", EmbeddingId),
-          subject_class("Embedding", E),
-          instance(E, EmbeddingId),
-          property_getter(E, EmbeddingId, "embedding", Embedding)
+
+          ${this.channelFromItem}
+          ${this.semanticRelationshipForItem}
+          ${this.emeddingFromSemanticRelationship}
         ), Embeddings).
       `);
 
@@ -202,23 +174,10 @@ export default class SemanticRelationship extends SubjectEntity {
           % 1. Find all items of valid type
           subject_class("${itemType.slice(0, -1)}", TypeClass),
           instance(TypeClass, ItemId),
-    
-          % 2. Find Channel that owns this Item
-          subject_class("Channel", CH),
-          instance(CH, ChannelId),
-          triple(ChannelId, "ad4m://has_child", ItemId),
-          property_getter(CH, ChannelId, "name", ChannelName),
-    
-          % 3. Find SemanticRelationship for this Item
-          subject_class("SemanticRelationship", SR),
-          instance(SR, Relationship),
-          property_getter(SR, Relationship, "expression", ItemId),
-    
-          % 4. Get Embedding data
-          property_getter(SR, Relationship, "tag", EmbeddingId),
-          subject_class("Embedding", E),
-          instance(E, EmbeddingId),
-          property_getter(E, EmbeddingId, "embedding", Embedding)
+
+          ${this.channelFromItem}
+          ${this.semanticRelationshipForItem}
+          ${this.emeddingFromSemanticRelationship}
         ), Embeddings).
       `);
 
