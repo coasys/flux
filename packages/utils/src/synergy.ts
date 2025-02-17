@@ -343,18 +343,3 @@ export async function runProcessingCheck(
     });
   }
 }
-
-export async function startTranscription(callback: (text) => void) {
-  const client = await getAd4mClient();
-  return await client.ai.openTranscriptionStream("Whisper", callback);
-}
-
-export async function feedTranscription(id, chunks) {
-  const client = await getAd4mClient();
-  await client.ai.feedTranscriptionStream(id, Array.from(chunks));
-}
-
-export async function stopTranscription(id) {
-  const client = await getAd4mClient();
-  await client.ai.closeTranscriptionStream(id);
-}
