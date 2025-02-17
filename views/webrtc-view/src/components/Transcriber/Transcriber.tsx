@@ -48,21 +48,24 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   async function saveMessage() {
     // fetch latest text & mark message as saving
     let text = "";
+    setPreviewText("");
     setTranscripts((ts) => {
       const newTranscripts = [...ts];
       const match = newTranscripts.find((t) => t.id === transcriptId.current);
       if (match) {
         text = match.text;
-        match.state = "saved";
+        if(text) match.state = "saved";
+        else match.state = "aborted";
       }
       return newTranscripts;
     });
-    if (text) {
-      // store id for outro transitions
-      const previousId = transcriptId.current;
-      transcriptId.current = null;
-      // trigger outro transitions
-      const transcriptCard = document.getElementById(`transcript-${previousId}`);
+    // store id for outro transitions
+    const previousId = transcriptId.current;
+    transcriptId.current = null;
+    // trigger outro transitions
+    const transcriptCard = document.getElementById(`transcript-${previousId}`);
+
+    if (text) {  
       if (transcriptCard) {
         transcriptCard.classList.add(styles.slideLeft);
         setTimeout(() => {
@@ -75,20 +78,26 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // save message
       // @ts-ignore
       await messageRepo.create({ body: `<p>${text}</p>` });
+    } else {
+      if (transcriptCard) {
+        transcriptCard.classList.add(styles.slideRight);
+        setTimeout(() => {
+          transcriptCard.classList.add(styles.hide);
+        }, 500);
+      }
     }
   }
 
-  async function handleTranscriptionText(text: string) {
-    // Clear preview text when we get final text
-    setPreviewText("");
-    
-    // function fires every time a new chunk of text is sent back from the AI service
+  function addCurrentTranscript(text?: string) {
+    if (!text) text = "";
     setTranscripts((ts) => {
       const newTranscripts = [...ts];
       // search for existing transcript
       const match = newTranscripts.find((t) => t.id === transcriptId.current);
       // if match found, update text
-      if (match) match.text = match.text + text;
+      if (match) {
+        match.text = match.text + text;
+      }
       else {
         // otherwise initialise new transcript
         transcriptId.current = uuidv4();
@@ -96,33 +105,27 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       }
       return newTranscripts;
     });
+  }
 
-    // // restart countdown interval
-    // if (countDownInterval.current) {
-    //   clearInterval(countDownInterval.current);
-    //   countDownInterval.current = null;
-    // }
-    // setCountDown(messageTimeout);
-    // countDownInterval.current = setInterval(
-    //   () => setCountDown((t) => t - 1),
-    //   1000
-    // );
-
-    // set up timeout to save transcript after messageTimeout has elapsed with no new text
+  function resetSaveTimeout() {
     if (timeout.current) clearTimeout(timeout.current);
     timeout.current = setTimeout(async () => {
-      // reset countdown interval
-      // clearInterval(countDownInterval.current);
-      // countDownInterval.current = null;
       saveMessage();
     }, messageTimeout * 1000);
   }
 
+  // function fires every time a new chunk of text is sent back from the AI service
+  async function handleTranscriptionText(text: string) {
+    // Clear preview text when we get final text
+    setPreviewText("");
+    addCurrentTranscript(text);
+    resetSaveTimeout();
+  }
+
   async function handleTranscriptionPreview(text: string) {
-    // Only show preview if we're currently transcribing something
-    if (transcriptId.current) {
-      setPreviewText(prevText => prevText + text);
-    }
+    addCurrentTranscript();
+    setPreviewText(prevText => prevText + text);
+    resetSaveTimeout();
   }
 
   function startRemoteTranscription() {
@@ -237,8 +240,8 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
-        client.ai.feedTranscriptionStream(streamId.current, Array.from(event.data));
         client.ai.feedTranscriptionStream(fastStreamId.current, Array.from(event.data));
+        client.ai.feedTranscriptionStream(streamId.current, Array.from(event.data));
       }
     };
     workletNode.connect(audioContext.current.destination);
@@ -335,9 +338,14 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           </j-text>
         </j-flex>
       )}
-      {transcripts.length > 0 && (
+      
         <j-box mt="600">
           <j-flex direction="column" gap="400">
+            {transcripts.length == 0 && previewText && (
+              <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
+                {previewText}
+              </span>
+            )}
             {transcripts.map((transcript) => (
               <div key={transcript.id} id={`transcript-${transcript.id}`} className={styles.transcript}>
                 <j-flex direction="column" gap="300">
@@ -345,7 +353,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                   <j-text nomargin size="600">
                     {transcript.text}
                     {/* Show preview text in italics and grey if this is the current transcript */}
-                    {transcript.id === transcriptId.current && previewText && (
+                    {previewText && (
                       <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
                         {previewText}
                       </span>
@@ -370,12 +378,20 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                       </j-text>
                     </j-flex>
                   )}
+                  {transcript.state === "aborted" && (
+                    <j-flex gap="400" a="center">
+                      <j-icon name="x-circle" color="error-600" />
+                      <j-text nomargin size="600" color="error-600">
+                          Aborted
+                        </j-text>
+                      </j-flex>
+                  )}
                 </j-flex>
               </div>
             ))}
           </j-flex>
         </j-box>
-      )}
+      
     </div>
   );
 }

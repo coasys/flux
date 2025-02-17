@@ -38,6 +38,11 @@
       opacity: 0;
     }
 
+    &.slideRight {
+      margin-left: 100%;
+      opacity: 0;
+    }
+
     &.hide {
       max-height: 0;
     }
