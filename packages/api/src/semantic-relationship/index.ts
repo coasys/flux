@@ -1,5 +1,28 @@
 import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
-import { SynergyMatch, SynergyTopic, ItemType, SearchType, FilterSettings } from "@coasys/flux-utils";
+import { SynergyMatch } from "@coasys/flux-utils";
+
+const CHANNEL_FROM_ITEM = `
+  % Find Channel that owns this Item
+  subject_class("Channel", CH),
+  instance(CH, ChannelId),
+  triple(ChannelId, "ad4m://has_child", ItemId),
+  property_getter(CH, ChannelId, "name", ChannelName),
+`;
+
+const SEMANTIC_RELATIONSHIP_FOR_ITEM = `
+  % Find SemanticRelationship for Item
+  subject_class("SemanticRelationship", SR),
+  instance(SR, SemanticRelationship),
+  property_getter(SR, SemanticRelationship, "expression", ItemId),
+`;
+
+const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
+  % Get Embedding from SemanticRelationship
+  property_getter(SR, SemanticRelationship, "tag", EmbeddingId),
+  subject_class("Embedding", E),
+  instance(E, EmbeddingId),
+  property_getter(E, EmbeddingId, "embedding", Embedding)
+`;
 
 @SDNAClass({ name: "SemanticRelationship" })
 export default class SemanticRelationship extends SubjectEntity {
@@ -29,35 +52,12 @@ export default class SemanticRelationship extends SubjectEntity {
   })
   relevance: number; // 0 - 100
 
-  channelFromItem = `
-    % Find Channel that owns this Item
-    subject_class("Channel", CH),
-    instance(CH, ChannelId),
-    triple(ChannelId, "ad4m://has_child", ItemId),
-    property_getter(CH, ChannelId, "name", ChannelName),
-  `;
-
-  semanticRelationshipForItem = `
-    % Find SemanticRelationship for Item
-    subject_class("SemanticRelationship", SR),
-    instance(SR, SemanticRelationship),
-    property_getter(SR, SemanticRelationship, "expression", ItemId),
-  `;
-
-  emeddingFromSemanticRelationship = `
-    % Get Embedding from SemanticRelationship
-    property_getter(SR, SemanticRelationship, "tag", EmbeddingId),
-    subject_class("Embedding", E),
-    instance(E, EmbeddingId),
-    property_getter(E, EmbeddingId, "embedding", Embedding)
-  `;
-
   async itemEmbedding(itemId: string): Promise<number[]> {
     // get the embedding of a specific item
     try {
       const result = await this.perspective.infer(`
-        ${this.semanticRelationshipForItem.replace("ItemId", `"${itemId}"`)}
-        ${this.emeddingFromSemanticRelationship}.
+        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace("ItemId", `"${itemId}"`)}
+        ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}.
       `);
       return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : [];
     } catch (error) {
@@ -75,9 +75,9 @@ export default class SemanticRelationship extends SubjectEntity {
           subject_class("Conversation", Conversation),
           instance(Conversation, ItemId),
 
-          ${this.channelFromItem}
-          ${this.semanticRelationshipForItem}
-          ${this.emeddingFromSemanticRelationship}
+          ${CHANNEL_FROM_ITEM}
+          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
+          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
         ), Embeddings).
       `);
 
@@ -108,9 +108,9 @@ export default class SemanticRelationship extends SubjectEntity {
           instance(CC, Conversation),
           triple(Conversation, "ad4m://has_child", ItemId),
 
-          ${this.channelFromItem.replace("ItemId", "Conversation")}
-          ${this.semanticRelationshipForItem}
-          ${this.emeddingFromSemanticRelationship}
+          ${CHANNEL_FROM_ITEM.replace("ItemId", "Conversation")}
+          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
+          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
         ), Embeddings).
       `);
 
@@ -147,9 +147,9 @@ export default class SemanticRelationship extends SubjectEntity {
             instance(TC, ItemId)
           ),
 
-          ${this.channelFromItem}
-          ${this.semanticRelationshipForItem}
-          ${this.emeddingFromSemanticRelationship}
+          ${CHANNEL_FROM_ITEM}
+          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
+          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
         ), Embeddings).
       `);
 
@@ -175,9 +175,9 @@ export default class SemanticRelationship extends SubjectEntity {
           subject_class("${itemType.slice(0, -1)}", TypeClass),
           instance(TypeClass, ItemId),
 
-          ${this.channelFromItem}
-          ${this.semanticRelationshipForItem}
-          ${this.emeddingFromSemanticRelationship}
+          ${CHANNEL_FROM_ITEM}
+          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
+          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
         ), Embeddings).
       `);
 
