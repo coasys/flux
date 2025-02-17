@@ -3,7 +3,7 @@ import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../u
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
-import { LinkQuery, Literal } from "@coasys/ad4m";
+import { LinkQuery } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import {
   SynergyGroup,

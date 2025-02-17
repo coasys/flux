@@ -2,7 +2,7 @@ import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery, Lite
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
 import Conversation from "../conversation";
-import { SynergyTopic, SynergyItem } from "@coasys/flux-utils";
+import { SynergyTopic, SynergyItem, icons } from "@coasys/flux-utils";
 
 @SDNAClass({
   name: "ConversationSubgroup",
@@ -145,7 +145,6 @@ export default class ConversationSubgroup extends SubjectEntity {
           )
         ), Items).
       `);
-      const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
       return (result[0]?.Items || []).map(([baseExpression, timestamp, author, type, text]) => ({
         baseExpression,
         type,
