@@ -1,8 +1,8 @@
-import { Link, SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { Link, SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
-import { TopicWithRelevance } from "../topic";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
+import { SynergyTopic, SynergyGroup } from "@coasys/flux-utils";
 
 @SDNAClass({
   name: "Conversation",
@@ -30,17 +30,156 @@ export default class Conversation extends SubjectEntity {
   })
   summary: string;
 
+  async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
+    // find the total subgroup count and the dids of participants in the conversation
+    try {
+      const result = await this.perspective.infer(`
+        findall([SubgroupCount, SortedAuthors], (
+          % 1. Gather all subgroups and find the count
+          findall(Subgroup, (
+            subject_class("ConversationSubgroup", CS),
+            instance(CS, Subgroup),
+            triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
+          ), SubgroupList),
+          length(SubgroupList, SubgroupCount),
+    
+          % 2. Gather and deduplicate authors
+          findall(Author, (
+            member(S, SubgroupList),
+            triple(S, "ad4m://has_child", Item),
+            link(_, "ad4m://has_child", Item, _, Author)
+          ), AuthorList),
+          sort(AuthorList, SortedAuthors)
+        ), [Stats]).
+      `);
+      const [totalSubgroups, participants] = result[0]?.Stats ?? [];
+      return { totalSubgroups: totalSubgroups ?? 0, participants: participants ?? [] };
+    } catch (error) {
+      console.error("Error getting conversation stats:", error);
+      return { totalSubgroups: 0, participants: [] };
+    }
+  }
+
+  async topics(): Promise<SynergyTopic[]> {
+    // find the conversations topics (via its subgroups)
+    try {
+      const result = await this.perspective.infer(`
+        % Get all topics and sort in one step
+        findall(TopicList, (
+          % First get all topic pairs
+          findall([TopicBase, TopicName], (
+            % 1. Gather subgroups
+            findall(Subgroup, (
+              subject_class("ConversationSubgroup", CS),
+              instance(CS, Subgroup),
+              triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
+            ), SubgroupList),
+    
+            % 2. Get topics from relationships
+            member(S, SubgroupList),
+            subject_class("SemanticRelationship", SR),
+            instance(SR, Relationship),
+            triple(Relationship, "flux://has_expression", S),
+            triple(Relationship, "flux://has_tag", TopicBase),
+            
+            % 3. Get topic names
+            subject_class("Topic", T),
+            instance(T, TopicBase),
+            property_getter(T, TopicBase, "topic", TopicName)
+          ), AllTopics),
+          
+          % Remove duplicates
+          sort(AllTopics, TopicList)
+        ), [Topics]).
+      `);
+
+      return (
+        result[0]?.Topics?.map(
+          ([baseExpression, name]): SynergyTopic => ({
+            baseExpression,
+            name: Literal.fromUrl(name).get().data,
+          })
+        ) || []
+      );
+    } catch (error) {
+      console.error("Error getting conversation topics:", error);
+      return [];
+    }
+  }
+
   async subgroups(): Promise<ConversationSubgroup[]> {
+    // find the conversations subgroup entities
     const subgroups = (await ConversationSubgroup.query(this.perspective, {
       source: this.baseExpression,
     })) as ConversationSubgroup[];
-
-    // Sort subgroups by timestamp
-    const sortedSubgroups = subgroups.sort((a, b) => {
+    // sort by timestamp
+    return subgroups.sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
+  }
 
-    return sortedSubgroups;
+  async subgroupsData(): Promise<SynergyGroup[]> {
+    // find the necissary data to render the conversations subgroups in timeline components (include timestamps for the first and last item in each subgroup)
+    try {
+      const result = await this.perspective.infer(`
+        findall(SubgroupInfo, (
+          % 1. Identify all subgroups in the conversation
+          subject_class("ConversationSubgroup", CS),
+          instance(CS, Subgroup),
+          triple("${this.baseExpression}", "ad4m://has_child", Subgroup),
+      
+          % 2. Retrieve subgroup properties
+          property_getter(CS, Subgroup, "subgroupName", SubgroupName),
+          property_getter(CS, Subgroup, "summary", Summary),
+      
+          % 3. Collect timestamps for valid items only
+          findall(Timestamp, (
+            triple(Subgroup, "ad4m://has_child", Item),
+            
+            % Check item is valid type
+            (
+              subject_class("Message", MC),
+              instance(MC, Item)
+              ;
+              subject_class("Post", PC),
+              instance(PC, Item)
+              ;
+              subject_class("Task", TC),
+              instance(TC, Item)
+            ),
+            
+            % Get items timestamp from link to channel
+            link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
+            subject_class("Channel", CH),
+            instance(CH, ChannelId)
+          ), Timestamps),
+      
+          % 4. Derive start and end from earliest & latest timestamps
+          (
+            Timestamps = []
+            -> StartTime = 0, EndTime = 0
+            ; sort(Timestamps, Sorted),
+              Sorted = [StartTime|_],
+              reverse(Sorted, [EndTime|_])
+          ),
+      
+          % 5. Build a single structure for each subgroup
+          SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
+        ), Subgroups).
+      `);
+
+      // convert raw prolog output into a friendlier JS array
+      return (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
+        baseExpression,
+        name: Literal.fromUrl(subgroupName).get().data,
+        summary: Literal.fromUrl(summary).get().data,
+        start: parseInt(start, 10),
+        end: parseInt(end, 10),
+      }));
+    } catch (error) {
+      console.error("Error getting conversation subgroups:", error);
+      return [];
+    }
   }
 
   private async detectNewGroup(
@@ -130,12 +269,12 @@ export default class Conversation extends SubjectEntity {
     let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
 
     // Handle case where group is present but properties are not set
-    if (detectResult.group && !(detectResult.group.n?.length>0) && !(detectResult.group.s?.length>0)) {
+    if (detectResult.group && !(detectResult.group.n?.length > 0) && !(detectResult.group.s?.length > 0)) {
       detectResult.group = null;
     }
 
     // Handle case where newGroup is present but properties are not set
-    if (detectResult.newGroup && !(detectResult.newGroup.n?.length>0) && !(detectResult.newGroup.s?.length>0)) {
+    if (detectResult.newGroup && !(detectResult.newGroup.n?.length > 0) && !(detectResult.newGroup.s?.length > 0)) {
       detectResult.newGroup = null;
     }
 

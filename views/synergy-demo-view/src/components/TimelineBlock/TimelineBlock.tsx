@@ -15,6 +15,7 @@ import {
   MatchIndexes,
   GroupingOption,
 } from "@coasys/flux-utils";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 
 type Props = {
   agent: AgentClient;
@@ -69,226 +70,43 @@ export default function TimelineBlock({
     : false;
 
   async function getConversationStats() {
-    // find the total subgroup count and participants in the conversation
-    const result = await perspective.infer(`
-      findall([SubgroupCount, SortedAuthors], (
-        % 1. Gather all subgroups and count
-        findall(Subgroup, (
-          subject_class("ConversationSubgroup", CS),
-          instance(CS, Subgroup),
-          triple("${baseExpression}", "ad4m://has_child", Subgroup)
-        ), SubgroupList),
-        length(SubgroupList, SubgroupCount),
-  
-        % 2. Gather and deduplicate authors
-        findall(Author, (
-          member(S, SubgroupList),
-          triple(S, "ad4m://has_child", Item),
-          link(_, "ad4m://has_child", Item, _, Author)
-        ), AuthorList),
-        sort(AuthorList, SortedAuthors)
-      ), [Stats]).
-    `);
-
-    const stats = result[0]?.Stats;
-    if (stats) {
-      const [totalSubgroups, conversationParticipants] = stats;
-      setTotalChildren(totalSubgroups);
-      setParticipants(conversationParticipants);
-    }
+    const conversation = new Conversation(perspective, baseExpression);
+    const stats = await conversation.stats();
+    setTotalChildren(stats.totalSubgroups);
+    setParticipants(stats.participants);
   }
 
   async function getSubgroupStats() {
-    // find the total item count and participants in the subgroup
-    const result = await perspective.infer(`
-      findall([ItemCount, SortedAuthors], (
-        % 1. Gather all items in the subgroup
-        findall(Item, (
-          triple("${baseExpression}", "ad4m://has_child", Item),
-          % Ensure item is not a SemanticRelationship
-          (
-            subject_class("Message", MC),
-            instance(MC, Item)
-            ;
-            subject_class("Post", PC),
-            instance(PC, Item)
-            ;
-            subject_class("Task", TC),
-            instance(TC, Item)
-          )
-        ), AllItems),
-
-        % 2. Deduplicate items
-        sort(AllItems, UniqueItems),
-        length(UniqueItems, ItemCount),
-
-        % 3. For each item, gather its authors
-        findall(Author, (
-          member(I, UniqueItems),
-          link(_, "ad4m://has_child", I, _, Author)
-        ), AuthorList),
-
-        % 4. Remove duplicates among authors
-        sort(AuthorList, SortedAuthors)
-      ), [Stats]).
-    `);
-
-    const stats = result[0]?.Stats;
-    if (stats) {
-      const [totalItems, subgroupParticipants] = stats;
-      setTotalChildren(totalItems);
-      setParticipants(subgroupParticipants);
-    }
+    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    const stats = await subgroup.stats();
+    setTotalChildren(stats.totalItems);
+    setParticipants(stats.participants);
   }
 
   async function getConversationTopics() {
-    // find the conversations topics
-    const result = await perspective.infer(`
-      % Get all topics and sort in one step
-      findall(TopicList, (
-        % First get all topic pairs
-        findall([TopicBase, TopicName], (
-          % 1. Gather subgroups
-          findall(Subgroup, (
-            subject_class("ConversationSubgroup", CS),
-            instance(CS, Subgroup),
-            triple("${baseExpression}", "ad4m://has_child", Subgroup)
-          ), SubgroupList),
-  
-          % 2. Get topics from relationships
-          member(S, SubgroupList),
-          subject_class("SemanticRelationship", SR),
-          instance(SR, Relationship),
-          triple(Relationship, "flux://has_expression", S),
-          triple(Relationship, "flux://has_tag", TopicBase),
-          
-          % 3. Get topic names
-          subject_class("Topic", T),
-          instance(T, TopicBase),
-          property_getter(T, TopicBase, "topic", TopicName)
-        ), AllTopics),
-        
-        % Remove duplicates
-        sort(AllTopics, TopicList)
-      ), [Topics]).
-    `);
-
-    const topics: SynergyTopic[] =
-      result[0]?.Topics?.map(
-        ([baseExpression, name]): SynergyTopic => ({
-          baseExpression,
-          name: Literal.fromUrl(name).get().data,
-        })
-      ) || [];
-
-    setTopics(topics);
+    const conversation = new Conversation(perspective, baseExpression);
+    setTopics(await conversation.topics());
   }
 
-  // todo: check why deduplication is needed for subgroup topics
   async function getSubgroupTopics() {
-    // find the subgroups topics
-    const result = await perspective.infer(`
-      % Collect and deduplicate topic data for this specific subgroup
-      findall(TopicList, (
-        findall([TopicBase, TopicName], (
-          % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's baseExpression
-          subject_class("SemanticRelationship", SR),
-          instance(SR, Relationship),
-          triple(Relationship, "flux://has_expression", "${baseExpression}"),
-          
-          % 2. Retrieve the Topic base
-          triple(Relationship, "flux://has_tag", TopicBase),
-          
-          % 3. Get the topic class & name
-          subject_class("Topic", T),
-          instance(T, TopicBase),
-          property_getter(T, TopicBase, "topic", TopicName)
-        ), UnsortedTopics),
-  
-        % 4. Deduplicate via sort
-        sort(UnsortedTopics, TopicList)
-      ), [Topics]).
-    `);
-
-    const topics: SynergyTopic[] =
-      result[0]?.Topics?.map(
-        ([baseExpression, name]): SynergyTopic => ({
-          baseExpression,
-          name: Literal.fromUrl(name).get().data,
-        })
-      ) || [];
-
-    setTopics(topics);
+    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    setTopics(await subgroup.topics());
   }
 
   async function getSubgroups() {
-    // find all subgroups in the conversation (include timestamps for the first and last item in each subgroup)
-    const result = await perspective.infer(`
-      findall(SubgroupInfo, (
-        % 1. Identify all subgroups in the conversation
-        subject_class("ConversationSubgroup", CS),
-        instance(CS, Subgroup),
-        triple("${baseExpression}", "ad4m://has_child", Subgroup),
-    
-        % 2. Retrieve subgroup properties
-        property_getter(CS, Subgroup, "subgroupName", SubgroupName),
-        property_getter(CS, Subgroup, "summary", Summary),
-    
-        % 3. Collect timestamps for valid items only
-        findall(Timestamp, (
-          triple(Subgroup, "ad4m://has_child", Item),
-          
-          % Check item is valid type
-          (
-            subject_class("Message", MC),
-            instance(MC, Item)
-            ;
-            subject_class("Post", PC),
-            instance(PC, Item)
-            ;
-            subject_class("Task", TC),
-            instance(TC, Item)
-          ),
-          
-          % Get items timestamp from link to channel
-          link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
-          subject_class("Channel", CH),
-          instance(CH, ChannelId)
-        ), Timestamps),
-    
-        % 4. Derive start and end from earliest & latest timestamps
-        (
-          Timestamps = []
-          -> StartTime = 0, EndTime = 0
-          ; sort(Timestamps, Sorted),
-            Sorted = [StartTime|_],
-            reverse(Sorted, [EndTime|_])
-        ),
-    
-        % 5. Build a single structure for each subgroup
-        SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
-      ), Subgroups).
-    `);
-
-    // convert raw prolog output into a friendlier JS array
-    const newSubgroups = (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
-      baseExpression,
-      name: Literal.fromUrl(subgroupName).get().data,
-      summary: Literal.fromUrl(summary).get().data,
-      start: parseInt(start, 10),
-      end: parseInt(end, 10),
-    }));
-
+    const conversation = new Conversation(perspective, baseExpression);
+    const subgroups = await conversation.subgroupsData();
     if (match) {
-      newSubgroups.forEach((subgroup, subgroupIndex) => {
+      // look for match in subgroups
+      subgroups.forEach((subgroup, subgroupIndex) => {
         if (subgroup.baseExpression === match.baseExpression) {
+          // if found, store the subgroups index & mark loading true to prevent further loading
           setMatchIndexes({ conversation: index, subgroup: subgroupIndex, item: undefined });
           setLoading(false);
         }
       });
     }
-
-    setChildren(newSubgroups);
+    setChildren(subgroups);
   }
 
   async function removeDuplicateItems(itemIds: string[]) {
@@ -308,62 +126,23 @@ export default function TimelineBlock({
   }
 
   async function getItems() {
-    const result = await perspective.infer(`
-      findall([Item, Timestamp, Author, Type, Text], (
-        % 1. Get item linked to subgroup
-        triple("${baseExpression}", "ad4m://has_child", Item),
-  
-        % 2. Get timestamp and author from earliest link
-        findall([T, A], link(_, "ad4m://has_child", Item, T, A), AllData),
-        sort(AllData, SortedData),
-        SortedData = [[Timestamp, Author]|_],
-  
-        % 3. Check item type and get text content
-        (
-          Type = "Message",
-          subject_class("Message", MC),
-          instance(MC, Item), 
-          property_getter(MC, Item, "body", Text)
-          ;
-          Type = "Post",
-          subject_class("Post", PC),
-          instance(PC, Item), 
-          property_getter(PC, Item, "title", Text)
-          ;
-          Type = "Task",
-          subject_class("Task", TC),
-          instance(TC, Item), 
-          property_getter(TC, Item, "name", Text)
-        )
-      ), Items).
-    `);
-
+    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    const items = await subgroup.itemsData();
     const uniqueItems = new Map();
     const duplicates = new Set<string>();
-
-    const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
-    (result[0]?.Items || []).forEach(([baseExpression, timestamp, author, type, text], itemIndex) => {
+    items.forEach((item, itemIndex) => {
       // store duplicates for link cleanup
-      if (uniqueItems.has(baseExpression)) duplicates.add(baseExpression);
+      if (uniqueItems.has(item.baseExpression)) duplicates.add(item.baseExpression);
       else {
-        uniqueItems.set(baseExpression, {
-          baseExpression,
-          type,
-          timestamp: new Date(timestamp).toISOString(),
-          author,
-          text: Literal.fromUrl(text).get().data,
-          icon: icons[type] || "question",
-        });
+        uniqueItems.set(item.baseExpression, item);
         // set match indexes and stop loading if match found
-        if (match && baseExpression === match.baseExpression) {
+        if (match && item.baseExpression === match.baseExpression) {
           setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
           setLoading(false);
         }
       }
     });
-
     setChildren(Array.from(uniqueItems.values()));
-  
     // remove duplicates if found
     const duplicateItems = Array.from(duplicates);
     if (duplicateItems.length) removeDuplicateItems(duplicateItems);
