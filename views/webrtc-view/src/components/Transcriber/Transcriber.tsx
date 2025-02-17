@@ -231,11 +231,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     const moreDemaningParams = { startThreshold: 0.8 }
     streamId.current = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText, moreDemaningParams);
     const wordByWordParams = {
-      startThreshold: 0.25,        // Lower threshold to detect softer speech
-      startWindow: 80,            // Quick start detection
-      endThreshold: 0.10,          // Lower threshold to detect end of words
+      startThreshold: 0.5,       // Lower threshold to detect softer speech
+      startWindow: 80,           // Quick start detection
+      endThreshold: 0.10,        // Lower threshold to detect end of words
       endWindow: 50,             // Short pause between words (100ms)
-      timeBeforeSpeech: 20        // Include minimal context before speech
+      timeBeforeSpeech: 20       // Include minimal context before speech
     };
     fastStreamId.current = await client.ai.openTranscriptionStream("whisper_tiny_quantized", handleTranscriptionPreview, wordByWordParams);
     await audioContext.current.audioWorklet.addModule("/audio-processor.js");
