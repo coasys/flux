@@ -1,7 +1,7 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
 import { SubjectProperty, SubjectCollection, SDNAClass, SubjectFlag, SubjectEntity, Literal } from "@coasys/ad4m";
-import { SynergyItem, icons } from "@coasys/flux-utils";
+import { SynergyItem, SynergyGroup, icons } from "@coasys/flux-utils";
 import App from "../app";
 
 const { FLUX_APP, NAME, ENTRY_TYPE } = community;
@@ -116,6 +116,39 @@ export class Channel extends SubjectEntity {
     } catch (error) {
       console.error("Error getting total item count:", error);
       return 0;
+    }
+  }
+
+  async conversations(): Promise<SynergyGroup[]> {
+    // find the necissary data to render conversations in timeline components
+    try {
+      const result = await this.perspective.infer(`
+      findall(ConversationInfo, (
+        % 1. Identify all conversations in the channel
+        subject_class("Conversation", CC),
+        instance(CC, Conversation),
+        
+        % 2. Get timestamp from link
+        link("${this.baseExpression}", "ad4m://has_child", Conversation, Timestamp, _),
+  
+        % 3. Retrieve conversation properties
+        property_getter(CC, Conversation, "conversationName", ConversationName),
+        property_getter(CC, Conversation, "summary", Summary),
+  
+        % 4. Build a single structure for each conversation
+        ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
+      ), Conversations).
+    `);
+
+      return (result[0]?.Conversations || []).map(([baseExpression, conversationName, summary, timestamp]) => ({
+        baseExpression,
+        name: Literal.fromUrl(conversationName).get().data,
+        summary: Literal.fromUrl(summary).get().data,
+        timestamp: new Date(timestamp).toISOString(),
+      }));
+    } catch (error) {
+      console.error("Error getting channel conversations:", error);
+      return [];
     }
   }
 }

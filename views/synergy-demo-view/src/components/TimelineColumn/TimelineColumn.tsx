@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu, getConversations } from "../../utils";
+import { closeMenu } from "../../utils";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import {
   runProcessingCheck,
@@ -37,6 +37,11 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const processing = useRef(true);
   const gettingData = useRef(false);
 
+  async function getConversations() {
+    const channel = new Channel(perspective, channelId);
+    return await channel.conversations();
+  }
+
   async function getUnprocessedItems() {
     const channel = new Channel(perspective, channelId);
     return await channel.unprocessedItems();
@@ -50,10 +55,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   async function getData() {
     if (!gettingData.current) {
       gettingData.current = true;
-      const [newConversations, newUnproccessedItems] = await Promise.all([
-        getConversations(perspective, channelId),
-        getUnprocessedItems(),
-      ]);
+      const [newConversations, newUnproccessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
       setConversations(newConversations);
       setUnprocessedItems(newUnproccessedItems);
       setRefreshTrigger((prev) => prev + 1);

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { ChevronDownSVG, ChevronUpSVG, getConversations } from "../../utils";
+import { ChevronDownSVG, ChevronUpSVG } from "../../utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./Match.module.scss";
 import { SynergyGroup, SynergyMatch, GroupingOption, MatchIndexes } from "@coasys/flux-utils";
+import { Channel } from "@coasys/flux-api";
 
 type Props = {
   perspective: any;
@@ -33,7 +34,8 @@ export default function Match({ perspective, agent, match, index, grouping, sele
   const [collapseAfter, setCollapseAfter] = useState(true);
 
   async function getData() {
-    const newConversations = await getConversations(perspective, channelId);
+    const channel = new Channel(perspective, channelId);
+    const newConversations = await channel.conversations();
     // find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
       if (conversation.baseExpression === match.baseExpression) {
