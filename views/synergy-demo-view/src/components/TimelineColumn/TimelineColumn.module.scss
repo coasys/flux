@@ -74,6 +74,11 @@ $line-offset: 92px;
         border-radius: var(--j-border-radius);
         padding: var(--j-space-400);
         background-color: var(--j-color-ui-100);
+
+        .timestamp {
+          font-size: 14px;
+          color: var(--j-color-ui-400);
+        }
       }
 
       .itemText {

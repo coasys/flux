@@ -1,15 +1,26 @@
-import { closeMenu, groupingOptions, itemTypeOptions, ChevronDownSVG } from "../../utils";
 import Match from "../Match";
 import styles from "./MatchColumn.module.scss";
 import { useEffect, useState } from "preact/hooks";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import {
+  SynergyMatch,
+  GroupingOption,
+  ItemType,
+  SearchType,
+  FilterSettings,
+  groupingOptions,
+  itemTypeOptions,
+} from "@coasys/flux-utils";
+import { closeMenu, ChevronDownSVG } from "../../utils";
 
 type Props = {
   perspective: any;
-  agent: any;
-  matches: any;
+  agent: AgentClient;
+  matches: SynergyMatch[];
   selectedTopicId: string;
-  filterSettings: any;
-  setFilterSettings: (newSettings: any) => void;
+  searchType: SearchType;
+  filterSettings: FilterSettings;
+  setFilterSettings: (newSettings: FilterSettings) => void;
   matchText: () => string;
   close: () => void;
 };
@@ -19,6 +30,7 @@ export default function MatchColumn({
   agent,
   matches,
   selectedTopicId,
+  searchType,
   filterSettings,
   setFilterSettings,
   matchText,
@@ -26,6 +38,7 @@ export default function MatchColumn({
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
+  const filteredGroupingOptions = searchType === "topic" ? ["Conversations", "Subgroups"] : groupingOptions;
 
   useEffect(() => setNumberOfMatchesDisplayed(5), [matches]);
 
@@ -35,7 +48,7 @@ export default function MatchColumn({
         <j-flex a="center" gap="400" wrap>
           <j-menu style={{ height: 42, zIndex: 20 }}>
             <j-menu-group collapsible title={grouping} id="grouping-menu">
-              {groupingOptions.map((option) => (
+              {filteredGroupingOptions.map((option: GroupingOption) => (
                 <j-menu-item
                   selected={grouping === option}
                   onClick={() => {
@@ -51,7 +64,7 @@ export default function MatchColumn({
           {grouping === "Items" && (
             <j-menu style={{ height: 42, zIndex: 20 }}>
               <j-menu-group collapsible title={itemType} id="item-type-menu">
-                {itemTypeOptions.map((option) => (
+                {itemTypeOptions.map((option: ItemType) => (
                   <j-menu-item
                     selected={itemType === option}
                     onClick={() => {
@@ -67,9 +80,7 @@ export default function MatchColumn({
           )}
           <j-checkbox
             checked={includeChannel}
-            onChange={() =>
-              setFilterSettings({ ...filterSettings, includeChannel: !includeChannel })
-            }
+            onChange={() => setFilterSettings({ ...filterSettings, includeChannel: !includeChannel })}
           >
             Include Channel
           </j-checkbox>
@@ -87,14 +98,12 @@ export default function MatchColumn({
             agent={agent}
             match={match}
             index={index}
+            grouping={grouping}
             selectedTopicId={selectedTopicId}
           />
         ))}
         {matches.length > numberOfMatchesDisplayed && (
-          <j-button
-            className={styles.showMoreButton}
-            onClick={() => setNumberOfMatchesDisplayed((prev) => prev + 5)}
-          >
+          <j-button className={styles.showMoreButton} onClick={() => setNumberOfMatchesDisplayed((prev) => prev + 5)}>
             See more
             <span>
               <ChevronDownSVG /> {matches.length - numberOfMatchesDisplayed}
