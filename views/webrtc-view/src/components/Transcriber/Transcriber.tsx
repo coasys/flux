@@ -228,7 +228,8 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     // set up audio context & worklet node
     const client = await getAd4mClient();
   
-    streamId.current = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText);
+    const moreDemaningParams = { startThreshold: 0.8 }
+    streamId.current = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText, moreDemaningParams);
     const wordByWordParams = {
       startThreshold: 0.25,        // Lower threshold to detect softer speech
       startWindow: 80,            // Quick start detection
