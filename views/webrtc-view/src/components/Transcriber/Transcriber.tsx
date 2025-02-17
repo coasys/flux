@@ -1,11 +1,12 @@
 import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
-import { feedTranscription, startTranscription, stopTranscription, detectBrowser } from "@coasys/flux-utils";
+import { detectBrowser } from "@coasys/flux-utils";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
-import RecordingIcon from "../RecordingIcon/RecordingIcon";
+import RecordingIcon from "../RecordingIcon/RecordingIcon.jsx";
 import styles from "./Transcriber.module.scss";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 type Props = { source: string; perspective: any; webRTC: WebRTC };
 
@@ -25,9 +26,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const recognition = useRef(null);
   const timeout = useRef(null);
   const streamId = useRef(null);
+  const fastStreamId = useRef(null);
   const transcriptId = useRef("");
   const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
+  const [previewText, setPreviewText] = useState("");
 
   const { repo: messageRepo } = useSubjects({ perspective, source, subject: Message });
 
@@ -76,6 +79,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   }
 
   async function handleTranscriptionText(text: string) {
+    // Clear preview text when we get final text
+    setPreviewText("");
+    
     // function fires every time a new chunk of text is sent back from the AI service
     setTranscripts((ts) => {
       const newTranscripts = [...ts];
@@ -110,6 +116,13 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // countDownInterval.current = null;
       saveMessage();
     }, messageTimeout * 1000);
+  }
+
+  async function handleTranscriptionPreview(text: string) {
+    // Only show preview if we're currently transcribing something
+    if (transcriptId.current) {
+      setPreviewText(prevText => prevText + text);
+    }
   }
 
   function startRemoteTranscription() {
@@ -207,13 +220,26 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
 
   async function startLocalTransciption(stream: MediaStream) {
     // set up audio context & worklet node
-    streamId.current = await startTranscription(handleTranscriptionText);
+    const client = await getAd4mClient();
+  
+    streamId.current = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText);
+    const wordByWordParams = {
+      startThreshold: 0.25,        // Lower threshold to detect softer speech
+      startWindow: 80,            // Quick start detection
+      endThreshold: 0.10,          // Lower threshold to detect end of words
+      endWindow: 50,             // Short pause between words (100ms)
+      timeBeforeSpeech: 20        // Include minimal context before speech
+    };
+    fastStreamId.current = await client.ai.openTranscriptionStream("whisper_tiny_quantized", handleTranscriptionPreview, wordByWordParams);
     await audioContext.current.audioWorklet.addModule("/audio-processor.js");
     const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.current, "audio-processor");
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = (event) => {
-      if (listening.current) feedTranscription(streamId.current, event.data);
+      if (listening.current) {
+        client.ai.feedTranscriptionStream(streamId.current, Array.from(event.data));
+        client.ai.feedTranscriptionStream(fastStreamId.current, Array.from(event.data));
+      }
     };
     workletNode.connect(audioContext.current.destination);
   }
@@ -238,14 +264,15 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       });
   }
 
-  function stopListening() {
+  async function stopListening() {
     listening.current = false;
     sourceNode.current?.disconnect();
     audioContext.current?.close();
     recognition.current?.stop();
     clearInterval(volumeCheckInterval.current);
     if (streamId.current) {
-      stopTranscription(streamId.current);
+      const client = await getAd4mClient();
+      await client.ai.closeTranscriptionStream(streamId.current);
       streamId.current = null;
     }
   }
@@ -317,6 +344,12 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                   <j-timestamp value={transcript.timestamp} dateStyle="short" timeStyle="short" />
                   <j-text nomargin size="600">
                     {transcript.text}
+                    {/* Show preview text in italics and grey if this is the current transcript */}
+                    {transcript.id === transcriptId.current && previewText && (
+                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
+                        {previewText}
+                      </span>
+                    )}
                   </j-text>
                   {transcript.state === "transcribing" && (
                     <j-flex gap="400" a="center">
