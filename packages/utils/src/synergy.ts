@@ -5,6 +5,7 @@ import { Conversation, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
 
+export const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
 export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
 
