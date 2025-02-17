@@ -384,8 +384,8 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                   )}
                   {transcript.state === "aborted" && (
                     <j-flex gap="400" a="center">
-                      <j-icon name="x-circle" color="error-600" />
-                      <j-text nomargin size="600" color="error-600">
+                      <j-icon name="x-circle" color="danger-600" />
+                      <j-text nomargin size="600" color="danger-600">
                           Aborted
                         </j-text>
                       </j-flex>
