@@ -83,6 +83,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         transcriptCard.classList.add(styles.slideRight);
         setTimeout(() => {
           transcriptCard.classList.add(styles.hide);
+          setTimeout(() => {
+            setTranscripts((ts) => ts.filter((t) => t.id !== previousId));
+          }, 500);
         }, 500);
       }
     }
