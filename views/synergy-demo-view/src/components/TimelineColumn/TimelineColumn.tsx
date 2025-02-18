@@ -12,6 +12,7 @@ import {
   GroupingOption,
   minItemsToProcess,
   numberOfItemsDelay,
+  checkIfProcessingInProgress,
 } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
@@ -37,6 +38,26 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const timeout = useRef<any>(null);
   const processing = useRef(true);
   const gettingData = useRef(false);
+  const waitingToSeeIfOthersAreProcessing = useRef(true);
+
+  async function initialise() {
+    // add signal listener
+    await addSynergySignalHandler(perspective, setProcessingData, waitingToSeeIfOthersAreProcessing);
+    // add listener for new links
+    await perspective.addListener("link-added", linkAddedListener);
+    // check if processing in progress
+    checkIfProcessingInProgress(perspective, channelId);
+    // if no response after 5 seconds, mark waitingToSeeIfOthersAreProcessing false and refetch data
+    const timeoutId = setTimeout(() => {
+      waitingToSeeIfOthersAreProcessing.current = false;
+      getData();
+    }, 5000);
+    // return cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      perspective.removeListener("link-added", linkAddedListener);
+    };
+  }
 
   async function getConversations() {
     const channel = new Channel(perspective, channelId);
@@ -73,12 +94,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   }
 
   useEffect(() => {
-    // add signal listener
-    addSynergySignalHandler(perspective, setProcessingData);
-    // add listener for new links
-    perspective.addListener("link-added", linkAddedListener);
-
-    return () => perspective.removeListener("link-added", linkAddedListener);
+    const cleanup = initialise();
+    return () => {
+      cleanup.then((fn) => fn());
+    };
   }, []);
 
   useEffect(() => {

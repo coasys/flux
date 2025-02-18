@@ -8,6 +8,9 @@ import { sleep } from "./sleep";
 export const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
 export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
+export const minItemsToProcess = 5;
+export const maxItemsToProcess = 10;
+export const numberOfItemsDelay = 3;
 
 export type GroupingOption = (typeof groupingOptions)[number];
 export type ItemTypeOption = (typeof itemTypeOptions)[number];
@@ -19,6 +22,10 @@ export type MatchIndexes = { conversation: number | undefined; subgroup: number 
 export type ProcessingData = { author: string; channelId: string; items: string[] };
 export type Link = { source: string; predicate: string; target: string };
 export type LinkExpression = { author: string; data: Link };
+
+const receivedSignals: LinkExpression[] = [];
+let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+let processing = false;
 
 export class SynergyGroup {
   // used for conversations & subgroups
@@ -85,13 +92,31 @@ async function isMe(did: string): Promise<boolean> {
   return did === me.did;
 }
 
-let receivedSignals: LinkExpression[] = [];
-let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+export async function addSynergySignalHandler(
+  perspective: PerspectiveProxy,
+  setProcessingData: (data: ProcessingData | null) => void,
+  waitingToSeeIfOthersAreProcessing: React.MutableRefObject<boolean>
+): Promise<void> {
+  const neighbourhood = await perspective.getNeighbourhoodProxy();
+  signalHandler = (expression: PerspectiveExpression) =>
+    onSignalReceived(expression, neighbourhood, setProcessingData, waitingToSeeIfOthersAreProcessing);
+  neighbourhood.addSignalHandler(signalHandler);
+}
 
+export async function removeSynergySignalHandler(perspective: PerspectiveProxy): Promise<void> {
+  if (signalHandler) {
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    neighbourhood.removeSignalHandler(signalHandler);
+    signalHandler = null;
+  }
+}
+
+// todo: apply channel check so processing can occur in multiple channels simultaneouly
 async function onSignalReceived(
   expression: PerspectiveExpression,
   neighbourhood: NeighbourhoodProxy,
-  setProcessingData: (data: ProcessingData | null) => void
+  setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
+  waitingToSeeIfOthersAreProcessing: React.MutableRefObject<boolean>
 ): Promise<void> {
   const link = expression.data.links[0];
   const { author, data } = link;
@@ -123,22 +148,30 @@ async function onSignalReceived(
     processing = false;
     setProcessingData(null);
   }
-}
 
-export async function addSynergySignalHandler(
-  perspective: PerspectiveProxy,
-  setProcessingData: (data: ProcessingData | null) => void
-): Promise<void> {
-  const neighbourhood = await perspective.getNeighbourhoodProxy();
-  signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood, setProcessingData);
-  neighbourhood.addSignalHandler(signalHandler);
-}
+  if (predicate === "is-anyone-processing") {
+    console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
+    setProcessingData((prev) => {
+      if (prev) {
+        neighbourhood.sendSignalU(author, {
+          links: [{ source: "", predicate: "processing-in-progress", target: JSON.stringify(prev) }],
+        });
+      }
+      return prev;
+    });
+  }
 
-export async function removeSynergySignalHandler(perspective: PerspectiveProxy): Promise<void> {
-  if (signalHandler) {
-    const neighbourhood = await perspective.getNeighbourhoodProxy();
-    neighbourhood.removeSignalHandler(signalHandler);
-    signalHandler = null;
+  if (predicate === "processing-in-progress") {
+    console.log(`Signal recieved: ${author} confirmed that processing is in progress`);
+    setProcessingData((prev) => {
+      if (!prev) {
+        // if not already updated (via another agents response), mark processing true and update state
+        processing = true;
+        waitingToSeeIfOthersAreProcessing.current = false;
+        return JSON.parse(target);
+      }
+      return prev;
+    });
   }
 }
 
@@ -151,10 +184,6 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
   await sleep(3000);
   return receivedSignals.some((s) => s.data.target === signalUuid);
 }
-// todo: store these consts in channel settings
-export const minItemsToProcess = 5;
-export const maxItemsToProcess = 10;
-export const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
   perspective: PerspectiveProxy,
@@ -292,7 +321,6 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   return await conversation.get();
 }
 
-let processing = false;
 export async function runProcessingCheck(
   perspective: PerspectiveProxy,
   channelId: string,
@@ -305,6 +333,7 @@ export async function runProcessingCheck(
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
+
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
     const client = await getAd4mClient();
@@ -319,6 +348,7 @@ export async function runProcessingCheck(
       links: [{ source: channelId, predicate: "processing-items-started", target: JSON.stringify(itemIds) }],
     });
 
+    // process items into conversation
     const conversation = await findOrCreateNewConversation(perspective, channelId);
     try {
       await conversation.processNewExpressions(itemsToProcess);
@@ -334,4 +364,12 @@ export async function runProcessingCheck(
       links: [{ source: channelId, predicate: "processing-items-finished", target: "" }],
     });
   }
+}
+
+export async function checkIfProcessingInProgress(perspective: PerspectiveProxy, channelId: string): Promise<void> {
+  // broadcast signal to check if processing in progress when entering the synergy view
+  const neighbourhood = await perspective.getNeighbourhoodProxy();
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: channelId, predicate: "is-anyone-processing", target: "" }],
+  });
 }
