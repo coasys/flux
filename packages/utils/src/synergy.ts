@@ -152,9 +152,9 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
   return receivedSignals.some((s) => s.data.target === signalUuid);
 }
 // todo: store these consts in channel settings
-const minItemsToProcess = 5;
-const maxItemsToProcess = 10;
-const numberOfItemsDelay = 3;
+export const minItemsToProcess = 5;
+export const maxItemsToProcess = 10;
+export const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
   perspective: PerspectiveProxy,
@@ -165,25 +165,19 @@ async function responsibleForProcessing(
 ): Promise<boolean> {
   // check if enough unprocessed items are present to run the processing task (increment used so we can keep checking the next item until the limit is reached)
   const enoughUnprocessedItems = unprocessedItems.length >= minItemsToProcess + numberOfItemsDelay + increment;
-  if (!enoughUnprocessedItems) {
-    console.log("not enough items to process");
-    return false;
-  } else {
+  if (!enoughUnprocessedItems) return false;
+  else {
     // find the author of the nth item
     const nthItem = unprocessedItems[minItemsToProcess + increment - 1];
     // if we are the author, we are responsible for processing
-    if (await isMe(nthItem.author)) {
-      console.log("we are the author of the nth item!");
-      return true;
-    } else {
+    if (await isMe(nthItem.author)) return true;
+    else {
       // if not, signal the author to check if they can process the items
       const authorCanProcessItems = await agentCanProcessItems(neighbourhood, nthItem.author);
-      console.log("author can process items:", authorCanProcessItems);
       // if they can, we aren't responsible for processing
       if (authorCanProcessItems) return false;
       else {
         // if they can't, re-run the check on the next item
-        console.log("re-run responsibleForProcessing with increment:", increment + 1);
         return await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems, increment + 1);
       }
     }
@@ -305,14 +299,12 @@ export async function runProcessingCheck(
   unprocessedItems: any[],
   setProcessingData: (data: ProcessingData | null) => void
 ): Promise<void> {
-  console.log("Run processing check");
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
-  const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
-  console.log("Responsible for processing:", responsible);
+  const responsible = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
     const client = await getAd4mClient();

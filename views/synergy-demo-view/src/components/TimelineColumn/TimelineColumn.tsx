@@ -10,6 +10,8 @@ import {
   SynergyItem,
   SearchType,
   GroupingOption,
+  minItemsToProcess,
+  numberOfItemsDelay,
 } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
@@ -33,7 +35,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const [firstRun, setFirstRun] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const timeout = useRef<any>(null);
-  const totalItems = useRef(0);
   const processing = useRef(true);
   const gettingData = useRef(false);
 
@@ -47,11 +48,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     return await channel.unprocessedItems();
   }
 
-  async function getTotalItemCount() {
-    const channel = new Channel(perspective, channelId);
-    return await channel.totalItemCount();
-  }
-
   async function getData() {
     if (!gettingData.current) {
       gettingData.current = true;
@@ -60,11 +56,9 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       setUnprocessedItems(newUnproccessedItems);
       setRefreshTrigger((prev) => prev + 1);
       gettingData.current = false;
-      // after fetching new data, run processing check if new items have been added
-      const newTotalItems = await getTotalItemCount();
-      if (newTotalItems > totalItems.current)
-        runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
-      totalItems.current = newTotalItems;
+      // after fetching new data, run processing check if unprocessed items still present
+      const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
+      if (enoughUnprocessedItems) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
     }
   }
 
