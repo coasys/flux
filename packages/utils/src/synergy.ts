@@ -94,7 +94,7 @@ async function isMe(did: string): Promise<boolean> {
 
 export async function addSynergySignalHandler(
   perspective: PerspectiveProxy,
-  setProcessingData: (data: ProcessingData | null) => void,
+  setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
   waitingToSeeIfOthersAreProcessing: React.MutableRefObject<boolean>
 ): Promise<void> {
   const neighbourhood = await perspective.getNeighbourhoodProxy();
