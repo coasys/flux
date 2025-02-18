@@ -47,10 +47,17 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     await perspective.addListener("link-added", linkAddedListener);
     // check if processing in progress
     checkIfProcessingInProgress(perspective, channelId);
-    // if no response after 5 seconds, mark waitingToSeeIfOthersAreProcessing false and refetch data
-    const timeoutId = setTimeout(() => {
-      waitingToSeeIfOthersAreProcessing.current = false;
-      getData();
+    // if no response after 5 seconds, mark waitingToSeeIfOthersAreProcessing false and run processing check
+    const timeoutId = setTimeout(async () => {
+      if (waitingToSeeIfOthersAreProcessing.current) {
+        waitingToSeeIfOthersAreProcessing.current = false;
+        if (!gettingData.current) {
+          const newUnproccessedItems = await getUnprocessedItems();
+          const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
+          if (enoughUnprocessedItems)
+            runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+        }
+      }
     }, 5000);
     // return cleanup function
     return () => {
