@@ -79,7 +79,8 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       gettingData.current = false;
       // after fetching new data, run processing check if unprocessed items still present
       const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
-      if (enoughUnprocessedItems) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      if (enoughUnprocessedItems && !waitingToSeeIfOthersAreProcessing.current)
+        runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
     }
   }
 
