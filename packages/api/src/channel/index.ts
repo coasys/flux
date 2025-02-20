@@ -71,9 +71,10 @@ export class Channel extends SubjectEntity {
             instance(TaskClass, ItemId), 
             property_getter(TaskClass, ItemId, "name", Text)
           )
-        ), Items).
+        ), Items),
+        sort(Items, SortedItems).
       `);
-      return (result[0]?.Items || []).map(([itemId, author, timestamp, type, text]) => ({
+      return (result[0]?.SortedItems || []).map(([itemId, author, timestamp, type, text]) => ({
         baseExpression: itemId,
         author,
         timestamp: new Date(timestamp).toISOString(),
