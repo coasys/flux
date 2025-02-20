@@ -13,6 +13,7 @@ import {
   minItemsToProcess,
   numberOfItemsDelay,
   checkIfProcessingInProgress,
+  isMe,
 } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
@@ -38,30 +39,35 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const timeout = useRef<any>(null);
   const processing = useRef(true);
   const gettingData = useRef(false);
-  const waitingToSeeIfOthersAreProcessing = useRef(true);
+  const waitingForResponse = useRef(true);
 
   async function initialise() {
     // add signal listener
-    await addSynergySignalHandler(perspective, setProcessingData, waitingToSeeIfOthersAreProcessing);
+    await addSynergySignalHandler(perspective, setProcessingData, waitingForResponse);
     // add listener for new links
     await perspective.addListener("link-added", linkAddedListener);
-    // check if processing in progress
+    // set up recurring check to see if processing in progess (used to recover from disconnected peers)
     checkIfProcessingInProgress(perspective, channelId);
-    // if no response after 5 seconds, mark waitingToSeeIfOthersAreProcessing false and run processing check
-    const timeoutId = setTimeout(async () => {
-      if (waitingToSeeIfOthersAreProcessing.current) {
-        waitingToSeeIfOthersAreProcessing.current = false;
+    const intervalId = setInterval(async () => {
+      // if no response after 5 seconds, mark waiting false and run processing check
+      if (waitingForResponse.current) {
+        waitingForResponse.current = false;
         if (!gettingData.current) {
           const newUnproccessedItems = await getUnprocessedItems();
           const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
-          if (enoughUnprocessedItems)
+          if (enoughUnprocessedItems) {
             runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+          }
         }
+      } else if (processingData && !isMe(processingData.author)) {
+        // otherwise re-run check (povided processing state is present & we're not the one processing)
+        waitingForResponse.current = true;
+        checkIfProcessingInProgress(perspective, channelId);
       }
     }, 5000);
     // return cleanup function
     return () => {
-      clearTimeout(timeoutId);
+      clearInterval(intervalId);
       perspective.removeListener("link-added", linkAddedListener);
     };
   }
@@ -86,7 +92,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       gettingData.current = false;
       // after fetching new data, run processing check if unprocessed items still present
       const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
-      if (enoughUnprocessedItems && !waitingToSeeIfOthersAreProcessing.current)
+      if (enoughUnprocessedItems && !waitingForResponse.current)
         runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
     }
   }

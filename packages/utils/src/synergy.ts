@@ -4,6 +4,7 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
+import { isEqual } from "lodash";
 
 export const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
@@ -85,7 +86,7 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-async function isMe(did: string): Promise<boolean> {
+export async function isMe(did: string): Promise<boolean> {
   // checks if the did is mine
   const client = await getAd4mClient();
   const me = await client.agent.me();
@@ -95,11 +96,11 @@ async function isMe(did: string): Promise<boolean> {
 export async function addSynergySignalHandler(
   perspective: PerspectiveProxy,
   setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
-  waitingToSeeIfOthersAreProcessing: React.MutableRefObject<boolean>
+  waitingForResponse: React.MutableRefObject<boolean>
 ): Promise<void> {
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   signalHandler = (expression: PerspectiveExpression) =>
-    onSignalReceived(expression, neighbourhood, setProcessingData, waitingToSeeIfOthersAreProcessing);
+    onSignalReceived(expression, neighbourhood, setProcessingData, waitingForResponse);
   neighbourhood.addSignalHandler(signalHandler);
 }
 
@@ -116,7 +117,7 @@ async function onSignalReceived(
   expression: PerspectiveExpression,
   neighbourhood: NeighbourhoodProxy,
   setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
-  waitingToSeeIfOthersAreProcessing: React.MutableRefObject<boolean>
+  waitingForResponse: React.MutableRefObject<boolean>
 ): Promise<void> {
   const link = expression.data.links[0];
   const { author, data } = link;
@@ -166,13 +167,10 @@ async function onSignalReceived(
   if (predicate === "processing-in-progress") {
     console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
     setProcessingData((prev) => {
-      if (!prev) {
-        // if not already updated, mark processing true and update state
-        processing = true;
-        waitingToSeeIfOthersAreProcessing.current = false;
-        return JSON.parse(target);
-      }
-      return prev;
+      // mark processing true, waiting false, & update state if changed
+      processing = true;
+      waitingForResponse.current = false;
+      return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
     });
   }
 }
