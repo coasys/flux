@@ -73,7 +73,7 @@ export function detectBrowser(): string {
   return "unknown";
 }
 
-export async function getAllTopics(perspective) {
+export async function getAllTopics(perspective: PerspectiveProxy) {
   // gather up all existing topics in the neighbourhood
   return (await Topic.query(perspective)).map((topic: any) => {
     return { baseExpression: topic.baseExpression, name: topic.topic };
@@ -121,6 +121,8 @@ async function onSignalReceived(
   const link = expression.data.links[0];
   const { author, data } = link;
   const { source, predicate, target } = data;
+  const client = await getAd4mClient();
+  const me = await client.agent.me();
 
   if (predicate === "can-you-process-items") {
     const defaultLLM = await getDefaultLLM();
@@ -152,7 +154,7 @@ async function onSignalReceived(
   if (predicate === "is-anyone-processing") {
     console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
     setProcessingData((prev) => {
-      if (prev) {
+      if (prev && prev.author === me.did) {
         neighbourhood.sendSignalU(author, {
           links: [{ source: "", predicate: "processing-in-progress", target: JSON.stringify(prev) }],
         });
@@ -162,10 +164,10 @@ async function onSignalReceived(
   }
 
   if (predicate === "processing-in-progress") {
-    console.log(`Signal recieved: ${author} confirmed that processing is in progress`);
+    console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
     setProcessingData((prev) => {
       if (!prev) {
-        // if not already updated (via another agents response), mark processing true and update state
+        // if not already updated, mark processing true and update state
         processing = true;
         waitingToSeeIfOthersAreProcessing.current = false;
         return JSON.parse(target);
