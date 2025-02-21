@@ -32,8 +32,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/ad4m": "0.10.1-rc8",
-    "@coasys/ad4m-vue-hooks": "0.10.1-rc8",
+    "@coasys/ad4m": "0.10.1-release-candidate-1",
+    "@coasys/ad4m-vue-hooks": "0.10.1-release-candidate-1",
     "@coasys/flux-api": "0.10.1-rc3",
     "vue": "^3.5.12"
   },

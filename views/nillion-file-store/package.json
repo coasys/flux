@@ -33,8 +33,8 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/client": "=3.6.9",
-    "@coasys/ad4m": "0.10.1-rc8",
-    "@coasys/ad4m-react-hooks": "0.10.1-rc8",
+    "@coasys/ad4m": "0.10.1-release-candidate-1",
+    "@coasys/ad4m-react-hooks": "0.10.1-release-candidate-1",
     "@coasys/flux-api": "0.10.1-rc3",
     "@coasys/flux-container": "0.10.1-rc3",
     "@cosmjs/proto-signing": "^0.32.3",
