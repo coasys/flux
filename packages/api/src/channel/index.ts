@@ -72,15 +72,18 @@ export class Channel extends SubjectEntity {
             property_getter(TaskClass, ItemId, "name", Text)
           )
         ), Items),
-        sort(Items, SortedItems).
+        % 5. Remove duplicates
+        sort(Items, UniqueItems).
       `);
-      return (result[0]?.SortedItems || []).map(([itemId, author, timestamp, type, text]) => ({
-        baseExpression: itemId,
-        author,
-        timestamp: new Date(timestamp).toISOString(),
-        text: Literal.fromUrl(text).get().data,
-        icon: icons[type] ? icons[type] : "question",
-      }));
+      return (result[0]?.UniqueItems || [])
+        .map(([itemId, author, timestamp, type, text]) => ({
+          baseExpression: itemId,
+          author,
+          timestamp: new Date(timestamp).toISOString(),
+          text: Literal.fromUrl(text).get().data,
+          icon: icons[type] ? icons[type] : "question",
+        }))
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     } catch (error) {
       console.error("Error getting channel items:", error);
       return [];
