@@ -103,7 +103,7 @@ export default class ConversationSubgroup extends SubjectEntity {
         result[0]?.Topics?.map(
           ([baseExpression, name]): SynergyTopic => ({
             baseExpression,
-            name: Literal.fromUrl(name).get().data,
+            name,
           })
         ) || []
       );
@@ -205,7 +205,7 @@ export default class ConversationSubgroup extends SubjectEntity {
     return (
       result[0]?.Topics?.map(([base, name, relevance]) => ({
         baseExpression: base,
-        name: Literal.fromUrl(name).get().data,
+        name,
         relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
       })) || []
     );
@@ -215,10 +215,11 @@ export default class ConversationSubgroup extends SubjectEntity {
     const topic = await Topic.byName(this.perspective, topicName);
     const existingTopicRelationship = isNewGroup
       ? null
-      : await SemanticRelationship.query(this.perspective, {
-          where: { expression: this.baseExpression, tag: topic.baseExpression },
-        })[0];
-
+      : ((
+          await SemanticRelationship.query(this.perspective, {
+            where: { expression: this.baseExpression, tag: topic.baseExpression },
+          })
+        )[0] as SemanticRelationship);
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
       await existingTopicRelationship.update();
