@@ -93,11 +93,13 @@ export default class Topic extends SubjectEntity {
   }
 
   static async byName(perspective, topicName: string): Promise<Topic> {
-    const topicMatches = (await Topic.query(perspective, { where: { topic: topicName } })) as Topic[];
+    const topicMatches = (await Topic.query(perspective, {
+      where: { topic: Literal.from(topicName).toUrl() },
+    })) as Topic[];
     if (topicMatches[0]) return topicMatches[0];
 
     const newTopic = new Topic(perspective);
-    newTopic.topic = topicName;
+    newTopic.topic = Literal.from(topicName).toUrl();
     await newTopic.save();
     return await newTopic.get();
   }

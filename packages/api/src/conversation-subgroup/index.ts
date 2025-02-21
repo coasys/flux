@@ -103,7 +103,7 @@ export default class ConversationSubgroup extends SubjectEntity {
         result[0]?.Topics?.map(
           ([baseExpression, name]): SynergyTopic => ({
             baseExpression,
-            name,
+            name: Literal.fromUrl(name).get(),
           })
         ) || []
       );
@@ -205,7 +205,7 @@ export default class ConversationSubgroup extends SubjectEntity {
     return (
       result[0]?.Topics?.map(([base, name, relevance]) => ({
         baseExpression: base,
-        name,
+        name: Literal.fromUrl(name).get(),
         relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
       })) || []
     );

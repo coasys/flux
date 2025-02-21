@@ -97,7 +97,7 @@ export default class Conversation extends SubjectEntity {
         result[0]?.Topics?.map(
           ([baseExpression, name]): SynergyTopic => ({
             baseExpression,
-            name,
+            name: Literal.fromUrl(name).get(),
           })
         ) || []
       );

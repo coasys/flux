@@ -1,4 +1,4 @@
-import { PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal, Expression } from "@coasys/ad4m";
+import { PerspectiveExpression, NeighbourhoodProxy, PerspectiveProxy, Literal } from "@coasys/ad4m";
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, Topic } from "@coasys/flux-api";
@@ -77,7 +77,7 @@ export function detectBrowser(): string {
 export async function getAllTopics(perspective: PerspectiveProxy) {
   // gather up all existing topics in the neighbourhood
   return (await Topic.query(perspective)).map((topic: any) => {
-    return { baseExpression: topic.baseExpression, name: topic.topic };
+    return { baseExpression: topic.baseExpression, name: Literal.fromUrl(topic.topic).get() };
   });
 }
 
