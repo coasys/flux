@@ -130,7 +130,7 @@ export default class Conversation extends SubjectEntity {
       
           % 2. Retrieve subgroup properties
           property_getter(CS, Subgroup, "subgroupName", SubgroupName),
-          property_getter(CS, Subgroup, "summary", Summary),
+          (property_getter(CS, Subgroup, "summary", S) -> Summary = S ; Summary = ""),
       
           % 3. Collect timestamps for valid items only
           findall(Timestamp, (
@@ -172,7 +172,8 @@ export default class Conversation extends SubjectEntity {
       return (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
         baseExpression,
         name: Literal.fromUrl(subgroupName).get().data,
-        summary: Literal.fromUrl(summary).get().data,
+        // handle the empty array that's returned if no summary is present
+        summary: Array.isArray(summary) ? "" : Literal.fromUrl(summary).get().data,
         start: parseInt(start, 10),
         end: parseInt(end, 10),
       }));

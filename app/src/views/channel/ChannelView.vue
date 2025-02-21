@@ -110,6 +110,7 @@
         :source="channelId"
         :agent="agentClient"
         :perspective="data.perspective"
+        :appStore="appStore"
         :currentView="currentView"
         :setModalOpen="() => (webrtcModalOpen = false)"
         @click="onViewClick"

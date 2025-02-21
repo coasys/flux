@@ -1,7 +1,6 @@
 import { WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
 import { useEffect, useRef } from "preact/hooks";
-
 import Avatar from "../Avatar";
 import Disclaimer from "../Disclaimer";
 import styles from "./JoinScreen.module.scss";
@@ -12,6 +11,9 @@ type Props = {
   onToggleSettings: () => void;
   did?: string;
   currentView: string;
+  inAnotherRoom?: boolean;
+  joinRoom?: () => void;
+  leaveRoom?: () => void;
 };
 
 export default function JoinScreen({
@@ -20,6 +22,9 @@ export default function JoinScreen({
   onToggleSettings,
   did,
   currentView,
+  inAnotherRoom,
+  joinRoom,
+  leaveRoom
 }: Props) {
   const videoRef = useRef(null);
 
@@ -112,15 +117,28 @@ export default function JoinScreen({
       </j-box>
 
       <j-box pt="500">
-        <j-button
-          variant="primary"
-          size="lg"
-          loading={webRTC.isLoading}
-          disabled={!webRTC.audioPermissionGranted}
-          onClick={webRTC.onJoin}
-        >
-          Join room!
-        </j-button>
+        {inAnotherRoom  ? (
+          <j-flex direction="column" gap="300" a="center">
+            <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
+            <j-button
+              variant="primary"
+              size="lg"
+              onClick={leaveRoom}
+            >
+              Leave other call
+            </j-button>
+          </j-flex>
+        ) : (
+          <j-button
+            variant="primary"
+            size="lg"
+            loading={webRTC.isLoading}
+            disabled={!webRTC.audioPermissionGranted}
+            onClick={joinRoom}
+          >
+            Join room!
+          </j-button>
+        )}
       </j-box>
 
       {currentView === "@coasys/flux-webrtc-view" && (

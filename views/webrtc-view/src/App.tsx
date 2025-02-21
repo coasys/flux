@@ -7,11 +7,12 @@ type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
+  appStore: any;
   currentView: string;
   setModalOpen?: (state: boolean) => void;
 };
 
-export default function App({ perspective, source, agent, currentView, setModalOpen }: Props) {
+export default function App({ perspective, source, agent, appStore, currentView, setModalOpen }: Props) {
   if (!perspective?.uuid || !source) {
     return null;
   }
@@ -22,6 +23,7 @@ export default function App({ perspective, source, agent, currentView, setModalO
         source={source}
         agent={agent}
         perspective={perspective}
+        appStore={appStore}
         currentView={currentView}
         setModalOpen={setModalOpen}
       />

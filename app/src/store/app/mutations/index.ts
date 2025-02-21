@@ -1,9 +1,4 @@
-import {
-  UpdateState,
-  ToastState,
-  ThemeState,
-  CurrentThemeState,
-} from "@/store/types";
+import { UpdateState, ToastState, ThemeState, CurrentThemeState } from "@/store/types";
 import { useAppStore } from "..";
 
 export default {
@@ -122,5 +117,10 @@ export default {
   setGlobalNotification(payload: boolean): void {
     const state = useAppStore();
     state.notification.globalNotification = payload;
+  },
+  setActiveWebrtc(instance: any, channelId: string): void {
+    const state = useAppStore();
+    state.activeWebrtc.instance = instance;
+    state.activeWebrtc.channelId = channelId;
   },
 };

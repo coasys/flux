@@ -31,4 +31,8 @@ export interface ApplicationState {
   notification: {
     globalNotification: boolean;
   };
+  activeWebrtc: {
+    instance: any;
+    channelId: string;
+  };
 }

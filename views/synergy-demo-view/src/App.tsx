@@ -8,9 +8,10 @@ type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
+  appStore: any;
 };
 
-export default function App({ agent, perspective, source }: Props) {
+export default function App({ agent, perspective, source, appStore }: Props) {
   if (!perspective?.uuid || !agent) return "No perspective or agent client";
   return (
     <div className={styles.appContainer}>
@@ -18,7 +19,8 @@ export default function App({ agent, perspective, source }: Props) {
         agent={agent}
         perspective={perspective}
         source={source}
-      ></SynergyDemoView>
+        appStore={appStore}
+      />
     </div>
   );
 }

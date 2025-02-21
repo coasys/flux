@@ -9,9 +9,9 @@ import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
 import { SynergyMatch, SynergyTopic, SearchType, FilterSettings } from "@coasys/flux-utils";
 
-type Props = { perspective: any; source: string; agent: AgentClient };
+type Props = { perspective: any; source: string; agent: AgentClient; appStore: any };
 
-export default function SynergyDemoView({ perspective, agent, source }: Props) {
+export default function SynergyDemoView({ perspective, agent, source, appStore }: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
   const [allTopics, setAllTopics] = useState<SynergyTopic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
@@ -154,6 +154,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             perspective={perspective}
             source={source}
             agent={agent}
+            appStore={appStore}
             currentView="@coasys/flux-synergy-demo-view"
           />
         </div>

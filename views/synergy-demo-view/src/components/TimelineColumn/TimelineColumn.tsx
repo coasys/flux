@@ -10,6 +10,10 @@ import {
   SynergyItem,
   SearchType,
   GroupingOption,
+  minItemsToProcess,
+  numberOfItemsDelay,
+  checkIfProcessingInProgress,
+  isMe,
 } from "@coasys/flux-utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
@@ -33,9 +37,40 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   const [firstRun, setFirstRun] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const timeout = useRef<any>(null);
-  const totalItems = useRef(0);
   const processing = useRef(true);
   const gettingData = useRef(false);
+  const waitingForResponse = useRef(true);
+
+  async function initialise() {
+    // add signal listener
+    await addSynergySignalHandler(perspective, setProcessingData, waitingForResponse);
+    // add listener for new links
+    await perspective.addListener("link-added", linkAddedListener);
+    // set up recurring check to see if processing in progess (used to recover from disconnected peers)
+    checkIfProcessingInProgress(perspective, channelId);
+    const intervalId = setInterval(async () => {
+      // if no response after 5 seconds, mark waiting false and run processing check
+      if (waitingForResponse.current) {
+        waitingForResponse.current = false;
+        if (!gettingData.current) {
+          const newUnproccessedItems = await getUnprocessedItems();
+          const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
+          if (enoughUnprocessedItems) {
+            runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+          }
+        }
+      } else if (processingData && !isMe(processingData.author)) {
+        // otherwise re-run check (povided processing state is present & we're not the one processing)
+        waitingForResponse.current = true;
+        checkIfProcessingInProgress(perspective, channelId);
+      }
+    }, 5000);
+    // return cleanup function
+    return () => {
+      clearInterval(intervalId);
+      perspective.removeListener("link-added", linkAddedListener);
+    };
+  }
 
   async function getConversations() {
     const channel = new Channel(perspective, channelId);
@@ -47,11 +82,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     return await channel.unprocessedItems();
   }
 
-  async function getTotalItemCount() {
-    const channel = new Channel(perspective, channelId);
-    return await channel.totalItemCount();
-  }
-
   async function getData() {
     if (!gettingData.current) {
       gettingData.current = true;
@@ -60,11 +90,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       setUnprocessedItems(newUnproccessedItems);
       setRefreshTrigger((prev) => prev + 1);
       gettingData.current = false;
-      // after fetching new data, run processing check if new items have been added
-      const newTotalItems = await getTotalItemCount();
-      if (newTotalItems > totalItems.current)
+      // after fetching new data, run processing check if unprocessed items still present
+      const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
+      if (enoughUnprocessedItems && !waitingForResponse.current)
         runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
-      totalItems.current = newTotalItems;
     }
   }
 
@@ -79,12 +108,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
   }
 
   useEffect(() => {
-    // add signal listener
-    addSynergySignalHandler(perspective, setProcessingData);
-    // add listener for new links
-    perspective.addListener("link-added", linkAddedListener);
-
-    return () => perspective.removeListener("link-added", linkAddedListener);
+    const cleanup = initialise();
+    return () => {
+      cleanup.then((fn) => fn());
+    };
   }, []);
 
   useEffect(() => {

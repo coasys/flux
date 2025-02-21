@@ -49,6 +49,10 @@ export const useAppStore = defineStore("app", {
       notification: {
         globalNotification: false,
       },
+      activeWebrtc: {
+        instance: undefined,
+        channelId: "",
+      }
     };
   },
   getters,

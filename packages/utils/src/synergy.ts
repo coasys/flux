@@ -4,10 +4,14 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Conversation, Topic } from "@coasys/flux-api";
 import { v4 as uuidv4 } from "uuid";
 import { sleep } from "./sleep";
+import { isEqual } from "lodash";
 
 export const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
 export const groupingOptions = ["Conversations", "Subgroups", "Items"];
 export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
+export const minItemsToProcess = 5;
+export const maxItemsToProcess = 10;
+export const numberOfItemsDelay = 3;
 
 export type GroupingOption = (typeof groupingOptions)[number];
 export type ItemTypeOption = (typeof itemTypeOptions)[number];
@@ -19,6 +23,10 @@ export type MatchIndexes = { conversation: number | undefined; subgroup: number 
 export type ProcessingData = { author: string; channelId: string; items: string[] };
 export type Link = { source: string; predicate: string; target: string };
 export type LinkExpression = { author: string; data: Link };
+
+const receivedSignals: LinkExpression[] = [];
+let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+let processing = false;
 
 export class SynergyGroup {
   // used for conversations & subgroups
@@ -66,7 +74,7 @@ export function detectBrowser(): string {
   return "unknown";
 }
 
-export async function getAllTopics(perspective) {
+export async function getAllTopics(perspective: PerspectiveProxy) {
   // gather up all existing topics in the neighbourhood
   return (await Topic.query(perspective)).map((topic: any) => {
     return { baseExpression: topic.baseExpression, name: topic.topic };
@@ -78,24 +86,44 @@ export async function getDefaultLLM() {
   return await client.ai.getDefaultModel("LLM");
 }
 
-async function isMe(did: string): Promise<boolean> {
+export async function isMe(did: string): Promise<boolean> {
   // checks if the did is mine
   const client = await getAd4mClient();
   const me = await client.agent.me();
   return did === me.did;
 }
 
-let receivedSignals: LinkExpression[] = [];
-let signalHandler: ((expression: PerspectiveExpression) => void) | null = null;
+export async function addSynergySignalHandler(
+  perspective: PerspectiveProxy,
+  setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
+  waitingForResponse: React.MutableRefObject<boolean>
+): Promise<void> {
+  const neighbourhood = await perspective.getNeighbourhoodProxy();
+  signalHandler = (expression: PerspectiveExpression) =>
+    onSignalReceived(expression, neighbourhood, setProcessingData, waitingForResponse);
+  neighbourhood.addSignalHandler(signalHandler);
+}
 
+export async function removeSynergySignalHandler(perspective: PerspectiveProxy): Promise<void> {
+  if (signalHandler) {
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    neighbourhood.removeSignalHandler(signalHandler);
+    signalHandler = null;
+  }
+}
+
+// todo: apply channel check so processing can occur in multiple channels simultaneouly
 async function onSignalReceived(
   expression: PerspectiveExpression,
   neighbourhood: NeighbourhoodProxy,
-  setProcessingData: (data: ProcessingData | null) => void
+  setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
+  waitingForResponse: React.MutableRefObject<boolean>
 ): Promise<void> {
   const link = expression.data.links[0];
   const { author, data } = link;
   const { source, predicate, target } = data;
+  const client = await getAd4mClient();
+  const me = await client.agent.me();
 
   if (predicate === "can-you-process-items") {
     const defaultLLM = await getDefaultLLM();
@@ -123,22 +151,27 @@ async function onSignalReceived(
     processing = false;
     setProcessingData(null);
   }
-}
 
-export async function addSynergySignalHandler(
-  perspective: PerspectiveProxy,
-  setProcessingData: (data: ProcessingData | null) => void
-): Promise<void> {
-  const neighbourhood = await perspective.getNeighbourhoodProxy();
-  signalHandler = (expression: PerspectiveExpression) => onSignalReceived(expression, neighbourhood, setProcessingData);
-  neighbourhood.addSignalHandler(signalHandler);
-}
+  if (predicate === "is-anyone-processing") {
+    console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
+    setProcessingData((prev) => {
+      if (prev && prev.author === me.did) {
+        neighbourhood.sendSignalU(author, {
+          links: [{ source: "", predicate: "processing-in-progress", target: JSON.stringify(prev) }],
+        });
+      }
+      return prev;
+    });
+  }
 
-export async function removeSynergySignalHandler(perspective: PerspectiveProxy): Promise<void> {
-  if (signalHandler) {
-    const neighbourhood = await perspective.getNeighbourhoodProxy();
-    neighbourhood.removeSignalHandler(signalHandler);
-    signalHandler = null;
+  if (predicate === "processing-in-progress") {
+    console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
+    setProcessingData((prev) => {
+      // mark processing true, waiting false, & update state if changed
+      processing = true;
+      waitingForResponse.current = false;
+      return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
+    });
   }
 }
 
@@ -151,10 +184,6 @@ async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid
   await sleep(3000);
   return receivedSignals.some((s) => s.data.target === signalUuid);
 }
-// todo: store these consts in channel settings
-const minItemsToProcess = 5;
-const maxItemsToProcess = 10;
-const numberOfItemsDelay = 3;
 
 async function responsibleForProcessing(
   perspective: PerspectiveProxy,
@@ -165,25 +194,19 @@ async function responsibleForProcessing(
 ): Promise<boolean> {
   // check if enough unprocessed items are present to run the processing task (increment used so we can keep checking the next item until the limit is reached)
   const enoughUnprocessedItems = unprocessedItems.length >= minItemsToProcess + numberOfItemsDelay + increment;
-  if (!enoughUnprocessedItems) {
-    console.log("not enough items to process");
-    return false;
-  } else {
+  if (!enoughUnprocessedItems) return false;
+  else {
     // find the author of the nth item
     const nthItem = unprocessedItems[minItemsToProcess + increment - 1];
     // if we are the author, we are responsible for processing
-    if (await isMe(nthItem.author)) {
-      console.log("we are the author of the nth item!");
-      return true;
-    } else {
+    if (await isMe(nthItem.author)) return true;
+    else {
       // if not, signal the author to check if they can process the items
       const authorCanProcessItems = await agentCanProcessItems(neighbourhood, nthItem.author);
-      console.log("author can process items:", authorCanProcessItems);
       // if they can, we aren't responsible for processing
       if (authorCanProcessItems) return false;
       else {
         // if they can't, re-run the check on the next item
-        console.log("re-run responsibleForProcessing with increment:", increment + 1);
         return await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems, increment + 1);
       }
     }
@@ -298,21 +321,19 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
   return await conversation.get();
 }
 
-let processing = false;
 export async function runProcessingCheck(
   perspective: PerspectiveProxy,
   channelId: string,
   unprocessedItems: any[],
   setProcessingData: (data: ProcessingData | null) => void
 ): Promise<void> {
-  console.log("Run processing check");
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
-  const responsible: boolean = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
-  console.log("Responsible for processing:", responsible);
+  const responsible = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
+
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
     const client = await getAd4mClient();
@@ -327,6 +348,7 @@ export async function runProcessingCheck(
       links: [{ source: channelId, predicate: "processing-items-started", target: JSON.stringify(itemIds) }],
     });
 
+    // process items into conversation
     const conversation = await findOrCreateNewConversation(perspective, channelId);
     try {
       await conversation.processNewExpressions(itemsToProcess);
@@ -342,4 +364,12 @@ export async function runProcessingCheck(
       links: [{ source: channelId, predicate: "processing-items-finished", target: "" }],
     });
   }
+}
+
+export async function checkIfProcessingInProgress(perspective: PerspectiveProxy, channelId: string): Promise<void> {
+  // broadcast signal to check if processing in progress when entering the synergy view
+  const neighbourhood = await perspective.getNeighbourhoodProxy();
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: channelId, predicate: "is-anyone-processing", target: "" }],
+  });
 }
