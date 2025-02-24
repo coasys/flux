@@ -1,6 +1,5 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
-import { getAllTopics } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
 import { useEffect, useState } from "preact/hooks";
@@ -13,7 +12,6 @@ type Props = { perspective: any; source: string; agent: AgentClient; appStore: a
 
 export default function SynergyDemoView({ perspective, agent, source, appStore }: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
-  const [allTopics, setAllTopics] = useState<SynergyTopic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
   const [searchItemId, setSearchItemId] = useState("");
   const [searching, setSearching] = useState(false);
@@ -95,11 +93,6 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     return `${matches.length} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic.name}` : ""}`;
   }
 
-  // get all topic tags on page load
-  useEffect(() => {
-    getAllTopics(perspective).then((topics: SynergyTopic[]) => setAllTopics(topics));
-  }, []);
-
   // update search results when filters change
   useEffect(() => {
     if (searchItemId && searchType) search(searchType, searchItemId, selectedTopic);
@@ -123,12 +116,6 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
       <j-text uppercase size="500" weight="800" color="primary-500">
         Synergy Demo
       </j-text>
-      <j-flex gap="400" wrap style={{ width: "100%" }}>
-        All topics:
-        {allTopics.map((t) => (
-          <j-text nomargin>#{t.name}</j-text>
-        ))}
-      </j-flex>
       <j-flex className={styles.content}>
         <div
           style={{
