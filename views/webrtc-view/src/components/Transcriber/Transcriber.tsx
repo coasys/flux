@@ -343,9 +343,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         </j-flex>
       )}
       
+      {(transcripts.length || previewText) && (
         <j-box mt="600">
           <j-flex direction="column" gap="400">
-            {transcripts.length == 0 && previewText && (
+            {!transcripts.length && previewText && (
               <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
                 {previewText}
               </span>
@@ -395,6 +396,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
             ))}
           </j-flex>
         </j-box>
+      )}
       
     </div>
   );
