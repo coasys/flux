@@ -248,9 +248,7 @@ export default class Conversation extends SubjectEntity {
       this.perspective.ai
     );
 
-    for (const topic of currentNewTopics) {
-      await group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup);
-    }
+    await Promise.all(currentNewTopics.map((topic) => group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup)));
   }
 
   private async createNewGroup(newGroup: { n: string; s: string }) {
