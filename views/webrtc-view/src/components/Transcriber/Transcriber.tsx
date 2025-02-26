@@ -244,8 +244,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
-        client.ai.feedTranscriptionStream(fastStreamId.current, Array.from(event.data));
-        client.ai.feedTranscriptionStream(streamId.current, Array.from(event.data));
+        const audioData = Array.from(event.data);
+        client.ai.feedTranscriptionStream(fastStreamId.current, audioData);
+        client.ai.feedTranscriptionStream(streamId.current, audioData);
       }
     };
     workletNode.connect(audioContext.current.destination);
