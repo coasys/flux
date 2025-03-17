@@ -1,9 +1,9 @@
-import { SDNAClass, SubjectFlag, SubjectProperty } from "@coasys/ad4m";
+import { SDNAClass, SubjectFlag, SubjectProperty, SubjectEntity } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "Answer",
 })
-export default class Answer {
+export default class Answer extends SubjectEntity {
   @SubjectFlag({
     through: "flux://entry_type",
     value: "flux://has_answer",

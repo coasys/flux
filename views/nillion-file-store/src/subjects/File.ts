@@ -1,9 +1,9 @@
-import { SDNAClass, SubjectProperty, SubjectFlag } from "@coasys/ad4m";
+import { SDNAClass, SubjectProperty, SubjectFlag, SubjectEntity } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "NillionFile",
 })
-export default class File {
+export default class File extends SubjectEntity {
   @SubjectFlag({
     through: "flux://entry_type",
     writable: true,

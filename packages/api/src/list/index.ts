@@ -3,6 +3,7 @@ import {
   SubjectProperty,
   SubjectCollection,
   SDNAClass,
+  SubjectEntity
 } from "@coasys/ad4m";
 
 const { NAME } = community;
@@ -10,7 +11,7 @@ const { NAME } = community;
 @SDNAClass({
   name: "List",
 })
-export class List {
+export class List extends SubjectEntity {
   @SubjectProperty({
     through: NAME,
     writable: true,

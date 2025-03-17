@@ -1,13 +1,13 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { SubjectProperty, SDNAClass, SubjectFlag } from "@coasys/ad4m";
+import { SubjectProperty, SDNAClass, SubjectFlag, SubjectEntity } from "@coasys/ad4m";
 
 const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
 
 @SDNAClass({
   name: "App",
 })
-export class App {
+export class App extends SubjectEntity {
   @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.App,

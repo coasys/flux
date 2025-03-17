@@ -9,13 +9,14 @@ import {
   SubjectProperty,
   SubjectCollection,
   SubjectFlag,
+  SubjectEntity
 } from "@coasys/ad4m";
 import Channel from "../channel";
 
 @SDNAClass({
   name: "Community",
 })
-export class Community {
+export class Community extends SubjectEntity {
   @SubjectFlag({ through: ENTRY_TYPE, value: EntryType.Community })
   type: string;
 

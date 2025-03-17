@@ -5,6 +5,7 @@ import {
   SubjectProperty,
   SubjectCollection,
   SubjectFlag,
+  SubjectEntity
 } from "@coasys/ad4m";
 
 const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
@@ -12,7 +13,7 @@ const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
 @SDNAClass({
   name: "Message",
 })
-export class Message {
+export class Message extends SubjectEntity {
   @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.Message,

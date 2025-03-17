@@ -5,6 +5,7 @@ import {
   SubjectProperty,
   SubjectCollection,
   SubjectFlag,
+  SubjectEntity
 } from "@coasys/ad4m";
 import Message from "../message";
 
@@ -14,7 +15,7 @@ const { FILE_STORAGE_LANGUAGE } = languages;
 @SDNAClass({
   name: "Post",
 })
-export class Post {
+export class Post extends SubjectEntity {
   @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.Post,
