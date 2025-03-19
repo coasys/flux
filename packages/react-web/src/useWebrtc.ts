@@ -626,6 +626,12 @@ export default function useWebRTC({
   }
 
   async function onLeave() {
+    if (localStream) {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+        localStream.removeTrack(track);
+      });
+    }
     await manager.current?.leave();
     setConnections([]);
     setReactions([]);

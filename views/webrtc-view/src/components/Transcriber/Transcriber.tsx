@@ -273,6 +273,13 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
 
   async function stopListening() {
     listening.current = false;
+    // Stop and cleanup all media tracks
+    if (sourceNode.current?.mediaStream) {
+      sourceNode.current.mediaStream.getTracks().forEach(track => {
+        track.stop();
+      });
+    }
+    
     sourceNode.current?.disconnect();
     audioContext.current?.close();
     recognition.current?.stop();
@@ -280,7 +287,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     if (streamId.current) {
       const client = await getAd4mClient();
       await client.ai.closeTranscriptionStream(streamId.current);
+      await client.ai.closeTranscriptionStream(fastStreamId.current);
       streamId.current = null;
+      fastStreamId.current = null;
     }
   }
 

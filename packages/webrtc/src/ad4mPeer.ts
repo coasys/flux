@@ -39,6 +39,28 @@ export class AD4MPeer {
     return this.peer;
   }
 
+  public destroy() {
+    console.log("destroying peer");
+    if (this.peer) {
+      console.log("destroying peer", this.peer);
+      // Remove all tracks from the peer connection
+      if (this.peer.streams) {
+        console.log("destroying peer streams", this.peer.streams);
+        this.peer.streams.forEach(stream => {
+          stream.getTracks().forEach(track => {
+            track.stop();
+            stream.removeTrack(track);
+          });
+        });
+      }
+      
+      // Clean up the peer connection
+      this.peer.destroy();
+      // @ts-ignore
+      this.peer = null;
+    }
+  }
+
   private createPeer(): AD4MPeerInstance {
     const peer = new SimplePeerInstance({
       initiator: this.initiator,

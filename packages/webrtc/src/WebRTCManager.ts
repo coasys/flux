@@ -58,6 +58,7 @@ export type EventLogItem = {
 export type Connection = {
   peer: AD4MPeerInstance;
   eventLog: EventLogItem[];
+  ad4mPeer: AD4MPeer;
 };
 
 type Transcriber = {
@@ -319,6 +320,7 @@ export class WebRTCManager {
     const newConnection = {
       peer,
       eventLog: [],
+      ad4mPeer,
     };
 
     this.connections.set(remoteDid, newConnection);
@@ -394,6 +396,7 @@ export class WebRTCManager {
 
     if (connection) {
       connection.peer.destroy();
+      connection.ad4mPeer.destroy();
       this.connections.delete(did);
     }
   }
@@ -434,6 +437,10 @@ export class WebRTCManager {
     console.log("trying to join");
 
     let settings = { audio: true, video: false, ...initialSettings };
+
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+    }
 
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: settings.audio,
@@ -485,8 +492,16 @@ export class WebRTCManager {
       this.closeConnection(key);
     });
 
-    // Kill media recording
-    this.localStream.getTracks().forEach((track) => track.stop());
+    // Kill media recording and ensure all tracks are stopped
+    if (this.localStream) {
+      const tracks = this.localStream.getTracks();
+      tracks.forEach((track) => {
+        track.stop();
+        this.localStream.removeTrack(track);
+      });
+      // @ts-ignore
+      this.localStream = null;
+    }
   }
 
   async heartbeat() {
