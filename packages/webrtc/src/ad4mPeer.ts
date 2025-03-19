@@ -44,7 +44,7 @@ export class AD4MPeer {
       initiator: this.initiator,
       stream: this.stream,
       ...this.options,
-      trickle: false,
+      trickle: true,
     }) as Instance;
 
     // Local peerjs instance has data it wants to send to remote peer
