@@ -49,6 +49,7 @@ export class AD4MPeer {
 
     // Local peerjs instance has data it wants to send to remote peer
     peer.on("signal", (signal) => {
+      console.log("ad4mPeer sending signal", signal);
       const data = {
         signalData: signal,
         targetPeer: this.did,
