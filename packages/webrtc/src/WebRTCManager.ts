@@ -436,8 +436,10 @@ export class WebRTCManager {
       this.localStream.getTracks().forEach(track => track.stop());
     }
 
+    // Get user media
     try {
-      // Force new constraints by adding a timestamp
+      // To avoid problems rejoining calls, we make sure always get a new stream / device.
+      // For that we use a timestamp in the constraints.
       const uniqueConstraints = {
         audio: typeof settings.audio === 'boolean' ? 
           { deviceId: 'default', timestamp: Date.now() } : 
