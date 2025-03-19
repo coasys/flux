@@ -40,12 +40,9 @@ export class AD4MPeer {
   }
 
   public destroy() {
-    console.log("destroying peer");
     if (this.peer) {
-      console.log("destroying peer", this.peer);
       // Remove all tracks from the peer connection
       if (this.peer.streams) {
-        console.log("destroying peer streams", this.peer.streams);
         this.peer.streams.forEach(stream => {
           stream.getTracks().forEach(track => {
             track.stop();
