@@ -442,10 +442,20 @@ export class WebRTCManager {
       this.localStream.getTracks().forEach(track => track.stop());
     }
 
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: settings.audio,
-      video: settings.video,
-    });
+    try {
+      // Force new constraints by adding a timestamp
+      const uniqueConstraints = {
+        audio: typeof settings.audio === 'boolean' ? 
+          { deviceId: 'default', timestamp: Date.now() } : 
+          { ...settings.audio, timestamp: Date.now() },
+        video: settings.video,
+      };
+
+      this.localStream = await navigator.mediaDevices.getUserMedia(uniqueConstraints);
+    } catch (error) {
+      console.error("Failed to get user media:", error);
+      throw error;
+    }
 
     if (!this.addedListener) {
       await this.neighbourhood.addSignalHandler(this.onBroadcastReceived);
