@@ -199,7 +199,7 @@ export class WebRTCManager {
     const link = await getLinkFromPerspective(expression);
     console.log(`🔵 ${link?.data?.predicate}`, {
       link,
-      target: getExpressionData(link?.data?.target),
+      target: Literal.fromUrl(link?.data?.target).get(),
       author: expression.author,
     });
 
