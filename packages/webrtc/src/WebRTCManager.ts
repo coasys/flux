@@ -159,7 +159,7 @@ export class WebRTCManager {
     const that = this;
 
     this.connections.set = function (key: string, value: Connection) {
-      // console.log(`✅ Added key: ${key} value: ${value} to the map`);
+      console.log(`✅ Added key: ${key} value: ${value} to the map`);
 
       that.callbacks[Event.PEER_ADDED].forEach((cb) => {
         cb(key, value);
@@ -170,7 +170,7 @@ export class WebRTCManager {
 
     // Listen for deletions from the map
     this.connections.delete = function (key: string) {
-      // console.log(`🚫 Deleted key: ${key} from the map`);
+      console.log(`🚫 Deleted key: ${key} from the map`);
 
       that.callbacks[Event.PEER_REMOVED].forEach((cb) => {
         cb(key);
@@ -191,15 +191,15 @@ export class WebRTCManager {
     if (!this.isListening) return;
 
     if (expression.author === this.agent.did) {
-      // console.log("Received signal from self, ignoring!");
+      console.log("Received signal from self, ignoring!");
       return null;
     }
 
     const link = await getLinkFromPerspective(expression);
-    // console.log(`🔵 ${link?.data?.predicate}`, {
-    //   link,
-    //   author: expression.author,
-    // });
+    console.log(`🔵 ${link?.data?.predicate}`, {
+      link,
+      author: expression.author,
+    });
 
     if (!link) {
       this.addToEventLog(
@@ -210,10 +210,10 @@ export class WebRTCManager {
       return;
     }
 
-    // if (link.source !== this.agent.did) {
-    //   console.log("Signal not adressed to current peer, ignoring");
-    //   return null;
-    // }
+    if (link.source !== this.agent.did) {
+      console.log("Signal not adressed to current peer, ignoring");
+      return null;
+    }
 
     if (
       link.data.predicate === IS_ANYONE_HERE &&
@@ -273,11 +273,11 @@ export class WebRTCManager {
       return this.connections.get(remoteDid);
     }
 
-    // console.log(
-    //   "🟠 Creating ",
-    //   initiator ? "active" : "passive",
-    //   " connection"
-    // );
+    console.log(
+      "🟠 Creating ",
+      initiator ? "active" : "passive",
+      " connection"
+    );
 
     const ad4mPeer = new AD4MPeer({
       did: remoteDid,
@@ -372,9 +372,9 @@ export class WebRTCManager {
       if (!recepients || recepients.includes(key)) {
         try {
           e.peer.send(data);
-          // console.log(`📩 Sending message to ${key} -> `, type);
+          console.log(`📩 Sending message to ${key} -> `, type);
         } catch (e) {
-          // console.log(`📩 Couldn't send message to ${key} -> `, type, e);
+          console.log(`📩 Couldn't send message to ${key} -> `, type, e);
         }
       }
     });
@@ -419,7 +419,7 @@ export class WebRTCManager {
 
     const connection = this.connections.get(did);
     if (!connection) {
-      // console.log("🔴 Failed to add log entry, no connection found!");
+      console.log("🔴 Failed to add log entry, no connection found!");
       return;
     }
 
@@ -430,7 +430,7 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
-    // console.log("trying to join");
+    console.log("trying to join");
 
     let settings = { audio: true, video: false, ...initialSettings };
 
@@ -489,7 +489,7 @@ export class WebRTCManager {
   }
 
   async heartbeat() {
-    // console.log("💚 Sending HEARTBEAT");
+    console.log("💚 Sending HEARTBEAT");
     this.addToEventLog(this.agent.did, HEARTBEAT);
 
     this.neighbourhood.sendBroadcastU({
@@ -504,7 +504,7 @@ export class WebRTCManager {
   }
 
   async sendTestSignal(recipientDid: string) {
-    // console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
+    console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -517,7 +517,7 @@ export class WebRTCManager {
   }
 
   async sendTestBroadcast() {
-    // console.log("⚙️ Sending TEST_BROADCAST to room");
+    console.log("⚙️ Sending TEST_BROADCAST to room");
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -530,7 +530,7 @@ export class WebRTCManager {
   }
 
   setIceServers(iceServers: IceServer[]) {
-    // console.log("⚙️ Setting ICE servers: ", iceServers);
+    console.log("⚙️ Setting ICE servers: ", iceServers);
     this.iceServers = iceServers;
   }
 }
