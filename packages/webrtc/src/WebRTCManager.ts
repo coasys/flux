@@ -210,10 +210,10 @@ export class WebRTCManager {
       return;
     }
 
-    if (link.source !== this.agent.did) {
-      console.log("Signal not adressed to current peer, ignoring");
-      return null;
-    }
+    //if (link.source !== this.agent.did) {
+    //  console.log("Signal not adressed to current peer, ignoring");
+    //  return null;
+    //}
 
     if (
       link.data.predicate === IS_ANYONE_HERE &&
