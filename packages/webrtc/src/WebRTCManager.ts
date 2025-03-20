@@ -58,6 +58,7 @@ export type EventLogItem = {
 export type Connection = {
   peer: AD4MPeerInstance;
   eventLog: EventLogItem[];
+  ad4mPeer: AD4MPeer;
 };
 
 type Transcriber = {
@@ -210,11 +211,6 @@ export class WebRTCManager {
       return;
     }
 
-    // if (link.source !== this.agent.did) {
-    //   console.log("Signal not adressed to current peer, ignoring");
-    //   return null;
-    // }
-
     if (
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
@@ -318,6 +314,7 @@ export class WebRTCManager {
     const newConnection = {
       peer,
       eventLog: [],
+      ad4mPeer,
     };
 
     this.connections.set(remoteDid, newConnection);
@@ -393,6 +390,7 @@ export class WebRTCManager {
 
     if (connection) {
       connection.peer.destroy();
+      connection.ad4mPeer.destroy();
       this.connections.delete(did);
     }
   }
@@ -434,10 +432,26 @@ export class WebRTCManager {
 
     let settings = { audio: true, video: false, ...initialSettings };
 
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: settings.audio,
-      video: settings.video,
-    });
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Get user media
+    try {
+      // To avoid problems rejoining calls, we make sure always get a new stream / device.
+      // For that we use a timestamp in the constraints.
+      const uniqueConstraints = {
+        audio: typeof settings.audio === 'boolean' ? 
+          { deviceId: 'default', timestamp: Date.now() } : 
+          { ...settings.audio, timestamp: Date.now() },
+        video: settings.video,
+      };
+
+      this.localStream = await navigator.mediaDevices.getUserMedia(uniqueConstraints);
+    } catch (error) {
+      console.error("Failed to get user media:", error);
+      throw error;
+    }
 
     if (!this.addedListener) {
       await this.neighbourhood.addSignalHandler(this.onBroadcastReceived);
@@ -484,8 +498,16 @@ export class WebRTCManager {
       this.closeConnection(key);
     });
 
-    // Kill media recording
-    this.localStream.getTracks().forEach((track) => track.stop());
+    // Kill media recording and ensure all tracks are stopped
+    if (this.localStream) {
+      const tracks = this.localStream.getTracks();
+      tracks.forEach((track) => {
+        track.stop();
+        this.localStream.removeTrack(track);
+      });
+      // @ts-ignore
+      this.localStream = null;
+    }
   }
 
   async heartbeat() {
