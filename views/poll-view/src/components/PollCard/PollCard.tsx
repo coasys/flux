@@ -1,5 +1,4 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { SubjectRepository } from "@coasys/flux-api";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import * as d3 from "d3";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
@@ -26,7 +25,7 @@ export default function PollCard(props: {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const { entries: answers } = useSubjects({ perspective, source: poll.id, subject: Answer });
+  const { entries: answers } = useAd4mModel({ perspective, model: Answer, query: { source: poll.baseExpression } });
 
   const colorScale = useMemo(() => {
     return d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
@@ -47,7 +46,7 @@ export default function PollCard(props: {
       answers.map(
         (answer) =>
           new Promise(async (resolve) => {
-            const votes = await new SubjectRepository(Vote, { perspective, source: answer.id }).getAllData();
+            const votes = await Vote.findAll(perspective, { source: answer.baseExpression });
             const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
             newTotalVotes += votes.length;
             let totalAnswerPoints = 0;
@@ -76,29 +75,39 @@ export default function PollCard(props: {
   function removePreviousVotes() {
     return Promise.all(
       answers.map(async (answer) => {
-        const voteRepo = await new SubjectRepository(Vote, { perspective, source: answer.id });
-        const votes = await voteRepo.getAllData();
+        const votes = await Vote.findAll(perspective, { source: answer.baseExpression });
         const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-        if (previousVote) await voteRepo.remove(previousVote.id);
+        if (previousVote) {
+          const vote = new Vote(perspective, previousVote.baseExpression);
+          await vote.delete();
+        }
       })
     );
   }
 
+  async function createVote(source, score) {
+    const newVote = new Vote(perspective, undefined, source);
+    newVote.score = score;
+    await newVote.save();
+  }
+
+  async function updateVote(id, score) {
+    const vote = new Vote(perspective, id);
+    vote.score = score;
+    await vote.update();
+  }
+
   async function vote(answerId: string, value?: number) {
-    const voteRepo = await new SubjectRepository(Vote, { perspective, source: answerId });
-    const votes = await voteRepo.getAllData();
+    const votes = await Vote.findAll(perspective, { source: answerId });
     const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
     if (voteType === "single-choice") {
       previousVote
-        ? await voteRepo.remove(previousVote.id)
-        : // @ts-ignore
-          await removePreviousVotes().then(() => voteRepo.create({ score: 100 }));
+        ? await previousVote.delete()
+        : await removePreviousVotes().then(() => createVote(answerId, 100));
     } else if (voteType === "multiple-choice") {
-      // @ts-ignore
-      previousVote ? await voteRepo.remove(previousVote.id) : await voteRepo.create({ score: 100 });
+      previousVote ? await previousVote.delete() : await createVote(answerId, 100);
     } else if (voteType === "weighted-choice") {
-      // @ts-ignore
-      previousVote ? await voteRepo.update(previousVote.id, { score: value }) : await voteRepo.create({ score: value });
+      previousVote ? await updateVote(previousVote.baseExpression, value) : await createVote(answerId, value);
     }
     buildAnswerData();
   }
@@ -120,7 +129,7 @@ export default function PollCard(props: {
           </j-flex>
           {myDid === author && (
             <j-button square>
-              <j-icon name="trash" onClick={() => deletePoll(poll.id)} />
+              <j-icon name="trash" onClick={() => deletePoll(poll.baseExpression)} />
             </j-button>
           )}
         </j-flex>
@@ -132,7 +141,7 @@ export default function PollCard(props: {
         </j-text>
         <j-flex j="center">
           <PieChart
-            pollId={poll.id}
+            pollId={poll.baseExpression}
             type={voteType}
             totalVotes={totalVotes}
             totalPoints={totalPoints}
@@ -152,7 +161,7 @@ export default function PollCard(props: {
         <j-flex gap="400" direction="column">
           {processedAnswers.map((answer, i) => (
             <AnswerCard
-              key={answer.id}
+              key={answer.baseExpression}
               perspective={perspective}
               myDid={myDid}
               answer={answer}

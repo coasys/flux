@@ -1,4 +1,4 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Vote from "../../models/Vote";
 import Avatar from "../Avatar";
@@ -17,18 +17,18 @@ export default function AnswerCard(props: {
   removeAnswer?: (index: number) => void;
 }) {
   const { perspective, myDid, answer, index, color, percentage, voteType, preview, vote, removeAnswer } = props;
-  const { id, author, text, myPoints } = answer;
+  const { baseExpression, author, text, myPoints } = answer;
   const [hasVoted, setHasVoted] = useState(false);
   const [points, setPoints] = useState(myPoints);
   const pointsRef = useRef(0);
   const slidingRef = useRef(false);
-  const { entries: votes } = useSubjects({ perspective, source: answer.id, subject: Vote });
+  const { entries: votes } = useAd4mModel({ perspective, model: Vote, query: { source: baseExpression } });
 
   useEffect(() => {
     window.addEventListener("mouseup", () => {
       if (slidingRef.current) {
         slidingRef.current = false;
-        vote(id, pointsRef.current);
+        vote(baseExpression, pointsRef.current);
       }
     });
   }, []);
@@ -87,12 +87,12 @@ export default function AnswerCard(props: {
                     onInput={(e: any) => {
                       pointsRef.current = +e.target.value;
                       setPoints(+e.target.value);
-                      vote(id, +e.target.value);
+                      vote(baseExpression, +e.target.value);
                     }}
                   />
                 </j-flex>
               ) : (
-                <j-checkbox onChange={() => vote(id)} checked={hasVoted} size="sm">
+                <j-checkbox onChange={() => vote(baseExpression)} checked={hasVoted} size="sm">
                   <j-icon slot="checkmark" size="xs" name="check" />
                 </j-checkbox>
               )}

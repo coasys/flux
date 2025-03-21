@@ -1,5 +1,5 @@
 import { AgentClient } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { useEffect, useState } from "preact/hooks";
 import Poll from "../../models/Poll";
 import NewPollModal from "../NewPollModal";
@@ -14,10 +14,11 @@ type Props = {
 export default function PollView({ perspective, source, agent }: Props) {
   const [myDid, setMyDid] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const { entries: polls, repo: pollRepo } = useSubjects({ perspective, source, subject: Poll });
+  const { entries: polls } = useAd4mModel({ perspective, model: Poll, query: { source } });
 
-  function deletePoll(id: string) {
-    pollRepo.remove(id).catch(console.log);
+  async function deletePoll(id: string) {
+    const poll = new Poll(perspective, id, source);
+    await poll.delete();
   }
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function PollView({ perspective, source, agent }: Props) {
 
       <j-flex gap="500" direction="column">
         {polls.map((poll) => (
-          <PollCard key={poll.id} perspective={perspective} myDid={myDid} poll={poll} deletePoll={deletePoll} />
+          <PollCard key={poll.baseExpression} perspective={perspective} myDid={myDid} poll={poll} deletePoll={deletePoll} />
         ))}
       </j-flex>
     </j-flex>

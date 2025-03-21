@@ -1,5 +1,3 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { SubjectRepository } from "@coasys/flux-api";
 import * as d3 from "d3";
 import { useRef, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
@@ -29,7 +27,6 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
   const [answersError, setAnswersError] = useState("");
   const [loading, setLoading] = useState(false);
   const colorScale = useRef(d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis));
-  const { repo: pollRepo } = useSubjects({ perspective, source, subject: Poll });
 
   function addAnswer() {
     if (!newAnswer) setAnswersError("Required");
@@ -70,11 +67,18 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
     setAnswersError(answersValid ? "" : "At least 2 answers required for locked polls");
     if (title && answersValid) {
       setLoading(true);
-      // @ts-ignore
-      const poll = (await pollRepo.create({ title, description, voteType, answersLocked })) as any;
-      const answerRepo = await new SubjectRepository(Answer, { perspective, source: poll.id });
-      // @ts-ignore
-      Promise.all(answers.map((answer) => answerRepo.create({ text: answer.text })))
+      const newPoll = new Poll(perspective, undefined, source);
+      newPoll.title = title;
+      newPoll.description = description;
+      newPoll.voteType = voteType;
+      newPoll.answersLocked = answersLocked;
+      await newPoll.save();
+
+      Promise.all(answers.map((answer) => {
+        const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
+        newAnswer.text = answer.text;
+        return newAnswer.save();
+      }))
         .then(() => toggleOpen(false))
         .catch(console.log);
     }
