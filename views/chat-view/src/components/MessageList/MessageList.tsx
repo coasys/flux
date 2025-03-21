@@ -1,4 +1,5 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
+// import { useAd4mModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { Message } from "@coasys/flux-api";
@@ -19,22 +20,6 @@ type Props = {
   onThreadClick?: (message: Message) => void;
 };
 
-function generateHashSync(str1, str2) {
-  const combinedString = str1 + str2;
-
-  function hashString(input) {
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) {
-      hash ^= input.charCodeAt(i);
-    }
-    return hash.toString(16).padStart(2, "0");
-  }
-
-  const hash = hashString(combinedString);
-
-  return hash;
-}
-
 const PAGE_SIZE = 30;
 
 export default function MessageList({
@@ -49,13 +34,41 @@ export default function MessageList({
 }: Props) {
   const virtuosoRef = useRef(null);
   const [atBottom, setAtBottom] = useState(false);
-  const showButtonTimeoutRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [key, setKey] = useState(0);
+  const showButtonTimeoutRef = useRef(null);
 
-  const uniqueKey = useRef(generateHashSync(perspective.uuid, source));
+  const { entries, loading, totalCount, loadMore } = useAd4mModel({
+    perspective,
+    model: Message,
+    query: { source, order: { timestamp: "DESC" } },
+    pageSize: PAGE_SIZE,
+  });
+
+  const messages = useMemo(() => {
+    // Reverse order after pagination for inverted message scrolling
+    return entries.slice().sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }, [JSON.stringify(entries)]);
+
+  function differenceInMinutes(timestamp1: string | number | Date, timestamp2: string | number | Date): number {
+    const date1 = new Date(timestamp1);
+    const date2 = new Date(timestamp2);
+    const differenceInMilliseconds = date1.getTime() - date2.getTime();
+    const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+    return Math.floor(differenceInMinutes);
+  }
+
+  function showAvatar(index: number): boolean {
+    const previousMessage = messages[index - 1];
+    const message = messages[index];
+    // Always show avatar if this is the first message or messages are invalid
+    if (!previousMessage || !message) return true;
+    // Show avatar if author changed
+    if (previousMessage.author !== message.author) return true;
+    // For same author, show avatar if messages are separated by ≥ 2 minutes
+    const timeDifference = differenceInMinutes(new Date(message.timestamp), new Date(previousMessage.timestamp));
+
+    return timeDifference >= 2;
+  }
 
   useEffect(() => {
     return () => {
@@ -72,52 +85,8 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries, setQuery, isMore, isLoading } = useSubjects({
-    perspective,
-    source,
-    subject: Message,
-    query: {
-      page,
-      size: PAGE_SIZE,
-      infinite: true,
-      uniqueKey: uniqueKey.current,
-    },
-  });
-
-  const messages = useMemo(() => {
-    return entries
-      .slice()
-      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  }, [JSON.stringify(entries)]);
-
-  function showAvatar(index: number): boolean {
-    const previousMessage = messages[index - 1];
-    const message = messages[index];
-
-    if (!previousMessage || !message) {
-      return true;
-    }
-
-    return previousMessage.author !== message.author
-      ? true
-      : previousMessage.author === message.author &&
-          differenceInMinutes(
-            new Date(message.timestamp),
-            new Date(previousMessage.timestamp)
-          ) >= 2;
-  }
-
-
-useEffect(() => {
-  setTotalCount(messages.length);
-}, [messages]);
-
-useEffect(() => {
-    setKey(prevKey => prevKey + 1);
-  }, [JSON.stringify(messages)])
-
   return (
-    <div className={styles.messageList} data-value={key}>
+    <div className={styles.messageList}>
       {showButton && (
         <j-button
           circle
@@ -143,34 +112,22 @@ useEffect(() => {
       <Virtuoso
         components={{
           Header: () => {
-            if (isLoading)
+            if (loading)
               return (
                 <div className={styles.loadMore}>
                   <j-spinner></j-spinner>
                 </div>
               );
 
-            return (
-              isMore && (
+            if (totalCount > messages.length)
+              return (
                 <div className={styles.loadMore}>
-                  <j-button
-                    variant="subtle"
-                    onClick={() => {
-                      setQuery({
-                        page: page + 1,
-                        size: PAGE_SIZE,
-                        infinite: true,
-                        uniqueKey: uniqueKey.current,
-                      });
-
-                      setPage(page + 1);
-                    }}
-                  >
+                  <j-button variant="subtle" onClick={loadMore}>
                     load more
+                    <j-text nomargin>({totalCount - messages.length})</j-text>
                   </j-button>
                 </div>
-              )
-            );
+              );
           },
         }}
         ref={virtuosoRef}
@@ -180,16 +137,16 @@ useEffect(() => {
         alignToBottom
         overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
-        computeItemKey={(index) => messages[index].id}
+        computeItemKey={(index) => messages[index].baseExpression}
         totalCount={messages.length}
         initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (
             <MessageItem
-              isReplying={messages[index].id === replyId}
+              isReplying={messages[index].baseExpression === replyId}
               perspective={perspective}
               showAvatar={showAvatar(index)}
-              key={messages[index].id}
+              key={messages[index].baseExpression}
               agent={agent}
               message={messages[index]}
               isThread={isThread}
@@ -202,17 +159,4 @@ useEffect(() => {
       />
     </div>
   );
-}
-
-function differenceInMinutes(
-  timestamp1: string | number | Date,
-  timestamp2: string | number | Date
-): number {
-  const date1 = new Date(timestamp1);
-  const date2 = new Date(timestamp2);
-
-  const differenceInMilliseconds = date1.getTime() - date2.getTime();
-  const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
-
-  return Math.floor(differenceInMinutes);
 }
