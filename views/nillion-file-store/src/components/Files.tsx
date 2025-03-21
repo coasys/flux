@@ -5,14 +5,14 @@ import styles from "./FileView.module.css";
 interface FileProps {
   files: any[];
   handleGetQuote: (name: string, storeId: string, secretId: string) => void;
-  repo: any;
+  deleteFile: (id: string) => void;
   profiles: Map<string, any>;
 }
 
 export default function Files({
   files,
   handleGetQuote,
-  repo,
+  deleteFile,
   profiles,
 }: FileProps) {
   return (
@@ -59,7 +59,7 @@ export default function Files({
                 square
                 variant="subtle"
                 size="sm"
-                onClick={() => repo.remove(file.id)}
+                onClick={() => deleteFile(file.baseExpression)}
               >
                 <j-icon name="x" />
               </j-button>

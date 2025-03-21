@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "preact/hooks";
 import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { getProfile } from "@coasys/flux-api";
 import { v4 } from "uuid";
 import * as nil from "@nillion/client-web";
@@ -98,16 +98,16 @@ export function FileView({ perspective, source, agent }: Props) {
 
   const [showLoader, setShowLoader] = useState<boolean>(false);
 
-  const { entries: files, repo } = useSubjects({
+  const { entries: files } = useAd4mModel({
     perspective,
-    source,
-    subject: File,
+    model: File,
+    query: { source },
   });
 
-  const { entries: nillionUsers, repo: nilUserRepo } = useSubjects({
+  const { entries: nillionUsers } = useAd4mModel({
     perspective,
-    source,
-    subject: NillionUser,
+    model: NillionUser,
+    query: { source },
   });
 
   console.log({ nillionUsers });
@@ -117,13 +117,11 @@ export function FileView({ perspective, source, agent }: Props) {
     //Create a mapping in ADAM between the nillion user and the agent did
     const createNillionUser = async () => {
       console.log("Creating nillion user...", client.user_id);
-      const res = await nilUserRepo.create(
-        {
-          userId: client.user_id,
-        },
-        (await agent.me()).did
-      );
-      console.log("Nillion user created", res);
+      const me = await agent.me();
+      const newNillionUser = new NillionUser(perspective, me.did, source);
+      newNillionUser.userId = client.user_id;
+      await newNillionUser.save();
+      console.log("Nillion user created", newNillionUser);
     };
 
     createNillionUser();
@@ -305,12 +303,13 @@ export function FileView({ perspective, source, agent }: Props) {
 
         const sizeInMB = quote.rawSecret!.length / 1_048_576;
 
-        await repo.create({
-          name: fileName,
-          secretId: secretId,
-          storeId: storeId,
-          size: sizeInMB.toString(),
-        });
+        const newFile = new File(perspective, undefined, source);
+        newFile.name = fileName;
+        newFile.secretId = secretId;
+        newFile.storeId = storeId;
+        newFile.size = sizeInMB.toString();
+        await newFile.save();
+
         setShowLoader(false);
 
         setVariant("success");
@@ -444,7 +443,10 @@ export function FileView({ perspective, source, agent }: Props) {
         <Files
           files={files}
           handleGetQuote={handleGetQuote}
-          repo={repo}
+          deleteFile={async (id: string) => {
+            const file = new File(perspective, id, source);
+            await file.delete();
+          }}
           profiles={profiles}
         />
       </j-flex>
