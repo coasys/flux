@@ -49,7 +49,7 @@ export default function PostItem({ agent, perspective, post, displayView }) {
 
   return (
     <div
-      onClick={() => UIMehthods.goToPost(post.id)}
+      onClick={() => UIMehthods.goToPost(post.baseExpression)}
       className={[styles.post, displayStyle, popularStyle].join(" ")}
     >
       <div className={styles.postContentWrapper}>
