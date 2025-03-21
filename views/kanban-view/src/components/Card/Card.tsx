@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
-import { useSubjects, useSubject } from "@coasys/ad4m-react-hooks";
+import { useSubject } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
@@ -22,10 +23,10 @@ export default function Card({
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
   const { entry } = useSubject({ perspective, id, subject: selectedClass });
 
-  const { entries: comments } = useSubjects({
+  const { entries: comments } = useAd4mModel({
     perspective,
-    source: id,
-    subject: Message,
+    model: Message,
+    query: { source: id },
   });
 
   const { associations } = useAssociations({
