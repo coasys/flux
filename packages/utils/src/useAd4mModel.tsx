@@ -15,6 +15,7 @@ type Result<T extends SubjectEntity> = {
   error: string;
   totalCount: number;
   loadMore: () => void;
+  setEntries: React.Dispatch<React.SetStateAction<T[]>>;
 };
 
 export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T> {
@@ -67,5 +68,5 @@ export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T
     subscribeToCollection();
   }, [JSON.stringify(query), pageNumber]);
 
-  return useMemo(() => ({ entries, loading, error, totalCount, loadMore }), [entries, loading, error]);
+  return useMemo(() => ({ entries, loading, error, totalCount, loadMore, setEntries }), [entries, loading, error]);
 }

@@ -37,6 +37,7 @@ export default function ChatView({
   } | null>(null);
   const [threadSource, setThreadSource] = useState<Message | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
+  const [newMessage, setNewMessage] = useState<Message | null>(null);
   const editor = useRef(null);
   const threadContainer = useRef(null);
 
@@ -62,6 +63,10 @@ export default function ChatView({
       const message = new Message(perspective, undefined, source);
       message.body = html;
       await message.save();
+
+      // Pass the new message to the MessageList component and then reset the state
+      setNewMessage(message);
+      setTimeout(() => setNewMessage(null), 100);
 
       if (replyMessage) {
         perspective.addLinks([
@@ -184,6 +189,7 @@ export default function ChatView({
           isThread={threaded}
           agent={agent}
           source={source}
+          newMessage={newMessage}
         />
 
         <footer className={styles.footer}>

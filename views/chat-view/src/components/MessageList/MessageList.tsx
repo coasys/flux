@@ -15,6 +15,7 @@ type Props = {
   source: string;
   replyId: string | undefined | null;
   isThread?: boolean;
+  newMessage: Message;
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
@@ -28,6 +29,7 @@ export default function MessageList({
   source,
   replyId,
   isThread,
+  newMessage,
   onEmojiClick = () => {},
   onReplyClick = () => {},
   onThreadClick = () => {},
@@ -37,7 +39,7 @@ export default function MessageList({
   const [showButton, setShowButton] = useState(false);
   const showButtonTimeoutRef = useRef(null);
 
-  const { entries, loading, totalCount, loadMore } = useAd4mModel({
+  const { entries, loading, totalCount, loadMore, setEntries } = useAd4mModel({
     perspective,
     model: Message,
     query: { source, order: { timestamp: "DESC" } },
@@ -84,6 +86,11 @@ export default function MessageList({
       setShowButton(false);
     }
   }, [atBottom, setShowButton]);
+
+  // Update the entries array when new messages are created
+  useEffect(() => {
+    if (newMessage) setEntries((prevEntries) => [newMessage, ...prevEntries]);
+  }, [newMessage]);
 
   return (
     <div className={styles.messageList}>
