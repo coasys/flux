@@ -46,12 +46,6 @@ export default function ChatView({
     formatter: profileFormatter,
   });
 
-  const { repo } = useSubjects({
-    perspective,
-    source,
-    subject: Message,
-  });
-
   const { profile: threadProfile } = useAgent<Profile>({
     client: agent,
     did: threadSource?.author,
@@ -65,19 +59,21 @@ export default function ChatView({
       editor.current?.clear();
 
       // @ts-ignore
-      const message = (await repo.create({ body: html })) as any;
+      const message = new Message(perspective, undefined, source);
+      message.body = html;
+      await message.save();
 
       if (replyMessage) {
         perspective.addLinks([
           {
-            source: replyMessage.id,
+            source: replyMessage.baseExpression,
             predicate: REPLY_TO,
-            target: message.id,
+            target: message.baseExpression,
           },
           {
-            source: replyMessage.id,
+            source: replyMessage.baseExpression,
             predicate: EntryType.Message,
-            target: message.id,
+            target: message.baseExpression,
           },
         ]);
       }
@@ -98,7 +94,7 @@ export default function ChatView({
     message: Message,
     position: { x: number; y: number }
   ) {
-    setPickerInfo({ x: position.x, y: position.y, id: message.id });
+    setPickerInfo({ x: position.x, y: position.y, id: message.baseExpression });
   }
 
   async function onOpenThread(message: Message) {
@@ -117,7 +113,7 @@ export default function ChatView({
       el.className = styles.webComponent;
       el.perspective = perspective;
       el.agent = agent;
-      el.setAttribute("source", message.id);
+      el.setAttribute("source", message.baseExpression);
       el.setAttribute("threaded", "true");
     }
   }
@@ -183,7 +179,7 @@ export default function ChatView({
           onEmojiClick={onOpenEmojiPicker}
           onReplyClick={(message) => setReplyMessage(message)}
           onThreadClick={(message) => onOpenThread(message)}
-          replyId={replyMessage?.id}
+          replyId={replyMessage?.baseExpression}
           perspective={perspective}
           isThread={threaded}
           agent={agent}
