@@ -1,4 +1,3 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
 import { detectBrowser } from "@coasys/flux-utils";
@@ -31,8 +30,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
   const [previewText, setPreviewText] = useState("");
-
-  const { repo: messageRepo } = useSubjects({ perspective, source, subject: Message });
 
   function renderVolume() {
     if (listening.current) {
@@ -76,8 +73,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         }, 500);
       }
       // save message
-      // @ts-ignore
-      await messageRepo.create({ body: `<p>${text}</p>` });
+      const newMessage = new Message(perspective, undefined, source);
+      newMessage.body = text;
+      await newMessage.create();
     } else {
       if (transcriptCard) {
         transcriptCard.classList.add(styles.slideRight);
