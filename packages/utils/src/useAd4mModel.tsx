@@ -53,7 +53,6 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
         typeof model === "string"
           ? Ad4mModel.query(perspective, query).overrideModelClassName(model)
           : model.query(perspective, query);
-      // const modelQuery = model.query(perspective, query);
       if (pageSize) {
         // handle paginated results
         const totalPageSize = pageSize * pageNumber;
@@ -86,7 +85,7 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
 
   useEffect(() => {
     if (subjectEnsured) subscribeToCollection();
-  }, [subjectEnsured, JSON.stringify(query), pageNumber]);
+  }, [subjectEnsured, model, JSON.stringify(query), pageNumber]);
 
   return useMemo(() => ({ entries, loading, error, totalCount, loadMore, setEntries }), [entries, loading, error]);
 }
