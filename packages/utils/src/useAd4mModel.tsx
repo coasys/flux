@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
-import { PerspectiveProxy, SubjectEntity, Query, PaginationResult } from "@coasys/ad4m";
+import { PerspectiveProxy, Ad4mModel, Query, PaginationResult } from "@coasys/ad4m";
 
-type Props<T extends SubjectEntity> = {
+type Props<T extends Ad4mModel> = {
   perspective: PerspectiveProxy;
-  model: (new (...args: any[]) => T) & typeof SubjectEntity;
+  model: string | ((new (...args: any[]) => T) & typeof Ad4mModel);
   query?: Query;
   pageSize?: number;
   preserveReferences?: boolean;
 };
 
-type Result<T extends SubjectEntity> = {
+type Result<T extends Ad4mModel> = {
   entries: T[];
   loading: boolean;
   error: string;
@@ -18,7 +18,7 @@ type Result<T extends SubjectEntity> = {
   setEntries: React.Dispatch<React.SetStateAction<T[]>>;
 };
 
-export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T> {
+export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
   const { perspective, model, query = {}, preserveReferences = false, pageSize } = props;
   const [subjectEnsured, setSubjectEnsured] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,24 +42,28 @@ export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T
     setEntries((oldEntries) => (preserveReferences ? preserveEntryReferences(oldEntries, newEntries) : newEntries));
   }
 
-  function paginateSubscribeCallback({ results: newEntries, totalCount }: PaginationResult<T>) {
-    handleNewEntires(newEntries);
-    setTotalCount(totalCount || 0);
+  function paginateSubscribeCallback({ results, totalCount }: PaginationResult<T>) {
+    handleNewEntires(results);
+    setTotalCount(totalCount);
   }
 
   async function subscribeToCollection() {
     try {
-      const modelQuery = model.query(perspective, query);
+      const modelQuery =
+        typeof model === "string"
+          ? Ad4mModel.query(perspective, query).overrideModelClassName(model)
+          : model.query(perspective, query);
+      // const modelQuery = model.query(perspective, query);
       if (pageSize) {
         // handle paginated results
         const totalPageSize = pageSize * pageNumber;
         const { results, totalCount } = await modelQuery.paginateSubscribe(totalPageSize, 1, paginateSubscribeCallback);
-        setEntries(results);
-        setTotalCount(totalCount || 0);
+        setEntries(results as T[]);
+        setTotalCount(totalCount);
       } else {
         // handle non-paginated results
         const results = await modelQuery.subscribe(handleNewEntires);
-        setEntries(results);
+        setEntries(results as T[]);
       }
     } catch (err) {
       console.log("useAd4mModel error", err);
