@@ -1,5 +1,5 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { Ad4mModel, PerspectiveProxy, Literal, makeRandomPrologAtom } from "@coasys/ad4m";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useEffect, useMemo } from "preact/hooks";
 import { useState } from "react";
@@ -44,11 +44,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     });
   }, [perspective.uuid]);
 
-  const { entries, repo } = useSubjects({
-    perspective,
-    source,
-    subject: selectedClass,
-  });
+  const { entries } = useAd4mModel({ perspective, model: selectedClass, query: { source } });
 
   function loadColumns() {
     getNamedOptions(perspective, selectedClass).then((namedOpts) => {
@@ -87,11 +83,21 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     );
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
-  async function createNewTodo(propertyName, value) {
-    await repo.create({ [propertyName]: value });
+  async function setValue(model, property, value) {
+    const setter = `set${property.charAt(0).toUpperCase() + property.slice(1)}`;
+    await model[setter](value);
   }
 
-  const onDragEnd = (result) => {
+  async function createNewTodo(property, value) {
+    const baseExpression = Literal.from(makeRandomPrologAtom(24)).toUrl();
+    //@ts-ignore
+    const model = await perspective.createSubject(selectedClass, baseExpression) as Ad4mModel;
+    await setValue(model, property, value);
+    // link to channel
+    await perspective.addLinks([{ source, predicate: "ad4m://has_child", target: baseExpression }]);
+  }
+
+  const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     // If there is no destination, do not do anything
@@ -111,11 +117,13 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
     setTasks((oldTasks) => {
       return oldTasks.map((t) =>
-        t.id === draggableId ? { ...t, [selectedProperty]: status } : t
+        t.baseExpression === draggableId ? { ...t, [selectedProperty]: status } : t
       );
     });
 
-    repo.update(draggableId, { [selectedProperty]: status });
+    // update state
+    const model = await perspective.getSubjectProxy(draggableId, selectedClass);
+    await setValue(model, selectedProperty, status);
   };
 
   async function addColumn() {
@@ -188,8 +196,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                         >
                           {tasks.map((task, index) => (
                             <Draggable
-                              key={task.id}
-                              draggableId={task.id}
+                              key={task.baseExpression}
+                              draggableId={task.baseExpression}
                               index={index}
                             >
                               {(provided, snapshot) => (
@@ -204,8 +212,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                                   <Card
                                     perspective={perspective}
                                     selectedClass={selectedClass}
-                                    onClick={() => setCurrentTaskId(task.id)}
-                                    id={task.id}
+                                    onClick={() => setCurrentTaskId(task.baseExpression)}
+                                    id={task.baseExpression}
                                   ></Card>
                                 </div>
                               )}
@@ -316,9 +324,9 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
         ...acc,
         tasks: {
           ...acc.tasks,
-          [task.id]: {
-            id: task.id,
-            title: task.title || task.name || task.id,
+          [task.baseExpression]: {
+            baseExpression: task.baseExpression,
+            title: task.title || task.name || task.baseExpression,
           },
         },
         columns: addTaskToColumn(acc.columns, task, property),
@@ -364,7 +372,7 @@ function addTaskToColumn(columns, task, propertyName) {
         ...column,
         taskIds:
           task[propertyName] === column.id
-            ? [...column.taskIds, task.id]
+            ? [...column.taskIds, task.baseExpression]
             : column.taskIds,
       },
     };
