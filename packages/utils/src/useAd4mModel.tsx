@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { PerspectiveProxy, SubjectEntity, Query } from "@coasys/ad4m";
+import { PerspectiveProxy, SubjectEntity, Query, PaginationResult } from "@coasys/ad4m";
 
 type Props<T extends SubjectEntity> = {
   perspective: PerspectiveProxy;
@@ -19,21 +19,32 @@ type Result<T extends SubjectEntity> = {
 };
 
 export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T> {
-  const { perspective, model, query = {}, preserveReferences = true, pageSize } = props;
+  const { perspective, model, query = {}, preserveReferences = false, pageSize } = props;
+  const [subjectEnsured, setSubjectEnsured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<T[]>([]);
   const [error, setError] = useState<string>("");
   const [pageNumber, setPageNumber] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  function preserveEnrtyReferences(oldEntries: T[], newEntries: T[]): T[] {
+  async function ensureSubject() {
+    if (typeof model !== "string") await perspective.ensureSDNASubjectClass(model);
+    setSubjectEnsured(true);
+  }
+
+  function preserveEntryReferences(oldEntries: T[], newEntries: T[]): T[] {
     // Merge new results into old results, preserving references for optimized rendering
     const existingMap = new Map(oldEntries.map((entry) => [entry.baseExpression, entry]));
     return newEntries.map((newEntry) => existingMap.get(newEntry.baseExpression) || newEntry);
   }
 
-  function subscribeCallback(newEntries: T[]) {
-    setEntries((oldEntries) => (preserveReferences ? preserveEnrtyReferences(oldEntries, newEntries) : newEntries));
+  function handleNewEntires(newEntries: T[]) {
+    setEntries((oldEntries) => (preserveReferences ? preserveEntryReferences(oldEntries, newEntries) : newEntries));
+  }
+
+  function paginateSubscribeCallback({ results: newEntries, totalCount }: PaginationResult<T>) {
+    handleNewEntires(newEntries);
+    setTotalCount(totalCount || 0);
   }
 
   async function subscribeToCollection() {
@@ -41,12 +52,13 @@ export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T
       const modelQuery = model.query(perspective, query);
       if (pageSize) {
         // handle paginated results
-        const { results, totalCount } = await modelQuery.paginateSubscribe(pageSize * pageNumber, 1, subscribeCallback);
+        const totalPageSize = pageSize * pageNumber;
+        const { results, totalCount } = await modelQuery.paginateSubscribe(totalPageSize, 1, paginateSubscribeCallback);
         setEntries(results);
-        setTotalCount(totalCount);
+        setTotalCount(totalCount || 0);
       } else {
         // handle non-paginated results
-        const results = await modelQuery.subscribe(subscribeCallback);
+        const results = await modelQuery.subscribe(handleNewEntires);
         setEntries(results);
       }
     } catch (err) {
@@ -65,8 +77,12 @@ export function useAd4mModel<T extends SubjectEntity>(props: Props<T>): Result<T
   }
 
   useEffect(() => {
-    subscribeToCollection();
-  }, [JSON.stringify(query), pageNumber]);
+    ensureSubject();
+  }, []);
+
+  useEffect(() => {
+    if (subjectEnsured) subscribeToCollection();
+  }, [subjectEnsured, JSON.stringify(query), pageNumber]);
 
   return useMemo(() => ({ entries, loading, error, totalCount, loadMore, setEntries }), [entries, loading, error]);
 }
