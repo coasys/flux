@@ -57,6 +57,7 @@ export default function PollCard(props: {
             users.push(...votes.map((v: any) => v.author));
             resolve({
               ...answer,
+              baseExpression: answer.baseExpression,
               totalVotes: votes.length,
               totalPoints: totalAnswerPoints,
               myPoints: previousVote?.score || 0,
@@ -101,9 +102,7 @@ export default function PollCard(props: {
     const votes = await Vote.findAll(perspective, { source: answerId });
     const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
     if (voteType === "single-choice") {
-      previousVote
-        ? await previousVote.delete()
-        : await removePreviousVotes().then(() => createVote(answerId, 100));
+      previousVote ? await previousVote.delete() : await removePreviousVotes().then(() => createVote(answerId, 100));
     } else if (voteType === "multiple-choice") {
       previousVote ? await previousVote.delete() : await createVote(answerId, 100);
     } else if (voteType === "weighted-choice") {

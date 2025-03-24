@@ -9,14 +9,13 @@ type Props = {
   perspective: any;
   source: string;
   myDid: string;
-  open: boolean;
-  setOpen: (state: boolean) => void;
+  close: () => void;
 };
 
 type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
 const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
 
-export default function PollView({ perspective, source, myDid, open, setOpen }: Props) {
+export default function PollView({ perspective, source, myDid, close }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
@@ -46,21 +45,6 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
     setAnswers(newAnswers);
   }
 
-  function toggleOpen(open: boolean) {
-    setOpen(open);
-    if (!open) {
-      // reset state
-      setTitle("");
-      setDescription("");
-      setAnswers([]);
-      setVoteType(voteTypes[0]);
-      setAnswersLocked(true);
-      setTitleError("");
-      setAnswersError("");
-      setLoading(false);
-    }
-  }
-
   async function createPoll() {
     setTitleError(title ? "" : "Required");
     const answersValid = !answersLocked || answers.length > 1;
@@ -74,19 +58,21 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
       newPoll.answersLocked = answersLocked;
       await newPoll.save();
 
-      Promise.all(answers.map((answer) => {
-        const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
-        newAnswer.text = answer.text;
-        return newAnswer.save();
-      }))
-        .then(() => toggleOpen(false))
+      Promise.all(
+        answers.map((answer) => {
+          const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
+          newAnswer.text = answer.text;
+          return newAnswer.save();
+        })
+      )
+        .then(() => close())
         .catch(console.log);
     }
   }
 
   return (
     // @ts-ignore
-    <j-modal open={open} onToggle={(e) => toggleOpen(e.target.open)}>
+    <j-modal open onToggle={(e) => !e.target.open && close()}>
       <j-box m="700">
         <j-flex direction="column" gap="600" a="center">
           <j-text variant="heading-lg">New poll</j-text>

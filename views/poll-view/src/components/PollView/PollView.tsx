@@ -2,6 +2,8 @@ import { AgentClient } from "@coasys/ad4m";
 import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { useEffect, useState } from "preact/hooks";
 import Poll from "../../models/Poll";
+import Answer from "../../models/Answer";
+import Vote from "../../models/Vote";
 import NewPollModal from "../NewPollModal";
 import PollCard from "../PollCard";
 
@@ -21,8 +23,24 @@ export default function PollView({ perspective, source, agent }: Props) {
     await poll.delete();
   }
 
+  async function ensureSDNAClasses() {
+    // Ensure all SDNA classes are loaded into the perspective
+    await Promise.all([
+      perspective.ensureSDNASubjectClass(Poll),
+      perspective.ensureSDNASubjectClass(Answer),
+      perspective.ensureSDNASubjectClass(Vote),
+    ]);
+  }
+
+  async function getMyDid() {
+    // Store user DID for use throughout the view
+    const me = await agent.me();
+    setMyDid(me.did);
+  }
+
   useEffect(() => {
-    agent.me().then((data) => setMyDid(data.did));
+    ensureSDNAClasses();
+    getMyDid();
   }, []);
 
   return (
@@ -35,11 +53,19 @@ export default function PollView({ perspective, source, agent }: Props) {
         New Poll
       </j-button>
 
-      <NewPollModal perspective={perspective} source={source} myDid={myDid} open={modalOpen} setOpen={setModalOpen} />
+      {modalOpen && (
+        <NewPollModal perspective={perspective} source={source} myDid={myDid} close={() => setModalOpen(false)} />
+      )}
 
       <j-flex gap="500" direction="column">
         {polls.map((poll) => (
-          <PollCard key={poll.baseExpression} perspective={perspective} myDid={myDid} poll={poll} deletePoll={deletePoll} />
+          <PollCard
+            key={poll.baseExpression}
+            perspective={perspective}
+            myDid={myDid}
+            poll={poll}
+            deletePoll={deletePoll}
+          />
         ))}
       </j-flex>
     </j-flex>
