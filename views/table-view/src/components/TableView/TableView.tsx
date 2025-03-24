@@ -11,7 +11,7 @@ import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
@@ -39,7 +39,7 @@ export default function TableView({
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
 
-  const { entries } = useSubjects({ perspective, source, subject: selected });
+  const { entries } = useAd4mModel({ perspective, model: selected, query: { source } });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);
