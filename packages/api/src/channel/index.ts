@@ -1,27 +1,27 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { SubjectProperty, SubjectCollection, SDNAClass, SubjectFlag, SubjectEntity, Literal } from "@coasys/ad4m";
+import { Property, Collection, ModelOptions, Flag, Ad4mModel, Literal } from "@coasys/ad4m";
 import { SynergyItem, SynergyGroup, icons } from "@coasys/flux-utils";
 import App from "../app";
 
 const { FLUX_APP, NAME, ENTRY_TYPE } = community;
 
-@SDNAClass({ name: "Channel" })
-export class Channel extends SubjectEntity {
-  @SubjectFlag({
+@ModelOptions({ name: "Channel" })
+export class Channel extends Ad4mModel {
+  @Flag({
     through: ENTRY_TYPE,
     value: EntryType.Channel,
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @SubjectCollection({
+  @Collection({
     through: "ad4m://has_child",
     where: {
       isInstance: App,

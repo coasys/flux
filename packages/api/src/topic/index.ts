@@ -1,4 +1,4 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
 import { SynergyMatch } from "@coasys/flux-utils";
 
 export class TopicWithRelevance {
@@ -7,15 +7,15 @@ export class TopicWithRelevance {
   relevance: number;
 }
 
-@SDNAClass({ name: "Topic" })
-export default class Topic extends SubjectEntity {
-  @SubjectFlag({
+@ModelOptions({ name: "Topic" })
+export default class Topic extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://has_topic",
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://topic",
     writable: true,
   })

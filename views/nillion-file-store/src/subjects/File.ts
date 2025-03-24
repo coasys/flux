@@ -1,38 +1,38 @@
-import { SDNAClass, SubjectProperty, SubjectFlag, SubjectEntity } from "@coasys/ad4m";
+import { ModelOptions, Property, Flag, Ad4mModel } from "@coasys/ad4m";
 
-@SDNAClass({
+@ModelOptions({
   name: "NillionFile",
 })
-export default class File extends SubjectEntity {
-  @SubjectFlag({
+export default class File extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     writable: true,
     value: "flux://has_file",
   })
   type: String;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://secretId",
     writable: true,
     resolveLanguage: "literal",
   })
   secretId: String;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://fileSize",
     writable: true,
     resolveLanguage: "literal",
   })
   size: String;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://storeId",
     writable: true,
     resolveLanguage: "literal",
   })
   storeId: String;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://file_name",
     writable: true,
     resolveLanguage: "literal",

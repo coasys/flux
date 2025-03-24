@@ -1,55 +1,48 @@
 import { community, languages } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import {
-  SDNAClass,
-  SubjectProperty,
-  SubjectCollection,
-  SubjectFlag,
-  SubjectEntity
-} from "@coasys/ad4m";
+import { ModelOptions, Property, Collection, Flag, Ad4mModel } from "@coasys/ad4m";
 import Message from "../message";
 
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;
 
-@SDNAClass({
+@ModelOptions({
   name: "Post",
 })
-export class Post extends SubjectEntity {
-  @SubjectFlag({
+export class Post extends Ad4mModel {
+  @Flag({
     through: ENTRY_TYPE,
     value: EntryType.Post,
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: TITLE,
     writable: true,
     resolveLanguage: "literal",
   })
   title: string;
 
-  @SubjectProperty({
+  @Property({
     through: BODY,
     writable: true,
     resolveLanguage: "literal",
   })
   body: string;
 
-  @SubjectProperty({
+  @Property({
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     // @ts-ignore
-    transform: (data) =>
-      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
+    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
   image: string;
 
-  @SubjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
+  @Property({ through: URL, writable: true, resolveLanguage: "literal" })
   url: string;
 
-  @SubjectCollection({
+  @Collection({
     through: "ad4m://has_child",
     where: {
       isInstance: Message,

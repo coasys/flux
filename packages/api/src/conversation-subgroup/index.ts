@@ -1,20 +1,20 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Property, LinkQuery, Literal } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
 import Conversation from "../conversation";
 import { SynergyTopic, SynergyItem, icons } from "@coasys/flux-utils";
 
-@SDNAClass({
+@ModelOptions({
   name: "ConversationSubgroup",
 })
-export default class ConversationSubgroup extends SubjectEntity {
-  @SubjectFlag({
+export default class ConversationSubgroup extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://conversation_subgroup",
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
@@ -22,7 +22,7 @@ export default class ConversationSubgroup extends SubjectEntity {
   })
   subgroupName: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",
@@ -159,22 +159,22 @@ export default class ConversationSubgroup extends SubjectEntity {
     }
   }
 
-  async parentConversation(): Promise<Conversation> {
-    const allConversations = (await Conversation.all(this.perspective)) as Conversation[];
-    const parentLinks = await this.perspective.get(
-      new LinkQuery({ predicate: "ad4m://has_child", target: this.baseExpression })
-    );
-    const parentConversation = allConversations.find((c) =>
-      parentLinks.find((p) => p.data.source === c.baseExpression)
-    );
-    return parentConversation;
-  }
+  // async parentConversation(): Promise<Conversation> {
+  //   const allConversations = (await Conversation.all(this.perspective)) as Conversation[];
+  //   const parentLinks = await this.perspective.get(
+  //     new LinkQuery({ predicate: "ad4m://has_child", target: this.baseExpression })
+  //   );
+  //   const parentConversation = allConversations.find((c) =>
+  //     parentLinks.find((p) => p.data.source === c.baseExpression)
+  //   );
+  //   return parentConversation;
+  // }
 
-  async semanticRelationships(): Promise<SemanticRelationship[]> {
-    return (await SemanticRelationship.query(this.perspective, {
-      where: { expression: this.baseExpression },
-    })) as SemanticRelationship[];
-  }
+  // async semanticRelationships(): Promise<SemanticRelationship[]> {
+  //   return (await SemanticRelationship.query(this.perspective, {
+  //     where: { expression: this.baseExpression },
+  //   })) as SemanticRelationship[];
+  // }
 
   // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {

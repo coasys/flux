@@ -1,32 +1,27 @@
 import { community } from "@coasys/flux-constants";
-import {
-  SubjectProperty,
-  SubjectCollection,
-  SDNAClass,
-  SubjectEntity
-} from "@coasys/ad4m";
+import { Property, Collection, ModelOptions, Ad4mModel } from "@coasys/ad4m";
 
 const { NAME } = community;
 
-@SDNAClass({
+@ModelOptions({
   name: "List",
 })
-export class List extends SubjectEntity {
-  @SubjectProperty({
+export class List extends Ad4mModel {
+  @Property({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @SubjectProperty({
+  @Property({
     through: "rdf://order",
     writable: true,
     resolveLanguage: "literal",
   })
   order: string;
 
-  @SubjectCollection({
+  @Collection({
     through: "ad4m://has_child",
     where: {
       condition: `instance(_, Target)`,

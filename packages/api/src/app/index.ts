@@ -1,41 +1,41 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { SubjectProperty, SDNAClass, SubjectFlag, SubjectEntity } from "@coasys/ad4m";
+import { Property, ModelOptions, Flag, Ad4mModel } from "@coasys/ad4m";
 
 const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
 
-@SDNAClass({
+@ModelOptions({
   name: "App",
 })
-export class App extends SubjectEntity {
-  @SubjectFlag({
+export class App extends Ad4mModel {
+  @Flag({
     through: ENTRY_TYPE,
     value: EntryType.App,
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @SubjectProperty({
+  @Property({
     through: DESCRIPTION,
     writable: true,
     resolveLanguage: "literal",
   })
   description: string;
 
-  @SubjectProperty({
+  @Property({
     through: "rdf://icon",
     writable: true,
     resolveLanguage: "literal",
   })
   icon: string;
 
-  @SubjectProperty({
+  @Property({
     through: "rdf://pkg",
     writable: true,
     resolveLanguage: "literal",

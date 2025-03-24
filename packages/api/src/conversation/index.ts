@@ -1,20 +1,20 @@
-import { Link, SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
+import { Link, ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
 import { SynergyTopic, SynergyGroup } from "@coasys/flux-utils";
 
-@SDNAClass({
+@ModelOptions({
   name: "Conversation",
 })
-export default class Conversation extends SubjectEntity {
-  @SubjectFlag({
+export default class Conversation extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://conversation",
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
@@ -22,7 +22,7 @@ export default class Conversation extends SubjectEntity {
   })
   conversationName: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",

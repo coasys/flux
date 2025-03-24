@@ -1,4 +1,4 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
 import { SynergyMatch } from "@coasys/flux-utils";
 
 const CHANNEL_FROM_ITEM = `
@@ -24,28 +24,28 @@ const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
   property_getter(E, EmbeddingId, "embedding", Embedding)
 `;
 
-@SDNAClass({ name: "SemanticRelationship" })
-export default class SemanticRelationship extends SubjectEntity {
-  @SubjectFlag({
+@ModelOptions({ name: "SemanticRelationship" })
+export default class SemanticRelationship extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://has_semantic_relationship",
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_expression",
     writable: true,
   })
   expression: string; // base url of expression
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_tag",
     writable: true,
     required: false,
   })
   tag: string; // base url of semantic tag
 
-  @SubjectProperty({
+  @Property({
     through: "flux://has_relevance",
     writable: true,
     resolveLanguage: "literal",

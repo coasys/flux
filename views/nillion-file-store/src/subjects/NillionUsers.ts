@@ -1,17 +1,17 @@
-import { SDNAClass, SubjectProperty, SubjectFlag, SubjectEntity } from "@coasys/ad4m";
+import { ModelOptions, Property, Flag, Ad4mModel } from "@coasys/ad4m";
 
-@SDNAClass({
+@ModelOptions({
   name: "NillionUserUser",
 })
-export default class NillionUser extends SubjectEntity {
-  @SubjectFlag({
+export default class NillionUser extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     writable: true,
     value: "flux://nillion_user",
   })
   type: String;
 
-  @SubjectProperty({
+  @Property({
     through: "flux://nillion_user_id",
     writable: true,
     resolveLanguage: "literal",
