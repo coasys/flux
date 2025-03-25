@@ -42,7 +42,7 @@ function Main({
             perspective={perspective}
             source={source}
             id={UIState.currentPost}
-          ></Post>
+          />
         )
       );
   }

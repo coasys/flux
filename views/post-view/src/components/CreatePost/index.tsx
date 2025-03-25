@@ -1,10 +1,10 @@
-import { Post as PostSubject, SubjectRepository } from "@coasys/flux-api";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../FileUpload";
 import PostImagePreview from "../PostImagePreview";
 import styles from "./index.module.css";
+import { Post } from "@coasys/flux-api";
 
 const initialState = {
   title: null,
@@ -28,15 +28,22 @@ export default function CreatePost({
   const [isLoading, setIsLoading] = useState(!!postId);
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
-  const [initState, setInitState] = useState(initialState);
   const isEditing = !!postId;
 
-  const Post = useMemo(() => {
-    return new SubjectRepository(PostSubject, {
-      perspective: perspective,
-      source: source,
+  async function getPost() {
+    const entry = await new Post(perspective, postId, source).get();
+    setState({
+      title: entry.title || undefined,
+      body: entry.body || undefined,
+      url: entry.url || undefined,
+      image: entry.image || undefined,
     });
-  }, [perspective.uuid, source]);
+    setIsLoading(false);
+
+    // FIX - Better post type detection
+    if (entry?.image) setEntryType(PostOption.Image);
+    if (entry?.url) setEntryType(PostOption.Link);
+  }
 
   useEffect(() => {
     setTimeout(() => {
@@ -46,26 +53,7 @@ export default function CreatePost({
 
   // Fetch post if editing
   useEffect(() => {
-    if (postId) {
-      Post.getData(postId).then((entry) => {
-        setState({
-          title: entry.title || undefined,
-          body: entry.body || undefined,
-          url: entry.url || undefined,
-          image: entry.image || undefined,
-        });
-        setInitState(entry);
-        setIsLoading(false);
-
-        // FIX - Better post type detection
-        if (entry?.image) {
-          setEntryType(PostOption.Image);
-        }
-        if (entry?.url) {
-          setEntryType(PostOption.Link);
-        }
-      });
-    }
+    if (postId) getPost()
   }, [postId]);
 
   // We set dynamic refs based on the input name
@@ -96,20 +84,16 @@ export default function CreatePost({
 
     let data = state;
 
-    let newPost = undefined;
-
     try {
-      if (isEditing) {
-        await Post.update(postId, {
-          ...data,
-          // if we send in null the property does not get updated
-          image: imageReplaced ? data.image : undefined,
-        });
-      } else {
-        newPost = await Post.create(data);
-      }
+      const post = new Post(perspective, isEditing ? postId : undefined, source);
+      post.title = data.title;
+      post.body = data.body;
+      post.url = data.url;
+      post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
+      if (isEditing) await post.update();
+      else await post.save()
 
-      onPublished(isEditing ? postId : newPost?.id);
+      onPublished(isEditing ? postId : post?.baseExpression);
     } catch (e) {
       console.log(e);
     } finally {
@@ -207,7 +191,7 @@ export default function CreatePost({
                   value={state.url}
                   required
                   type="url"
-                ></j-input>
+                />
               </j-box>
             )}
             {showImage && (
@@ -219,7 +203,7 @@ export default function CreatePost({
                     onRemove={() => setState({ ...state, image: undefined })}
                   />
                 ) : (
-                  <FileUpload onChange={handleImage}></FileUpload>
+                  <FileUpload onChange={handleImage} />
                 )}
               </j-box>
             )}
@@ -230,7 +214,7 @@ export default function CreatePost({
                 source={source}
                 className={styles.editor}
                 onChange={onEditorChange}
-              ></flux-editor>
+              />
             )}
           </j-flex>
         </j-box>
@@ -241,7 +225,7 @@ export default function CreatePost({
             </j-button>
             <j-button
               loading={isCreating}
-              disabled={isCreating || isLoading}
+              disabled={isCreating || isLoading || !state.title}
               onClick={() => publish()}
               size="lg"
               variant="primary"
