@@ -109,13 +109,7 @@ export default class Conversation extends Ad4mModel {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    const subgroups = (await ConversationSubgroup.query(this.perspective, {
-      source: this.baseExpression,
-    })) as ConversationSubgroup[];
-    // sort by timestamp
-    return subgroups.sort((a, b) => {
-      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    });
+    return await ConversationSubgroup.findAll(this.perspective, { where: { source: this.baseExpression } })
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {

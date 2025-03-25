@@ -93,9 +93,9 @@ export default class Topic extends Ad4mModel {
   }
 
   static async byName(perspective, topicName: string): Promise<Topic> {
-    const topicMatches = (await Topic.query(perspective, {
-      where: { topic: Literal.from(topicName).toUrl() },
-    })) as Topic[];
+    const topicMatches = await Topic.findAll(perspective, {
+      where: { topic: topicName },
+    });
     if (topicMatches[0]) return topicMatches[0];
 
     const newTopic = new Topic(perspective);

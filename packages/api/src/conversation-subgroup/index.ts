@@ -159,23 +159,6 @@ export default class ConversationSubgroup extends Ad4mModel {
     }
   }
 
-  // async parentConversation(): Promise<Conversation> {
-  //   const allConversations = (await Conversation.all(this.perspective)) as Conversation[];
-  //   const parentLinks = await this.perspective.get(
-  //     new LinkQuery({ predicate: "ad4m://has_child", target: this.baseExpression })
-  //   );
-  //   const parentConversation = allConversations.find((c) =>
-  //     parentLinks.find((p) => p.data.source === c.baseExpression)
-  //   );
-  //   return parentConversation;
-  // }
-
-  // async semanticRelationships(): Promise<SemanticRelationship[]> {
-  //   return (await SemanticRelationship.query(this.perspective, {
-  //     where: { expression: this.baseExpression },
-  //   })) as SemanticRelationship[];
-  // }
-
   // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
     const result = await this.perspective.infer(`
@@ -216,7 +199,7 @@ export default class ConversationSubgroup extends Ad4mModel {
     const existingTopicRelationship = isNewGroup
       ? null
       : ((
-          await SemanticRelationship.query(this.perspective, {
+          await SemanticRelationship.findAll(this.perspective, {
             where: { expression: this.baseExpression, tag: topic.baseExpression },
           })
         )[0] as SemanticRelationship);

@@ -76,9 +76,8 @@ export function detectBrowser(): string {
 
 export async function getAllTopics(perspective: PerspectiveProxy) {
   // gather up all existing topics in the neighbourhood
-  return (await Topic.query(perspective)).map((topic: any) => {
-    return { baseExpression: topic.baseExpression, name: Literal.fromUrl(topic.topic).get() };
-  });
+  const allTopics = await Topic.findAll(perspective);
+  return allTopics.map((topic: any) => ({ baseExpression: topic.baseExpression, name: topic.topic }));
 }
 
 export async function getDefaultLLM() {
