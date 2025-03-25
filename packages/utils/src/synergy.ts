@@ -329,12 +329,15 @@ export async function runProcessingCheck(
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
+  console.log('runProcessingCheck')
+
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
 
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
+    console.log('I am responsible for processing')
     const client = await getAd4mClient();
     const me = await client.agent.me();
     const numberOfItemsToProcess = Math.min(maxItemsToProcess, unprocessedItems.length - numberOfItemsDelay);

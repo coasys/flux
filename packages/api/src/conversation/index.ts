@@ -242,6 +242,12 @@ export default class Conversation extends Ad4mModel {
       this.perspective.ai
     );
 
+    console.log("currentNewTopics", currentNewTopics);
+
+    // for each new topic:
+    // + search all topics for match (could do one search with all new topics before this loop and then check results to find matches)
+    // + if not isNewGroup, search for SemanticRelationships connecting topic to group (could be skipped if newely created topic)
+    // + if SemanticRelationship found, update relevance, otherwise create new SemanticRelationship
     await Promise.all(currentNewTopics.map((topic) => group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup)));
   }
 
@@ -254,10 +260,17 @@ export default class Conversation extends Ad4mModel {
   }
 
   async processNewExpressions(unprocessedItems) {
+    const startProcessing = new Date().getTime();
+
     const subgroups = await this.subgroups();
     const currentSubgroup: ConversationSubgroup | null = subgroups.length ? subgroups[subgroups.length - 1] : null;
 
+    function duration(start, end) {
+      return `${(end - start) / 1000} secs`;
+    }
+
     // ============== LLM group detection ===============================
+    const startGroupTask = new Date().getTime();
     // Have LLM sort new messages into old group or detect subject change
     let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
 
@@ -309,12 +322,21 @@ export default class Conversation extends Ad4mModel {
       });
     }
 
+    const endGroupTask = new Date().getTime();
+    console.log(`============== 1: LLM group detection complete! (${duration(startGroupTask, endGroupTask)}) ==============`);
+
     // ============== LLM topic list updating ===============================
+    const startTopicTask = new Date().getTime();
     // Get update topic lists from LLM and save results
     if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages);
     if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
 
+    const endTopicTask = new Date().getTime();
+    console.log(`============== 2: LLM topic list updating complete! (${duration(startTopicTask, endTopicTask)}) ==============`);
+
     // ============== LLM conversation updating ===============================
+
+    const startConversationTask = new Date().getTime();
     // Gather list of all sub-group name and info as it is now after this processing
 
     // update current group info in the array
@@ -325,9 +347,7 @@ export default class Conversation extends Ad4mModel {
     }
 
     // create array with property names for the prompt
-    const promptArray = subgroups.map((g) => {
-      return { n: g.subgroupName, s: g.summary };
-    });
+    const promptArray = subgroups.map((g) => ({ n: g.subgroupName, s: g.summary }));
 
     // Add new group if one was detected
     if (detectResult.newGroup) promptArray.push({ n: detectResult.newGroup.n, s: detectResult.newGroup.s });
@@ -335,29 +355,49 @@ export default class Conversation extends Ad4mModel {
     const { conversation } = await ensureLLMTasks(this.perspective.ai);
     let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray, this.perspective.ai);
 
+    const endConversationTask = new Date().getTime();
+    console.log(`============== 3: LLM conversation updating complete! (${duration(startConversationTask, endConversationTask)}) ==============`);
+
     // ------------ saving all new data ------------------
 
     // Save conversation info
+    const start1 = new Date().getTime();
     this.conversationName = newConversationInfo.n;
     this.summary = newConversationInfo.s;
     await this.update();
+    const end1 = new Date().getTime();
+    console.log('Conversation info updated: ', duration(start1, end1));
 
     // Save current group
-    if (currentSubgroup) await currentSubgroup.update();
+    if (currentSubgroup) {
+      console.log('Current subgroup updating:', currentSubgroup);
+      const start2 = new Date().getTime();
+      await currentSubgroup.update();
+      const end2 = new Date().getTime();
+      console.log('Current subgroup info updated: ', duration(start2, end2));
+    }
 
     // create vector embeddings for each unprocessed item
+    console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
+    const start3 = new Date().getTime();
     await Promise.all(
-      unprocessedItems.map((item) =>
-        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai)
+      unprocessedItems.map((item, index) =>
+        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, index + 1)
       )
     );
+    const end3 = new Date().getTime();
+    console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
 
     // update vector embedding for conversation
+    const start4 = new Date().getTime();
     await removeEmbedding(this.perspective, this.baseExpression);
     await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai);
+    const end4 = new Date().getTime();
+    console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
+      const start5 = new Date().getTime();
       await removeEmbedding(this.perspective, currentSubgroup.baseExpression);
       await createEmbedding(
         this.perspective,
@@ -365,19 +405,31 @@ export default class Conversation extends Ad4mModel {
         currentSubgroup.baseExpression,
         this.perspective.ai
       );
+      const end5 = new Date().getTime();
+      console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
     }
     // create vector embedding for new subgroup if returned from LLM
     if (newSubgroupEntity) {
+      const start6 = new Date().getTime();
       await createEmbedding(
         this.perspective,
         newSubgroupEntity.summary,
         newSubgroupEntity.baseExpression,
         this.perspective.ai
       );
+      const end6 = new Date().getTime();
+      console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
     }
 
     // batch commit all new links (currently only "ad4m://has_child" links)
     // i.e. sorting messages into current and/or new sub-group
+    const start7 = new Date().getTime();
     await this.perspective.addLinks(newLinks);
+    const end7 = new Date().getTime();
+    console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
+
+    const endProcessing = new Date().getTime();
+
+    console.log(`============== All processing complete in ${duration(startProcessing, endProcessing)}! ==============`);
   }
 }

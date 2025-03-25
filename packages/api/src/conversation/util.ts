@@ -23,25 +23,40 @@ async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
 export async function removeEmbedding(perspective, itemId): Promise<void> {
   const embeddingSRId = await findEmbeddingSRId(perspective, itemId);
   if (embeddingSRId) {
-    const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId).get();
-    const embedding = await new Embedding(perspective, semanticRelationship.tag).get();
+    console.log('embeddingSRId found:', embeddingSRId);
+    const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId);
+    const { tag } = await semanticRelationship.get();
+    const embedding = new Embedding(perspective, tag);
     await embedding.delete();
     await semanticRelationship.delete();
   }
 }
 
+function duration(start, end) {
+  return `${(end - start) / 1000} secs`;
+}
+
 // todo: use embedding language instead of stringifying
-export async function createEmbedding(perspective, text, itemId, ai: AIClient): Promise<void> {
+export async function createEmbedding(perspective, text, itemId, ai: AIClient, index?: number): Promise<void> {
   // generate embedding
+  const start1 = new Date().getTime();
   const rawEmbedding = await ai.embed("bert", text);
+  const end1 = new Date().getTime();
+  console.log(`${index ? `Item ${index} e` : "E"}mbedding created in ${duration(start1, end1)}`);
   // create embedding subject entity
+  const start2 = new Date().getTime();
   const embedding = new Embedding(perspective, undefined, itemId);
   embedding.model = "bert";
   embedding.embedding = JSON.stringify(rawEmbedding);
   await embedding.save();
+  const end2 = new Date().getTime();
+  console.log(`${index ? `Item ${index} e` : "E"}mbedding saved in ${duration(start2, end2)}`);
   // create semantic relationship subject entity
+  const start3 = new Date().getTime();
   const relationship = new SemanticRelationship(perspective, undefined, itemId);
   relationship.expression = itemId;
   relationship.tag = embedding.baseExpression;
   await relationship.save();
+  const end3 = new Date().getTime();
+  console.log(`${index ? `Item ${index}` : ""} SR saved in ${duration(start3, end3)}`);
 }

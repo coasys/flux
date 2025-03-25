@@ -196,6 +196,7 @@ export default class ConversationSubgroup extends Ad4mModel {
 
   async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
     const topic = await Topic.byName(this.perspective, topicName);
+    console.log('returned topic:', topic);
     const existingTopicRelationship = isNewGroup
       ? null
       : ((
@@ -203,6 +204,7 @@ export default class ConversationSubgroup extends Ad4mModel {
             where: { expression: this.baseExpression, tag: topic.baseExpression },
           })
         )[0] as SemanticRelationship);
+    console.log('existing topic relationship:', existingTopicRelationship);
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
       await existingTopicRelationship.update();
