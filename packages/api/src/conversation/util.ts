@@ -1,6 +1,8 @@
 import { AIClient } from "@coasys/ad4m";
 import Embedding from "../embedding";
 import SemanticRelationship from "../semantic-relationship";
+import { languages } from "@coasys/flux-constants";
+const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 
 async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
   const result = await perspective.infer(`
@@ -47,7 +49,9 @@ export async function createEmbedding(perspective, text, itemId, ai: AIClient, i
   const start2 = new Date().getTime();
   const embedding = new Embedding(perspective, undefined, itemId);
   embedding.model = "bert";
-  embedding.embedding = JSON.stringify(rawEmbedding);
+  const embeddingExpression = await perspective.createExpression(rawEmbedding, EMBEDDING_VECTOR_LANGUAGE);
+  console.log(`embeddingExpression for item ${index}:`, embeddingExpression);
+  embedding.embedding = embeddingExpression;
   await embedding.save();
   const end2 = new Date().getTime();
   console.log(`${index ? `Item ${index} e` : "E"}mbedding saved in ${duration(start2, end2)}`);
