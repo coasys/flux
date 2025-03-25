@@ -1,6 +1,6 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { ModelOptions, Property, Collection, Flag, Ad4mModel } from "@coasys/ad4m";
+import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel } from "@coasys/ad4m";
 
 const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
 
@@ -26,12 +26,12 @@ export class Message extends Ad4mModel {
   })
   reactions: string[] = [];
 
-  @Property({
+  @Optional({
     getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
   })
   replyingTo: string | undefined = "";
 
-  @Property({
+  @Optional({
     getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
     (length(List, Length), Length > 5 -> Value = true ; Value = false)`,
   })

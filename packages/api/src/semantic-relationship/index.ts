@@ -1,4 +1,4 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Property, Literal, Optional } from "@coasys/ad4m";
 import { SynergyMatch } from "@coasys/flux-utils";
 
 const CHANNEL_FROM_ITEM = `
@@ -38,14 +38,13 @@ export default class SemanticRelationship extends Ad4mModel {
   })
   expression: string; // base url of expression
 
-  @Property({
+  @Optional({
     through: "flux://has_tag",
     writable: true,
-    required: false,
   })
   tag: string; // base url of semantic tag
 
-  @Property({
+  @Optional({
     through: "flux://has_relevance",
     writable: true,
     resolveLanguage: "literal",

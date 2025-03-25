@@ -38,7 +38,7 @@ export class Community extends Ad4mModel {
   image: string;
 
   // @ts-ignore
-  @Property({
+  @Optional({
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
