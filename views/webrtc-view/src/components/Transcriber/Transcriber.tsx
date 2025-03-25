@@ -75,7 +75,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // save message
       const newMessage = new Message(perspective, undefined, source);
       newMessage.body = text;
-      await newMessage.create();
+      await newMessage.save();
     } else {
       if (transcriptCard) {
         transcriptCard.classList.add(styles.slideRight);
