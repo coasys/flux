@@ -4,7 +4,7 @@ import { community, languages } from "@coasys/flux-constants";
 const { FILE_STORAGE_LANGUAGE } = languages;
 const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
 
-import { ModelOptions, Property, Collection, Flag, Ad4mModel } from "@coasys/ad4m";
+import { ModelOptions, Property, Collection, Flag, Ad4mModel, Optional } from "@coasys/ad4m";
 import Channel from "../channel";
 
 @ModelOptions({
@@ -29,7 +29,7 @@ export class Community extends Ad4mModel {
   description: string;
 
   // @ts-ignore
-  @Property({
+  @Optional({
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
