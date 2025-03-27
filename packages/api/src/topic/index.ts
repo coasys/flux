@@ -91,21 +91,4 @@ export default class Topic extends Ad4mModel {
       return [];
     }
   }
-
-  static async byName(perspective, topicName: string): Promise<Topic> {
-    const topicMatches = await Topic.findAll(perspective, {
-      where: { topic: topicName },
-    });
-    if (topicMatches[0]) {
-      console.log("Found existing topic:", topicMatches[0]);
-      return topicMatches[0];
-    }
-
-    console.log("Creating new topic:", topicName);
-    const newTopic = new Topic(perspective);
-    newTopic.topic = Literal.from(topicName).toUrl();
-    await newTopic.save();
-    console.log("New topic created:", await newTopic.get());
-    return await newTopic.get();
-  }
 }

@@ -3,6 +3,7 @@ import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
 import { SynergyTopic, SynergyGroup } from "@coasys/flux-utils";
+import { Topic } from "@coasys/flux-api";
 
 @ModelOptions({
   name: "Conversation",
@@ -234,21 +235,19 @@ export default class Conversation extends Ad4mModel {
     let currentNewTopics = await LLMTaskWithExpectedOutputs(
       topics,
       {
-        topics: currentTopics.map((t) => {
-          return { n: t.name, rel: t.relevance };
-        }),
+        topics: currentTopics.map((t) => ({ n: t.name, rel: t.relevance })),
         messages: newMessages,
       },
       this.perspective.ai
     );
 
-    console.log("currentNewTopics", currentNewTopics);
-
-    // for each new topic:
-    // + search all topics for match (could do one search with all new topics before this loop and then check results to find matches)
-    // + if not isNewGroup, search for SemanticRelationships connecting topic to group (could be skipped if newely created topic)
-    // + if SemanticRelationship found, update relevance, otherwise create new SemanticRelationship
-    await Promise.all(currentNewTopics.map((topic) => group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup)));
+    const topicMatches = await Topic.findAll(this.perspective, {
+      where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl())},
+    });
+    await Promise.all(currentNewTopics.map((topic) => {
+      const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
+      group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic)
+    }));
   }
 
   private async createNewGroup(newGroup: { n: string; s: string }) {
