@@ -87,11 +87,6 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  // Update the entries array when new messages are created
-  useEffect(() => {
-    if (newMessage) setEntries((prevEntries) => [newMessage, ...prevEntries]);
-  }, [newMessage]);
-
   return (
     <div className={styles.messageList}>
       {showButton && (
