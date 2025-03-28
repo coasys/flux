@@ -269,6 +269,13 @@ export default class Conversation extends Ad4mModel {
       return `${(end - start) / 1000} secs`;
     }
 
+    unprocessedItems = unprocessedItems.map((item) => {
+      if(!item.text) {
+        item.text = ""
+      }
+      return item
+    })
+
     // ============== LLM group detection ===============================
     const startGroupTask = new Date().getTime();
     // Have LLM sort new messages into old group or detect subject change
