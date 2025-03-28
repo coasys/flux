@@ -194,9 +194,15 @@ export default class ConversationSubgroup extends Ad4mModel {
     );
   }
 
-  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
-    const topic = await Topic.byName(this.perspective, topicName);
-    console.log('returned topic:', topic);
+  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean, existingTopic: Topic | null = null) {
+    let topic = existingTopic;
+    if (!topic) {
+      console.log('create new topic for:', topicName);
+      const newTopic = new Topic(this.perspective);
+      newTopic.topic = Literal.from(topicName).toUrl();
+      await newTopic.save();
+      topic = await newTopic.get();
+    }
     const existingTopicRelationship = isNewGroup
       ? null
       : ((
@@ -204,7 +210,6 @@ export default class ConversationSubgroup extends Ad4mModel {
             where: { expression: this.baseExpression, tag: topic.baseExpression },
           })
         )[0] as SemanticRelationship);
-    console.log('existing topic relationship:', existingTopicRelationship);
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
       await existingTopicRelationship.update();

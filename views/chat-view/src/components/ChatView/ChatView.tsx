@@ -64,10 +64,6 @@ export default function ChatView({
       message.body = html;
       await message.save();
 
-      // Pass the new message to the MessageList component and then reset the state
-      setNewMessage(message);
-      setTimeout(() => setNewMessage(null), 100);
-
       if (replyMessage) {
         perspective.addLinks([
           {
