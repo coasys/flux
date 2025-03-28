@@ -204,7 +204,8 @@ export default class Conversation extends Ad4mModel {
       {
         group: inputGroup,
         unprocessedItems: unprocessedItems.map((item, index) => {
-          return { id: index, text: item.text.replace(/<[^>]*>/g, "") };
+          const text = item.text?.replace(/<[^>]*>/g, "") || "undefined"
+          return { id: index, text };
         }),
       },
       this.perspective.ai
