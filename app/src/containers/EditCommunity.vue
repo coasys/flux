@@ -45,7 +45,8 @@ import {
   getImage,
   resizeImage,
 } from "@coasys/flux-utils";
-import { useSubject, usePerspective } from "@coasys/ad4m-vue-hooks";
+import { usePerspective } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community } from "@coasys/flux-api";
 
@@ -56,15 +57,16 @@ export default defineComponent({
   async setup(props) {
     const client = getAd4mClient;
     const { data } = usePerspective(client, () => props.communityId);
-    const { entry: community, repo } = useSubject({
+
+    const { entries: communities } = useAd4mModel({
       perspective: () => data.value.perspective,
-      id: "ad4m://self",
-      subject: Community,
+      model: Community,
+      query: { where: { base: "ad4m://self" } },
     });
 
     return {
-      repo,
-      community,
+      perspective: data.value.perspective,
+      community: communities.value[0],
     };
   },
   data() {
@@ -100,17 +102,17 @@ export default defineComponent({
           );
         }
 
-        await this.repo?.update(this.community?.id, {
-          name: this.communityName || undefined,
-          description: this.communityDescription || undefined,
-          image: compressedImage
-            ? {
-                data_base64: compressedImage,
-                name: "form-image",
-                file_type: "image/png",
-              }
-            : undefined,
-        });
+        const community = new Community(this.perspective!, this.community.baseExpression);
+        community.name = this.communityName;
+        community.description = this.communityDescription;
+        community.image = compressedImage
+          ? {
+              data_base64: compressedImage,
+              name: "form-image",
+              file_type: "image/png",
+            }
+          : undefined,
+        await community.update();
       } catch (e) {
         console.log(e);
       } finally {

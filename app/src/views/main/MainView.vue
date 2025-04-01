@@ -197,10 +197,10 @@ import {
   PerspectiveProxy,
 } from "@coasys/ad4m";
 import {
-  useSubject,
   usePerspective,
   usePerspectives,
 } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
@@ -218,9 +218,9 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useSubject({
+    const { entries: communities } = useAd4mModel({
       perspective: () => data.value.perspective,
-      subject: Community,
+      model: Community,
     });
 
     setTimeout(async () => {
@@ -236,7 +236,7 @@ export default defineComponent({
 
     return {
       client,
-      activeCommunity: community,
+      activeCommunity: communities.value[0],
       onLinkAdded,
       perspectives,
       isJoining: ref(false),

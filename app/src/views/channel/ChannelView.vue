@@ -28,7 +28,7 @@
         <j-tooltip placement="auto" title="Manage views">
           <j-button
             v-if="sameAgent"
-            @click="() => goToEditChannel(channel?.id)"
+            @click="() => goToEditChannel(channel?.baseExpression)"
             size="sm"
             variant="ghost"
           >
@@ -55,7 +55,7 @@
               v-for="app in apps"
             >
               <input
-                :name="channel?.id"
+                :name="channel?.baseExpression"
                 type="radio"
                 :value.prop="app.pkg"
                 @change="changeCurrentView"
@@ -66,7 +66,7 @@
             <j-tooltip placement="auto" title="Manage views">
               <j-button
                 v-if="sameAgent"
-                @click="() => goToEditChannel(channel?.id)"
+                @click="() => goToEditChannel(channel?.baseExpression)"
                 size="sm"
                 variant="ghost"
               >
@@ -156,7 +156,7 @@
           @click="changeCurrentView"
         >
           <input
-            :name="channel?.id"
+            :name="channel?.baseExpression"
             type="radio"
             :checked.prop="app.pkg === currentView"
             :value.prop="app.pkg"
@@ -180,9 +180,8 @@ import {
   useMe,
   usePerspective,
   usePerspectives,
-  useSubject,
-  useSubjects,
 } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import {
   App,
   Channel,
@@ -193,7 +192,7 @@ import {
 } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 
 interface MentionTrigger {
   label: string;
@@ -221,21 +220,21 @@ export default defineComponent({
     // ensure SNDA is working for topics
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
-    const { entry: community } = useSubject({
+    const { entries: communities } = useAd4mModel({
       perspective: () => data.value.perspective,
-      subject: Community,
+      model: Community,
     });
 
-    const { entry: channel, repo: channelRepo } = useSubject({
+    const { entries: channels } = useAd4mModel({
       perspective: () => data.value.perspective,
-      id: () => props.channelId,
-      subject: Channel,
+      model: Channel,
+      query: { where: { base: props.channelId! } },
     });
 
-    const { entries: apps } = useSubjects({
+    const { entries: apps } = useAd4mModel({
       perspective: () => data.value.perspective,
-      source: () => props.channelId,
-      subject: App,
+      model: App,
+      query: { source: props.channelId },
     });
 
     const { me } = useMe(client.agent, profileFormatter);
@@ -247,9 +246,8 @@ export default defineComponent({
       apps,
       perspectives,
       data,
-      community,
-      channel,
-      channelRepo,
+      community: communities.value[0],
+      channel: channels.value[0],
       currentView: ref(""),
       webrtcModalOpen: ref(false),
       allDefined: ref(false),
@@ -279,8 +277,6 @@ export default defineComponent({
         if (!this.currentView) {
           this.currentView = val[0]?.pkg;
         }
-
-        //console.log(JSON.stringify(val));
 
         // Add new views
         val?.forEach(async (app: App) => {

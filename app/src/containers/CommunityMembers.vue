@@ -58,7 +58,8 @@ import { defineComponent, watchEffect, ref } from "vue";
 import { Community, getProfile } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
+import { usePerspective } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
@@ -70,9 +71,9 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useSubject({
+    const { entries: communities } = useAd4mModel({
       perspective: () => data.value.perspective,
-      subject: Community,
+      model: Community,
     });
 
     watchEffect(async () => {
@@ -90,7 +91,7 @@ export default defineComponent({
 
     return {
       members,
-      community,
+      community: communities.value[0],
     };
   },
   data() {

@@ -12,15 +12,15 @@
     <div
       style="height: 100%"
       v-for="channel in channels"
-      :key="channel?.id"
+      :key="channel?.baseExpression"
       :style="{
-        height: channel?.id === channelId ? '100%' : '0',
+        height: channel?.baseExpression === channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel?.id]"
-        v-show="channel?.id === channelId"
-        :channelId="channel?.id"
+        v-if="loadedChannels[channel?.baseExpression]"
+        v-show="channel?.baseExpression === channelId"
+        :channelId="channel?.baseExpression"
         :communityId="communityId"
       ></channel-view>
     </div>
@@ -63,7 +63,7 @@
           <div class="channel-card-grid">
             <button
               class="channel-card"
-              @click="() => navigateToChannel(channel.id)"
+              @click="() => navigateToChannel(channel.baseExpression)"
               v-for="channel in channels"
             >
               # {{ channel.name }}
@@ -112,8 +112,8 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   usePerspective,
   usePerspectives,
-  useSubjects,
 } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
@@ -140,9 +140,9 @@ export default defineComponent({
 
     const { communities } = useCommunities(neighbourhoods);
 
-    const { entries: channels } = useSubjects({
+    const { entries: channels } = useAd4mModel({
       perspective: () => data.value.perspective,
-      subject: Channel,
+      model: Channel,
     });
 
     return {

@@ -14,15 +14,15 @@
         event="contextmenu"
         placement="bottom-start"
         v-for="channel in channels"
-        :key="channel.id"
+        :key="channel.baseExpression"
       >
         <div slot="trigger">
           <j-menu-item
             tag="j-menu-item"
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
-            :selected="channel.id === activeChannelId && !channel.expanded"
-            @click="() => navigateToChannel(channel.id)"
+            :selected="channel.baseExpression === activeChannelId && !channel.expanded"
+            @click="() => navigateToChannel(channel.baseExpression)"
           >
             {{ channel.name }}
             <div
@@ -37,7 +37,7 @@
             ></j-icon>
             <div class="active-agents">
               <j-box
-                v-for="(agent, did) in activeAgents[channel.id]"
+                v-for="(agent, did) in activeAgents[channel.baseExpression]"
                 :key="did"
               >
                 <ActiveAgent :key="did" :did="did" v-if="agent" />
@@ -48,11 +48,11 @@
             <j-menu-item
               :selected="
                 view.type === channel.currentView &&
-                channel.id === $route.params.channelId
+                channel.baseExpression === $route.params.channelId
               "
               size="sm"
               v-for="view in getViewOptions(channel.views)"
-              @click="() => handleChangeView(channel.id, view.type)"
+              @click="() => handleChangeView(channel.baseExpression, view.type)"
             >
               <j-icon size="xs" slot="start" :name="view.icon"></j-icon>
               {{ view.title }}
@@ -61,15 +61,15 @@
         </div>
         <j-menu slot="content">
           <j-menu-item
-            v-if="isChannelCreator(channel.id)"
-            @click="() => goToEditChannel(channel.id)"
+            v-if="isChannelCreator(channel.baseExpression)"
+            @click="() => goToEditChannel(channel.baseExpression)"
           >
             <j-icon size="xs" slot="start" name="pencil" />
             Edit Channel
           </j-menu-item>
           <j-menu-item
-            v-if="isChannelCreator(channel.id)"
-            @click="() => deleteChannel(channel.id)"
+            v-if="isChannelCreator(channel.baseExpression)"
+            @click="() => deleteChannel(channel.baseExpression)"
           >
             <j-icon size="xs" slot="start" name="trash" />
             Delete Channel
@@ -89,7 +89,8 @@ import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/ad4m-vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
+import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import {
@@ -131,16 +132,17 @@ export default defineComponent({
     const client: Ad4mClient = await getAd4mClient();
     const neighbhourhoodProxy = props.perspective.getNeighbourhoodProxy();
     const { me } = useMe(client.agent, profileFormatter);
-    const { entries: channels, repo: channelRepo } = useSubjects({
+
+    const { entries: channels } = useAd4mModel({
       perspective: () => props.perspective,
-      source: () => "ad4m://self",
-      subject: Channel,
+      model: Channel,
+      query: { source: "ad4m://self" },
     });
+
     return {
       me,
       activeAgents: ref<Record<string, Record<string, boolean>>>({}),
       neighbhourhoodProxy,
-      channelRepo,
       channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
@@ -166,7 +168,7 @@ export default defineComponent({
           this.neighbhourhoodProxy.sendBroadcastU({
             links: [
               {
-                source: channel.id,
+                source: channel.baseExpression,
                 predicate: "is-anyone-here",
                 target: "just checking",
               },
@@ -244,7 +246,7 @@ export default defineComponent({
       });
     },
     isChannelCreator(channelId: string): boolean {
-      const channel = this.channels.find((e) => e.id === channelId);
+      const channel = this.channels.find((e) => e.baseExpression === channelId);
       if (channel) {
         return channel.author === this.me?.did;
       } else {
@@ -259,7 +261,9 @@ export default defineComponent({
       return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
-      await this.channelRepo?.remove(channelId);
+      const channel = new Channel(this.perspective as PerspectiveProxy, channelId);
+      await channel.delete();
+
       this.$router.push({
         name: "community",
         params: {
