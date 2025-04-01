@@ -27,20 +27,17 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
   const totalCount = ref(0);
   const subjectEnsured = ref(false);
 
-  // Create perspective ref
-  const perspectiveRef =
-    typeof perspective === "function"
-      ? computed(() => perspective())
-      : shallowRef(perspective);
+  const perspectiveRef = typeof perspective === "function" ? computed(() => perspective()) : shallowRef(perspective);
 
-  // Helper functions
   async function ensureSubject() {
     if (typeof model !== "string") await perspectiveRef.value.ensureSDNASubjectClass(model);
     subjectEnsured.value = true;
   }
 
   function includeBaseExpressions(entries: T[]): T[] {
-    return entries.map((entry) => { return { ...entry, baseExpression: entry.baseExpression } });
+    return entries.map((entry) => {
+      return { ...entry, baseExpression: entry.baseExpression };
+    });
   }
 
   function preserveEntryReferences(oldEntries: T[], newEntries: T[]): T[] {
@@ -50,7 +47,9 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
   }
 
   function handleNewEntires(newEntries: T[]) {
-    entries.value = includeBaseExpressions(preserveReferences ? preserveEntryReferences(entries.value, newEntries) : newEntries);
+    entries.value = includeBaseExpressions(
+      preserveReferences ? preserveEntryReferences(entries.value, newEntries) : newEntries
+    );
   }
 
   function paginateSubscribeCallback(result: PaginationResult<Ad4mModel>) {
@@ -66,7 +65,7 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
           : model.query(perspectiveRef.value, query);
 
       if (pageSize) {
-        // handle paginated results
+        // Handle paginated results
         const totalPageSize = pageSize * pageNumber.value;
         const { results, totalCount: count } = await modelQuery.paginateSubscribe(
           totalPageSize,
@@ -76,7 +75,7 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
         entries.value = includeBaseExpressions(results as T[]);
         totalCount.value = count as number;
       } else {
-        // handle non-paginated results
+        // Handle non-paginated results
         const results = await modelQuery.subscribe((results: Ad4mModel[]) => handleNewEntires(results as T[]));
         entries.value = includeBaseExpressions(results as T[]);
       }

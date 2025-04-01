@@ -41,9 +41,9 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
     setEntries((oldEntries) => (preserveReferences ? preserveEntryReferences(oldEntries, newEntries) : newEntries));
   }
 
-  function paginateSubscribeCallback({ results, totalCount }: PaginationResult<T>) {
+  function paginateSubscribeCallback({ results, totalCount: count }: PaginationResult<T>) {
     handleNewEntires(results);
-    setTotalCount(totalCount);
+    setTotalCount(count as number);
   }
 
   async function subscribeToCollection() {
@@ -53,14 +53,18 @@ export function useAd4mModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
           ? Ad4mModel.query(perspective, query).overrideModelClassName(model)
           : model.query(perspective, query);
       if (pageSize) {
-        // handle paginated results
+        // Handle paginated results
         const totalPageSize = pageSize * pageNumber;
-        const { results, totalCount } = await modelQuery.paginateSubscribe(totalPageSize, 1, paginateSubscribeCallback);
+        const { results, totalCount: count } = await modelQuery.paginateSubscribe(
+          totalPageSize,
+          1,
+          paginateSubscribeCallback as (results: PaginationResult<Ad4mModel>) => void
+        );
         setEntries(results as T[]);
-        setTotalCount(totalCount);
+        setTotalCount(count as number);
       } else {
-        // handle non-paginated results
-        const results = await modelQuery.subscribe(handleNewEntires);
+        // Handle non-paginated results
+        const results = await modelQuery.subscribe(handleNewEntires as (results: Ad4mModel[]) => void);
         setEntries(results as T[]);
       }
     } catch (err) {
