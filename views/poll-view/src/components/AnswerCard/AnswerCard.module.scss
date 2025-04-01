@@ -14,11 +14,14 @@
   }
 
   .voters {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    gap: var(--j-space-300);
     border: 1px solid var(--j-color-ui-200);
     border-radius: var(--j-border-radius);
     background-color: var(--j-color-ui-100);
     padding: var(--j-space-200) var(--j-space-300);
-    height: 42px;
   }
 
   .slider {
@@ -53,6 +56,8 @@
       height: 20px;
       border-radius: 50%;
       background-color: var(--j-color-primary-500);
+      position: relative;
+      top: -7px;
       cursor: pointer;
     }
 

@@ -17,25 +17,25 @@ export default function AnswerCard(props: {
   removeAnswer?: (index: number) => void;
 }) {
   const { perspective, myDid, answer, index, color, percentage, voteType, preview, vote, removeAnswer } = props;
-  const { baseExpression, author, text, myPoints } = answer;
+  const { author, text, myPoints } = answer;
   const [hasVoted, setHasVoted] = useState(false);
   const [points, setPoints] = useState(myPoints);
   const pointsRef = useRef(0);
   const slidingRef = useRef(false);
-  const { entries: votes } = useAd4mModel({ perspective, model: Vote, query: { source: baseExpression } });
+  const { entries: votes } = useAd4mModel({ perspective, model: Vote, query: { source: answer.baseExpression } });
 
   useEffect(() => {
     window.addEventListener("mouseup", () => {
       if (slidingRef.current) {
         slidingRef.current = false;
-        vote(baseExpression, pointsRef.current);
+        vote(answer.baseExpression, pointsRef.current);
       }
     });
   }, []);
 
   useEffect(() => {
     setHasVoted(!!votes.find((vote) => vote.author === myDid));
-  }, [myDid, JSON.stringify(votes)]);
+  }, [votes]);
 
   return (
     <j-flex gap="400" direction="column" className={styles.wrapper}>
@@ -54,18 +54,15 @@ export default function AnswerCard(props: {
             </j-button>
           ) : (
             <>
-              <j-flex gap="300" a="center" className={styles.voters}>
-                {votes.length > 0 && (
-                  <j-flex a="center">
-                    {votes.map((vote, i) => (
-                      <Avatar did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
-                    ))}
-                  </j-flex>
-                )}
+              <div className={styles.voters}>
+                {votes.length > 0 &&
+                  votes.map((vote, i) => (
+                    <Avatar did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
+                  ))}
                 <j-text size="500" nomargin>
                   {percentage}%
                 </j-text>
-              </j-flex>
+              </div>
 
               {voteType === "weighted-choice" ? (
                 <j-flex gap="400" a="center">
@@ -87,12 +84,12 @@ export default function AnswerCard(props: {
                     onInput={(e: any) => {
                       pointsRef.current = +e.target.value;
                       setPoints(+e.target.value);
-                      vote(baseExpression, +e.target.value);
+                      vote(answer.baseExpression, +e.target.value);
                     }}
                   />
                 </j-flex>
               ) : (
-                <j-checkbox onChange={() => vote(baseExpression)} checked={hasVoted} size="sm">
+                <j-checkbox onChange={() => vote(answer.baseExpression)} checked={hasVoted} size="sm">
                   <j-icon slot="checkmark" size="xs" name="check" />
                 </j-checkbox>
               )}

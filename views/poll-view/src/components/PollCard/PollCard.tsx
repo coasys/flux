@@ -78,22 +78,19 @@ export default function PollCard(props: {
       answers.map(async (answer) => {
         const votes = await Vote.findAll(perspective, { source: answer.baseExpression });
         const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-        if (previousVote) {
-          const vote = new Vote(perspective, previousVote.baseExpression);
-          await vote.delete();
-        }
+        if (previousVote) await previousVote.delete();
       })
     );
   }
 
-  async function createVote(source, score) {
-    const newVote = new Vote(perspective, undefined, source);
+  async function createVote(answerId, score) {
+    const newVote = new Vote(perspective, undefined, answerId);
     newVote.score = score;
     await newVote.save();
   }
 
-  async function updateVote(id, score) {
-    const vote = new Vote(perspective, id);
+  async function updateVote(voteId, score) {
+    const vote = new Vote(perspective, voteId);
     vote.score = score;
     await vote.update();
   }
