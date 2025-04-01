@@ -53,13 +53,8 @@
                 checked: app.pkg === currentView,
               }"
               v-for="app in apps"
+              @click="() => changeCurrentView(app.pkg)"
             >
-              <input
-                :name="channel?.baseExpression"
-                type="radio"
-                :value.prop="app.pkg"
-                @change="changeCurrentView"
-              />
               <j-icon :name="app.icon" size="xs"></j-icon>
               <span>{{ app.name }}</span>
             </label>
@@ -153,7 +148,7 @@
             checked: app.pkg === currentView,
           }"
           v-for="app in apps"
-          @click="changeCurrentView"
+          @click="() => changeCurrentView(app.pkg)"
         >
           <input
             :name="channel?.baseExpression"
@@ -212,12 +207,10 @@ export default defineComponent({
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
-
     const { perspectives } = usePerspectives(client);
-
     const { data } = usePerspective(client, () => props.communityId);
+    const { me } = useMe(client.agent, profileFormatter);
 
-    // ensure SNDA is working for topics
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
     const { entries: communities } = useAd4mModel({
@@ -236,8 +229,6 @@ export default defineComponent({
       model: App,
       query: { source: props.channelId },
     });
-
-    const { me } = useMe(client.agent, profileFormatter);
 
     return {
       agentClient: client.agent,
@@ -340,8 +331,7 @@ export default defineComponent({
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
-    changeCurrentView(e: any) {
-      const value = e.target.value;
+    changeCurrentView(value: string) {
       // if entering webrtc or synergy view, close modal
       if (
         ["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
