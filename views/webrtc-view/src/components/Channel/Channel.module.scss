@@ -8,6 +8,16 @@
   min-height: 100%;
   padding: var(--j-space-500);
 
+  &.fullscreen {
+    position: fixed;
+    width: calc(100vw - 100px);
+    height: 100vh;
+    top: 0;
+    left: 100px;
+    z-index: 1000;
+    background-color: var(--app-channel-bg-color);
+  }
+
   &.synergy {
     display: flex;
     flex-direction: column;

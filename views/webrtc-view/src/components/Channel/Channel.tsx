@@ -37,6 +37,7 @@ export default function Channel({
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [inAnotherRoom, setInAnotherRoom] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
   const { profile } = useAgent<Profile>({
@@ -83,7 +84,6 @@ export default function Channel({
   }
 
   useEffect(() => {
-
     const cleanupWebRTC = () => {
       try {
         // 1. Cleanup WebRTC instance
@@ -133,9 +133,12 @@ export default function Channel({
 
   return (
     <section
-      className={`${styles.outer} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+      className={`${styles.outer} ${fullscreen && styles.fullscreen} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
       ref={wrapperEl}
     >
+      <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
+        <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+      </j-button>
       {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(currentView) &&
         setModalOpen && (
           <button className={styles.closeButton} onClick={() => setModalOpen(false)}>
