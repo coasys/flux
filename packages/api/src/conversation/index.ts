@@ -230,7 +230,7 @@ export default class Conversation extends Ad4mModel {
     return result;
   }
 
-  private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
+  private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], batchId: string, isNewGroup?: boolean) {
     const { topics } = await ensureLLMTasks(this.perspective.ai);
     let currentTopics = (await group.topicsWithRelevance()) as any;
     let currentNewTopics = await LLMTaskWithExpectedOutputs(
@@ -247,16 +247,16 @@ export default class Conversation extends Ad4mModel {
     });
     await Promise.all(currentNewTopics.map((topic) => {
       const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
-      group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic)
+      group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId)
     }));
   }
 
-  private async createNewGroup(newGroup: { n: string; s: string }) {
+  private async createNewGroup(newGroup: { n: string; s: string }, batchId: string) {
     let newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
     newSubgroupEntity.subgroupName = newGroup.n;
     newSubgroupEntity.summary = newGroup.s;
-    await newSubgroupEntity.save();
-    return await newSubgroupEntity.get();
+    await newSubgroupEntity.save(batchId);
+    return newSubgroupEntity
   }
 
   async processNewExpressions(unprocessedItems) {
@@ -275,6 +275,7 @@ export default class Conversation extends Ad4mModel {
       }
       return item
     })
+    const batchId = await this.perspective.createBatch();
 
     // ============== LLM group detection ===============================
     const startGroupTask = new Date().getTime();
@@ -303,7 +304,7 @@ export default class Conversation extends Ad4mModel {
     let newSubgroupEntity;
     let indexOfFirstItemInNewSubgroup;
     if (detectResult.newGroup) {
-      newSubgroupEntity = await this.createNewGroup(detectResult.newGroup);
+      newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
         (item) => item.baseExpression === detectResult.newGroup.firstItemId
       );
@@ -335,8 +336,8 @@ export default class Conversation extends Ad4mModel {
     // ============== LLM topic list updating ===============================
     const startTopicTask = new Date().getTime();
     // Get update topic lists from LLM and save results
-    if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages);
-    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
+    if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages, batchId);
+    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, batchId, true);
 
     const endTopicTask = new Date().getTime();
     console.log(`============== 2: LLM topic list updating complete! (${duration(startTopicTask, endTopicTask)}) ==============`);
@@ -371,7 +372,7 @@ export default class Conversation extends Ad4mModel {
     const start1 = new Date().getTime();
     this.conversationName = newConversationInfo.n;
     this.summary = newConversationInfo.s;
-    await this.update();
+    await this.update(batchId);
     const end1 = new Date().getTime();
     console.log('Conversation info updated: ', duration(start1, end1));
 
@@ -379,7 +380,7 @@ export default class Conversation extends Ad4mModel {
     if (currentSubgroup) {
       console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
-      await currentSubgroup.update();
+      await currentSubgroup.update(batchId);
       const end2 = new Date().getTime();
       console.log('Current subgroup info updated: ', duration(start2, end2));
     }
@@ -389,7 +390,7 @@ export default class Conversation extends Ad4mModel {
     const start3 = new Date().getTime();
     await Promise.all(
       unprocessedItems.map((item, index) =>
-        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, index + 1)
+        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1)
       )
     );
     const end3 = new Date().getTime();
@@ -397,20 +398,21 @@ export default class Conversation extends Ad4mModel {
 
     // update vector embedding for conversation
     const start4 = new Date().getTime();
-    await removeEmbedding(this.perspective, this.baseExpression);
-    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai);
+    await removeEmbedding(this.perspective, this.baseExpression, batchId);
+    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
     const end4 = new Date().getTime();
     console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
       const start5 = new Date().getTime();
-      await removeEmbedding(this.perspective, currentSubgroup.baseExpression);
+      await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
       await createEmbedding(
         this.perspective,
         currentSubgroup.summary,
         currentSubgroup.baseExpression,
-        this.perspective.ai
+        this.perspective.ai,
+        batchId
       );
       const end5 = new Date().getTime();
       console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
@@ -422,7 +424,8 @@ export default class Conversation extends Ad4mModel {
         this.perspective,
         newSubgroupEntity.summary,
         newSubgroupEntity.baseExpression,
-        this.perspective.ai
+        this.perspective.ai,
+        batchId
       );
       const end6 = new Date().getTime();
       console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
@@ -431,12 +434,17 @@ export default class Conversation extends Ad4mModel {
     // batch commit all new links (currently only "ad4m://has_child" links)
     // i.e. sorting messages into current and/or new sub-group
     const start7 = new Date().getTime();
-    await this.perspective.addLinks(newLinks);
+    await this.perspective.addLinks(newLinks, 'shared', batchId);
     const end7 = new Date().getTime();
     console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
 
     const endProcessing = new Date().getTime();
 
     console.log(`============== All processing complete in ${duration(startProcessing, endProcessing)}! ==============`);
+    const startBatchCommit = new Date().getTime();
+    console.log('Committing batch...');
+    await this.perspective.commitBatch(batchId);
+    const endBatchCommit = new Date().getTime();  
+    console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
 }

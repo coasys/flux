@@ -22,15 +22,15 @@ async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
   return result[0]?.Result || null;
 }
 
-export async function removeEmbedding(perspective, itemId): Promise<void> {
+export async function removeEmbedding(perspective, itemId, batchId: string): Promise<void> {
   const embeddingSRId = await findEmbeddingSRId(perspective, itemId);
   if (embeddingSRId) {
     console.log('embeddingSRId found:', embeddingSRId);
     const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId);
     const { tag } = await semanticRelationship.get();
     const embedding = new Embedding(perspective, tag);
-    await embedding.delete();
-    await semanticRelationship.delete();
+    await embedding.delete(batchId);
+    await semanticRelationship.delete(batchId);
   }
 }
 
@@ -39,7 +39,7 @@ function duration(start, end) {
 }
 
 // todo: use embedding language instead of stringifying
-export async function createEmbedding(perspective, text, itemId, ai: AIClient, index?: number): Promise<void> {
+export async function createEmbedding(perspective, text, itemId, ai: AIClient, batchId: string, index?: number): Promise<void> {
   // generate embedding
   const start1 = new Date().getTime();
   const rawEmbedding = await ai.embed("bert", text);
@@ -52,7 +52,7 @@ export async function createEmbedding(perspective, text, itemId, ai: AIClient, i
   const embeddingExpression = await perspective.createExpression(rawEmbedding, EMBEDDING_VECTOR_LANGUAGE);
   console.log(`embeddingExpression for item ${index}:`, embeddingExpression);
   embedding.embedding = embeddingExpression;
-  await embedding.save();
+  await embedding.save(batchId);
   const end2 = new Date().getTime();
   console.log(`${index ? `Item ${index} e` : "E"}mbedding saved in ${duration(start2, end2)}`);
   // create semantic relationship subject entity
