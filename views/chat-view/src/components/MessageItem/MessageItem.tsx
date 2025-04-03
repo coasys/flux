@@ -1,12 +1,13 @@
 import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
-import { useAgent, useSubject } from "@coasys/flux-react-web";
+import { useAgent } from "@coasys/flux-react-web";
 import styles from "./MessageItem.module.css";
 import Avatar from "../Avatar";
 import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
 import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
+import { useModel } from "@coasys/ad4m-react-hooks";
 
 export default function MessageItem({
   showAvatar,
@@ -33,15 +34,15 @@ export default function MessageItem({
 }) {
   const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
 
-  const { entry: replyMessage } = useSubject({
+  const { entries: replyMessages } = useModel({
     perspective,
-    id: message.replyingTo,
-    subject: Message,
+    model: Message,
+    query: { where: { base: message.replyingTo } }
   });
 
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
-    did: replyMessage?.author,
+    did: replyMessages[0]?.author,
     formatter: profileFormatter,
   });
 
@@ -63,7 +64,7 @@ export default function MessageItem({
     const me = await agent.me();
     const reactions = await perspective.get(
       new LinkQuery({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       })
@@ -75,7 +76,7 @@ export default function MessageItem({
       perspective.removeLinks(myReactions);
     } else {
       perspective.add({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       });
@@ -101,7 +102,7 @@ export default function MessageItem({
                 size="300"
                 className={styles.body}
                 nomargin
-                dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
+                dangerouslySetInnerHTML={{ __html: replyMessages[0]?.body }}
               ></j-text>
             </j-box>
           </div>

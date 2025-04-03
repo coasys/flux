@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { Post } from "@coasys/flux-api";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
@@ -18,7 +18,7 @@ export default function PostList({
 }) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, loading } = useAd4mModel({
+  const { entries: posts, loading } = useModel({
     perspective,
     model: Post,
     query: { source, order: { timestamp: "DESC" } },

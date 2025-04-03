@@ -109,11 +109,7 @@ import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
 import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  usePerspective,
-  usePerspectives,
-} from "@coasys/ad4m-vue-hooks";
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
+import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
@@ -140,7 +136,7 @@ export default defineComponent({
 
     const { communities } = useCommunities(neighbourhoods);
 
-    const { entries: channels } = useAd4mModel({
+    const { entries: channels } = useModel({
       perspective: () => data.value.perspective,
       model: Channel,
     });

@@ -1,5 +1,5 @@
 import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
-import { useAgent, useSubjects } from "@coasys/ad4m-react-hooks";
+import { useAgent } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
 import { community } from "@coasys/flux-constants";

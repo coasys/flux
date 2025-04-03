@@ -1,9 +1,9 @@
-import { ModelOptions, Property, Flag } from "@coasys/ad4m";
+import { ModelOptions, Property, Flag, Ad4mModel } from "@coasys/ad4m";
 
 @ModelOptions({
   name: "Todo",
 })
-export default class Todo {
+export default class Todo extends Ad4mModel {
   @Flag({
     through: "flux://entry_type",
     value: "flux://has_todo",

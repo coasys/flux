@@ -175,8 +175,8 @@ import {
   useMe,
   usePerspective,
   usePerspectives,
+  useModel,
 } from "@coasys/ad4m-vue-hooks";
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
 import {
   App,
   Channel,
@@ -213,18 +213,18 @@ export default defineComponent({
 
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
-    const { entries: communities } = useAd4mModel({
+    const { entries: communities } = useModel({
       perspective: () => data.value.perspective,
       model: Community,
     });
 
-    const { entries: channels } = useAd4mModel({
+    const { entries: channels } = useModel({
       perspective: () => data.value.perspective,
       model: Channel,
       query: { where: { base: props.channelId! } },
     });
 
-    const { entries: apps } = useAd4mModel({
+    const { entries: apps } = useModel({
       perspective: () => data.value.perspective,
       model: App,
       query: { source: props.channelId },

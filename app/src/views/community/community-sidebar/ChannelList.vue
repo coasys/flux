@@ -89,8 +89,7 @@ import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
+import { useMe, useModel } from "@coasys/ad4m-vue-hooks";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import {
@@ -133,7 +132,7 @@ export default defineComponent({
     const neighbhourhoodProxy = props.perspective.getNeighbourhoodProxy();
     const { me } = useMe(client.agent, profileFormatter);
 
-    const { entries: channels } = useAd4mModel({
+    const { entries: channels } = useModel({
       perspective: () => props.perspective,
       model: Channel,
       query: { source: "ad4m://self" },

@@ -1,5 +1,5 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubject } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
@@ -19,11 +19,7 @@ export default function Entry({
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const { entry, repo } = useSubject({
-    perspective,
-    subject: selectedClass,
-    id,
-  });
+  const { entries } = useModel({ perspective, model: selectedClass, query: { where: { base: id } } });
 
   useEffect(() => {
     perspective
@@ -47,24 +43,14 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    await repo.update(id, { [propName]: value }).then(() => {
-      if (["name", "status"].includes(propName)) {
-        const task = propName === "name" ? value : entry.name;
-        const status =
-          propName === "status"
-            ? value.split("task://")[1]
-            : entry.status.split("task://")[1];
-        const taskText = `Task: "${task}", Status: "${status}"`;
-        // processItem(perspective, channelId, {
-        //   baseExpression: id,
-        //   text: taskText,
-        // });
-      }
-    });
+    const model = await perspective.getSubjectProxy(entries[0]?.baseExpression, selectedClass) as any;
+    const entry = new model(perspective, entries[0]?.baseExpression, id);
+    entry[propName] = value;
+    await entry.update();
   }
 
-  if (entry) {
-    const properties = Object.entries(entry).filter(([key, value]) => {
+  if (entries[0]) {
+    const properties = Object.entries(entries[0]).filter(([key, value]) => {
       return !(
         key === "author" ||
         key === "timestamp" ||
@@ -74,13 +60,13 @@ export default function Entry({
       );
     });
 
-    const titleName = entry.hasOwnProperty("name")
+    const titleName = entries[0].hasOwnProperty("name")
       ? "name"
-      : entry.hasOwnProperty("title")
+      : entries[0].hasOwnProperty("title")
         ? "title"
         : "";
 
-    const defaultName = entry?.name || entry?.title || "";
+    const defaultName = entries[0]?.name || entries[0]?.title || "";
 
     return (
       <div>

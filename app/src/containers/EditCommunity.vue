@@ -45,8 +45,7 @@ import {
   getImage,
   resizeImage,
 } from "@coasys/flux-utils";
-import { usePerspective } from "@coasys/ad4m-vue-hooks";
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModelVue";
+import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community } from "@coasys/flux-api";
 
@@ -58,7 +57,7 @@ export default defineComponent({
     const client = getAd4mClient;
     const { data } = usePerspective(client, () => props.communityId);
 
-    const { entries: communities } = useAd4mModel({
+    const { entries: communities } = useModel({
       perspective: () => data.value.perspective,
       model: Community,
       query: { where: { base: "ad4m://self" } },

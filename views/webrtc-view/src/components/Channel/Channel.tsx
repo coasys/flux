@@ -136,9 +136,6 @@ export default function Channel({
       className={`${styles.outer} ${fullscreen && styles.fullscreen} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
       ref={wrapperEl}
     >
-      <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
-        <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
-      </j-button>
       {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(currentView) &&
         setModalOpen && (
           <button className={styles.closeButton} onClick={() => setModalOpen(false)}>
@@ -173,6 +170,10 @@ export default function Channel({
       <>{showDebug && <Debug webRTC={webRTC} profile={profile} />}</>
 
       <Notifications />
+
+      <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
+        <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+      </j-button>
     </section>
   );
 }

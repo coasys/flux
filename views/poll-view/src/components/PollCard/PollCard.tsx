@@ -1,4 +1,4 @@
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import * as d3 from "d3";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
@@ -25,7 +25,7 @@ export default function PollCard(props: {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const { entries: answers } = useAd4mModel({ perspective, model: Answer, query: { source: poll.baseExpression } });
+  const { entries: answers } = useModel({ perspective, model: Answer, query: { source: poll.baseExpression } });
 
   const colorScale = useMemo(() => {
     return d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);

@@ -1,4 +1,4 @@
-import { useAd4mModel } from "@coasys/flux-utils/src/useAd4mModel";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { Message } from "@coasys/flux-api";
@@ -38,7 +38,7 @@ export default function MessageList({
   const [showButton, setShowButton] = useState(false);
   const showButtonTimeoutRef = useRef(null);
 
-  const { entries, loading, totalCount, loadMore } = useAd4mModel({
+  const { entries, loading, totalCount, loadMore } = useModel({
     perspective,
     model: Message,
     query: { source, order: { timestamp: "DESC" } },
