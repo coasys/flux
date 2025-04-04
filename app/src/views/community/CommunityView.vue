@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import SidebarLayout from "@/layout/SidebarLayout.vue";
-import { defineComponent, ref, watch, onUnmounted } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -107,7 +107,7 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
-import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
+import { PerspectiveState } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community } from "@coasys/flux-api";
@@ -137,7 +137,7 @@ export default defineComponent({
     const { communities } = useCommunities(neighbourhoods);
 
     const { entries: channels } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Channel,
     });
 

@@ -34,17 +34,17 @@ export default function MessageItem({
 }) {
   const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
 
-  const { entries: replyMessages } = useModel({
-    perspective,
-    model: Message,
-    query: { where: { base: message.replyingTo } }
-  });
+  // const { entries: replyMessages } = useModel({
+  //   perspective,
+  //   model: Message,
+  //   query: { where: { base: message.replyingTo } }
+  // });
 
-  const { profile: replyProfile } = useAgent<Profile>({
-    client: agent,
-    did: replyMessages[0]?.author,
-    formatter: profileFormatter,
-  });
+  // const { profile: replyProfile } = useAgent<Profile>({
+  //   client: agent,
+  //   did: replyMessages[0]?.author,
+  //   formatter: profileFormatter,
+  // });
 
   function onOpenPicker(e) {
     e.stopPropagation();
@@ -89,7 +89,7 @@ export default function MessageItem({
         message.isPopular && styles.isPopular
       }`}
     >
-      {message.replyingTo && (
+      {/* {message.replyingTo && (
         <>
           <div></div>
           <div>
@@ -107,7 +107,7 @@ export default function MessageItem({
             </j-box>
           </div>
         </>
-      )}
+      )} */}
       <div>
         {isFullVersion && (
           <j-box>

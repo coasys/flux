@@ -187,7 +187,7 @@ import {
 } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 interface MentionTrigger {
   label: string;
@@ -214,18 +214,18 @@ export default defineComponent({
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
     const { entries: communities } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Community,
     });
 
     const { entries: channels } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Channel,
       query: { where: { base: props.channelId! } },
     });
 
     const { entries: apps } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: App,
       query: { source: props.channelId },
     });

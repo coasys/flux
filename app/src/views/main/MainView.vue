@@ -174,7 +174,7 @@
 <script lang="ts">
 import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
@@ -215,7 +215,7 @@ export default defineComponent({
     const { data } = usePerspective(client, () => route.params.communityId);
 
     const { entries: communities } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Community,
     });
 
