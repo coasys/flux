@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
@@ -133,7 +133,7 @@ export default defineComponent({
     const { me } = useMe(client.agent, profileFormatter);
 
     const { entries: channels } = useModel({
-      perspective: () => props.perspective,
+      perspective: computed(() => props.perspective),
       model: Channel,
       query: { source: "ad4m://self" },
     });

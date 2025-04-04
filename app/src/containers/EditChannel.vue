@@ -106,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useAppStore } from "@/store/app";
 import {
   App,
@@ -157,13 +157,13 @@ export default defineComponent({
     const { data } = usePerspective(client, () => route.params.communityId);
 
     const { entries: channels } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Channel,
       query: { where: { base: props.channelId } },
     });
 
     const { entries: apps } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: App,
       query: { source: props.channelId },
     });

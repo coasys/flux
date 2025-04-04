@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import {
   blobToDataURL,
@@ -58,7 +58,7 @@ export default defineComponent({
     const { data } = usePerspective(client, () => props.communityId);
 
     const { entries: communities } = useModel({
-      perspective: () => data.value.perspective,
+      perspective: computed(() => data.value.perspective),
       model: Community,
       query: { where: { base: "ad4m://self" } },
     });
