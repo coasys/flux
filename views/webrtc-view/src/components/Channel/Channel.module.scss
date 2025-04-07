@@ -8,22 +8,6 @@
   min-height: 100%;
   padding: var(--j-space-500);
 
-  &.fullscreen {
-    position: fixed;
-    width: calc(100vw - 100px);
-    height: 100vh;
-    top: 0;
-    left: 100px;
-    z-index: 1000;
-    background-color: var(--app-channel-bg-color);
-  }
-
-  &.synergy {
-    display: flex;
-    flex-direction: column;
-    place-content: unset;
-  }
-
   .closeButton {
     all: unset;
     cursor: pointer;
@@ -35,8 +19,29 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: -16px;
-    right: calc(var(--j-space-500) + 5px);
+    top: 0;
+    right: 0;
     z-index: 5;
+  }
+
+  &.fullscreen {
+    position: fixed;
+    width: calc(100vw - 100px);
+    height: 100vh;
+    top: 0;
+    left: 100px;
+    z-index: 1000;
+    background-color: var(--app-channel-bg-color);
+
+    .closeButton {
+      top: var(--j-space-500);
+      right: var(--j-space-500);
+    }
+  }
+
+  &.synergy {
+    display: flex;
+    flex-direction: column;
+    place-content: unset;
   }
 }
