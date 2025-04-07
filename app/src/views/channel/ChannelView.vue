@@ -175,8 +175,8 @@ import {
   useMe,
   usePerspective,
   usePerspectives,
-  useModel,
 } from "@coasys/ad4m-vue-hooks";
+import { useModel } from "@coasys/flux-utils/src/useModelVue";
 import {
   App,
   Channel,
@@ -213,21 +213,24 @@ export default defineComponent({
 
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
-    const { entries: communities } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: Community,
-    });
+    // const { entries: communities } = useModel({
+    //   perspective: computed(() => data.value.perspective),
+    //   model: Community,
+    //   location: 'ChannelView communities'
+    // });
 
     const { entries: channels } = useModel({
       perspective: computed(() => data.value.perspective),
       model: Channel,
       query: { where: { base: props.channelId! } },
+      location: 'ChannelView channels'
     });
 
     const { entries: apps } = useModel({
       perspective: computed(() => data.value.perspective),
       model: App,
       query: { source: props.channelId },
+      location: 'ChannelView apps'
     });
 
     return {
@@ -237,7 +240,7 @@ export default defineComponent({
       apps,
       perspectives,
       data,
-      community: communities.value[0],
+      // community: communities.value[0],
       channel: channels.value[0],
       currentView: ref(""),
       webrtcModalOpen: ref(false),

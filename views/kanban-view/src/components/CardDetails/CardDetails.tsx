@@ -1,5 +1,6 @@
 import { PerspectiveProxy, Ad4mModel, SubjectProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+// import { useModel } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/flux-utils/src/useModelReact";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { getProfile } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
@@ -30,6 +31,7 @@ export default function CardDetails({
     perspective,
     model: selectedClass,
     query: { source: id },
+    location: 'CardDetails'
   });
 
   const {
