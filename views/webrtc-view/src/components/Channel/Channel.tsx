@@ -150,6 +150,8 @@ export default function Channel({
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           currentView={currentView}
           inAnotherRoom={inAnotherRoom}
+          fullscreen={fullscreen}
+          setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
         />
@@ -158,7 +160,7 @@ export default function Channel({
       {webRTC.hasJoined && (
         <>
           <UserGrid webRTC={webRTC} agentClient={agentClient} profile={profile} />
-          <Footer webRTC={webRTC} onToggleSettings={() => toggleShowSettings(!showSettings)} />
+          <Footer webRTC={webRTC} onToggleSettings={() => toggleShowSettings(!showSettings)} currentView={currentView} fullscreen={fullscreen} setFullscreen={setFullscreen} />
           {webRTC.localState.settings.transcriber.on && (
             <Transcriber webRTC={webRTC} source={source} perspective={perspective} />
           )}
@@ -170,12 +172,6 @@ export default function Channel({
       <>{showDebug && <Debug webRTC={webRTC} profile={profile} />}</>
 
       <Notifications />
-
-      {currentView !== "@coasys/flux-webrtc-view" && (
-        <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
-          <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
-        </j-button>
-      )}
     </section>
   );
 }
