@@ -213,11 +213,6 @@ export default defineComponent({
 
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
-    const { entries: communities } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: Community,
-    });
-
     const { entries: channels } = useModel({
       perspective: computed(() => data.value.perspective),
       model: Channel,
@@ -237,7 +232,6 @@ export default defineComponent({
       apps,
       perspectives,
       data,
-      community: communities.value[0],
       channel: channels.value[0],
       currentView: ref(""),
       webrtcModalOpen: ref(false),
