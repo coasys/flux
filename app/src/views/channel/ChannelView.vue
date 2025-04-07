@@ -232,7 +232,7 @@ export default defineComponent({
       apps,
       perspectives,
       data,
-      channel: channels.value[0],
+      channel: computed(() => channels.value[0]),
       currentView: ref(""),
       webrtcModalOpen: ref(false),
       allDefined: ref(false),

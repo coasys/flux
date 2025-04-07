@@ -90,7 +90,7 @@ export default defineComponent({
 
     return {
       members,
-      community: communities.value[0],
+      community: computed(() => communities.value[0]),
     };
   },
   data() {

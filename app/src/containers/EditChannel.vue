@@ -170,8 +170,8 @@ export default defineComponent({
 
     return {
       apps,
-      channel: channels.value[0],
-      perspective: data.value.perspective,
+      channel: computed(() => channels.value[0]),
+      perspective: computed(() => data.value.perspective),
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
