@@ -280,7 +280,7 @@ export default defineComponent({
         const addedApps = this.selectedPlugins
           .filter((app) => !this.apps.some((a) => a.pkg === app.pkg))
           .map((app) => {
-            const appModel = new App(this.perspective!, app.pkg);
+            const appModel = new App(this.perspective!, undefined, this.$route.params.channelId as string);
             appModel.name = app.name;
             appModel.description = app.description;
             appModel.icon = app.icon;
