@@ -232,7 +232,7 @@ export default defineComponent({
 
     return {
       client,
-      activeCommunity: computed(() => communities.value[0]),
+      activeCommunity: computed(() => communities.value?.[0] || null),
       onLinkAdded,
       perspectives,
       isJoining: ref(false),

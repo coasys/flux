@@ -57,7 +57,7 @@ export default function AnswerCard(props: {
               <div className={styles.voters}>
                 {votes.length > 0 &&
                   votes.map((vote, i) => (
-                    <Avatar did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
+                    <Avatar key={vote.author} did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
                   ))}
                 <j-text size="500" nomargin>
                   {percentage}%

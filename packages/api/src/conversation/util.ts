@@ -60,7 +60,7 @@ export async function createEmbedding(perspective, text, itemId, ai: AIClient, b
   const relationship = new SemanticRelationship(perspective, undefined, itemId);
   relationship.expression = itemId;
   relationship.tag = embedding.baseExpression;
-  await relationship.save();
+  await relationship.save(batchId);
   const end3 = new Date().getTime();
   console.log(`${index ? `Item ${index}` : ""} SR saved in ${duration(start3, end3)}`);
 }

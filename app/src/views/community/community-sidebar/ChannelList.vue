@@ -260,15 +260,13 @@ export default defineComponent({
       return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
-      const channel = new Channel(this.perspective as PerspectiveProxy, channelId);
-      await channel.delete();
-
-      this.$router.push({
-        name: "community",
-        params: {
-          communityId: this.perspective.uuid,
-        },
-      });
+      try {
+        const channel = new Channel(this.perspective as PerspectiveProxy, channelId);
+        await channel.delete();
+        this.$router.push({ name: "community", params: { communityId: this.perspective.uuid } });
+      } catch (error) {
+        console.error("Failed to delete channel:", error);
+      }
     },
   },
 });

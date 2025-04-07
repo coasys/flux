@@ -252,6 +252,9 @@ export default defineComponent({
       this.isCreatingChannel = true;
 
       try {
+        if (!this.perspective) {
+          throw new Error("Cannot create a channel because perspective is undefined.");
+        }
         const channel = new Channel(this.perspective!);
         channel.name = name;
         await channel.save();

@@ -46,7 +46,7 @@ export default function MessageList({
   const messages = useMemo(() => {
     // Reverse order after pagination for inverted message scrolling
     return entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  }, [JSON.stringify(entries)]);
+  }, [entries]);
 
   function differenceInMinutes(timestamp1: string | number | Date, timestamp2: string | number | Date): number {
     const date1 = new Date(timestamp1);

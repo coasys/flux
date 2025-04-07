@@ -79,12 +79,16 @@ export default function MessageItem({
   }
 
   async function getReplyMessage() {
-    const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } })
-    setReplyMessage(replies[0]);
+    try {
+      const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } })
+      setReplyMessage(replies[0]);
+    } catch (error) {
+      console.error("Failed to fetch reply message:", error);
+    }
   }
 
   useEffect(() => {
-    getReplyMessage()
+    if (message.replyingTo) getReplyMessage()
   }, []);
 
   return (

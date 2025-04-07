@@ -170,7 +170,7 @@ export default defineComponent({
 
     return {
       apps,
-      channel: computed(() => channels.value[0]),
+      channel: computed(() => channels.value?.[0] || null),
       perspective: computed(() => data.value.perspective),
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
