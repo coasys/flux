@@ -171,9 +171,11 @@ export default function Channel({
 
       <Notifications />
 
-      <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
-        <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
-      </j-button>
+      {currentView !== "@coasys/flux-webrtc-view" && (
+        <j-button variant="ghost" onClick={() => setFullscreen(!fullscreen)} style={{ position: 'absolute', right: 0 }}>
+          <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+        </j-button>
+      )}
     </section>
   );
 }
