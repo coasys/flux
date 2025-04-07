@@ -14,7 +14,6 @@ type Props = {
   source: string;
   replyId: string | undefined | null;
   isThread?: boolean;
-  newMessage: Message;
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
@@ -28,7 +27,6 @@ export default function MessageList({
   source,
   replyId,
   isThread,
-  newMessage,
   onEmojiClick = () => {},
   onReplyClick = () => {},
   onThreadClick = () => {},

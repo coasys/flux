@@ -7,7 +7,7 @@ import Avatar from "../Avatar";
 import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
 import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
-import { useModel } from "@coasys/ad4m-react-hooks";
+import { useEffect, useState } from "preact/hooks";
 
 export default function MessageItem({
   showAvatar,
@@ -32,19 +32,14 @@ export default function MessageItem({
   onThreadClick?: (message: Message) => void;
   hideToolbar?: boolean;
 }) {
+  const [replyMessage, setReplyMessage] = useState<Message | null>(null)
   const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
 
-  // const { entries: replyMessages } = useModel({
-  //   perspective,
-  //   model: Message,
-  //   query: { where: { base: message.replyingTo } }
-  // });
-
-  // const { profile: replyProfile } = useAgent<Profile>({
-  //   client: agent,
-  //   did: replyMessages[0]?.author,
-  //   formatter: profileFormatter,
-  // });
+  const { profile: replyProfile } = useAgent<Profile>({
+    client: agent,
+    did: replyMessage?.author,
+    formatter: profileFormatter,
+  });
 
   function onOpenPicker(e) {
     e.stopPropagation();
@@ -83,13 +78,22 @@ export default function MessageItem({
     }
   }
 
+  async function getReplyMessage() {
+    const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } })
+    setReplyMessage(replies[0]);
+  }
+
+  useEffect(() => {
+    getReplyMessage()
+  }, []);
+
   return (
     <div
       className={`${styles.message} ${isReplying && styles.isReplying} ${
         message.isPopular && styles.isPopular
       }`}
     >
-      {/* {message.replyingTo && (
+      {message.replyingTo && (
         <>
           <div></div>
           <div>
@@ -102,12 +106,12 @@ export default function MessageItem({
                 size="300"
                 className={styles.body}
                 nomargin
-                dangerouslySetInnerHTML={{ __html: replyMessages[0]?.body }}
+                dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
               ></j-text>
             </j-box>
           </div>
         </>
-      )} */}
+      )}
       <div>
         {isFullVersion && (
           <j-box>
