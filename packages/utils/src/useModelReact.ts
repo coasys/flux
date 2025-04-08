@@ -51,17 +51,18 @@ export function useModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
 
   async function subscribeToCollection() {
     try {
-      console.log('useModel (React) subscribeToCollection', location);
       if(modelQuery) {
-        console.log('react dispose!')
+        console.log('react dispose!', location)
         modelQuery.dispose();
       }
+
+      console.log('useModel (React) subscribeToCollection', location);
 
       modelQuery =
         typeof model === "string"
           ? Ad4mModel.query(perspective, query).overrideModelClassName(model)
           : model.query(perspective, query);
-          
+
       if (pageSize) {
         // Handle paginated results
         const totalPageSize = pageSize * pageNumber;

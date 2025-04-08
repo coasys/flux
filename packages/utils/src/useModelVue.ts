@@ -73,12 +73,12 @@ export function useModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
         return;
       }
 
-      console.log('useModel (Vue) subscribeToCollection', location, perspectiveRef.value.uuid);
-
       if(modelQuery) {
-        console.log('vue dispose!')
+        console.log('vue dispose!', location)
         modelQuery.dispose();
       }
+
+      console.log('useModel (Vue) subscribeToCollection', location);
 
       modelQuery =
         typeof model === "string"
@@ -119,9 +119,7 @@ export function useModel<T extends Ad4mModel>(props: Props<T>): Result<T> {
   watch(
     perspectiveRef,
     async (newPerspective, oldPerspective) => {
-      // if (newPerspective !== oldPerspective) {
-      if (newPerspective !== oldPerspective) {
-        // console.log('perspective changed', newPerspective?.uuid, oldPerspective?.uuid);
+      if (!oldPerspective || newPerspective?.uuid !== oldPerspective?.uuid) {
         loading.value = true;
         entries.value = [];
         if (newPerspective) {
