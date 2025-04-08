@@ -59,10 +59,12 @@ export default function ChatView({
       const text = editor.current?.editor.getText();
       editor.current?.clear();
 
+      const batchId = await perspective.createBatch();
+
       // @ts-ignore
       const message = new Message(perspective, undefined, source);
       message.body = html;
-      await message.save();
+      await message.save(batchId);
 
       if (replyMessage) {
         perspective.addLinks([
@@ -76,8 +78,9 @@ export default function ChatView({
             predicate: EntryType.Message,
             target: message.baseExpression,
           },
-        ]);
+        ], undefined, batchId);
       }
+      perspective.commitBatch(batchId);
       setReplyMessage(null);
     } catch (e) {
       console.error(e);
