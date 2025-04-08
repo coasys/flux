@@ -134,7 +134,7 @@ export default defineComponent({
     const { me } = useMe(client.agent, profileFormatter);
 
     const { entries: channels } = useModel({
-      perspective: props.perspective as PerspectiveProxy,
+      perspective: computed(() => props.perspective as PerspectiveProxy),
       model: Channel,
       query: { source: "ad4m://self" },
       location: 'ChannelList'
