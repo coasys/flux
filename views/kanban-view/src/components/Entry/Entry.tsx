@@ -1,5 +1,6 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+// import { useModel } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/flux-utils/src/useModelReact";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
@@ -19,7 +20,7 @@ export default function Entry({
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const { entries } = useModel({ perspective, model: selectedClass, query: { where: { base: id } } });
+  const { entries } = useModel({ perspective, model: selectedClass, query: { where: { base: id } }, location: 'Enrty' });
 
   useEffect(() => {
     perspective

@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+// import { useModel } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/flux-utils/src/useModelReact";
 
 import Todo from "../subjects/Todo";
 
@@ -14,7 +15,7 @@ type Props = {
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
-  const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
+  const { entries: todos } = useModel({ perspective, model: Todo, query: { source }, location: 'TodoView create' });
 
   async function createTodo(event: React.KeyboardEvent<Element>) {
     if (event.key !== "Enter") return;

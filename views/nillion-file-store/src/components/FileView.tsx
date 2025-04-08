@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "preact/hooks";
 import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+// import { useModel } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/flux-utils/src/useModelReact";
 import { getProfile } from "@coasys/flux-api";
 import { v4 } from "uuid";
 import * as nil from "@nillion/client-web";
@@ -102,12 +103,14 @@ export function FileView({ perspective, source, agent }: Props) {
     perspective,
     model: File,
     query: { source },
+    location: 'FileView files'
   });
 
   const { entries: nillionUsers } = useModel({
     perspective,
     model: NillionUser,
     query: { source },
+    location: 'FileView nillion users'
   });
 
   console.log({ nillionUsers });
