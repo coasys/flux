@@ -1,7 +1,6 @@
-import { ModelOptions, Ad4mModel, Flag, Property, LinkQuery, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Literal, Optional } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
-import Conversation from "../conversation";
 import { SynergyTopic, SynergyItem, icons } from "@coasys/flux-utils";
 
 @ModelOptions({
@@ -14,19 +13,17 @@ export default class ConversationSubgroup extends Ad4mModel {
   })
   type: string;
 
-  @Property({
+  @Optional({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   subgroupName: string;
 
-  @Property({
+  @Optional({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   summary: string;
 

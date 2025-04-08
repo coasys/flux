@@ -1,4 +1,4 @@
-import { Link, ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
+import { Link, ModelOptions, Ad4mModel, Flag, Literal, Optional } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
@@ -15,19 +15,17 @@ export default class Conversation extends Ad4mModel {
   })
   type: string;
 
-  @Property({
+  @Optional({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   conversationName: string;
 
-  @Property({
+  @Optional({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   summary: string;
 
