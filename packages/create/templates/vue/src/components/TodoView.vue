@@ -26,7 +26,7 @@
           <j-flex j="between">
             <div :class="{ [styles.doneTodo]: todo.done }">
               <j-checkbox
-                @change="toggleTodo({ id: todo.id, done: $event.target.checked })"
+                @change="toggleTodo({ id: todo.baseExpression, done: $event.target.checked })"
                 :checked="todo.done"
                 style="--j-border-radius: 50%;"
                 size="sm"
@@ -40,7 +40,7 @@
                 </j-text>
               </j-checkbox>
             </div>
-            <j-button @click="deleteTodo(todo.id)">Delete</j-button>
+            <j-button @click="deleteTodo(todo.baseExpression)">Delete</j-button>
           </j-flex>
         </j-box>
       </j-flex>
@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-vue-hooks";
+import { useModel } from "@coasys/ad4m-vue-hooks";
 import { ref, computed, onMounted } from 'vue';
 
 import Todo from "../subjects/Todo";
@@ -70,26 +70,22 @@ onMounted(async () => {
   await perspective.ensureSDNASubjectClass(Todo);
 });
 
-const { entries: todos, repo } = useSubjects({
-  perspective: computed(() => perspective),
-  source: computed(() => source),
-  subject: Todo,
-});
+const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
 
 const createTodo = () => {
-  repo.value
-    .create({ title: title.value })
-    .then(() => {
-      title.value = "";
-    })
-    .catch(console.log);
+  const todo = new Todo(perspective, undefined, source);
+  todo.title = title.value;
+  todo.save();
 }
 
 const toggleTodo = ({ id, done }) => {
-  repo.value.update(id, { done }).catch(console.log);
+  const todo = new Todo(perspective, id, source);
+  todo.done = done;
+  todo.update();
 }
 
 const deleteTodo = (id: string) => {
-  repo.value.remove(id).catch(console.log);
+  const todo = new Todo(perspective, id, source);
+  todo.delete();
 }
 </script>

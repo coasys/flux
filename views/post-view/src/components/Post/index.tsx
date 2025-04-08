@@ -4,7 +4,7 @@ import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
 import { Post as PostSubject } from "@coasys/flux-api";
-import { useAgent, useSubject, useMe } from "@coasys/ad4m-react-hooks";
+import { useAgent, useMe, useModel } from "@coasys/ad4m-react-hooks";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
@@ -23,12 +23,14 @@ export default function Post({
   source: string;
 }) {
   const { methods: UIMethods } = useContext(UIContext);
+  const [ogData, setOgData] = useState<any>({});
 
-  const { entry: post } = useSubject({
+  const { entries: posts } = useModel({
     perspective,
-    id,
-    subject: PostSubject,
+    model: PostSubject,
+    query: { where: { base: id } },
   });
+  const post = posts[0];
 
   const { me } = useMe(agent, profileFormatter);
 
@@ -37,8 +39,6 @@ export default function Post({
     did: post?.author,
     formatter: profileFormatter,
   });
-
-  const [ogData, setOgData] = useState<any>({});
 
   async function fetchOgData(url) {
     try {
@@ -50,19 +50,16 @@ export default function Post({
   }
 
   useEffect(() => {
-    if (post?.url) {
-      fetchOgData(post.url);
-    }
+    if (post?.url) fetchOgData(post.url);
   }, [post?.url]);
 
   if (!post) return;
 
   const isAuthor = author?.did === me?.did;
-
-  const hasTitle = post.title;
-  const hasImage = post.image;
-  const hasBody = post.body;
-  const hasUrl = post.url;
+  const hasTitle = post?.title;
+  const hasImage = post?.image;
+  const hasBody = post?.body;
+  const hasUrl = post?.url;
 
   return (
     <div className={styles.post}>
@@ -174,8 +171,8 @@ export default function Post({
         <comment-section
           agent={agent}
           perspective={perspective}
-          source={post.id}
-        ></comment-section>
+          source={post.baseExpression}
+        />
       </j-box>
     </div>
   );

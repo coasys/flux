@@ -1,5 +1,5 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubject } from "@coasys/ad4m-react-hooks";
+import { PerspectiveProxy, Ad4mModel, SubjectProxy } from "@coasys/ad4m";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { getProfile } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
@@ -25,10 +25,11 @@ export default function CardDetails({
   perspective,
   channelId,
 }: Props) {
-  const { entry, repo } = useSubject({
+
+  const { entries } = useModel({
     perspective,
-    id,
-    subject: selectedClass,
+    model: selectedClass,
+    query: { source: id },
   });
 
   const {
@@ -61,7 +62,9 @@ export default function CardDetails({
 
   async function onDelete() {
     try {
-      await repo.remove(entry.id);
+      const model = await perspective.getSubjectProxy(entries[0]?.baseExpression, selectedClass) as any;
+      const entry = new model(perspective, entries[0]?.baseExpression, id);
+      entry.delete();
       onDeleted();
     } catch (e) {
       // Todo: error handling

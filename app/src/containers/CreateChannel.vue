@@ -129,11 +129,10 @@ import {
   getOfflineFluxApps,
 } from "@coasys/flux-api";
 import semver from "semver";
-import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
+import { usePerspective } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";
-import { dependencies } from "../../package.json";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -168,25 +167,10 @@ export default defineComponent({
   },
   async setup() {
     const route = useRoute();
-
     const client = await getAd4mClient();
-
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { repo } = useSubject({
-      perspective: () => data.value.perspective,
-      subject: Channel,
-    });
-
-    const { repo: appRepo } = useSubject({
-      perspective: () => data.value.perspective,
-      subject: App,
-    });
-
-    return {
-      appRepo,
-      repo,
-    };
+    return { perspective: data.value.perspective };
   },
   data() {
     return {
@@ -260,9 +244,7 @@ export default defineComponent({
         : [...this.selectedViews, pkg.pkg];
 
       // Preload view when selected to remove loading on submit
-      if (!isSelected) {
-        fetchFluxApp(pkg.pkg);
-      }
+      if (!isSelected) fetchFluxApp(pkg.pkg);
     },
     async createChannel() {
       const communityId = this.$route.params.communityId as string;
@@ -270,24 +252,23 @@ export default defineComponent({
       this.isCreatingChannel = true;
 
       try {
-        const channel = await this.repo?.create({
-          name,
-        });
+        if (!this.perspective) {
+          throw new Error("Cannot create a channel because perspective is undefined.");
+        }
+        const channel = new Channel(this.perspective!);
+        channel.name = name;
+        await channel.save();
 
-        const promises = this.selectedPlugins.map(async (app) => {
-          return this.appRepo?.create(
-            {
-              name: app.name,
-              description: app.description,
-              icon: app.icon,
-              pkg: app.pkg,
-            },
-            app.pkg,
-            channel.id
-          );
-        });
+        await this.perspective!.ensureSDNASubjectClass(App);
 
-        await Promise.all(promises);
+        await Promise.all(this.selectedPlugins.map(async (app) => {
+          const appInstance = new App(this.perspective!, undefined, channel.baseExpression);
+          appInstance.name = app.name;
+          appInstance.description = app.description;
+          appInstance.icon = app.icon;
+          appInstance.pkg = app.pkg;
+          await appInstance.save();
+        }))
 
         this.$emit("submit");
         this.channelName = "";
@@ -295,7 +276,7 @@ export default defineComponent({
           name: "channel",
           params: {
             communityId: communityId.toString(),
-            channelId: channel.id,
+            channelId: channel.baseExpression,
           },
         });
       } finally {

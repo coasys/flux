@@ -37,6 +37,7 @@ export default function Channel({
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
   const [inAnotherRoom, setInAnotherRoom] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
   const { profile } = useAgent<Profile>({
@@ -83,7 +84,6 @@ export default function Channel({
   }
 
   useEffect(() => {
-
     const cleanupWebRTC = () => {
       try {
         // 1. Cleanup WebRTC instance
@@ -133,7 +133,7 @@ export default function Channel({
 
   return (
     <section
-      className={`${styles.outer} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+      className={`${styles.outer} ${fullscreen && styles.fullscreen} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
       ref={wrapperEl}
     >
       {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(currentView) &&
@@ -150,6 +150,8 @@ export default function Channel({
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           currentView={currentView}
           inAnotherRoom={inAnotherRoom}
+          fullscreen={fullscreen}
+          setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
         />
@@ -158,7 +160,7 @@ export default function Channel({
       {webRTC.hasJoined && (
         <>
           <UserGrid webRTC={webRTC} agentClient={agentClient} profile={profile} />
-          <Footer webRTC={webRTC} onToggleSettings={() => toggleShowSettings(!showSettings)} />
+          <Footer webRTC={webRTC} onToggleSettings={() => toggleShowSettings(!showSettings)} currentView={currentView} fullscreen={fullscreen} setFullscreen={setFullscreen} />
           {webRTC.localState.settings.transcriber.on && (
             <Transcriber webRTC={webRTC} source={source} perspective={perspective} />
           )}

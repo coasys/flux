@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import {
   blobToDataURL,
@@ -45,7 +45,7 @@ import {
   getImage,
   resizeImage,
 } from "@coasys/flux-utils";
-import { useSubject, usePerspective } from "@coasys/ad4m-vue-hooks";
+import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community } from "@coasys/flux-api";
 
@@ -56,15 +56,16 @@ export default defineComponent({
   async setup(props) {
     const client = getAd4mClient;
     const { data } = usePerspective(client, () => props.communityId);
-    const { entry: community, repo } = useSubject({
-      perspective: () => data.value.perspective,
-      id: "ad4m://self",
-      subject: Community,
+
+    const { entries: communities } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Community,
+      query: { where: { base: "ad4m://self" } },
     });
 
     return {
-      repo,
-      community,
+      perspective: data.value.perspective,
+      community: communities.value[0],
     };
   },
   data() {
@@ -100,17 +101,17 @@ export default defineComponent({
           );
         }
 
-        await this.repo?.update(this.community?.id, {
-          name: this.communityName || undefined,
-          description: this.communityDescription || undefined,
-          image: compressedImage
-            ? {
-                data_base64: compressedImage,
-                name: "form-image",
-                file_type: "image/png",
-              }
-            : undefined,
-        });
+        const community = new Community(this.perspective!, this.community.baseExpression);
+        community.name = this.communityName;
+        community.description = this.communityDescription;
+        community.image = compressedImage
+          ? {
+              data_base64: compressedImage,
+              name: "form-image",
+              file_type: "image/png",
+            }
+          : undefined,
+        await community.update();
       } catch (e) {
         console.log(e);
       } finally {

@@ -12,15 +12,15 @@
     <div
       style="height: 100%"
       v-for="channel in channels"
-      :key="channel?.id"
+      :key="channel?.baseExpression"
       :style="{
-        height: channel?.id === channelId ? '100%' : '0',
+        height: channel?.baseExpression === channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel?.id]"
-        v-show="channel?.id === channelId"
-        :channelId="channel?.id"
+        v-if="loadedChannels[channel?.baseExpression]"
+        v-show="channel?.baseExpression === channelId"
+        :channelId="channel?.baseExpression"
         :communityId="communityId"
       ></channel-view>
     </div>
@@ -63,7 +63,7 @@
           <div class="channel-card-grid">
             <button
               class="channel-card"
-              @click="() => navigateToChannel(channel.id)"
+              @click="() => navigateToChannel(channel.baseExpression)"
               v-for="channel in channels"
             >
               # {{ channel.name }}
@@ -97,7 +97,7 @@
 
 <script lang="ts">
 import SidebarLayout from "@/layout/SidebarLayout.vue";
-import { defineComponent, ref, watch, onUnmounted } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -107,13 +107,9 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
-import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
+import { PerspectiveState } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  usePerspective,
-  usePerspectives,
-  useSubjects,
-} from "@coasys/ad4m-vue-hooks";
+import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
@@ -140,9 +136,9 @@ export default defineComponent({
 
     const { communities } = useCommunities(neighbourhoods);
 
-    const { entries: channels } = useSubjects({
-      perspective: () => data.value.perspective,
-      subject: Channel,
+    const { entries: channels } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Channel,
     });
 
     return {

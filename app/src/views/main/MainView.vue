@@ -174,7 +174,7 @@
 <script lang="ts">
 import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
@@ -196,11 +196,7 @@ import {
   Literal,
   PerspectiveProxy,
 } from "@coasys/ad4m";
-import {
-  useSubject,
-  usePerspective,
-  usePerspectives,
-} from "@coasys/ad4m-vue-hooks";
+import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
@@ -218,9 +214,9 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useSubject({
-      perspective: () => data.value.perspective,
-      subject: Community,
+    const { entries: communities } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Community,
     });
 
     setTimeout(async () => {
@@ -236,7 +232,7 @@ export default defineComponent({
 
     return {
       client,
-      activeCommunity: community,
+      activeCommunity: computed(() => communities.value?.[0] || null),
       onLinkAdded,
       perspectives,
       isJoining: ref(false),

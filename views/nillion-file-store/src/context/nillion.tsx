@@ -1,11 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as nil from "@nillion/client-web";
 import { NillionContextProviderProps } from "./nillion.d";
-
 import getConfig from "../config";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import NillionUser from "../subjects/NillionUsers";
-import { Literal } from "@coasys/ad4m";
 
 interface NillionContextType {
   client: nil.NillionClient | null;
@@ -24,18 +20,6 @@ export const NillionContextProvider = (props: NillionContextProviderProps) => {
   const [state, setState] = useState(defaultState);
   const { client, nillion } = state;
   const agentClient = props.agent;
-
-  // const { repo } = useSubject({
-  //   perspective: props.perspective,
-  //   id: client?.user_id || "ad4m://self",
-  //   subject: NillionUser,
-  // });
-
-  const { entries: nillionUsers, repo } = useSubjects({
-    perspective: props.perspective,
-    source: props.source,
-    subject: NillionUser,
-  });
 
   const loaded = React.useRef(false);
 

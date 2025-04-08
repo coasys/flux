@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { useSubjects, useSubject } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
@@ -20,12 +20,17 @@ export default function Card({
   perspective,
 }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
-  const { entry } = useSubject({ perspective, id, subject: selectedClass });
 
-  const { entries: comments } = useSubjects({
+  const { entries } = useModel({
     perspective,
-    source: id,
-    subject: Message,
+    model: selectedClass,
+    query: { source: id },
+  });
+
+  const { entries: comments } = useModel({
+    perspective,
+    model: Message,
+    query: { source: id },
   });
 
   const { associations } = useAssociations({
@@ -48,7 +53,7 @@ export default function Card({
   return (
     <div className={styles.card} onClick={onClick}>
       <j-text size="500" color="ui-800" nomargin>
-        {entry?.name || entry?.title || "Unnamed"}
+        {entries[0]?.name || entries[0]?.title || "Unnamed"}
       </j-text>
 
       <j-flex full a="center" j="between">

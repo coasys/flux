@@ -24,7 +24,7 @@ export default function Overlay({ perspective, agent, source }) {
           source={source}
           initialType={uiState.initialPostType}
           onPublished={onPublished}
-        ></CreatePost>
+        />
       )}
     </j-modal>
   );

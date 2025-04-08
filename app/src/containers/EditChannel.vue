@@ -106,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useAppStore } from "@/store/app";
 import {
   App,
@@ -118,15 +118,10 @@ import {
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  useSubjects,
-  useSubject,
-  usePerspective,
-} from "@coasys/ad4m-vue-hooks";
+import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import semver from "semver";
-import { dependencies } from "../../package.json";
 
 export default defineComponent({
   props: ["channelId"],
@@ -161,23 +156,22 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: channel, repo } = useSubject({
-      perspective: () => data.value.perspective,
-      id: props.channelId,
-      subject: Channel,
+    const { entries: channels } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Channel,
+      query: { where: { base: props.channelId } },
     });
 
-    const { entries: apps, repo: appRepo } = useSubjects({
-      perspective: () => data.value.perspective,
-      source: () => props.channelId,
-      subject: App,
+    const { entries: apps } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: App,
+      query: { source: props.channelId },
     });
 
     return {
-      repo,
       apps,
-      appRepo,
-      channel,
+      channel: computed(() => channels.value?.[0] || null),
+      perspective: computed(() => data.value.perspective),
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
@@ -277,7 +271,8 @@ export default defineComponent({
         const removeApps = this.apps
           .filter((app) => !this.selectedPlugins.some((a) => a.pkg === app.pkg))
           .map((app) => {
-            return this.appRepo?.remove(app.id);
+            const appModel = new App(this.perspective!, app.baseExpression);
+            return appModel.delete();
           });
 
         await Promise.all(removeApps);
@@ -285,22 +280,19 @@ export default defineComponent({
         const addedApps = this.selectedPlugins
           .filter((app) => !this.apps.some((a) => a.pkg === app.pkg))
           .map((app) => {
-            return this.appRepo?.create(
-              {
-                name: app.name,
-                description: app.description,
-                icon: app.icon,
-                pkg: app.pkg,
-              },
-              app.pkg
-            );
+            const appModel = new App(this.perspective!, undefined, this.$route.params.channelId as string);
+            appModel.name = app.name;
+            appModel.description = app.description;
+            appModel.icon = app.icon;
+            appModel.pkg = app.pkg;
+            return appModel.save();
           });
 
         await Promise.all(addedApps);
 
-        await this.repo?.update(this.$route.params.channelId as string, {
-          name: this.name,
-        });
+        const channel = new Channel(this.perspective!, this.$route.params.channelId as string);
+        channel.name = this.name;
+        await channel.update();
 
         this.$emit("submit");
       } finally {

@@ -1,12 +1,13 @@
 import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
-import { useAgent, useSubject } from "@coasys/flux-react-web";
+import { useAgent } from "@coasys/flux-react-web";
 import styles from "./MessageItem.module.css";
 import Avatar from "../Avatar";
 import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
 import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
+import { useEffect, useState } from "preact/hooks";
 
 export default function MessageItem({
   showAvatar,
@@ -31,13 +32,8 @@ export default function MessageItem({
   onThreadClick?: (message: Message) => void;
   hideToolbar?: boolean;
 }) {
+  const [replyMessage, setReplyMessage] = useState<Message | null>(null)
   const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
-
-  const { entry: replyMessage } = useSubject({
-    perspective,
-    id: message.replyingTo,
-    subject: Message,
-  });
 
   const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
@@ -63,7 +59,7 @@ export default function MessageItem({
     const me = await agent.me();
     const reactions = await perspective.get(
       new LinkQuery({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       })
@@ -75,12 +71,25 @@ export default function MessageItem({
       perspective.removeLinks(myReactions);
     } else {
       perspective.add({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       });
     }
   }
+
+  async function getReplyMessage() {
+    try {
+      const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } })
+      setReplyMessage(replies[0]);
+    } catch (error) {
+      console.error("Failed to fetch reply message:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (message.replyingTo) getReplyMessage()
+  }, []);
 
   return (
     <div

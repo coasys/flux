@@ -12,6 +12,8 @@ type Props = {
   did?: string;
   currentView: string;
   inAnotherRoom?: boolean;
+  fullscreen?: boolean;
+  setFullscreen?: (state: boolean) => void;
   joinRoom?: () => void;
   leaveRoom?: () => void;
 };
@@ -23,6 +25,8 @@ export default function JoinScreen({
   did,
   currentView,
   inAnotherRoom,
+  fullscreen,
+  setFullscreen,
   joinRoom,
   leaveRoom
 }: Props) {
@@ -89,13 +93,20 @@ export default function JoinScreen({
           </div>
 
           <div className={styles.settings}>
-            <div>
+            <j-flex gap="400">
               <j-tooltip placement="top" title="Settings">
                 <j-button onClick={onToggleSettings} square circle size="lg">
                   <j-icon name="gear"></j-icon>
                 </j-button>
               </j-tooltip>
-            </div>
+              {currentView !== "@coasys/flux-webrtc-view" && (
+                <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
+                  <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+                    <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+                  </j-button>
+                </j-tooltip>
+              )}
+            </j-flex>
           </div>
         </div>
       </j-box>

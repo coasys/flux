@@ -6,6 +6,9 @@ import styles from "./Footer.module.css";
 type Props = {
   webRTC: WebRTC;
   onToggleSettings: () => void;
+  currentView: string;
+  fullscreen?: boolean;
+  setFullscreen?: (state: boolean) => void;
 };
 
 function transcriptionSVG(on: boolean) {
@@ -37,7 +40,7 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, onToggleSettings }: Props) {
+export default function Footer({ webRTC, onToggleSettings, currentView, fullscreen, setFullscreen }: Props) {
   const {
     hasJoined,
     localState,
@@ -174,6 +177,15 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             <j-icon name="gear" />
           </j-button>
         </j-tooltip>
+
+        {currentView !== "@coasys/flux-webrtc-view" && (
+          <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
+            <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+              <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+            </j-button>
+          </j-tooltip>
+        )}
+
         {/* 
         <j-tooltip placement="top" title="Experiments">
           <j-button

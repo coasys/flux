@@ -54,11 +54,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watchEffect, ref } from "vue";
+import { defineComponent, watchEffect, ref, computed } from "vue";
 import { Community, getProfile } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
+import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
@@ -70,9 +70,9 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useSubject({
-      perspective: () => data.value.perspective,
-      subject: Community,
+    const { entries: communities } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Community,
     });
 
     watchEffect(async () => {
@@ -90,7 +90,7 @@ export default defineComponent({
 
     return {
       members,
-      community,
+      community: computed(() => communities.value[0]),
     };
   },
   data() {

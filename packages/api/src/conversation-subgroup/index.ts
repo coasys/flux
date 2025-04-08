@@ -1,32 +1,29 @@
-import { SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, LinkQuery, Literal } from "@coasys/ad4m";
+import { ModelOptions, Ad4mModel, Flag, Literal, Optional } from "@coasys/ad4m";
 import Topic, { TopicWithRelevance } from "../topic";
 import SemanticRelationship from "../semantic-relationship";
-import Conversation from "../conversation";
 import { SynergyTopic, SynergyItem, icons } from "@coasys/flux-utils";
 
-@SDNAClass({
+@ModelOptions({
   name: "ConversationSubgroup",
 })
-export default class ConversationSubgroup extends SubjectEntity {
-  @SubjectFlag({
+export default class ConversationSubgroup extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://conversation_subgroup",
   })
   type: string;
 
-  @SubjectProperty({
+  @Optional({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   subgroupName: string;
 
-  @SubjectProperty({
+  @Optional({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   summary: string;
 
@@ -159,23 +156,6 @@ export default class ConversationSubgroup extends SubjectEntity {
     }
   }
 
-  async parentConversation(): Promise<Conversation> {
-    const allConversations = (await Conversation.all(this.perspective)) as Conversation[];
-    const parentLinks = await this.perspective.get(
-      new LinkQuery({ predicate: "ad4m://has_child", target: this.baseExpression })
-    );
-    const parentConversation = allConversations.find((c) =>
-      parentLinks.find((p) => p.data.source === c.baseExpression)
-    );
-    return parentConversation;
-  }
-
-  async semanticRelationships(): Promise<SemanticRelationship[]> {
-    return (await SemanticRelationship.query(this.perspective, {
-      where: { expression: this.baseExpression },
-    })) as SemanticRelationship[];
-  }
-
   // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
     const result = await this.perspective.infer(`
@@ -211,24 +191,31 @@ export default class ConversationSubgroup extends SubjectEntity {
     );
   }
 
-  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean) {
-    const topic = await Topic.byName(this.perspective, topicName);
+  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean, existingTopic: Topic | null = null, batchId: string) {
+    let topic = existingTopic;
+    if (!topic) {
+      console.log('create new topic for:', topicName);
+      const newTopic = new Topic(this.perspective);
+      newTopic.topic = Literal.from(topicName).toUrl();
+      await newTopic.save(batchId);
+      topic = await newTopic.get();
+    }
     const existingTopicRelationship = isNewGroup
       ? null
       : ((
-          await SemanticRelationship.query(this.perspective, {
+          await SemanticRelationship.findAll(this.perspective, {
             where: { expression: this.baseExpression, tag: topic.baseExpression },
           })
         )[0] as SemanticRelationship);
     if (existingTopicRelationship) {
       existingTopicRelationship.relevance = relevance;
-      await existingTopicRelationship.update();
+      await existingTopicRelationship.update(batchId);
     } else {
       const relationship = new SemanticRelationship(this.perspective);
       relationship.expression = this.baseExpression;
       relationship.tag = topic.baseExpression;
       relationship.relevance = relevance;
-      await relationship.save();
+      await relationship.save(batchId);
     }
   }
 }

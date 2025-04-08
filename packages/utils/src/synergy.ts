@@ -76,9 +76,8 @@ export function detectBrowser(): string {
 
 export async function getAllTopics(perspective: PerspectiveProxy) {
   // gather up all existing topics in the neighbourhood
-  return (await Topic.query(perspective)).map((topic: any) => {
-    return { baseExpression: topic.baseExpression, name: Literal.fromUrl(topic.topic).get() };
-  });
+  const allTopics = await Topic.findAll(perspective);
+  return allTopics.map((topic: any) => ({ baseExpression: topic.baseExpression, name: topic.topic }));
 }
 
 export async function getDefaultLLM() {
@@ -330,12 +329,15 @@ export async function runProcessingCheck(
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
+  console.log('runProcessingCheck')
+
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
   const responsible = await responsibleForProcessing(perspective, neighbourhood, channelId, unprocessedItems);
 
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
+    console.log('I am responsible for processing')
     const client = await getAd4mClient();
     const me = await client.agent.me();
     const numberOfItemsToProcess = Math.min(maxItemsToProcess, unprocessedItems.length - numberOfItemsDelay);

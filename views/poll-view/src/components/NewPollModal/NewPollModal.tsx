@@ -1,5 +1,3 @@
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { SubjectRepository } from "@coasys/flux-api";
 import * as d3 from "d3";
 import { useRef, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
@@ -11,14 +9,13 @@ type Props = {
   perspective: any;
   source: string;
   myDid: string;
-  open: boolean;
-  setOpen: (state: boolean) => void;
+  close: () => void;
 };
 
 type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
 const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
 
-export default function PollView({ perspective, source, myDid, open, setOpen }: Props) {
+export default function PollView({ perspective, source, myDid, close }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
@@ -29,7 +26,6 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
   const [answersError, setAnswersError] = useState("");
   const [loading, setLoading] = useState(false);
   const colorScale = useRef(d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis));
-  const { repo: pollRepo } = useSubjects({ perspective, source, subject: Poll });
 
   function addAnswer() {
     if (!newAnswer) setAnswersError("Required");
@@ -49,40 +45,34 @@ export default function PollView({ perspective, source, myDid, open, setOpen }: 
     setAnswers(newAnswers);
   }
 
-  function toggleOpen(open: boolean) {
-    setOpen(open);
-    if (!open) {
-      // reset state
-      setTitle("");
-      setDescription("");
-      setAnswers([]);
-      setVoteType(voteTypes[0]);
-      setAnswersLocked(true);
-      setTitleError("");
-      setAnswersError("");
-      setLoading(false);
-    }
-  }
-
   async function createPoll() {
     setTitleError(title ? "" : "Required");
     const answersValid = !answersLocked || answers.length > 1;
     setAnswersError(answersValid ? "" : "At least 2 answers required for locked polls");
     if (title && answersValid) {
       setLoading(true);
-      // @ts-ignore
-      const poll = (await pollRepo.create({ title, description, voteType, answersLocked })) as any;
-      const answerRepo = await new SubjectRepository(Answer, { perspective, source: poll.id });
-      // @ts-ignore
-      Promise.all(answers.map((answer) => answerRepo.create({ text: answer.text })))
-        .then(() => toggleOpen(false))
+      const newPoll = new Poll(perspective, undefined, source);
+      newPoll.title = title;
+      newPoll.description = description;
+      newPoll.voteType = voteType;
+      newPoll.answersLocked = answersLocked;
+      await newPoll.save();
+
+      Promise.all(
+        answers.map((answer) => {
+          const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
+          newAnswer.text = answer.text;
+          return newAnswer.save();
+        })
+      )
+        .then(() => close())
         .catch(console.log);
     }
   }
 
   return (
     // @ts-ignore
-    <j-modal open={open} onToggle={(e) => toggleOpen(e.target.open)}>
+    <j-modal open onToggle={(e) => !e.target.open && close()}>
       <j-box m="700">
         <j-flex direction="column" gap="600" a="center">
           <j-text variant="heading-lg">New poll</j-text>

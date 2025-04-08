@@ -1,32 +1,31 @@
-import { Link, SDNAClass, SubjectEntity, SubjectFlag, SubjectProperty, Literal } from "@coasys/ad4m";
+import { Link, ModelOptions, Ad4mModel, Flag, Literal, Optional } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
 import { SynergyTopic, SynergyGroup } from "@coasys/flux-utils";
+import { Topic } from "@coasys/flux-api";
 
-@SDNAClass({
+@ModelOptions({
   name: "Conversation",
 })
-export default class Conversation extends SubjectEntity {
-  @SubjectFlag({
+export default class Conversation extends Ad4mModel {
+  @Flag({
     through: "flux://entry_type",
     value: "flux://conversation",
   })
   type: string;
 
-  @SubjectProperty({
+  @Optional({
     through: "flux://has_name",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   conversationName: string;
 
-  @SubjectProperty({
+  @Optional({
     through: "flux://has_summary",
     writable: true,
     resolveLanguage: "literal",
-    required: false,
   })
   summary: string;
 
@@ -109,13 +108,7 @@ export default class Conversation extends SubjectEntity {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    const subgroups = (await ConversationSubgroup.query(this.perspective, {
-      source: this.baseExpression,
-    })) as ConversationSubgroup[];
-    // sort by timestamp
-    return subgroups.sort((a, b) => {
-      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    });
+    return await ConversationSubgroup.findAll(this.perspective, { where: { source: this.baseExpression } })
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {
@@ -210,7 +203,8 @@ export default class Conversation extends SubjectEntity {
       {
         group: inputGroup,
         unprocessedItems: unprocessedItems.map((item, index) => {
-          return { id: index, text: item.text.replace(/<[^>]*>/g, "") };
+          const text = item.text?.replace(/<[^>]*>/g, "") || "undefined"
+          return { id: index, text };
         }),
       },
       this.perspective.ai
@@ -234,38 +228,55 @@ export default class Conversation extends SubjectEntity {
     return result;
   }
 
-  private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], isNewGroup?: boolean) {
+  private async updateGroupTopics(group: ConversationSubgroup, newMessages: string[], batchId: string, isNewGroup?: boolean) {
     const { topics } = await ensureLLMTasks(this.perspective.ai);
     let currentTopics = (await group.topicsWithRelevance()) as any;
     let currentNewTopics = await LLMTaskWithExpectedOutputs(
       topics,
       {
-        topics: currentTopics.map((t) => {
-          return { n: t.name, rel: t.relevance };
-        }),
+        topics: currentTopics.map((t) => ({ n: t.name, rel: t.relevance })),
         messages: newMessages,
       },
       this.perspective.ai
     );
 
-    for (const topic of currentNewTopics) {
-      await group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup);
-    }
+    const topicMatches = await Topic.findAll(this.perspective, {
+      where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl())},
+    });
+    await Promise.all(currentNewTopics.map((topic) => {
+      const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
+      group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId)
+    }));
   }
 
-  private async createNewGroup(newGroup: { n: string; s: string }) {
+  private async createNewGroup(newGroup: { n: string; s: string }, batchId: string) {
     let newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
     newSubgroupEntity.subgroupName = newGroup.n;
     newSubgroupEntity.summary = newGroup.s;
-    await newSubgroupEntity.save();
-    return await newSubgroupEntity.get();
+    await newSubgroupEntity.save(batchId);
+    return newSubgroupEntity
   }
 
   async processNewExpressions(unprocessedItems) {
+    const startProcessing = new Date().getTime();
+
     const subgroups = await this.subgroups();
     const currentSubgroup: ConversationSubgroup | null = subgroups.length ? subgroups[subgroups.length - 1] : null;
 
+    function duration(start, end) {
+      return `${(end - start) / 1000} secs`;
+    }
+
+    unprocessedItems = unprocessedItems.map((item) => {
+      if(!item.text) {
+        item.text = ""
+      }
+      return item
+    })
+    const batchId = await this.perspective.createBatch();
+
     // ============== LLM group detection ===============================
+    const startGroupTask = new Date().getTime();
     // Have LLM sort new messages into old group or detect subject change
     let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
 
@@ -291,7 +302,7 @@ export default class Conversation extends SubjectEntity {
     let newSubgroupEntity;
     let indexOfFirstItemInNewSubgroup;
     if (detectResult.newGroup) {
-      newSubgroupEntity = await this.createNewGroup(detectResult.newGroup);
+      newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
         (item) => item.baseExpression === detectResult.newGroup.firstItemId
       );
@@ -317,12 +328,21 @@ export default class Conversation extends SubjectEntity {
       });
     }
 
+    const endGroupTask = new Date().getTime();
+    console.log(`============== 1: LLM group detection complete! (${duration(startGroupTask, endGroupTask)}) ==============`);
+
     // ============== LLM topic list updating ===============================
+    const startTopicTask = new Date().getTime();
     // Get update topic lists from LLM and save results
-    if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages);
-    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, true);
+    if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages, batchId);
+    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, batchId, true);
+
+    const endTopicTask = new Date().getTime();
+    console.log(`============== 2: LLM topic list updating complete! (${duration(startTopicTask, endTopicTask)}) ==============`);
 
     // ============== LLM conversation updating ===============================
+
+    const startConversationTask = new Date().getTime();
     // Gather list of all sub-group name and info as it is now after this processing
 
     // update current group info in the array
@@ -333,9 +353,7 @@ export default class Conversation extends SubjectEntity {
     }
 
     // create array with property names for the prompt
-    const promptArray = subgroups.map((g) => {
-      return { n: g.subgroupName, s: g.summary };
-    });
+    const promptArray = subgroups.map((g) => ({ n: g.subgroupName, s: g.summary }));
 
     // Add new group if one was detected
     if (detectResult.newGroup) promptArray.push({ n: detectResult.newGroup.n, s: detectResult.newGroup.s });
@@ -343,49 +361,88 @@ export default class Conversation extends SubjectEntity {
     const { conversation } = await ensureLLMTasks(this.perspective.ai);
     let newConversationInfo = await LLMTaskWithExpectedOutputs(conversation, promptArray, this.perspective.ai);
 
+    const endConversationTask = new Date().getTime();
+    console.log(`============== 3: LLM conversation updating complete! (${duration(startConversationTask, endConversationTask)}) ==============`);
+
     // ------------ saving all new data ------------------
 
     // Save conversation info
+    const start1 = new Date().getTime();
     this.conversationName = newConversationInfo.n;
     this.summary = newConversationInfo.s;
-    await this.update();
+    await this.update(batchId);
+    const end1 = new Date().getTime();
+    console.log('Conversation info updated: ', duration(start1, end1));
 
     // Save current group
-    if (currentSubgroup) await currentSubgroup.update();
+    if (currentSubgroup) {
+      console.log('Current subgroup updating:', currentSubgroup);
+      const start2 = new Date().getTime();
+      await currentSubgroup.update(batchId);
+      const end2 = new Date().getTime();
+      console.log('Current subgroup info updated: ', duration(start2, end2));
+    }
 
     // create vector embeddings for each unprocessed item
+    console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
+    const start3 = new Date().getTime();
     await Promise.all(
-      unprocessedItems.map((item) =>
-        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai)
+      unprocessedItems.map((item, index) =>
+        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1)
       )
     );
+    const end3 = new Date().getTime();
+    console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
 
     // update vector embedding for conversation
-    await removeEmbedding(this.perspective, this.baseExpression);
-    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai);
+    const start4 = new Date().getTime();
+    await removeEmbedding(this.perspective, this.baseExpression, batchId);
+    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
+    const end4 = new Date().getTime();
+    console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
-      await removeEmbedding(this.perspective, currentSubgroup.baseExpression);
+      const start5 = new Date().getTime();
+      await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
       await createEmbedding(
         this.perspective,
         currentSubgroup.summary,
         currentSubgroup.baseExpression,
-        this.perspective.ai
+        this.perspective.ai,
+        batchId
       );
+      const end5 = new Date().getTime();
+      console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
     }
     // create vector embedding for new subgroup if returned from LLM
     if (newSubgroupEntity) {
+      const start6 = new Date().getTime();
       await createEmbedding(
         this.perspective,
         newSubgroupEntity.summary,
         newSubgroupEntity.baseExpression,
-        this.perspective.ai
+        this.perspective.ai,
+        batchId
       );
+      const end6 = new Date().getTime();
+      console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
     }
 
     // batch commit all new links (currently only "ad4m://has_child" links)
     // i.e. sorting messages into current and/or new sub-group
-    await this.perspective.addLinks(newLinks);
+    const start7 = new Date().getTime();
+    await this.perspective.addLinks(newLinks, 'shared', batchId);
+    const end7 = new Date().getTime();
+    console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
+
+    const endProcessing = new Date().getTime();
+
+    console.log(`============== All processing complete in ${duration(startProcessing, endProcessing)}! ==============`);
+    const startBatchCommit = new Date().getTime();
+    console.log('Committing batch...');
+    await this.perspective.commitBatch(batchId);
+    const endBatchCommit = new Date().getTime();  
+    console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
 }

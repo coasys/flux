@@ -1,7 +1,9 @@
 import { AgentClient } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useState } from "preact/hooks";
 import Poll from "../../models/Poll";
+import Answer from "../../models/Answer";
+import Vote from "../../models/Vote";
 import NewPollModal from "../NewPollModal";
 import PollCard from "../PollCard";
 
@@ -14,14 +16,31 @@ type Props = {
 export default function PollView({ perspective, source, agent }: Props) {
   const [myDid, setMyDid] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const { entries: polls, repo: pollRepo } = useSubjects({ perspective, source, subject: Poll });
+  const { entries: polls } = useModel({ perspective, model: Poll, query: { source } });
 
-  function deletePoll(id: string) {
-    pollRepo.remove(id).catch(console.log);
+  async function deletePoll(id: string) {
+    const poll = new Poll(perspective, id, source);
+    await poll.delete();
+  }
+
+  async function ensureSDNAClasses() {
+    // Ensure all SDNA classes are loaded into the perspective
+    await Promise.all([
+      perspective.ensureSDNASubjectClass(Poll),
+      perspective.ensureSDNASubjectClass(Answer),
+      perspective.ensureSDNASubjectClass(Vote),
+    ]);
+  }
+
+  async function getMyDid() {
+    // Store user DID for use throughout the view
+    const me = await agent.me();
+    setMyDid(me.did);
   }
 
   useEffect(() => {
-    agent.me().then((data) => setMyDid(data.did));
+    ensureSDNAClasses();
+    getMyDid();
   }, []);
 
   return (
@@ -34,11 +53,19 @@ export default function PollView({ perspective, source, agent }: Props) {
         New Poll
       </j-button>
 
-      <NewPollModal perspective={perspective} source={source} myDid={myDid} open={modalOpen} setOpen={setModalOpen} />
+      {modalOpen && (
+        <NewPollModal perspective={perspective} source={source} myDid={myDid} close={() => setModalOpen(false)} />
+      )}
 
       <j-flex gap="500" direction="column">
         {polls.map((poll) => (
-          <PollCard key={poll.id} perspective={perspective} myDid={myDid} poll={poll} deletePoll={deletePoll} />
+          <PollCard
+            key={poll.baseExpression}
+            perspective={perspective}
+            myDid={myDid}
+            poll={poll}
+            deletePoll={deletePoll}
+          />
         ))}
       </j-flex>
     </j-flex>

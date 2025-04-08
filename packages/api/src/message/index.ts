@@ -1,48 +1,43 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import {
-  SDNAClass,
-  SubjectProperty,
-  SubjectCollection,
-  SubjectFlag,
-} from "@coasys/ad4m";
+import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from "@coasys/ad4m";
 
 const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
 
-@SDNAClass({
+@ModelOptions({
   name: "Message",
 })
-export class Message {
-  @SubjectFlag({
+export class Message extends Ad4mModel {
+  @Flag({
     through: ENTRY_TYPE,
     value: EntryType.Message,
   })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: BODY,
     writable: true,
     resolveLanguage: "literal",
   })
   body: string;
 
-  @SubjectCollection({
+  @Collection({
     through: REACTION,
   })
   reactions: string[] = [];
 
-  @SubjectProperty({
+  @Optional({
     getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
   })
   replyingTo: string | undefined = "";
 
-  @SubjectProperty({
+  @ReadOnly({
     getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
     (length(List, Length), Length > 5 -> Value = true ; Value = false)`,
   })
   isPopular: boolean = false;
 
-  @SubjectCollection({
+  @Collection({
     through: "ad4m://has_child",
     where: {
       condition: `subject_class("Message", Class), instance(Class, Target)`,
@@ -50,7 +45,7 @@ export class Message {
   })
   thread: string[] = [];
 
-  @SubjectCollection({
+  @Collection({
     through: REPLY_TO,
   })
   replies: string[] = [];

@@ -28,7 +28,7 @@
         <j-tooltip placement="auto" title="Manage views">
           <j-button
             v-if="sameAgent"
-            @click="() => goToEditChannel(channel?.id)"
+            @click="() => goToEditChannel(channel?.baseExpression)"
             size="sm"
             variant="ghost"
           >
@@ -53,20 +53,15 @@
                 checked: app.pkg === currentView,
               }"
               v-for="app in apps"
+              @click="() => changeCurrentView(app.pkg)"
             >
-              <input
-                :name="channel?.id"
-                type="radio"
-                :value.prop="app.pkg"
-                @change="changeCurrentView"
-              />
               <j-icon :name="app.icon" size="xs"></j-icon>
               <span>{{ app.name }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
               <j-button
                 v-if="sameAgent"
-                @click="() => goToEditChannel(channel?.id)"
+                @click="() => goToEditChannel(channel?.baseExpression)"
                 size="sm"
                 variant="ghost"
               >
@@ -153,10 +148,10 @@
             checked: app.pkg === currentView,
           }"
           v-for="app in apps"
-          @click="changeCurrentView"
+          @click="() => changeCurrentView(app.pkg)"
         >
           <input
-            :name="channel?.id"
+            :name="channel?.baseExpression"
             type="radio"
             :checked.prop="app.pkg === currentView"
             :value.prop="app.pkg"
@@ -180,8 +175,7 @@ import {
   useMe,
   usePerspective,
   usePerspectives,
-  useSubject,
-  useSubjects,
+  useModel,
 } from "@coasys/ad4m-vue-hooks";
 import {
   App,
@@ -193,7 +187,7 @@ import {
 } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 interface MentionTrigger {
   label: string;
@@ -213,32 +207,23 @@ export default defineComponent({
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
-
     const { perspectives } = usePerspectives(client);
-
     const { data } = usePerspective(client, () => props.communityId);
+    const { me } = useMe(client.agent, profileFormatter);
 
-    // ensure SNDA is working for topics
     await data.value.perspective?.ensureSDNASubjectClass(Topic);
 
-    const { entry: community } = useSubject({
-      perspective: () => data.value.perspective,
-      subject: Community,
+    const { entries: channels } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: Channel,
+      query: { where: { base: props.channelId! } },
     });
 
-    const { entry: channel, repo: channelRepo } = useSubject({
-      perspective: () => data.value.perspective,
-      id: () => props.channelId,
-      subject: Channel,
+    const { entries: apps } = useModel({
+      perspective: computed(() => data.value.perspective),
+      model: App,
+      query: { source: props.channelId },
     });
-
-    const { entries: apps } = useSubjects({
-      perspective: () => data.value.perspective,
-      source: () => props.channelId,
-      subject: App,
-    });
-
-    const { me } = useMe(client.agent, profileFormatter);
 
     return {
       agentClient: client.agent,
@@ -247,9 +232,7 @@ export default defineComponent({
       apps,
       perspectives,
       data,
-      community,
-      channel,
-      channelRepo,
+      channel: computed(() => channels.value[0]),
       currentView: ref(""),
       webrtcModalOpen: ref(false),
       allDefined: ref(false),
@@ -279,8 +262,6 @@ export default defineComponent({
         if (!this.currentView) {
           this.currentView = val[0]?.pkg;
         }
-
-        //console.log(JSON.stringify(val));
 
         // Add new views
         val?.forEach(async (app: App) => {
@@ -344,8 +325,7 @@ export default defineComponent({
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
-    changeCurrentView(e: any) {
-      const value = e.target.value;
+    changeCurrentView(value: string) {
       // if entering webrtc or synergy view, close modal
       if (
         ["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
