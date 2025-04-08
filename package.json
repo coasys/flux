@@ -33,8 +33,8 @@
   "resolutions": {
     "@coasys/ad4m": "0.10.1-release-candidate-2-test-3",
     "@coasys/ad4m-connect": "0.10.1-release-candidate-2-test-3",
-    "@coasys/ad4m-vue-hooks": "0.10.1-release-candidate-2-test-4",
-    "@coasys/ad4m-react-hooks": "0.10.1-release-candidate-2-test-4"
+    "@coasys/ad4m-vue-hooks": "0.10.1-release-candidate-2-test-7",
+    "@coasys/ad4m-react-hooks": "0.10.1-release-candidate-2-test-6"
   },
   "engines": {
     "node": ">=18.16.0"
