@@ -1,6 +1,5 @@
 import { AgentClient } from "@coasys/ad4m";
-// import { useModel } from "@coasys/ad4m-react-hooks"
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useState } from "preact/hooks";
 import Poll from "../../models/Poll";
 import Answer from "../../models/Answer";
@@ -17,7 +16,7 @@ type Props = {
 export default function PollView({ perspective, source, agent }: Props) {
   const [myDid, setMyDid] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const { entries: polls } = useModel({ perspective, model: Poll, query: { source }, location: 'PollView' });
+  const { entries: polls } = useModel({ perspective, model: Poll, query: { source } });
 
   async function deletePoll(id: string) {
     const poll = new Poll(perspective, id, source);

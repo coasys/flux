@@ -1,6 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-// import { useModel } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
@@ -26,14 +25,12 @@ export default function Card({
     perspective,
     model: selectedClass,
     query: { source: id },
-    location: 'Card entries'
   });
 
   const { entries: comments } = useModel({
     perspective,
     model: Message,
     query: { source: id },
-    location: 'Card comments'
   });
 
   const { associations } = useAssociations({

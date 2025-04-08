@@ -118,8 +118,7 @@ import {
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { usePerspective } from "@coasys/ad4m-vue-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelVue";
+import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import semver from "semver";
@@ -161,14 +160,12 @@ export default defineComponent({
       perspective: computed(() => data.value.perspective),
       model: Channel,
       query: { where: { base: props.channelId } },
-      location: 'EditChannel: channels'
     });
 
     const { entries: apps } = useModel({
       perspective: computed(() => data.value.perspective),
       model: App,
       query: { source: props.channelId },
-      location: 'EditChannel: apps'
     });
 
     return {

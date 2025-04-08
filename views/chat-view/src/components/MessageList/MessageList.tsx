@@ -1,5 +1,4 @@
-// import { useModel } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { Message } from "@coasys/flux-api";
@@ -42,7 +41,6 @@ export default function MessageList({
     model: Message,
     query: { source, order: { timestamp: "DESC" } },
     pageSize: PAGE_SIZE,
-    location: 'MessageList'
   });
 
   const messages = useMemo(() => {

@@ -1,6 +1,5 @@
 import { Ad4mModel, PerspectiveProxy, Literal, makeRandomPrologAtom } from "@coasys/ad4m";
-// import { useModel } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useEffect, useMemo } from "preact/hooks";
 import { useState } from "react";
@@ -45,7 +44,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     });
   }, [perspective.uuid]);
 
-  const { entries } = useModel({ perspective, model: selectedClass, query: { source }, location: 'Board' });
+  const { entries } = useModel({ perspective, model: selectedClass, query: { source } });
 
   function loadColumns() {
     getNamedOptions(perspective, selectedClass).then((namedOpts) => {

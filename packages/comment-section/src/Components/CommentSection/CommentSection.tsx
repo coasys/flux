@@ -1,8 +1,7 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message } from "@coasys/flux-api";
-import { useMe } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel, useMe } from "@coasys/ad4m-react-hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
@@ -23,7 +22,7 @@ export default function CommentSection({
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const { entries: comments } = useModel({ perspective, model: Message, query: { source }, location: 'CommentSection' });
+  const { entries: comments } = useModel({ perspective, model: Message, query: { source } });
 
   function onKeydown(e) {
     if (e.key === "Enter" && !e.shiftKey) {

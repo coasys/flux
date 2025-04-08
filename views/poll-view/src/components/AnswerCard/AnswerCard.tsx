@@ -1,5 +1,4 @@
-// import { useModel } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Vote from "../../models/Vote";
 import Avatar from "../Avatar";
@@ -23,7 +22,7 @@ export default function AnswerCard(props: {
   const [points, setPoints] = useState(myPoints);
   const pointsRef = useRef(0);
   const slidingRef = useRef(false);
-  const { entries: votes } = useModel({ perspective, model: Vote, query: { source: answer.baseExpression }, location: `AnsweCard ${answer.baseExpression}` });
+  const { entries: votes } = useModel({ perspective, model: Vote, query: { source: answer.baseExpression } });
 
   useEffect(() => {
     window.addEventListener("mouseup", () => {

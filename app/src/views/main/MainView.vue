@@ -196,8 +196,7 @@ import {
   Literal,
   PerspectiveProxy,
 } from "@coasys/ad4m";
-import { usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelVue";
+import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
@@ -218,7 +217,6 @@ export default defineComponent({
     const { entries: communities } = useModel({
       perspective: computed(() => data.value.perspective),
       model: Community,
-      location: 'MainView'
     });
 
     setTimeout(async () => {

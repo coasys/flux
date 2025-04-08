@@ -89,8 +89,7 @@ import { defineComponent, ref, computed } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelVue";
+import { useMe, useModel } from "@coasys/ad4m-vue-hooks";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import {
@@ -137,7 +136,6 @@ export default defineComponent({
       perspective: computed(() => props.perspective as PerspectiveProxy),
       model: Channel,
       query: { source: "ad4m://self" },
-      location: 'ChannelList'
     });
 
     return {

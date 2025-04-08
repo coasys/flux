@@ -4,8 +4,7 @@ import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
 import { Post as PostSubject } from "@coasys/flux-api";
-import { useAgent, useMe } from "@coasys/ad4m-react-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelReact";
+import { useAgent, useMe, useModel } from "@coasys/ad4m-react-hooks";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
@@ -30,7 +29,6 @@ export default function Post({
     perspective,
     model: PostSubject,
     query: { where: { base: id } },
-    location: 'Post'
   });
   const post = posts[0];
 

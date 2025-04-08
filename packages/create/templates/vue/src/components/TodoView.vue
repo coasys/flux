@@ -50,8 +50,7 @@
 
 <script setup lang="ts">
 import { PerspectiveProxy } from "@coasys/ad4m";
-// import { useModel } from "@coasys/ad4m-vue-hooks";
-import { useModel } from "@coasys/flux-utils/src/useModelVue";
+import { useModel } from "@coasys/ad4m-vue-hooks";
 import { ref, computed, onMounted } from 'vue';
 
 import Todo from "../subjects/Todo";
@@ -71,7 +70,7 @@ onMounted(async () => {
   await perspective.ensureSDNASubjectClass(Todo);
 });
 
-const { entries: todos } = useModel({ perspective, model: Todo, query: { source }, location: 'TodoView create' });
+const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
 
 const createTodo = () => {
   const todo = new Todo(perspective, undefined, source);
