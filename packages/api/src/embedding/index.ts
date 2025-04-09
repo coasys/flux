@@ -14,13 +14,12 @@ export default class Embedding extends Ad4mModel {
 
   @Property({
     through: "flux://embedding",
-    writable: true,
+    resolveLanguage: EMBEDDING_VECTOR_LANGUAGE,
   })
   embedding: any;
 
   @Property({
     through: "flux://model",
-    writable: true,
     resolveLanguage: "literal",
   })
   model: string;
