@@ -1,4 +1,4 @@
-import { Link, ModelOptions, Ad4mModel, Flag, Literal, Optional, PerspectiveUnsignedInput } from "@coasys/ad4m";
+import { Link, ModelOptions, Ad4mModel, Flag, Literal, Optional, NeighbourhoodProxy } from "@coasys/ad4m";
 import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
@@ -265,10 +265,10 @@ export default class Conversation extends Ad4mModel {
   }
 
   async processNewExpressions(
+    neighbourhood: NeighbourhoodProxy,
     channelId: string,
     unprocessedItems: SynergyItem[],
-    setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>,
-    broadcast: (payload: PerspectiveUnsignedInput) => void
+    setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>
   ) {
     const startProcessing = new Date().getTime();
 
@@ -278,7 +278,7 @@ export default class Conversation extends Ad4mModel {
 
     function updateProgress(progress: { step: number; description: string }) {
       setProcessingData((prev) => ({ ...prev, progress }));
-      broadcast({ links: [{ source: channelId, predicate: "processing-update", target: JSON.stringify(progress) }] });
+      neighbourhood.sendBroadcastU({ links: [{ source: channelId, predicate: "processing-update", target: JSON.stringify(progress) }] });
     }
 
     updateProgress({ step: 2, description: "Starting..." });

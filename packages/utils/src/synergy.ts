@@ -358,7 +358,7 @@ export async function runProcessingCheck(
     // process items into conversation
     const conversation = await findOrCreateNewConversation(perspective, channelId);
     try {
-      await conversation.processNewExpressions(channelId, itemsToProcess, setProcessingData, neighbourhood.sendBroadcastU);
+      await conversation.processNewExpressions(neighbourhood, channelId, itemsToProcess, setProcessingData);
     } catch (e) {
       console.log("Error processing items into conversation:" + e);
     }
