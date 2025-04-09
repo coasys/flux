@@ -315,7 +315,7 @@ export default class Conversation extends Ad4mModel {
 
     // Handle case where the conversation is empty (no group yet) but LLM returns data in group and not in newGroup
     if (!currentSubgroup && detectResult.group && !detectResult.newGroup) {
-      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].id };
+      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].baseExpression };
       detectResult.group = null;
     }
 
