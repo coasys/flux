@@ -69,26 +69,58 @@
               # {{ channel.name }}
             </button>
           </div>
+
+          <j-box pt="500">
+            <j-flex a="center" gap="700">
+              <j-button
+                size="xl"
+                @click="() => setShowCreateChannel(true)"
+              >
+                Create a new channel
+              </j-button>
+
+              <j-text nomargin color="black" size="500" weight="800">
+                or
+              </j-text>
+
+              <j-button variant="primary" size="xl" @click="createConversation" :loading="isCreatingConversation">
+                Start a conversation!
+              </j-button>
+            </j-flex>
+          </j-box>
         </j-flex>
       </div>
     </div>
 
     <div class="center" v-if="isSynced && !channelId && channels.length === 0">
       <div class="center-inner">
-        <j-flex gap="400" direction="column" a="center" j="center">
+        <j-flex gap="600" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
           <j-flex direction="column" a="center">
             <j-text nomargin color="black" size="700" weight="800">
               No channels yet
             </j-text>
             <j-text size="400" weight="400">Be the first to make one!</j-text>
-            <j-button
-              variant="primary"
-              @click="() => setShowCreateChannel(true)"
-            >
-              Create a new channel
-            </j-button>
           </j-flex>
+
+          <j-box pt="500">
+            <j-flex a="center" gap="700">
+              <j-button
+                size="xl"
+                @click="() => setShowCreateChannel(true)"
+              >
+                Create a new channel
+              </j-button>
+
+              <j-text nomargin color="black" size="500" weight="800">
+                or
+              </j-text>
+
+              <j-button variant="primary" size="xl" @click="createConversation" :loading="isCreatingConversation">
+                Start a conversation!
+              </j-button>
+            </j-flex>
+          </j-box>
         </j-flex>
       </div>
     </div>
@@ -110,7 +142,7 @@ import { ModalsState } from "@/store/types";
 import { PerspectiveState } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
-import { Channel, Community } from "@coasys/flux-api";
+import { Channel, Community, App, getAllFluxApps } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
 
@@ -131,9 +163,7 @@ export default defineComponent({
     const route = useRoute();
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
-
     const { neighbourhoods } = usePerspectives(client);
-
     const { communities } = useCommunities(neighbourhoods);
 
     const { entries: channels } = useModel({
@@ -148,6 +178,7 @@ export default defineComponent({
       hasCopied: ref(false),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
+      isCreatingConversation: false,
     };
   },
   watch: {
@@ -201,6 +232,44 @@ export default defineComponent({
         // this.appStore.changeCurrentTheme(
         //   this.communityState.state?.useLocalTheme ? id : "global"
         // );
+      }
+    },
+    async createConversation() {
+      this.isCreatingConversation = true;
+
+      try {
+        if (!this.data.perspective || !this.$route.params.communityId) throw new Error("Cannot create a channel because perspective is undefined.");
+
+        await this.data.perspective!.ensureSDNASubjectClass(Channel)
+        await this.data.perspective!.ensureSDNASubjectClass(App)
+
+        // Create channel
+        const channel = new Channel(this.data.perspective);
+        channel.name = `Conversation ${this.channels.length + 1}`;
+        await channel.save();
+
+        // Add chat and synergy view
+        const allFluxApps = await getAllFluxApps();
+        const conversationApps = allFluxApps.filter((app) => ["@coasys/flux-chat-view", "@coasys/flux-synergy-demo-view"].includes(app.pkg))
+        await Promise.all(conversationApps.map(async (app) => {
+          const appInstance = new App(this.data.perspective!, undefined, channel.baseExpression);
+          appInstance.name = app.name;
+          appInstance.description = app.description;
+          appInstance.icon = app.icon;
+          appInstance.pkg = app.pkg;
+          await appInstance.save();
+        }))
+
+        // Navigate to new conversation
+        this.$router.push({
+          name: "channel",
+          params: { communityId: this.$route.params.communityId, channelId: channel.baseExpression },
+        });
+
+      } catch (error) {
+        console.error("Error creating conversation:", error);
+      } finally {
+        this.isCreatingConversation = false;
       }
     },
   },
