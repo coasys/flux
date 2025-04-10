@@ -178,6 +178,15 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                     {/* @ts-ignore */}
                     <j-spinner size="xs" />
                   </j-flex>
+                  <div className={styles.progress}>
+                    <div
+                      className={styles.progressBar}
+                      style={{ width: `calc((100% / 8) * ${processingData.progress.step})` }}
+                    />
+                    <j-text nomargin className={styles.progressText} color="ui-700" size="400">
+                      <b>{processingData.progress.description}</b> ({processingData.progress.step}/8)
+                    </j-text>
+                  </div>
                 </j-box>
               )}
               {unprocessedItems.map((item) => (
