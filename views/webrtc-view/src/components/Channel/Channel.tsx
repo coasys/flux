@@ -74,7 +74,9 @@ export default function Channel({
     },
   });
 
-  function joinRoom(e) {
+  async function joinRoom(e) {
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    await neighbourhood.sendBroadcastU({ links: [{ source, predicate: "is-anyone-here", target: "" }] });
     appStore.setActiveWebrtc(webRTC, source);
     appStore.activeWebrtc.instance.onJoin(e);
   }
