@@ -49,6 +49,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     // set up recurring check to see if processing in progess (used to recover from disconnected peers)
     checkIfProcessingInProgress(perspective, channelId);
     const intervalId = setInterval(async () => {
+      console.log('processing interval signal check. waiting for response: ', waitingForResponse.current);
       // if no response after 5 seconds, mark waiting false and run processing check
       if (waitingForResponse.current) {
         waitingForResponse.current = false;
@@ -173,20 +174,24 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               {processingData && (
                 <j-box mb="500">
                   <j-flex a="center" gap="300">
-                    <j-text nomargin>{processingData.items.length} items being processed by</j-text>
+                    {processingData.items && (
+                      <j-text nomargin>{processingData.items.length} items being processed by</j-text>
+                    )}
                     <Avatar did={processingData.author} showName />
                     {/* @ts-ignore */}
                     <j-spinner size="xs" />
                   </j-flex>
-                  <div className={styles.progress}>
-                    <div
-                      className={styles.progressBar}
-                      style={{ width: `calc((100% / 8) * ${processingData.progress.step})` }}
-                    />
-                    <j-text nomargin className={styles.progressText} color="ui-700" size="400">
-                      <b>{processingData.progress.description}</b> ({processingData.progress.step}/8)
-                    </j-text>
-                  </div>
+                  {processingData.progress && (
+                    <div className={styles.progress}>
+                      <div
+                        className={styles.progressBar}
+                        style={{ width: `calc((100% / 8) * ${processingData.progress.step})` }}
+                      />
+                      <j-text nomargin className={styles.progressText} color="ui-700" size="400">
+                        <b>{processingData.progress.description}</b> ({processingData.progress.step}/8)
+                      </j-text>
+                    </div>
+                  )}
                 </j-box>
               )}
               {unprocessedItems.map((item) => (
