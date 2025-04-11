@@ -2,11 +2,12 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useRef } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
 import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
 import { SynergyMatch, SynergyTopic, SearchType, FilterSettings } from "@coasys/flux-utils";
+import { PerspectiveExpression } from "@coasys/ad4m";
 
 type Props = { perspective: any; source: string; agent: AgentClient; appStore: any };
 
@@ -22,6 +23,9 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     includeChannel: false,
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
+  const [allSignalsWorking, setAllSignalsWorking] = useState(true);
+  const webrtcConnections = useRef<string[]>([]);
+  const connectedAgents = useRef<string[]>([]);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -93,6 +97,40 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     return `${matches.length} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic.name}` : ""}`;
   }
 
+  async function addSignalHandler() {
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
+      const link = expression.data.links[0];
+      if (link.data.predicate === "hc-signal-test-check") {
+        console.log(`Signal recieved: hc-signal-test-check from ${link.author}`);
+        await neighbourhood.sendSignalU(link.author, { links: [{ source: "", predicate: "hc-signal-test-response", target: "" }] });
+      }
+      if (link.data.predicate === "hc-signal-test-response") {
+        console.log(`Signal recieved: hc-signal-test-response from ${link.author}`);
+        connectedAgents.current.push(link.author);
+      }
+    })
+  }
+
+  async function checkSignalsWorking(): Promise<boolean> {
+    console.log('checkSignalsWorking for: ', webrtcConnections)
+    if (!webrtcConnections.current.length) return true;
+    // reset connected agents
+    connectedAgents.current = [];
+    // send holochain signals to all webrtc connections and wait for response
+    const neighbourhood = await perspective.getNeighbourhoodProxy();
+    const results = await Promise.all(webrtcConnections.current.map(async (connectionDid) => {
+      await neighbourhood.sendSignalU(connectionDid, { links: [{ source: "", predicate: "hc-signal-test-check", target: "" }] })
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (connectedAgents.current.some((did) => did === connectionDid)) return true;
+      return false;
+    }));
+    const allConnected = results.every((result) => result);
+    console.log('All signals working:', allConnected);
+    setAllSignalsWorking(allConnected);
+    return allConnected;
+  }
+
   // update search results when filters change
   useEffect(() => {
     if (searchItemId && searchType) search(searchType, searchItemId, selectedTopic);
@@ -101,8 +139,9 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
   // reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
-  // temp: ensure SDNA classes
   useEffect(() => {
+    addSignalHandler()
+      // temp: ensure SDNA classes
     perspective.ensureSDNASubjectClass(Conversation);
     perspective.ensureSDNASubjectClass(ConversationSubgroup);
     perspective.ensureSDNASubjectClass(Topic);
@@ -116,6 +155,12 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
       <j-text uppercase size="500" weight="800" color="primary-500">
         Synergy Demo
       </j-text>
+      {!allSignalsWorking && (
+        <j-badge variant="danger">
+          <j-icon name="exclamation-triangle" style={{ marginRight: 10 }} />
+          Holochain signals disrupted. Processing paused until connection restored.
+        </j-badge>
+      )}
       <j-flex className={styles.content}>
         <div
           style={{
@@ -129,6 +174,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
             channelId={source}
             selectedTopicId={selectedTopic?.baseExpression || ""}
             search={search}
+            checkSignalsWorking={checkSignalsWorking}
           />
         </div>
         <div
@@ -143,6 +189,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
             agent={agent}
             appStore={appStore}
             currentView="@coasys/flux-synergy-demo-view"
+            webrtcConnections={webrtcConnections}
           />
         </div>
         <div

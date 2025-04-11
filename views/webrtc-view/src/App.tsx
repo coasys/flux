@@ -2,6 +2,7 @@ import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import Channel from "./components/Channel";
 import { UiProvider } from "./context/UiContext";
+import { MutableRef } from "preact/hooks";
 
 type Props = {
   source: string;
@@ -9,10 +10,11 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   currentView: string;
+  webrtcConnections?: MutableRef<string[]>;
   setModalOpen?: (state: boolean) => void;
 };
 
-export default function App({ perspective, source, agent, appStore, currentView, setModalOpen }: Props) {
+export default function App({ perspective, source, agent, appStore, currentView, webrtcConnections, setModalOpen }: Props) {
   if (!perspective?.uuid || !source) {
     return null;
   }
@@ -25,6 +27,7 @@ export default function App({ perspective, source, agent, appStore, currentView,
         perspective={perspective}
         appStore={appStore}
         currentView={currentView}
+        webrtcConnections={webrtcConnections}
         setModalOpen={setModalOpen}
       />
     </UiProvider>
