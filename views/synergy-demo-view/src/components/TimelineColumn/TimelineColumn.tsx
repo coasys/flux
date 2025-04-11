@@ -203,7 +203,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                         <Avatar did={item.author} showName />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
-                      {processingData && processingData.items.includes(item.baseExpression) && (
+                      {processingData?.items?.includes(item.baseExpression) && (
                         <j-badge variant="success">Processing...</j-badge>
                       )}
                     </j-flex>
