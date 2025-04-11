@@ -26,9 +26,10 @@ type Props = {
   channelId: string;
   selectedTopicId: string;
   search: (type: SearchType, id: string) => void;
+  checkSignalsWorking: () => Promise<boolean>;
 };
 
-export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
+export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search, checkSignalsWorking }: Props) {
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<SynergyItem[]>([]);
   const [processingData, setProcessingData] = useState<ProcessingData | null>(null);
@@ -49,7 +50,6 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
     // set up recurring check to see if processing in progess (used to recover from disconnected peers)
     checkIfProcessingInProgress(perspective, channelId);
     const intervalId = setInterval(async () => {
-      console.log('processing interval signal check. waiting for response: ', waitingForResponse.current);
       // if no response after 5 seconds, mark waiting false and run processing check
       if (waitingForResponse.current) {
         waitingForResponse.current = false;
@@ -57,7 +57,8 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
           const newUnproccessedItems = await getUnprocessedItems();
           const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
           if (enoughUnprocessedItems) {
-            runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+            const allSignalsWorking = await checkSignalsWorking();
+            if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
           }
         }
       } else if (processingData && !isMe(processingData.author)) {
@@ -93,8 +94,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       gettingData.current = false;
       // after fetching new data, run processing check if unprocessed items still present
       const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
-      if (enoughUnprocessedItems && !waitingForResponse.current)
-        runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      if (enoughUnprocessedItems && !waitingForResponse.current) {
+        const allSignalsWorking = await checkSignalsWorking();
+        if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      }
     }
   }
 
@@ -203,7 +206,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                         <Avatar did={item.author} showName />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
-                      {processingData && processingData.items.includes(item.baseExpression) && (
+                      {processingData?.items?.includes(item.baseExpression) && (
                         <j-badge variant="success">Processing...</j-badge>
                       )}
                     </j-flex>

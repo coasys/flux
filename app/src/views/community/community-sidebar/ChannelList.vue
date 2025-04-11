@@ -168,7 +168,7 @@ export default defineComponent({
             links: [
               {
                 source: channel.baseExpression,
-                predicate: "is-anyone-here",
+                predicate: "is-anyone-in-channel",
                 target: "just checking",
               },
             ],
@@ -181,7 +181,7 @@ export default defineComponent({
       if (
         link &&
         link.author !== this.me?.did &&
-        link.data.predicate === "i-am-here"
+        link.data.predicate === "i-am-in-channel"
       ) {
         this.activeAgents[link.data.source] = {
           ...this.activeAgents[link.data.source],
