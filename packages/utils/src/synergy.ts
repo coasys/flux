@@ -142,18 +142,23 @@ async function onSignalReceived(
     const items = JSON.parse(target);
     console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
     processing = true;
+    console.log('new processing data', { author, channelId: source, items });
     setProcessingData({ author, channelId: source, items });
   }
 
   if (predicate === "processing-update") {
     console.log(`Signal recieved: Processing update from ${author}`);
     const progress = JSON.parse(target);
-    setProcessingData((prev) => ({ ...prev, progress }));
+    setProcessingData((prev) => {
+      console.log('new processing data', { ...prev, progress });
+      return { ...prev, progress }
+    });
   }
 
   if (predicate === "processing-items-finished") {
     console.log(`Signal recieved: ${author} finished processing items`);
     processing = false;
+    console.log('new processing data', null);
     setProcessingData(null);
   }
 
@@ -175,6 +180,7 @@ async function onSignalReceived(
       // mark processing true, waiting false, & update state if changed
       processing = true;
       waitingForResponse.current = false;
+      console.log('new processing data', isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target));
       return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
     });
   }
@@ -350,6 +356,7 @@ export async function runProcessingCheck(
     const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
     const itemIds = itemsToProcess.map((item) => item.baseExpression);
     processing = true;
+    console.log('new processing data (set by me)', { author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
     setProcessingData({ author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
     // notify other agents that we are processing
     await neighbourhood.sendBroadcastU({
