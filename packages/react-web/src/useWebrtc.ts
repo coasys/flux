@@ -605,7 +605,6 @@ export default function useWebRTC({
   }
 
   async function onJoin({ initialState }) {
-    console.log('onJoin in useWebrtc', initialState);
     setIsLoading(true);
 
     const joinSettings = { ...localState.settings };

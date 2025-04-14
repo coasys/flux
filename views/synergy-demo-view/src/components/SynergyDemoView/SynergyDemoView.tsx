@@ -110,13 +110,10 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
       const link = expression.data.links[0];
       if (link.data.predicate === SIGNAL_TEST_REQUEST && link.data.target === me.did) {
-        console.log(`Signal test request recieved from ${link.author}, responding...`);
         await neighbourhood.sendBroadcastU({ links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: link.author }] });
       }
       if (link.data.predicate === SIGNAL_TEST_RESPONSE && link.data.target === me.did) {
-        console.log(`Signal test response recieved from ${link.author}`);
         if (link.data.source === signalCheckId.current) {
-          console.log('Signal test success!')
           connectedAgents.current.push(link.author);
         } else {
           console.log(`Signal test failed: response from ${link.author} does not match the current request id ${signalCheckId.current}`);
@@ -135,7 +132,6 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     // if signal check already in progress, return false
     if (signalCheckId.current) return false;
 
-    console.log('Check holochain signals working for: ', webrtcConnections.current)
     // reset check id & connected agents
     signalCheckId.current = Math.random().toString(36).substring(2, 15);
     connectedAgents.current = [];
@@ -148,8 +144,8 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
       if (connectedAgents.current.some((did) => did === connectionDid)) return true;
       return false;
     }));
+    
     const allConnected = results.every((result) => result);
-    console.log('All signals working:', allConnected);
     signalCheckId.current = "";
     setAllSignalsWorking(allConnected);
     return allConnected;
