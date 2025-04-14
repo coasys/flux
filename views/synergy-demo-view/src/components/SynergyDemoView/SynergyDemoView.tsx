@@ -8,6 +8,7 @@ import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
 import { SynergyMatch, SynergyTopic, SearchType, FilterSettings } from "@coasys/flux-utils";
 import { PerspectiveExpression } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 const SIGNAL_TEST_TIMEOUT = 4000;
 const SIGNAL_TEST_REQUEST = "hc-signal-test-request";
@@ -104,13 +105,15 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
 
   async function addSignalHandler() {
     const neighbourhood = await perspective.getNeighbourhoodProxy();
+    const client = await getAd4mClient();
+    const me = await client.agent.me();
     neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
       const link = expression.data.links[0];
-      if (link.data.predicate === SIGNAL_TEST_REQUEST) {
+      if (link.data.predicate === SIGNAL_TEST_REQUEST && link.data.target === me.did) {
         console.log(`Signal test request recieved from ${link.author}, responding...`);
-        await neighbourhood.sendSignalU(link.author, { links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: "" }] });
+        await neighbourhood.sendBroadcastU({ links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: link.author }] });
       }
-      if (link.data.predicate === SIGNAL_TEST_RESPONSE) {
+      if (link.data.predicate === SIGNAL_TEST_RESPONSE && link.data.target === me.did) {
         console.log(`Signal test response recieved from ${link.author}`);
         if (link.data.source === signalCheckId.current) {
           console.log('Signal test success!')
@@ -140,7 +143,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     // send holochain signals to all webrtc peers and wait for response
     const neighbourhood = await perspective.getNeighbourhoodProxy();
     const results = await Promise.all(webrtcConnections.current.map(async (connectionDid) => {
-      await neighbourhood.sendSignalU(connectionDid, { links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: "" }] })
+      await neighbourhood.sendBroadcastU({ links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: connectionDid }] })
       await new Promise(resolve => setTimeout(resolve, SIGNAL_TEST_TIMEOUT));
       if (connectedAgents.current.some((did) => did === connectionDid)) return true;
       return false;

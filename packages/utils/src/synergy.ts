@@ -124,16 +124,16 @@ async function onSignalReceived(
   const client = await getAd4mClient();
   const me = await client.agent.me();
 
-  if (predicate === "can-you-process-items") {
+  if (predicate === "can-you-process-items" && source === me.did) {
     const defaultLLM = await getDefaultLLM();
     // console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
     if (defaultLLM)
-      await neighbourhood.sendSignalU(author, {
-        links: [{ source: "", predicate: "i-can-process-items", target }],
+      await neighbourhood.sendBroadcastU({
+        links: [{ source: author, predicate: "i-can-process-items", target }],
       });
   }
 
-  if (predicate === "i-can-process-items") {
+  if (predicate === "i-can-process-items" && source === me.did) {
     // console.log(`Signal recieved: remote agent ${author} can process items!`);
     receivedSignals.push(link);
   }
@@ -169,15 +169,15 @@ async function onSignalReceived(
     // console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
     setProcessingData((prev) => {
       if (prev && prev.author === me.did) {
-        neighbourhood.sendSignalU(author, {
-          links: [{ source: "", predicate: "processing-in-progress", target: JSON.stringify(prev) }],
+        neighbourhood.sendBroadcastU({
+          links: [{ source: author, predicate: "processing-in-progress", target: JSON.stringify(prev) }],
         });
       }
       return prev;
     });
   }
 
-  if (predicate === "processing-in-progress") {
+  if (predicate === "processing-in-progress" && source === me.did) {
     // console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
     setProcessingData((prev) => {
       // mark processing true, waiting false, & update state if changed
@@ -191,8 +191,8 @@ async function onSignalReceived(
 
 async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid: string): Promise<boolean> {
   const signalUuid = uuidv4();
-  await neighbourhood.sendSignalU(agentsDid, {
-    links: [{ source: "", predicate: "can-you-process-items", target: signalUuid }],
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: agentsDid, predicate: "can-you-process-items", target: signalUuid }],
   });
 
   await sleep(3000);

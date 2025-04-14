@@ -229,7 +229,8 @@ export class WebRTCManager {
 
     if (
       link.data.predicate === I_AM_HERE &&
-      link.data.source === this.source
+      link.data.source === this.source &&
+      link.data.target === this.agent.did
     ) {
       console.log(`*** ${link.author} responded that they are here!`)
       // Check if we should create the offer
@@ -351,9 +352,9 @@ export class WebRTCManager {
   async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
     try {
-      const link = { source: this.source, predicate: I_AM_HERE, target: "" };
+      const link = { source: this.source, predicate: I_AM_HERE, target: author };
       console.log(`*** Responding to arrival broadcast from: ${author}`, link, this.neighbourhood);
-      this.neighbourhood.sendSignalU(author, { links: [link] });
+      this.neighbourhood.sendBroadcastU({ links: [link] });
     } catch (e) {
       console.error(`Error sending I_AM_HERE signal to ${author}:`, e);
     }

@@ -173,7 +173,7 @@ export default defineComponent({
       if (!link) return;
       
       const { author, data } = link;
-      const { predicate, source } = data;
+      const { predicate, source, target } = data;
       const isMe = author === this.me?.did;
 
       if (isMe) {
@@ -188,12 +188,12 @@ export default defineComponent({
       } else {
         // Handle signals from others
         if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
-          this.neighbhourhoodProxy.sendSignalU(author, {
-            links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: "" }],
+          this.neighbhourhoodProxy.sendBroadcastU({
+            links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: author }],
           });
         }
 
-        if (predicate === "i-am-in-channel") {
+        if (predicate === "i-am-in-channel" && target === this.me?.did) {
           this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
         }
 
