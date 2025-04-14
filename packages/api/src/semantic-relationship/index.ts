@@ -58,7 +58,12 @@ export default class SemanticRelationship extends Ad4mModel {
         ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace("ItemId", `"${itemId}"`)}
         ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}.
       `);
-      return result[0]?.Embedding ? JSON.parse(result[0].Embedding) : [];
+
+      if (!result?.[0]?.Embedding) return []
+      else {
+        const embeddingExpression = await this.perspective.getExpression(result[0].Embedding);
+        return JSON.parse(embeddingExpression.data);
+      };
     } catch (error) {
       console.error("Error getting items embedding", error);
       return [];
@@ -80,12 +85,15 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
-        baseExpression,
-        type: "Conversation",
-        embedding: JSON.parse(embedding),
-        channelId,
-        channelName: Literal.fromUrl(channelName).get().data,
+      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+        const embeddingExpression = await this.perspective.getExpression(embedding);
+        return {
+          baseExpression,
+          type: "Conversation",
+          embedding: JSON.parse(embeddingExpression.data),
+          channelId,
+          channelName: Literal.fromUrl(channelName).get().data,
+        }
       }));
     } catch (error) {
       console.error("Error getting all conversation embedding", error);
@@ -113,13 +121,16 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
-        baseExpression,
-        type: "Subgroup",
-        embedding: JSON.parse(embedding),
-        channelId,
-        channelName: Literal.fromUrl(channelName).get().data,
-      }));
+      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+        const embeddingExpression = await this.perspective.getExpression(embedding);
+        return {
+          baseExpression,
+          type: "Subgroup",
+          embedding: JSON.parse(embeddingExpression.data),
+          channelId,
+          channelName: Literal.fromUrl(channelName).get().data,
+        }
+      }))
     } catch (error) {
       console.error("Error getting all conversation embedding", error);
       return [];
@@ -152,12 +163,15 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return (result[0]?.Embeddings || []).map(([baseExpression, type, embedding, channelId, channelName]) => ({
-        baseExpression,
-        type,
-        embedding: JSON.parse(embedding),
-        channelId,
-        channelName: Literal.fromUrl(channelName).get().data,
+      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, type, embedding, channelId, channelName]) => {
+        const embeddingExpression = await this.perspective.getExpression(embedding);
+        return {
+          baseExpression,
+          type,
+          embedding: JSON.parse(embeddingExpression.data),
+          channelId,
+          channelName: Literal.fromUrl(channelName).get().data,
+        }
       }));
     } catch (error) {
       console.error("Error getting all conversation embedding", error);
@@ -180,12 +194,15 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return (result[0]?.Embeddings || []).map(([baseExpression, embedding, channelId, channelName]) => ({
-        baseExpression,
-        type: itemType,
-        embedding: JSON.parse(embedding),
-        channelId,
-        channelName: Literal.fromUrl(channelName).get().data,
+      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+        const embeddingExpression = await this.perspective.getExpression(embedding);
+        return {
+          baseExpression,
+          type: itemType,
+          embedding: JSON.parse(embeddingExpression.data),
+          channelId,
+          channelName: Literal.fromUrl(channelName).get().data,
+        }
       }));
     } catch (error) {
       console.error("Error getting all conversation embedding", error);
