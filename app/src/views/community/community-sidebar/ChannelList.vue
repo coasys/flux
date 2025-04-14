@@ -162,9 +162,9 @@ export default defineComponent({
   },
   methods: {
     checkWhoIsHere() {
-      if (this.neighbhourhoodProxy && this.activeChannelId) {
+      if (this.neighbhourhoodProxy) {
         this.neighbhourhoodProxy.sendBroadcastU({
-          links: [{ source: this.activeChannelId, predicate: "is-anyone-in-channel", target: "" }],
+          links: [{ source: "", predicate: "is-anyone-in-a-channel", target: "" }],
         });
       }
     },
@@ -187,13 +187,13 @@ export default defineComponent({
         }
       } else {
         // Handle signals from others
-        if (predicate === "is-anyone-in-channel" && source === this.activeChannelId) {
+        if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
           this.neighbhourhoodProxy.sendSignalU(author, {
             links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: "" }],
           });
         }
 
-        if (predicate === "i-am-in-channel" && source === this.activeChannelId) {
+        if (predicate === "i-am-in-channel") {
           this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
         }
 
