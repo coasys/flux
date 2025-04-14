@@ -9,6 +9,10 @@ import styles from "./SynergyDemoView.module.scss";
 import { SynergyMatch, SynergyTopic, SearchType, FilterSettings } from "@coasys/flux-utils";
 import { PerspectiveExpression } from "@coasys/ad4m";
 
+const SIGNAL_TEST_TIMEOUT = 4000;
+const SIGNAL_TEST_REQUEST = "hc-signal-test-request";
+const SIGNAL_TEST_RESPONSE = "hc-signal-test-response";
+
 type Props = { perspective: any; source: string; agent: AgentClient; appStore: any };
 
 export default function SynergyDemoView({ perspective, agent, source, appStore }: Props) {
@@ -26,6 +30,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
   const [allSignalsWorking, setAllSignalsWorking] = useState(true);
   const webrtcConnections = useRef<string[]>([]);
   const connectedAgents = useRef<string[]>([]);
+  const signalCheckId = useRef<string>("");
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -101,32 +106,48 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
     const neighbourhood = await perspective.getNeighbourhoodProxy();
     neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
       const link = expression.data.links[0];
-      if (link.data.predicate === "hc-signal-test-check") {
-        console.log(`Signal recieved: hc-signal-test-check from ${link.author}`);
-        await neighbourhood.sendSignalU(link.author, { links: [{ source: "", predicate: "hc-signal-test-response", target: "" }] });
+      if (link.data.predicate === SIGNAL_TEST_REQUEST) {
+        console.log(`Signal test request recieved from ${link.author}, responding...`);
+        await neighbourhood.sendSignalU(link.author, { links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: "" }] });
       }
-      if (link.data.predicate === "hc-signal-test-response") {
-        console.log(`Signal recieved: hc-signal-test-response from ${link.author}`);
-        connectedAgents.current.push(link.author);
+      if (link.data.predicate === SIGNAL_TEST_RESPONSE) {
+        console.log(`Signal test response recieved from ${link.author}`);
+        if (link.data.source === signalCheckId.current) {
+          console.log('Signal test success!')
+          connectedAgents.current.push(link.author);
+        } else {
+          console.log(`Signal test failed: response from ${link.author} does not match the current request id ${signalCheckId.current}`);
+        }
       }
     })
   }
 
   async function checkSignalsWorking(): Promise<boolean> {
-    console.log('checkSignalsWorking for: ', webrtcConnections)
-    if (!webrtcConnections.current.length) return true;
-    // reset connected agents
+    // if no webrtc connections, return true
+    if (!webrtcConnections.current.length) {
+      setAllSignalsWorking(true);
+      return true;
+    }
+
+    // if signal check already in progress, return false
+    if (signalCheckId.current) return false;
+
+    console.log('Check holochain signals working for: ', webrtcConnections.current)
+    // reset check id & connected agents
+    signalCheckId.current = Math.random().toString(36).substring(2, 15);
     connectedAgents.current = [];
-    // send holochain signals to all webrtc connections and wait for response
+
+    // send holochain signals to all webrtc peers and wait for response
     const neighbourhood = await perspective.getNeighbourhoodProxy();
     const results = await Promise.all(webrtcConnections.current.map(async (connectionDid) => {
-      await neighbourhood.sendSignalU(connectionDid, { links: [{ source: "", predicate: "hc-signal-test-check", target: "" }] })
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await neighbourhood.sendSignalU(connectionDid, { links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: "" }] })
+      await new Promise(resolve => setTimeout(resolve, SIGNAL_TEST_TIMEOUT));
       if (connectedAgents.current.some((did) => did === connectionDid)) return true;
       return false;
     }));
     const allConnected = results.every((result) => result);
     console.log('All signals working:', allConnected);
+    signalCheckId.current = "";
     setAllSignalsWorking(allConnected);
     return allConnected;
   }
