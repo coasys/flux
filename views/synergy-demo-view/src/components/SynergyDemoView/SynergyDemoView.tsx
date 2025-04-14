@@ -144,7 +144,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
       if (connectedAgents.current.some((did) => did === connectionDid)) return true;
       return false;
     }));
-    
+
     const allConnected = results.every((result) => result);
     signalCheckId.current = "";
     setAllSignalsWorking(allConnected);
@@ -161,13 +161,12 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
 
   useEffect(() => {
     addSignalHandler()
-      // temp: ensure SDNA classes
+    // Ensure SDNA classes
     perspective.ensureSDNASubjectClass(Conversation);
     perspective.ensureSDNASubjectClass(ConversationSubgroup);
     perspective.ensureSDNASubjectClass(Topic);
     perspective.ensureSDNASubjectClass(Embedding);
     perspective.ensureSDNASubjectClass(SemanticRelationship);
-    console.log("SNDA classes ensured");
   }, []);
 
   return (

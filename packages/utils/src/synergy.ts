@@ -139,29 +139,33 @@ async function onSignalReceived(
   }
 
   if (predicate === "processing-items-started") {
-    const items = JSON.parse(target);
-    // console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
-    processing = true;
-    // console.log('new processing data', { author, channelId: source, items });
-    setProcessingData({ author, channelId: source, items, progress: { step: 1, description: "Initializing..." } });
+    try {
+      const items = JSON.parse(target);
+      // console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
+      processing = true;
+      // console.log('new processing data', { author, channelId: source, items });
+      setProcessingData({ author, channelId: source, items, progress: { step: 1, description: "Initializing..." } });
+    } catch (e) {
+      console.error("Error parsing processing items signal:", e);
+    }
   }
 
   if (predicate === "processing-update") {
     // console.log(`Signal recieved: Processing update from ${author}`);
-    const progress = JSON.parse(target);
-    setProcessingData((prev) => {
-      if (prev) {
-        // console.log('new processing data', { ...prev, progress });
-        return { ...prev, progress }
-      }
-      return prev;
-    });
+    try {
+      const progress = JSON.parse(target);
+        setProcessingData((prev) => {
+          if (prev) return { ...prev, progress }
+          return prev;
+      });
+    } catch (e) {
+      console.error("Error parsing processing update signal:", e);
+    }
   }
 
   if (predicate === "processing-items-finished") {
     // console.log(`Signal recieved: ${author} finished processing items`);
     processing = false;
-    // console.log('new processing data', null);
     setProcessingData(null);
   }
 
@@ -183,8 +187,13 @@ async function onSignalReceived(
       // mark processing true, waiting false, & update state if changed
       processing = true;
       waitingForResponse.current = false;
-      // console.log('new processing data', isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target));
-      return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
+      try {
+        const parsedData = JSON.parse(target);
+        return isEqual(parsedData, prev) ? prev : parsedData;
+      } catch (e) {
+        console.error("Error parsing processing in progress signal:", e);
+        return prev;
+      }
     });
   }
 }
