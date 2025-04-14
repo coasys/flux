@@ -160,7 +160,7 @@ export class WebRTCManager {
     const that = this;
 
     this.connections.set = function (key: string, value: Connection) {
-      // console.log(`✅ Added key: ${key} value: ${value} to the map`);
+      console.log(`✅ Added key: ${key} value: ${value} to the map`);
 
       that.callbacks[Event.PEER_ADDED].forEach((cb) => {
         cb(key, value);
@@ -171,7 +171,7 @@ export class WebRTCManager {
 
     // Listen for deletions from the map
     this.connections.delete = function (key: string) {
-      // console.log(`🚫 Deleted key: ${key} from the map`);
+      console.log(`🚫 Deleted key: ${key} from the map`);
 
       that.callbacks[Event.PEER_REMOVED].forEach((cb) => {
         cb(key);
@@ -197,10 +197,10 @@ export class WebRTCManager {
     }
 
     const link = await getLinkFromPerspective(expression);
-    // console.log(`🔵 ${link?.data?.predicate}`, {
-    //   link,
-    //   author: expression.author,
-    // });
+    console.log(`🔵 ${link?.data?.predicate}`, {
+      link,
+      author: expression.author,
+    });
 
     if (!link) {
       this.addToEventLog(
@@ -216,11 +216,11 @@ export class WebRTCManager {
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
     ) {
-      console.log(`${link.author} broadcast their arrival in the call!`)
+      console.log(`*** ${link.author} broadcast their arrival in the call!`)
       // Check if the remote host should create the offer
       // -> If so, create passive connection
       if (link.author.localeCompare(this.agent.did) < 1) {
-        console.log('adding connection as initiator')
+        console.log('*** adding connection')
         this.addConnection(link.author, false);
       }
 
@@ -229,17 +229,16 @@ export class WebRTCManager {
 
     if (
       link.data.predicate === I_AM_HERE &&
-      link.data.source === this.source &&
-      link.data.target === this.agent.did
+      link.data.source === this.source
     ) {
-      console.log(`${link.author} signalled their presence in the call!`)
+      console.log(`*** ${link.author} responded that they are here!`)
       // Check if we should create the offer
       // -> If so, create active connection
       if (link.author.localeCompare(this.agent.did) > 0) {
-        console.log('adding connection as responder')
+        console.log('*** adding connection')
         this.addConnection(link.author, true);
       } else {
-        console.log('adding connection as initiator & responding')
+        console.log('*** adding connection & responding')
         this.addConnection(link.author, false);
         this.respondToArrival(link.author);
       }
@@ -294,6 +293,7 @@ export class WebRTCManager {
 
     // got a data channel message
     peer.on("data", (data) => {
+      console.log('** peer data recieved: ', data)
       const parsed = getMessageData(data);
 
       this.callbacks[Event.MESSAGE].forEach((cb) => {
@@ -303,6 +303,7 @@ export class WebRTCManager {
 
     // Connection established
     peer.on("connect", () => {
+      console.log('** peer connected')
       this.callbacks[Event.CONNECTION_ESTABLISHED].forEach((cb) => {
         cb(remoteDid);
       });
@@ -310,6 +311,7 @@ export class WebRTCManager {
 
     // Connection broken
     peer.on("close", () => {
+      console.log('** peer connection closed')
       this.closeConnection(remoteDid);
 
       this.callbacks[Event.PEER_REMOVED].forEach((cb) => {
@@ -334,12 +336,14 @@ export class WebRTCManager {
   async broadcastArrival() {
     this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
 
+    console.log('*** Broadcasting arrival')
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {
           source: this.source,
           predicate: IS_ANYONE_HERE,
-          target: this.agent.did,
+          target: "",
         },
       ],
     });
@@ -351,12 +355,13 @@ export class WebRTCManager {
   async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
 
+    console.log('*** Responding to arrival broadcast')
     this.neighbourhood.sendSignalU(author, {
       links: [
         {
           source: this.source,
           predicate: I_AM_HERE,
-          target: author,
+          target: "",
         },
       ],
     });
@@ -434,7 +439,7 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
-    console.log("Trying to join in WebRTCManager");
+    console.log("*** Trying to join the call");
 
     let settings = { audio: true, video: false, ...initialSettings };
 
@@ -463,7 +468,6 @@ export class WebRTCManager {
     }
 
     this.isListening = true;
-    console.log('Broadcasting arrival to other peers...')
     this.broadcastArrival();
 
     // TEMP: Heartbeat disabled for now
@@ -516,7 +520,7 @@ export class WebRTCManager {
   }
 
   async heartbeat() {
-    // console.log("💚 Sending HEARTBEAT");
+    console.log("💚 Sending HEARTBEAT");
     this.addToEventLog(this.agent.did, HEARTBEAT);
 
     this.neighbourhood.sendBroadcastU({
@@ -531,7 +535,7 @@ export class WebRTCManager {
   }
 
   async sendTestSignal(recipientDid: string) {
-    // console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
+    console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -544,7 +548,7 @@ export class WebRTCManager {
   }
 
   async sendTestBroadcast() {
-    // console.log("⚙️ Sending TEST_BROADCAST to room");
+    console.log("⚙️ Sending TEST_BROADCAST to room");
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -557,7 +561,7 @@ export class WebRTCManager {
   }
 
   setIceServers(iceServers: IceServer[]) {
-    // console.log("⚙️ Setting ICE servers: ", iceServers);
+    console.log("⚙️ Setting ICE servers: ", iceServers);
     this.iceServers = iceServers;
   }
 }

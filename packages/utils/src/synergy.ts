@@ -126,7 +126,7 @@ async function onSignalReceived(
 
   if (predicate === "can-you-process-items") {
     const defaultLLM = await getDefaultLLM();
-    console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
+    // console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
     if (defaultLLM)
       await neighbourhood.sendSignalU(author, {
         links: [{ source: "", predicate: "i-can-process-items", target }],
@@ -134,24 +134,24 @@ async function onSignalReceived(
   }
 
   if (predicate === "i-can-process-items") {
-    console.log(`Signal recieved: remote agent ${author} can process items!`);
+    // console.log(`Signal recieved: remote agent ${author} can process items!`);
     receivedSignals.push(link);
   }
 
   if (predicate === "processing-items-started") {
     const items = JSON.parse(target);
-    console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
+    // console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
     processing = true;
-    console.log('new processing data', { author, channelId: source, items });
+    // console.log('new processing data', { author, channelId: source, items });
     setProcessingData({ author, channelId: source, items, progress: { step: 1, description: "Initializing..." } });
   }
 
   if (predicate === "processing-update") {
-    console.log(`Signal recieved: Processing update from ${author}`);
+    // console.log(`Signal recieved: Processing update from ${author}`);
     const progress = JSON.parse(target);
     setProcessingData((prev) => {
       if (prev) {
-        console.log('new processing data', { ...prev, progress });
+        // console.log('new processing data', { ...prev, progress });
         return { ...prev, progress }
       }
       return prev;
@@ -159,14 +159,14 @@ async function onSignalReceived(
   }
 
   if (predicate === "processing-items-finished") {
-    console.log(`Signal recieved: ${author} finished processing items`);
+    // console.log(`Signal recieved: ${author} finished processing items`);
     processing = false;
-    console.log('new processing data', null);
+    // console.log('new processing data', null);
     setProcessingData(null);
   }
 
   if (predicate === "is-anyone-processing") {
-    console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
+    // console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
     setProcessingData((prev) => {
       if (prev && prev.author === me.did) {
         neighbourhood.sendSignalU(author, {
@@ -178,12 +178,12 @@ async function onSignalReceived(
   }
 
   if (predicate === "processing-in-progress") {
-    console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
+    // console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
     setProcessingData((prev) => {
       // mark processing true, waiting false, & update state if changed
       processing = true;
       waitingForResponse.current = false;
-      console.log('new processing data', isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target));
+      // console.log('new processing data', isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target));
       return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
     });
   }
