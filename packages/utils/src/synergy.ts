@@ -359,7 +359,7 @@ export async function runProcessingCheck(
     const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
     const itemIds = itemsToProcess.map((item) => item.baseExpression);
     processing = true;
-    console.log('new processing data (set by me)', { author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
+    // console.log('new processing data (set by me)', { author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
     setProcessingData({ author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
     // notify other agents that we are processing
     await neighbourhood.sendBroadcastU({

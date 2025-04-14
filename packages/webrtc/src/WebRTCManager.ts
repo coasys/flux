@@ -192,7 +192,7 @@ export class WebRTCManager {
     if (!this.isListening) return;
 
     if (expression.author === this.agent.did) {
-      // console.log("Received signal from self, ignoring!");
+      console.log("Received signal from self, ignoring!");
       return null;
     }
 
@@ -335,18 +335,14 @@ export class WebRTCManager {
    */
   async broadcastArrival() {
     this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
+    try {
+      const link = { source: this.source, predicate: IS_ANYONE_HERE, target: "" }
+      console.log('*** Broadcasting arrival', link, this.neighbourhood);
 
-    console.log('*** Broadcasting arrival')
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: IS_ANYONE_HERE,
-          target: "",
-        },
-      ],
-    });
+      this.neighbourhood.sendBroadcastU({ links: [link] });
+    } catch (e) {
+      console.error(`Error sending IS_ANYONE_HERE signal to peers:`, e);
+    }
   }
 
   /**
@@ -354,17 +350,13 @@ export class WebRTCManager {
    */
   async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
-
-    console.log('*** Responding to arrival broadcast')
-    this.neighbourhood.sendSignalU(author, {
-      links: [
-        {
-          source: this.source,
-          predicate: I_AM_HERE,
-          target: "",
-        },
-      ],
-    });
+    try {
+      const link = { source: this.source, predicate: I_AM_HERE, target: "" };
+      console.log(`*** Responding to arrival broadcast from: ${author}`, link, this.neighbourhood);
+      this.neighbourhood.sendSignalU(author, { links: [link] });
+    } catch (e) {
+      console.error(`Error sending I_AM_HERE signal to ${author}:`, e);
+    }
   }
 
   /**
