@@ -143,15 +143,18 @@ async function onSignalReceived(
     console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
     processing = true;
     console.log('new processing data', { author, channelId: source, items });
-    setProcessingData({ author, channelId: source, items });
+    setProcessingData({ author, channelId: source, items, progress: { step: 1, description: "Initializing..." } });
   }
 
   if (predicate === "processing-update") {
     console.log(`Signal recieved: Processing update from ${author}`);
     const progress = JSON.parse(target);
     setProcessingData((prev) => {
-      console.log('new processing data', { ...prev, progress });
-      return { ...prev, progress }
+      if (prev) {
+        console.log('new processing data', { ...prev, progress });
+        return { ...prev, progress }
+      }
+      return prev;
     });
   }
 
