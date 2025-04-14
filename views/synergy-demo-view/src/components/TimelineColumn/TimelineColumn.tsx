@@ -26,9 +26,10 @@ type Props = {
   channelId: string;
   selectedTopicId: string;
   search: (type: SearchType, id: string) => void;
+  checkSignalsWorking: () => Promise<boolean>;
 };
 
-export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search }: Props) {
+export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search, checkSignalsWorking }: Props) {
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<SynergyItem[]>([]);
   const [processingData, setProcessingData] = useState<ProcessingData | null>(null);
@@ -56,7 +57,8 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
           const newUnproccessedItems = await getUnprocessedItems();
           const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
           if (enoughUnprocessedItems) {
-            runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+            const allSignalsWorking = await checkSignalsWorking();
+            if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
           }
         }
       } else if (processingData && !isMe(processingData.author)) {
@@ -92,8 +94,10 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
       gettingData.current = false;
       // after fetching new data, run processing check if unprocessed items still present
       const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
-      if (enoughUnprocessedItems && !waitingForResponse.current)
-        runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      if (enoughUnprocessedItems && !waitingForResponse.current) {
+        const allSignalsWorking = await checkSignalsWorking();
+        if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+      }
     }
   }
 
@@ -173,11 +177,24 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               {processingData && (
                 <j-box mb="500">
                   <j-flex a="center" gap="300">
-                    <j-text nomargin>{processingData.items.length} items being processed by</j-text>
+                    {processingData.items && (
+                      <j-text nomargin>{processingData.items.length} items being processed by</j-text>
+                    )}
                     <Avatar did={processingData.author} showName />
                     {/* @ts-ignore */}
                     <j-spinner size="xs" />
                   </j-flex>
+                  {processingData.progress && (
+                    <div className={styles.progress}>
+                      <div
+                        className={styles.progressBar}
+                        style={{ width: `calc((100% / 8) * ${processingData.progress.step})` }}
+                      />
+                      <j-text nomargin className={styles.progressText} color="ui-700" size="400">
+                        <b>{processingData.progress.description}</b> ({processingData.progress.step}/8)
+                      </j-text>
+                    </div>
+                  )}
                 </j-box>
               )}
               {unprocessedItems.map((item) => (
@@ -189,7 +206,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                         <Avatar did={item.author} showName />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
-                      {processingData && processingData.items.includes(item.baseExpression) && (
+                      {processingData?.items?.includes(item.baseExpression) && (
                         <j-badge variant="success">Processing...</j-badge>
                       )}
                     </j-flex>

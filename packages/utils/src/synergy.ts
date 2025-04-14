@@ -20,7 +20,7 @@ export type SearchType = "" | "vector" | "topic";
 export type BlockType = "conversation" | "subgroup" | "item";
 export type FilterSettings = { grouping: GroupingOption; itemType: "All Types" | ItemType; includeChannel: boolean };
 export type MatchIndexes = { conversation: number | undefined; subgroup: number | undefined; item: number | undefined };
-export type ProcessingData = { author: string; channelId: string; items: string[] };
+export type ProcessingData = { author: string; channelId: string; items: string[], progress?: { step: number, description: string } };
 export type Link = { source: string; predicate: string; target: string };
 export type LinkExpression = { author: string; data: Link };
 
@@ -124,60 +124,84 @@ async function onSignalReceived(
   const client = await getAd4mClient();
   const me = await client.agent.me();
 
-  if (predicate === "can-you-process-items") {
+  if (predicate === "can-you-process-items" && source === me.did) {
     const defaultLLM = await getDefaultLLM();
-    console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
+    // console.log(`Signal recieved: can you process items? (${defaultLLM ? "yes" : "no"})`);
     if (defaultLLM)
-      await neighbourhood.sendSignalU(author, {
-        links: [{ source: "", predicate: "i-can-process-items", target }],
+      await neighbourhood.sendBroadcastU({
+        links: [{ source: author, predicate: "i-can-process-items", target }],
       });
   }
 
-  if (predicate === "i-can-process-items") {
-    console.log(`Signal recieved: remote agent ${author} can process items!`);
+  if (predicate === "i-can-process-items" && source === me.did) {
+    // console.log(`Signal recieved: remote agent ${author} can process items!`);
     receivedSignals.push(link);
   }
 
   if (predicate === "processing-items-started") {
-    const items = JSON.parse(target);
-    console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
-    processing = true;
-    setProcessingData({ author, channelId: source, items });
+    try {
+      const items = JSON.parse(target);
+      // console.log(`Signal recieved: ${items.length} items being processed by ${author}`);
+      processing = true;
+      // console.log('new processing data', { author, channelId: source, items });
+      setProcessingData({ author, channelId: source, items, progress: { step: 1, description: "Initializing..." } });
+    } catch (e) {
+      console.error("Error parsing processing items signal:", e);
+    }
+  }
+
+  if (predicate === "processing-update") {
+    // console.log(`Signal recieved: Processing update from ${author}`);
+    try {
+      const progress = JSON.parse(target);
+      setProcessingData((prev) => {
+        if (prev) return { ...prev, progress }
+        return prev;
+      });
+    } catch (e) {
+      console.error("Error parsing processing update signal:", e);
+    }
   }
 
   if (predicate === "processing-items-finished") {
-    console.log(`Signal recieved: ${author} finished processing items`);
+    // console.log(`Signal recieved: ${author} finished processing items`);
     processing = false;
     setProcessingData(null);
   }
 
   if (predicate === "is-anyone-processing") {
-    console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
+    // console.log(`Signal recieved: ${author} wants to know if anyone is processing`);
     setProcessingData((prev) => {
       if (prev && prev.author === me.did) {
-        neighbourhood.sendSignalU(author, {
-          links: [{ source: "", predicate: "processing-in-progress", target: JSON.stringify(prev) }],
+        neighbourhood.sendBroadcastU({
+          links: [{ source: author, predicate: "processing-in-progress", target: JSON.stringify(prev) }],
         });
       }
       return prev;
     });
   }
 
-  if (predicate === "processing-in-progress") {
-    console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
+  if (predicate === "processing-in-progress" && source === me.did) {
+    // console.log(`Signal recieved: ${author} confirmed that they are currently processing`);
     setProcessingData((prev) => {
       // mark processing true, waiting false, & update state if changed
       processing = true;
       waitingForResponse.current = false;
-      return isEqual(JSON.parse(target), prev) ? prev : JSON.parse(target);
+      try {
+        const parsedData = JSON.parse(target);
+        return isEqual(parsedData, prev) ? prev : parsedData;
+      } catch (e) {
+        console.error("Error parsing processing in progress signal:", e);
+        return prev;
+      }
     });
   }
 }
 
 async function agentCanProcessItems(neighbourhood: NeighbourhoodProxy, agentsDid: string): Promise<boolean> {
   const signalUuid = uuidv4();
-  await neighbourhood.sendSignalU(agentsDid, {
-    links: [{ source: "", predicate: "can-you-process-items", target: signalUuid }],
+  await neighbourhood.sendBroadcastU({
+    links: [{ source: agentsDid, predicate: "can-you-process-items", target: signalUuid }],
   });
 
   await sleep(3000);
@@ -323,13 +347,13 @@ async function findOrCreateNewConversation(perspective: PerspectiveProxy, channe
 export async function runProcessingCheck(
   perspective: PerspectiveProxy,
   channelId: string,
-  unprocessedItems: any[],
-  setProcessingData: (data: ProcessingData | null) => void
+  unprocessedItems: SynergyItem[],
+  setProcessingData: React.Dispatch<React.SetStateAction<ProcessingData | null>>
 ): Promise<void> {
   // only attempt processing if default LLM is set
   if (!(await getDefaultLLM())) return;
 
-  console.log('runProcessingCheck')
+  // console.log('runProcessingCheck')
 
   // check if we are responsible for processing
   const neighbourhood = await perspective.getNeighbourhoodProxy();
@@ -337,23 +361,23 @@ export async function runProcessingCheck(
 
   // if we are responsible, process items & add to conversation
   if (responsible && !processing) {
-    console.log('I am responsible for processing')
+    // console.log('I am responsible for processing')
     const client = await getAd4mClient();
     const me = await client.agent.me();
     const numberOfItemsToProcess = Math.min(maxItemsToProcess, unprocessedItems.length - numberOfItemsDelay);
     const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
     const itemIds = itemsToProcess.map((item) => item.baseExpression);
     processing = true;
-    setProcessingData({ author: me.did, channelId, items: itemIds });
+    // console.log('new processing data (set by me)', { author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
+    setProcessingData({ author: me.did, channelId, items: itemIds, progress: { step: 1, description: "Initializing..." } });
     // notify other agents that we are processing
     await neighbourhood.sendBroadcastU({
       links: [{ source: channelId, predicate: "processing-items-started", target: JSON.stringify(itemIds) }],
     });
-
     // process items into conversation
     const conversation = await findOrCreateNewConversation(perspective, channelId);
     try {
-      await conversation.processNewExpressions(itemsToProcess);
+      await conversation.processNewExpressions(neighbourhood, channelId, itemsToProcess, setProcessingData);
     } catch (e) {
       console.log("Error processing items into conversation:" + e);
     }

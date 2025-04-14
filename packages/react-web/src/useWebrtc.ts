@@ -622,6 +622,8 @@ export default function useWebRTC({
       const stream = await manager.current.join(joinSettings);
       setLocalStream(stream);
       setHasJoined(true);
+    } else {
+      console.log("Error: No WebRTCManager instance when trying to join!");
     }
   }
 

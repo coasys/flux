@@ -1,6 +1,6 @@
 import { useAgent } from "@coasys/ad4m-react-hooks";
 import { useWebRTC } from "@coasys/flux-react-web";
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
+import { MutableRef, useContext, useEffect, useRef, useState } from "preact/hooks";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import UiContext from "../../context/UiContext";
 import Footer from "../Footer";
@@ -24,6 +24,7 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   currentView: string;
+  webrtcConnections?: MutableRef<string[]>;
   setModalOpen?: (state: boolean) => void;
 };
 
@@ -33,6 +34,7 @@ export default function Channel({
   agent: agentClient,
   appStore,
   currentView,
+  webrtcConnections,
   setModalOpen,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
@@ -72,7 +74,7 @@ export default function Channel({
     },
   });
 
-  function joinRoom(e) {
+  async function joinRoom(e) {
     appStore.setActiveWebrtc(webRTC, source);
     appStore.activeWebrtc.instance.onJoin(e);
   }
@@ -82,6 +84,10 @@ export default function Channel({
     appStore.setActiveWebrtc(undefined, '');
     setInAnotherRoom(false);
   }
+
+  useEffect(() => {
+    webrtcConnections.current = webRTC.connections.map((peer) => peer.did);
+  }, [webRTC.connections]);
 
   useEffect(() => {
     const cleanupWebRTC = () => {

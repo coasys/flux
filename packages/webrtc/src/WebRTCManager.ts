@@ -141,7 +141,7 @@ export class WebRTCManager {
     this.closeConnection = this.closeConnection.bind(this);
     this.addConnection = this.addConnection.bind(this);
     this.broadcastArrival = this.broadcastArrival.bind(this);
-    this.broadcastArrivalResponse = this.broadcastArrivalResponse.bind(this);
+    this.respondToArrival = this.respondToArrival.bind(this);
 
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
@@ -211,6 +211,7 @@ export class WebRTCManager {
       return;
     }
 
+    // fires when joining webrtc call
     if (
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
@@ -221,7 +222,7 @@ export class WebRTCManager {
         this.addConnection(link.author, false);
       }
 
-      this.broadcastArrivalResponse(link.author);
+      this.respondToArrival(link.author);
     }
 
     if (
@@ -235,7 +236,7 @@ export class WebRTCManager {
         this.addConnection(link.author, true);
       } else {
         this.addConnection(link.author, false);
-        this.broadcastArrivalResponse(link.author);
+        this.respondToArrival(link.author);
       }
     }
 
@@ -248,9 +249,7 @@ export class WebRTCManager {
       // Check if the signal is for us
       if (data.targetPeer === this.agent.did) {
         const remotePeer = this.connections.get(link.author);
-        if (remotePeer) {
-          remotePeer.peer.signal(data.signalData);
-        }
+        if (remotePeer) remotePeer.peer.signal(data.signalData);
       }
     }
 
@@ -265,9 +264,9 @@ export class WebRTCManager {
    * Create connection and add to connections array
    */
   async addConnection(remoteDid: string, initiator: boolean) {
-    if (this.connections.get(remoteDid)) {
-      return this.connections.get(remoteDid);
-    }
+    // if (this.connections.get(remoteDid)) {
+    //   return this.connections.get(remoteDid);
+    // }
 
     // console.log(
     //   "🟠 Creating ",
@@ -319,7 +318,7 @@ export class WebRTCManager {
 
     this.connections.set(remoteDid, newConnection);
 
-    return newConnection;
+    // return newConnection;
   }
 
   /**
@@ -327,33 +326,25 @@ export class WebRTCManager {
    */
   async broadcastArrival() {
     this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: IS_ANYONE_HERE,
-          target: this.agent.did,
-        },
-      ],
-    });
+    try {
+      const link = { source: this.source, predicate: IS_ANYONE_HERE, target: "" }
+      this.neighbourhood.sendBroadcastU({ links: [link] });
+    } catch (e) {
+      console.error(`Error sending IS_ANYONE_HERE signal to peers:`, e);
+    }
   }
 
   /**
-   * Broadcast arrival response
+   * Response to arrival
    */
-  async broadcastArrivalResponse(target: string) {
+  async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: I_AM_HERE,
-          target,
-        },
-      ],
-    });
+    try {
+      const link = { source: this.source, predicate: I_AM_HERE, target: author };
+      this.neighbourhood.sendBroadcastU({ links: [link] });
+    } catch (e) {
+      console.error(`Error sending I_AM_HERE signal to ${author}:`, e);
+    }
   }
 
   /**
@@ -428,13 +419,9 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
-    // console.log("trying to join");
-
     let settings = { audio: true, video: false, ...initialSettings };
 
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
-    }
+    if (this.localStream) this.localStream.getTracks().forEach(track => track.stop());
 
     // Get user media
     try {

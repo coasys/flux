@@ -163,62 +163,43 @@ export default defineComponent({
   methods: {
     checkWhoIsHere() {
       if (this.neighbhourhoodProxy) {
-        this.channels.forEach((channel) => {
-          this.neighbhourhoodProxy.sendBroadcastU({
-            links: [
-              {
-                source: channel.baseExpression,
-                predicate: "is-anyone-here",
-                target: "just checking",
-              },
-            ],
-          });
+        this.neighbhourhoodProxy.sendBroadcastU({
+          links: [{ source: "", predicate: "is-anyone-in-a-channel", target: "" }],
         });
       }
     },
-    handleBroadcastCb(perspectiveExpression: PerspectiveExpression) {
-      const link = perspectiveExpression.data.links[0];
-      if (
-        link &&
-        link.author !== this.me?.did &&
-        link.data.predicate === "i-am-here"
-      ) {
-        this.activeAgents[link.data.source] = {
-          ...this.activeAgents[link.data.source],
-          [link.author]: true,
-        };
-      }
-      if (
-        link &&
-        link.author !== this.me?.did &&
-        link.data.predicate === "leave"
-      ) {
-        this.activeAgents[link.data.source] = {
-          ...this.activeAgents[link.data.source],
-          [link.author]: false,
-        };
-      }
-      if (
-        link &&
-        link.author === this.me?.did &&
-        link.data.predicate === "leave" &&
-        this.me?.did
-      ) {
-        this.activeAgents[link.data.source] = {
-          ...this.activeAgents[link.data.source],
-          [this.me.did]: false,
-        };
-      }
-      if (
-        link &&
-        link.author === this.me?.did &&
-        link.data.predicate === "peer-signal" &&
-        this.me?.did
-      ) {
-        this.activeAgents[link.data.source] = {
-          ...this.activeAgents[link.data.source],
-          [this.me.did]: true,
-        };
+    handleBroadcastCb(expression: PerspectiveExpression) {
+      const link = expression.data.links[0];
+      if (!link) return;
+      
+      const { author, data } = link;
+      const { predicate, source, target } = data;
+      const isMe = author === this.me?.did;
+
+      if (isMe) {
+        // Handle signals from me
+        if (predicate === "leave" && this.me?.did) {
+          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: false };
+        }
+
+        if (predicate === "peer-signal" && this.me?.did) {
+          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: true };
+        }
+      } else {
+        // Handle signals from others
+        if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
+          this.neighbhourhoodProxy.sendBroadcastU({
+            links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: author }],
+          });
+        }
+
+        if (predicate === "i-am-in-channel" && target === this.me?.did) {
+          this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
+        }
+
+        if (predicate === "leave") {
+          this.activeAgents[source] = { ...this.activeAgents[source], [author]: false };
+        }
       }
     },
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
