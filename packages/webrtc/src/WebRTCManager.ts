@@ -211,29 +211,12 @@ export class WebRTCManager {
       return;
     }
 
-    // Fires for each channel when user joins neighbourhood (in ChannelList.vue)
-    if (
-      link.data.predicate === "is-anyone-in-channel" &&
-      link.data.source === this.source
-    ) {
-      console.log('IS_ANYONE_HERE (in channel) signal recieved')
-      this.neighbourhood.sendBroadcastU({
-        links: [
-          {
-            source: this.source,
-            predicate: "i-am-in-channel",
-            target: this.agent.did,
-          },
-        ],
-      });
-    }
-
     // fires when joining webrtc call
     if (
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
     ) {
-      console.log('IS_ANYONE_HERE (in call) signal recieved')
+      console.log('IS_ANYONE_HERE signal recieved')
       // Check if the remote host should create the offer
       // -> If so, create passive connection
       if (link.author.localeCompare(this.agent.did) < 1) {
