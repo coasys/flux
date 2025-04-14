@@ -141,7 +141,7 @@ export class WebRTCManager {
     this.closeConnection = this.closeConnection.bind(this);
     this.addConnection = this.addConnection.bind(this);
     this.broadcastArrival = this.broadcastArrival.bind(this);
-    this.broadcastArrivalResponse = this.broadcastArrivalResponse.bind(this);
+    this.respondToArrival = this.respondToArrival.bind(this);
 
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
@@ -216,14 +216,15 @@ export class WebRTCManager {
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
     ) {
-      console.log('IS_ANYONE_HERE signal recieved')
+      console.log(`${link.author} broadcast their arrival in the call!`)
       // Check if the remote host should create the offer
       // -> If so, create passive connection
       if (link.author.localeCompare(this.agent.did) < 1) {
+        console.log('adding connection as initiator')
         this.addConnection(link.author, false);
       }
 
-      this.broadcastArrivalResponse(link.author);
+      this.respondToArrival(link.author);
     }
 
     if (
@@ -231,13 +232,16 @@ export class WebRTCManager {
       link.data.source === this.source &&
       link.data.target === this.agent.did
     ) {
+      console.log(`${link.author} signalled their presence in the call!`)
       // Check if we should create the offer
       // -> If so, create active connection
       if (link.author.localeCompare(this.agent.did) > 0) {
+        console.log('adding connection as responder')
         this.addConnection(link.author, true);
       } else {
+        console.log('adding connection as initiator & responding')
         this.addConnection(link.author, false);
-        this.broadcastArrivalResponse(link.author);
+        this.respondToArrival(link.author);
       }
     }
 
@@ -250,9 +254,7 @@ export class WebRTCManager {
       // Check if the signal is for us
       if (data.targetPeer === this.agent.did) {
         const remotePeer = this.connections.get(link.author);
-        if (remotePeer) {
-          remotePeer.peer.signal(data.signalData);
-        }
+        if (remotePeer) remotePeer.peer.signal(data.signalData);
       }
     }
 
@@ -267,15 +269,17 @@ export class WebRTCManager {
    * Create connection and add to connections array
    */
   async addConnection(remoteDid: string, initiator: boolean) {
-    if (this.connections.get(remoteDid)) {
-      return this.connections.get(remoteDid);
-    }
+    // if (this.connections.get(remoteDid)) {
+    //   return this.connections.get(remoteDid);
+    // }
 
     // console.log(
     //   "🟠 Creating ",
     //   initiator ? "active" : "passive",
     //   " connection"
     // );
+
+    console.log('adding connection to: ', remoteDid)
 
     const ad4mPeer = new AD4MPeer({
       did: remoteDid,
@@ -321,7 +325,7 @@ export class WebRTCManager {
 
     this.connections.set(remoteDid, newConnection);
 
-    return newConnection;
+    // return newConnection;
   }
 
   /**
@@ -342,17 +346,17 @@ export class WebRTCManager {
   }
 
   /**
-   * Broadcast arrival response
+   * Response to arrival
    */
-  async broadcastArrivalResponse(target: string) {
+  async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
 
-    this.neighbourhood.sendBroadcastU({
+    this.neighbourhood.sendSignalU(author, {
       links: [
         {
           source: this.source,
           predicate: I_AM_HERE,
-          target,
+          target: author,
         },
       ],
     });
@@ -430,13 +434,11 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
-    // console.log("trying to join");
+    console.log("Trying to join in WebRTCManager");
 
     let settings = { audio: true, video: false, ...initialSettings };
 
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
-    }
+    if (this.localStream) this.localStream.getTracks().forEach(track => track.stop());
 
     // Get user media
     try {
@@ -461,6 +463,7 @@ export class WebRTCManager {
     }
 
     this.isListening = true;
+    console.log('Broadcasting arrival to other peers...')
     this.broadcastArrival();
 
     // TEMP: Heartbeat disabled for now
