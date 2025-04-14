@@ -154,9 +154,9 @@ async function onSignalReceived(
     // console.log(`Signal recieved: Processing update from ${author}`);
     try {
       const progress = JSON.parse(target);
-        setProcessingData((prev) => {
-          if (prev) return { ...prev, progress }
-          return prev;
+      setProcessingData((prev) => {
+        if (prev) return { ...prev, progress }
+        return prev;
       });
     } catch (e) {
       console.error("Error parsing processing update signal:", e);
