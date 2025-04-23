@@ -120,12 +120,12 @@ export default defineComponent({
   },
   mounted() {
     // Add signal handler
-    this.neighbhourhoodProxy.addSignalHandler(this.onSignal);
+    this.neighbhourhoodProxy?.addSignalHandler(this.onSignal);
 
-    // If in a channel, let the neighbhourhood know
+    // If in a channel, let the neighbourhood know
     if (this.activeChannelId) this.signalPresenceInChannel(this.activeChannelId);
 
-    // Check who else is in the neighbhourhoods channels
+    // Check who else is in the neighbourhoods channels
     this.checkWhoIsInChannels();
   },
   unmounted() {
@@ -133,7 +133,7 @@ export default defineComponent({
     if (this.activeChannelId) this.signalLeavingChannel(this.activeChannelId);
 
     // Remove signal handler
-    this.neighbhourhoodProxy.removeSignalHandler(this.onSignal);
+    this.neighbhourhoodProxy?.removeSignalHandler(this.onSignal);
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
@@ -188,17 +188,17 @@ export default defineComponent({
       }
     },
     signalPresenceInChannel(channelId: string) {
-      this.neighbhourhoodProxy.sendBroadcastU({
+      this.neighbhourhoodProxy?.sendBroadcastU({
         links: [{ source: channelId, predicate: I_AM_IN_CHANNEL, target: "" }],
       });
     },
     signalLeavingChannel(channelId: string) {
-      this.neighbhourhoodProxy.sendBroadcastU({
+      this.neighbhourhoodProxy?.sendBroadcastU({
         links: [{ source: channelId, predicate: I_AM_LEAVING_CHANNEL, target: "" }],
       });
     },
     checkWhoIsInChannels() {
-      this.neighbhourhoodProxy.sendBroadcastU({
+      this.neighbhourhoodProxy?.sendBroadcastU({
         links: [{ source: "", predicate: IS_ANYONE_IN_A_CHANNEL, target: "" }],
       });
     },
