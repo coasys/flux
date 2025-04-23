@@ -102,6 +102,10 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import ActiveAgent from "./ActiveAgent.vue";
 import { profileFormatter } from "@coasys/flux-utils";
 
+const IS_ANYONE_IN_A_CHANNEL = "is-anyone-in-a-channel";
+const I_AM_IN_CHANNEL = "i-am-in-channel";
+const I_AM_LEAVING_CHANNEL = "i-am-leaving-channel";
+
 export default defineComponent({
   components: { ActiveAgent },
   props: {
@@ -115,17 +119,21 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.neighbhourhoodProxy.addSignalHandler(this.handleBroadcastCb);
+    // Add signal handler
+    this.neighbhourhoodProxy.addSignalHandler(this.onSignal);
 
-    this.polling = setInterval(() => {
-      this.checkWhoIsHere();
-    }, 5000);
+    // If in a channel, let the neighbhourhood know
+    if (this.activeChannelId) this.signalPresenceInChannel(this.activeChannelId);
 
-    this.checkWhoIsHere();
+    // Check who else is in the neighbhourhoods channels
+    this.checkWhoIsInChannels();
   },
   unmounted() {
-    clearInterval(this.polling);
-    this.neighbhourhoodProxy.removeSignalHandler(this.handleBroadcastCb);
+    // Signal leaving channel
+    if (this.activeChannelId) this.signalLeavingChannel(this.activeChannelId);
+
+    // Remove signal handler
+    this.neighbhourhoodProxy.removeSignalHandler(this.onSignal);
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
@@ -147,9 +155,8 @@ export default defineComponent({
       appStore: useAppStore(),
     };
   },
-  data: function () {
+  data: () => {
     return {
-      polling: null as any,
       neighbhourhoodProxy: null as NeighbourhoodProxy | null,
       showCommunityMenu: false,
       communityImage: null,
@@ -161,46 +168,39 @@ export default defineComponent({
     },
   },
   methods: {
-    checkWhoIsHere() {
-      if (this.neighbhourhoodProxy) {
-        this.neighbhourhoodProxy.sendBroadcastU({
-          links: [{ source: "", predicate: "is-anyone-in-a-channel", target: "" }],
-        });
-      }
-    },
-    handleBroadcastCb(expression: PerspectiveExpression) {
+    onSignal(expression: PerspectiveExpression) {
       const link = expression.data.links[0];
       if (!link) return;
-      
+
       const { author, data } = link;
-      const { predicate, source, target } = data;
-      const isMe = author === this.me?.did;
+      const { predicate, source } = data;
 
-      if (isMe) {
-        // Handle signals from me
-        if (predicate === "leave" && this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: false };
-        }
-
-        if (predicate === "peer-signal" && this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: true };
-        }
-      } else {
-        // Handle signals from others
-        if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
-          this.neighbhourhoodProxy.sendBroadcastU({
-            links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: author }],
-          });
-        }
-
-        if (predicate === "i-am-in-channel" && target === this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
-        }
-
-        if (predicate === "leave") {
-          this.activeAgents[source] = { ...this.activeAgents[source], [author]: false };
-        }
+      if (predicate === IS_ANYONE_IN_A_CHANNEL && this.activeChannelId) {
+        this.signalPresenceInChannel(this.activeChannelId);
       }
+
+      if (predicate === I_AM_IN_CHANNEL) {
+        this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
+      }
+
+      if (predicate === I_AM_LEAVING_CHANNEL) {
+        this.activeAgents[source] = { ...this.activeAgents[source], [author]: false };
+      }
+    },
+    signalPresenceInChannel(channelId: string) {
+      this.neighbhourhoodProxy.sendBroadcastU({
+        links: [{ source: channelId, predicate: I_AM_IN_CHANNEL, target: "" }],
+      });
+    },
+    signalLeavingChannel(channelId: string) {
+      this.neighbhourhoodProxy.sendBroadcastU({
+        links: [{ source: channelId, predicate: I_AM_LEAVING_CHANNEL, target: "" }],
+      });
+    },
+    checkWhoIsInChannels() {
+      this.neighbhourhoodProxy.sendBroadcastU({
+        links: [{ source: "", predicate: IS_ANYONE_IN_A_CHANNEL, target: "" }],
+      });
     },
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
     handleToggleClick(channelId: string) {
@@ -247,6 +247,14 @@ export default defineComponent({
         this.$router.push({ name: "community", params: { communityId: this.perspective.uuid } });
       } catch (error) {
         console.error("Failed to delete channel:", error);
+      }
+    },
+  },
+  watch: {
+    async activeChannelId(newChannel, oldChannel) {
+      if (newChannel !== oldChannel) {
+        if (oldChannel) this.signalLeavingChannel(oldChannel);
+        if (newChannel) this.signalPresenceInChannel(newChannel);
       }
     },
   },
