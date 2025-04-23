@@ -2,16 +2,18 @@
   <button @click="$emit('click')" class="avatar-group">
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
-        <Avatar
-          v-for="(user, index) in firstUsers"
-          :data-testid="`avatar-group__avatar__${user.did}`"
-          :key="index"
-          :hash="user.did"
-          :size="size"
-          :url="user.profileThumbnailPicture"
-        ></Avatar>
+        <j-spinner size="sm" v-if="loading" />
 
-        <span v-if="users.length >= 5" class="avatar-group__see-all">
+        <Avatar
+          v-if="!loading"
+          v-for="user in firstUsers"
+          :key="user.did"
+          :did="user.did"
+          :url="user.profileThumbnailPicture"
+          :size="size"
+        />
+
+        <span v-if="!loading && users.length > 4" class="avatar-group__see-all">
           +{{ users.length - 4 }}
         </span>
       </div>
@@ -28,32 +30,18 @@ import Avatar from "@/components/avatar/Avatar.vue";
 export default defineComponent({
   emits: ["click"],
   components: { Avatar },
-  props: ["users", "size"],
+  props: ["loading", "users", "size"],
   data() {
-    return {
-      firstUsers: {} as Record<string, Profile>,
-      loading: false,
-    };
+    return { firstUsers: [] as Profile[] | { did: string, profileThumbnailPicture: string }[] };
   },
   watch: {
     users: {
       handler: async function (users: string[]) {
-        // reset on change
-        let firstUsers = {} as any;
-        this.loading = true;
-
-        for (let i = 0; i < users.length; i++) {
-          const did = users[i];
-          if (i <= 3) {
-            const profile = await getProfile(did);
-            if (profile) {
-              firstUsers[did] = profile;
-            }
-          }
-        }
-
-        this.firstUsers = firstUsers;
-        this.loading = false;
+        const newUsers = users.slice(0, 4);
+        // Immediatly display the first 4 users identicons via their dids
+        this.firstUsers = newUsers.map((did) => ({ did, profileThumbnailPicture: '' }));
+        // Update their images when they are available
+        this.firstUsers = await Promise.all(newUsers.map(async (did) => await getProfile(did) || { did, profileThumbnailPicture: '' }));
       },
       immediate: true,
       deep: true,
