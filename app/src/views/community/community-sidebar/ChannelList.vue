@@ -180,11 +180,11 @@ export default defineComponent({
       }
 
       if (predicate === I_AM_IN_CHANNEL) {
-        this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
+        this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: true };
       }
 
       if (predicate === I_AM_LEAVING_CHANNEL) {
-        this.activeAgents[source] = { ...this.activeAgents[source], [author]: false };
+        this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: false };
       }
     },
     signalPresenceInChannel(channelId: string) {
