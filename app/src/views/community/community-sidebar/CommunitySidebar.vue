@@ -1,6 +1,6 @@
 <template>
   <Header :community="community" :isSynced="isSynced"></Header>
-  <Members></Members>
+  <Members :perspective="perspective"></Members>
   <ChannelList :perspective="perspective" :community="community"></ChannelList>
 </template>
 

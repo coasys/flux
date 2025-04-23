@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group open :title="`Members (${others?.length})`">
+    <j-menu-group open :title="`Members ${loading ? '' : `(${others.length})`}`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -12,7 +12,8 @@
       <j-box px="500">
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
-          :users="others || []"
+          :loading="loading"
+          :users="others"
         />
       </j-box>
     </j-menu-group>
@@ -20,47 +21,54 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, watchEffect } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { usePerspective } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useRoute } from "vue-router";
-
 export default defineComponent({
   components: { AvatarGroup },
-  async setup() {
-    const route = useRoute();
+  props: {
+    perspective: {
+      type: Object, // PerspectiveProxy,
+      required: true,
+    },
+  },
+  async setup(props) {
     const client = await getAd4mClient();
+    const loading = ref(true);
     const others = ref<string[]>([]);
+    let currentPerspectiveUuid = props.perspective.uuid
 
-    const { data } = usePerspective(
-      client,
-      () => route.params.communityId as string
+    watch(
+      () => props.perspective.uuid,
+      async (newUuid, oldUuid) => {
+        if (newUuid !== oldUuid) {
+          loading.value = true;
+
+          // Store the current perspectives uuid so we can skip stale results if the perspective changes before the other agents are returned
+          currentPerspectiveUuid = newUuid
+
+          // Get the members from the neighbourhood
+          const neighbourhood = props.perspective.getNeighbourhoodProxy();
+          const me = await client.agent.me();
+          const agents = await neighbourhood?.otherAgents() || [];
+
+          // If the perspective has already changed, skip the stale result
+          if (newUuid !== currentPerspectiveUuid) return;
+
+          // Update the members
+          others.value = [...agents, me.did];
+          loading.value = false;
+        }
+      },
+      { immediate: true }
     );
 
-    watchEffect(async () => {
-      // TODO: how to watch for the uuid change, without having an unused var
-      const uuid = data.value.perspective?.uuid;
-      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
-      if (neighbourhood) {
-        const me = await client.agent.me();
-        const agents = await neighbourhood?.otherAgents();
-        others.value = [...agents, me.did];
-      }
-    });
-
-    return {
-      data,
-      others,
-    };
+    return { loading, others };
   },
   methods: {
-    ...mapActions(useAppStore, [
-      "setShowCommunityMembers",
-      "setShowInviteCode",
-    ]),
+    ...mapActions(useAppStore, ["setShowCommunityMembers", "setShowInviteCode" ]),
   },
 });
 </script>
