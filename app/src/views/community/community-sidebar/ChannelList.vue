@@ -105,6 +105,7 @@ import { profileFormatter } from "@coasys/flux-utils";
 const IS_ANYONE_IN_A_CHANNEL = "is-anyone-in-a-channel";
 const I_AM_IN_CHANNEL = "i-am-in-channel";
 const I_AM_LEAVING_CHANNEL = "i-am-leaving-channel";
+const POLLING_INTERVAL = 5000;
 
 export default defineComponent({
   components: { ActiveAgent },
@@ -127,6 +128,28 @@ export default defineComponent({
 
     // Check who else is in the neighbourhoods channels
     this.checkWhoIsInChannels();
+
+    // Set up polling that periodically rechecks agents are still present incase their connection has dropped
+    this.pollingInterval = setInterval(() => {
+      // Iterate over all channels in activeAgents
+      Object.keys(this.activeAgents || {}).forEach((channelId) => {
+        // Skip if the channel has no active agents
+        if (!this.activeAgents[channelId]) return;
+
+        // Keep only agents who responded during the polling interval
+        this.activeAgents[channelId] = Object.fromEntries(
+          Object.keys(this.activeAgents[channelId])
+            .filter((did) => this.pollingSignals.includes(did)) // Filter agents who responded
+            .map((did) => [did, true]) // Mark them as active
+        );
+      });
+
+      // Reset the polling signals for the next interval
+      this.pollingSignals = [];
+
+      // Trigger another check to broadcast and collect responses
+      this.checkWhoIsInChannels();
+    }, POLLING_INTERVAL);
   },
   unmounted() {
     // Signal leaving channel
@@ -134,6 +157,9 @@ export default defineComponent({
 
     // Remove signal handler
     this.neighbhourhoodProxy?.removeSignalHandler(this.onSignal);
+
+    // Clear polling interval
+    if (this.pollingInterval) clearInterval(this.pollingInterval);
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
@@ -153,6 +179,8 @@ export default defineComponent({
       channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
+      pollingInterval: null as NodeJS.Timeout | null,
+      pollingSignals: ref<string[]>([]),
     };
   },
   data: () => {
@@ -173,18 +201,21 @@ export default defineComponent({
       if (!link) return;
 
       const { author, data } = link;
-      const { predicate, source } = data;
+      const { source, predicate } = data;
 
       if (predicate === IS_ANYONE_IN_A_CHANNEL && this.activeChannelId) {
         this.signalPresenceInChannel(this.activeChannelId);
+        this.pollingSignals.push(author);
       }
 
       if (predicate === I_AM_IN_CHANNEL) {
         this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: true };
+        this.pollingSignals.push(author);
       }
 
       if (predicate === I_AM_LEAVING_CHANNEL) {
         this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: false };
+        this.pollingSignals.push(author);
       }
     },
     signalPresenceInChannel(channelId: string) {
