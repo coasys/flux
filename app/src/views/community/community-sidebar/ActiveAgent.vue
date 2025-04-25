@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="wrapper" :class="{ 'outline': inCall }">
     <Avatar
       size="xxs"
       :did="did"
       :url="profile?.profileThumbnailPicture"
-    ></Avatar>
+    />
   </div>
 </template>
 
@@ -25,6 +25,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    inCall: {
+      type: Boolean,
+      default: false,
+    },
   },
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
@@ -40,4 +44,18 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrapper {
+  height: 20px;
+  z-index: 1;
+
+  &:not(:first-child) {
+    margin-left: -10px;
+  }
+
+  &.outline {
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #e62b63;
+  }
+}
+</style>

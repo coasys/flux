@@ -24,24 +24,35 @@
             :selected="channel.baseExpression === activeChannelId && !channel.expanded"
             @click="() => navigateToChannel(channel.baseExpression)"
           >
-            {{ channel.name }}
-            <div
-              slot="end"
-              class="channel__notification"
-              v-if="channel.hasNewMessages"
-            ></div>
-            <j-icon
-              slot="start"
-              size="xs"
-              :name="getIcon(channel.views[0])"
-            ></j-icon>
-            <div class="active-agents">
-              <j-box
-                v-for="(agent, did) in activeAgents[channel.baseExpression]"
+            <j-flex slot="start" gap="300" a="center">
+              <j-icon size="xs" :name="getIcon(channel.views[0])" />
+              
+              {{ channel.name }}
+
+              <div class="channel__notification" v-if="channel.hasNewMessages"></div>
+
+              <div class="active-agents">
+                <template
+                  v-for="(agentState, did) in activeAgents[channel.baseExpression]"
+                  :key="did"
+                >
+                  <ActiveAgent v-if="agentState?.inChannel" :key="did" :did="`${did}`" />
+                </template>
+              </div>
+            </j-flex>
+
+
+            <div class="active-agents in-call" slot="end"  v-if="activeCall(channel.baseExpression)">
+              <div class="recording-icon">
+                <div class="icon1" />
+                <div class="icon2" />
+              </div>
+              <template
+                v-for="(agentState, did) in activeAgents[channel.baseExpression]"
                 :key="did"
               >
-                <ActiveAgent :key="did" :did="did" v-if="agent" />
-              </j-box>
+                <ActiveAgent v-if="agentState?.inCall" :key="did" :did="`${did}`" inCall />
+              </template>
             </div>
           </j-menu-item>
           <div class="channel-views" v-if="channel.expanded">
@@ -101,6 +112,10 @@ import {
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import ActiveAgent from "./ActiveAgent.vue";
 import { profileFormatter } from "@coasys/flux-utils";
+import { IS_ANYONE_HERE, I_AM_HERE, PEER_SIGNAL, LEAVE } from "@coasys/flux-webrtc";
+
+type AgentState = { inChannel?: boolean; inCall?: boolean };
+type ActiveAgents = { [channelId: string]: { [did: string]: AgentState } };
 
 const IS_ANYONE_IN_A_CHANNEL = "is-anyone-in-a-channel";
 const I_AM_IN_CHANNEL = "i-am-in-channel";
@@ -138,9 +153,15 @@ export default defineComponent({
 
         // Keep only agents who responded during the polling interval
         this.activeAgents[channelId] = Object.fromEntries(
-          Object.keys(this.activeAgents[channelId])
-            .filter((did) => this.pollingSignals.find((s) => s.channelId === channelId && s.author === did)) // Filter agents who responded & are in the channel
-            .map((did) => [did, true]) // Mark them as active
+          Object.entries(this.activeAgents[channelId]).map(([did]) => {
+            const inChannelSignal = this.pollingSignals.find((s) => s.channelId === channelId && s.author === did && s.state.inChannel);
+            const inCallSignal = this.pollingSignals.find((s) => s.channelId === channelId && s.author === did && s.state.inCall);
+            return [did, { inChannel: !!inChannelSignal, inCall: !!inCallSignal } ];
+          })
+            .filter(([did, agentState]) => {
+              // Keep only agents that are in the channel or in a call
+              return (agentState as AgentState).inChannel || (agentState as AgentState).inCall;
+            })
         );
       });
 
@@ -174,13 +195,13 @@ export default defineComponent({
 
     return {
       me,
-      activeAgents: ref<Record<string, Record<string, boolean>>>({}),
+      activeAgents: ref<ActiveAgents>({}),
       neighbhourhoodProxy,
       channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
       pollingInterval: null as NodeJS.Timeout | null,
-      pollingSignals: ref<{ author: string, channelId: ""}[]>([]),
+      pollingSignals: ref<{ author: string, channelId: string, state: AgentState }[]>([]),
     };
   },
   data: () => {
@@ -194,6 +215,12 @@ export default defineComponent({
     activeChannelId() {
       return this.$route.params.channelId as string;
     },
+    activeCall() {
+      return (channelId: string) => {
+        const channelState = this.activeAgents[channelId] || {};
+        return Object.values(channelState).some((agentState) => agentState.inCall);
+      };
+    },
   },
   methods: {
     onSignal(expression: PerspectiveExpression) {
@@ -203,20 +230,43 @@ export default defineComponent({
       const { author, data } = link;
       const { source, predicate } = data;
 
+      // Handle channel signals sent from this component
       if (predicate === IS_ANYONE_IN_A_CHANNEL && this.activeChannelId) {
         this.signalPresenceInChannel(this.activeChannelId);
-        this.pollingSignals.push({ author, channelId: source });
+        this.pollingSignals.push({ author, channelId: source, state: { inChannel: true } });
       }
 
       if (predicate === I_AM_IN_CHANNEL) {
-        this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: true };
-        this.pollingSignals.push({ author, channelId: source });
+        const channelState = this.activeAgents[source] || {}
+        const agentState = channelState[author] || {};
+        const newAgentState = { ...agentState, inChannel: true };
+        this.activeAgents[source] = { ...channelState, [author]: newAgentState };
+        this.pollingSignals.push({ author, channelId: source, state: newAgentState });
       }
 
       if (predicate === I_AM_LEAVING_CHANNEL) {
-        this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: false };
-        this.pollingSignals.push({ author, channelId: source });
+        const channelState = this.activeAgents[source] || {}
+        const agentState = channelState[author] || {};
+        const newAgentState = { ...agentState, inChannel: false };
+        this.activeAgents[source] = { ...channelState, [author]: newAgentState };
       }
+
+      // Handle WebRTC signals sent from the WebRTC Manager
+      if ([IS_ANYONE_HERE, I_AM_HERE, PEER_SIGNAL].includes(predicate)) {
+        const channelState = this.activeAgents[source] || {}
+        const agentState = channelState[author] || {};
+        const newAgentState = { ...agentState, inCall: true };
+        this.activeAgents[source] = { ...channelState, [author]: newAgentState };
+        this.pollingSignals.push({ author, channelId: source, state: newAgentState });
+      }
+
+      if ([LEAVE].includes(predicate)) {
+        const channelState = this.activeAgents[source] || {}
+        const agentState = channelState[author] || {};
+        const newAgentState = { ...agentState, inCall: false };
+        this.activeAgents[source] = { ...channelState, [author]: newAgentState };
+      }
+
     },
     signalPresenceInChannel(channelId: string) {
       this.neighbhourhoodProxy?.sendBroadcastU({
@@ -292,7 +342,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .channel {
   position: relative;
   display: block;
@@ -311,15 +361,72 @@ export default defineComponent({
   height: 10px;
   border-radius: 50%;
   background: var(--j-color-primary-500);
+  margin-left: 10px;
 }
 
 .active-agents {
   display: flex;
   align-items: center;
-  position: absolute;
   gap: var(--j-space-100);
-  right: var(--j-space-400);
-  top: 50%;
-  transform: translateY(-50%);
+  margin-left: 10px;
+}
+
+.recording-icon {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
+  width: 20px;
+  margin-right: 10px;
+
+  $speed: 1.8s;
+
+  @keyframes pulse1 {
+    0% {
+      transform: scale(0.4);
+    }
+    25% {
+      transform: scale(0.5);
+    }
+    50% {
+      transform: scale(0.4);
+    }
+    100% {
+      transform: scale(0.4);
+    }
+  }
+
+  @keyframes pulse2 {
+    0% {
+      transform: scale(0.4);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+  }
+
+  .icon1,
+  .icon2 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #e62b63;
+  }
+
+  .icon1 {
+    animation: pulse1 $speed ease-in infinite;
+  }
+
+  .icon2 {
+    animation: pulse2 $speed ease-in infinite;
+  }
 }
 </style>
