@@ -127,7 +127,7 @@ export default defineComponent({
     if (this.activeChannelId) this.signalPresenceInChannel(this.activeChannelId);
 
     // Check who else is in the neighbourhoods channels
-    this.checkWhoIsInChannels();
+    this.checkWhoIsInChannels(this.activeChannelId || "");
 
     // Set up polling that periodically rechecks agents are still present incase their connection has dropped
     this.pollingInterval = setInterval(() => {
@@ -139,7 +139,7 @@ export default defineComponent({
         // Keep only agents who responded during the polling interval
         this.activeAgents[channelId] = Object.fromEntries(
           Object.keys(this.activeAgents[channelId])
-            .filter((did) => this.pollingSignals.includes(did)) // Filter agents who responded
+            .filter((did) => this.pollingSignals.find((s) => s.channelId === channelId && s.author === did)) // Filter agents who responded & are in the channel
             .map((did) => [did, true]) // Mark them as active
         );
       });
@@ -148,7 +148,7 @@ export default defineComponent({
       this.pollingSignals = [];
 
       // Trigger another check to broadcast and collect responses
-      this.checkWhoIsInChannels();
+      this.checkWhoIsInChannels(this.activeChannelId || "");
     }, POLLING_INTERVAL);
   },
   unmounted() {
@@ -180,7 +180,7 @@ export default defineComponent({
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
       pollingInterval: null as NodeJS.Timeout | null,
-      pollingSignals: ref<string[]>([]),
+      pollingSignals: ref<{ author: string, channelId: ""}[]>([]),
     };
   },
   data: () => {
@@ -205,17 +205,17 @@ export default defineComponent({
 
       if (predicate === IS_ANYONE_IN_A_CHANNEL && this.activeChannelId) {
         this.signalPresenceInChannel(this.activeChannelId);
-        this.pollingSignals.push(author);
+        this.pollingSignals.push({ author, channelId: source });
       }
 
       if (predicate === I_AM_IN_CHANNEL) {
         this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: true };
-        this.pollingSignals.push(author);
+        this.pollingSignals.push({ author, channelId: source });
       }
 
       if (predicate === I_AM_LEAVING_CHANNEL) {
         this.activeAgents[source] = { ...(this.activeAgents[source] || {}), [author]: false };
-        this.pollingSignals.push(author);
+        this.pollingSignals.push({ author, channelId: source });
       }
     },
     signalPresenceInChannel(channelId: string) {
@@ -228,9 +228,9 @@ export default defineComponent({
         links: [{ source: channelId, predicate: I_AM_LEAVING_CHANNEL, target: "" }],
       });
     },
-    checkWhoIsInChannels() {
+    checkWhoIsInChannels(channelId: string) {
       this.neighbhourhoodProxy?.sendBroadcastU({
-        links: [{ source: "", predicate: IS_ANYONE_IN_A_CHANNEL, target: "" }],
+        links: [{ source: channelId, predicate: IS_ANYONE_IN_A_CHANNEL, target: "" }],
       });
     },
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
