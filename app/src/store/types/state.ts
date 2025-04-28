@@ -36,5 +36,5 @@ export interface ApplicationState {
     instance: any;
     channelId: string;
   };
-  userProfilesCache: Profile[];
+  userProfilesCache: Record<string, Profile>;
 }
