@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text nomargin variant="heading-sm">
-        Members ({{ members.length ?? 0 }})
+        Members {{ members.length ? `(${members.length})` : "" }}
       </j-text>
       <j-input
         size="lg"
@@ -23,12 +23,12 @@
           direction="row"
           j="center"
           a="center"
+          @click="() => profileClick(member.did)"
         >
           <Avatar
             size="xl"
-            :hash="member.did"
-            :url="member.profileThumbnailPicture"
-            @click="() => profileClick(member.did)"
+            :did="member.did"
+            :src="member.profileThumbnailPicture"
           ></Avatar>
           <j-text color="black" nomargin variant="body">
             {{ member.username }}
@@ -54,19 +54,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watchEffect, ref, computed } from "vue";
-import { Community, getProfile } from "@coasys/flux-api";
+import { defineComponent, watch, ref, computed } from "vue";
+import { Community } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
 import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { Profile } from "@coasys/flux-types";
 
 export default defineComponent({
   emits: ["close", "submit"],
   components: { Avatar },
-  async setup() {
+  async setup(_, { emit }) {
     const route = useRoute();
-    const members = ref<any[]>([]);
+    const router = useRouter();
+
+    const loading = ref(true);
+    const members = ref<Profile[]>([]);
+    const searchValue = ref('');
+    const perspectiveUuid = computed(() => data.value?.perspective?.uuid);
+
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
@@ -75,46 +83,50 @@ export default defineComponent({
       model: Community,
     });
 
-    watchEffect(async () => {
-      // TODO: how to watch for the uuid change, without having an unused var
-      const uuid = data.value.perspective?.uuid;
-      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
-      if (neighbourhood) {
-        const me = await client.agent.me();
-        const others = await neighbourhood?.otherAgents();
-        members.value = await Promise.all(
-          [...others, me.did].map((did) => getProfile(did))
-        );
+    async function getMembers() {
+      loading.value = true;
+      try {
+        // Get the members from the neighbourhood
+        const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
+        if (neighbourhood) {
+          const me = await client.agent.me();
+          const others = await neighbourhood?.otherAgents();
+          // Get the profiles from each members DID
+          members.value = await Promise.all(
+            [...others, me.did].map((did) => getCachedAgentProfile(did))
+          );
+        }
+      } catch (e) {
+        console.error("Error getting members", e);
+      } finally {
+        loading.value = false;
       }
-    });
+    }
 
-    return {
-      members,
-      community: computed(() => communities.value[0]),
-    };
-  },
-  data() {
-    return {
-      searchValue: "",
-      loading: false,
-    };
-  },
-  methods: {
-    async profileClick(did: string) {
-      const client = await getAd4mClient();
+    async function profileClick(did: string) {
+      emit("close");
       const me = await client.agent.me();
+      // Navigate to my profile
+      if (did === me.did) router.push({ name: "home", params: { did } });
+      // Navigate to the other members profile
+      else router.push({ name: "profile", params: { did, communityId: route.params.communityId } });
+    }
 
-      this.$emit("close");
+    watch(perspectiveUuid,
+      async (newUuid, oldUuid) => {
+        if (newUuid !== oldUuid) await getMembers();
+      },
+      { immediate: true }
+    );
 
-      if (did === me.did) {
-        this.$router.push({ name: "home", params: { did } });
-      } else {
-        this.$router.push({
-          name: "profile",
-          params: { did, communityId: this.$route.params.communityId },
-        });
-      }
-    },
+    return {
+      loading,
+      members,
+      searchValue,
+      community: computed(() => communities.value[0]),
+      profileClick,
+
+    };
   },
 });
 </script>
