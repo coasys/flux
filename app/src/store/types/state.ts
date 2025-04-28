@@ -1,3 +1,4 @@
+import { Profile } from "@coasys/flux-types";
 import {
   WindowState,
   ModalsState,
@@ -35,4 +36,5 @@ export interface ApplicationState {
     instance: any;
     channelId: string;
   };
+  userProfilesCache: Profile[];
 }

@@ -52,7 +52,9 @@ export const useAppStore = defineStore("app", {
       activeWebrtc: {
         instance: undefined,
         channelId: "",
-      }
+      },
+      // Stores user profile data as its fetched so we don't need to re-fetch it every time their avatar is displayed
+      userProfilesCache: [],
     };
   },
   getters,

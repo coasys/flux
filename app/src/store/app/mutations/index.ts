@@ -1,3 +1,4 @@
+import { Profile } from "@coasys/flux-types";
 import { UpdateState, ToastState, ThemeState, CurrentThemeState } from "@/store/types";
 import { useAppStore } from "..";
 
@@ -122,5 +123,9 @@ export default {
     const state = useAppStore();
     state.activeWebrtc.instance = instance;
     state.activeWebrtc.channelId = channelId;
+  },
+  cacheUserProfile(userProfile: Profile): void {
+    const state = useAppStore();
+    state.userProfilesCache = [...state.userProfilesCache, userProfile];
   },
 };
