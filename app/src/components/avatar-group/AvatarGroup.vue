@@ -6,10 +6,9 @@
 
         <Avatar
           v-if="!loading"
-          v-for="user in firstUsers"
-          :key="user.did"
-          :did="user.did"
-          :url="user.profileThumbnailPicture"
+          v-for="did in users.slice(0, 4)"
+          :key="did"
+          :did="did"
           :size="size"
         />
 
@@ -22,8 +21,6 @@
 </template>
 
 <script lang="ts">
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 
@@ -31,22 +28,6 @@ export default defineComponent({
   emits: ["click"],
   components: { Avatar },
   props: ["loading", "users", "size"],
-  data() {
-    return { firstUsers: [] as Profile[] | { did: string, profileThumbnailPicture: string }[] };
-  },
-  watch: {
-    users: {
-      handler: async function (users: string[]) {
-        const newUsers = users.slice(0, 4);
-        // Immediatly display the first 4 users identicons via their dids
-        this.firstUsers = newUsers.map((did) => ({ did, profileThumbnailPicture: '' }));
-        // Update their images when they are available
-        this.firstUsers = await Promise.all(newUsers.map(async (did) => await getProfile(did) || { did, profileThumbnailPicture: '' }));
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
 });
 </script>
 

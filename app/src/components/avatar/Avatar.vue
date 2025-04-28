@@ -1,59 +1,45 @@
 <template>
   <j-avatar
-    :slot="slot"
-    :initials="initials"
     :hash="did"
-    :src="realSrc || src"
-    :size="size"
+    :src="displaySrc"
+    :initials="initials"
     :online="online"
+    :slot="slot"
+    :size="size"
   ></j-avatar>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { getImage } from "@coasys/flux-utils";
+import { defineComponent, ref, computed, onMounted } from "vue";
+import { useAppStore } from "@/store/app";
 export default defineComponent({
   props: {
     did: String,
-    url: String,
     src: String,
-    size: {
-      type: String,
-      default: "md",
-    },
-    slot: String,
-    online: Boolean,
     initials: String,
+    online: Boolean,
+    slot: String,
+    size: { type: String, default: "md" },
   },
-  data() {
-    return { realSrc: null as null | string, loading: false };
-  },
-  watch: {
-    url: {
-      handler(url: any) {
-        if (typeof url === "string") {
-          if (url.includes("base64")) {
-            this.realSrc = url;
-          } else {
-            this.getProfileImage(url);
-          }
-        } else {
-          this.realSrc = null;
-        }
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    async getProfileImage(url: string) {
-      try {
-        this.loading = true;
-        const src = await getImage(url);
-        this.realSrc = src || null;
-      } finally {
-        this.loading = false;
-      }
-    },
+  setup(props) {
+    const realSrc = ref<string | null>(null);
+    const displaySrc = computed(() => props.src || realSrc.value);
+
+    onMounted(async () => {
+      // Get the profile picture from the app store if no src is provided and a DID is available
+      if (props.src || !props.did) return;
+      const appStore = useAppStore();
+      const userProfile = await appStore.getAgentProfileData(props.did);
+      realSrc.value = userProfile.profileThumbnailPicture || null;
+    })
+
+    return {
+      displaySrc,
+      size: props.size,
+      initials: props.initials,
+      online: props.online,
+      slot: props.slot,
+    };
   },
 });
 </script>
