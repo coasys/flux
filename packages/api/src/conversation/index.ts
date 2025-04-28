@@ -109,7 +109,7 @@ export default class Conversation extends Ad4mModel {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    return await ConversationSubgroup.findAll(this.perspective, { where: { source: this.baseExpression } });
+    return await ConversationSubgroup.findAll(this.perspective, { source: this.baseExpression });
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {
