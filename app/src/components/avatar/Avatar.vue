@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from "vue";
-import { useAppStore } from "@/store/app";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 export default defineComponent({
   props: {
     did: String,
@@ -28,8 +28,7 @@ export default defineComponent({
     onMounted(async () => {
       // Get the profile picture from the app store if no src is provided and a DID is available
       if (props.src || !props.did) return;
-      const appStore = useAppStore();
-      const userProfile = await appStore.getAgentProfileData(props.did);
+      const userProfile = await getCachedAgentProfile(props.did);
       realSrc.value = userProfile.profileThumbnailPicture || null;
     })
 
