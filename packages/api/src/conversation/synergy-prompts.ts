@@ -88,9 +88,7 @@ Example input:
 ## Your Task:
 - Analyze "unprocessedItems" to determine if they still belong to the given "group".
 - If they fit, update the group's summary (if necessary).
-- If the conversation has shifted to a different topic significantly, create a **newGroup**.
-- Don't create a new group if it's unclear whether the conversation has shifted to a different topic.
-- Default to just updating the group summary of the existing group if it's unclear whether the conversation has shifted to a different topic.
+- If a message shifts the topic significantly, create a **newGroup**.
 - If there is a long gap (> 10 minutes) between messages, take special care to see if this is a response or a new topic.
 - **Do NOT create more than one newGroup.**
 - If no group exists, always create a newGroup.
