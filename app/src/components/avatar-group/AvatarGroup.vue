@@ -6,9 +6,10 @@
 
         <Avatar
           v-if="!loading"
-          v-for="did in users.slice(0, 4)"
-          :key="did"
-          :did="did"
+          v-for="user in users.slice(0, 4)"
+          :key="user.did"
+          :did="user.did"
+          :src="user.profileThumbnailPicture"
           :size="size"
         />
 

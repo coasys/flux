@@ -1,7 +1,7 @@
 <template>
   <j-avatar
     :hash="did"
-    :src="displaySrc"
+    :src="src"
     :initials="initials"
     :online="online"
     :slot="slot"
@@ -10,8 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from "vue";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { defineComponent } from "vue";
 export default defineComponent({
   props: {
     did: String,
@@ -20,25 +19,6 @@ export default defineComponent({
     online: Boolean,
     slot: String,
     size: { type: String, default: "md" },
-  },
-  setup(props) {
-    const realSrc = ref<string | null>(null);
-    const displaySrc = computed(() => props.src || realSrc.value);
-
-    onMounted(async () => {
-      // Get the profile picture from the app store if no src is provided and a DID is available
-      if (props.src || !props.did) return;
-      const userProfile = await getCachedAgentProfile(props.did);
-      realSrc.value = userProfile.profileThumbnailPicture || null;
-    })
-
-    return {
-      displaySrc,
-      size: props.size,
-      initials: props.initials,
-      online: props.online,
-      slot: props.slot,
-    };
   },
 });
 </script>

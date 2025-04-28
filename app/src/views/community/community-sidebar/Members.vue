@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group open :title="`Members ${loading ? '' : `(${others.length})`}`">
+    <j-menu-group open :title="`Members ${loading ? '' : `(${members.length})`}`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -13,7 +13,7 @@
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
           :loading="loading"
-          :users="others"
+          :users="members"
         />
       </j-box>
     </j-menu-group>
@@ -26,6 +26,9 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { Profile } from "@coasys/flux-types";
+
 export default defineComponent({
   components: { AvatarGroup },
   props: {
@@ -37,7 +40,7 @@ export default defineComponent({
   async setup(props) {
     const client = await getAd4mClient();
     const loading = ref(true);
-    const others = ref<string[]>([]);
+    const members = ref<Profile[]>([]);
     let currentPerspectiveUuid = props.perspective.uuid
 
     watch(
@@ -52,20 +55,23 @@ export default defineComponent({
           // Get the members from the neighbourhood
           const neighbourhood = props.perspective.getNeighbourhoodProxy();
           const me = await client.agent.me();
-          const agents = await neighbourhood?.otherAgents() || [];
+          const others = await neighbourhood?.otherAgents() || [];
 
           // If the perspective has already changed, skip the stale result
           if (newUuid !== currentPerspectiveUuid) return;
 
-          // Update the members
-          others.value = [...agents, me.did];
+          // Get the profiles from each members DID
+          members.value = await Promise.all(
+            [...others, me.did].map((did) => getCachedAgentProfile(did))
+          );
+          
           loading.value = false;
         }
       },
       { immediate: true }
     );
 
-    return { loading, others };
+    return { loading, members };
   },
   methods: {
     ...mapActions(useAppStore, ["setShowCommunityMembers", "setShowInviteCode" ]),

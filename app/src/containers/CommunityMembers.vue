@@ -100,7 +100,7 @@ export default defineComponent({
         const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
         if (neighbourhood) {
           const me = await client.agent.me();
-          const others = await neighbourhood?.otherAgents();
+          const others = await neighbourhood?.otherAgents() || [];
           // Get the profiles from each members DID
           members.value = await Promise.all(
             [...others, me.did].map((did) => getCachedAgentProfile(did))
