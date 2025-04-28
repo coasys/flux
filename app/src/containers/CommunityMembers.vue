@@ -2,14 +2,14 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text nomargin variant="heading-sm">
-        Members {{ members.length ? `(${members.length})` : "" }}
+        Members {{ filteredMembers.length ? `(${filteredMembers.length})` : "" }}
       </j-text>
       <j-input
         size="lg"
         placeholder="Search members..."
         type="search"
-        :value="searchValue"
-        @input="(e: any) => (searchValue = e.target.value)"
+        :value="search"
+        @input="(e: any) => (search = e.target.value)"
       >
         <j-icon name="search" size="sm" slot="start"></j-icon>
       </j-input>
@@ -17,7 +17,7 @@
         <j-flex
           gap="500"
           style="cursor: pointer"
-          v-for="member in members"
+          v-for="member in filteredMembers"
           :key="member.did"
           inline
           direction="row"
@@ -72,7 +72,7 @@ export default defineComponent({
 
     const loading = ref(true);
     const members = ref<Profile[]>([]);
-    const searchValue = ref('');
+    const search = ref('');
     const perspectiveUuid = computed(() => data.value?.perspective?.uuid);
 
     const client = await getAd4mClient();
@@ -81,6 +81,16 @@ export default defineComponent({
     const { entries: communities } = useModel({
       perspective: computed(() => data.value.perspective),
       model: Community,
+    });
+
+    const filteredMembers = computed(() => {
+      if (!search.value) return members.value;
+      
+      return members.value.filter((member) => {
+        const { username, givenName, familyName } = member;
+        const stringValues = [username, givenName, familyName].filter(Boolean);
+        return stringValues.some((field) => field.toLowerCase().includes(search.value.toLowerCase()));
+      });
     });
 
     async function getMembers() {
@@ -122,7 +132,8 @@ export default defineComponent({
     return {
       loading,
       members,
-      searchValue,
+      filteredMembers,
+      search,
       community: computed(() => communities.value[0]),
       profileClick,
 
