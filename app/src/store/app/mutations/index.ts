@@ -124,8 +124,4 @@ export default {
     state.activeWebrtc.instance = instance;
     state.activeWebrtc.channelId = channelId;
   },
-  cacheUserProfile(userProfile: Profile): void {
-    const state = useAppStore();
-    state.userProfilesCache = [...state.userProfilesCache, userProfile];
-  },
 };
