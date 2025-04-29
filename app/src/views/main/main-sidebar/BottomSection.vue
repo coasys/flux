@@ -5,17 +5,11 @@
         <j-icon size="md" name="gear"></j-icon>
       </j-button>
     </j-tooltip>
-    <router-link
-      :to="{
-        name: 'home',
-      }"
-      custom
-      v-slot="{ navigate }"
-    >
+    <router-link :to="{ name: 'home' }" v-slot="{ navigate }" custom>
       <j-tooltip title="Profile">
         <j-avatar
           class="left-nav__profile-icon"
-          :did="me?.did"
+          :hash="profile?.did"
           :src="profile?.profileThumbnailPicture"
           @click="() => navigate()"
         />
@@ -25,42 +19,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { useAppStore } from "@/store/app";
-import { mapActions, mapState } from "pinia";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { profileFormatter } from "@coasys/flux-utils";
+import { defineComponent, ref } from "vue";
+import { getAd4mClient } from "@coasys/ad4m-connect";
+import { getCachedAgentProfile } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   async setup() {
-    const appStore = useAppStore();
-
+    const router = useRouter();
     const client = await getAd4mClient();
+    const profile = ref<Profile | null>(null);
+    const showBottomOptions = ref(false);
 
-    const { profile, me } = useMe(client.agent, profileFormatter);
+    const me = await client.agent.me();
+    profile.value = await getCachedAgentProfile(me.did);
 
-    return {
-      me,
-      profile,
-      appStore,
-    };
-  },
-  data() {
-    return {
-      showBottomOptions: false,
-    };
-  },
+    function logOut(): void {
+      router.replace({ name: "login" });
+    }
 
-  methods: {
-    ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
-    logOut(): void {
-      this.$router.replace({ name: "login" });
-    },
-    goToSettings() {
-      this.$router.push({ name: "settings" });
-      this.showBottomOptions = false;
-    },
+    function goToSettings(): void {
+      router.push({ name: "settings" });
+      showBottomOptions.value = false;
+    }
+
+    return { profile, logOut, goToSettings };
   },
 });
 </script>
