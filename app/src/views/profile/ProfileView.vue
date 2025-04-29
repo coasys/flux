@@ -194,7 +194,7 @@ import {
   LinkExpression,
   Literal,
 } from "@coasys/ad4m";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
@@ -204,11 +204,7 @@ import { mapActions } from "pinia";
 import { getImage } from "@coasys/flux-utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "@coasys/flux-api";
-import {
-  usePerspectives,
-  useAgent,
-  useMe,
-} from "@coasys/ad4m-vue-hooks";
+import { usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { useCommunities } from "@coasys/flux-vue";
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
@@ -216,7 +212,7 @@ import { useRoute } from "vue-router";
 import Attestations from "./Attestations.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
-import { profileFormatter } from "@coasys/flux-utils";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 
 export default defineComponent({
   name: "ProfileView",
@@ -230,20 +226,21 @@ export default defineComponent({
   },
   async setup() {
     const route = useRoute();
-
+    const profile = ref<Profile | null>(null);
     const client: Ad4mClient = await getAd4mClient();
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
-
-    const { me } = useMe(client.agent, profileFormatter);
-
-    const { profile } = useAgent(
-      client.agent,
-      () => route.params.did || me.value?.did,
-      profileFormatter
-    );
-
+    const me = await client.agent.me();
     const appStore = useAppStore();
+
+    watch(
+      () => route.params.did,
+      async (newDid) => {
+        const did = Array.isArray(newDid) ? newDid[0] : newDid || me.did
+        profile.value = await getCachedAgentProfile(did)
+      },
+      { immediate: true }
+    );
 
     return {
       client,
