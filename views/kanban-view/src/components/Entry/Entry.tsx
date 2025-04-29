@@ -11,6 +11,13 @@ type Props = {
   onUrlClick?: Function;
 };
 
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function propertyNameToSetterName(property: string): string {
+  return `set${capitalize(property)}`
+}
+
 export default function Entry({
   perspective,
   id,
@@ -44,9 +51,8 @@ export default function Entry({
 
   async function onUpdate(propName, value) {
     const model = await perspective.getSubjectProxy(entries[0]?.baseExpression, selectedClass) as any;
-    const entry = new model(perspective, entries[0]?.baseExpression, id);
-    entry[propName] = value;
-    await entry.update();
+    const setterName = propertyNameToSetterName(propName);
+    await model[setterName](value);
   }
 
   if (entries[0]) {
