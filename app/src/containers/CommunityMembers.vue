@@ -60,7 +60,7 @@ import { Community } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { useRoute, useRouter } from "vue-router";
-import { getCachedAgentProfile } from "@coasys/flux-utils";
+import { getCachedAgentProfile } from "@/utils/userProfileCache"
 import { Profile } from "@coasys/flux-types";
 
 export default defineComponent({

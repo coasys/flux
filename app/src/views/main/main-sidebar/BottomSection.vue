@@ -21,7 +21,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getAd4mClient } from "@coasys/ad4m-connect";
-import { getCachedAgentProfile } from "@coasys/flux-utils";
+import { getCachedAgentProfile } from "@/utils/userProfileCache"
 import { Profile } from "@coasys/flux-types";
 import { useRouter } from "vue-router";
 

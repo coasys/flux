@@ -15,4 +15,3 @@ export * from "./scrollHelpers";
 export * from "./sleep";
 export * from "./synergy";
 export * from "./throttle";
-export * from "./userProfileCache";

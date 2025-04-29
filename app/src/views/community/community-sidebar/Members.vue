@@ -26,7 +26,7 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { getCachedAgentProfile } from "@coasys/flux-utils";
+import { getCachedAgentProfile } from "@/utils/userProfileCache"
 import { Profile } from "@coasys/flux-types";
 
 export default defineComponent({
