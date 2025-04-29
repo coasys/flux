@@ -24,7 +24,7 @@ export default function Card({
   const { entries } = useModel({
     perspective,
     model: selectedClass,
-    query: { source: id },
+    query: { where: { base: id } },
   });
 
   const { entries: comments } = useModel({
