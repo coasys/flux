@@ -6,7 +6,7 @@
       :title="community.name || 'Unknown Community'"
     >
       <j-popover event="contextmenu">
-        <Avatar
+        <j-avatar
           slot="trigger"
           class="left-nav__community-item"
           :selected="communityIsActive(uuid as string)"
@@ -14,7 +14,7 @@
           :src="community.image || undefined"
           :initials="`${community?.name}`.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(uuid as string)"
-        ></Avatar>
+        />
         <j-menu slot="content">
           <j-menu-item
             @click="() => setShowLeaveCommunity(true, uuid as string)"
@@ -48,7 +48,6 @@
 </template>
 
 <script lang="ts">
-import Avatar from "@/components/avatar/Avatar.vue";
 import { useAppStore } from "@/store/app";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspectives } from "@coasys/ad4m-vue-hooks";
@@ -56,9 +55,6 @@ import { useCommunities } from "@coasys/flux-vue";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  components: {
-    Avatar,
-  },
   async setup() {
     const appStore = useAppStore();
 

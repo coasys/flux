@@ -50,11 +50,11 @@
       </j-popover>
     </div>
     <div class="community-info">
-      <Avatar
+      <j-avatar
         size="xl"
         :initials="`${community?.name}`.charAt(0).toUpperCase()"
         :src="community.image || null"
-      ></Avatar>
+      />
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
           {{ community.name || "No name" }}
@@ -93,7 +93,6 @@
 </template>
 
 <script lang="ts">
-import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useAppStore } from "@/store/app";
 import { Ad4mClient } from "@coasys/ad4m";
@@ -105,7 +104,7 @@ import { mapActions } from "pinia";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  components: { Avatar, LoadingBar },
+  components: { LoadingBar },
   props: {
     isSynced: Boolean,
     community: {
@@ -185,6 +184,10 @@ export default defineComponent({
   color: var(--j-color-ui-800);
   font-size: var(--j-font-size-500);
   min-height: 68px;
+
+  > j-avatar::part(base) {
+    flex-shrink: 0;
+  }
 }
 
 .community-info-content {

@@ -9,11 +9,11 @@
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <Avatar
+            <j-avatar
               class="avatar"
               :hash="did"
-              :url="profile?.profilePicture"
-            ></Avatar>
+              :src="profile?.profilePicture"
+            />
             <j-button
               v-if="sameAgent"
               variant="ghost"
@@ -201,7 +201,6 @@ import ProfileJoinLink from "./ProfileJoinLink.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
-import Avatar from "@/components/avatar/Avatar.vue";
 import { getImage } from "@coasys/flux-utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "@coasys/flux-api";
@@ -227,7 +226,6 @@ export default defineComponent({
     ProfileJoinLink,
     EditProfile,
     WebLinkAdd,
-    Avatar,
     Attestations,
   },
   async setup() {

@@ -1,17 +1,15 @@
 <template>
   <div>
-    <Avatar
+    <j-avatar
       size="xxs"
       :did="did"
-      :url="profile?.profileThumbnailPicture"
-    ></Avatar>
+      :src="profile?.profileThumbnailPicture"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Avatar from "@/components/avatar/Avatar.vue";
-
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useAgent } from "@coasys/ad4m-vue-hooks";
@@ -19,7 +17,6 @@ import { Ad4mClient } from "@coasys/ad4m";
 import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
-  components: { Avatar },
   props: {
     did: {
       type: String,

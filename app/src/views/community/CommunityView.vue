@@ -50,11 +50,11 @@
     >
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
-          <Avatar
+          <j-avatar
             :initials="`${community?.name}`.charAt(0)"
             size="xxl"
-            :url="community.thumbnail || null"
-          ></Avatar>
+            :src="community.thumbnail || null"
+          />
           <j-box align="center" pb="300">
             <j-text variant="heading"> Welcome to {{ community.name }} </j-text>
             <j-text variant="ingress">Pick a channel</j-text>
@@ -100,11 +100,8 @@ import SidebarLayout from "@/layout/SidebarLayout.vue";
 import { defineComponent, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
-
-import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
-
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
 import { PerspectiveState } from "@coasys/ad4m";
@@ -124,7 +121,6 @@ export default defineComponent({
     ChannelView,
     CommunitySidebar,
     SidebarLayout,
-    Avatar,
     Hourglass,
   },
   async setup() {

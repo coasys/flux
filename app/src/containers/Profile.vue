@@ -1,11 +1,11 @@
 <template>
   <j-box class="profile" v-if="profile" p="800">
     <j-box pb="500">
-      <Avatar
+      <j-avatar
         size="xxl"
         :hash="did"
-        :url="profile.profileThumbnailPicture"
-      ></Avatar>
+        :src="profile.profileThumbnailPicture"
+      />
     </j-box>
 
     <j-text
@@ -40,31 +40,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import Avatar from "@/components/avatar/Avatar.vue";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 
 export default defineComponent({
-  components: { Avatar },
   props: ["did", "langAddress"],
   emits: ["openCompleteProfile"],
-  data() {
-    return {
-      profile: null as null | Profile,
-    };
-  },
-  watch: {
-    did: {
-      handler: async function (did) {
-        // reset profile before fetching again
-        this.profile = null;
-        if (did) {
-          this.profile = await getProfile(did);
-        }
+  async setup(props) {
+    const profile = ref<Profile>();
+
+    watch(
+      () => props.did,
+      async (newDid, oldDid) => {
+        if (newDid !== oldDid) profile.value = await getCachedAgentProfile(newDid);
       },
-      immediate: true,
-    },
+      { immediate: true }
+    )
+    
+    return { profile };
   },
 });
 </script>

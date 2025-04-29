@@ -13,12 +13,12 @@
       v-slot="{ navigate }"
     >
       <j-tooltip title="Profile">
-        <Avatar
+        <j-avatar
           class="left-nav__profile-icon"
           :did="me?.did"
-          :url="profile?.profileThumbnailPicture"
+          :src="profile?.profileThumbnailPicture"
           @click="() => navigate()"
-        ></Avatar>
+        />
       </j-tooltip>
     </router-link>
   </div>
@@ -28,15 +28,11 @@
 import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import { mapActions, mapState } from "pinia";
-import Avatar from "@/components/avatar/Avatar.vue";
 import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
-  components: {
-    Avatar,
-  },
   async setup() {
     const appStore = useAppStore();
 

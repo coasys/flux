@@ -4,11 +4,11 @@
       <div class="avatar-group__avatars">
         <j-spinner size="sm" v-if="loading" />
 
-        <Avatar
+        <j-avatar
           v-if="!loading"
           v-for="user in users.slice(0, 4)"
           :key="user.did"
-          :did="user.did"
+          :hash="user.did"
           :src="user.profileThumbnailPicture"
           :size="size"
         />
@@ -23,13 +23,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Avatar from "@/components/avatar/Avatar.vue";
-
-export default defineComponent({
-  emits: ["click"],
-  components: { Avatar },
-  props: ["loading", "users", "size"],
-});
+export default defineComponent({ emits: ["click"], props: ["loading", "users", "size"] });
 </script>
 
 <style scoped>

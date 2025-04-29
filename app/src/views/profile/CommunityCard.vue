@@ -1,16 +1,10 @@
 <template>
-  <router-link
-    class="community-card"
-    :to="{
-      name: 'community',
-      params: { communityId: uuid },
-    }"
-  >
-    <Avatar
+  <router-link class="community-card" :to="{ name: 'community', params: { communityId: uuid } }">
+    <j-avatar
       size="xl"
       :initials="name?.charAt(0).toUpperCase()"
       :url="url"
-    ></Avatar>
+    />
     <div>
       <j-text size="600" color="black" weight="bold">
         {{ name || "Unknown Community" }}
@@ -23,11 +17,9 @@
 </template>
 
 <script lang="ts">
-import Avatar from "@/components/avatar/Avatar.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  components: { Avatar },
   props: ["uuid", "name", "url", "description"],
   methods: {},
 });

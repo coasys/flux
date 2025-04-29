@@ -25,11 +25,12 @@
           a="center"
           @click="() => profileClick(member.did)"
         >
-          <Avatar
+          <j-avatar
             size="xl"
             :did="member.did"
+            :hash="member.did"
             :src="member.profileThumbnailPicture"
-          ></Avatar>
+          />
           <j-text color="black" nomargin variant="body">
             {{ member.username }}
           </j-text>
@@ -57,7 +58,6 @@
 import { defineComponent, watch, ref, computed } from "vue";
 import { Community } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import Avatar from "@/components/avatar/Avatar.vue";
 import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
 import { useRoute, useRouter } from "vue-router";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
@@ -65,7 +65,6 @@ import { Profile } from "@coasys/flux-types";
 
 export default defineComponent({
   emits: ["close", "submit"],
-  components: { Avatar },
   async setup(_, { emit }) {
     const route = useRoute();
     const router = useRouter();
