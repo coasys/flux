@@ -10,8 +10,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-
+import { getCachedAgentProfile } from "@coasys/flux-utils";
 export default defineComponent({
   props: { did: { type: String, required: true } },
   async setup(props) {

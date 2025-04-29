@@ -212,7 +212,7 @@ import { useRoute } from "vue-router";
 import Attestations from "./Attestations.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { getCachedAgentProfile } from "@coasys/flux-utils";
 
 export default defineComponent({
   name: "ProfileView",

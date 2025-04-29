@@ -42,7 +42,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { Profile } from "@coasys/flux-types";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { getCachedAgentProfile } from "@coasys/flux-utils";
 
 export default defineComponent({
   props: ["did", "langAddress"],
