@@ -1,32 +1,24 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
+import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
 type Props = {
   perspective: PerspectiveProxy;
-  id: string;
+  task: Ad4mModel;
   channelId: string;
   selectedClass: string;
   onUrlClick?: Function;
 };
 
-export function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-function propertyNameToSetterName(property: string): string {
-  return `set${capitalize(property)}`
-}
-
 export default function Entry({
   perspective,
-  id,
+  task,
   channelId,
   selectedClass,
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const { entries } = useModel({ perspective, model: selectedClass, query: { where: { base: id } } });
 
   useEffect(() => {
     perspective
@@ -50,13 +42,12 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    const model = await perspective.getSubjectProxy(entries[0]?.baseExpression, selectedClass) as any;
-    const setterName = propertyNameToSetterName(propName);
-    await model[setterName](value);
+    task[propName] = value;
+    await task.update();
   }
 
-  if (entries[0]) {
-    const properties = Object.entries(entries[0]).filter(([key, value]) => {
+  if (task) {
+    const properties = Object.entries(task).filter(([key, value]) => {
       return !(
         key === "author" ||
         key === "timestamp" ||
@@ -66,13 +57,14 @@ export default function Entry({
       );
     });
 
-    const titleName = entries[0].hasOwnProperty("name")
+    const titleName = task.hasOwnProperty("name")
       ? "name"
-      : entries[0].hasOwnProperty("title")
+      : task.hasOwnProperty("title")
         ? "title"
         : "";
 
-    const defaultName = entries[0]?.name || entries[0]?.title || "";
+    // @ts-ignore
+    const defaultName = task?.name || task?.title || "";
 
     return (
       <div>
@@ -130,5 +122,5 @@ export default function Entry({
     );
   }
 
-  return <span>{id}</span>;
+  return <span>{task.baseExpression}</span>;
 }
