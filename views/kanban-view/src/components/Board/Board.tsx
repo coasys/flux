@@ -36,6 +36,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   const [tasks, setTasks] = useState([]);
 
   const cachedProfiles = useRef({});
+  const allAgents = useRef([]);
 
   const getCachedProfile = useCallback(async (did: string) => {
     if (cachedProfiles.current[did]) {
@@ -46,6 +47,30 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     cachedProfiles.current[did] = profile;
     return profile;
   }, []);
+
+  const initAllAgents = useCallback(async () => {
+    const others = await perspective.getNeighbourhoodProxy().otherAgents();
+    const me = await agent.me();
+    allAgents.current = [me.did, ...others];
+    return allAgents.current;
+  }, [perspective, agent]);
+
+  const getAllAgents = useCallback(async () => {
+    if (allAgents.current.length === 0) {
+      await initAllAgents();
+    }
+    return allAgents.current;
+  }, [initAllAgents]);
+
+  const getAllProfiles = useCallback(async () => {
+    const agents = await getAllAgents();
+    const profiles = await Promise.all(agents.map(getCachedProfile));
+    return profiles;
+  }, [getAllAgents, getCachedProfile]);
+
+  useEffect(() => {
+    initAllAgents();
+  }, [initAllAgents]);
 
   useEffect(() => {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
@@ -277,6 +302,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
             task={currentTask}
             selectedClass={selectedClass}
             onDeleted={() => setCurrentTask(null)}
+            allProfiles={getAllProfiles}
           />
         </j-modal>
       )}

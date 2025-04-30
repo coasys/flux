@@ -14,6 +14,7 @@ type Props = {
   channelId: string;
   selectedClass: string;
   agent: AgentClient;
+  allProfiles: ()=>Promise<Profile[]>;
   onDeleted: () => void;
 };
 
@@ -24,17 +25,13 @@ export default function CardDetails({
   onDeleted = () => {},
   perspective,
   channelId,
+  allProfiles,
 }: Props) {
   const [showAssign, setShowAssign] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
 
   async function fetchProfiles() {
-    const n = await perspective.getNeighbourhoodProxy();
-    const dids = await n.otherAgents();
-    const me = await agent.me();
-    const allAgents = [me.did, ...dids];
-    const profiles = await Promise.all(allAgents.map((d) => getProfile(d)));
-    setProfiles(profiles);
+    setProfiles(await allProfiles());
   }
 
   useEffect(() => {
@@ -132,8 +129,8 @@ export default function CardDetails({
                     <j-menu-item key={profile.did}>
                       <j-checkbox
                         full
-                        checked={assignees.some(
-                          (l) => l.data.target === profile.did
+                        checked={task.assignees.some(
+                          (a) => a === profile.did
                         )}
                         onChange={(e) =>
                           toggleAssignee(e.target.checked, profile.did)
