@@ -1,12 +1,18 @@
-import { AgentStatus } from "@coasys/ad4m";
+import { Agent, AgentStatus } from "@coasys/ad4m";
 import { Profile } from "@coasys/flux-types";
 
-export type CurrentTheme = "global" | string;
 export type WindowState = "minimize" | "visible" | "foreground";
 export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
+
+export interface Payload {
+  communityId: string;
+  name: string;
+  description: string;
+}
+
 export interface ToastState {
-  variant: "success" | "" | "danger" | "error";
-  message: string;
+  variant?: "" | "success" | "danger" | "error";
+  message?: string;
   open: boolean;
 }
 
@@ -34,13 +40,14 @@ export interface ModalsState {
 }
 
 export interface ApplicationState {
+  me: Agent;
   windowState: WindowState;
   toast: ToastState;
   updateState: UpdateState;
   globalTheme: ThemeState;
-  currentTheme: CurrentTheme;
-  activeCommunity: string;
-  activeChannel: string;
+  currentTheme: string;
+  activeCommunityId: string;
+  activeChannelId: string;
   modals: ModalsState;
   showSidebar: boolean;
   showMainSidebar: boolean;
