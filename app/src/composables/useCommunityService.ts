@@ -1,56 +1,75 @@
-import { ref, readonly, inject, InjectionKey, computed } from 'vue'
-import { Profile } from "@coasys/flux-types";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useModel } from "@coasys/ad4m-vue-hooks";
-import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
 import { Channel, Community } from "@coasys/flux-api";
-import { getCachedAgentProfile } from "@/utils/userProfileCache"
+import { Profile } from "@coasys/flux-types";
+import { computed, inject, InjectionKey, readonly, ref } from "vue";
+import { useRoute } from "vue-router";
 
-export async function createCommunityService(client: Ad4mClient, uuid: string) {
-    const perspective = await client.perspective.byUUID(uuid) as PerspectiveProxy;
-    const neighbourhood = perspective.getNeighbourhoodProxy();
+export async function createCommunityService() {
+  // Get the communities UUID and the active channel ID from the route
+  const route = useRoute();
+  const { communityId: uuid, channelId } = route.params;
+  const communityId = Array.isArray(uuid) ? uuid[0] : uuid;
+  const activeChannelId = Array.isArray(channelId) ? channelId[0] : channelId;
 
-    // General state
-    const loading = ref(true);
-    const members = ref<Profile[]>([]);
+  // Todo: get client and me from global appStore
+  const client = await getAd4mClient();
+  const me = await client.agent.me();
 
-    // Model subscriptions
-    const { entries: communities } = useModel({ perspective, model: Community });
-    const { entries: channels } = useModel({ perspective, model: Channel });
+  // Get the perspective and neighbourhood proxies using the UUID
+  const perspective = (await client.perspective.byUUID(communityId)) as PerspectiveProxy;
+  const neighbourhood = perspective.getNeighbourhoodProxy();
 
-    // Getter functions
-    async function getMembers() {
-        try {
-            const others = await neighbourhood?.otherAgents() || [];
-            const me = await client.agent.me();
-            const allMembersDids = [...others, me.did];
-            members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
-        } catch (error) {
-            console.error("Error loading community members:", error);
-        }
+  // Model subscriptions
+  const { entries: communities, loading: communityLoading } = useModel({ perspective, model: Community });
+  const { entries: channels, loading: channelsLoading } = useModel({ perspective, model: Channel });
+
+  // General state
+  const isSynced = computed(() => perspective.state === PerspectiveState.Synced);
+  const isAuthor = computed(() => communities.value[0]?.author === me.did);
+  const community = computed(() => communities.value[0] || null);
+  const members = ref<Profile[]>([]);
+  const membersLoading = ref(true);
+
+  // Getter functions
+  async function getMembers() {
+    try {
+      const others = (await neighbourhood?.otherAgents()) || [];
+      const allMembersDids = [...others, me.did];
+      members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
+      membersLoading.value = false;
+    } catch (error) {
+      console.error("Error loading community members:", error);
     }
+  }
 
-    async function getInitialData() {
-        await getMembers()
-        loading.value = false;
-    }
+  getMembers();
 
-    getInitialData()
-
-    return {
-        perspective: readonly(perspective),
-        neighbourhood: readonly(neighbourhood),
-        loading: readonly(loading),
-        members: readonly(members),
-        community: readonly(computed(() => communities.value[0] || null)),
-        channels: readonly(channels),
-        getMembers,
-    }
+  return {
+    communityId,
+    activeChannelId,
+    perspective,
+    neighbourhood,
+    isSynced: readonly(isSynced),
+    isAuthor: readonly(isAuthor),
+    community: readonly(community),
+    members: readonly(members),
+    channels: readonly(channels),
+    communityLoading: readonly(communityLoading),
+    membersLoading: readonly(membersLoading),
+    channelsLoading: readonly(channelsLoading),
+    getMembers,
+  };
 }
 
-export const CommunityServiceKey: InjectionKey<Awaited<ReturnType<typeof createCommunityService>>> = Symbol('CommunityService')
+export const CommunityServiceKey: InjectionKey<Awaited<ReturnType<typeof createCommunityService>>> =
+  Symbol("FluxCommunityService");
 
 export function useCommunityService() {
-  const service = inject(CommunityServiceKey)
-  if (!service) throw new Error('Community service not provided. Make sure your component is a child of the CommunityView component.')
-  return service
+  const service = inject(CommunityServiceKey);
+  if (!service)
+    throw new Error("Unable to inject service. Make sure your component is a child of the CommunityView component.");
+  return service;
 }

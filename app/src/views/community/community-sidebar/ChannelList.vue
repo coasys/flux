@@ -1,20 +1,20 @@
 <template>
   <j-box pt="500" pb="800">
     <j-menu-group open title="Channels">
-      <j-button
-        @click.prevent="() => setShowCreateChannel(true)"
-        size="sm"
-        slot="end"
-        variant="ghost"
-      >
+      <j-button @click.prevent="() => setShowCreateChannel(true)" size="sm" slot="end" variant="ghost">
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
 
+      <j-box mt="400" ml="600" v-if="channelsLoading">
+        <j-spinner size="sm" />
+      </j-box>
+
       <j-popover
-        event="contextmenu"
-        placement="bottom-start"
+        v-else
         v-for="channel in channels"
         :key="channel.baseExpression"
+        event="contextmenu"
+        placement="bottom-start"
       >
         <div slot="trigger">
           <j-menu-item
@@ -24,32 +24,18 @@
             :selected="channel.baseExpression === activeChannelId && !channel.expanded"
             @click="() => navigateToChannel(channel.baseExpression)"
           >
+            <j-icon slot="start" size="xs" :name="getIcon(channel.views[0])" />
             {{ channel.name }}
-            <div
-              slot="end"
-              class="channel__notification"
-              v-if="channel.hasNewMessages"
-            ></div>
-            <j-icon
-              slot="start"
-              size="xs"
-              :name="getIcon(channel.views[0])"
-            ></j-icon>
+            <div slot="end" class="channel__notification" v-if="channel.hasNewMessages"></div>
             <div class="active-agents">
-              <j-box
-                v-for="(agent, did) in activeAgents[channel.baseExpression]"
-                :key="did"
-              >
+              <j-box v-for="(agent, did) in activeAgents[channel.baseExpression]" :key="did">
                 <ActiveAgent :key="did" :did="did" v-if="agent" />
               </j-box>
             </div>
           </j-menu-item>
           <div class="channel-views" v-if="channel.expanded">
             <j-menu-item
-              :selected="
-                view.type === channel.currentView &&
-                channel.baseExpression === $route.params.channelId
-              "
+              :selected="view.type === channel.currentView && channel.baseExpression === $route.params.channelId"
               size="sm"
               v-for="view in getViewOptions(channel.views)"
               @click="() => handleChangeView(channel.baseExpression, view.type)"
@@ -77,179 +63,137 @@
         </j-menu>
       </j-popover>
     </j-menu-group>
-    <j-menu-item @click="() => setShowCreateChannel(true)">
+    <j-menu-item @click="() => setShowCreateChannel(true)" v-if="!channelsLoading">
       <j-icon size="xs" slot="start" name="plus" />
       Add channel
     </j-menu-item>
   </j-box>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from "vue";
-import { mapActions } from "pinia";
-import { useAppStore } from "@/store/app";
-import { Channel } from "@coasys/flux-api";
-import { useMe, useModel } from "@coasys/ad4m-vue-hooks";
-import { ChannelView } from "@coasys/flux-types";
+<script setup lang="ts">
+import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
-import {
-  Ad4mClient,
-  NeighbourhoodProxy,
-  PerspectiveProxy,
-  PerspectiveExpression,
-} from "@coasys/ad4m";
+import { useAppStore } from "@/store/app";
+import { Ad4mClient, PerspectiveExpression } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Channel } from "@coasys/flux-api";
+import { ChannelView } from "@coasys/flux-types";
+import { onMounted, onUnmounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import ActiveAgent from "./ActiveAgent.vue";
-import { profileFormatter } from "@coasys/flux-utils";
 
-export default defineComponent({
-  components: { ActiveAgent },
-  props: {
-    community: {
-      type: Object,
-      required: true,
-    },
-    perspective: {
-      type: Object, // PerspectiveProxy,
-      required: true,
-    },
-  },
-  mounted() {
-    this.neighbhourhoodProxy.addSignalHandler(this.handleBroadcastCb);
+const client: Ad4mClient = await getAd4mClient();
+const me = await client.agent.me();
+const router = useRouter();
+const { setShowCreateChannel, setSidebar, setActiveChannel, setShowEditChannel } = useAppStore();
+const { perspective, neighbourhood, communityId, activeChannelId, channels, channelsLoading } = useCommunityService();
+// Todo: handle signalling via community service
 
-    this.polling = setInterval(() => {
-      this.checkWhoIsHere();
-    }, 5000);
+const activeAgents = ref<Record<string, Record<string, boolean>>>({});
 
-    this.checkWhoIsHere();
-  },
-  unmounted() {
-    clearInterval(this.polling);
-    this.neighbhourhoodProxy.removeSignalHandler(this.handleBroadcastCb);
-  },
-  async setup(props) {
-    const client: Ad4mClient = await getAd4mClient();
-    const neighbhourhoodProxy = props.perspective.getNeighbourhoodProxy();
-    const { me } = useMe(client.agent, profileFormatter);
+watch(channels, (newChannels) => {
+  console.log("channels changed", newChannels);
+});
 
-    const { entries: channels } = useModel({
-      perspective: computed(() => props.perspective as PerspectiveProxy),
-      model: Channel,
-      query: { source: "ad4m://self" },
+function isChannelCreator(channelId: string): boolean {
+  const channel = channels.value.find((e) => e.baseExpression === channelId);
+  if (channel) {
+    return channel.author === me.did;
+  } else {
+    throw new Error("Did not find channel");
+  }
+}
+
+function getIcon(view: ChannelView | string) {
+  return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
+}
+
+function navigateToChannel(channelId: string) {
+  setSidebar(false);
+  router.push({ name: "channel", params: { communityId, channelId } });
+}
+
+function checkWhoIsHere() {
+  if (neighbourhood) {
+    neighbourhood.sendBroadcastU({
+      links: [{ source: "", predicate: "is-anyone-in-a-channel", target: "" }],
     });
+  }
+}
 
-    return {
-      me,
-      activeAgents: ref<Record<string, Record<string, boolean>>>({}),
-      neighbhourhoodProxy,
-      channels,
-      userProfileImage: ref<null | string>(null),
-      appStore: useAppStore(),
-    };
-  },
-  data: function () {
-    return {
-      polling: null as any,
-      neighbhourhoodProxy: null as NeighbourhoodProxy | null,
-      showCommunityMenu: false,
-      communityImage: null,
-    };
-  },
-  computed: {
-    activeChannelId() {
-      return this.$route.params.channelId as string;
-    },
-  },
-  methods: {
-    checkWhoIsHere() {
-      if (this.neighbhourhoodProxy) {
-        this.neighbhourhoodProxy.sendBroadcastU({
-          links: [{ source: "", predicate: "is-anyone-in-a-channel", target: "" }],
-        });
-      }
-    },
-    handleBroadcastCb(expression: PerspectiveExpression) {
-      const link = expression.data.links[0];
-      if (!link) return;
-      
-      const { author, data } = link;
-      const { predicate, source, target } = data;
-      const isMe = author === this.me?.did;
+function handleBroadcastCb(expression: PerspectiveExpression) {
+  const link = expression.data.links[0];
+  if (!link) return;
 
-      if (isMe) {
-        // Handle signals from me
-        if (predicate === "leave" && this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: false };
-        }
+  const { author, data } = link;
+  const { predicate, source, target } = data;
+  const isMe = author === me.did;
 
-        if (predicate === "peer-signal" && this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [this.me.did]: true };
-        }
-      } else {
-        // Handle signals from others
-        if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
-          this.neighbhourhoodProxy.sendBroadcastU({
-            links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: author }],
-          });
-        }
+  // if (isMe) {
+  //   // Handle signals from me
+  //   if (predicate === "leave" && me.did) {
+  //     activeAgents[source] = { ...activeAgents[source], [me.did]: false };
+  //   }
 
-        if (predicate === "i-am-in-channel" && target === this.me?.did) {
-          this.activeAgents[source] = { ...this.activeAgents[source], [author]: true };
-        }
+  //   if (predicate === "peer-signal" && me.did) {
+  //     activeAgents[source] = { ...activeAgents[source], [me.did]: true };
+  //   }
+  // } else {
+  //   // Handle signals from others
+  //   if (predicate === "is-anyone-in-a-channel" && this.activeChannelId) {
+  //     neighbourhood.sendBroadcastU({
+  //       links: [{ source: this.activeChannelId, predicate: "i-am-in-channel", target: author }],
+  //     });
+  //   }
 
-        if (predicate === "leave") {
-          this.activeAgents[source] = { ...this.activeAgents[source], [author]: false };
-        }
-      }
-    },
-    ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
-    handleToggleClick(channelId: string) {
-      // TODO: Toggle channel collapse
-    },
-    goToEditChannel(id: string) {
-      this.appStore.setActiveChannel(id);
-      this.appStore.setShowEditChannel(true);
-    },
-    handleChangeView(channelId: string, view: ChannelView) {
-      // TODO: Set current channel view
-      //this.dataStore.setCurrentChannelView({ channelId, view });
-      this.navigateToChannel(channelId);
-    },
-    navigateToChannel(channelName: string) {
-      this.setSidebar(false);
-      this.$router.push({
-        name: "channel",
-        params: {
-          communityId: this.perspective.uuid,
-          channelId: channelName,
-        },
-      });
-    },
-    isChannelCreator(channelId: string): boolean {
-      const channel = this.channels.find((e) => e.baseExpression === channelId);
-      if (channel) {
-        return channel.author === this.me?.did;
-      } else {
-        throw new Error("Did not find channel");
-      }
-    },
-    getViewOptions(views: ChannelView[]) {
-      return channelViewOptions.filter((o) => views.includes(o.type));
-    },
-    getIcon(view: ChannelView) {
-      //console.log({ channelViewOptions, view, channels: this.channels });
-      return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
-    },
-    async deleteChannel(channelId: string) {
-      try {
-        const channel = new Channel(this.perspective as PerspectiveProxy, channelId);
-        await channel.delete();
-        this.$router.push({ name: "community", params: { communityId: this.perspective.uuid } });
-      } catch (error) {
-        console.error("Failed to delete channel:", error);
-      }
-    },
-  },
+  //   if (predicate === "i-am-in-channel" && target === me.did) {
+  //     activeAgents[source] = { ...activeAgents[source], [author]: true };
+  //   }
+
+  //   if (predicate === "leave") {
+  //     activeAgents[source] = { ...activeAgents[source], [author]: false };
+  //   }
+  // }
+}
+
+function handleToggleClick(channelId: string) {
+  // TODO: Toggle channel collapse
+}
+
+function goToEditChannel(id: string) {
+  setActiveChannel(id);
+  setShowEditChannel(true);
+}
+
+function handleChangeView(channelId: string, view: ChannelView) {
+  // TODO: Set current channel view
+  //this.dataStore.setCurrentChannelView({ channelId, view });
+  navigateToChannel(channelId);
+}
+
+function getViewOptions(views: ChannelView[]) {
+  return channelViewOptions.filter((o) => views.includes(o.type));
+}
+
+async function deleteChannel(channelId: string) {
+  try {
+    const channel = new Channel(perspective, channelId);
+    await channel.delete();
+    router.push({ name: "community", params: { communityId } });
+  } catch (error) {
+    console.error("Failed to delete channel:", error);
+  }
+}
+
+onMounted(() => {
+  neighbourhood.addSignalHandler(handleBroadcastCb);
+  // polling.value = setInterval(() => checkWhoIsHere(), 5000);
+  checkWhoIsHere();
+});
+
+onUnmounted(() => {
+  // clearInterval(polling);
+  neighbourhood.removeSignalHandler(handleBroadcastCb);
 });
 </script>
 

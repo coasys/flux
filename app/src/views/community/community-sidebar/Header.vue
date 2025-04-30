@@ -1,20 +1,14 @@
 <template>
   <div class="sidebar-header">
     <div class="sidebar-header__top">
-      <j-button
-        variant="ghost"
-        size="sm"
-        @click="() => appStore.toggleMainSidebar()"
-      >
-        <j-icon
-          size="sm"
-          :name="appStore.showMainSidebar ? 'layout-sidebar' : 'layout-sidebar'"
-        ></j-icon>
+      <j-button variant="ghost" size="sm" @click="toggleMainSidebar">
+        <j-icon size="sm" :name="showMainSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
       </j-button>
+
       <j-popover
         :open="showCommunityMenu"
         @toggle="(e: any) => (showCommunityMenu = e.target.open)"
-        :class="{ 'is-creator': isCreator }"
+        :class="{ 'is-author': isAuthor }"
         event="click"
         placement="bottom-end"
       >
@@ -22,10 +16,7 @@
           <j-icon size="sm" name="sliders2"></j-icon>
         </j-button>
         <j-menu slot="content">
-          <j-menu-item
-            v-if="isCreator"
-            @click="() => setShowEditCommunity(true)"
-          >
+          <j-menu-item v-if="isAuthor" @click="() => setShowEditCommunity(true)">
             <j-icon size="xs" slot="start" name="pencil" />
             Edit community
           </j-menu-item>
@@ -50,21 +41,13 @@
       </j-popover>
     </div>
     <div class="community-info">
-      <j-avatar
-        size="xl"
-        :initials="`${community?.name}`.charAt(0).toUpperCase()"
-        :src="community.image || null"
-      />
+      <j-avatar size="xl" :initials="`${community.name}`.charAt(0).toUpperCase()" :src="community.image || null" />
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
           {{ community.name || "No name" }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
-          {{
-            isSynced
-              ? community.description || "No description"
-              : "syncing community..."
-          }}
+          {{ communityDescription() }}
         </j-text>
         <j-box pt="400" v-if="!isSynced">
           <LoadingBar></LoadingBar>
@@ -73,87 +56,55 @@
     </div>
     <div class="warning-box">
       <j-flex a="center" gap="300">
-        <j-icon
-          name="exclamation-circle"
-          size="xs"
-          color="warning-500"
-        ></j-icon>
-        <j-text nomargin weight="700" size="400" color="warning-500"
-          >Warning</j-text
-        >
+        <j-icon name="exclamation-circle" size="xs" color="warning-500"></j-icon>
+        <j-text nomargin weight="700" size="400" color="warning-500">Warning</j-text>
       </j-flex>
       <j-text nomargin size="300" color="warning-500">
         Flux is still in the alpha phase, things may break.
-        <a href="https://discord.gg/pWCA3wQrtE" target="_blank">
-          Join our Discord and report bugs here.
-        </a>
+        <a href="https://discord.gg/pWCA3wQrtE" target="_blank"> Join our Discord and report bugs here. </a>
       </j-text>
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
+import { useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore } from "@/store/app";
-import { Ad4mClient } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { Profile } from "@coasys/flux-types";
-import { profileFormatter } from "@coasys/flux-utils";
-import { mapActions } from "pinia";
-import { defineComponent, ref } from "vue";
+import { ref } from "vue";
 
-export default defineComponent({
-  components: { LoadingBar },
-  props: {
-    isSynced: Boolean,
-    community: {
-      type: Object,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const client: Ad4mClient = await getAd4mClient();
+const {
+  showMainSidebar,
+  toggleMainSidebar,
+  setActiveCommunity,
+  setShowLeaveCommunity,
+  setShowEditCommunity,
+  setShowInviteCode,
+  setShowCommunitySettings,
+  setShowCreateChannel,
+} = useAppStore();
 
-    const { status, me, profile } = useMe(client.agent, profileFormatter);
+const { communityId, isSynced, isAuthor, community } = useCommunityService();
 
-    return {
-      profile,
-      status,
-      me,
-      showCommunityMenu: ref(false),
-      appStore: useAppStore(),
-    };
-  },
-  computed: {
-    isCreator(): boolean {
-      return this.community.author === this.me?.did;
-    },
-    userProfile(): Profile | null {
-      return this.profile;
-    },
-  },
-  methods: {
-    ...mapActions(useAppStore, [
-      "setSidebar",
-      "setShowCreateChannel",
-      "setShowEditCommunity",
-      "setShowCommunityMembers",
-      "setShowInviteCode",
-      "setShowCommunitySettings",
-    ]),
-    goToLeaveCommunity() {
-      this.appStore.setActiveCommunity(
-        this.$route.params.communityId as string
-      );
-      this.appStore.setShowLeaveCommunity(true);
-    },
-    goToSettings() {
-      this.setShowCommunitySettings(true);
-      this.showCommunityMenu = false;
-    },
-  },
-});
+const showCommunityMenu = ref(false);
+
+function communityDescription() {
+  if (!isSynced) return "Syncing community...";
+  const { description } = community.value;
+  // Temp bug fix for undefined model properties being an empty array
+  if (Array.isArray(description) || !description) return "No description";
+  return description;
+}
+
+function goToLeaveCommunity() {
+  setActiveCommunity(communityId);
+  setShowLeaveCommunity(true);
+}
+
+function goToSettings() {
+  setShowCommunitySettings(true);
+  showCommunityMenu.value = false;
+}
 </script>
 
 <style lang="scss" scoped>

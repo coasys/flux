@@ -1,15 +1,10 @@
 <template>
-  <sidebar-layout>
+  <sidebar-layout v-if="!communityLoading">
     <template v-slot:sidebar>
-      <community-sidebar
-        v-if="community?.name && data.perspective?.uuid"
-        :perspective="data.perspective"
-        :community="community"
-        :isSynced="isSynced"
-      ></community-sidebar>
+      <community-sidebar />
     </template>
 
-    <div
+    <!-- <div
       style="height: 100%"
       v-for="channel in channels"
       :key="channel?.baseExpression"
@@ -91,25 +86,130 @@
           </j-flex>
         </j-flex>
       </div>
-    </div>
+    </div> -->
   </sidebar-layout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
-import { defineComponent, ref, computed } from "vue";
+import { provide } from "vue";
+import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
+
+type LoadedChannels = {
+  [channelId: string]: boolean;
+};
+
+// Initialize community service
+const communityService = await createCommunityService();
+provide(CommunityServiceKey, communityService);
+const { communityLoading } = communityService;
+
+//     return {
+//       loading,
+//       serviceReady,
+//       appStore, // Todo remove if not needed
+
+//       community,
+//       communityId: uuid,
+//       channels,
+//       // data,
+//       // hasCopied: ref(false),
+//       loadedChannels: ref<LoadedChannels>({}),
+//       // appStore: useAppStore(),
+//     };
+//   },
+//   watch: {
+//     // "$route.params.communityId": {
+//     //   handler: function (id: string) {
+//     //     if (id) {
+//     //       this.handleThemeChange(id);
+//     //     } else {
+//     //       this.handleThemeChange();
+//     //     }
+//     //   },
+//     //   deep: true,
+//     //   immediate: true,
+//     // },
+//     // "$route.params.channelId": {
+//     //   handler: function (id: string) {
+//     //     if (id) {
+//     //       this.loadedChannels = {
+//     //         ...this.loadedChannels,
+//     //         [id]: true,
+//     //       };
+//     //     }
+//     //   },
+//     //   immediate: true,
+//     // },
+//   },
+//   methods: {
+//     ...mapActions(useAppStore, [
+//       "setShowCreateChannel",
+//       "setShowEditCommunity",
+//       "setShowEditChannel",
+//       "setShowCommunityMembers",
+//       "setShowInviteCode",
+//       "setShowCommunitySettings",
+//     ]),
+//     navigateToChannel(channelId: string) {
+//       this.$router.push({
+//         name: "channel",
+//         params: {
+//           communityId: this.communityId,
+//           channelId: channelId,
+//         },
+//       });
+//     },
+//     // handleThemeChange(id?: string) {
+//     //   if (!id) {
+//     //     this.appStore.changeCurrentTheme("global");
+//     //     return;
+//     //   } else {
+//     //     // TODO: Change community theme
+//     //     // this.appStore.changeCurrentTheme(
+//     //     //   this.communityState.state?.useLocalTheme ? id : "global"
+//     //     // );
+//     //   }
+//     // },
+//   },
+//   computed: {
+//     isSynced(): boolean {
+//       return true
+//       // return this.data.perspective?.state === PerspectiveState.Synced;
+//     },
+//     // community(): Community | null {
+//     //   return this.communities[this.$route.params.communityId as string];
+//     // },
+//     // communityId() {
+//     //   return this.$route.params.communityId as string;
+//     // },
+//     channelId() {
+//       return this.$route.params.channelId as string;
+//     },
+//     modals(): ModalsState {
+//       return this.appStore.modals;
+//     },
+//   },
+// });
+</script>
+
+<!-- <script lang="ts">
+import SidebarLayout from "@/layout/SidebarLayout.vue";
+import { defineComponent, ref, computed, provide, watch } from "vue";
 import { useRoute } from "vue-router";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import { useAppStore } from "@/store/app";
 import { ModalsState } from "@/store/types";
-import { PerspectiveState } from "@coasys/ad4m";
+import { PerspectiveState, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { usePerspective, usePerspectives, useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community } from "@coasys/flux-api";
 import { useCommunities } from "@coasys/flux-vue";
 import { mapActions } from "pinia";
+import { createCommunityService, CommunityServiceKey } from "@/composables/useCommunityService";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -124,51 +224,80 @@ export default defineComponent({
     Hourglass,
   },
   async setup() {
+    const appStore = useAppStore();
+    
+    provide('test', 'yoooo')
+    // console.log('serviceReady 1', serviceReady.value);
+
     const route = useRoute();
     const client = await getAd4mClient();
-    const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { neighbourhoods } = usePerspectives(client);
+    // Extract the communities UUID from the route parameters
+    const { communityId } = route.params;
+    const uuid = Array.isArray(communityId) ? communityId[0] : communityId;
+  
+    // Initialize the community service
+    const perspective = await client.perspective.byUUID(uuid) as PerspectiveProxy;
+    const communityService = createCommunityService(client, perspective)
+    // serviceRef.value = communityService
+    // provide('ABC', communityService)
 
-    const { communities } = useCommunities(neighbourhoods);
+    // serviceReady.value = true;
 
-    const { entries: channels } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: Channel,
-    });
+
+    const { loading, community, channels } = communityService
+
+    watch(() => loading.value, (newLoadingState) => {
+      if (newLoadingState) {
+        console.log('*** service loading:', newLoadingState);
+      }
+    }, { immediate: true });
+
+    watch(() => community.value, (newCommunity) => {
+      if (newCommunity) {
+        console.log('*** newCommunity', newCommunity);
+      }
+    }, { immediate: true });
+
+    // console.log('serviceReady2', serviceReady.value);
 
     return {
-      communities,
+      loading,
+      serviceReady,
+      appStore, // Todo remove if not needed
+
+      community,
+      communityId: uuid,
       channels,
-      data,
-      hasCopied: ref(false),
+      // data,
+      // hasCopied: ref(false),
       loadedChannels: ref<LoadedChannels>({}),
-      appStore: useAppStore(),
+      // appStore: useAppStore(),
     };
   },
   watch: {
-    "$route.params.communityId": {
-      handler: function (id: string) {
-        if (id) {
-          this.handleThemeChange(id);
-        } else {
-          this.handleThemeChange();
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
-    "$route.params.channelId": {
-      handler: function (id: string) {
-        if (id) {
-          this.loadedChannels = {
-            ...this.loadedChannels,
-            [id]: true,
-          };
-        }
-      },
-      immediate: true,
-    },
+    // "$route.params.communityId": {
+    //   handler: function (id: string) {
+    //     if (id) {
+    //       this.handleThemeChange(id);
+    //     } else {
+    //       this.handleThemeChange();
+    //     }
+    //   },
+    //   deep: true,
+    //   immediate: true,
+    // },
+    // "$route.params.channelId": {
+    //   handler: function (id: string) {
+    //     if (id) {
+    //       this.loadedChannels = {
+    //         ...this.loadedChannels,
+    //         [id]: true,
+    //       };
+    //     }
+    //   },
+    //   immediate: true,
+    // },
   },
   methods: {
     ...mapActions(useAppStore, [
@@ -188,28 +317,29 @@ export default defineComponent({
         },
       });
     },
-    handleThemeChange(id?: string) {
-      if (!id) {
-        this.appStore.changeCurrentTheme("global");
-        return;
-      } else {
-        // TODO: Change community theme
-        // this.appStore.changeCurrentTheme(
-        //   this.communityState.state?.useLocalTheme ? id : "global"
-        // );
-      }
-    },
+    // handleThemeChange(id?: string) {
+    //   if (!id) {
+    //     this.appStore.changeCurrentTheme("global");
+    //     return;
+    //   } else {
+    //     // TODO: Change community theme
+    //     // this.appStore.changeCurrentTheme(
+    //     //   this.communityState.state?.useLocalTheme ? id : "global"
+    //     // );
+    //   }
+    // },
   },
   computed: {
     isSynced(): boolean {
-      return this.data.perspective?.state === PerspectiveState.Synced;
+      return true
+      // return this.data.perspective?.state === PerspectiveState.Synced;
     },
-    community(): Community | null {
-      return this.communities[this.$route.params.communityId as string];
-    },
-    communityId() {
-      return this.$route.params.communityId as string;
-    },
+    // community(): Community | null {
+    //   return this.communities[this.$route.params.communityId as string];
+    // },
+    // communityId() {
+    //   return this.$route.params.communityId as string;
+    // },
     channelId() {
       return this.$route.params.channelId as string;
     },
@@ -218,7 +348,7 @@ export default defineComponent({
     },
   },
 });
-</script>
+</script> -->
 
 <style scoped>
 .center {
