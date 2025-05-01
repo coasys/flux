@@ -1,5 +1,6 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import { ad4mConnect } from "@/ad4mConnect";
+import { useAppStore } from "@/store/app";
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -52,48 +53,35 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
-const router = createRouter({
-  history: createWebHashHistory(),
-  routes,
-});
+const router = createRouter({ history: createWebHashHistory(), routes });
 
 router.beforeEach(async (to, from, next) => {
   try {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
-
     if (isAuthenticated) {
-      const client = await ad4mConnect.getAd4mClient();
-      const me = await client.agent.me();
+      const { me, setActiveCommunityId, setActiveChannelId } = useAppStore();
 
-      const fluxLinksFound = me?.perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
+      // Update the active community and channel IDs in the app store
+      const { communityId, channelId } = to.params;
+      setActiveCommunityId((communityId as string) || "");
+      setActiveChannelId((channelId as string) || "");
 
+      // Handle login routing
+      const fluxAccountCreated = me.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
-
-      if (fluxLinksFound && isOnSignupOrMain) {
-        next("/home");
-      }
-
-      if (!fluxLinksFound && !isOnSignupOrMain) {
-        next("/signup");
-      }
+      if (fluxAccountCreated && isOnSignupOrMain) next("/home");
+      if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
 
       next();
     } else {
-      if (to.name !== "signup") {
-        next("/signup");
-      }
-
+      // If not logged in, redirect to signup
+      if (to.name !== "signup") next("/signup");
       next();
     }
   } catch (e) {
-    console.log("error in route", e);
-    if (to.name !== "signup") {
-      next("/signup");
-    } else {
-      next();
-    }
+    console.log("Error in route", e);
+    if (to.name !== "signup") next("/signup");
+    else next();
   }
 });
 

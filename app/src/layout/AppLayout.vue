@@ -3,54 +3,47 @@
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
     class="app-layout"
-    :class="{ 'app-layout--show-sidebar': appStore.showMainSidebar }"
+    :class="{ 'app-layout--show-sidebar': showMainSidebar }"
   >
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
     <main class="app-layout__main"><slot></slot></main>
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
+<script setup lang="ts">
 import { useAppStore } from "@/store/app";
+import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
-export default defineComponent({
-  setup() {
-    return {
-      appStore: useAppStore(),
-      touchstartX: ref(0),
-      touchendX: ref(0),
-    };
-  },
-  methods: {
-    handleTouchStart(e: any) {
-      this.touchstartX = e.changedTouches[0].screenX;
-    },
-    handleTouchEnd(e: any) {
-      this.touchendX = e.changedTouches[0].screenX;
-      this.checkDirection();
-    },
-    checkDirection() {
-      const treshold = 70;
-      // left swipe
-      if (this.touchendX + treshold < this.touchstartX) {
-        if (this.appStore.showMainSidebar) {
-          this.appStore.setMainSidebar(false);
-        } else {
-          this.appStore.setSidebar(false);
-        }
-      }
-      // right swipe
-      if (this.touchendX > this.touchstartX + treshold) {
-        if (!this.appStore.showMainSidebar && this.appStore.showSidebar) {
-          this.appStore.setMainSidebar(true);
-        } else {
-          this.appStore.setSidebar(true);
-        }
-      }
-    },
-  },
-});
+const appStore = useAppStore();
+const { showSidebar, showMainSidebar } = storeToRefs(appStore);
+const { setSidebar, setMainSidebar } = appStore;
+
+const touchstartX = ref(0);
+const touchendX = ref(0);
+
+function handleTouchStart(e: any) {
+  touchstartX.value = e.changedTouches[0].screenX;
+}
+
+function handleTouchEnd(e: any) {
+  touchendX.value = e.changedTouches[0].screenX;
+  checkDirection();
+}
+
+function checkDirection() {
+  const treshold = 70;
+  // Left swipe
+  if (touchendX.value + treshold < touchstartX.value) {
+    if (showMainSidebar) setMainSidebar(false);
+    else setSidebar(false);
+  }
+  // Right swipe
+  if (touchendX.value > touchstartX.value + treshold) {
+    if (!showMainSidebar && showSidebar) setMainSidebar(true);
+    else setSidebar(true);
+  }
+}
 </script>
 
 <style>
@@ -84,8 +77,7 @@ export default defineComponent({
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
   z-index: 10;
-  border-right: 1px solid
-    var(--app-main-sidebar-border-color, var(--j-border-color));
+  border-right: 1px solid var(--app-main-sidebar-border-color, var(--j-border-color));
   transition: all 0.3s ease;
   transform: translateX(calc(var(--app-main-sidebar-width) * -1));
 }
