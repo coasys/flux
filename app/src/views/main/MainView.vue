@@ -172,7 +172,6 @@ const {
   setShowCreateChannel,
   setShowDisclaimer,
   setShowLeaveCommunity,
-  setShowCommunityMembers,
   setShowEditCommunity,
   joinTestingCommunity,
   showSuccessToast,

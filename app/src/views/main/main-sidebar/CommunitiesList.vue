@@ -1,10 +1,6 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-tooltip
-      v-for="(community, uuid) in communities"
-      :key="uuid"
-      :title="community.name || 'Unknown Community'"
-    >
+    <j-tooltip v-for="(community, uuid) in myCommunities" :key="uuid" :title="community.name || 'Unknown Community'">
       <j-popover event="contextmenu">
         <j-avatar
           slot="trigger"
@@ -16,9 +12,7 @@
           @click="() => handleCommunityClick(uuid as string)"
         />
         <j-menu slot="content">
-          <j-menu-item
-            @click="() => setShowLeaveCommunity(true, uuid as string)"
-          >
+          <j-menu-item @click="() => handleSetShowLeaveCommunity(true, uuid as string)">
             <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
             Leave community
           </j-menu-item>
@@ -27,6 +21,7 @@
             ><j-icon size="xs" slot="start" name="bell" />
             Mute Community
           </j-menu-item>
+
           <j-menu-item @click="() => toggleHideMutedChannels(uuid as string)">
             <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
@@ -34,70 +29,62 @@
         </j-menu>
       </j-popover>
     </j-tooltip>
+
     <j-tooltip title="Create or join community">
-      <j-button
-        @click="() => appStore.setShowCreateCommunity(true)"
-        square
-        circle
-        variant="subtle"
-      >
+      <j-button @click="() => setShowCreateCommunity(true)" square circle variant="subtle">
         <j-icon size="md" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useAppStore } from "@/store/app";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { useCommunities } from "@coasys/flux-vue";
-import { defineComponent, ref } from "vue";
+import { Community } from "@coasys/flux-api";
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-export default defineComponent({
-  async setup() {
-    const appStore = useAppStore();
+const route = useRoute();
+const router = useRouter();
+const { ad4mClient, setActiveCommunityId, setShowLeaveCommunity, toggleSidebar, setSidebar, setShowCreateCommunity } =
+  useAppStore();
+const myCommunities = ref<Record<string, Community>>({});
 
-    const client = await getAd4mClient();
+function communityIsActive(communityId: string) {
+  return route.params.communityId === communityId;
+}
 
-    const { neighbourhoods } = usePerspectives(client);
-    const { communities } = useCommunities(neighbourhoods);
+function toggleHideMutedChannels(id: string) {
+  // this.dataStore.toggleHideMutedChannels({ communityId: id });
+}
 
-    return {
-      communities,
-      showLeaveCommunity: ref(false),
-      appStore,
-    };
-  },
-  methods: {
-    toggleHideMutedChannels(id: string) {
-      /*
-      this.dataStore.toggleHideMutedChannels({ communityId: id });
-      */
-    },
-    muteCommunity(id: string) {
-      /*
-      this.dataStore.toggleCommunityMute({ communityId: id });
-      */
-    },
-    setShowLeaveCommunity(show: boolean, uuid: string) {
-      this.appStore.setActiveCommunity(uuid);
-      this.appStore.setShowLeaveCommunity(show);
-    },
-    handleCommunityClick(communityId: string) {
-      if (this.communityIsActive(communityId)) {
-        this.appStore.toggleSidebar;
-      } else {
-        this.appStore.setSidebar(true);
-        this.$router.push({ name: "community", params: { communityId } });
-      }
-    },
-  },
-  computed: {
-    communityIsActive() {
-      return (id: string) => this.$route.params.communityId === id;
-    },
-  },
+function muteCommunity(id: string) {
+  // Todo: Implement mute community functionality
+  // toggleCommunityMute({ communityId: id });
+}
+
+function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
+  setActiveCommunityId(uuid);
+  setShowLeaveCommunity(show);
+}
+
+function handleCommunityClick(communityId: string) {
+  if (communityIsActive(communityId)) toggleSidebar();
+  else {
+    setSidebar(true);
+    router.push({ name: "community", params: { communityId } });
+  }
+}
+
+onMounted(async () => {
+  // Fetch my communities
+  const allMyPerspectives = await ad4mClient.perspective.all();
+  await Promise.all(
+    allMyPerspectives.map(async (perspective) => {
+      const community = (await Community.findAll(perspective))[0];
+      if (community) myCommunities.value[perspective.uuid] = community;
+    })
+  );
 });
 </script>
 

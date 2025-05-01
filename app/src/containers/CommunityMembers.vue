@@ -4,16 +4,18 @@
       <j-text nomargin variant="heading-sm">
         Members {{ filteredMembers.length ? `(${filteredMembers.length})` : "" }}
       </j-text>
+
       <j-input
         size="lg"
         placeholder="Search members..."
         type="search"
-        :value="search"
-        @input="(e: any) => (search = e.target.value)"
+        :value="searchInput"
+        @input="(e: any) => (searchInput = e.target.value)"
       >
         <j-icon name="search" size="sm" slot="start"></j-icon>
       </j-input>
-      <j-flex direction="column" gap="400" v-if="!loading">
+
+      <j-flex direction="column" gap="400" v-if="members.length">
         <j-flex
           gap="500"
           style="cursor: pointer"
@@ -25,27 +27,15 @@
           a="center"
           @click="() => profileClick(member.did)"
         >
-          <j-avatar
-            size="xl"
-            :did="member.did"
-            :hash="member.did"
-            :src="member.profileThumbnailPicture"
-          />
+          <j-avatar size="xl" :did="member.did" :hash="member.did" :src="member.profileThumbnailPicture" />
           <j-text color="black" nomargin variant="body">
             {{ member.username }}
           </j-text>
         </j-flex>
       </j-flex>
+
       <j-flex direction="column" gap="400" v-else>
-        <j-flex
-          inline
-          direction="row"
-          j="center"
-          a="center"
-          gap="500"
-          v-for="i in 4"
-          :key="i"
-        >
+        <j-flex inline direction="row" j="center" a="center" gap="500" v-for="i in 4" :key="i">
           <j-skeleton :key="i" variant="circle" width="xl" height="xl" />
           <j-skeleton width="xl" height="text" />
         </j-flex>
@@ -54,89 +44,39 @@
   </j-box>
 </template>
 
-<script lang="ts">
-import { defineComponent, watch, ref, computed } from "vue";
-import { Community } from "@coasys/flux-api";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
-import { useRoute, useRouter } from "vue-router";
-import { getCachedAgentProfile } from "@/utils/userProfileCache"
-import { Profile } from "@coasys/flux-types";
+<script setup lang="ts">
+import { useCommunityService } from "@/composables/useCommunityService";
+import { useAppStore } from "@/store/app";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default defineComponent({
-  emits: ["close", "submit"],
-  async setup(_, { emit }) {
-    const route = useRoute();
-    const router = useRouter();
+const emit = defineEmits(["close", "submit"]);
+const router = useRouter();
+const { me } = useAppStore();
+const { communityId, members, membersLoading, getMembers } = useCommunityService();
 
-    const loading = ref(true);
-    const members = ref<Profile[]>([]);
-    const search = ref('');
-    const perspectiveUuid = computed(() => data.value?.perspective?.uuid);
+const searchInput = ref("");
 
-    const client = await getAd4mClient();
-    const { data } = usePerspective(client, () => route.params.communityId);
+const filteredMembers = computed(() => {
+  if (!searchInput.value) return members.value;
 
-    const { entries: communities } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: Community,
-    });
-
-    const filteredMembers = computed(() => {
-      if (!search.value) return members.value;
-      
-      return members.value.filter((member) => {
-        const { username, givenName, familyName } = member;
-        const stringValues = [username, givenName, familyName].filter(Boolean);
-        return stringValues.some((field) => field.toLowerCase().includes(search.value.toLowerCase()));
-      });
-    });
-
-    async function getMembers() {
-      loading.value = true;
-      try {
-        // Get the members from the neighbourhood
-        const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
-        if (neighbourhood) {
-          const me = await client.agent.me();
-          const others = await neighbourhood?.otherAgents() || [];
-          // Get the profiles from each members DID
-          members.value = await Promise.all(
-            [...others, me.did].map((did) => getCachedAgentProfile(did))
-          );
-        }
-      } catch (e) {
-        console.error("Error getting members", e);
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function profileClick(did: string) {
-      emit("close");
-      const me = await client.agent.me();
-      // Navigate to my profile
-      if (did === me.did) router.push({ name: "home", params: { did } });
-      // Navigate to the other members profile
-      else router.push({ name: "profile", params: { did, communityId: route.params.communityId } });
-    }
-
-    watch(perspectiveUuid,
-      async (newUuid, oldUuid) => {
-        if (newUuid !== oldUuid) await getMembers();
-      },
-      { immediate: true }
-    );
-
-    return {
-      loading,
-      members,
-      filteredMembers,
-      search,
-      community: computed(() => communities.value[0]),
-      profileClick,
-
-    };
-  },
+  // Filter members based on the search input
+  return members.value.filter((member) => {
+    const { username, givenName, familyName } = member;
+    const stringValues = [username, givenName, familyName].filter(Boolean);
+    return stringValues.some((field) => field.toLowerCase().includes(searchInput.value.toLowerCase()));
+  });
 });
+
+async function profileClick(did: string) {
+  emit("close");
+
+  // If my DID navigate to my profile
+  if (did === me.did) router.push({ name: "home", params: { did } });
+  // Otherwise navigate to the other members profile
+  else router.push({ name: "profile", params: { did, communityId } });
+}
+
+// Refetch members every time the modal is opened
+onMounted(() => getMembers());
 </script>

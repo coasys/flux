@@ -1,46 +1,35 @@
 <template>
-  <div
-    class="channel-view"
-    style="height: 100%"
-    :class="{ expanded: isExpanded }"
-  >
+  <div class="channel-view" style="height: 100%" :class="{ expanded: isExpanded }">
     <div class="channel-view__header">
-      <j-button
-        class="channel-view__sidebar-toggle"
-        variant="ghost"
-        @click="() => toggleSidebar()"
-      >
+      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => toggleSidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
       <div v-if="isMobile" class="channel-view__header-actions">
         <j-box pr="500" @click="onIsChannelChange">
           <j-flex a="center" gap="200">
-            <j-icon name="hash" size="md" color="ui-300"></j-icon>
+            <j-icon name="hash" size="md" color="ui-300" />
             <j-text color="black" weight="700" size="500" nomargin>
               {{ channel?.name }}
             </j-text>
           </j-flex>
+
           <j-box pl="600">
             <j-text variant="label" size="200">Change View</j-text>
           </j-box>
         </j-box>
         <j-tooltip placement="auto" title="Manage views">
-          <j-button
-            v-if="sameAgent"
-            @click="() => goToEditChannel(channel?.baseExpression)"
-            size="sm"
-            variant="ghost"
-          >
-            <j-icon size="md" name="plus"></j-icon>
+          <j-button v-if="sameAgent" @click="() => goToEditChannel(activeChannelId)" size="sm" variant="ghost">
+            <j-icon size="md" name="plus" />
           </j-button>
         </j-tooltip>
       </div>
+
       <div class="channel-view__header-actions" v-if="!isMobile">
         <div class="channel-view__header-left">
           <j-box pr="500">
             <j-flex a="center" gap="200">
-              <j-icon name="hash" size="md" color="ui-300"></j-icon>
+              <j-icon name="hash" size="md" color="ui-300" />
               <j-text color="black" weight="700" size="500" nomargin>
                 {{ channel?.name }}
               </j-text>
@@ -48,42 +37,31 @@
           </j-box>
           <div class="channel-view__tabs">
             <label
-              :class="{
-                'channel-view-tab': true,
-                checked: app.pkg === currentView,
-              }"
+              :class="{ 'channel-view-tab': true, checked: app.pkg === currentView }"
               v-for="app in apps"
               @click="() => changeCurrentView(app.pkg)"
             >
-              <j-icon :name="app.icon" size="xs"></j-icon>
+              <j-icon :name="app.icon" size="xs" />
               <span>{{ app.name }}</span>
             </label>
+
             <j-tooltip placement="auto" title="Manage views">
-              <j-button
-                v-if="sameAgent"
-                @click="() => goToEditChannel(channel?.baseExpression)"
-                size="sm"
-                variant="ghost"
-              >
-                <j-icon size="md" name="plus"></j-icon>
+              <j-button v-if="sameAgent" @click="() => goToEditChannel(activeChannelId)" size="sm" variant="ghost">
+                <j-icon size="md" name="plus" />
               </j-button>
             </j-tooltip>
           </div>
         </div>
       </div>
+
       <div v-if="!isMobile" class="channel-view__header-right">
-        <j-tooltip
-          placement="auto"
-          :title="isExpanded ? 'Minimize' : 'Fullsize'"
-        >
+        <j-tooltip placement="auto" :title="isExpanded ? 'Minimize' : 'Fullsize'">
           <j-button size="sm" variant="ghost">
             <j-icon
               size="sm"
-              :name="
-                isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'
-              "
+              :name="isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'"
               @click="isExpanded = !isExpanded"
-            ></j-icon>
+            />
           </j-button>
         </j-tooltip>
       </div>
@@ -93,18 +71,14 @@
       <component
         v-if="wcNames[app.pkg]"
         v-show="
-          (currentView === app.pkg && wcNames[app.pkg]) ||
-          (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
+          (currentView === app.pkg && wcNames[app.pkg]) || (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
         "
         :is="wcNames[app.pkg]"
         class="perspective-view"
-        :class="{
-          split: webrtcModalOpen,
-          right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view',
-        }"
-        :source="channelId"
-        :agent="agentClient"
-        :perspective="data.perspective"
+        :class="{ split: webrtcModalOpen, right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view' }"
+        :source="activeChannelId"
+        :agent="ad4mClient.agent"
+        :perspective="perspective"
         :appStore="appStore"
         :currentView="currentView"
         :setModalOpen="() => (webrtcModalOpen = false)"
@@ -113,7 +87,7 @@
       />
       <j-box pt="1000" v-show="currentView === app.pkg" v-else>
         <j-flex direction="column" a="center" j="center" gap="500">
-          <j-spinner></j-spinner>
+          <j-spinner />
           <span>Loading plugin...</span>
         </j-flex>
       </j-box>
@@ -125,28 +99,25 @@
       :open="showProfile"
       @toggle="(e: any) => toggleProfile(e.target.open, activeProfile)"
     >
-      <Profile
-        :did="activeProfile"
-        @openCompleteProfile="() => handleProfileClick(activeProfile)"
-      />
+      <Profile :did="activeProfile" @openCompleteProfile="() => handleProfileClick(activeProfile)" />
     </j-modal>
+
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
-      <j-box p="500" align="center">
+      <j-box p="500" a="center">
         <Hourglass width="30px"></Hourglass>
         <j-text variant="heading">Joining community</j-text>
         <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
+
     <j-modal size="xs" v-if="isChangeChannel" :open="isChangeChannel">
       <j-box pt="600" pb="800" px="400">
         <j-box pb="300">
           <j-text variant="heading-sm">Select a channel</j-text>
         </j-box>
+
         <label
-          :class="{
-            'channel-view-tab-2': true,
-            checked: app.pkg === currentView,
-          }"
+          :class="{ 'channel-view-tab-2': true, checked: app.pkg === currentView }"
           v-for="app in apps"
           @click="() => changeCurrentView(app.pkg)"
         >
@@ -156,7 +127,7 @@
             :checked.prop="app.pkg === currentView"
             :value.prop="app.pkg"
           />
-          <j-icon :name="app.icon" size="xs"></j-icon>
+          <j-icon :name="app.icon" size="xs" />
           <span>{{ app.name }}</span>
         </label>
       </j-box>
@@ -164,30 +135,39 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Hourglass from "@/components/hourglass/Hourglass.vue";
+import { useCommunityService } from "@/composables/useCommunityService";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import fetchFluxApp from "@/utils/fetchFluxApp";
-import { Ad4mClient } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  useMe,
-  usePerspective,
-  usePerspectives,
-  useModel,
-} from "@coasys/ad4m-vue-hooks";
-import {
-  App,
-  Channel,
-  Community,
-  generateWCName,
-  joinCommunity,
-  Topic,
-} from "@coasys/flux-api";
-import { ChannelView } from "@coasys/flux-types";
-import { profileFormatter } from "@coasys/flux-utils";
-import { defineComponent, ref, computed } from "vue";
+import { useModel } from "@coasys/ad4m-vue-hooks";
+import { App, Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
+import { storeToRefs } from "pinia";
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+defineOptions({ name: "ChannelView" });
+
+const router = useRouter();
+const route = useRoute();
+const appStore = useAppStore();
+const { activeCommunityId, activeChannelId } = storeToRefs(appStore);
+const { me, ad4mClient, setActiveChannelId, setShowEditChannel, toggleSidebar } = appStore;
+const { perspective, channels } = useCommunityService();
+
+const wcNames = ref<Record<string, string>>({});
+const currentView = ref("");
+const webrtcModalOpen = ref(false);
+const allDefined = ref(false);
+const showEditChannel = ref(false);
+const script = ref<HTMLElement | null>(null);
+const memberMentions = ref<MentionTrigger[]>([]);
+const activeProfile = ref<string>("");
+const showProfile = ref(false);
+const isJoiningCommunity = ref(false);
+const isExpanded = ref(false);
+const isChangeChannel = ref(false);
 
 interface MentionTrigger {
   label: string;
@@ -195,242 +175,123 @@ interface MentionTrigger {
   trigger: string;
 }
 
-export default defineComponent({
-  name: "ChannelView",
-  props: {
-    communityId: String,
-    channelId: String,
-  },
-  components: {
-    Profile,
-    Hourglass,
-  },
-  async setup(props) {
-    const client: Ad4mClient = await getAd4mClient();
-    const { perspectives } = usePerspectives(client);
-    const { data } = usePerspective(client, () => props.communityId);
-    const { me } = useMe(client.agent, profileFormatter);
+const channel = computed(() => channels.value.find((c) => c.baseExpression === activeChannelId.value));
+const sameAgent = computed(() => channel.value?.author === me.did);
+const isMobile = computed(() => window.innerWidth <= 768);
 
-    await data.value.perspective?.ensureSDNASubjectClass(Topic);
+const { entries: apps } = useModel({ perspective, model: App, query: { source: activeChannelId.value } });
 
-    const { entries: channels } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: Channel,
-      query: { where: { base: props.channelId! } },
-    });
+// Watch for app changes
+watch(
+  () => apps.value,
+  async (newApps, oldApps) => {
+    // Skip if no changes
+    if (oldApps && newApps.every((app, i) => app.pkg === oldApps[i]?.pkg)) return;
 
-    const { entries: apps } = useModel({
-      perspective: computed(() => data.value.perspective),
-      model: App,
-      query: { source: props.channelId },
-    });
+    // Update the current view if it has changed
+    if (!currentView.value) currentView.value = newApps[0]?.pkg;
 
-    return {
-      agentClient: client.agent,
-      agent: me,
-      wcNames: ref<Record<string, string>>({}),
-      apps,
-      perspectives,
-      data,
-      channel: computed(() => channels.value[0]),
-      currentView: ref(""),
-      webrtcModalOpen: ref(false),
-      allDefined: ref(false),
-      ChannelView: ChannelView,
-      showEditChannel: ref(false),
-      appStore: useAppStore(),
-      script: null as HTMLElement | null,
-      memberMentions: ref<MentionTrigger[]>([]),
-      activeProfile: ref<string>(""),
-      showProfile: ref(false),
-      isJoiningCommunity: ref(false),
-      isExpanded: ref(false),
-      isChangeChannel: ref(false),
-    };
-  },
-  computed: {
-    sameAgent() {
-      return this.channel?.author === this.agent?.did;
-    },
-    isMobile() {
-      return window.innerWidth <= 768;
-    },
-  },
-  watch: {
-    apps: {
-      handler: function (val) {
-        if (!this.currentView) {
-          this.currentView = val[0]?.pkg;
-        }
+    // Add new views
+    newApps.forEach(async (app: App) => {
+      const wcName = await generateWCName(app.pkg);
 
-        // Add new views
-        val?.forEach(async (app: App) => {
-          const wcName = await generateWCName(app.pkg);
-
-          if (!customElements.get(wcName)) {
-            const module = await fetchFluxApp(app.pkg);
-            if (module?.default) {
-              await customElements.define(wcName, module.default);
-              //console.log("fetched the new app");
-
-              this.wcNames[app.pkg] = wcName;
-            }
-          } else {
-            //console.log("this should update", app.pkg, wcName, this.wcNames);
-            this.wcNames[app.pkg] = wcName;
-          }
-        });
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  methods: {
-    async onViewClick(e: any) {
-      const parentLink = e.target.closest("a");
-      if (parentLink) {
-        const url = parentLink.href;
-
-        if (url.startsWith("neighbourhood://")) {
-          this.onNeighbourhoodClick(url);
-        }
-
-        if (url.startsWith("did:")) {
-          this.onAgentClick(url);
-        }
-
-        if (url.startsWith("literal://")) {
-          const isChannel = this.data.perspective?.isSubjectInstance(
-            url,
-            Channel
-          );
-          if (isChannel) {
-            this.$router.push({
-              name: "channel",
-              params: {
-                communityId: this.communityId,
-                channelId: url,
-              },
-            });
+      if (!customElements.get(wcName)) {
+        const module = await fetchFluxApp(app.pkg);
+        if (module?.default) {
+          try {
+            await customElements.define(wcName, module.default);
+            wcNames.value[app.pkg] = wcName;
+          } catch (e) {
+            console.error(`Failed to define custom element ${wcName}:`, e);
           }
         }
-
-        if (!url.startsWith("http")) {
-          e.preventDefault();
-        }
-      }
-    },
-
-    goToEditChannel(id: string) {
-      this.appStore.setActiveChannel(id);
-      this.appStore.setShowEditChannel(true);
-    },
-    changeCurrentView(value: string) {
-      // if entering webrtc or synergy view, close modal
-      if (
-        ["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(
-          value
-        )
-      )
-        this.webrtcModalOpen = false;
-      else if (
-        // if leaving webrtc view (& not small screen) open modal
-        this.currentView === "@coasys/flux-webrtc-view" &&
-        window.innerWidth > 900
-      )
-        this.webrtcModalOpen = true;
-      this.currentView = value;
-      this.isChangeChannel = false;
-    },
-    toggleSidebar() {
-      this.appStore.toggleSidebar();
-    },
-    onAgentClick(did: string) {
-      this.toggleProfile(true, did);
-    },
-    onIsChannelChange() {
-      this.isChangeChannel = !this.isChangeChannel;
-    },
-    onChannelClick(channel: string) {
-      this.$router.push({
-        name: "channel",
-        params: {
-          channelId: channel,
-          communityId: this.$route.params.communityId,
-        },
-      });
-    },
-    onNeighbourhoodClick(url: any) {
-      let neighbourhood = Object.values(this.perspectives).find(
-        (e) => e.sharedUrl === url
-      );
-
-      if (!neighbourhood) {
-        this.joinCommunity(url);
       } else {
-        this.$router.push({
-          name: "community",
-          params: {
-            communityId: neighbourhood.uuid,
-          },
-        });
+        wcNames.value[app.pkg] = wcName;
       }
-    },
-    joinCommunity(url: string) {
-      this.isJoiningCommunity = true;
-      joinCommunity({ joiningLink: url })
-        .then((community) => {
-          this.$router.push({
-            name: "community",
-            params: {
-              communityId: community.uuid,
-            },
-          });
-        })
-        .finally(() => {
-          this.isJoiningCommunity = false;
-        });
-    },
-    onHideNotificationIndicator({ detail }: any) {
-      const { channelId } = this.$route.params;
+    });
+  }
+);
 
-      if (channelId) {
-        // TODO: Set channel has new messages
-        // this.dataStore.setHasNewMessages({
-        //   communityId: this.$route.params.communityId as string,
-        //   channelId: channelId as string,
-        //   value: false,
-        // });
-      }
-    },
-    toggleProfile(open: boolean, did?: any): void {
-      if (!open) {
-        this.activeProfile = "";
-      } else {
-        this.activeProfile = did;
-      }
-      this.showProfile = open;
-    },
-    async handleProfileClick(did: string) {
-      const client = await getAd4mClient();
-      this.activeProfile = did;
+async function onViewClick(e: any) {
+  const parentLink = e.target.closest("a");
+  if (parentLink) {
+    const url = parentLink.href;
+    if (!url.startsWith("http")) e.preventDefault();
+    if (url.startsWith("neighbourhood://")) onNeighbourhoodClick(url);
+    if (url.startsWith("did:")) onAgentClick(url);
+    if (url.startsWith("literal://")) {
+      const isChannel = await perspective.isSubjectInstance(url, Channel);
+      if (isChannel) router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId: url } });
+    }
+  }
+}
 
-      const me = await client.agent.me();
+function goToEditChannel(id: string) {
+  setActiveChannelId(id);
+  setShowEditChannel(true);
+}
 
-      if (did === me.did) {
-        this.$router.push({ name: "home", params: { did } });
-      } else {
-        this.$router.push({
-          name: "profile",
-          params: {
-            did,
-            communityId: this.$route.params.communityId,
-          },
-        });
-      }
-    },
-  },
-});
+function changeCurrentView(value: string) {
+  // If entering webrtc or synergy view: close modal
+  if (["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(value)) webrtcModalOpen.value = false;
+  // Else if leaving webrtc view (& not small screen): open modal
+  else if (currentView.value === "@coasys/flux-webrtc-view" && window.innerWidth > 900) webrtcModalOpen.value = true;
+
+  currentView.value = value;
+  isChangeChannel.value = false;
+}
+
+function onAgentClick(did: string) {
+  toggleProfile(true, did);
+}
+
+function onIsChannelChange() {
+  isChangeChannel.value = !isChangeChannel.value;
+}
+
+function onChannelClick(channel: string) {
+  router.push({ name: "channel", params: { channelId: channel, communityId: activeCommunityId.value } });
+}
+
+async function onNeighbourhoodClick(url: any) {
+  const allMyPerspectives = await ad4mClient.perspective.all();
+  const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
+
+  if (!neighbourhood) joinCommunityHandler(url);
+  else router.push({ name: "community", params: { communityId: neighbourhood.uuid } });
+}
+
+function joinCommunityHandler(url: string) {
+  isJoiningCommunity.value = true;
+  joinCommunity({ joiningLink: url })
+    .then((community) => router.push({ name: "community", params: { communityId: community.uuid } }))
+    .finally(() => (isJoiningCommunity.value = false));
+}
+
+function onHideNotificationIndicator({ detail }: any) {
+  const { channelId } = route.params;
+
+  if (channelId) {
+    // TODO: Set channel has new messages
+    // dataStore.setHasNewMessages({
+    //   communityId: route.params.communityId as string,
+    //   channelId: channelId as string,
+    //   value: false,
+    // });
+  }
+}
+
+function toggleProfile(open: boolean, did?: any): void {
+  if (!open) activeProfile.value = "";
+  else activeProfile.value = did;
+  showProfile.value = open;
+}
+
+async function handleProfileClick(did: string) {
+  activeProfile.value = did;
+  if (did === me.did) router.push({ name: "home", params: { did } });
+  else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
+}
 </script>
 
 <style>
@@ -455,8 +316,7 @@ export default defineComponent({
   padding: 0 var(--j-space-200);
   position: sticky;
   background: var(--app-channel-header-bg-color, transparent);
-  border-bottom: 1px solid
-    var(--app-channel-header-border-color, var(--j-border-color));
+  border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
 }
 
