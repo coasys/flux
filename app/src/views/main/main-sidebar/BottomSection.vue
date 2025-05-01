@@ -5,7 +5,8 @@
         <j-icon size="md" name="gear"></j-icon>
       </j-button>
     </j-tooltip>
-    <router-link :to="{ name: 'home' }" v-slot="{ navigate }" custom>
+
+    <RouterLink :to="{ name: 'home' }" v-slot="{ navigate }" custom>
       <j-tooltip title="Profile">
         <j-avatar
           class="left-nav__profile-icon"
@@ -14,38 +15,34 @@
           @click="() => navigate()"
         />
       </j-tooltip>
-    </router-link>
+    </RouterLink>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { getCachedAgentProfile } from "@/utils/userProfileCache"
+<script setup lang="ts">
+import { useAppStore } from "@/store/app";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
-export default defineComponent({
-  async setup() {
-    const router = useRouter();
-    const client = await getAd4mClient();
-    const profile = ref<Profile | null>(null);
-    const showBottomOptions = ref(false);
+const router = useRouter();
+const { me } = useAppStore();
+const profile = ref<Profile | null>(null);
+const showBottomOptions = ref(false);
 
-    const me = await client.agent.me();
-    profile.value = await getCachedAgentProfile(me.did);
+// Todo: Implement logout logic
+function logOut(): void {
+  // router.replace({ name: "login" });
+}
 
-    function logOut(): void {
-      router.replace({ name: "login" });
-    }
+function goToSettings(): void {
+  router.push({ name: "settings" });
+  showBottomOptions.value = false;
+}
 
-    function goToSettings(): void {
-      router.push({ name: "settings" });
-      showBottomOptions.value = false;
-    }
-
-    return { profile, logOut, goToSettings };
-  },
+onMounted(async () => {
+  profile.value = await getCachedAgentProfile(me.did);
 });
 </script>
 

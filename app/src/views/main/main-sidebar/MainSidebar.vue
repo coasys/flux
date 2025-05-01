@@ -1,18 +1,13 @@
 <template>
   <div class="sidebar-container">
-    <communities-list></communities-list>
-    <bottom-section></bottom-section>
+    <CommunitiesList />
+    <BottomSection />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import CommunitiesList from "./CommunitiesList.vue";
+<script setup lang="ts">
 import BottomSection from "./BottomSection.vue";
-
-export default defineComponent({
-  components: { CommunitiesList, BottomSection },
-});
+import CommunitiesList from "./CommunitiesList.vue";
 </script>
 
 <style scoped>

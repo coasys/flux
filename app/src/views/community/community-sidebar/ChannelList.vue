@@ -78,22 +78,19 @@ import { Ad4mClient, PerspectiveExpression } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Channel } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import ActiveAgent from "./ActiveAgent.vue";
 
 const client: Ad4mClient = await getAd4mClient();
 const me = await client.agent.me();
 const router = useRouter();
-const { setShowCreateChannel, setSidebar, setActiveChannel, setShowEditChannel } = useAppStore();
+const { setShowCreateChannel, setSidebar, setActiveChannelId, setShowEditChannel } = useAppStore();
 const { perspective, neighbourhood, communityId, activeChannelId, channels, channelsLoading } = useCommunityService();
+
 // Todo: handle signalling via community service
 
 const activeAgents = ref<Record<string, Record<string, boolean>>>({});
-
-watch(channels, (newChannels) => {
-  console.log("channels changed", newChannels);
-});
 
 function isChannelCreator(channelId: string): boolean {
   const channel = channels.value.find((e) => e.baseExpression === channelId);
@@ -161,7 +158,7 @@ function handleToggleClick(channelId: string) {
 }
 
 function goToEditChannel(id: string) {
-  setActiveChannel(id);
+  setActiveChannelId(id);
   setShowEditChannel(true);
 }
 
