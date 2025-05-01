@@ -4,11 +4,13 @@ import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000; // 5 seconds
+const CLEANUP_INTERVAL = 15000; // 15 seconds
+const MAX_AGE = 30000; // 30 seconds
 const HEARTBEAT = "agent/heartbeat";
 const IN_COMMUNITY = "agent/in-community";
 const IN_CHANNEL = "agent/in-channel";
 
-type AgentStatus = "active" | "asleep" | "in-call" | "unknown";
+type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
 
 interface AgentState {
   status: AgentStatus;
@@ -33,6 +35,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
   });
   const agents = ref<Record<string, any>>({});
   let heartbeatInterval: NodeJS.Timeout | null = null;
+  let cleanupInterval: NodeJS.Timeout | null = null;
 
   function onSignal(signal: PerspectiveExpression) {
     const link = signal.data.links[0];
@@ -63,33 +66,56 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     }
   }
 
+  function broadcastState() {
+    // Broadcast my state to the neighbourhood
+    const myHeartbeatState = { source: me.did, predicate: HEARTBEAT, target: JSON.stringify(myState.value) };
+    neighbourhood
+      .sendBroadcastU({ links: [myHeartbeatState] })
+      .catch((error) => console.error("Error sending heartbeat:", error));
+  }
+
+  function cleanupStaleAgents() {
+    // Mark agents as offline if their last update is older than MAX_AGE
+    const now = Date.now();
+    Object.keys(agents.value).forEach((did) => {
+      const agent = agents.value[did];
+      const stale = now - agent.lastUpdate >= MAX_AGE;
+      const alreadyOffline = agent.status === "offline";
+      if (stale && !alreadyOffline) agents.value[did] = { ...agent, status: "offline" };
+    });
+  }
+
   function startSignaling() {
     // Clean up previous signal handler if present & set signalling to true
     if (signalling.value) stopSignaling();
     signalling.value = true;
 
-    // Add signal handler
+    // Add the signal handler
     neighbourhood.addSignalHandler(onSignal);
 
     // Start the heartbeat interval
-    heartbeatInterval = setInterval(() => {
-      // Broadcast my state to the neighbourhood
-      const myHeartbeatState = { source: me.did, predicate: HEARTBEAT, target: JSON.stringify(myState.value) };
-      neighbourhood
-        .sendBroadcastU({ links: [myHeartbeatState] })
-        .catch((error) => console.error("Error sending heartbeat:", error));
-    }, HEARTBEAT_INTERVAL);
+    heartbeatInterval = setInterval(() => broadcastState(), HEARTBEAT_INTERVAL);
+
+    // Start the cleanup interval
+    cleanupInterval = setInterval(() => cleanupStaleAgents(), CLEANUP_INTERVAL);
   }
 
   function stopSignaling() {
-    // Clean up signal handler
+    // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
-    // Stop the heartbeat interval if it's running
+    // Clear the heartbeat interval
     if (heartbeatInterval) {
       clearInterval(heartbeatInterval);
       heartbeatInterval = null;
     }
+
+    // Clear the cleanup interval
+    if (cleanupInterval) {
+      clearInterval(cleanupInterval);
+      cleanupInterval = null;
+    }
+
     signalling.value = false;
   }
 
