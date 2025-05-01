@@ -46,7 +46,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
 
     if (predicate === HEARTBEAT) {
       try {
-        // Parse the agent's state and add it to the store
+        // Try to parse the agent's state and add it to the store
         const agentState = JSON.parse(target);
         if (typeof agentState === "object" && agentState !== null) {
           agents.value[author] = { ...agents.value[author], ...agentState, lastUpdate: Date.now() };
@@ -74,14 +74,16 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
       .catch((error) => console.error("Error sending heartbeat:", error));
   }
 
-  function cleanupStaleAgents() {
-    // Mark agents as offline if their last update is older than MAX_AGE
+  function updateAgentStatuses() {
+    // Mark agents as asleep or offline if their last update is older than the HEARTBEAT_INTERVAL
     const now = Date.now();
     Object.keys(agents.value).forEach((did) => {
       const agent = agents.value[did];
-      const stale = now - agent.lastUpdate >= MAX_AGE;
-      const alreadyOffline = agent.status === "offline";
-      if (stale && !alreadyOffline) agents.value[did] = { ...agent, status: "offline" };
+      const timeSinceLastUpdate = now - agent.lastUpdate;
+      if (timeSinceLastUpdate <= HEARTBEAT_INTERVAL) return;
+
+      const status = timeSinceLastUpdate < MAX_AGE ? "asleep" : "offline";
+      if (status !== agent.status) agents.value[did] = { ...agent, status };
     });
   }
 
@@ -90,32 +92,28 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     if (signalling.value) stopSignaling();
     signalling.value = true;
 
-    // Add the signal handler
+    // Add the signal handler and start the intervals
     neighbourhood.addSignalHandler(onSignal);
-
-    // Start the heartbeat interval
     heartbeatInterval = setInterval(() => broadcastState(), HEARTBEAT_INTERVAL);
-
-    // Start the cleanup interval
-    cleanupInterval = setInterval(() => cleanupStaleAgents(), CLEANUP_INTERVAL);
+    cleanupInterval = setInterval(() => updateAgentStatuses(), CLEANUP_INTERVAL);
   }
 
   function stopSignaling() {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
-    // Clear the heartbeat interval
+    // Clear the intervals
     if (heartbeatInterval) {
       clearInterval(heartbeatInterval);
       heartbeatInterval = null;
     }
 
-    // Clear the cleanup interval
     if (cleanupInterval) {
       clearInterval(cleanupInterval);
       cleanupInterval = null;
     }
 
+    // Mark signaling as inactive to allow future restarts
     signalling.value = false;
   }
 
