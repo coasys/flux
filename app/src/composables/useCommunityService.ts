@@ -6,6 +6,7 @@ import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { computed, inject, InjectionKey, readonly, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useSignalingService } from "./useSignallingService";
 
 export async function createCommunityService() {
   const { ad4mClient, me } = useAppStore();
@@ -20,11 +21,10 @@ export async function createCommunityService() {
   const perspective = (await ad4mClient.perspective.byUUID(communityId)) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
-  // Ensure SDNA is installed
-  // Todo: Include all models...
+  // Ensure required SDNA is installed (Todo: include other models here...)
   perspective.ensureSDNASubjectClass(Topic);
 
-  // Model subscriptions
+  // Model subscriptions (Todo: singularise communities when singular useModel hook available)
   const { entries: communities, loading: communityLoading } = useModel({ perspective, model: Community });
   const { entries: channels, loading: channelsLoading } = useModel({ perspective, model: Channel });
 
@@ -49,11 +49,15 @@ export async function createCommunityService() {
     }
   }
 
+  // Initialise the signalling service
+  const signalingService = useSignalingService(neighbourhood);
+  signalingService.startSignaling();
+
   getMembers();
 
   return {
     // Todo: Look into whether best to store the ids here or necissary to place in the main app store
-    // Currently used in MainView for the modals (which should be moved into the community view...)
+    // Currently used in MainView for the modals (which should be moved into the community view... but also needed in signaling service)
     communityId,
     activeChannelId,
 
@@ -67,7 +71,9 @@ export async function createCommunityService() {
     communityLoading: readonly(communityLoading),
     membersLoading: readonly(membersLoading),
     channelsLoading: readonly(channelsLoading),
+
     getMembers,
+    signalingService,
   };
 }
 

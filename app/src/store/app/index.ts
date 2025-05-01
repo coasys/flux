@@ -17,7 +17,6 @@ export const useAppStore = defineStore("app", () => {
     return ad4mClientRef.value as Ad4mClient;
   });
 
-  // State
   const state = reactive<ApplicationState>({
     me: { did: "" },
     updateState: "not-available",
