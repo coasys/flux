@@ -73,10 +73,12 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore } from "@/store/app";
 import { ref } from "vue";
 
+defineOptions({ name: "Header" });
+
 const {
   showMainSidebar,
   toggleMainSidebar,
-  setActiveCommunity,
+  setActiveCommunityId,
   setShowLeaveCommunity,
   setShowEditCommunity,
   setShowInviteCode,
@@ -97,7 +99,7 @@ function communityDescription() {
 }
 
 function goToLeaveCommunity() {
-  setActiveCommunity(communityId);
+  setActiveCommunityId(communityId);
   setShowLeaveCommunity(true);
 }
 

@@ -74,19 +74,21 @@
 import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { useAppStore } from "@/store/app";
-import { Ad4mClient, PerspectiveExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel } from "@coasys/flux-api";
 import { ChannelView } from "@coasys/flux-types";
-import { onMounted, onUnmounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { defineOptions, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import ActiveAgent from "./ActiveAgent.vue";
 
-const client: Ad4mClient = await getAd4mClient();
-const me = await client.agent.me();
+defineOptions({ name: "ChannelList" });
+
 const router = useRouter();
-const { setShowCreateChannel, setSidebar, setActiveChannelId, setShowEditChannel } = useAppStore();
-const { perspective, neighbourhood, communityId, activeChannelId, channels, channelsLoading } = useCommunityService();
+const appStore = useAppStore();
+const { me, activeCommunityId, activeChannelId } = storeToRefs(appStore);
+const { setShowCreateChannel, setSidebar, setActiveChannelId, setShowEditChannel } = appStore;
+const { perspective, neighbourhood, channels, channelsLoading } = useCommunityService();
 
 // Todo: handle signalling via community service
 
@@ -94,11 +96,8 @@ const activeAgents = ref<Record<string, Record<string, boolean>>>({});
 
 function isChannelCreator(channelId: string): boolean {
   const channel = channels.value.find((e) => e.baseExpression === channelId);
-  if (channel) {
-    return channel.author === me.did;
-  } else {
-    throw new Error("Did not find channel");
-  }
+  if (channel) return channel.author === me.value.did;
+  else throw new Error("Did not find channel");
 }
 
 function getIcon(view: ChannelView | string) {
@@ -107,7 +106,7 @@ function getIcon(view: ChannelView | string) {
 
 function navigateToChannel(channelId: string) {
   setSidebar(false);
-  router.push({ name: "channel", params: { communityId, channelId } });
+  router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId } });
 }
 
 function checkWhoIsHere() {
@@ -124,7 +123,7 @@ function handleBroadcastCb(expression: PerspectiveExpression) {
 
   const { author, data } = link;
   const { predicate, source, target } = data;
-  const isMe = author === me.did;
+  const isMe = author === me.value.did;
 
   // if (isMe) {
   //   // Handle signals from me
@@ -176,7 +175,7 @@ async function deleteChannel(channelId: string) {
   try {
     const channel = new Channel(perspective, channelId);
     await channel.delete();
-    router.push({ name: "community", params: { communityId } });
+    router.push({ name: "community", params: { communityId: activeCommunityId.value } });
   } catch (error) {
     console.error("Failed to delete channel:", error);
   }

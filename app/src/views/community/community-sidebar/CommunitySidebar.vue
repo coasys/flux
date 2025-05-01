@@ -8,4 +8,6 @@
 import ChannelList from "./ChannelList.vue";
 import Header from "./Header.vue";
 import Members from "./Members.vue";
+
+defineOptions({ name: "CommunitySidebar" });
 </script>
