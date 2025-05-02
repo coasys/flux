@@ -5,20 +5,13 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { computed, inject, InjectionKey, ref } from "vue";
-import { useRoute } from "vue-router";
 import { useSignalingService } from "./useSignallingService";
 
 export async function createCommunityService() {
-  const { ad4mClient, me } = useAppStore();
+  const { ad4mClient, me, activeCommunityId } = useAppStore();
 
-  // Get the communities UUID and the active channel ID from the route
-  const route = useRoute();
-  const { communityId: uuid, channelId } = route.params;
-  const communityId = Array.isArray(uuid) ? uuid[0] : uuid;
-  const activeChannelId = Array.isArray(channelId) ? channelId[0] : channelId;
-
-  // Get the perspective and neighbourhood proxies using the UUID
-  const perspective = (await ad4mClient.perspective.byUUID(communityId)) as PerspectiveProxy;
+  // Get the perspective and neighbourhood proxies
+  const perspective = (await ad4mClient.perspective.byUUID(activeCommunityId)) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure required SDNA is installed (Todo: include other models here...)
@@ -61,10 +54,10 @@ export async function createCommunityService() {
     isSynced,
     isAuthor,
     community,
-    members,
-    channels,
     communityLoading,
+    members,
     membersLoading,
+    channels,
     channelsLoading,
 
     getMembers,

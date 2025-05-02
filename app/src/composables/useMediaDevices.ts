@@ -36,11 +36,12 @@ export function useMediaDevices() {
 
       stream.value = await navigator.mediaDevices.getUserMedia(constraints);
 
-      mediaPermissions.value.camera.requested = video;
-      mediaPermissions.value.camera.granted = video && !!stream.value.getVideoTracks().length;
+      const { camera, microphone } = mediaPermissions.value;
+      camera.requested = video;
+      camera.granted = video && !!stream.value.getVideoTracks().length;
 
-      mediaPermissions.value.microphone.requested = audio;
-      mediaPermissions.value.microphone.granted = audio && !!stream.value.getAudioTracks().length;
+      microphone.requested = audio;
+      microphone.granted = audio && !!stream.value.getAudioTracks().length;
 
       // Update available devices after permissions granted
       await refreshDeviceList();
