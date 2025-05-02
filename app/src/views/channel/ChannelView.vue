@@ -9,6 +9,7 @@
         <j-box pr="500" @click="onIsChannelChange">
           <j-flex a="center" gap="200">
             <j-icon name="hash" size="md" color="ui-300" />
+
             <j-text color="black" weight="700" size="500" nomargin>
               {{ channel?.name }}
             </j-text>
@@ -18,6 +19,7 @@
             <j-text variant="label" size="200">Change View</j-text>
           </j-box>
         </j-box>
+
         <j-tooltip placement="auto" title="Manage views">
           <j-button v-if="sameAgent" @click="() => goToEditChannel(activeChannelId)" size="sm" variant="ghost">
             <j-icon size="md" name="plus" />
@@ -35,6 +37,7 @@
               </j-text>
             </j-flex>
           </j-box>
+
           <div class="channel-view__tabs">
             <label
               :class="{ 'channel-view-tab': true, checked: app.pkg === currentView }"
@@ -105,7 +108,9 @@
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" a="center">
         <Hourglass width="30px"></Hourglass>
+
         <j-text variant="heading">Joining community</j-text>
+
         <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
@@ -127,7 +132,9 @@
             :checked.prop="app.pkg === currentView"
             :value.prop="app.pkg"
           />
+
           <j-icon :name="app.icon" size="xs" />
+
           <span>{{ app.name }}</span>
         </label>
       </j-box>

@@ -10,9 +10,9 @@ const HEARTBEAT = "agent/heartbeat";
 const IN_COMMUNITY = "agent/in-community";
 const IN_CHANNEL = "agent/in-channel";
 
-type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
+export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
 
-interface AgentState {
+export interface AgentState {
   status: AgentStatus;
   processing: boolean;
   communityId: string;

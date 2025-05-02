@@ -13,9 +13,7 @@
           :size="size"
         />
 
-        <span v-if="!loading && users.length > 4" class="avatar-group__see-all">
-          +{{ users.length - 4 }}
-        </span>
+        <span v-if="!loading && users.length > 4" class="avatar-group__see-all"> +{{ users.length - 4 }} </span>
       </div>
     </j-tooltip>
   </button>
@@ -28,6 +26,7 @@ export default defineComponent({ emits: ["click"], props: ["loading", "users", "
 
 <style scoped>
 .avatar-group {
+  height: 42px;
   outline: 0;
   border: 0;
   background: none;
