@@ -29,7 +29,7 @@ export async function createCommunityService() {
   const isSynced = computed(() => perspective.state === PerspectiveState.Synced);
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
   const community = computed(() => communities.value[0] || null);
-  const members = ref<Profile[]>([]);
+  const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
 
   // Getter functions
@@ -38,6 +38,9 @@ export async function createCommunityService() {
       membersLoading.value = true;
       const others = (await neighbourhood?.otherAgents()) || [];
       const allMembersDids = [...others, me.value.did];
+      // Pre-fill members with partial profiles to speed up display
+      members.value = allMembersDids.map((did) => ({ did, profileThumbnailPicture: undefined }));
+      // Fetch full profiles with images
       members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
       membersLoading.value = false;
     } catch (error) {
