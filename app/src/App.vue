@@ -29,22 +29,25 @@
     autohide="5"
     :variant="toast.variant"
     :open="toast.open"
-    @toggle="(e: any) => setToast({ open: e.target.open })"
+    @toggle="(e: any) => app.setToast({ open: e.target.open })"
   >
     {{ toast.message }}
   </j-toast>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/app";
+import { useAppStore, useThemeStore, useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
-const appStore = useAppStore();
-const { toast, globalError, showGlobalLoading } = storeToRefs(appStore);
-const { setToast, changeCurrentTheme } = appStore;
+const app = useAppStore();
+const ui = useUIStore();
+const theme = useThemeStore();
 
-onMounted(async () => changeCurrentTheme("global"));
+const { toast } = storeToRefs(app);
+const { globalError, showGlobalLoading } = storeToRefs(ui);
+
+onMounted(async () => theme.changeCurrentTheme("global"));
 </script>
 
 <style>

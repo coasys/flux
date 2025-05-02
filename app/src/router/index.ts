@@ -1,5 +1,6 @@
 import { ad4mConnect } from "@/ad4mConnect";
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store";
+import { storeToRefs } from "pinia";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
@@ -59,10 +60,11 @@ router.beforeEach(async (to, from, next) => {
   try {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
     if (isAuthenticated) {
-      const { me } = useAppStore();
+      const app = useAppStore();
+      const { me } = storeToRefs(app);
 
       // Handle login routing
-      const fluxAccountCreated = me.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
+      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
       if (fluxAccountCreated && isOnSignupOrMain) next("/home");
       if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");

@@ -7,11 +7,7 @@
         @change="(url) => (profileBackground = url)"
         @hide="(val) => (hideContainer = val)"
       ></img-upload>
-      <avatar-upload
-        :hash="me?.did"
-        :value="profilePicture"
-        @change="(url) => (profilePicture = url)"
-      ></avatar-upload>
+      <avatar-upload :hash="me?.did" :value="profilePicture" @change="(url) => (profilePicture = url)"></avatar-upload>
       <j-input
         size="lg"
         label="Username"
@@ -44,25 +40,22 @@
 
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { defineComponent } from "vue";
-import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { getProfile, updateProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { AvatarUpload, ImgUpload },
   async setup() {
-    const appStore = useAppStore();
     const client = await getAd4mClient();
     const { profile, me } = useMe(client.agent, profileFormatter);
     return {
       me,
       profile,
-      appStore,
     };
   },
   data() {

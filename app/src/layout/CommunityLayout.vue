@@ -15,13 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/app";
+import { useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
-const appStore = useAppStore();
-const { showSidebar, sidebarWidth } = storeToRefs(appStore);
-const { setSidebarWidth } = appStore;
+const ui = useUIStore();
+const { showSidebar, sidebarWidth } = storeToRefs(ui);
 
 const sidebar = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
@@ -38,7 +37,7 @@ function startResize(e: any) {
 }
 
 function doResize(e: any) {
-  setSidebarWidth(startWidth.value + (e.clientX - startX.value));
+  ui.setSidebarWidth(startWidth.value + (e.clientX - startX.value));
 }
 
 function stopResize() {

@@ -11,13 +11,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/app";
+import { useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
-const appStore = useAppStore();
-const { showSidebar, showMainSidebar } = storeToRefs(appStore);
-const { setSidebar, setMainSidebar } = appStore;
+const ui = useUIStore();
+const { showSidebar, showMainSidebar } = storeToRefs(ui);
 
 const touchstartX = ref(0);
 const touchendX = ref(0);
@@ -35,13 +34,13 @@ function checkDirection() {
   const treshold = 70;
   // Left swipe
   if (touchendX.value + treshold < touchstartX.value) {
-    if (showMainSidebar) setMainSidebar(false);
-    else setSidebar(false);
+    if (showMainSidebar) ui.setMainSidebar(false);
+    else ui.setSidebar(false);
   }
   // Right swipe
   if (touchendX.value > touchstartX.value + treshold) {
-    if (!showMainSidebar && showSidebar) setMainSidebar(true);
-    else setSidebar(true);
+    if (!showMainSidebar && showSidebar) ui.setMainSidebar(true);
+    else ui.setSidebar(true);
   }
 }
 </script>

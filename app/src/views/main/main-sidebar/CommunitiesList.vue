@@ -31,7 +31,7 @@
     </j-tooltip>
 
     <j-tooltip title="Create or join community">
-      <j-button @click="() => setShowCreateCommunity(true)" square circle variant="subtle">
+      <j-button @click="() => modals.setShowCreateCommunity(true)" square circle variant="subtle">
         <j-icon size="md" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
@@ -39,15 +39,18 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/app";
+import { useAppStore, useModalStore, useUIStore } from "@/store";
 import { Community } from "@coasys/flux-api";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
-const { ad4mClient, setActiveCommunityId, setShowLeaveCommunity, toggleSidebar, setSidebar, setShowCreateCommunity } =
-  useAppStore();
+
+const app = useAppStore();
+const modals = useModalStore();
+const ui = useUIStore();
+
 const myCommunities = ref<Record<string, Community>>({});
 
 function communityIsActive(communityId: string) {
@@ -64,21 +67,21 @@ function muteCommunity(id: string) {
 }
 
 function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
-  setActiveCommunityId(uuid);
-  setShowLeaveCommunity(show);
+  app.setActiveCommunityId(uuid);
+  modals.setShowLeaveCommunity(show);
 }
 
 function handleCommunityClick(communityId: string) {
-  if (communityIsActive(communityId)) toggleSidebar();
+  if (communityIsActive(communityId)) ui.toggleSidebar();
   else {
-    setSidebar(true);
+    ui.setSidebar(true);
     router.push({ name: "community", params: { communityId } });
   }
 }
 
 onMounted(async () => {
   // Fetch my communities
-  const allMyPerspectives = await ad4mClient.perspective.all();
+  const allMyPerspectives = await app.ad4mClient.perspective.all();
   await Promise.all(
     allMyPerspectives.map(async (perspective) => {
       const community = (await Community.findAll(perspective))[0];

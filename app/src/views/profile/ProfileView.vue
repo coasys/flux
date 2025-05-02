@@ -1,38 +1,21 @@
 <template>
   <div v-if="profile" class="profile__container">
-    <div
-      :style="{ backgroundImage: `url(${profileBackground})` }"
-      class="profile__bg"
-    />
+    <div :style="{ backgroundImage: `url(${profileBackground})` }" class="profile__bg" />
 
     <div class="profile">
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <j-avatar
-              class="avatar"
-              :hash="did"
-              :src="profile?.profilePicture"
-            />
-            <j-button
-              v-if="sameAgent"
-              variant="ghost"
-              @click="() => setShowEditProfile(true)"
-            >
+            <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
+            <j-button v-if="sameAgent" variant="ghost" @click="() => modals.setShowEditProfile(true)">
               <j-icon size="sm" name="pen"></j-icon>
             </j-button>
           </div>
           <j-box pt="400" pb="300">
-            <j-text
-              nomargin
-              v-if="profile.familyName || profile.givenName"
-              variant="heading-sm"
-            >
+            <j-text nomargin v-if="profile.familyName || profile.givenName" variant="heading-sm">
               {{ `${profile.givenName} ${profile.familyName}` }}
             </j-text>
-            <j-text nomargin size="500" weight="500" color="ui-500">
-              @{{ profile.username }}
-            </j-text>
+            <j-text nomargin size="500" weight="500" color="ui-500"> @{{ profile.username }} </j-text>
           </j-box>
           <j-box pt="400">
             <j-text nomargin size="500" color="ui-800" v-if="profile.bio">
@@ -43,22 +26,14 @@
 
         <div class="profile__content">
           <j-box my="500">
-            <j-tabs
-              class="tabs"
-              @change="(e: any) => (currentTab = e.target.value)"
-              :value="currentTab"
-            >
+            <j-tabs class="tabs" @change="(e: any) => (currentTab = e.target.value)" :value="currentTab">
               <j-tab-item value="web2">Web2</j-tab-item>
               <j-tab-item value="web3">Web3</j-tab-item>
             </j-tabs>
 
             <div v-show="currentTab === 'web2'">
-              <j-box py="500" align="right">
-                <j-button
-                  v-if="sameAgent"
-                  variant="primary"
-                  @click="() => (showAddlinkModal = true)"
-                >
+              <j-box py="500" a="right">
+                <j-button v-if="sameAgent" variant="primary" @click="() => (showAddlinkModal = true)">
                   Add Link
                 </j-button>
               </j-box>
@@ -87,10 +62,7 @@
                     @click="() => (selectedAddress = proof.deviceKey)"
                     v-for="(proof, i) in proofs"
                   >
-                    <div
-                      class="wallet__avatar"
-                      v-html="getIcon(proof.deviceKey)"
-                    ></div>
+                    <div class="wallet__avatar" v-html="getIcon(proof.deviceKey)"></div>
                     <j-badge size="sm" variant="primary">
                       <j-icon
                         size="xs"
@@ -98,33 +70,19 @@
                         color="success-500"
                         name="check"
                       ></j-icon>
-                      <j-icon size="xs" color="danger-500" name="cross" v-else>
-                      </j-icon>
-                      {{
-                        verifiedProofs[proof.deviceKey]
-                          ? "Verified"
-                          : "Not verified"
-                      }}
+                      <j-icon size="xs" color="danger-500" name="cross" v-else> </j-icon>
+                      {{ verifiedProofs[proof.deviceKey] ? "Verified" : "Not verified" }}
                     </j-badge>
                     <j-box pt="200">
                       <j-text nomargin color="black">
                         {{ shortETH(proof.deviceKey) }}
                       </j-text>
                     </j-box>
-                    <j-button
-                      v-if="sameAgent"
-                      variant="link"
-                      @click="() => removeProof(proof)"
-                    >
+                    <j-button v-if="sameAgent" variant="link" @click="() => removeProof(proof)">
                       Remove wallet
                     </j-button>
                   </div>
-                  <a
-                    v-if="sameAgent"
-                    class="wallet"
-                    href="https://dapp.ad4m.dev/"
-                    target="_blank"
-                  >
+                  <a v-if="sameAgent" class="wallet" href="https://dapp.ad4m.dev/" target="_blank">
                     <j-text size="600" nomargin>
                       <j-icon name="plus"></j-icon>
                       Add
@@ -141,10 +99,7 @@
       </div>
     </div>
 
-    <div
-      class="sidebar"
-      @click="() => appStore.setMainSidebar(!appStore.showMainSidebar)"
-    >
+    <div class="sidebar" @click="() => ui.setMainSidebar(!ui.showMainSidebar)">
       <j-icon name="layout-sidebar" size="md"></j-icon>
     </div>
   </div>
@@ -154,10 +109,7 @@
     :open="showAddlinkModal"
     @toggle="(e: any) => setAddLinkModal(e.target.open)"
   >
-    <WebLinkAdd
-      @cancel="() => setAddLinkModal(false)"
-      @submit="() => setAddLinkModal(false)"
-    />
+    <WebLinkAdd @cancel="() => setAddLinkModal(false)" @submit="() => setAddLinkModal(false)" />
   </j-modal>
 
   <j-modal
@@ -175,44 +127,33 @@
   <j-modal
     v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
-    @toggle="(e: any) => setShowEditProfile(e.target.open)"
+    @toggle="(e: any) => modals.setShowEditProfile(e.target.open)"
   >
-    <edit-profile
-      @submit="() => setShowEditProfile(false)"
-      @cancel="() => setShowEditProfile(false)"
-    />
+    <edit-profile @submit="() => modals.setShowEditProfile(false)" @cancel="() => modals.setShowEditProfile(false)" />
   </j-modal>
   <router-view></router-view>
 </template>
 
 <script lang="ts">
-import { Profile } from "@coasys/flux-types";
-import { ModalsState } from "@/store/types";
-import {
-  Ad4mClient,
-  EntanglementProof,
-  LinkExpression,
-  Literal,
-} from "@coasys/ad4m";
-import { defineComponent, ref, watch } from "vue";
-import WebLinkCard from "./WebLinkCard.vue";
-import CommunityCard from "./CommunityCard.vue";
-import ProfileJoinLink from "./ProfileJoinLink.vue";
 import EditProfile from "@/containers/EditProfile.vue";
-import { useAppStore } from "@/store/app";
-import { mapActions } from "pinia";
-import { getImage } from "@coasys/flux-utils";
-import WebLinkAdd from "./WebLinkAdd.vue";
-import { getAgentWebLinks } from "@coasys/flux-api";
+import { useAppStore, useModalStore, useThemeStore, useUIStore } from "@/store";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { Ad4mClient, EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { usePerspectives } from "@coasys/ad4m-vue-hooks";
+import { getAgentWebLinks } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import { getImage } from "@coasys/flux-utils";
 import { useCommunities } from "@coasys/flux-vue";
-// @ts-ignore
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import Attestations from "./Attestations.vue";
+import CommunityCard from "./CommunityCard.vue";
+import ProfileJoinLink from "./ProfileJoinLink.vue";
+import WebLinkAdd from "./WebLinkAdd.vue";
+import WebLinkCard from "./WebLinkCard.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
-import { getCachedAgentProfile } from "@/utils/userProfileCache"
 
 export default defineComponent({
   name: "ProfileView",
@@ -231,13 +172,16 @@ export default defineComponent({
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
     const me = await client.agent.me();
-    const appStore = useAppStore();
+    const app = useAppStore();
+    const modals = useModalStore();
+    const theme = useThemeStore();
+    const ui = useUIStore();
 
     watch(
       () => route.params.did,
       async (newDid) => {
-        const did = Array.isArray(newDid) ? newDid[0] : newDid || me.did
-        profile.value = await getCachedAgentProfile(did)
+        const did = Array.isArray(newDid) ? newDid[0] : newDid || me.did;
+        profile.value = await getCachedAgentProfile(did);
       },
       { immediate: true }
     );
@@ -251,7 +195,10 @@ export default defineComponent({
       profile,
       neighbourhoods,
       communities,
-      appStore,
+      app,
+      modals,
+      theme,
+      ui,
     };
   },
   data() {
@@ -269,7 +216,7 @@ export default defineComponent({
     };
   },
   beforeCreate() {
-    this.appStore.changeCurrentTheme("global");
+    this.theme.changeCurrentTheme("global");
   },
   methods: {
     getIcon(address: string) {
@@ -285,9 +232,7 @@ export default defineComponent({
       if (!address || address.length !== 42 || !address.startsWith("0x")) {
         return "Invalid ETH Address";
       }
-      return `${address.substring(0, 8)}...${address.substring(
-        address.length - 4
-      )}`;
+      return `${address.substring(0, 8)}...${address.substring(address.length - 4)}`;
     },
     async getEntanglementProofs() {
       const agent = await this.client.agent.byDID(this.did);
@@ -296,20 +241,12 @@ export default defineComponent({
         // Map to dedupe array
         const seen = new Set<string>();
         const proofLinks = agent.perspective?.links
-          ? agent.perspective.links.filter(
-              (l) => l.data.predicate === "ad4m://entanglement_proof"
-            )
+          ? agent.perspective.links.filter((l) => l.data.predicate === "ad4m://entanglement_proof")
           : [];
 
-        const expressions = await Promise.all(
-          proofLinks?.map((link) =>
-            this.client.expression.get(link.data.target)
-          )
-        );
+        const expressions = await Promise.all(proofLinks?.map((link) => this.client.expression.get(link.data.target)));
 
-        const proofs = expressions.map((e) =>
-          JSON.parse(e.data)
-        ) as EntanglementProof[];
+        const proofs = expressions.map((e) => JSON.parse(e.data)) as EntanglementProof[];
 
         const filteredProofs = proofs.filter((p: EntanglementProof) => {
           if (seen.has(p.deviceKey)) {
@@ -331,8 +268,7 @@ export default defineComponent({
         });
 
         this.proofs = filteredProofs;
-        this.selectedAddress =
-          filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
+        this.selectedAddress = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
       }
     },
     async removeProof(proof: EntanglementProof) {
@@ -341,8 +277,7 @@ export default defineComponent({
           return (
             l.data.predicate === "ad4m://entanglement_proof" &&
             l.data.target.startsWith("literal://") &&
-            Literal.fromUrl(l.data.target).get().data.deviceKey ===
-              proof.deviceKey
+            Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
           );
         }) || [];
 
@@ -371,11 +306,11 @@ export default defineComponent({
       const webLinks = await getAgentWebLinks(this.did);
       this.weblinks = webLinks;
     },
-    ...mapActions(useAppStore, [
-      "setShowEditProfile",
-      "setSidebar",
-      "setShowCreateCommunity",
-    ]),
+    // ...mapActions(useAppStore, [
+    //   "setShowEditProfile",
+    //   "setSidebar",
+    //   "setShowCreateCommunity",
+    // ]),
   },
   watch: {
     showAddlinkModal() {
@@ -424,9 +359,9 @@ export default defineComponent({
     sameAgent() {
       return this.did === this.me?.did;
     },
-    modals(): ModalsState {
-      return this.appStore.modals;
-    },
+    // modals(): ModalsStore {
+    //   return this.modals;
+    // },
   },
 });
 </script>

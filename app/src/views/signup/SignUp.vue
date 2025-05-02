@@ -19,12 +19,7 @@
 
         <j-text variant="heading"> Create a user </j-text>
 
-        <avatar-upload
-          icon="camera"
-          :value="profilePicture"
-          @change="(url) => (profilePicture = url)"
-        >
-        </avatar-upload>
+        <avatar-upload icon="camera" :value="profilePicture" @change="(url) => (profilePicture = url)"> </avatar-upload>
         <j-input
           label="Username"
           size="xl"
@@ -34,12 +29,7 @@
           :errortext="usernameErrorMessage"
           @blur="(e: any) => validateUsername()"
         ></j-input>
-        <j-toggle
-          style="width: 100%"
-          full
-          size="lg"
-          variant="primary"
-          @change="allowNotifications"
+        <j-toggle style="width: 100%" full size="lg" variant="primary" @change="allowNotifications"
           >Allow Notifications</j-toggle
         >
         <j-button
@@ -61,20 +51,19 @@
 
 <script lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
-import { defineComponent, ref } from "vue";
-import Carousel from "./SignUpCarousel.vue";
-import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useValidation } from "@/utils/validation";
 import ad4mLogo from "@/assets/images/ad4mLogo.svg";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import Logo from "@/components/logo/Logo.vue";
-import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
-import SignUpCarousel from "./SignUpCarousel.vue";
-import { createProfile, getAd4mProfile } from "@coasys/flux-api";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import Logo from "@/components/logo/Logo.vue";
+import { useAppStore } from "@/store";
+import { useValidation } from "@/utils/validation";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
+import { createProfile, getAd4mProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";
+import { defineComponent, ref } from "vue";
 import { registerNotification } from "../../utils/registerMobileNotifications";
+import { default as Carousel, default as SignUpCarousel } from "./SignUpCarousel.vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -165,9 +154,7 @@ export default defineComponent({
 
       const { perspective } = await client.agent.me();
 
-      const fluxLinksFound = perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
+      const fluxLinksFound = perspective?.links.find((e) => e.data.source.startsWith("flux://"));
 
       return fluxLinksFound ? true : false;
     },
@@ -212,9 +199,7 @@ export default defineComponent({
     },
     //@ts-ignore
     async allowNotifications(value) {
-      this.appStore.changeNotificationState(
-        !this.appStore.notification.globalNotification
-      );
+      this.appStore.changeNotificationState(!this.appStore.notification.globalNotification);
     },
   },
 });

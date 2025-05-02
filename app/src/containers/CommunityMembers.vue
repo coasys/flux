@@ -46,15 +46,15 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const emit = defineEmits(["close", "submit"]);
 const router = useRouter();
-const appStore = useAppStore();
-const { me, activeCommunityId } = storeToRefs(appStore);
+const app = useAppStore();
+const { me, activeCommunityId } = storeToRefs(app);
 const { members, membersLoading, getMembers } = useCommunityService();
 
 const searchInput = ref("");

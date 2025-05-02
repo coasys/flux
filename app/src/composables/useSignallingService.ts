@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref } from "vue";
@@ -21,9 +21,8 @@ interface AgentState {
 }
 
 export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
-  const appStore = useAppStore();
-  const { activeCommunityId, activeChannelId } = storeToRefs(appStore);
-  const { me } = appStore;
+  const app = useAppStore();
+  const { me, activeCommunityId, activeChannelId } = storeToRefs(app);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
@@ -39,7 +38,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
 
   function onSignal(signal: PerspectiveExpression) {
     const link = signal.data.links[0];
-    if (!link || link.author === me.did) return;
+    if (!link || link.author === me.value.did) return;
 
     const { author, data } = link;
     const { predicate, source, target } = data;
@@ -68,7 +67,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
 
   function broadcastState() {
     // Broadcast my state to the neighbourhood
-    const myHeartbeatState = { source: me.did, predicate: HEARTBEAT, target: JSON.stringify(myState.value) };
+    const myHeartbeatState = { source: me.value.did, predicate: HEARTBEAT, target: JSON.stringify(myState.value) };
     neighbourhood
       .sendBroadcastU({ links: [myHeartbeatState] })
       .catch((error) => console.error("Error sending heartbeat:", error));

@@ -8,9 +8,7 @@
         <j-icon slot="start" name="file-plus" size="xl"></j-icon>
         <div class="option-body">
           <j-text variant="heading-sm">Create a Community</j-text>
-          <j-text variant="body" nomargin>
-            Make a community and start inviting people
-          </j-text>
+          <j-text variant="body" nomargin> Make a community and start inviting people </j-text>
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
       </button>
@@ -18,9 +16,7 @@
         <j-icon slot="start" name="files" size="xl"></j-icon>
         <div class="option-body">
           <j-text variant="heading-sm">Join a Community</j-text>
-          <j-text variant="body" nomargin>
-            Join an already existing community
-          </j-text>
+          <j-text variant="body" nomargin> Join an already existing community </j-text>
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
       </button>
@@ -28,9 +24,7 @@
         <j-icon slot="start" name="file-arrow-up" size="xl"></j-icon>
         <div class="option-body">
           <j-text variant="heading-sm">Load a Community</j-text>
-          <j-text variant="body" nomargin
-            >Load a existing perspective as community</j-text
-          >
+          <j-text variant="body" nomargin>Load a existing perspective as community</j-text>
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
       </button>
@@ -41,19 +35,10 @@
         variant="secondary"
         @click="joinTestingCommunity"
       >
-        <j-icon
-          slot="start"
-          color="primary-700"
-          name="stars"
-          size="xl"
-        ></j-icon>
+        <j-icon slot="start" color="primary-700" name="stars" size="xl"></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm" color="primary-800"
-            >Join Testing Community</j-text
-          >
-          <j-text variant="body" nomargin
-            >Try the Flux Alpha testing community</j-text
-          >
+          <j-text variant="heading-sm" color="primary-800">Join Testing Community</j-text>
+          <j-text variant="body" nomargin>Try the Flux Alpha testing community</j-text>
         </div>
         <j-icon slot="end" name="plus-lg"></j-icon>
       </button>
@@ -62,21 +47,13 @@
 
   <j-box p="800" v-if="tabView">
     <j-flex direction="column" gap="700">
-      <j-button
-        :disabled="isCreatingCommunity || isJoiningCommunity"
-        variant="link"
-        @click="tabView = ''"
-      >
+      <j-button :disabled="isCreatingCommunity || isJoiningCommunity" variant="link" @click="tabView = ''">
         <j-icon name="arrow-left-short" />
         Back
       </j-button>
       <div v-if="tabView === 'Create'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <avatar-upload
-            :value="newProfileImage"
-            @change="(val) => (newProfileImage = val)"
-            icon="camera"
-          />
+          <avatar-upload :value="newProfileImage" @change="(val) => (newProfileImage = val)" icon="camera" />
           <j-input
             size="lg"
             label="Name"
@@ -123,12 +100,8 @@
           </j-button>
         </j-flex>
         <div v-if="isCreatingCommunity" style="text-align: center">
-          <j-text variant="heading-sm">
-            Your community is being created
-          </j-text>
-          <j-text variant="body">
-            Please be patient, this might take a while right now.
-          </j-text>
+          <j-text variant="heading-sm"> Your community is being created </j-text>
+          <j-text variant="body"> Please be patient, this might take a while right now. </j-text>
           <j-box pt="500">
             <j-flex j="center">
               <HourGlass width="50" />
@@ -159,9 +132,7 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text
-            variant="body"
-            v-if="Object.keys(nonFluxCommunities).length === 0"
+          <j-text variant="body" v-if="Object.keys(nonFluxCommunities).length === 0"
             >No perspective found that is not a flux community</j-text
           >
           <j-menu-item
@@ -176,13 +147,8 @@
           </j-menu-item>
         </j-flex>
         <div v-if="isCreatingCommunity" style="text-align: center">
-          <j-text variant="heading-sm">
-            Please wait while your community is being created
-          </j-text>
-          <j-text variant="body">
-            Right now this proccess might take a couple of minutes, so please be
-            patient
-          </j-text>
+          <j-text variant="heading-sm"> Please wait while your community is being created </j-text>
+          <j-text variant="body"> Right now this proccess might take a couple of minutes, so please be patient </j-text>
           <j-flex j="center">
             <j-spinner size="lg"></j-spinner>
           </j-flex>
@@ -190,13 +156,8 @@
       </div>
       <div v-if="tabView === 'Test'">
         <div style="text-align: center">
-          <j-text variant="heading-sm">
-            Please wait while you join the testing community
-          </j-text>
-          <j-text variant="body">
-            Right now this proccess might take a couple of minutes, so please be
-            patient
-          </j-text>
+          <j-text variant="heading-sm"> Please wait while you join the testing community </j-text>
+          <j-text variant="body"> Right now this proccess might take a couple of minutes, so please be patient </j-text>
           <j-flex j="center">
             <j-spinner size="lg"></j-spinner>
           </j-flex>
@@ -207,42 +168,41 @@
 </template>
 
 <script lang="ts">
-import { isValid } from "@/utils/validation";
-import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
-import { useAppStore } from "@/store/app";
-import { joinCommunity, createCommunity } from "@coasys/flux-api";
-import { useCommunities } from "@coasys/flux-vue";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import HourGlass from "@/components/hourglass/Hourglass.vue";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import { useAppStore, useModalStore } from "@/store";
+import { isValid } from "@/utils/validation";
+import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect";
+import { usePerspectives } from "@coasys/ad4m-vue-hooks";
+import { createCommunity, joinCommunity } from "@coasys/flux-api";
+import { useCommunities } from "@coasys/flux-vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: { AvatarUpload, HourGlass },
   emits: ["cancel", "submit"],
   async setup() {
-    const appStore = useAppStore();
+    const app = useAppStore();
+    const modals = useModalStore();
 
     return {
       selectedLang: ref<any>(null),
       langMeta: ref<any>(null),
       communities: [],
       perspectives: [],
-      appStore,
+      app,
+      modals,
     };
   },
   async mounted() {
     const client: Ad4mClient = await getAd4mClient();
 
     const linkLangs = await client.runtime.knownLinkLanguageTemplates();
-    const langExpression = await client.expression.getMany(
-      linkLangs.map((l) => `lang://${l}`)
-    );
+    const langExpression = await client.expression.getMany(linkLangs.map((l) => `lang://${l}`));
 
-    const langMeta = langExpression
-      .map((l) => JSON.parse(l.data));
+    const langMeta = langExpression.map((l) => JSON.parse(l.data));
 
     // const langMeta = langExpression
     //   .map((l) => JSON.parse(l.data))
@@ -271,26 +231,19 @@ export default defineComponent({
   computed: {
     nonFluxCommunities(): Record<string, PerspectiveProxy> {
       console.log({ c: this.communities, p: this.perspectives });
-      return Object.entries(this.perspectives).reduce(
-        (acc, [uuid, perspective]) => {
-          const perspectiveIsCommunity = Object.keys(this.communities).some(
-            (id) => uuid === id
-          );
+      return Object.entries(this.perspectives).reduce((acc, [uuid, perspective]) => {
+        const perspectiveIsCommunity = Object.keys(this.communities).some((id) => uuid === id);
 
-          if (!perspectiveIsCommunity)
-            return {
-              ...acc,
-              [uuid]: perspective,
-            };
-          return acc;
-        },
-        {}
-      );
+        if (!perspectiveIsCommunity)
+          return {
+            ...acc,
+            [uuid]: perspective,
+          };
+        return acc;
+      }, {});
     },
     hasAlreadyJoinedTestingCommunity(): boolean {
-      const p = Object.values(this.perspectives).find(
-        (p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD
-      );
+      const p = Object.values(this.perspectives).find((p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD);
       return p ? true : false;
     },
     canJoin(): boolean {
@@ -326,7 +279,7 @@ export default defineComponent({
       const match = neighbourhoodUrlMatch[0];
       this.joiningLink = match;
       if (text && !match) {
-        this.appStore.setToast({
+        this.app.setToast({
           variant: "error",
           message: "We were not able to parse this invite link",
           open: true,
@@ -339,18 +292,16 @@ export default defineComponent({
 
       const neighbourhoodUrl = this.joiningLink;
 
-      const existingPerspective = Object.values(this.perspectives).find(
-        (p) => p.sharedUrl === neighbourhoodUrl
-      );
+      const existingPerspective = Object.values(this.perspectives).find((p) => p.sharedUrl === neighbourhoodUrl);
 
       if (existingPerspective) {
-        this.appStore.setToast({
+        this.app.setToast({
           variant: "error",
           message: "You are already a member of this community",
           open: true,
         });
         this.isJoiningCommunity = false;
-        this.appStore.setShowCreateCommunity(false);
+        this.modals.setShowCreateCommunity(false);
         return;
       }
 
@@ -419,7 +370,7 @@ export default defineComponent({
     async joinTestingCommunity() {
       try {
         this.tabView = "Test";
-        await this.appStore.joinTestingCommunity();
+        await this.app.joinTestingCommunity();
       } catch (e) {
         console.log(e);
       } finally {

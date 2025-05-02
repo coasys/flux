@@ -52,7 +52,7 @@
   </div>
 
   <j-menu slot="content">
-    <j-menu-item v-if="isChannelCreator" @click="() => setShowEditChannel(true)">
+    <j-menu-item v-if="isChannelCreator" @click="() => modals.setShowEditChannel(true)">
       <j-icon size="xs" slot="start" name="pencil" />
       Edit Channel
     </j-menu-item>
@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { useAppStore } from "@/store/app";
+import { useAppStore, useModalStore, useUIStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { ChannelView } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -79,15 +79,16 @@ defineOptions({ name: "ChannelListItem" });
 const { channel } = defineProps({ channel: { type: Object, required: true } });
 
 const router = useRouter();
-const appStore = useAppStore();
-const { activeCommunityId, activeChannelId } = storeToRefs(appStore);
-const { me, setSidebar, setShowEditChannel } = appStore;
+const app = useAppStore();
+const modals = useModalStore();
+const ui = useUIStore();
+const { me, activeCommunityId, activeChannelId } = storeToRefs(app);
 const { signalingService } = useCommunityService();
 const { agents } = signalingService;
 
 const activeAgents = ref<Awaited<ReturnType<typeof findActiveAgents>>>([]);
 const activeCall = ref(false);
-const isChannelCreator = computed(() => channel.author === me.did);
+const isChannelCreator = computed(() => channel.author === me.value.did);
 
 async function findActiveAgents() {
   if (!agents.value) return [];
@@ -115,7 +116,7 @@ function getIcon(view: ChannelView | string) {
 }
 
 function navigateToChannel() {
-  setSidebar(false);
+  ui.setSidebar(false);
   router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId: channel.baseExpression } });
 }
 

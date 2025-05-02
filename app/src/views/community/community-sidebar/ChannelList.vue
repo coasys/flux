@@ -1,7 +1,7 @@
 <template>
   <j-box pt="500" pb="800">
     <j-menu-group open title="Channels">
-      <j-button @click.prevent="() => setShowCreateChannel(true)" size="sm" slot="end" variant="ghost">
+      <j-button @click.prevent="() => modals.setShowCreateChannel(true)" size="sm" slot="end" variant="ghost">
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
 
@@ -14,7 +14,7 @@
       </j-popover>
     </j-menu-group>
 
-    <j-menu-item @click="() => setShowCreateChannel(true)" v-if="!channelsLoading">
+    <j-menu-item @click="() => modals.setShowCreateChannel(true)" v-if="!channelsLoading">
       <j-icon size="xs" slot="start" name="plus" />
       Add channel
     </j-menu-item>
@@ -23,14 +23,13 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore } from "@/store/app";
+import { useModalStore } from "@/store";
 import ChannelListItem from "@/views/community/community-sidebar/ChannelListItem.vue";
 import { defineOptions } from "vue";
 
 defineOptions({ name: "ChannelList" });
 
-const appStore = useAppStore();
-const { setShowCreateChannel } = appStore;
+const modals = useModalStore();
 const { channels, channelsLoading } = useCommunityService();
 </script>
 

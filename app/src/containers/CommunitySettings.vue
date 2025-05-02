@@ -5,11 +5,7 @@
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
-        <j-tabs
-          full
-          :value="currentView"
-          @change="(e: any) => (currentView = e.target.value)"
-        >
+        <j-tabs full :value="currentView" @change="(e: any) => (currentView = e.target.value)">
           <j-tab-item variant="button" value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Apperance
@@ -38,19 +34,16 @@
 </template>
 
 <script lang="ts">
-import { useAppStore } from "@/store/app";
-import { ThemeState } from "@/store/types";
+import { Theme, useThemeStore } from "@/store";
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
 
 export default defineComponent({
   components: { ThemeEditor },
   setup() {
-    const appStore = useAppStore();
+    const theme = useThemeStore();
 
-    return {
-      appStore,
-    };
+    return { theme };
   },
   data() {
     return {
@@ -62,11 +55,11 @@ export default defineComponent({
       const id = this.$route.params.communityId as string;
       // TODO: Set local theme
       // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
-      this.appStore.changeCurrentTheme(val ? id : "global");
+      this.theme.changeCurrentTheme(val ? id : "global");
     },
-    updateCommunityTheme(val: ThemeState) {
+    updateCommunityTheme(val: Theme) {
       const id = this.$route.params.communityId as string;
-      this.appStore.updateCommunityTheme({
+      this.theme.updateCommunityTheme({
         communityId: id,
         theme: { ...val },
       });

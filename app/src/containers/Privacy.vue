@@ -12,9 +12,7 @@
           @change="(e: any) => changeNotificationState()"
         >
           <div>
-            <j-text nomargin color="black" weight="600" size="500">
-              Enable Desktop Notifications
-            </j-text>
+            <j-text nomargin color="black" weight="600" size="500"> Enable Desktop Notifications </j-text>
           </div>
         </j-toggle>
       </j-flex>
@@ -23,8 +21,8 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store";
 import { defineComponent, ref } from "vue";
-import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   setup() {
@@ -37,9 +35,7 @@ export default defineComponent({
   },
   methods: {
     changeNotificationState() {
-      this.appStore.changeNotificationState(
-        !this.appStore.notification.globalNotification
-      );
+      this.appStore.changeNotificationState(!this.appStore.notification.globalNotification);
     },
   },
 });

@@ -1,17 +1,21 @@
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
+import { storeToRefs } from "pinia";
 import { computed, inject, InjectionKey, ref } from "vue";
+import { useRoute } from "vue-router";
 import { useSignalingService } from "./useSignallingService";
 
 export async function createCommunityService() {
-  const { ad4mClient, me, activeCommunityId } = useAppStore();
+  const route = useRoute();
+  const app = useAppStore();
+  const { me } = storeToRefs(app);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = (await ad4mClient.perspective.byUUID(activeCommunityId)) as PerspectiveProxy;
+  const perspective = (await app.ad4mClient.perspective.byUUID(route.params.communityId as string)) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure required SDNA is installed (Todo: include other models here...)
@@ -23,7 +27,7 @@ export async function createCommunityService() {
 
   // General state
   const isSynced = computed(() => perspective.state === PerspectiveState.Synced);
-  const isAuthor = computed(() => communities.value[0]?.author === me.did);
+  const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
   const community = computed(() => communities.value[0] || null);
   const members = ref<Profile[]>([]);
   const membersLoading = ref(true);
@@ -33,7 +37,7 @@ export async function createCommunityService() {
     try {
       membersLoading.value = true;
       const others = (await neighbourhood?.otherAgents()) || [];
-      const allMembersDids = [...others, me.did];
+      const allMembersDids = [...others, me.value.did];
       members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
       membersLoading.value = false;
     } catch (error) {

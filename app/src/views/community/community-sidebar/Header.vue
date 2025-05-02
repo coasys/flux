@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-header">
     <div class="sidebar-header__top">
-      <j-button variant="ghost" size="sm" @click="toggleMainSidebar">
+      <j-button variant="ghost" size="sm" @click="ui.toggleMainSidebar">
         <j-icon size="sm" :name="showMainSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
       </j-button>
 
@@ -16,16 +16,16 @@
           <j-icon size="sm" name="sliders2"></j-icon>
         </j-button>
         <j-menu slot="content">
-          <j-menu-item v-if="isAuthor" @click="() => setShowEditCommunity(true)">
+          <j-menu-item v-if="isAuthor" @click="() => modals.setShowEditCommunity(true)">
             <j-icon size="xs" slot="start" name="pencil" />
             Edit community
           </j-menu-item>
-          <j-menu-item @click="() => setShowInviteCode(true)">
+          <j-menu-item @click="() => modals.setShowInviteCode(true)">
             <j-icon size="xs" slot="start" name="person-plus" />
             Invite people
           </j-menu-item>
           <j-divider />
-          <j-menu-item @click="() => setShowCreateChannel(true)">
+          <j-menu-item @click="() => modals.setShowCreateChannel(true)">
             <j-icon size="xs" slot="start" name="plus" />
             Create channel
           </j-menu-item>
@@ -41,10 +41,10 @@
       </j-popover>
     </div>
     <div class="community-info">
-      <j-avatar size="xl" :initials="`${community.name}`.charAt(0).toUpperCase()" :src="community.image || null" />
+      <j-avatar size="xl" :initials="`${community?.name}`.charAt(0).toUpperCase()" :src="community?.image || null" />
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
-          {{ community.name || "No name" }}
+          {{ community?.name || "No name" }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{ communityDescription() }}
@@ -70,30 +70,25 @@
 <script setup lang="ts">
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore } from "@/store/app";
+import { useAppStore, useModalStore, useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 defineOptions({ name: "Header" });
 
-const appStore = useAppStore();
-const { activeCommunityId, showMainSidebar } = storeToRefs(appStore);
-const {
-  toggleMainSidebar,
-  setActiveCommunityId,
-  setShowLeaveCommunity,
-  setShowEditCommunity,
-  setShowInviteCode,
-  setShowCommunitySettings,
-  setShowCreateChannel,
-} = appStore;
+const app = useAppStore();
+const ui = useUIStore();
+const modals = useModalStore();
+const { activeCommunityId } = storeToRefs(app);
+const { showMainSidebar } = storeToRefs(ui);
 
-const { isSynced, isAuthor, community } = useCommunityService();
+const { isSynced, isAuthor, community, communityLoading } = useCommunityService();
 
 const showCommunityMenu = ref(false);
 
 function communityDescription() {
-  if (!isSynced) return "Syncing community...";
+  if (!community.value) return "";
+  if (!isSynced.value) return "Syncing community...";
   const { description } = community.value;
   // Temp bug fix for undefined model properties being an empty array
   if (Array.isArray(description) || !description) return "No description";
@@ -101,12 +96,12 @@ function communityDescription() {
 }
 
 function goToLeaveCommunity() {
-  setActiveCommunityId(activeCommunityId.value);
-  setShowLeaveCommunity(true);
+  app.setActiveCommunityId(activeCommunityId.value);
+  modals.setShowLeaveCommunity(true);
 }
 
 function goToSettings() {
-  setShowCommunitySettings(true);
+  modals.setShowCommunitySettings(true);
   showCommunityMenu.value = false;
 }
 </script>

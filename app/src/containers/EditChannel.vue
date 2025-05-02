@@ -16,25 +16,16 @@
           <j-text variant="label">Select at least one plugin</j-text>
           <j-text size="300" variant="label">
             Can't find a suitable plugin?
-            <a
-              target="_blank"
-              style="color: var(--j-color-black)"
-              href="https://docs.fluxsocial.io"
-              >Create one</a
-            >
+            <a target="_blank" style="color: var(--j-color-black)" href="https://docs.fluxsocial.io">Create one</a>
           </j-text>
         </j-box>
 
-        <j-box v-if="isLoading" align="center" p="500">
+        <j-box v-if="isLoading" a="center" p="500">
           <j-spinner></j-spinner>
         </j-box>
 
         <j-box v-else pb="500">
-          <j-tabs
-            class="tabs"
-            :value="tab"
-            @change="(e) => (tab = e.target.value)"
-          >
+          <j-tabs class="tabs" :value="tab" @change="(e) => (tab = e.target.value)">
             <j-tab-item value="official">Official</j-tab-item>
             <j-tab-item value="community">Community</j-tab-item>
           </j-tabs>
@@ -50,13 +41,7 @@
                     <j-text variant="heading-sm">
                       {{ app.name }}
                     </j-text>
-                    <j-badge
-                      size="sm"
-                      v-if="app.pkg.startsWith('@coasys')"
-                      variant="success"
-                    >
-                      Official App
-                    </j-badge>
+                    <j-badge size="sm" v-if="app.pkg.startsWith('@coasys')" variant="success"> Official App </j-badge>
                   </j-flex>
                   <j-text nomargin>
                     {{ app.description }}
@@ -65,19 +50,11 @@
               </j-flex>
               <div>
                 <j-button
-                  :variant="
-                    isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded'
-                      ? ''
-                      : 'primary'
-                  "
+                  :variant="isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded' ? '' : 'primary'"
                   :loading="loadedPlugins[app.pkg] === 'loading'"
                   @click="() => toggleView(app)"
                 >
-                  {{
-                    isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded"
-                      ? "Remove"
-                      : "Add"
-                  }}
+                  {{ isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded" ? "Remove" : "Add" }}
                 </j-button>
               </div>
             </j-flex>
@@ -87,9 +64,7 @@
 
       <j-box mt="500">
         <j-flex direction="row" j="end" gap="300">
-          <j-button size="lg" variant="link" @click="() => $emit('cancel')">
-            Cancel
-          </j-button>
+          <j-button size="lg" variant="link" @click="() => $emit('cancel')"> Cancel </j-button>
           <j-button
             :loading="isSaving"
             :disabled="!canSave || isSaving"
@@ -106,22 +81,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
-import { useAppStore } from "@/store/app";
-import {
-  App,
-  Channel,
-  getAllFluxApps,
-  FluxApp,
-  generateWCName,
-} from "@coasys/flux-api";
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { usePerspective, useModel } from "@coasys/ad4m-vue-hooks";
-import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { getAd4mClient } from "@coasys/ad4m-connect";
+import { useModel, usePerspective } from "@coasys/ad4m-vue-hooks";
+import { App, Channel, FluxApp, generateWCName, getAllFluxApps } from "@coasys/flux-api";
 import semver from "semver";
+import { computed, defineComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   props: ["channelId"],
@@ -135,10 +103,7 @@ export default defineComponent({
       this.isLoading = false;
       const filtered = res.filter((pkg) => {
         try {
-          return semver.gte(
-            semver.coerce(pkg?.ad4mVersion || "0.0.0"),
-            "0.8.1"
-          );
+          return semver.gte(semver.coerce(pkg?.ad4mVersion || "0.0.0"), "0.8.1");
         } catch (error) {
           return false;
         }
@@ -175,14 +140,11 @@ export default defineComponent({
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
-      loadedPlugins: ref<
-        Record<string, "loaded" | "loading" | undefined | null>
-      >({}),
+      loadedPlugins: ref<Record<string, "loaded" | "loading" | undefined | null>>({}),
       name: ref(""),
       description: ref(""),
       selectedPlugins: ref<App[]>([]),
       isSaving: ref(false),
-      appStore: useAppStore(),
     };
   },
   computed: {

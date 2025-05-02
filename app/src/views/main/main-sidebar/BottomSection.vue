@@ -20,14 +20,16 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
+import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { me } = useAppStore();
+const app = useAppStore();
+const { me } = storeToRefs(app);
 const profile = ref<Profile | null>(null);
 const showBottomOptions = ref(false);
 
@@ -42,7 +44,7 @@ function goToSettings(): void {
 }
 
 onMounted(async () => {
-  profile.value = await getCachedAgentProfile(me.did);
+  profile.value = await getCachedAgentProfile(me.value.did);
 });
 </script>
 

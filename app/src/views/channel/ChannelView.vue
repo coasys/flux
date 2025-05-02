@@ -1,7 +1,7 @@
 <template>
   <div class="channel-view" style="height: 100%" :class="{ expanded: isExpanded }">
     <div class="channel-view__header">
-      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => toggleSidebar()">
+      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => ui.toggleSidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
@@ -77,7 +77,7 @@
         class="perspective-view"
         :class="{ split: webrtcModalOpen, right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view' }"
         :source="activeChannelId"
-        :agent="ad4mClient.agent"
+        :agent="appStore.ad4mClient.agent"
         :perspective="perspective"
         :appStore="appStore"
         :currentView="currentView"
@@ -139,7 +139,7 @@
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import Profile from "@/containers/Profile.vue";
-import { useAppStore } from "@/store/app";
+import { useAppStore, useModalStore, useUIStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
@@ -152,8 +152,9 @@ defineOptions({ name: "ChannelView" });
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
-const { activeCommunityId, activeChannelId } = storeToRefs(appStore);
-const { me, ad4mClient, setActiveChannelId, setShowEditChannel, toggleSidebar } = appStore;
+const modals = useModalStore();
+const ui = useUIStore();
+const { me, activeCommunityId, activeChannelId } = storeToRefs(appStore);
 const { perspective, channels } = useCommunityService();
 
 const wcNames = ref<Record<string, string>>({});
@@ -176,7 +177,7 @@ interface MentionTrigger {
 }
 
 const channel = computed(() => channels.value.find((c) => c.baseExpression === activeChannelId.value));
-const sameAgent = computed(() => channel.value?.author === me.did);
+const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
 
 const { entries: apps } = useModel({ perspective, model: App, query: { source: activeChannelId.value } });
@@ -226,8 +227,8 @@ async function onViewClick(e: any) {
 }
 
 function goToEditChannel(id: string) {
-  setActiveChannelId(id);
-  setShowEditChannel(true);
+  appStore.setActiveChannelId(id);
+  modals.setShowEditChannel(true);
 }
 
 function changeCurrentView(value: string) {
@@ -249,7 +250,7 @@ function onIsChannelChange() {
 }
 
 async function onNeighbourhoodClick(url: any) {
-  const allMyPerspectives = await ad4mClient.perspective.all();
+  const allMyPerspectives = await appStore.ad4mClient.perspective.all();
   const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
 
   if (!neighbourhood) joinCommunityHandler(url);
@@ -284,7 +285,7 @@ function toggleProfile(open: boolean, did?: any): void {
 
 async function handleProfileClick(did: string) {
   activeProfile.value = did;
-  if (did === me.did) router.push({ name: "home", params: { did } });
+  if (did === me.value.did) router.push({ name: "home", params: { did } });
   else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
 }
 </script>

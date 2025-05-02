@@ -1,5 +1,6 @@
 <template>
-  <CommunityLayout v-if="community" :key="`${route.params.communityId}`">
+  <!-- v-if="community"  -->
+  <CommunityLayout :key="`${route.params.communityId}`">
     <template v-slot:sidebar>
       <CommunitySidebar />
     </template>
@@ -14,9 +15,9 @@
       size="sm"
       :style="{ height: 500 }"
       :open="modals.showCommunityMembers"
-      @toggle="(e: any) => setShowCommunityMembers(e.target.open)"
+      @toggle="(e: any) => modals.setShowCommunityMembers(e.target.open)"
     >
-      <CommunityMembers @close="() => setShowCommunityMembers(false)" v-if="modals.showCommunityMembers" />
+      <CommunityMembers @close="() => modals.setShowCommunityMembers(false)" v-if="modals.showCommunityMembers" />
     </j-modal>
 
     <div v-if="!isSynced && !activeChannelId" class="center">
@@ -67,7 +68,9 @@
           <j-flex direction="column" a="center">
             <j-text nomargin color="black" size="700" weight="800"> No channels yet </j-text>
             <j-text size="400" weight="400">Be the first to make one!</j-text>
-            <j-button variant="primary" @click="() => setShowCreateChannel(true)"> Create a new channel </j-button>
+            <j-button variant="primary" @click="() => modals.setShowCreateChannel(true)">
+              Create a new channel
+            </j-button>
           </j-flex>
         </j-flex>
       </div>
@@ -80,7 +83,7 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useAppStore } from "@/store/app";
+import { useAppStore, useModalStore } from "@/store";
 import CommunitySidebar from "@/views/community/community-sidebar/CommunitySidebar.vue";
 import { storeToRefs } from "pinia";
 import { onMounted, provide } from "vue";
@@ -90,9 +93,10 @@ defineOptions({ name: "CommunityView" });
 
 const route = useRoute();
 const router = useRouter();
-const appStore = useAppStore();
-const { modals, activeCommunityId, activeChannelId } = storeToRefs(appStore);
-const { setShowCommunityMembers, setShowCreateChannel } = appStore;
+
+const app = useAppStore();
+const modals = useModalStore();
+const { activeCommunityId, activeChannelId } = storeToRefs(app);
 
 // Initialize community service
 const communityService = await createCommunityService();

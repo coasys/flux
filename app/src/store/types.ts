@@ -16,7 +16,7 @@ export interface ToastState {
   open: boolean;
 }
 
-export interface ThemeState {
+export interface Theme {
   name: string;
   fontFamily: string;
   hue: number;
@@ -24,7 +24,7 @@ export interface ThemeState {
   fontSize: string;
 }
 
-export interface ModalsState {
+export interface ModalsStore {
   showCreateCommunity: boolean;
   showEditCommunity: boolean;
   showEditChannel: boolean;
@@ -39,28 +39,33 @@ export interface ModalsState {
   showLeaveCommunity: boolean;
 }
 
-export interface ApplicationState {
-  me: Agent;
-  windowState: WindowState;
-  toast: ToastState;
-  updateState: UpdateState;
-  globalTheme: ThemeState;
+export interface ThemeStore {
+  globalTheme: Theme;
   currentTheme: string;
-  activeCommunityId: string;
-  activeChannelId: string;
-  modals: ModalsState;
+}
+
+export interface UIStore {
   showSidebar: boolean;
   showMainSidebar: boolean;
   sidebarWidth: number;
   showGlobalLoading: boolean;
   globalError: { show: boolean; message: string };
+  windowState: WindowState;
+}
+
+export interface AppStore {
+  me: Agent;
+  updateState: UpdateState;
+  toast: ToastState;
+  activeCommunityId: string;
+  activeChannelId: string;
   notification: { globalNotification: boolean };
   activeWebrtc: { instance: any; channelId: string };
 }
 
-export interface State {
-  app: ApplicationState;
-}
+// export interface State {
+//   app: ApplicationState;
+// }
 
 // Currently unused
 export interface UserState {

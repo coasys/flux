@@ -38,9 +38,7 @@
       ></j-input>
 
       <j-flex gap="400">
-        <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
-          Cancel
-        </j-button>
+        <j-button full style="width: 100%" size="lg" @click="$emit('cancel')"> Cancel </j-button>
         <j-button
           style="width: 100%"
           full
@@ -59,10 +57,9 @@
 </template>
 
 <script lang="ts">
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useAppStore } from "@/store/app";
-import { defineComponent, ref } from "vue";
+import { useAppStore } from "@/store";
 import { createAgentWebLink } from "@coasys/flux-api";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: ["step"],
@@ -83,9 +80,7 @@ export default defineComponent({
     async getMeta() {
       try {
         this.loadingMeta = true;
-        const data = await fetch(
-          "https://jsonlink.io/api/extract?url=" + this.link
-        ).then((res) => res.json());
+        const data = await fetch("https://jsonlink.io/api/extract?url=" + this.link).then((res) => res.json());
 
         this.title = data.title || "";
         this.description = data.description || "";
@@ -106,7 +101,6 @@ export default defineComponent({
       }
     },
     async createLink() {
-      const client = await getAd4mClient();
       this.isAddingLink = true;
 
       const appStore = useAppStore();
