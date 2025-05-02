@@ -59,12 +59,7 @@ router.beforeEach(async (to, from, next) => {
   try {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
     if (isAuthenticated) {
-      const { me, setActiveCommunityId, setActiveChannelId } = useAppStore();
-
-      // Update the active community and channel IDs in the app store
-      const { communityId, channelId } = to.params;
-      setActiveCommunityId((communityId as string) || "");
-      setActiveChannelId((channelId as string) || "");
+      const { me } = useAppStore();
 
       // Handle login routing
       const fluxAccountCreated = me.perspective?.links.find((e) => e.data.source.startsWith("flux://"));

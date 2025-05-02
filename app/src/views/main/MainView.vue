@@ -237,7 +237,7 @@ function getInviteCode() {
 }
 
 // Todo: move this initialisation up to parent App component or app.ts file?
-onMounted(async () => {
+async function initializeApp() {
   // Add notification callback
   await ad4mClient.runtime.addNotificationTriggeredCallback((notification: any) => {
     console.log("notification", notification);
@@ -270,14 +270,24 @@ onMounted(async () => {
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }
-});
+}
 
-// Update the active community when the activeCommunityId changes
+onMounted(async () => initializeApp());
+
+// Update the active community and channel IDs in the app store when the route changes
 watch(
-  () => activeCommunityId.value,
-  async (newCommunityId) => {
-    activeCommunity.value = (await ad4mClient.perspective.byUUID(newCommunityId)) as PerspectiveProxy;
+  () => route.params,
+  async ({ communityId, channelId }) => {
+    if (activeCommunityId.value !== communityId) {
+      appStore.setActiveCommunityId((communityId as string) || "");
+      if (communityId) {
+        // Todo: Move all community modals into the Community view so this isn't needed and we avoid conflicts persisting community state
+        // Fetch and store the active community model for use in the modals
+        activeCommunity.value = (await ad4mClient.perspective.byUUID(communityId as string)) as PerspectiveProxy;
+      }
+    }
+    if (activeChannelId.value !== channelId) appStore.setActiveChannelId((channelId as string) || "");
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 </script>
