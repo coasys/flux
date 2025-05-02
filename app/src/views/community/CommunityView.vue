@@ -81,10 +81,10 @@ import { CommunityServiceKey, createCommunityService } from "@/composables/useCo
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
 import { useAppStore } from "@/store/app";
+import CommunitySidebar from "@/views/community/community-sidebar/CommunitySidebar.vue";
 import { storeToRefs } from "pinia";
-import { provide, watch } from "vue";
+import { onMounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
 defineOptions({ name: "CommunityView" });
 
@@ -103,13 +103,9 @@ function navigateToChannel(channelId: string) {
   router.push({ name: "channel", params: { communityId, channelId } });
 }
 
-watch(
-  () => activeChannelId.value,
-  (newactiveChannelId) => {
-    if (newactiveChannelId) console.log("new activeChannelId", newactiveChannelId);
-  },
-  { immediate: true }
-);
+onMounted(() => {
+  console.log("CommunityView mounted", communityId);
+});
 </script>
 
 <style scoped>

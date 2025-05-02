@@ -4,7 +4,7 @@ import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
-import { computed, inject, InjectionKey, readonly, ref } from "vue";
+import { computed, inject, InjectionKey, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSignalingService } from "./useSignallingService";
 
@@ -63,14 +63,14 @@ export async function createCommunityService() {
 
     perspective,
     neighbourhood,
-    isSynced: readonly(isSynced),
-    isAuthor: readonly(isAuthor),
-    community: readonly(community),
-    members: readonly(members),
-    channels: readonly(channels),
-    communityLoading: readonly(communityLoading),
-    membersLoading: readonly(membersLoading),
-    channelsLoading: readonly(channelsLoading),
+    isSynced,
+    isAuthor,
+    community,
+    members,
+    channels,
+    communityLoading,
+    membersLoading,
+    channelsLoading,
 
     getMembers,
     signalingService,

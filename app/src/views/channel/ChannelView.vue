@@ -188,14 +188,15 @@ watch(
     // Skip if no changes
     if (oldApps && newApps.every((app, i) => app.pkg === oldApps[i]?.pkg)) return;
 
-    // Update the current view if it has changed
+    // Update the current view if changed
     if (!currentView.value) currentView.value = newApps[0]?.pkg;
 
     // Add new views
     newApps.forEach(async (app: App) => {
       const wcName = await generateWCName(app.pkg);
 
-      if (!customElements.get(wcName)) {
+      if (customElements.get(wcName)) wcNames.value[app.pkg] = wcName;
+      else {
         const module = await fetchFluxApp(app.pkg);
         if (module?.default) {
           try {
@@ -205,8 +206,6 @@ watch(
             console.error(`Failed to define custom element ${wcName}:`, e);
           }
         }
-      } else {
-        wcNames.value[app.pkg] = wcName;
       }
     });
   }
@@ -232,9 +231,9 @@ function goToEditChannel(id: string) {
 }
 
 function changeCurrentView(value: string) {
-  // If entering webrtc or synergy view: close modal
+  // If entering WebRTC or Synergy view, close WebRTC modal
   if (["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(value)) webrtcModalOpen.value = false;
-  // Else if leaving webrtc view (& not small screen): open modal
+  // Else if leaving WebRTC view & not small screen, open WebRTC modal
   else if (currentView.value === "@coasys/flux-webrtc-view" && window.innerWidth > 900) webrtcModalOpen.value = true;
 
   currentView.value = value;
@@ -247,10 +246,6 @@ function onAgentClick(did: string) {
 
 function onIsChannelChange() {
   isChangeChannel.value = !isChangeChannel.value;
-}
-
-function onChannelClick(channel: string) {
-  router.push({ name: "channel", params: { channelId: channel, communityId: activeCommunityId.value } });
 }
 
 async function onNeighbourhoodClick(url: any) {

@@ -33,7 +33,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     channelId: activeChannelId.value,
     lastUpdate: Date.now(),
   });
-  const agents = ref<Record<string, any>>({});
+  const agents = ref<Record<string, AgentState>>({});
   let heartbeatInterval: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
 
@@ -88,14 +88,19 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
   }
 
   function startSignaling() {
-    // Clean up previous signal handler if present & set signalling to true
+    // Clean up previous signal handler if present
     if (signalling.value) stopSignaling();
     signalling.value = true;
 
-    // Add the signal handler and start the intervals
+    // Add the signal handler
     neighbourhood.addSignalHandler(onSignal);
+
+    // Start the intervals
     heartbeatInterval = setInterval(() => broadcastState(), HEARTBEAT_INTERVAL);
     cleanupInterval = setInterval(() => updateAgentStatuses(), CLEANUP_INTERVAL);
+
+    // Broadcast my first heartbeat
+    broadcastState();
   }
 
   function stopSignaling() {
@@ -125,12 +130,9 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
   }
 
-  // Get active agents (seen in last 15 seconds)
   const activeAgents = computed(() => {
-    const now = Date.now();
-    const maxAge = 15000;
     return Object.values(agents.value).filter((agent: AgentState) => {
-      return now - agent.lastUpdate < maxAge;
+      return agent.status === "active";
     });
   });
 
