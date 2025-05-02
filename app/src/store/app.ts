@@ -2,7 +2,7 @@ import iconPath from "@/assets/images/icon.png";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { AppStore, ToastState, UpdateState } from "@/store/types";
 import { Ad4mClient, Agent } from "@coasys/ad4m";
-import { joinCommunity } from "@coasys/flux-api";
+import { Community, joinCommunity } from "@coasys/flux-api";
 import { defineStore } from "pinia";
 import { computed, reactive, shallowRef, toRefs } from "vue";
 
@@ -18,6 +18,7 @@ export const useAppStore = defineStore("app", () => {
 
   const state = reactive<AppStore>({
     me: { did: "" },
+    myCommunities: {},
     updateState: "not-available",
     activeCommunityId: "",
     activeChannelId: "",
@@ -69,7 +70,6 @@ export const useAppStore = defineStore("app", () => {
   }
 
   // Actions
-
   async function changeNotificationState(payload: boolean): Promise<void> {
     if (payload) {
       const notificationState = await Notification.requestPermission();
@@ -92,6 +92,18 @@ export const useAppStore = defineStore("app", () => {
     }
   }
 
+  async function getMyCommunities() {
+    const allMyPerspectives = await ad4mClient.value.perspective.all();
+    await Promise.all(
+      allMyPerspectives
+        .filter((p) => p.neighbourhood)
+        .map(async (p) => {
+          const community = (await Community.findAll(p))[0];
+          if (community && !state.myCommunities[p.uuid]) state.myCommunities[p.uuid] = community;
+        })
+    );
+  }
+
   return {
     // State
     ...toRefs(state),
@@ -112,5 +124,6 @@ export const useAppStore = defineStore("app", () => {
     // Actions
     changeNotificationState,
     joinTestingCommunity,
+    getMyCommunities,
   };
 });

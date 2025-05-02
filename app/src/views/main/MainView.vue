@@ -234,7 +234,7 @@ function getInviteCode() {
   app.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
 }
 
-// Todo: move this initialisation up to parent App component or app.ts file?
+// Todo: move this initialisation into a composable or higher component?
 async function initializeApp() {
   // Add notification callback
   await app.ad4mClient.runtime.addNotificationTriggeredCallback((notification: any) => {
@@ -268,6 +268,8 @@ async function initializeApp() {
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }
+
+  app.getMyCommunities();
 }
 
 onMounted(async () => initializeApp());

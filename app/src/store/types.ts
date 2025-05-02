@@ -1,5 +1,5 @@
-import { Agent, AgentStatus } from "@coasys/ad4m";
-import { Profile } from "@coasys/flux-types";
+import { Agent } from "@coasys/ad4m";
+import { Community } from "@coasys/flux-api";
 
 export type WindowState = "minimize" | "visible" | "foreground";
 export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
@@ -22,6 +22,17 @@ export interface Theme {
   hue: number;
   saturation: number;
   fontSize: string;
+}
+
+export interface AppStore {
+  me: Agent;
+  myCommunities: Record<string, Community>;
+  updateState: UpdateState;
+  toast: ToastState;
+  activeCommunityId: string;
+  activeChannelId: string;
+  notification: { globalNotification: boolean };
+  activeWebrtc: { instance: any; channelId: string };
 }
 
 export interface ModalsStore {
@@ -51,25 +62,4 @@ export interface UIStore {
   showGlobalLoading: boolean;
   globalError: { show: boolean; message: string };
   windowState: WindowState;
-}
-
-export interface AppStore {
-  me: Agent;
-  updateState: UpdateState;
-  toast: ToastState;
-  activeCommunityId: string;
-  activeChannelId: string;
-  notification: { globalNotification: boolean };
-  activeWebrtc: { instance: any; channelId: string };
-}
-
-// export interface State {
-//   app: ApplicationState;
-// }
-
-// Currently unused
-export interface UserState {
-  agent: AgentStatus;
-  profile: Profile | null;
-  agentProfileProxyPerspectiveId?: string;
 }

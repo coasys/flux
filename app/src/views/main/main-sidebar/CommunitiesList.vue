@@ -40,8 +40,7 @@
 
 <script setup lang="ts">
 import { useAppStore, useModalStore, useUIStore } from "@/store";
-import { Community } from "@coasys/flux-api";
-import { onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -51,7 +50,7 @@ const app = useAppStore();
 const modals = useModalStore();
 const ui = useUIStore();
 
-const myCommunities = ref<Record<string, Community>>({});
+const { myCommunities } = storeToRefs(app);
 
 function communityIsActive(communityId: string) {
   return route.params.communityId === communityId;
@@ -72,23 +71,13 @@ function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
 }
 
 function handleCommunityClick(communityId: string) {
+  console.log("community clicked", communityId);
   if (communityIsActive(communityId)) ui.toggleSidebar();
   else {
     ui.setSidebar(true);
     router.push({ name: "community", params: { communityId } });
   }
 }
-
-onMounted(async () => {
-  // Fetch my communities
-  const allMyPerspectives = await app.ad4mClient.perspective.all();
-  await Promise.all(
-    allMyPerspectives.map(async (perspective) => {
-      const community = (await Community.findAll(perspective))[0];
-      if (community) myCommunities.value[perspective.uuid] = community;
-    })
-  );
-});
 </script>
 
 <style lang="scss" scoped>
