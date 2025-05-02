@@ -18,18 +18,18 @@
       <j-flex direction="column" gap="400" v-if="members.length">
         <j-flex
           gap="500"
-          style="cursor: pointer"
+          style="cursor: pointer; height: 60px"
           v-for="member in filteredMembers"
           :key="member.did"
           inline
           direction="row"
           j="center"
           a="center"
-          @click="() => profileClick(member.did)"
+          @click="() => member.did && profileClick(member.did)"
         >
           <j-avatar size="xl" :did="member.did" :hash="member.did" :src="member.profileThumbnailPicture" />
           <j-text color="black" nomargin variant="body">
-            {{ member.username }}
+            {{ member.username || "Loading profile..." }}
           </j-text>
         </j-flex>
       </j-flex>
@@ -66,16 +66,13 @@ const filteredMembers = computed(() => {
   return members.value.filter((member) => {
     const { username, givenName, familyName } = member;
     const stringValues = [username, givenName, familyName].filter(Boolean);
-    return stringValues.some((field) => field.toLowerCase().includes(searchInput.value.toLowerCase()));
+    return stringValues.some((field) => field?.toLowerCase().includes(searchInput.value.toLowerCase()));
   });
 });
 
 async function profileClick(did: string) {
   emit("close");
-
-  // If my DID navigate to my profile
   if (did === me.value.did) router.push({ name: "home", params: { did } });
-  // Otherwise navigate to the other members profile
   else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
 }
 
