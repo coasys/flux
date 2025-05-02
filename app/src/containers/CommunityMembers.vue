@@ -47,13 +47,15 @@
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore } from "@/store/app";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const emit = defineEmits(["close", "submit"]);
 const router = useRouter();
-const { me } = useAppStore();
-const { communityId, members, membersLoading, getMembers } = useCommunityService();
+const appStore = useAppStore();
+const { me, activeCommunityId } = storeToRefs(appStore);
+const { members, membersLoading, getMembers } = useCommunityService();
 
 const searchInput = ref("");
 
@@ -72,9 +74,9 @@ async function profileClick(did: string) {
   emit("close");
 
   // If my DID navigate to my profile
-  if (did === me.did) router.push({ name: "home", params: { did } });
+  if (did === me.value.did) router.push({ name: "home", params: { did } });
   // Otherwise navigate to the other members profile
-  else router.push({ name: "profile", params: { did, communityId } });
+  else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
 }
 
 // Refetch members every time the modal is opened

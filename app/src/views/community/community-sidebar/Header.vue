@@ -71,12 +71,14 @@
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore } from "@/store/app";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 defineOptions({ name: "Header" });
 
+const appStore = useAppStore();
+const { activeCommunityId, showMainSidebar } = storeToRefs(appStore);
 const {
-  showMainSidebar,
   toggleMainSidebar,
   setActiveCommunityId,
   setShowLeaveCommunity,
@@ -84,9 +86,9 @@ const {
   setShowInviteCode,
   setShowCommunitySettings,
   setShowCreateChannel,
-} = useAppStore();
+} = appStore;
 
-const { communityId, isSynced, isAuthor, community } = useCommunityService();
+const { isSynced, isAuthor, community } = useCommunityService();
 
 const showCommunityMenu = ref(false);
 
@@ -99,7 +101,7 @@ function communityDescription() {
 }
 
 function goToLeaveCommunity() {
-  setActiveCommunityId(communityId);
+  setActiveCommunityId(activeCommunityId.value);
   setShowLeaveCommunity(true);
 }
 

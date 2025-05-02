@@ -91,20 +91,20 @@ defineOptions({ name: "CommunityView" });
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
-const { modals, activeChannelId } = storeToRefs(appStore);
+const { modals, activeCommunityId, activeChannelId } = storeToRefs(appStore);
 const { setShowCommunityMembers, setShowCreateChannel } = appStore;
 
 // Initialize community service
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
-const { community, communityId, isSynced, channels } = communityService;
+const { community, isSynced, channels } = communityService;
 
 function navigateToChannel(channelId: string) {
-  router.push({ name: "channel", params: { communityId, channelId } });
+  router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId } });
 }
 
 onMounted(() => {
-  console.log("CommunityView mounted", communityId);
+  console.log("CommunityView mounted", activeCommunityId.value);
 });
 </script>
 

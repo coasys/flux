@@ -56,11 +56,6 @@ export async function createCommunityService() {
   getMembers();
 
   return {
-    // Todo: Look into whether best to store the ids here or necissary to place in the main app store
-    // Currently used in MainView for the modals (which should be moved into the community view... but also needed in signaling service)
-    communityId,
-    activeChannelId,
-
     perspective,
     neighbourhood,
     isSynced,
