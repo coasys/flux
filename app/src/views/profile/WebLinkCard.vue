@@ -2,60 +2,63 @@
   <div class="link-card">
     <div class="link-card__image">
       <img v-if="image" :src="image" />
-      <j-icon class="link-card__icon" v-else name="link"></j-icon>
+      <j-icon class="link-card__icon" v-else name="link" />
     </div>
+
     <div class="link-card__content">
       <a :href="url" target="_blank" class="link-card__info">
-        <h2 class="link-card__title">
-          {{ title || url }}
-        </h2>
-        <div class="link-card__description" v-if="description">
-          {{ description }}
-        </div>
+        <h2 class="link-card__title">{{ title || url }}</h2>
+
+        <div class="link-card__description" v-if="description">{{ description }}</div>
+
         <div class="link-card__url" v-if="title">{{ hostname }}</div>
       </a>
-      <j-button
-        size="sm"
-        squared
-        class="delete-button"
-        variant="ghost"
-        v-if="sameAgent"
-        @click.stop="deleteLink"
-        ><j-icon name="x"></j-icon
-      ></j-button>
+
+      <j-button size="sm" squared class="delete-button" variant="ghost" v-if="sameAgent" @click.stop="deleteLink">
+        <j-icon name="x" />
+      </j-button>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+<script setup lang="ts">
+import { useAppStore } from "@/store";
 import { getLiteralObjectLinks } from "@coasys/flux-utils";
-import { defineComponent } from "vue";
-export default defineComponent({
-  props: ["id", "title", "description", "url", "image", "sameAgent"],
-  emits: ["delete", "edit"],
+import { computed } from "vue";
 
-  computed: {
-    hostname() {
-      return new URL(this.url).hostname;
-    },
-  },
-  methods: {
-    async deleteLink() {
-      const client = await getAd4mClient();
-      const { perspective } = await client.agent.me();
-      if (perspective) {
-        const links = await getLiteralObjectLinks(this.id, perspective.links);
-        this.$emit("delete", links[0]);
-
-        await client.agent.mutatePublicPerspective({
-          removals: links,
-          additions: [],
-        });
-      }
-    },
-  },
+const props = defineProps({
+  id: { type: String, required: true },
+  title: { type: String, required: true },
+  description: String,
+  url: { type: String, required: true },
+  image: String,
+  sameAgent: { type: Boolean, default: false },
 });
+
+const emit = defineEmits(["delete", "edit"]);
+
+const { ad4mClient } = useAppStore();
+
+const hostname = computed(() => {
+  if (props.url) {
+    try {
+      return new URL(props.url).hostname;
+    } catch (e) {
+      return "";
+    }
+  }
+  return "";
+});
+
+async function deleteLink() {
+  const { perspective } = await ad4mClient.agent.me();
+
+  if (perspective) {
+    const links = await getLiteralObjectLinks(props.id, perspective.links);
+    emit("delete", links[0]);
+    await ad4mClient.agent.mutatePublicPerspective({ removals: links, additions: [] });
+  }
+}
 </script>
 
 <style scoped>

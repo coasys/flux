@@ -134,236 +134,208 @@
   <router-view></router-view>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore, useModalStore, useThemeStore, useUIStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Ad4mClient, EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
+import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { getImage } from "@coasys/flux-utils";
-import { useCommunities } from "@coasys/flux-vue";
-import { defineComponent, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { computed, onBeforeMount, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Attestations from "./Attestations.vue";
-import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import WebLinkCard from "./WebLinkCard.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
+import { storeToRefs } from "pinia";
 
-export default defineComponent({
-  name: "ProfileView",
-  components: {
-    CommunityCard,
-    WebLinkCard,
-    ProfileJoinLink,
-    EditProfile,
-    WebLinkAdd,
-    Attestations,
-  },
-  async setup() {
-    const route = useRoute();
-    const profile = ref<Profile | null>(null);
-    const client: Ad4mClient = await getAd4mClient();
-    const { neighbourhoods } = usePerspectives(client);
-    const { communities } = useCommunities(neighbourhoods);
-    const me = await client.agent.me();
-    const app = useAppStore();
-    const modals = useModalStore();
-    const theme = useThemeStore();
-    const ui = useUIStore();
+defineOptions({ name: "ProfileView" });
 
-    watch(
-      () => route.params.did,
-      async (newDid) => {
-        const did = Array.isArray(newDid) ? newDid[0] : newDid || me.did;
-        profile.value = await getCachedAgentProfile(did);
-      },
-      { immediate: true }
-    );
+// Initialize state
+const route = useRoute();
+const router = useRouter();
+const app = useAppStore();
+const modals = useModalStore();
+const theme = useThemeStore();
+const ui = useUIStore();
 
-    return {
-      client,
-      verifiedProofs: ref<Record<string, boolean>>({}),
-      selectedAddress: ref(""),
-      proofs: ref<EntanglementProof[]>([]),
-      me,
-      profile,
-      neighbourhoods,
-      communities,
-      app,
-      modals,
-      theme,
-      ui,
-    };
-  },
-  data() {
-    return {
-      currentTab: "web3",
-      showAddlinkModal: false,
-      showAddProofModal: false,
-      showEditlinkModal: false,
-      showJoinCommunityModal: false,
-      weblinks: [] as any,
-      profileBackground: "",
-      profile: null as Profile | null,
-      joiningLink: "",
-      editArea: null as any,
-    };
-  },
-  beforeCreate() {
-    this.theme.changeCurrentTheme("global");
-  },
-  methods: {
-    getIcon(address: string) {
-      if (address) {
-        const seed = parseInt(address.slice(2, 10), 16);
-        const diameter = 40;
-        const icon = jazzicon(diameter, seed);
-        icon.innerHTML;
-        return icon.innerHTML;
-      }
-    },
-    shortETH(address: string) {
-      if (!address || address.length !== 42 || !address.startsWith("0x")) {
-        return "Invalid ETH Address";
-      }
-      return `${address.substring(0, 8)}...${address.substring(address.length - 4)}`;
-    },
-    async getEntanglementProofs() {
-      const agent = await this.client.agent.byDID(this.did);
+const { me } = storeToRefs(app);
+const { ad4mClient } = app;
 
-      if (agent) {
-        // Map to dedupe array
-        const seen = new Set<string>();
-        const proofLinks = agent.perspective?.links
-          ? agent.perspective.links.filter((l) => l.data.predicate === "ad4m://entanglement_proof")
-          : [];
+const profile = ref<Profile | null>(null);
+const currentTab = ref("web3");
+const showAddlinkModal = ref(false);
+const showAddProofModal = ref(false);
+const showEditlinkModal = ref(false);
+const showJoinCommunityModal = ref(false);
+const weblinks = ref<any[]>([]);
+const profileBackground = ref("");
+const joiningLink = ref("");
+const editArea = ref(null);
+const verifiedProofs = ref<Record<string, boolean>>({});
+const selectedAddress = ref("");
+const proofs = ref<EntanglementProof[]>([]);
 
-        const expressions = await Promise.all(proofLinks?.map((link) => this.client.expression.get(link.data.target)));
-
-        const proofs = expressions.map((e) => JSON.parse(e.data)) as EntanglementProof[];
-
-        const filteredProofs = proofs.filter((p: EntanglementProof) => {
-          if (seen.has(p.deviceKey)) {
-            return false;
-          } else {
-            seen.add(p.deviceKey);
-            return true;
-          }
-        });
-
-        filteredProofs.forEach(async (proof) => {
-          const isVerified = await this.client.runtime.verifyStringSignedByDid(
-            agent.did,
-            proof.did,
-            proof.deviceKey,
-            proof.deviceKeySignedByDid
-          );
-          this.verifiedProofs[proof.deviceKey] = isVerified;
-        });
-
-        this.proofs = filteredProofs;
-        this.selectedAddress = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
-      }
-    },
-    async removeProof(proof: EntanglementProof) {
-      const proofLink =
-        this.me?.perspective?.links.filter((l) => {
-          return (
-            l.data.predicate === "ad4m://entanglement_proof" &&
-            l.data.target.startsWith("literal://") &&
-            Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
-          );
-        }) || [];
-
-      if (proofLink.length > 0) {
-        await this.client.agent.mutatePublicPerspective({
-          additions: [],
-          removals: proofLink,
-        });
-      }
-      this.getEntanglementProofs();
-    },
-    setAddLinkModal(value: boolean): void {
-      this.showAddlinkModal = value;
-    },
-    setEditLinkModal(value: boolean, area: any): void {
-      this.showEditlinkModal = value;
-      this.editArea = area;
-    },
-    setShowJoinCommunityModal(value: boolean): void {
-      this.showJoinCommunityModal = value;
-    },
-    async deleteWebLink(link: LinkExpression) {
-      this.weblinks = this.weblinks.filter((l: any) => l.id !== link.id);
-    },
-    async getAgentAreas() {
-      const webLinks = await getAgentWebLinks(this.did);
-      this.weblinks = webLinks;
-    },
-    // ...mapActions(useAppStore, [
-    //   "setShowEditProfile",
-    //   "setSidebar",
-    //   "setShowCreateCommunity",
-    // ]),
-  },
-  watch: {
-    showAddlinkModal() {
-      if (!this.showAddlinkModal) {
-        this.getAgentAreas();
-      }
-    },
-    showAddProofModal() {
-      if (!this.showAddProofModal) {
-        this.getEntanglementProofs();
-      }
-    },
-    showEditlinkModal() {
-      if (!this.showEditlinkModal) {
-        this.getAgentAreas();
-      }
-    },
-    "modals.showEditProfile"() {
-      if (!this.modals.showEditProfile) {
-        this.getAgentAreas();
-      }
-    },
-    did: {
-      handler: async function () {
-        this.getAgentAreas();
-        this.getEntanglementProofs();
-      },
-      immediate: true,
-    },
-    profile: {
-      handler: async function (val) {
-        if (val) {
-          this.profileBackground = await getImage(val.profileBackground);
-        }
-      },
-      immediate: true,
-    },
-  },
-  computed: {
-    hasHistory() {
-      return this.$router.options.history.state.back;
-    },
-    did(): string {
-      return (this.$route.params.did as string) || this.me?.did || "";
-    },
-    sameAgent() {
-      return this.did === this.me?.did;
-    },
-    // modals(): ModalsStore {
-    //   return this.modals;
-    // },
-  },
+// Computed properties
+const did = computed((): string => {
+  return (route.params.did as string) || me.value?.did || "";
 });
+
+const sameAgent = computed(() => {
+  return did.value === me.value?.did;
+});
+
+const hasHistory = computed(() => {
+  return router?.options?.history?.state?.back;
+});
+
+// Methods
+function getIcon(address: string) {
+  if (address) {
+    const seed = parseInt(address.slice(2, 10), 16);
+    const diameter = 40;
+    const icon = jazzicon(diameter, seed);
+    return icon.innerHTML;
+  }
+}
+
+function shortETH(address: string) {
+  if (!address || address.length !== 42 || !address.startsWith("0x")) {
+    return "Invalid ETH Address";
+  }
+  return `${address.substring(0, 8)}...${address.substring(address.length - 4)}`;
+}
+
+async function getEntanglementProofs() {
+  const agent = await ad4mClient.agent.byDID(did.value);
+
+  if (agent) {
+    // Map to dedupe array
+    const seen = new Set<string>();
+    const proofLinks = agent.perspective?.links
+      ? agent.perspective.links.filter((l) => l.data.predicate === "ad4m://entanglement_proof")
+      : [];
+
+    const expressions = await Promise.all(proofLinks?.map((link) => ad4mClient.expression.get(link.data.target)));
+
+    const fetchedProofs = expressions.map((e) => JSON.parse(e.data)) as EntanglementProof[];
+
+    const filteredProofs = fetchedProofs.filter((p: EntanglementProof) => {
+      if (seen.has(p.deviceKey)) {
+        return false;
+      } else {
+        seen.add(p.deviceKey);
+        return true;
+      }
+    });
+
+    for (const proof of filteredProofs) {
+      const isVerified = await ad4mClient.runtime.verifyStringSignedByDid(
+        agent.did,
+        proof.did,
+        proof.deviceKey,
+        proof.deviceKeySignedByDid
+      );
+      verifiedProofs.value[proof.deviceKey] = isVerified;
+    }
+
+    proofs.value = filteredProofs;
+    selectedAddress.value = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
+  }
+}
+
+async function removeProof(proof: EntanglementProof) {
+  const proofLink =
+    me.value?.perspective?.links.filter((l: any) => {
+      return (
+        l.data.predicate === "ad4m://entanglement_proof" &&
+        l.data.target.startsWith("literal://") &&
+        Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
+      );
+    }) || [];
+
+  if (proofLink.length > 0) {
+    await ad4mClient.agent.mutatePublicPerspective({
+      additions: [],
+      removals: proofLink,
+    });
+  }
+  getEntanglementProofs();
+}
+
+function setAddLinkModal(value: boolean): void {
+  showAddlinkModal.value = value;
+}
+
+function setEditLinkModal(value: boolean, area: any): void {
+  showEditlinkModal.value = value;
+  editArea.value = area;
+}
+
+function setShowJoinCommunityModal(value: boolean): void {
+  showJoinCommunityModal.value = value;
+}
+
+async function deleteWebLink(link: LinkExpression) {
+  weblinks.value = weblinks.value.filter((l: any) => l.id !== link.id);
+}
+
+async function getAgentAreas() {
+  const fetchedWebLinks = await getAgentWebLinks(did.value);
+  weblinks.value = fetchedWebLinks;
+}
+
+onBeforeMount(() => theme.changeCurrentTheme("global"));
+
+// Watchers
+watch(showAddlinkModal, (val) => {
+  if (!val) getAgentAreas();
+});
+
+watch(showAddProofModal, (val) => {
+  if (!val) getEntanglementProofs();
+});
+
+watch(showEditlinkModal, (val) => {
+  if (!val) getAgentAreas();
+});
+
+watch(
+  () => modals.showEditProfile,
+  (val) => {
+    if (!val) getAgentAreas();
+  }
+);
+
+watch(
+  did,
+  () => {
+    getAgentAreas();
+    getEntanglementProofs();
+  },
+  { immediate: true }
+);
+
+watch(
+  profile,
+  async (val) => {
+    if (val) profileBackground.value = await getImage(val.profileBackground);
+  },
+  { immediate: true }
+);
+
+// Load profile when route changes
+watch(
+  () => route.params.did,
+  async (newDid) => {
+    const agentDid = Array.isArray(newDid) ? newDid[0] : newDid || me.value?.did;
+    profile.value = await getCachedAgentProfile(agentDid);
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="css" scoped>

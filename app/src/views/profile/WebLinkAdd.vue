@@ -13,7 +13,7 @@
         required
       >
         <j-box pr="300" v-if="loadingMeta" slot="end">
-          <j-spinner size="xxs"></j-spinner>
+          <j-spinner size="xxs" />
         </j-box>
       </j-input>
 
@@ -24,8 +24,8 @@
         size="xl"
         label="Title"
         :value="title"
-        @input="(e) => (title = e.target.value)"
-      ></j-input>
+        @input="(e: any) => (title = e.target.value)"
+      />
 
       <j-input
         v-if="isValidLink"
@@ -35,7 +35,7 @@
         label="Description"
         :value="description"
         @input="(e: any) => (description = e.target.value)"
-      ></j-input>
+      />
 
       <j-flex gap="400">
         <j-button full style="width: 100%" size="lg" @click="$emit('cancel')"> Cancel </j-button>
@@ -56,77 +56,74 @@
   </j-box>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useAppStore } from "@/store";
 import { createAgentWebLink } from "@coasys/flux-api";
-import { defineComponent, ref } from "vue";
+import { ref } from "vue";
 
-export default defineComponent({
-  props: ["step"],
-  emits: ["cancel", "submit"],
+defineProps({ step: { type: Number } });
+const emit = defineEmits(["cancel", "submit"]);
 
-  setup() {
-    return {
-      title: ref(""),
-      description: ref(""),
-      imageUrl: ref(""),
-      link: ref(""),
-      loadingMeta: ref(false),
-      isAddingLink: ref(false),
-      isValidLink: ref(false),
-    };
-  },
-  methods: {
-    async getMeta() {
-      try {
-        this.loadingMeta = true;
-        const data = await fetch("https://jsonlink.io/api/extract?url=" + this.link).then((res) => res.json());
+const title = ref("");
+const description = ref("");
+const imageUrl = ref("");
+const link = ref("");
+const loadingMeta = ref(false);
+const isAddingLink = ref(false);
+const isValidLink = ref(false);
+const titleEl = ref<HTMLElement | null>(null);
 
-        this.title = data.title || "";
-        this.description = data.description || "";
-        this.imageUrl = data.images[0] || "";
-      } finally {
-        this.loadingMeta = false;
-        this.$refs.titleEl?.focus();
-      }
-    },
-    async handleInput(e: any) {
-      try {
-        this.link = e.target.value;
-        await new URL(e.target.value);
-        this.getMeta();
-        this.isValidLink = true;
-      } catch (e) {
-        this.isValidLink = false;
-      }
-    },
-    async createLink() {
-      this.isAddingLink = true;
+async function getMeta() {
+  try {
+    loadingMeta.value = true;
+    const data = await fetch("https://jsonlink.io/api/extract?url=" + link.value).then((res) => res.json());
 
-      const appStore = useAppStore();
+    title.value = data.title || "";
+    description.value = data.description || "";
+    imageUrl.value = data.images[0] || "";
+  } finally {
+    loadingMeta.value = false;
+    titleEl.value?.focus();
+  }
+}
 
-      await createAgentWebLink({
-        title: this.title,
-        description: this.description,
-        imageUrl: this.imageUrl,
-        url: this.link,
-      });
+async function handleInput(e: any) {
+  try {
+    link.value = e.target.value;
+    await new URL(e.target.value);
+    getMeta();
+    isValidLink.value = true;
+  } catch (e) {
+    isValidLink.value = false;
+  }
+}
 
-      appStore.showSuccessToast({
-        message: "Link added to agent perspective",
-      });
+async function createLink() {
+  isAddingLink.value = true;
 
-      this.link = "";
-      this.title = "";
-      this.description = "";
-      this.link = "";
-      this.imageUrl = "";
-      this.isAddingLink = false;
+  const appStore = useAppStore();
 
-      this.$emit("submit");
-    },
-  },
-});
+  try {
+    await createAgentWebLink({
+      title: title.value,
+      description: description.value,
+      imageUrl: imageUrl.value,
+      url: link.value,
+    });
+
+    appStore.showSuccessToast({ message: "Link added to agent perspective" });
+
+    // Reset form
+    link.value = "";
+    title.value = "";
+    description.value = "";
+    imageUrl.value = "";
+
+    emit("submit");
+  } finally {
+    isAddingLink.value = false;
+  }
+}
 </script>
 
 <style scoped>

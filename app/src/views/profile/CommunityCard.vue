@@ -1,27 +1,21 @@
 <template>
   <router-link class="community-card" :to="{ name: 'community', params: { communityId: uuid } }">
-    <j-avatar
-      size="xl"
-      :initials="name?.charAt(0).toUpperCase()"
-      :url="url"
-    />
+    <j-avatar size="xl" :initials="name?.charAt(0).toUpperCase()" :url="url" />
     <div>
       <j-text size="600" color="black" weight="bold">
         {{ name || "Unknown Community" }}
       </j-text>
-      <j-text nomargin size="500" color="ui-400">{{
-        description || "No description"
-      }}</j-text>
+      <j-text nomargin size="500" color="ui-400">{{ description || "No description" }}</j-text>
     </div>
   </router-link>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  props: ["uuid", "name", "url", "description"],
-  methods: {},
+<script setup lang="ts">
+defineProps({
+  uuid: { type: String },
+  name: { type: String },
+  url: { type: String },
+  description: { type: String },
 });
 </script>
 

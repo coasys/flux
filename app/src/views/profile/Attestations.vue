@@ -8,10 +8,7 @@
           <j-badge>{{ object.value.type }}</j-badge>
           <j-text>{{ object.value.value }}</j-text>
         </j-box>
-        <a
-          target="_blank"
-          :href="`https://sepolia.easscan.org/attestation/view/${attestation.id}`"
-        >
+        <a target="_blank" :href="`https://sepolia.easscan.org/attestation/view/${attestation.id}`">
           See on EAS Scan
         </a>
       </j-box>
@@ -19,57 +16,34 @@
   </j-box>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { useMe } from "@coasys/ad4m-vue-hooks";
+<script setup lang="ts">
+import { useAppStore } from "@/store";
+import { onMounted, ref, watch } from "vue";
+
+const props = defineProps({ address: { type: String, required: true } });
+const { ad4mClient } = useAppStore();
+
 const EAS_LANG = "QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E";
+const attestations = ref<any>([]);
 
-export default defineComponent({
-  props: {
-    address: {
-      type: String,
-      required: true,
-    },
-  },
-  async setup() {
-    const client = await getAd4mClient();
+async function getAttestations() {
+  if (!ad4mClient) return;
 
-    const { me } = useMe(client.agent);
+  await ad4mClient.languages.byAddress(EAS_LANG);
+  const expression = await ad4mClient.expression.get(`${EAS_LANG}://${props.address}`);
+  const fetchedAttestations = JSON.parse(expression?.data || "[]");
+  const json = fetchedAttestations.map((a: any) => JSON.parse(a.decodedDataJson));
+  attestations.value = json;
+}
 
-    return {
-      me,
-      client,
-      attestations: ref<any>([]),
-    };
-  },
-  mounted() {
-    this.getAttestations();
-  },
-  watch: {
-    address: {
-      handler: async function () {
-        this.getAttestations();
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    async getAttestations() {
-      await this.client.languages.byAddress(EAS_LANG);
+onMounted(() => getAttestations());
 
-      const expression = await this.client.expression.get(
-        `${EAS_LANG}://${this.address}`
-      );
-
-      const attestations = JSON.parse(expression?.data || "[]");
-
-      const json = attestations.map((a: any) => JSON.parse(a.decodedDataJson));
-
-      this.attestations = json;
-    },
-  },
-});
+// Watch for address changes
+watch(
+  () => props.address,
+  () => getAttestations(),
+  { immediate: true }
+);
 </script>
 
 <style scoped>
