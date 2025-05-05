@@ -1,7 +1,7 @@
-import styles from "./App.module.css";
-import { PerspectiveProxy, Ad4mClient } from "@coasys/ad4m";
-import ChatView from "./components/ChatView/ChatView";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import styles from "./App.module.css";
+import ChatView from "./components/ChatView/ChatView";
 
 type Props = {
   agent: AgentClient;
@@ -9,17 +9,11 @@ type Props = {
   source: string;
   threaded: string;
   element: HTMLElement;
+  getProfile: (did: string) => Promise<any>;
 };
 
-export default function App({
-  agent,
-  perspective,
-  source,
-  threaded,
-  element,
-}: Props) {
-  if (!perspective?.uuid || !agent)
-    return <div>"No perspective or agent client"</div>;
+export default function App({ agent, perspective, source, threaded, element, getProfile }: Props) {
+  if (!perspective?.uuid || !agent) return <div>"No perspective or agent client"</div>;
 
   return (
     <div className={styles.appContainer}>
@@ -29,7 +23,8 @@ export default function App({
         perspective={perspective}
         source={source}
         threaded={!!threaded}
-      ></ChatView>
+        getProfile={getProfile}
+      />
     </div>
   );
 }

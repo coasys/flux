@@ -82,6 +82,7 @@
         :source="activeChannelId"
         :agent="appStore.ad4mClient.agent"
         :perspective="perspective"
+        :getProfile="getCachedAgentProfile"
         :appStore="appStore"
         :currentView="currentView"
         :setModalOpen="() => (webrtcModalOpen = false)"
@@ -148,6 +149,7 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUIStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";

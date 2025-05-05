@@ -1,12 +1,11 @@
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { PerspectiveProxy } from "@coasys/ad4m";
 import { Message } from "@coasys/flux-api";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { Virtuoso } from "react-virtuoso";
 import MessageItem from "../MessageItem";
-import { useMemo } from "preact/hooks";
 import styles from "./MessageList.module.css";
-import { useEffect, useRef, useState } from "preact/hooks";
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -17,6 +16,7 @@ type Props = {
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
+  getProfile: (did: string) => Promise<any>;
 };
 
 const PAGE_SIZE = 30;
@@ -30,6 +30,7 @@ export default function MessageList({
   onEmojiClick = () => {},
   onReplyClick = () => {},
   onThreadClick = () => {},
+  getProfile,
 }: Props) {
   const virtuosoRef = useRef(null);
   const [atBottom, setAtBottom] = useState(false);
@@ -89,14 +90,8 @@ export default function MessageList({
       {showButton && (
         <j-button
           circle
-          squared
           variant="primary"
-          onClick={() =>
-            virtuosoRef.current.scrollToIndex({
-              index: messages.length - 1,
-              behavior: "smooth",
-            })
-          }
+          onClick={() => virtuosoRef.current.scrollToIndex({ index: messages.length - 1, behavior: "smooth" })}
           style={{
             position: "absolute",
             right: "var(--j-space-500)",
@@ -114,7 +109,7 @@ export default function MessageList({
             if (loading)
               return (
                 <div className={styles.loadMore}>
-                  <j-spinner></j-spinner>
+                  <j-spinner />
                 </div>
               );
 
@@ -152,7 +147,8 @@ export default function MessageList({
               onEmojiClick={onEmojiClick}
               onReplyClick={onReplyClick}
               onThreadClick={onThreadClick}
-            ></MessageItem>
+              getProfile={getProfile}
+            />
           );
         }}
       />
