@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useModalStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
@@ -56,26 +56,29 @@ function communityIsActive(communityId: string) {
   return route.params.communityId === communityId;
 }
 
+// Todo: Implement hidding muted channels
 function toggleHideMutedChannels(id: string) {
   // this.dataStore.toggleHideMutedChannels({ communityId: id });
 }
 
+// Todo: Implement mute community
 function muteCommunity(id: string) {
-  // Todo: Implement mute community functionality
   // toggleCommunityMute({ communityId: id });
 }
 
 function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
-  app.setActiveCommunityId(uuid);
   modals.setShowLeaveCommunity(show);
 }
 
+// Todo: investigate why toggleSidebar class applied in CommunityLayout doesn't change the UI
 function handleCommunityClick(communityId: string) {
-  console.log("community clicked", communityId);
   if (communityIsActive(communityId)) ui.toggleSidebar();
   else {
     ui.setSidebar(true);
-    router.push({ name: "community", params: { communityId } });
+    // Navigate back to the last route if saved
+    const routeMemory = useRouteMemoryStore();
+    const lastRoute = routeMemory.getLastRoute(communityId);
+    router.push(lastRoute ? lastRoute.path : { name: "community", params: { communityId } });
   }
 }
 </script>

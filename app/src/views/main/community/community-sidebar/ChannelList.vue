@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore } from "@/store";
-import ChannelListItem from "@/views/community/community-sidebar/ChannelListItem.vue";
+import ChannelListItem from "@/views/main/community/community-sidebar/ChannelListItem.vue";
 import { defineOptions } from "vue";
 
 defineOptions({ name: "ChannelList" });

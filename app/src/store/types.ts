@@ -29,8 +29,6 @@ export interface AppStore {
   myCommunities: Record<string, Community>;
   updateState: UpdateState;
   toast: ToastState;
-  activeCommunityId: string;
-  activeChannelId: string;
   notification: { globalNotification: boolean };
   activeWebrtc: { instance: any; channelId: string };
 }
@@ -62,4 +60,10 @@ export interface UIStore {
   showGlobalLoading: boolean;
   globalError: { show: boolean; message: string };
   windowState: WindowState;
+}
+
+export interface RouteParams {
+  communityId?: string;
+  channelId?: string;
+  viewId?: string;
 }

@@ -49,12 +49,13 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const emit = defineEmits(["close", "submit"]);
+const route = useRoute();
 const router = useRouter();
 const app = useAppStore();
-const { me, activeCommunityId } = storeToRefs(app);
+const { me } = storeToRefs(app);
 const { members, membersLoading, getMembers } = useCommunityService();
 
 const searchInput = ref("");
@@ -73,7 +74,7 @@ const filteredMembers = computed(() => {
 async function profileClick(did: string) {
   emit("close");
   if (did === me.value.did) router.push({ name: "home", params: { did } });
-  else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
+  else router.push({ name: "profile", params: { did, communityId: route.params.communityId } });
 }
 
 // Refetch members every time the modal is opened

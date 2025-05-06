@@ -1,6 +1,5 @@
 import { ad4mConnect } from "@/ad4mConnect";
-import { useAppStore } from "@/store";
-import { storeToRefs } from "pinia";
+import { RouteParams, useAppStore, useRouteMemoryStore } from "@/store";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
@@ -23,19 +22,27 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "home",
-        component: () => import(`@/views/profile/ProfileView.vue`),
+        component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
         path: "communities/:communityId",
         props: true,
         name: "community",
-        component: () => import(`@/views/community/CommunityView.vue`),
+        component: () => import(`@/views/main/community/CommunityView.vue`),
         children: [
           {
             path: ":channelId",
             props: true,
             name: "channel",
-            component: () => import(`@/views/channel/ChannelView.vue`),
+            component: () => import(`@/views/main/community/channel/ChannelView.vue`),
+            children: [
+              {
+                path: ":viewId",
+                props: true,
+                name: "view",
+                component: () => import(`@/views/main/community/channel/view/ViewView.vue`),
+              },
+            ],
           },
         ],
       },
@@ -43,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "profile/:did",
         props: true,
         name: "profile",
-        component: () => import(`@/views/profile/ProfileView.vue`),
+        component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
         path: "settings",
@@ -56,15 +63,13 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({ history: createWebHashHistory(), routes });
 
+// Handle login routing
 router.beforeEach(async (to, from, next) => {
   try {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
     if (isAuthenticated) {
-      const app = useAppStore();
-      const { me } = storeToRefs(app);
-
-      // Handle login routing
-      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
+      const { me } = useAppStore();
+      const fluxAccountCreated = me.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
       if (fluxAccountCreated && isOnSignupOrMain) next("/home");
       if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
@@ -79,6 +84,20 @@ router.beforeEach(async (to, from, next) => {
     console.log("Error in route", e);
     if (to.name !== "signup") next("/signup");
     else next();
+  }
+});
+
+// Update the route memory store when navigating within a community
+router.afterEach((to) => {
+  const { communityId, channelId, viewId } = to.params as RouteParams;
+  if (communityId) {
+    const routeMemory = useRouteMemoryStore();
+
+    // Store the last full route for the community
+    routeMemory.saveLastRoute(communityId, to.path, to.params);
+
+    // Store the last view visited in the channel
+    if (channelId && viewId) routeMemory.saveLastChannelView(communityId, channelId, viewId);
   }
 });
 

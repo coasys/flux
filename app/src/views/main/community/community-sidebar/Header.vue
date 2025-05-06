@@ -79,7 +79,6 @@ defineOptions({ name: "Header" });
 const app = useAppStore();
 const ui = useUIStore();
 const modals = useModalStore();
-const { activeCommunityId } = storeToRefs(app);
 const { showMainSidebar } = storeToRefs(ui);
 
 const { isSynced, isAuthor, community, communityLoading } = useCommunityService();
@@ -96,7 +95,6 @@ function communityDescription() {
 }
 
 function goToLeaveCommunity() {
-  app.setActiveCommunityId(activeCommunityId.value);
   modals.setShowLeaveCommunity(true);
 }
 

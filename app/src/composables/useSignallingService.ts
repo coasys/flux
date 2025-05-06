@@ -1,7 +1,7 @@
-import { useAppStore } from "@/store";
+import { RouteParams, useAppStore } from "@/store";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, ref } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000; // 5 seconds
 const CLEANUP_INTERVAL = 15000; // 15 seconds
@@ -12,24 +12,27 @@ const IN_CHANNEL = "agent/in-channel";
 
 export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
 
-export interface AgentState {
+export interface AgentState extends RouteParams {
   status: AgentStatus;
   processing: boolean;
-  communityId: string;
-  channelId: string;
   lastUpdate: number;
 }
 
-export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
+export function useSignallingService(
+  neighbourhood: NeighbourhoodProxy,
+  initialRouteParams: { communityId?: string; channelId?: string; viewId?: string }
+) {
   const app = useAppStore();
-  const { me, activeCommunityId, activeChannelId } = storeToRefs(app);
+  const { me } = storeToRefs(app);
+  const { communityId, channelId, viewId } = initialRouteParams;
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
     status: "active",
     processing: false,
-    communityId: activeCommunityId.value,
-    channelId: activeChannelId.value,
+    communityId,
+    channelId,
+    viewId,
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
@@ -86,9 +89,9 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     });
   }
 
-  function startSignaling() {
+  function startSignalling() {
     // Clean up previous signal handler if present
-    if (signalling.value) stopSignaling();
+    if (signalling.value) stopSignalling();
     signalling.value = true;
 
     // Add the signal handler
@@ -102,7 +105,7 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     broadcastState();
   }
 
-  function stopSignaling() {
+  function stopSignalling() {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
@@ -129,14 +132,16 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
   }
 
+  function setRouteParams(params: RouteParams) {
+    const { communityId, channelId, viewId } = params;
+    myState.value = { ...myState.value, communityId, channelId, viewId, lastUpdate: Date.now() };
+  }
+
   const activeAgents = computed(() => {
     return Object.values(agents.value).filter((agent: AgentState) => {
       return agent.status === "active";
     });
   });
-
-  // Clean up on unmount
-  onBeforeUnmount(() => stopSignaling());
 
   return {
     // State
@@ -145,10 +150,11 @@ export function useSignalingService(neighbourhood: NeighbourhoodProxy) {
     activeAgents,
 
     // Methods
-    startSignaling,
-    stopSignaling,
+    startSignalling,
+    stopSignalling,
     setStatus,
     setProcessing,
+    setRouteParams,
   };
 }
 

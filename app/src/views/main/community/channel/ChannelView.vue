@@ -21,7 +21,7 @@
         </j-box>
 
         <j-tooltip placement="auto" title="Manage views">
-          <j-button v-if="sameAgent" @click="() => goToEditChannel(activeChannelId)" size="sm" variant="ghost">
+          <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
             <j-icon size="md" name="plus" />
           </j-button>
         </j-tooltip>
@@ -40,16 +40,16 @@
 
           <div class="channel-view__tabs">
             <label
-              :class="{ 'channel-view-tab': true, checked: app.pkg === currentView }"
-              v-for="app in apps"
-              @click="() => changeCurrentView(app.pkg)"
+              v-for="view in views"
+              :class="{ 'channel-view-tab': true, checked: view.pkg === viewId }"
+              @click="() => changeCurrentView(view.pkg)"
             >
-              <j-icon :name="app.icon" size="xs" />
-              <span>{{ app.name }}</span>
+              <j-icon :name="view.icon" size="xs" />
+              <span>{{ view.name }}</span>
             </label>
 
             <j-tooltip placement="auto" title="Manage views">
-              <j-button v-if="sameAgent" @click="() => goToEditChannel(activeChannelId)" size="sm" variant="ghost">
+              <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
                 <j-icon size="md" name="plus" />
               </j-button>
             </j-tooltip>
@@ -70,32 +70,16 @@
       </div>
     </div>
 
-    <template v-for="app in apps">
-      <component
-        v-if="wcNames[app.pkg]"
-        v-show="
-          (currentView === app.pkg && wcNames[app.pkg]) || (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
-        "
-        :is="wcNames[app.pkg]"
-        class="perspective-view"
-        :class="{ split: webrtcModalOpen, right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view' }"
-        :source="activeChannelId"
-        :agent="appStore.ad4mClient.agent"
-        :perspective="perspective"
-        :getProfile="getCachedAgentProfile"
-        :appStore="appStore"
-        :currentView="currentView"
-        :setModalOpen="() => (webrtcModalOpen = false)"
-        @click="onViewClick"
-        @hide-notification-indicator="onHideNotificationIndicator"
-      />
-      <j-box pt="1000" v-show="currentView === app.pkg" v-else>
-        <j-flex direction="column" a="center" j="center" gap="500">
-          <j-spinner />
-          <span>Loading plugin...</span>
-        </j-flex>
-      </j-box>
-    </template>
+    <RouterView v-slot="{ Component }">
+      <KeepAlive :include="['ViewView']" :max="15">
+        <component
+          v-if="route.params.communityId === communityId && route.params.channelId === channelId"
+          :key="`${channelId}-${route.params.viewId}`"
+          :is="Component"
+          style="height: 100%"
+        />
+      </KeepAlive>
+    </RouterView>
 
     <j-modal
       size="xs"
@@ -108,7 +92,7 @@
 
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" a="center">
-        <Hourglass width="30px"></Hourglass>
+        <Hourglass width="30px" />
 
         <j-text variant="heading">Joining community</j-text>
 
@@ -123,20 +107,20 @@
         </j-box>
 
         <label
-          :class="{ 'channel-view-tab-2': true, checked: app.pkg === currentView }"
-          v-for="app in apps"
-          @click="() => changeCurrentView(app.pkg)"
+          :class="{ 'channel-view-tab-2': true, checked: view.pkg === currentView }"
+          v-for="view in views"
+          @click="() => changeCurrentView(view.pkg)"
         >
           <input
             :name="channel?.baseExpression"
             type="radio"
-            :checked.prop="app.pkg === currentView"
-            :value.prop="app.pkg"
+            :checked.prop="view.pkg === currentView"
+            :value.prop="view.pkg"
           />
 
-          <j-icon :name="app.icon" size="xs" />
+          <j-icon :name="view.icon" size="xs" />
 
-          <span>{{ app.name }}</span>
+          <span>{{ view.name }}</span>
         </label>
       </j-box>
     </j-modal>
@@ -148,28 +132,29 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUIStore } from "@/store";
-import fetchFluxApp from "@/utils/fetchFluxApp";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
-import { App, Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
+import { App } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelView" });
+const { communityId, channelId, viewId } = defineProps({
+  communityId: { type: String },
+  channelId: { type: String },
+  viewId: { type: String },
+});
 
 const router = useRouter();
 const route = useRoute();
-const appStore = useAppStore();
+const app = useAppStore();
 const modals = useModalStore();
 const ui = useUIStore();
-const { me, activeCommunityId, activeChannelId } = storeToRefs(appStore);
+const { me } = storeToRefs(app);
 const { perspective, channels } = useCommunityService();
 
-const wcNames = ref<Record<string, string>>({});
 const currentView = ref("");
 const webrtcModalOpen = ref(false);
-const allDefined = ref(false);
 const showEditChannel = ref(false);
 const script = ref<HTMLElement | null>(null);
 const memberMentions = ref<MentionTrigger[]>([]);
@@ -185,58 +170,17 @@ interface MentionTrigger {
   trigger: string;
 }
 
-const channel = computed(() => channels.value.find((c) => c.baseExpression === activeChannelId.value));
+const channel = computed(() => channels.value.find((c) => c.baseExpression === channelId));
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
 
-const { entries: apps } = useModel({ perspective, model: App, query: { source: activeChannelId.value } });
+const { entries: views } = useModel({
+  perspective,
+  model: App,
+  query: { source: channelId },
+});
 
-// Watch for app changes
-watch(
-  () => apps.value,
-  async (newApps, oldApps) => {
-    // Skip if no changes
-    if (oldApps && newApps.every((app, i) => app.pkg === oldApps[i]?.pkg)) return;
-
-    // Update the current view if changed
-    if (!currentView.value) currentView.value = newApps[0]?.pkg;
-
-    // Add new views
-    newApps.forEach(async (app: App) => {
-      const wcName = await generateWCName(app.pkg);
-
-      if (customElements.get(wcName)) wcNames.value[app.pkg] = wcName;
-      else {
-        const module = await fetchFluxApp(app.pkg);
-        if (module?.default) {
-          try {
-            await customElements.define(wcName, module.default);
-            wcNames.value[app.pkg] = wcName;
-          } catch (e) {
-            console.error(`Failed to define custom element ${wcName}:`, e);
-          }
-        }
-      }
-    });
-  }
-);
-
-async function onViewClick(e: any) {
-  const parentLink = e.target.closest("a");
-  if (parentLink) {
-    const url = parentLink.href;
-    if (!url.startsWith("http")) e.preventDefault();
-    if (url.startsWith("neighbourhood://")) onNeighbourhoodClick(url);
-    if (url.startsWith("did:")) onAgentClick(url);
-    if (url.startsWith("literal://")) {
-      const isChannel = await perspective.isSubjectInstance(url, Channel);
-      if (isChannel) router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId: url } });
-    }
-  }
-}
-
-function goToEditChannel(id: string) {
-  appStore.setActiveChannelId(id);
+function goToEditChannel() {
   modals.setShowEditChannel(true);
 }
 
@@ -246,31 +190,11 @@ function changeCurrentView(value: string) {
   // Else if leaving WebRTC view & not small screen, open WebRTC modal
   else if (currentView.value === "@coasys/flux-webrtc-view" && window.innerWidth > 900) webrtcModalOpen.value = true;
 
-  currentView.value = value;
-  isChangeChannel.value = false;
-}
-
-function onAgentClick(did: string) {
-  toggleProfile(true, did);
+  router.push({ name: "view", params: { communityId, channelId, viewId: value } });
 }
 
 function onIsChannelChange() {
   isChangeChannel.value = !isChangeChannel.value;
-}
-
-async function onNeighbourhoodClick(url: any) {
-  const allMyPerspectives = await appStore.ad4mClient.perspective.all();
-  const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
-
-  if (!neighbourhood) joinCommunityHandler(url);
-  else router.push({ name: "community", params: { communityId: neighbourhood.uuid } });
-}
-
-function joinCommunityHandler(url: string) {
-  isJoiningCommunity.value = true;
-  joinCommunity({ joiningLink: url })
-    .then((community) => router.push({ name: "community", params: { communityId: community.uuid } }))
-    .finally(() => (isJoiningCommunity.value = false));
 }
 
 function onHideNotificationIndicator({ detail }: any) {
@@ -295,8 +219,18 @@ function toggleProfile(open: boolean, did?: any): void {
 async function handleProfileClick(did: string) {
   activeProfile.value = did;
   if (did === me.value.did) router.push({ name: "home", params: { did } });
-  else router.push({ name: "profile", params: { did, communityId: activeCommunityId.value } });
+  else router.push({ name: "profile", params: { did, communityId } });
 }
+
+onMounted(() => {
+  console.log("*** channel mounted", channelId);
+});
+
+// Navigate to the first loaded view if no viewId set in the URL params
+watch(views, (newVal, oldVal) => {
+  const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
+  if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
+});
 </script>
 
 <style>

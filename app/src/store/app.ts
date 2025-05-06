@@ -20,8 +20,6 @@ export const useAppStore = defineStore("app", () => {
     me: { did: "" },
     myCommunities: {},
     updateState: "not-available",
-    activeCommunityId: "",
-    activeChannelId: "",
     toast: { variant: "", message: "", open: false },
     notification: { globalNotification: false },
     activeWebrtc: { instance: undefined, channelId: "" },
@@ -50,14 +48,6 @@ export const useAppStore = defineStore("app", () => {
 
   function setUpdateState({ updateState }: { updateState: UpdateState }): void {
     state.updateState = updateState;
-  }
-
-  function setActiveChannelId(id: string): void {
-    state.activeChannelId = id;
-  }
-
-  function setActiveCommunityId(uuid: string): void {
-    state.activeCommunityId = uuid;
   }
 
   function setGlobalNotification(payload: boolean): void {
@@ -116,8 +106,6 @@ export const useAppStore = defineStore("app", () => {
     showSuccessToast,
     showDangerToast,
     setUpdateState,
-    setActiveChannelId,
-    setActiveCommunityId,
     setGlobalNotification,
     setActiveWebrtc,
 

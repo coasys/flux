@@ -60,10 +60,6 @@ const appStore = useAppStore(pinia);
   }
 })();
 
-// Reset navigation state
-appStore.setActiveCommunityId("");
-appStore.setActiveChannelId("");
-
 // Mount the app
 vueApp.mount("#app");
 

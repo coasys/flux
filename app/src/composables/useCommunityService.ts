@@ -7,7 +7,7 @@ import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, inject, InjectionKey, ref } from "vue";
 import { useRoute } from "vue-router";
-import { useSignalingService } from "./useSignallingService";
+import { useSignallingService } from "./useSignallingService";
 
 export async function createCommunityService() {
   const route = useRoute();
@@ -32,7 +32,7 @@ export async function createCommunityService() {
   const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
 
-  // Getter functions
+  // Getters
   async function getMembers() {
     try {
       membersLoading.value = true;
@@ -50,8 +50,8 @@ export async function createCommunityService() {
   }
 
   // Initialise the signalling service
-  const signalingService = useSignalingService(neighbourhood);
-  signalingService.startSignaling();
+  const signallingService = useSignallingService(neighbourhood, route.params);
+  signallingService.startSignalling();
 
   getMembers();
 
@@ -66,9 +66,8 @@ export async function createCommunityService() {
     membersLoading,
     channels,
     channelsLoading,
-
+    signallingService,
     getMembers,
-    signalingService,
   };
 }
 

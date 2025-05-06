@@ -43,7 +43,7 @@
       @toggle="(e: any) => modals.setShowEditCommunity(e.target.open)"
     >
       <EditCommunity
-        :communityId="activeCommunityId"
+        :communityId="route.params.communityId"
         v-if="modals.showEditCommunity"
         @submit="() => modals.setShowEditCommunity(false)"
         @cancel="() => modals.setShowEditCommunity(false)"
@@ -66,7 +66,7 @@
     </j-modal>
 
     <j-modal
-      v-if="modals.showEditChannel && activeChannelId"
+      v-if="modals.showEditChannel && route.params.channelId"
       :open="modals.showEditChannel"
       @toggle="(e: any) => modals.setShowEditChannel(e.target.open)"
     >
@@ -74,7 +74,7 @@
         v-if="modals.showEditChannel"
         @cancel="() => modals.setShowEditChannel(false)"
         @submit="() => modals.setShowEditChannel(false)"
-        :channelId="activeChannelId"
+        :channelId="route.params.channelId"
       />
     </j-modal>
 
@@ -159,7 +159,6 @@ import { getAd4mClient } from "@coasys/ad4m-connect";
 import { usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { ensureLLMTasks } from "@coasys/flux-api/src/conversation/LLMutils";
 import { EntryType } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
 import semver from "semver";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -169,10 +168,8 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 
 const route = useRoute();
 const router = useRouter();
-
 const app = useAppStore();
 const modals = useModalStore();
-const { activeCommunityId, activeChannelId } = storeToRefs(app);
 
 const { perspectives, onLinkAdded } = usePerspectives(app.ad4mClient);
 
@@ -188,7 +185,7 @@ const hasJoinedTestingCommunity = computed(() => {
 async function leaveCommunity() {
   const client = await getAd4mClient();
   await router.push({ name: "home" });
-  await client.perspective.remove(activeCommunityId.value);
+  await client.perspective.remove(route.params.communityId as string);
   modals.setShowLeaveCommunity(false);
 }
 
@@ -274,20 +271,15 @@ async function initializeApp() {
 
 onMounted(async () => initializeApp());
 
-// Update the active community and channel IDs in the app store when the route changes
+// Todo: move effected modals into the community view to avoid needing this?
+// Get the active community model for use in the modals when the community route changes
 watch(
-  () => route.params,
-  async ({ communityId, channelId }) => {
-    if (activeCommunityId.value !== communityId) {
-      app.setActiveCommunityId((communityId as string) || "");
-      if (communityId) {
-        // Todo: Move all community modals into the Community view so this isn't needed and we avoid conflicts persisting community state
-        // Fetch and store the active community model for use in the modals
-        activeCommunity.value = (await app.ad4mClient.perspective.byUUID(communityId as string)) as PerspectiveProxy;
-      }
+  () => route.params.communityId,
+  async (newCommunityId) => {
+    if (activeCommunity.value?.uuid !== newCommunityId) {
+      activeCommunity.value = (await app.ad4mClient.perspective.byUUID(newCommunityId as string)) as PerspectiveProxy;
     }
-    if (activeChannelId.value !== channelId) app.setActiveChannelId((channelId as string) || "");
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 );
 </script>

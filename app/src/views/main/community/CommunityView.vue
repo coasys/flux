@@ -1,13 +1,17 @@
 <template>
-  <!-- v-if="community"  -->
-  <CommunityLayout :key="`${route.params.communityId}`">
+  <CommunityLayout>
     <template v-slot:sidebar>
       <CommunitySidebar />
     </template>
 
     <RouterView v-slot="{ Component }">
       <KeepAlive :include="['ChannelView']" :max="5">
-        <component :is="Component" :key="route.params.channelId" style="height: 100%" />
+        <component
+          v-if="route.params.communityId === communityId"
+          :is="Component"
+          :key="channelId"
+          style="height: 100%"
+        />
       </KeepAlive>
     </RouterView>
 
@@ -20,7 +24,7 @@
       <CommunityMembers @close="() => modals.setShowCommunityMembers(false)" v-if="modals.showCommunityMembers" />
     </j-modal>
 
-    <div v-if="!isSynced && !activeChannelId" class="center">
+    <div v-if="!isSynced && !route.params.channelId" class="center">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
@@ -37,7 +41,7 @@
       </j-box>
     </div>
 
-    <div class="center" v-if="isSynced && !activeChannelId && community && channels.length">
+    <div class="center" v-if="isSynced && !route.params.channelId && community && channels.length">
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community.thumbnail || null" />
@@ -60,7 +64,7 @@
       </div>
     </div>
 
-    <div class="center" v-if="isSynced && !activeChannelId && channels.length === 0">
+    <div class="center" v-if="isSynced && !route.params.channelId && channels.length === 0">
       <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
@@ -83,33 +87,35 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useAppStore, useModalStore } from "@/store";
-import CommunitySidebar from "@/views/community/community-sidebar/CommunitySidebar.vue";
-import { storeToRefs } from "pinia";
-import { onMounted, provide } from "vue";
+import { useModalStore } from "@/store";
+import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
+import { onBeforeUnmount, onMounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "CommunityView" });
+const { communityId, channelId } = defineProps({
+  communityId: { type: String },
+  channelId: { type: String },
+});
 
 const route = useRoute();
 const router = useRouter();
-
-const app = useAppStore();
 const modals = useModalStore();
-const { activeCommunityId, activeChannelId } = storeToRefs(app);
 
 // Initialize community service
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
-const { community, isSynced, channels } = communityService;
+const { community, isSynced, channels, signallingService } = communityService;
 
 function navigateToChannel(channelId: string) {
-  router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId } });
+  router.push({ name: "channel", params: { communityId, channelId } });
 }
 
-onMounted(() => {
-  console.log("CommunityView mounted", activeCommunityId.value);
+onMounted(async () => {
+  console.log("*** community mounted", communityId);
 });
+
+onBeforeUnmount(() => signallingService.stopSignalling());
 </script>
 
 <style scoped>

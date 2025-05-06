@@ -4,7 +4,7 @@
       tag="j-menu-item"
       class="channel"
       :class="{ 'channel--muted': channel.notifications?.mute }"
-      :selected="channel.baseExpression === activeChannelId && !channel.expanded"
+      :selected="channel.baseExpression === route.params.channelId && !channel.expanded"
       @click="navigateToChannel"
     >
       <j-flex slot="start" gap="400" a="center">
@@ -38,19 +38,6 @@
         <RecordingIcon />
       </j-flex>
     </j-menu-item>
-
-    <div class="channel-views" v-if="channel.expanded">
-      <j-menu-item
-        v-for="view in getViewOptions(channel.views)"
-        :selected="channel.baseExpression === activeChannelId"
-        size="sm"
-        @click="() => handleChangeView(view.type)"
-      >
-        <j-icon size="xs" slot="start" :name="view.icon" />
-
-        {{ view.title }}
-      </j-menu-item>
-    </div>
   </div>
 
   <j-menu slot="content" v-if="isChannelCreator">
@@ -71,23 +58,25 @@ import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { AgentStatus } from "@/composables/useSignallingService";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { useAppStore, useModalStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { ChannelView, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, defineOptions, onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelListItem" });
 const { channel } = defineProps({ channel: { type: Object, required: true } });
 
+const route = useRoute();
 const router = useRouter();
 const app = useAppStore();
 const modals = useModalStore();
 const ui = useUIStore();
-const { me, activeCommunityId, activeChannelId } = storeToRefs(app);
-const { signalingService } = useCommunityService();
-const { agents } = signalingService;
+const routeMemory = useRouteMemoryStore();
+const { me } = storeToRefs(app);
+const { signallingService } = useCommunityService();
+const { agents } = signallingService;
 
 const activeAgents = ref<(Profile & { status: AgentStatus })[]>([]);
 const activeCall = ref(false);
@@ -139,23 +128,18 @@ function getIcon(view: ChannelView | string) {
 
 function navigateToChannel() {
   ui.setSidebar(false);
-  router.push({ name: "channel", params: { communityId: activeCommunityId.value, channelId: channel.baseExpression } });
-}
 
-function handleChangeView(view: ChannelView) {
-  // TODO: Set current channel view
-  //this.dataStore.setCurrentChannelView({ channelId, view });
-  navigateToChannel();
-}
-
-function getViewOptions(views: ChannelView[]) {
-  return channelViewOptions.filter((o) => views.includes(o.type));
+  // Use the route memory to navigate back to the last opened view in the channel if saved
+  const communityId = route.params.communityId as string;
+  const lastViewId = routeMemory.getLastChannelView(communityId, channel.baseExpression);
+  if (lastViewId) router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: lastViewId } })
+  else router.push({ name: "channel", params: { communityId, channelId: channel.baseExpression } });
 }
 
 async function deleteChannel() {
   try {
     await channel.delete();
-    router.push({ name: "community", params: { communityId: activeCommunityId.value } });
+    router.push({ name: "community", params: { communityId: route.params.communityId } });
   } catch (error) {
     console.error("Failed to delete channel:", error);
   }
