@@ -1,21 +1,21 @@
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { useModel } from "@coasys/ad4m-react-hooks";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Post } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { useState } from "preact/hooks";
+import { DisplayView, displayOptions } from "../../constants/options";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
-import { DisplayView, displayOptions } from "../../constants/options";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { Post } from "@coasys/flux-api";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
-export default function PostList({
-  agent,
-  perspective,
-  source,
-}: {
+type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
-}) {
+  getProfile: (did: string) => Promise<Profile>;
+};
+
+export default function PostList({ agent, perspective, source, getProfile }: Props) {
   const [view, setView] = useState(DisplayView.Compact);
 
   const { entries: posts, loading } = useModel({
@@ -25,11 +25,7 @@ export default function PostList({
   });
 
   const displayStyle: DisplayView =
-    view === DisplayView.Compact
-      ? style.compact
-      : view === DisplayView.Grid
-        ? style.grid
-        : style.card;
+    view === DisplayView.Compact ? style.compact : view === DisplayView.Grid ? style.grid : style.card;
 
   const currentOption = displayOptions.find((o) => o.value === view);
 
@@ -45,10 +41,7 @@ export default function PostList({
             <j-menu slot="content">
               {displayOptions.map((option) => {
                 return (
-                  <j-menu-item
-                    selected={option.value === view}
-                    onClick={() => setView(option.value)}
-                  >
+                  <j-menu-item selected={option.value === view} onClick={() => setView(option.value)}>
                     <j-icon size="sm" slot="start" name={option.icon}></j-icon>
                     {option.label}
                   </j-menu-item>
@@ -82,13 +75,7 @@ export default function PostList({
       )}
       <div className={[style.posts, displayStyle].join(" ")}>
         {posts.map((post) => (
-          <PostItem
-            key={post.baseExpression}
-            agent={agent}
-            perspective={perspective}
-            post={post}
-            displayView={view}
-          />
+          <PostItem key={post.baseExpression} agent={agent} post={post} displayView={view} getProfile={getProfile} />
         ))}
       </div>
     </div>
