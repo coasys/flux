@@ -155,9 +155,16 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     const status = destination.droppableId;
 
     setTasks((oldTasks) => {
-      return oldTasks.map((t) =>
-        t.baseExpression === draggableId ? { ...t, [selectedProperty]: status } : t
+      const changedTask = oldTasks.find((t) => t.baseExpression === draggableId)
+      if (changedTask) { 
+        changedTask[selectedProperty] = status;
+        changedTask.update();
+      }
+
+      const newTasks = oldTasks.map((t) =>
+        t.baseExpression === draggableId ? changedTask : t
       );
+      return newTasks;
     });
 
     // update state
