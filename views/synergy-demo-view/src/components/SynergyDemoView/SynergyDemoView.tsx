@@ -1,22 +1,28 @@
+import { PerspectiveExpression } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
-import { useEffect, useState, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
 import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
-import { SynergyMatch, SynergyTopic, SearchType, FilterSettings } from "@coasys/flux-utils";
-import { PerspectiveExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 const SIGNAL_TEST_TIMEOUT = 4000;
 const SIGNAL_TEST_REQUEST = "hc-signal-test-request";
 const SIGNAL_TEST_RESPONSE = "hc-signal-test-response";
 
-type Props = { perspective: any; source: string; agent: AgentClient; appStore: any };
+type Props = {
+  perspective: any;
+  source: string;
+  agent: AgentClient;
+  appStore: any;
+  getProfile: (did: string) => Promise<Profile>;
+};
 
-export default function SynergyDemoView({ perspective, agent, source, appStore }: Props) {
+export default function SynergyDemoView({ perspective, agent, source, appStore, getProfile }: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
   const [searchItemId, setSearchItemId] = useState("");
@@ -105,21 +111,24 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
 
   async function addSignalHandler() {
     const neighbourhood = await perspective.getNeighbourhoodProxy();
-    const client = await getAd4mClient();
-    const me = await client.agent.me();
+    const me = await agent.me();
     neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
       const link = expression.data.links[0];
       if (link.data.predicate === SIGNAL_TEST_REQUEST && link.data.target === me.did) {
-        await neighbourhood.sendBroadcastU({ links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: link.author }] });
+        await neighbourhood.sendBroadcastU({
+          links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: link.author }],
+        });
       }
       if (link.data.predicate === SIGNAL_TEST_RESPONSE && link.data.target === me.did) {
         if (link.data.source === signalCheckId.current) {
           connectedAgents.current.push(link.author);
         } else {
-          console.log(`Signal test failed: response from ${link.author} does not match the current request id ${signalCheckId.current}`);
+          console.log(
+            `Signal test failed: response from ${link.author} does not match the current request id ${signalCheckId.current}`
+          );
         }
       }
-    })
+    });
   }
 
   async function checkSignalsWorking(): Promise<boolean> {
@@ -138,12 +147,16 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
 
     // send holochain signals to all webrtc peers and wait for response
     const neighbourhood = await perspective.getNeighbourhoodProxy();
-    const results = await Promise.all(webrtcConnections.current.map(async (connectionDid) => {
-      await neighbourhood.sendBroadcastU({ links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: connectionDid }] })
-      await new Promise(resolve => setTimeout(resolve, SIGNAL_TEST_TIMEOUT));
-      if (connectedAgents.current.some((did) => did === connectionDid)) return true;
-      return false;
-    }));
+    const results = await Promise.all(
+      webrtcConnections.current.map(async (connectionDid) => {
+        await neighbourhood.sendBroadcastU({
+          links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: connectionDid }],
+        });
+        await new Promise((resolve) => setTimeout(resolve, SIGNAL_TEST_TIMEOUT));
+        if (connectedAgents.current.some((did) => did === connectionDid)) return true;
+        return false;
+      })
+    );
 
     const allConnected = results.every((result) => result);
     signalCheckId.current = "";
@@ -160,7 +173,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
   useEffect(() => setMatches([]), [source]);
 
   useEffect(() => {
-    addSignalHandler()
+    addSignalHandler();
     // Ensure SDNA classes
     perspective.ensureSDNASubjectClass(Conversation);
     perspective.ensureSDNASubjectClass(ConversationSubgroup);
@@ -194,6 +207,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
             selectedTopicId={selectedTopic?.baseExpression || ""}
             search={search}
             checkSignalsWorking={checkSignalsWorking}
+            getProfile={getProfile}
           />
         </div>
         <div
@@ -209,6 +223,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
             appStore={appStore}
             currentView="@coasys/flux-synergy-demo-view"
             webrtcConnections={webrtcConnections}
+            getProfile={getProfile}
           />
         </div>
         <div
@@ -229,6 +244,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore }
             setFilterSettings={setFilterSettings}
             matchText={matchText}
             close={() => setShowMatchColumn(false)}
+            getProfile={getProfile}
           />
         </div>
       </j-flex>

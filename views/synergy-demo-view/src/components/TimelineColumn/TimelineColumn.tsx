@@ -1,24 +1,25 @@
-import { useEffect, useState, useRef } from "preact/hooks";
-import { closeMenu } from "../../utils";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Channel } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import {
-  runProcessingCheck,
   addSynergySignalHandler,
-  groupingOptions,
-  ProcessingData,
-  SynergyGroup,
-  SynergyItem,
-  SearchType,
+  checkIfProcessingInProgress,
   GroupingOption,
+  groupingOptions,
+  isMe,
   minItemsToProcess,
   numberOfItemsDelay,
-  checkIfProcessingInProgress,
-  isMe,
+  ProcessingData,
+  runProcessingCheck,
+  SearchType,
+  SynergyGroup,
+  SynergyItem,
 } from "@coasys/flux-utils";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { closeMenu } from "../../utils";
+import Avatar from "../Avatar";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./TimelineColumn.module.scss";
-import Avatar from "../Avatar";
-import { Channel } from "@coasys/flux-api";
 
 type Props = {
   agent: AgentClient;
@@ -27,9 +28,18 @@ type Props = {
   selectedTopicId: string;
   search: (type: SearchType, id: string) => void;
   checkSignalsWorking: () => Promise<boolean>;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function TimelineColumn({ agent, perspective, channelId, selectedTopicId, search, checkSignalsWorking }: Props) {
+export default function TimelineColumn({
+  agent,
+  perspective,
+  channelId,
+  selectedTopicId,
+  search,
+  checkSignalsWorking,
+  getProfile,
+}: Props) {
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<SynergyItem[]>([]);
   const [processingData, setProcessingData] = useState<ProcessingData | null>(null);
@@ -167,6 +177,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
               selectedItemId={selectedItemId}
               setSelectedItemId={setSelectedItemId}
               search={search}
+              getProfile={getProfile}
             />
           ))}
           {unprocessedItems.length > 0 && (
@@ -180,7 +191,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                     {processingData.items && (
                       <j-text nomargin>{processingData.items.length} items being processed by</j-text>
                     )}
-                    <Avatar did={processingData.author} showName />
+                    <Avatar did={processingData.author} showName getProfile={getProfile} />
                     {/* @ts-ignore */}
                     <j-spinner size="xs" />
                   </j-flex>
@@ -203,7 +214,7 @@ export default function TimelineColumn({ agent, perspective, channelId, selected
                     <j-flex gap="400" a="center">
                       <j-icon name={item.icon} color="ui-400" size="lg" />
                       <j-flex gap="400" a="center" wrap>
-                        <Avatar did={item.author} showName />
+                        <Avatar did={item.author} showName getProfile={getProfile} />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
                       {processingData?.items?.includes(item.baseExpression) && (

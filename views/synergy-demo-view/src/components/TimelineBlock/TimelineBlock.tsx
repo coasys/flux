@@ -1,21 +1,22 @@
+import { LinkQuery } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import {
+  BlockType,
+  GroupingOption,
+  MatchIndexes,
+  SearchType,
+  SynergyGroup,
+  SynergyItem,
+  SynergyMatch,
+  SynergyTopic,
+} from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../utils";
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
 import styles from "./TimelineBlock.module.scss";
-import { LinkQuery } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import {
-  SynergyGroup,
-  SynergyItem,
-  SynergyMatch,
-  SynergyTopic,
-  BlockType,
-  SearchType,
-  MatchIndexes,
-  GroupingOption,
-} from "@coasys/flux-utils";
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
 
 type Props = {
   agent: AgentClient;
@@ -34,6 +35,7 @@ type Props = {
   search?: (type: SearchType, itemId: string, topic?: SynergyTopic) => void;
   setLoading?: (loading: boolean) => void;
   loading?: boolean;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 export default function TimelineBlock({
@@ -53,6 +55,7 @@ export default function TimelineBlock({
   search,
   setLoading,
   loading,
+  getProfile,
 }: Props) {
   const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
@@ -240,7 +243,7 @@ export default function TimelineBlock({
             <p className={styles.summary}>{summary}</p>
             <j-flex className={styles.participants}>
               {participants.map((p, i) => (
-                <Avatar did={p} style={{ marginLeft: i > 0 ? -10 : 0 }} />
+                <Avatar did={p} style={{ marginLeft: i > 0 ? -10 : 0 }} getProfile={getProfile} />
               ))}
             </j-flex>
             {selected && (
@@ -318,6 +321,7 @@ export default function TimelineBlock({
                     search={search}
                     setLoading={setLoading}
                     loading={loading}
+                    getProfile={getProfile}
                   />
                 ))}
               <div className={styles.curveBottom}>
@@ -348,7 +352,7 @@ export default function TimelineBlock({
             <j-flex gap="400" a="center">
               <j-icon name={data.icon} color="ui-400" size="lg" />
               <j-flex gap="400" a="center" wrap>
-                <Avatar did={author} showName />
+                <Avatar did={author} showName getProfile={getProfile} />
               </j-flex>
             </j-flex>
             <j-text

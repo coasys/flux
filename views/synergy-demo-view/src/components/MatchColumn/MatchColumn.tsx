@@ -1,17 +1,18 @@
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Profile } from "@coasys/flux-types";
+import {
+  FilterSettings,
+  GroupingOption,
+  groupingOptions,
+  ItemType,
+  itemTypeOptions,
+  SearchType,
+  SynergyMatch,
+} from "@coasys/flux-utils";
+import { useEffect, useState } from "preact/hooks";
+import { ChevronDownSVG, closeMenu } from "../../utils";
 import Match from "../Match";
 import styles from "./MatchColumn.module.scss";
-import { useEffect, useState } from "preact/hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import {
-  SynergyMatch,
-  GroupingOption,
-  ItemType,
-  SearchType,
-  FilterSettings,
-  groupingOptions,
-  itemTypeOptions,
-} from "@coasys/flux-utils";
-import { closeMenu, ChevronDownSVG } from "../../utils";
 
 type Props = {
   perspective: any;
@@ -23,6 +24,7 @@ type Props = {
   setFilterSettings: (newSettings: FilterSettings) => void;
   matchText: () => string;
   close: () => void;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 export default function MatchColumn({
@@ -35,6 +37,7 @@ export default function MatchColumn({
   setFilterSettings,
   matchText,
   close,
+  getProfile,
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
@@ -100,6 +103,7 @@ export default function MatchColumn({
             index={index}
             grouping={grouping}
             selectedTopicId={selectedTopicId}
+            getProfile={getProfile}
           />
         ))}
         {matches.length > numberOfMatchesDisplayed && (

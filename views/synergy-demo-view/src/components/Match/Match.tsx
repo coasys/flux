@@ -1,10 +1,11 @@
-import { useEffect, useState } from "preact/hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Channel } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import { GroupingOption, MatchIndexes, SynergyGroup, SynergyMatch } from "@coasys/flux-utils";
+import { useEffect, useState } from "preact/hooks";
 import { ChevronDownSVG, ChevronUpSVG } from "../../utils";
 import TimelineBlock from "../TimelineBlock";
 import styles from "./Match.module.scss";
-import { SynergyGroup, SynergyMatch, GroupingOption, MatchIndexes } from "@coasys/flux-utils";
-import { Channel } from "@coasys/flux-api";
 
 type Props = {
   perspective: any;
@@ -13,6 +14,7 @@ type Props = {
   index: number;
   grouping: GroupingOption;
   selectedTopicId: string;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 // todo:
@@ -21,7 +23,7 @@ type Props = {
 //   other items as expanded by the user. This would avoid the current need to fetch the full timeline tree (in a
 //   distributed fashion - subject oriented programming) before identifying the path and then collapsing all the other data
 
-export default function Match({ perspective, agent, match, index, grouping, selectedTopicId }: Props) {
+export default function Match({ perspective, agent, match, index, grouping, selectedTopicId, getProfile }: Props) {
   const { channelId, channelName } = match;
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
@@ -107,6 +109,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
                 selectedTopicId={selectedTopicId}
                 loading={loading}
                 setLoading={setLoading}
+                getProfile={getProfile}
               />
             ))}
           {matchIndexes.conversation !== undefined &&
