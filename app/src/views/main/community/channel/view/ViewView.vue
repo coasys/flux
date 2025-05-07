@@ -27,11 +27,10 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useModalStore, useUIStore } from "@/store";
+import { useAppStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
-import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -46,11 +45,7 @@ const { communityId, channelId, viewId } = defineProps({
 const router = useRouter();
 const route = useRoute();
 const app = useAppStore();
-const modals = useModalStore();
-const ui = useUIStore();
-
-const { me } = storeToRefs(app);
-const { perspective, channels, lastRouteParams } = useCommunityService();
+const { perspective } = useCommunityService();
 
 const loading = ref(true);
 const wcName = ref<string>("");

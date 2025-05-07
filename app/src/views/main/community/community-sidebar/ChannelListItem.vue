@@ -17,11 +17,7 @@
 
         <j-flex>
           <template v-for="agent in activeAgents" :key="agent.did">
-            <div
-              v-if="agent.status !== 'in-call'"
-              class="agent"
-              :class="{ active: agent.status === 'active', asleep: agent.status === 'asleep' }"
-            >
+            <div v-if="agent.status !== 'in-call'" :class="['agent', agent.status]">
               <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
             </div>
           </template>
@@ -30,7 +26,7 @@
 
       <j-flex class="active-agents in-call" slot="end" v-if="activeCall">
         <template v-for="agent in activeAgents" :key="agent.did">
-          <div v-if="agent.status === 'in-call'" class="agent inCall">
+          <div v-if="agent.status === 'in-call'" class="agent in-call">
             <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
           </div>
         </template>
@@ -131,9 +127,10 @@ function navigateToChannel() {
 
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const lastViewId = routeMemory.getLastChannelView(communityId, channel.baseExpression);
-  if (lastViewId) router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: lastViewId } })
-  else router.push({ name: "channel", params: { communityId, channelId: channel.baseExpression } });
+  const channelId = channel.baseExpression;
+  const lastViewId = routeMemory.getLastChannelView(communityId, channelId);
+  if (lastViewId) router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId } });
+  else router.push({ name: "channel", params: { communityId, channelId } });
 }
 
 async function deleteChannel() {
@@ -189,7 +186,7 @@ watch(() => agents.value, findActiveAgents, { deep: true });
     box-shadow: 0 0 0 1px var(--j-color-warning-500);
   }
 
-  &.inCall {
+  &.in-call {
     box-shadow: 0 0 0 1px var(--j-color-danger-400);
   }
 }

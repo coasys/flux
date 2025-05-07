@@ -13,8 +13,7 @@ export default function Avatar({ did, style, size = "", onClick, getProfile }: A
   const [profile, setProfile] = useState<Partial<Profile>>({});
 
   async function getProfileData() {
-    const profile = await getProfile(did);
-    setProfile(profile);
+    setProfile(await getProfile(did));
   }
 
   useEffect(() => {

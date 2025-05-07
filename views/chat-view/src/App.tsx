@@ -1,5 +1,6 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Profile } from "@coasys/flux-types";
 import styles from "./App.module.css";
 import ChatView from "./components/ChatView/ChatView";
 
@@ -9,7 +10,7 @@ type Props = {
   source: string;
   threaded: string;
   element: HTMLElement;
-  getProfile: (did: string) => Promise<any>;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 export default function App({ agent, perspective, source, threaded, element, getProfile }: Props) {
