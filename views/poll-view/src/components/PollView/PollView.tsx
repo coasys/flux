@@ -1,19 +1,21 @@
-import { AgentClient } from "@coasys/ad4m";
+import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
+import { Profile } from "@coasys/flux-types";
 import { useEffect, useState } from "preact/hooks";
-import Poll from "../../models/Poll";
 import Answer from "../../models/Answer";
+import Poll from "../../models/Poll";
 import Vote from "../../models/Vote";
 import NewPollModal from "../NewPollModal";
 import PollCard from "../PollCard";
 
 type Props = {
   agent: AgentClient;
-  perspective: any;
+  perspective: PerspectiveProxy;
   source: string;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function PollView({ perspective, source, agent }: Props) {
+export default function PollView({ perspective, source, agent, getProfile }: Props) {
   const [myDid, setMyDid] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const { entries: polls } = useModel({ perspective, model: Poll, query: { source } });
@@ -65,6 +67,7 @@ export default function PollView({ perspective, source, agent }: Props) {
             myDid={myDid}
             poll={poll}
             deletePoll={deletePoll}
+            getProfile={getProfile}
           />
         ))}
       </j-flex>

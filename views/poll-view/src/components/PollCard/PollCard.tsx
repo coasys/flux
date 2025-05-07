@@ -1,4 +1,5 @@
 import { useModel } from "@coasys/ad4m-react-hooks";
+import { Profile } from "@coasys/flux-types";
 import * as d3 from "d3";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import Answer from "../../models/Answer";
@@ -17,8 +18,9 @@ export default function PollCard(props: {
   myDid: string;
   poll: any;
   deletePoll: (id: string) => void;
+  getProfile: (did: string) => Promise<Profile>;
 }) {
-  const { perspective, myDid, poll, deletePoll } = props;
+  const { perspective, myDid, poll, deletePoll, getProfile } = props;
   const { author, timestamp, voteType } = poll;
   const [processedAnswers, setProcessedAnswers] = useState([]);
   const [totalVotes, setTotalVotes] = useState(0);
@@ -117,7 +119,7 @@ export default function PollCard(props: {
       <j-flex direction="column" gap="400">
         <j-flex j="between">
           <j-flex gap="300" a="center">
-            <Avatar size="sm" did={author} showName />
+            <Avatar size="sm" did={author} getProfile={getProfile} showName />
             <j-text nomargin>|</j-text>
             <j-text nomargin>
               <j-timestamp value={timestamp} relative />
@@ -166,6 +168,7 @@ export default function PollCard(props: {
               percentage={findPercentage(answer)}
               voteType={voteType}
               vote={vote}
+              getProfile={getProfile}
             />
           ))}
         </j-flex>
