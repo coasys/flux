@@ -1,47 +1,47 @@
-import { useState, useEffect, useRef } from "preact/hooks";
-import { Reaction } from "../../../types";
-import { useAgent } from "@coasys/ad4m-react-hooks";
 import { WebRTC } from "@coasys/flux-react-web";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { profileFormatter } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { Reaction } from "../../../types";
 
 import styles from "./Item.module.css";
-import { Profile } from "@coasys/flux-types";
-import Avatar from "../../Avatar";
 
 type Props = {
   webRTC: WebRTC;
   isMe?: boolean;
   userId: string;
-  agentClient: AgentClient;
   reaction?: Reaction;
   mirrored?: boolean;
   focused?: boolean;
   minimised?: boolean;
   onToggleFocus: () => void;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 export default function Item({
   webRTC,
   isMe,
   userId,
-  agentClient,
   focused,
   minimised,
   reaction,
   mirrored,
   onToggleFocus,
+  getProfile,
 }: Props) {
-  const videoRef = useRef(null);
-
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
-
-  const { profile } = useAgent<Profile>({ client: agentClient, did: () => userId, formatter: (profile: any) => {
-    return profileFormatter(profile?.perspective?.links || profile)
-  } });
+  const videoRef = useRef(null);
 
   const peer = webRTC.connections.find((p) => p.did === userId);
   const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;
+
+  async function getProfileData() {
+    setProfile(await getProfile(userId));
+  }
+
+  useEffect(() => {
+    if (getProfile && userId) getProfileData();
+  }, [getProfile, userId]);
 
   // Get loading state
   useEffect(() => {
@@ -76,20 +76,14 @@ export default function Item({
       // data-talking={voiceInputVolume > 0}
       data-connecting={isConnecting}
     >
-      <video
-        ref={videoRef}
-        className={styles.video}
-        id={`user-video-${userId}`}
-        autoPlay
-        playsInline
-      ></video>
+      <video ref={videoRef} className={styles.video} id={`user-video-${userId}`} autoPlay playsInline></video>
 
       <div className={styles.details} onClick={onToggleFocus}>
         <div className={styles.avatar}>
-          <Avatar
+          <j-avatar
             initials={profile?.username?.charAt(0) || "?"}
             size="xl"
-            profileAddress={profile?.profileThumbnailPicture}
+            src={profile?.profileThumbnailPicture || null}
             hash={userId}
           />
         </div>

@@ -1,7 +1,6 @@
 import { WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
 import { useEffect, useRef } from "preact/hooks";
-import Avatar from "../Avatar";
 import Disclaimer from "../Disclaimer";
 import styles from "./JoinScreen.module.scss";
 
@@ -14,7 +13,7 @@ type Props = {
   inAnotherRoom?: boolean;
   fullscreen?: boolean;
   setFullscreen?: (state: boolean) => void;
-  joinRoom?: () => void;
+  joinRoom?: (e: any) => void;
   leaveRoom?: () => void;
 };
 
@@ -28,7 +27,7 @@ export default function JoinScreen({
   fullscreen,
   setFullscreen,
   joinRoom,
-  leaveRoom
+  leaveRoom,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -44,8 +43,7 @@ export default function JoinScreen({
       a="center"
       direction="column"
       style={{
-        width:
-          currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
+        width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
       }}
     >
       <h1>You haven't joined this room</h1>
@@ -55,10 +53,7 @@ export default function JoinScreen({
       <j-box
         pt="200"
         style={{
-          width:
-            currentView === "@coasys/flux-synergy-demo-view"
-              ? "100%"
-              : undefined,
+          width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
         }}
       >
         <div
@@ -72,10 +67,10 @@ export default function JoinScreen({
             <div className={styles.avatar}>
               <>
                 {profile && (
-                  <Avatar
+                  <j-avatar
                     initials={profile?.username?.charAt(0) || "?"}
                     size="xl"
-                    profileAddress={profile?.profileThumbnailPicture}
+                    src={profile?.profileThumbnailPicture || null}
                     hash={did}
                   />
                 )}
@@ -100,9 +95,9 @@ export default function JoinScreen({
                 </j-button>
               </j-tooltip>
               {currentView !== "@coasys/flux-webrtc-view" && (
-                <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
+                <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
                   <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
-                    <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
+                    <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
                   </j-button>
                 </j-tooltip>
               )}
@@ -115,27 +110,19 @@ export default function JoinScreen({
         <j-toggle
           checked={webRTC.localState.settings.video ? true : false}
           disabled={
-            webRTC.isLoading ||
-            !webRTC.audioPermissionGranted ||
-            webRTC.devices.every((d) => d.kind !== "videoinput")
+            webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== "videoinput")
           }
-          onChange={() =>
-            webRTC.onToggleCamera(!webRTC.localState.settings.video)
-          }
+          onChange={() => webRTC.onToggleCamera(!webRTC.localState.settings.video)}
         >
           Join with camera!
         </j-toggle>
       </j-box>
 
       <j-box pt="500">
-        {inAnotherRoom  ? (
+        {inAnotherRoom ? (
           <j-flex direction="column" gap="300" a="center">
             <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
-            <j-button
-              variant="primary"
-              size="lg"
-              onClick={leaveRoom}
-            >
+            <j-button variant="primary" size="lg" onClick={leaveRoom}>
               Leave other call
             </j-button>
           </j-flex>
@@ -161,9 +148,7 @@ export default function JoinScreen({
       <>
         {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
-            <j-text variant="warning">
-              Please allow camera/microphone access to join.
-            </j-text>
+            <j-text color="warning-500">Please allow camera/microphone access to join.</j-text>
           </j-box>
         )}
       </>
