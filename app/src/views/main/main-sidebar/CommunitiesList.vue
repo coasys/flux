@@ -141,6 +141,7 @@ function handleCommunityClick(communityId: string) {
     z-index: 5;
     bottom: -4.8px;
     right: -4.8px;
+    pointer-events: none;
   }
 }
 </style>
