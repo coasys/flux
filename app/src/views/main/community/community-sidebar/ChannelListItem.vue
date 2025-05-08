@@ -79,7 +79,9 @@ const agentsInChannel = ref<AgentData[]>([]);
 
 const isChannelCreator = computed(() => channel.author === me.value.did);
 const activeAgents = computed(() =>
-  agentsInChannel.value.filter((agent) => !agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
+  agentsInChannel.value.filter(
+    (agent) => agent.status !== "offline" && (!agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
+  )
 );
 const agentsInCall = computed(() =>
   agentsInChannel.value.filter((agent) => agent.callRoute?.channelId === channel.baseExpression)
@@ -103,12 +105,12 @@ const agentsInCall = computed(() =>
 async function findAgentsInChannel() {
   if (!agents.value) return [];
 
-  // Include all agents with the channel ID in their currenRoute or their callRoute route
-  const agentsInChannelMap = Object.entries(agents.value).filter(
-    ([_, agent]) =>
-      agent.currentRoute?.channelId === channel.baseExpression ||
-      (agent.callRoute && agent.callRoute.channelId === channel.baseExpression)
-  );
+  // Include all agents with the channel ID in their currenRoute or their callRoute
+  const agentsInChannelMap = Object.entries(agents.value).filter(([_, agent]) => {
+    const inChannel = agent.currentRoute?.channelId === channel.baseExpression;
+    const inCall = agent.callRoute?.channelId === channel.baseExpression;
+    return inChannel || inCall;
+  });
 
   // Get each agents profile
   agentsInChannel.value = await Promise.all(
