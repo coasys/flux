@@ -87,8 +87,9 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { RouteParams, useModalStore } from "@/store";
+import { useModalStore } from "@/store";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
+import { RouteParams } from "@coasys/flux-types";
 import { onBeforeUnmount, onMounted, provide, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 

@@ -1,5 +1,6 @@
-import { RouteParams, useAppStore } from "@/store";
+import { useAppStore } from "@/store";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
+import { AgentState, AgentStatus, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 
@@ -7,21 +8,11 @@ const HEARTBEAT_INTERVAL = 5000; // 5 seconds
 const CLEANUP_INTERVAL = 15000; // 15 seconds
 const MAX_AGE = 30000; // 30 seconds
 const HEARTBEAT = "agent/heartbeat";
-// const IN_COMMUNITY = "agent/in-community";
-// const IN_CHANNEL = "agent/in-channel";
-
-export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
-
-export interface AgentState extends RouteParams {
-  status: AgentStatus;
-  processing: boolean;
-  lastUpdate: number;
-}
 
 export function useSignallingService(
   neighbourhood: NeighbourhoodProxy,
-  initialRouteParams: { communityId?: string; channelId?: string; viewId?: string }
-) {
+  initialRouteParams: RouteParams
+): SignallingService {
   const app = useAppStore();
   const { me } = storeToRefs(app);
   const { communityId, channelId, viewId } = initialRouteParams;
@@ -58,14 +49,6 @@ export function useSignallingService(
         agents.value[author] = { ...agents.value[author], status: "unknown", lastUpdate: Date.now() };
       }
     }
-
-    // if (predicate === IN_COMMUNITY) {
-    //   agents.value[author] = { ...agents.value[author], communityId: target, lastUpdate: Date.now() };
-    // }
-
-    // if (predicate === IN_CHANNEL) {
-    //   agents.value[author] = { ...agents.value[author], channelId: target, lastUpdate: Date.now() };
-    // }
   }
 
   function broadcastState() {

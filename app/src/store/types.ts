@@ -61,9 +61,3 @@ export interface UIStore {
   globalError: { show: boolean; message: string };
   windowState: WindowState;
 }
-
-export interface RouteParams {
-  communityId?: string;
-  channelId?: string;
-  viewId?: string;
-}

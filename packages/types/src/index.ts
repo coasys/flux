@@ -1,3 +1,7 @@
+// Ref types for reactive Vue.js properties
+export type Ref<T> = { value: T };
+export type ComputedRef<T> = { value: T };
+
 export interface NeighbourhoodMeta {
   name: string;
   description: string;
@@ -193,4 +197,30 @@ export interface WebLink {
   image: string;
   url: string;
   id: string;
+}
+
+export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
+
+export interface RouteParams {
+  communityId?: string;
+  channelId?: string;
+  viewId?: string;
+}
+
+export interface AgentState extends RouteParams {
+  status: AgentStatus;
+  processing: boolean;
+  lastUpdate: number;
+}
+
+export interface SignallingService {
+  signalling: Ref<boolean>;
+  agents: Ref<Record<string, AgentState>>;
+  activeAgents: ComputedRef<AgentState[]>;
+
+  startSignalling: () => void;
+  stopSignalling: () => void;
+  setStatus: (status: AgentState["status"]) => void;
+  setProcessing: (processing: boolean) => void;
+  setRouteParams: (params: RouteParams) => void;
 }

@@ -52,11 +52,10 @@
 <script setup lang="ts">
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { AgentStatus } from "@/composables/useSignallingService";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { ChannelView, Profile } from "@coasys/flux-types";
+import { AgentStatus, ChannelView, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, defineOptions, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
