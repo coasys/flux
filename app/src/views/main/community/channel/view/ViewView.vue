@@ -17,6 +17,7 @@
       :perspective="perspective"
       :getProfile="getCachedAgentProfile"
       :appStore="app"
+      :signallingService="signallingService"
       :currentView="route.params.viewId"
       :setModalOpen="() => null"
       @click="onViewClick"
@@ -45,7 +46,7 @@ const { communityId, channelId, viewId } = defineProps({
 const router = useRouter();
 const route = useRoute();
 const app = useAppStore();
-const { perspective } = useCommunityService();
+const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);
 const wcName = ref<string>("");

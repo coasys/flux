@@ -9,6 +9,7 @@ type Props = {
   currentView: string;
   fullscreen?: boolean;
   setFullscreen?: (state: boolean) => void;
+  leaveRoom?: () => void;
 };
 
 function transcriptionSVG(on: boolean) {
@@ -40,7 +41,7 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, onToggleSettings, currentView, fullscreen, setFullscreen }: Props) {
+export default function Footer({ webRTC, onToggleSettings, currentView, fullscreen, setFullscreen, leaveRoom }: Props) {
   const {
     hasJoined,
     localState,
@@ -132,8 +133,18 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
         </j-popover>
 
         <j-tooltip placement="top" title="Leave">
-          {/* @ts-ignore */}
-          <j-button variant="danger" onClick={onLeave} square circle size="lg" disabled={!hasJoined}>
+          <j-button
+            // @ts-ignore
+            variant="danger"
+            onClick={() => {
+              leaveRoom();
+              onLeave();
+            }}
+            square
+            circle
+            size="lg"
+            disabled={!hasJoined}
+          >
             <j-icon name="telephone-x" />
           </j-button>
         </j-tooltip>

@@ -1,7 +1,7 @@
 import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useWebRTC } from "@coasys/flux-react-web";
-import { Profile } from "@coasys/flux-types";
+import { Profile, SignallingService } from "@coasys/flux-types";
 import { MutableRef, useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
@@ -21,6 +21,7 @@ type Props = {
   appStore: any;
   currentView: string;
   webrtcConnections?: MutableRef<string[]>;
+  signallingService: SignallingService;
   setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -32,6 +33,7 @@ export default function Channel({
   appStore,
   currentView,
   webrtcConnections,
+  signallingService,
   setModalOpen,
   getProfile,
 }: Props) {
@@ -76,12 +78,14 @@ export default function Channel({
   async function joinRoom(e) {
     appStore.setActiveWebrtc(webRTC, source);
     appStore.activeWebrtc.instance.onJoin(e);
+    signallingService.setStatus("in-call");
   }
 
   function leaveRoom() {
     if (appStore.activeWebrtc.instance) appStore.activeWebrtc.instance.onLeave();
     appStore.setActiveWebrtc(undefined, "");
     setInAnotherRoom(false);
+    signallingService.setStatus("active");
   }
 
   // useEffect(() => {
@@ -163,6 +167,7 @@ export default function Channel({
             currentView={currentView}
             fullscreen={fullscreen}
             setFullscreen={setFullscreen}
+            leaveRoom={leaveRoom}
           />
           {webRTC.localState.settings.transcriber.on && (
             <Transcriber webRTC={webRTC} source={source} perspective={perspective} />
