@@ -87,9 +87,9 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useModalStore } from "@/store";
+import { RouteParams, useModalStore } from "@/store";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
-import { onBeforeUnmount, onMounted, provide } from "vue";
+import { onBeforeUnmount, onMounted, provide, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "CommunityView" });
@@ -116,6 +116,14 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => signallingService.stopSignalling());
+
+watch(
+  () => route.params,
+  ({ communityId, channelId, viewId }: RouteParams) => {
+    signallingService.setRouteParams({ communityId, channelId, viewId });
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

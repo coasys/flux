@@ -85,7 +85,12 @@ export function useSignallingService(
       if (timeSinceLastUpdate <= HEARTBEAT_INTERVAL) return;
 
       const status = timeSinceLastUpdate < MAX_AGE ? "asleep" : "offline";
-      if (status !== agent.status) agents.value[did] = { ...agent, status };
+      if (status !== agent.status) {
+        agents.value[did] = { ...agent, status };
+
+        // If the agent is me, update my state too
+        if (did === me.value.did) myState.value = { ...myState.value, status };
+      }
     });
   }
 
@@ -126,15 +131,18 @@ export function useSignallingService(
 
   function setStatus(status: AgentStatus) {
     myState.value = { ...myState.value, status, lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
   }
 
   function setProcessing(processing: boolean) {
-    myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
+    myState.value = { ...myState.value, processing, status: "active", lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
   }
 
   function setRouteParams(params: RouteParams) {
     const { communityId, channelId, viewId } = params;
-    myState.value = { ...myState.value, communityId, channelId, viewId, lastUpdate: Date.now() };
+    myState.value = { ...myState.value, communityId, channelId, viewId, status: "active", lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
   }
 
   const activeAgents = computed(() => {
