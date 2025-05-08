@@ -9,21 +9,16 @@ const CLEANUP_INTERVAL = 15000; // 15 seconds
 const MAX_AGE = 30000; // 30 seconds
 const HEARTBEAT = "agent/heartbeat";
 
-export function useSignallingService(
-  neighbourhood: NeighbourhoodProxy,
-  initialRouteParams: RouteParams
-): SignallingService {
+export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const app = useAppStore();
   const { me } = storeToRefs(app);
-  const { communityId, channelId, viewId } = initialRouteParams;
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
     status: "active",
+    currentRoute: null,
+    callRoute: null,
     processing: false,
-    communityId,
-    channelId,
-    viewId,
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
@@ -118,15 +113,20 @@ export function useSignallingService(
     broadcastState();
   }
 
-  function setProcessing(processing: boolean) {
-    myState.value = { ...myState.value, processing, status: "active", lastUpdate: Date.now() };
+  function setCurrentRoute(params: RouteParams) {
+    myState.value = { ...myState.value, currentRoute: params, status: "active", lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
   }
 
-  function setRouteParams(params: RouteParams) {
-    const { communityId, channelId, viewId } = params;
-    myState.value = { ...myState.value, communityId, channelId, viewId, status: "active", lastUpdate: Date.now() };
+  function setInCall(inCall: boolean) {
+    myState.value = { ...myState.value, callRoute: inCall ? app.callRoute : null, lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
+    broadcastState();
+  }
+
+  function setProcessing(processing: boolean) {
+    myState.value = { ...myState.value, processing, status: "active", lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
   }
@@ -148,7 +148,8 @@ export function useSignallingService(
     stopSignalling,
     setStatus,
     setProcessing,
-    setRouteParams,
+    setCurrentRoute,
+    setInCall,
   };
 }
 

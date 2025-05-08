@@ -17,16 +17,16 @@
 
         <j-flex>
           <template v-for="agent in activeAgents" :key="agent.did">
-            <div v-if="agent.status !== 'in-call'" :class="['agent', agent.status]">
+            <div :class="['agent', agent.status]">
               <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
             </div>
           </template>
         </j-flex>
       </j-flex>
 
-      <j-flex class="active-agents in-call" slot="end" v-if="activeCall">
-        <template v-for="agent in activeAgents" :key="agent.did">
-          <div v-if="agent.status === 'in-call'" class="agent in-call">
+      <j-flex v-if="agentsInCall.length" class="active-agents in-call" slot="end">
+        <template v-for="agent in agentsInCall" :key="agent.did">
+          <div class="agent in-call">
             <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
           </div>
         </template>
@@ -55,10 +55,12 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { AgentStatus, ChannelView, Profile } from "@coasys/flux-types";
+import { AgentState, ChannelView, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, defineOptions, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+
+type AgentData = Profile & AgentState;
 
 defineOptions({ name: "ChannelListItem" });
 const { channel } = defineProps({ channel: { type: Object, required: true } });
@@ -73,9 +75,15 @@ const { me } = storeToRefs(app);
 const { signallingService } = useCommunityService();
 const { agents } = signallingService;
 
-const activeAgents = ref<(Profile & { status: AgentStatus })[]>([]);
-const activeCall = ref(false);
+const agentsInChannel = ref<AgentData[]>([]);
+
 const isChannelCreator = computed(() => channel.author === me.value.did);
+const activeAgents = computed(() =>
+  agentsInChannel.value.filter((agent) => !agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
+);
+const agentsInCall = computed(() =>
+  agentsInChannel.value.filter((agent) => agent.callRoute?.channelId === channel.baseExpression)
+);
 
 // // Commented out code for testing active agents UI
 // const did1 = "did:key:z6MkqC5MxR8PothBSq5AVmkqzm7MuMn6CoWVq1Yqgciubw54";
@@ -92,29 +100,20 @@ const isChannelCreator = computed(() => channel.author === me.value.did);
 //   [did1]: { did: did1, status: "asleep", channelId },
 // } as Record<string, { did: string; status: AgentStatus; channelId: string }>;
 
-async function findActiveAgents() {
+async function findAgentsInChannel() {
   if (!agents.value) return [];
 
-  // Find active agents in the channel
-  const activeAgentsMap = Object.entries(agents.value).filter(
-    ([_, agent]) => agent.channelId === channel.baseExpression && agent.status !== "offline"
+  // Include all agents with the channel ID in their currenRoute or their callRoute route
+  const agentsInChannelMap = Object.entries(agents.value).filter(
+    ([_, agent]) =>
+      agent.currentRoute?.channelId === channel.baseExpression ||
+      (agent.callRoute && agent.callRoute.channelId === channel.baseExpression)
   );
 
-  // const activeAgentsMap = Object.entries(sampleAgents).filter(
-  //   ([_, agent]) => agent.channelId === channel.baseExpression && agent.status !== "offline"
-  // );
-
-  // Get active agents profiles and update activeCall status if any are in a call
-  let agentFoundInCall = false;
-  const agentsWithProfiles = await Promise.all(
-    activeAgentsMap.map(async ([agentDid, agent]) => {
-      if (agent.status === "in-call") agentFoundInCall = true;
-      const profile = await getCachedAgentProfile(agentDid);
-      return { ...profile, status: agent.status };
-    })
+  // Get each agents profile
+  agentsInChannel.value = await Promise.all(
+    agentsInChannelMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
   );
-  activeCall.value = agentFoundInCall;
-  activeAgents.value = agentsWithProfiles;
 }
 
 function getIcon(view: ChannelView | string) {
@@ -141,9 +140,9 @@ async function deleteChannel() {
   }
 }
 
-onMounted(findActiveAgents);
+onMounted(findAgentsInChannel);
 
-watch(() => agents.value, findActiveAgents, { deep: true });
+watch(() => agents.value, findAgentsInChannel, { deep: true });
 </script>
 
 <style lang="scss" scoped>

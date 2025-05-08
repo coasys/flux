@@ -121,12 +121,7 @@ onBeforeUnmount(() => signallingService.stopSignalling());
 watch(
   () => route.params,
   (newParams: RouteParams) => {
-    if (newParams.communityId === communityId)
-      signallingService.setRouteParams({
-        communityId: newParams.communityId,
-        channelId: newParams.channelId,
-        viewId: newParams.viewId,
-      });
+    if (newParams.communityId === communityId) signallingService.setCurrentRoute(newParams);
   },
   { immediate: true }
 );

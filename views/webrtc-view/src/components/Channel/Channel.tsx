@@ -78,14 +78,18 @@ export default function Channel({
   async function joinRoom(e) {
     appStore.setActiveWebrtc(webRTC, source);
     appStore.activeWebrtc.instance.onJoin(e);
-    signallingService.setStatus("in-call");
+
+    appStore.setInCall(true);
+    signallingService.setInCall(true);
   }
 
   function leaveRoom() {
     if (appStore.activeWebrtc.instance) appStore.activeWebrtc.instance.onLeave();
     appStore.setActiveWebrtc(undefined, "");
     setInAnotherRoom(false);
-    signallingService.setStatus("active");
+
+    appStore.setInCall(false);
+    signallingService.setInCall(false);
   }
 
   // useEffect(() => {

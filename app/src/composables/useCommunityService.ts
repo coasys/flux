@@ -50,7 +50,7 @@ export async function createCommunityService() {
   }
 
   // Initialise the signalling service
-  const signallingService = useSignallingService(neighbourhood, route.params);
+  const signallingService = useSignallingService(neighbourhood);
   signallingService.startSignalling();
 
   getMembers();

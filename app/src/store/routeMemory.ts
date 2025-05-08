@@ -1,4 +1,4 @@
-import { RouteParams } from "@/store/types";
+import { RouteParams } from "@coasys/flux-types";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

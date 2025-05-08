@@ -199,7 +199,7 @@ export interface WebLink {
   id: string;
 }
 
-export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
+export type AgentStatus = "active" | "asleep" | "offline" | "unknown";
 
 export interface RouteParams {
   communityId?: string;
@@ -207,9 +207,11 @@ export interface RouteParams {
   viewId?: string;
 }
 
-export interface AgentState extends RouteParams {
+export interface AgentState {
   status: AgentStatus;
   processing: boolean;
+  currentRoute: RouteParams | null;
+  callRoute: RouteParams | null;
   lastUpdate: number;
 }
 
@@ -222,5 +224,6 @@ export interface SignallingService {
   stopSignalling: () => void;
   setStatus: (status: AgentState["status"]) => void;
   setProcessing: (processing: boolean) => void;
-  setRouteParams: (params: RouteParams) => void;
+  setCurrentRoute: (params: RouteParams) => void;
+  setInCall: (inCall: boolean) => void;
 }
