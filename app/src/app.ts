@@ -49,6 +49,9 @@ const vueApp = createApp({ render: () => h(App) })
 
 const appStore = useAppStore(pinia);
 
+// Reset call state if persisted from the last session
+appStore.setInCall(false);
+
 // Initialize Ad4mClient
 (async () => {
   try {

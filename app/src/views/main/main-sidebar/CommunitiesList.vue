@@ -2,15 +2,19 @@
   <div class="left-nav__communities-list">
     <j-tooltip v-for="(community, uuid) in myCommunities" :key="uuid" :title="community.name || 'Unknown Community'">
       <j-popover event="contextmenu">
-        <j-avatar
-          slot="trigger"
-          class="left-nav__community-item"
-          :selected="communityIsActive(uuid as string)"
-          :online="false"
-          :src="community.image || undefined"
-          :initials="`${community?.name}`.charAt(0).toUpperCase()"
-          @click="() => handleCommunityClick(uuid as string)"
-        />
+        <div slot="trigger" :class="getAvatarClasses(uuid)">
+          <div v-if="isInCall(uuid)" class="recording-icon">
+            <RecordingIcon :size="30" />
+          </div>
+
+          <j-avatar
+            class="left-nav__community-item"
+            :src="community.image || null"
+            :initials="`${community?.name}`.charAt(0).toUpperCase()"
+            @click="() => handleCommunityClick(uuid as string)"
+          />
+        </div>
+
         <j-menu slot="content">
           <j-menu-item @click="() => handleSetShowLeaveCommunity(true, uuid as string)">
             <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
@@ -39,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
@@ -50,7 +55,19 @@ const app = useAppStore();
 const modals = useModalStore();
 const ui = useUIStore();
 
-const { myCommunities } = storeToRefs(app);
+const { myCommunities, callRoute } = storeToRefs(app);
+
+function isInCall(uuid: string) {
+  return callRoute.value?.communityId === uuid;
+}
+
+function isPresent(uuid: string) {
+  return route.params.communityId === uuid;
+}
+
+function getAvatarClasses(uuid: string) {
+  return { "avatar-wrapper": true, "in-call": isInCall(uuid), present: isPresent(uuid) };
+}
 
 function communityIsActive(communityId: string) {
   return route.params.communityId === communityId;
@@ -102,5 +119,28 @@ function handleCommunityClick(communityId: string) {
 
 .left-nav__community-item {
   cursor: pointer;
+}
+
+.avatar-wrapper {
+  border-radius: 50%;
+
+  &.present {
+    box-shadow: 0 0 0 2px var(--j-color-primary-500);
+  }
+
+  &.in-call {
+    box-shadow: 0 0 0 2px var(--j-color-danger-400);
+
+    &.present {
+      box-shadow: 0 0 0 3px var(--j-color-danger-400);
+    }
+  }
+
+  .recording-icon {
+    position: absolute;
+    z-index: 5;
+    bottom: -4.8px;
+    right: -4.8px;
+  }
 }
 </style>

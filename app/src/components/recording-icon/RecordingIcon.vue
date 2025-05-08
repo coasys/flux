@@ -1,9 +1,13 @@
 <template>
-  <div class="recording-icon">
+  <div class="recording-icon" :style="`width: ${size}px; height: ${size}px`">
     <div class="icon1" />
     <div class="icon2" />
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps({ size: { type: Number, default: 20 } });
+</script>
 
 <style scoped lang="scss">
 @keyframes pulse1 {
@@ -42,8 +46,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 20px;
-  width: 20px;
   margin-left: 5px;
 
   .icon1,
