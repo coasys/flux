@@ -71,7 +71,7 @@
     </div>
 
     <RouterView v-slot="{ Component }">
-      <KeepAlive :include="['ViewView']" :max="15">
+      <KeepAlive :include="['ViewView']" :max="10">
         <component
           v-if="route.params.communityId === communityId && route.params.channelId === channelId"
           :key="`${channelId}-${route.params.viewId}`"
