@@ -20,7 +20,7 @@ export const useAppStore = defineStore("app", () => {
     me: { did: "" },
     myCommunities: {},
     updateState: "not-available",
-    toast: { variant: "", message: "", open: false },
+    toast: { variant: undefined, message: "", open: false },
     notification: { globalNotification: false },
     activeWebrtc: { instance: undefined, channelId: "" },
   });

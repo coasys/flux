@@ -11,7 +11,7 @@ export interface Payload {
 }
 
 export interface ToastState {
-  variant?: "" | "success" | "danger" | "error";
+  variant?: "success" | "danger" | "error";
   message?: string;
   open: boolean;
 }
@@ -30,7 +30,7 @@ export interface AppStore {
   updateState: UpdateState;
   toast: ToastState;
   notification: { globalNotification: boolean };
-  activeWebrtc: { instance: any; channelId: string };
+  activeWebrtc: { instance: RTCPeerConnection | undefined; channelId: string };
 }
 
 export interface ModalsStore {

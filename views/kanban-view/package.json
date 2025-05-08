@@ -39,6 +39,7 @@
     "@coasys/flux-api": "0.10.1-rc3",
     "@coasys/flux-comment-section": "0.10.1-rc3",
     "@coasys/flux-container": "0.10.1-rc3",
+    "@coasys/flux-react-web": "0.10.1-rc3",
     "@coasys/flux-types": "0.10.1-rc3",
     "fractional-indexing": "^3.2.0",
     "preact": "^10.13.1",

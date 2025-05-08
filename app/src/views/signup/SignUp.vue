@@ -1,7 +1,7 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <SignUpCarousel></SignUpCarousel>
+      <SignUpCarousel />
     </div>
 
     <div class="signup-view__flow" v-else>
@@ -59,7 +59,7 @@ import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
 import { createProfile, getAd4mProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
 import SignUpCarousel from "./SignUpCarousel.vue";
@@ -162,13 +162,15 @@ async function allowNotifications(value: any) {
   appStore.changeNotificationState(!appStore.notification.globalNotification);
 }
 
-// Lifecycle hooks
 onMounted(() => {
-  ad4mConnect.addEventListener("authstatechange", async (e) => {
+  const authStateChangeHandler = async () => {
     if (ad4mConnect.authState === "authenticated") {
       autoFillUser();
     }
-  });
+  };
+
+  ad4mConnect.addEventListener("authstatechange", authStateChangeHandler);
+  onBeforeUnmount(() => ad4mConnect.removeEventListener("authstatechange", authStateChangeHandler));
 });
 </script>
 
