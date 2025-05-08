@@ -7,8 +7,8 @@ const HEARTBEAT_INTERVAL = 5000; // 5 seconds
 const CLEANUP_INTERVAL = 15000; // 15 seconds
 const MAX_AGE = 30000; // 30 seconds
 const HEARTBEAT = "agent/heartbeat";
-const IN_COMMUNITY = "agent/in-community";
-const IN_CHANNEL = "agent/in-channel";
+// const IN_COMMUNITY = "agent/in-community";
+// const IN_CHANNEL = "agent/in-channel";
 
 export type AgentStatus = "active" | "asleep" | "in-call" | "offline" | "unknown";
 
@@ -59,13 +59,13 @@ export function useSignallingService(
       }
     }
 
-    if (predicate === IN_COMMUNITY) {
-      agents.value[author] = { ...agents.value[author], communityId: target, lastUpdate: Date.now() };
-    }
+    // if (predicate === IN_COMMUNITY) {
+    //   agents.value[author] = { ...agents.value[author], communityId: target, lastUpdate: Date.now() };
+    // }
 
-    if (predicate === IN_CHANNEL) {
-      agents.value[author] = { ...agents.value[author], channelId: target, lastUpdate: Date.now() };
-    }
+    // if (predicate === IN_CHANNEL) {
+    //   agents.value[author] = { ...agents.value[author], channelId: target, lastUpdate: Date.now() };
+    // }
   }
 
   function broadcastState() {
@@ -132,17 +132,20 @@ export function useSignallingService(
   function setStatus(status: AgentStatus) {
     myState.value = { ...myState.value, status, lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
+    broadcastState();
   }
 
   function setProcessing(processing: boolean) {
     myState.value = { ...myState.value, processing, status: "active", lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
+    broadcastState();
   }
 
   function setRouteParams(params: RouteParams) {
     const { communityId, channelId, viewId } = params;
     myState.value = { ...myState.value, communityId, channelId, viewId, status: "active", lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
+    broadcastState();
   }
 
   const activeAgents = computed(() => {
