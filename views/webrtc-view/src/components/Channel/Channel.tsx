@@ -37,9 +37,9 @@ export default function Channel({
   setModalOpen,
   getProfile,
 }: Props) {
+  const [, forceUpdate] = useState({});
   const [agent, setAgent] = useState<Agent | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [inAnotherRoom, setInAnotherRoom] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
@@ -79,17 +79,20 @@ export default function Channel({
     appStore.setActiveWebrtc(webRTC, source);
     appStore.activeWebrtc.instance.onJoin(e);
 
-    appStore.setInCall(true);
-    signallingService.setInCall(true);
+    setTimeout(() => {
+      appStore.setInCall(true);
+      signallingService.setInCall(true);
+    }, 100);
   }
 
   function leaveRoom() {
     if (appStore.activeWebrtc.instance) appStore.activeWebrtc.instance.onLeave();
     appStore.setActiveWebrtc(undefined, "");
-    setInAnotherRoom(false);
 
     appStore.setInCall(false);
     signallingService.setInCall(false);
+
+    forceUpdate({});
   }
 
   // useEffect(() => {
@@ -154,11 +157,11 @@ export default function Channel({
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           currentView={currentView}
-          inAnotherRoom={inAnotherRoom}
           fullscreen={fullscreen}
           setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
+          appStore={appStore}
         />
       )}
 

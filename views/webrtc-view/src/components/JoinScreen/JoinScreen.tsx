@@ -7,11 +7,12 @@ import styles from "./JoinScreen.module.scss";
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
-  onToggleSettings: () => void;
   did?: string;
   currentView: string;
   inAnotherRoom?: boolean;
   fullscreen?: boolean;
+  appStore: any;
+  onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
   joinRoom?: (e: any) => void;
   leaveRoom?: () => void;
@@ -20,11 +21,11 @@ type Props = {
 export default function JoinScreen({
   webRTC,
   profile,
-  onToggleSettings,
   did,
   currentView,
-  inAnotherRoom,
   fullscreen,
+  appStore,
+  onToggleSettings,
   setFullscreen,
   joinRoom,
   leaveRoom,
@@ -119,7 +120,7 @@ export default function JoinScreen({
       </j-box>
 
       <j-box pt="500">
-        {inAnotherRoom ? (
+        {appStore.callRoute ? (
           <j-flex direction="column" gap="300" a="center">
             <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
             <j-button variant="primary" size="lg" onClick={leaveRoom}>
