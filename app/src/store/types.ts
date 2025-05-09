@@ -1,5 +1,4 @@
 import { Agent } from "@coasys/ad4m";
-import { Community } from "@coasys/flux-api";
 import { RouteParams } from "@coasys/flux-types";
 
 export type WindowState = "minimize" | "visible" | "foreground";
@@ -27,7 +26,6 @@ export interface Theme {
 
 export interface AppStore {
   me: Agent;
-  myCommunities: Record<string, Community>;
   updateState: UpdateState;
   toast: ToastState;
   notification: { globalNotification: boolean };

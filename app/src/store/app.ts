@@ -4,7 +4,7 @@ import { AppStore, ToastState, UpdateState } from "@/store/types";
 import { Ad4mClient, Agent } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
 import { defineStore } from "pinia";
-import { computed, reactive, shallowRef, toRefs } from "vue";
+import { computed, reactive, ref, shallowRef, toRefs } from "vue";
 import { useRoute } from "vue-router";
 
 export const useAppStore = defineStore("app", () => {
@@ -21,13 +21,14 @@ export const useAppStore = defineStore("app", () => {
 
   const state = reactive<AppStore>({
     me: { did: "" },
-    myCommunities: {},
     updateState: "not-available",
     toast: { variant: undefined, message: "", open: false },
     notification: { globalNotification: false },
     activeWebrtc: { instance: undefined, channelId: "" },
     callRoute: null,
   });
+
+  const myCommunities = ref<Record<string, Community>>({});
 
   // Mutations
   function setAdamClient(client: Ad4mClient): void {
@@ -97,7 +98,7 @@ export const useAppStore = defineStore("app", () => {
         .filter((p) => p.neighbourhood)
         .map(async (p) => {
           const community = (await Community.findAll(p))[0];
-          if (community && !state.myCommunities[p.uuid]) state.myCommunities[p.uuid] = community;
+          if (community && !myCommunities.value[p.uuid]) myCommunities.value[p.uuid] = community;
         })
     );
   }
@@ -106,6 +107,7 @@ export const useAppStore = defineStore("app", () => {
     // State
     ...toRefs(state),
     ad4mClient,
+    myCommunities,
 
     // Mutations
     setAdamClient,
