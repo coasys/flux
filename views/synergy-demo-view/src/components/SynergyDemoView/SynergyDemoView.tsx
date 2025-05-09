@@ -1,7 +1,7 @@
 import { PerspectiveExpression } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
+import { Profile, SignallingService } from "@coasys/flux-types";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
@@ -19,10 +19,18 @@ type Props = {
   source: string;
   agent: AgentClient;
   appStore: any;
+  signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function SynergyDemoView({ perspective, agent, source, appStore, getProfile }: Props) {
+export default function SynergyDemoView({
+  perspective,
+  agent,
+  source,
+  appStore,
+  signallingService,
+  getProfile,
+}: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
   const [searchItemId, setSearchItemId] = useState("");
@@ -223,6 +231,7 @@ export default function SynergyDemoView({ perspective, agent, source, appStore, 
             appStore={appStore}
             currentView="@coasys/flux-synergy-demo-view"
             webrtcConnections={webrtcConnections}
+            signallingService={signallingService}
             getProfile={getProfile}
           />
         </div>
