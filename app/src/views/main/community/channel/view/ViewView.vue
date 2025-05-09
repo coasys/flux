@@ -10,7 +10,7 @@
     <component
       v-if="wcName"
       :is="wcName"
-      class="perspective-view"
+      style="height: 100%"
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
       :source="channelId"
       :agent="app.ad4mClient.agent"
@@ -128,16 +128,3 @@ onMounted(async () => {
   loading.value = false;
 });
 </script>
-
-<style>
-.perspective-view {
-  position: relative;
-  height: calc(100% - var(--app-header-height));
-  overflow-y: auto;
-  display: block;
-}
-/* .perspective-view {
-  display: block;
-  height: calc(100% - var(--app-header-height));
-} */
-</style>

@@ -76,7 +76,7 @@
           v-if="route.params.communityId === communityId && route.params.channelId === channelId"
           :key="`${channelId}-${route.params.viewId}`"
           :is="Component"
-          style="height: 100%"
+          class="perspective-view"
         />
       </KeepAlive>
     </RouterView>
