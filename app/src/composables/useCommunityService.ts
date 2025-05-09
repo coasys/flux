@@ -26,7 +26,11 @@ export async function createCommunityService() {
   const { entries: channels, loading: channelsLoading } = useModel({ perspective, model: Channel });
 
   // General state
-  const isSynced = computed(() => perspective.state === PerspectiveState.Synced);
+  const isSynced = ref(perspective.state === PerspectiveState.Synced);
+  const syncStateListener = (state: PerspectiveState) => {
+    isSynced.value = (state === PerspectiveState.Synced) || (state === "\"Synced\"");
+  };
+  perspective.addSyncStateChangeListener(syncStateListener);
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
   const community = computed(() => communities.value[0] || null);
   const members = ref<Partial<Profile>[]>([]);
