@@ -1,4 +1,4 @@
-const VERSION = 3;
+const VERSION = 4;
 
 export const synergyConversationPrompt = `
 You are an integrated part of a chat system. 
@@ -72,14 +72,14 @@ You will receive a JSON object containing:
   - "n": The name of the group
   - "s": A summary of the group topic
 - A list called "unprocessedItems":
-  - Each item has an "id" and "text".
+  - Each item has an "id", "text", "author" (name of the person), and "timestamp".
 
 Example input:
 {
   "group": { "n": "Cosmic Expansion", "s": "Discussion about the universe's expansion." },
   "unprocessedItems": [
-    { "id": "1", "text": "Dark energy is thought to play a significant role in driving expansion." },
-    { "id": "2", "text": "Galaxies also influence large-scale cosmic movements." }
+    { "id": "1", "text": "Dark energy is thought to play a significant role in driving expansion.", "author": "Alice", "timestamp": "2024-03-20T10:00:00Z" },
+    { "id": "2", "text": "Galaxies also influence large-scale cosmic movements.", "author": "Bob", "timestamp": "2024-03-20T10:05:00Z" }
   ]
 }
 
@@ -89,8 +89,10 @@ Example input:
 - Analyze "unprocessedItems" to determine if they still belong to the given "group".
 - If they fit, update the group's summary (if necessary).
 - If a message shifts the topic significantly, create a **newGroup**.
+- If there is a long gap (> 10 minutes) between messages, take special care to see if this is a response or a new topic.
 - **Do NOT create more than one newGroup.**
 - If no group exists, always create a newGroup.
+- When creating summaries, consider relevant authors of messages to provide context.
 
 ### **Rules:**
 1. If all unprocessed items belong to the existing group, update **only** the group summary.
@@ -98,7 +100,7 @@ Example input:
    - Keep the existing "group".
    - Create a **newGroup** with:
      - "n": A name for the new group.
-     - "s": A summary of its topic.
+     - "s": A summary of its topic, including relevant author names and sequencing.
      - "firstItemId": The ID of the first item in the new group.
 3. **STRICT JSON FORMAT:** No extra properties, text, or explanations.
 
@@ -122,18 +124,18 @@ export const synergyGroupingExamples = [
     input: `{
     "group": null,
     "unprocessedItems": [
-      { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate." },
-      { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe." },
-      { "id": "3", "text": "Recent measurements suggest there may be discrepancies in the Hubble constant values." },
-      { "id": "4", "text": "These discrepancies might point to unknown physics beyond our current models." },
-      { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this." }
+      { "id": "1", "text": "The universe is constantly expanding, but scientists are still debating the exact rate.", "author": "Alice", "timestamp": "2024-03-20T10:00:00Z" },
+      { "id": "2", "text": "Dark energy is thought to play a significant role in driving the expansion of the universe.", "author": "Bob", "timestamp": "2024-03-20T10:05:00Z" },
+      { "id": "3", "text": "Recent measurements suggest there may be discrepancies in the Hubble constant values.", "author": "Charlie", "timestamp": "2024-03-20T10:10:00Z" },
+      { "id": "4", "text": "These discrepancies might point to unknown physics beyond our current models.", "author": "Alice", "timestamp": "2024-03-20T10:15:00Z" },
+      { "id": "5", "text": "For instance, some theories suggest modifications to general relativity could explain this.", "author": "Bob", "timestamp": "2024-03-20T10:20:00Z" }
     ]
   }`,
     output: `{
     "group": null,
     "newGroup": {
       "n": "Cosmic Expansion",
-      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+      "s": "Alice, Bob, and Charlie discuss the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
       "firstItemId": "1"
     }
   }`,
@@ -142,25 +144,25 @@ export const synergyGroupingExamples = [
     input: `{
     "group": {
       "n": "Cosmic Expansion",
-      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
+      "s": "Alice, Bob, and Charlie discuss the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and possible new physics such as modifications to general relativity.",
     },
     "unprocessedItems": [
-      { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant." },
-      { "id": "7", "text": "Its measurements are among the most precise but still leave room for debate about the true value." },
-      { "id": "8", "text": "By the way, a great way to bring out flavors in vegetables is to roast them with a mix of olive oil, garlic, and herbs." },
-      { "id": "9", "text": "Caramelization from roasting adds depth to vegetables like carrots and Brussels sprouts." },
-      { "id": "10", "text": "And don’t forget to season generously with salt and pepper before baking!" }
+      { "id": "6", "text": "The cosmic microwave background also helps refine our estimates of the Hubble constant.", "author": "Charlie", "timestamp": "2024-03-20T10:25:00Z" },
+      { "id": "7", "text": "Its measurements are among the most precise but still leave room for debate about the true value.", "author": "Alice", "timestamp": "2024-03-20T10:30:00Z" },
+      { "id": "8", "text": "By the way, a great way to bring out flavors in vegetables is to roast them with a mix of olive oil, garlic, and herbs.", "author": "Bob", "timestamp": "2024-03-20T10:35:00Z" },
+      { "id": "9", "text": "Caramelization from roasting adds depth to vegetables like carrots and Brussels sprouts.", "author": "Alice", "timestamp": "2024-03-20T10:40:00Z" },
+      { "id": "10", "text": "And don't forget to season generously with salt and pepper before baking!", "author": "Charlie", "timestamp": "2024-03-20T10:45:00Z" }
     ]
   }`,
     output: `{
     "group": {
       "n": "Cosmic Expansion",
-      "s": "Discussion about the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
+      "s": "Alice, Bob, and Charlie discuss the universe's expansion, including the role of dark energy, Hubble constant discrepancies, and precise measurements like those from the cosmic microwave background.",
     },
     "newGroup": {
       "n": "Vegetable Roasting",
-      "s": "Tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
-      "firstItemId": "8",
+      "s": "Bob, Alice, and Charlie share tips for enhancing vegetable flavors by roasting them with olive oil, garlic, herbs, and seasoning to achieve caramelization and depth.",
+      "firstItemId": "8"
     }
   }`,
   },
@@ -171,21 +173,21 @@ export const synergyGroupingExamples = [
       "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection.",
     },
     "unprocessedItems": [
-      { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust." },
-      { "id": "7", "text": "However, balancing innovation and privacy often creates challenges for developers." },
-      { "id": "8", "text": "On another note, effective team collaboration relies heavily on clear communication and shared goals." },
-      { "id": "9", "text": "Tools like Slack and Trello have made remote work more efficient by streamlining communication." },
-      { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity." }
+      { "id": "6", "text": "Many companies are adopting privacy-first approaches to regain user trust.", "author": "Alice", "timestamp": "2024-03-20T11:00:00Z" },
+      { "id": "7", "text": "However, balancing innovation and privacy often creates challenges for developers.", "author": "Bob", "timestamp": "2024-03-20T11:05:00Z" },
+      { "id": "8", "text": "On another note, effective team collaboration relies heavily on clear communication and shared goals.", "author": "Charlie", "timestamp": "2024-03-20T11:10:00Z" },
+      { "id": "9", "text": "Tools like Slack and Trello have made remote work more efficient by streamlining communication.", "author": "Alice", "timestamp": "2024-03-20T11:15:00Z" },
+      { "id": "10", "text": "Establishing regular check-ins and feedback loops further enhances team productivity.", "author": "Bob", "timestamp": "2024-03-20T11:20:00Z" }
     ]
   }`,
     output: `{
     "group": {
       "n": "Tech and Privacy",
-      "s": "Discussion about how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
+      "s": "Alice and Bob discuss how emerging technologies impact user privacy and the ethical implications of data collection, including privacy-first approaches and challenges for developers.",
     },
     "newGroup": {
       "n": "Team Collaboration",
-      "s": "Exploration of effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
+      "s": "Charlie, Alice, and Bob explore effective team collaboration, focusing on tools like Slack and Trello, and practices like regular check-ins to enhance productivity.",
       "firstItemId": "8"
     }
   }`,

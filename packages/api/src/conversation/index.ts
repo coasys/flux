@@ -3,7 +3,8 @@ import ConversationSubgroup from "../conversation-subgroup";
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
 import { createEmbedding, removeEmbedding } from "./util";
 import { SynergyTopic, SynergyGroup, SynergyItem, ProcessingData } from "@coasys/flux-utils";
-import { Topic } from "@coasys/flux-api";
+import { getProfile, Topic } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 
 @ModelOptions({
   name: "Conversation",
@@ -108,7 +109,7 @@ export default class Conversation extends Ad4mModel {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    return await ConversationSubgroup.findAll(this.perspective, { where: { source: this.baseExpression } });
+    return await ConversationSubgroup.findAll(this.perspective, { source: this.baseExpression });
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {
@@ -178,12 +179,19 @@ export default class Conversation extends Ad4mModel {
 
   private async detectNewGroup(
     currentSubgroup: ConversationSubgroup | null,
-    unprocessedItems: { baseExpression: string; text: string }[]
+    unprocessedItems: SynergyItem[]
   ): Promise<{
     group: { n: string; s: string };
     newGroup?: { n: string; s: string; firstItemId: string };
   }> {
     const { grouping } = await ensureLLMTasks(this.perspective.ai);
+
+    
+
+    const unprocessedItemsWithProfile: (SynergyItem & Profile)[] = await Promise.all(unprocessedItems.map(async (item) => ({
+      ...item,
+      ...(await getProfile(item.author))
+    })));
 
     let inputGroup;
     if (currentSubgroup) {
@@ -202,9 +210,18 @@ export default class Conversation extends Ad4mModel {
       grouping,
       {
         group: inputGroup,
-        unprocessedItems: unprocessedItems.map((item, index) => {
+        unprocessedItems: unprocessedItemsWithProfile.map((item, index) => {
           const text = item.text?.replace(/<[^>]*>/g, "") || "undefined";
-          return { id: index, text };
+          let author = item.givenName;
+          if(!author || author.length === 0) {
+            author = item.username
+          }
+          return { 
+            id: index, 
+            author,
+            timestamp: item.timestamp,
+            text,
+          };
         }),
       },
       this.perspective.ai
