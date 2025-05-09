@@ -55,20 +55,18 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   }
 
   function updateAgentStatuses() {
-    // Mark agents as asleep or offline if their last update is older than the HEARTBEAT_INTERVAL
     const now = Date.now();
     Object.keys(agents.value).forEach((did) => {
+      // Skip if agent is me
+      if (did === me.value.did) return;
+
+      // Mark agents as asleep or offline if their last update is older than the HEARTBEAT_INTERVAL
       const agent = agents.value[did];
       const timeSinceLastUpdate = now - agent.lastUpdate;
       if (timeSinceLastUpdate <= HEARTBEAT_INTERVAL) return;
 
       const status = timeSinceLastUpdate < MAX_AGE ? "asleep" : "offline";
-      if (status !== agent.status) {
-        agents.value[did] = { ...agent, status };
-
-        // If the agent is me, update my state too
-        if (did === me.value.did) myState.value = { ...myState.value, status };
-      }
+      if (status !== agent.status) agents.value[did] = { ...agent, status };
     });
   }
 
