@@ -100,7 +100,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   }, [classes.length]);
 
   useEffect(() => {
-    console.log("changed entries:", entries);
+    //console.log("changed entries:", entries);
     setTasks(entries);
   }, [JSON.stringify(entries), perspective.uuid]);
 
