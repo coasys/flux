@@ -1,5 +1,4 @@
 import { Agent } from "@coasys/ad4m";
-import { RouteParams } from "@coasys/flux-types";
 
 export type WindowState = "minimize" | "visible" | "foreground";
 export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
@@ -29,8 +28,6 @@ export interface AppStore {
   updateState: UpdateState;
   toast: ToastState;
   notification: { globalNotification: boolean };
-  activeWebrtc: { instance: RTCPeerConnection | undefined; channelId: string };
-  callRoute: RouteParams | null;
 }
 
 export interface ModalsStore {

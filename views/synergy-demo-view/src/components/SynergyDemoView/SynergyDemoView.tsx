@@ -1,24 +1,20 @@
-import { PerspectiveExpression } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
 import { Profile, SignallingService } from "@coasys/flux-types";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
 import TimelineColumn from "../TimelineColumn";
 import styles from "./SynergyDemoView.module.scss";
-
-const SIGNAL_TEST_TIMEOUT = 4000;
-const SIGNAL_TEST_REQUEST = "hc-signal-test-request";
-const SIGNAL_TEST_RESPONSE = "hc-signal-test-response";
 
 type Props = {
   perspective: any;
   source: string;
   agent: AgentClient;
   appStore: any;
+  webrtcStore: any;
   signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -28,6 +24,7 @@ export default function SynergyDemoView({
   agent,
   source,
   appStore,
+  webrtcStore,
   signallingService,
   getProfile,
 }: Props) {
@@ -42,10 +39,7 @@ export default function SynergyDemoView({
     includeChannel: false,
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
-  const [allSignalsWorking, setAllSignalsWorking] = useState(true);
-  const webrtcConnections = useRef<string[]>([]);
-  const connectedAgents = useRef<string[]>([]);
-  const signalCheckId = useRef<string>("");
+  const [signalsHealthy, setSignalsHealthy] = useState(true);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -75,8 +69,9 @@ export default function SynergyDemoView({
   }
 
   async function findTopicMatches(itemId: string, topicId: string): Promise<SynergyMatch[]> {
-    // update grouping if set to Items (no longer works with topics)
     const { grouping } = filterSettings;
+    // Todo: remove option for "Items" grouping so this isn't necissary
+    // If the grouping is "Items", we need to change it to "Conversations" as topics no longer have topic tags
     let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
     if (grouping === "Items") setFilterSettings((prev) => ({ ...prev, grouping: "Conversations" }));
     // find matches
@@ -117,85 +112,35 @@ export default function SynergyDemoView({
     return `${matches.length} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic.name}` : ""}`;
   }
 
-  async function addSignalHandler() {
-    const neighbourhood = await perspective.getNeighbourhoodProxy();
-    const me = await agent.me();
-    neighbourhood.addSignalHandler(async (expression: PerspectiveExpression) => {
-      const link = expression.data.links[0];
-      if (link.data.predicate === SIGNAL_TEST_REQUEST && link.data.target === me.did) {
-        await neighbourhood.sendBroadcastU({
-          links: [{ source: link.data.source, predicate: SIGNAL_TEST_RESPONSE, target: link.author }],
-        });
-      }
-      if (link.data.predicate === SIGNAL_TEST_RESPONSE && link.data.target === me.did) {
-        if (link.data.source === signalCheckId.current) {
-          connectedAgents.current.push(link.author);
-        } else {
-          console.log(
-            `Signal test failed: response from ${link.author} does not match the current request id ${signalCheckId.current}`
-          );
-        }
-      }
-    });
-  }
-
-  async function checkSignalsWorking(): Promise<boolean> {
-    // if no webrtc connections, return true
-    if (!webrtcConnections.current.length) {
-      setAllSignalsWorking(true);
-      return true;
-    }
-
-    // if signal check already in progress, return false
-    if (signalCheckId.current) return false;
-
-    // reset check id & connected agents
-    signalCheckId.current = Math.random().toString(36).substring(2, 15);
-    connectedAgents.current = [];
-
-    // send holochain signals to all webrtc peers and wait for response
-    const neighbourhood = await perspective.getNeighbourhoodProxy();
-    const results = await Promise.all(
-      webrtcConnections.current.map(async (connectionDid) => {
-        await neighbourhood.sendBroadcastU({
-          links: [{ source: signalCheckId.current, predicate: SIGNAL_TEST_REQUEST, target: connectionDid }],
-        });
-        await new Promise((resolve) => setTimeout(resolve, SIGNAL_TEST_TIMEOUT));
-        if (connectedAgents.current.some((did) => did === connectionDid)) return true;
-        return false;
-      })
-    );
-
-    const allConnected = results.every((result) => result);
-    signalCheckId.current = "";
-    setAllSignalsWorking(allConnected);
-    return allConnected;
-  }
-
-  // update search results when filters change
   useEffect(() => {
-    if (searchItemId && searchType) search(searchType, searchItemId, selectedTopic);
-  }, [filterSettings]);
-
-  // reset matches when channel changes
-  useEffect(() => setMatches([]), [source]);
-
-  useEffect(() => {
-    addSignalHandler();
     // Ensure SDNA classes
     perspective.ensureSDNASubjectClass(Conversation);
     perspective.ensureSDNASubjectClass(ConversationSubgroup);
     perspective.ensureSDNASubjectClass(Topic);
     perspective.ensureSDNASubjectClass(Embedding);
     perspective.ensureSDNASubjectClass(SemanticRelationship);
+
+    // Listen for call health updates from the signalling service
+    const eventName = `${perspective.uuid}-call-health-update`;
+    const handleCallHealthUpdate = (event: CustomEvent) => setSignalsHealthy(event.detail);
+    window.addEventListener(eventName, handleCallHealthUpdate);
+    return () => window.removeEventListener(eventName, handleCallHealthUpdate);
   }, []);
+
+  // Update search results when filters change
+  useEffect(() => {
+    if (searchItemId && searchType) search(searchType, searchItemId, selectedTopic);
+  }, [filterSettings]);
+
+  // Reset matches when channel changes
+  useEffect(() => setMatches([]), [source]);
 
   return (
     <div className={styles.wrapper}>
       <j-text uppercase size="500" weight="800" color="primary-500">
         Synergy Demo
       </j-text>
-      {!allSignalsWorking && (
+      {!signalsHealthy && (
         <j-badge variant="danger">
           <j-icon name="exclamation-triangle" style={{ marginRight: 10 }} />
           Holochain signals disrupted. Processing paused until connection restored.
@@ -213,8 +158,8 @@ export default function SynergyDemoView({
             perspective={perspective}
             channelId={source}
             selectedTopicId={selectedTopic?.baseExpression || ""}
+            signalsHealthy={signalsHealthy}
             search={search}
-            checkSignalsWorking={checkSignalsWorking}
             getProfile={getProfile}
           />
         </div>
@@ -229,8 +174,8 @@ export default function SynergyDemoView({
             source={source}
             agent={agent}
             appStore={appStore}
+            webrtcStore={webrtcStore}
             currentView="@coasys/flux-synergy-demo-view"
-            webrtcConnections={webrtcConnections}
             signallingService={signallingService}
             getProfile={getProfile}
           />

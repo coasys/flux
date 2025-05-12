@@ -5,11 +5,8 @@ import { Ad4mClient, Agent } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
 import { defineStore } from "pinia";
 import { computed, reactive, ref, shallowRef, toRefs } from "vue";
-import { useRoute } from "vue-router";
 
 export const useAppStore = defineStore("app", () => {
-  const route = useRoute();
-
   // Store a shallow ref of the Ad4mClient so we retain access to its methods
   const ad4mClientRef = shallowRef<Ad4mClient | null>(null);
 
@@ -24,8 +21,6 @@ export const useAppStore = defineStore("app", () => {
     updateState: "not-available",
     toast: { variant: undefined, message: "", open: false },
     notification: { globalNotification: false },
-    activeWebrtc: { instance: undefined, channelId: "" },
-    callRoute: null,
   });
 
   const myCommunities = ref<Record<string, Community>>({});
@@ -57,15 +52,6 @@ export const useAppStore = defineStore("app", () => {
 
   function setGlobalNotification(payload: boolean): void {
     state.notification.globalNotification = payload;
-  }
-
-  function setActiveWebrtc(instance: any, channelId: string): void {
-    state.activeWebrtc.instance = instance;
-    state.activeWebrtc.channelId = channelId;
-  }
-
-  function setInCall(inCall: boolean): void {
-    state.callRoute = inCall ? route.params : null;
   }
 
   // Actions
@@ -117,8 +103,6 @@ export const useAppStore = defineStore("app", () => {
     showDangerToast,
     setUpdateState,
     setGlobalNotification,
-    setActiveWebrtc,
-    setInCall,
 
     // Actions
     changeNotificationState,

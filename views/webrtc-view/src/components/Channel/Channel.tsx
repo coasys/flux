@@ -1,7 +1,7 @@
 import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useWebRTC } from "@coasys/flux-react-web";
-import { Profile, SignallingService } from "@coasys/flux-types";
+import { Profile } from "@coasys/flux-types";
 import { MutableRef, useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
@@ -19,9 +19,9 @@ type Props = {
   perspective: PerspectiveProxy;
   agent: AgentClient;
   appStore: any;
+  webrtcStore: any;
   currentView: string;
   webrtcConnections?: MutableRef<string[]>;
-  signallingService: SignallingService;
   setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -30,10 +30,8 @@ export default function Channel({
   source,
   perspective,
   agent: agentClient,
-  appStore,
+  webrtcStore,
   currentView,
-  webrtcConnections,
-  signallingService,
   setModalOpen,
   getProfile,
 }: Props) {
@@ -42,7 +40,6 @@ export default function Channel({
   const [profile, setProfile] = useState<Profile | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
-
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
@@ -75,65 +72,14 @@ export default function Channel({
     setProfile(myProfile);
   }
 
-  async function joinRoom(e) {
-    appStore.setActiveWebrtc(webRTC, source);
-    appStore.activeWebrtc.instance.onJoin(e);
-
-    setTimeout(() => {
-      appStore.setInCall(true);
-      signallingService.setInCall(true);
-    }, 100);
+  async function joinRoom() {
+    webrtcStore.joinRoom(webRTC);
   }
 
   function leaveRoom() {
-    if (appStore.activeWebrtc.instance) appStore.activeWebrtc.instance.onLeave();
-    appStore.setActiveWebrtc(undefined, "");
-
-    appStore.setInCall(false);
-    signallingService.setInCall(false);
-
-    forceUpdate({});
+    webrtcStore.leaveRoom();
+    setTimeout(() => forceUpdate({}), 100);
   }
-
-  // useEffect(() => {
-  //   webrtcConnections.current = webRTC.connections.map((peer) => peer.did);
-  // }, [webRTC.connections]);
-
-  // useEffect(() => {
-  //   const cleanupWebRTC = () => {
-  //     try {
-  //       // 1. Cleanup WebRTC instance
-  //       if (appStore?.activeWebrtc?.instance) {
-  //         appStore.activeWebrtc.instance.onLeave();
-  //       }
-  //       // 2. Update store directly
-  //       const key = `app-${version}`;
-  //       const stored = localStorage.getItem(key);
-  //       if (stored) {
-  //         const state = JSON.parse(stored);
-  //         state.activeWebrtc = { instance: undefined, channelId: "" };
-  //         localStorage.setItem(key, JSON.stringify(state));
-  //       }
-  //       // 3. Update Pinia store
-  //       appStore.setActiveWebrtc(undefined, "");
-  //     } catch (error) {
-  //       console.error("WebRTC cleanup failed:", error);
-  //     }
-  //   };
-
-  //   window.addEventListener("beforeunload", cleanupWebRTC, { capture: true });
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", cleanupWebRTC);
-  //   };
-  // }, [appStore]);
-
-  // useEffect(() => {
-  //   if (appStore && appStore.activeWebrtc) {
-  //     const { channelId } = appStore.activeWebrtc;
-  //     setInAnotherRoom(!!channelId && channelId !== source);
-  //   }
-  // }, [appStore, appStore?.activeWebrtc?.channelId]);
 
   useEffect(() => {
     if (!agent && getProfile) fetchAgentData();
@@ -150,7 +96,7 @@ export default function Channel({
         </button>
       )}
 
-      {!webRTC.hasJoined && appStore && profile && (
+      {!webRTC.hasJoined && profile && (
         <JoinScreen
           webRTC={webRTC}
           profile={profile}
@@ -161,7 +107,7 @@ export default function Channel({
           setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
-          appStore={appStore}
+          inAnotherRoom={!!webrtcStore.callRoute}
         />
       )}
 

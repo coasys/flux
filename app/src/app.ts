@@ -1,6 +1,6 @@
-import { useAppStore } from "@/store";
+import { useAppStore, useWebRTCStore } from "@/store";
 import { getAd4mClient } from "@coasys/ad4m-connect";
-import { createPinia } from "pinia";
+import { createPinia, storeToRefs } from "pinia";
 import { createApp, h, watch } from "vue";
 import { version } from "../package.json";
 import "./ad4mConnect";
@@ -47,12 +47,13 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
-const appStore = useAppStore(pinia);
-
 // Reset call state if persisted from the last session
-appStore.setInCall(false);
+const webrtcStore = useWebRTCStore(pinia);
+const { callRoute } = storeToRefs(webrtcStore);
+callRoute.value = null;
 
 // Initialize Ad4mClient
+const appStore = useAppStore(pinia);
 (async () => {
   try {
     const ad4mClient = await getAd4mClient();

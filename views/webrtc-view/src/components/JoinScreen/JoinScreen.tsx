@@ -9,9 +9,8 @@ type Props = {
   profile?: Profile;
   did?: string;
   currentView: string;
-  inAnotherRoom?: boolean;
   fullscreen?: boolean;
-  appStore: any;
+  inAnotherRoom?: boolean;
   onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
   joinRoom?: (e: any) => void;
@@ -24,7 +23,7 @@ export default function JoinScreen({
   did,
   currentView,
   fullscreen,
-  appStore,
+  inAnotherRoom,
   onToggleSettings,
   setFullscreen,
   joinRoom,
@@ -120,7 +119,7 @@ export default function JoinScreen({
       </j-box>
 
       <j-box pt="500">
-        {appStore.callRoute ? (
+        {inAnotherRoom ? (
           <j-flex direction="column" gap="300" a="center">
             <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
             <j-button variant="primary" size="lg" onClick={leaveRoom}>

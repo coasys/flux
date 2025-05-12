@@ -45,6 +45,7 @@
 <script setup lang="ts">
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
+import { useWebRTCStore } from "@/store/webrtc";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
@@ -54,8 +55,10 @@ const router = useRouter();
 const app = useAppStore();
 const modals = useModalStore();
 const ui = useUIStore();
+const webrtc = useWebRTCStore();
 
-const { myCommunities, callRoute } = storeToRefs(app);
+const { myCommunities } = storeToRefs(app);
+const { callRoute } = storeToRefs(webrtc);
 
 function isInCall(uuid: string) {
   return callRoute.value?.communityId === uuid;

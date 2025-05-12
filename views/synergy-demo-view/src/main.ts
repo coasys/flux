@@ -4,7 +4,7 @@ import MyComponent from "./App";
 
 const CustomElement = toCustomElement(
   MyComponent,
-  ["perspective", "agent", "source", "appStore", "getProfile", "signallingService"],
+  ["perspective", "agent", "source", "appStore", "webrtcStore", "getProfile", "signallingService"],
   {
     shadow: false,
   }

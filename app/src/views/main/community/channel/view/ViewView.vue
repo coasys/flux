@@ -17,6 +17,7 @@
       :perspective="perspective"
       :getProfile="getCachedAgentProfile"
       :appStore="app"
+      :webrtcStore="webrtcStore"
       :signallingService="signallingService"
       :currentView="route.params.viewId"
       :setModalOpen="() => null"
@@ -28,7 +29,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore } from "@/store";
+import { useAppStore, useWebRTCStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
@@ -46,6 +47,7 @@ const { communityId, channelId, viewId } = defineProps({
 const router = useRouter();
 const route = useRoute();
 const app = useAppStore();
+const webrtcStore = useWebRTCStore();
 const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);

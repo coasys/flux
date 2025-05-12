@@ -1,17 +1,22 @@
 import { useAppStore } from "@/store";
+import { useWebRTCStore } from "@/store/webrtc";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, AgentStatus, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
-const HEARTBEAT_INTERVAL = 5000; // 5 seconds
-const CLEANUP_INTERVAL = 15000; // 15 seconds
-const MAX_AGE = 30000; // 30 seconds
+const HEARTBEAT_INTERVAL = 5000;
+const CLEANUP_INTERVAL = 15000;
+const MAX_AGE = 30000;
+const CALL_HEALTH_CHECK_INTERVAL = 10000;
 const HEARTBEAT = "agent/heartbeat";
 
-export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
+export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
   const app = useAppStore();
+  const webrtc = useWebRTCStore();
+
   const { me } = storeToRefs(app);
+  const { instance, callRoute } = storeToRefs(webrtc);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
@@ -22,8 +27,11 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
+  const callHealthy = ref(true);
+
   let heartbeatInterval: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
+  let callHealthCheckInterval: NodeJS.Timeout | null = null;
 
   function onSignal(signal: PerspectiveExpression) {
     const link = signal.data.links[0];
@@ -79,8 +87,8 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     neighbourhood.addSignalHandler(onSignal);
 
     // Start the intervals
-    heartbeatInterval = setInterval(() => broadcastState(), HEARTBEAT_INTERVAL);
-    cleanupInterval = setInterval(() => updateAgentStatuses(), CLEANUP_INTERVAL);
+    heartbeatInterval = setInterval(broadcastState, HEARTBEAT_INTERVAL);
+    cleanupInterval = setInterval(updateAgentStatuses, CLEANUP_INTERVAL);
 
     // Broadcast my first heartbeat
     broadcastState();
@@ -117,10 +125,15 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     broadcastState();
   }
 
-  function setInCall(inCall: boolean) {
-    myState.value = { ...myState.value, callRoute: inCall ? app.callRoute : null, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
-    broadcastState();
+  function checkCallHealth() {
+    if (!instance.value) return;
+
+    const now = Date.now();
+    callHealthy.value = instance.value.connections.every((peer) => {
+      const agent = agents.value[peer.did];
+      const timeSinceLastUpdate = now - agent.lastUpdate;
+      return timeSinceLastUpdate <= HEARTBEAT_INTERVAL;
+    });
   }
 
   function setProcessing(processing: boolean) {
@@ -135,11 +148,42 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     });
   });
 
+  // Handle callRoute updates when changed in the webrtc store
+  watch(
+    () => callRoute.value,
+    (newCallRoute) => {
+      // Update my state & broadcast it to the neighbourhood
+      myState.value = { ...myState.value, callRoute: newCallRoute, lastUpdate: Date.now() };
+      agents.value[me.value.did] = myState.value;
+      broadcastState();
+
+      // If a new call route is present, start the health check interval
+      if (newCallRoute) callHealthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
+      // Otherwise clear the existing interval (if present)
+      else if (callHealthCheckInterval) {
+        clearInterval(callHealthCheckInterval);
+        callHealthCheckInterval = null;
+      }
+    },
+    { immediate: true, deep: true }
+  );
+
+  // Emit a custom event for webcomponents when the calls health changes
+  watch(
+    () => callHealthy.value,
+    (newHealthState) => {
+      console.log(`${communityId}-call-health-update`, newHealthState);
+      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newHealthState }));
+    },
+    { immediate: true, deep: true }
+  );
+
   return {
     // State
     signalling,
     agents,
     activeAgents,
+    callHealthy,
 
     // Methods
     startSignalling,
@@ -147,7 +191,6 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     setStatus,
     setProcessing,
     setCurrentRoute,
-    setInCall,
   };
 }
 

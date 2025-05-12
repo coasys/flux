@@ -26,8 +26,8 @@ type Props = {
   perspective: any;
   channelId: string;
   selectedTopicId: string;
+  signalsHealthy: boolean;
   search: (type: SearchType, id: string) => void;
-  checkSignalsWorking: () => Promise<boolean>;
   getProfile: (did: string) => Promise<Profile>;
 };
 
@@ -36,8 +36,8 @@ export default function TimelineColumn({
   perspective,
   channelId,
   selectedTopicId,
+  signalsHealthy,
   search,
-  checkSignalsWorking,
   getProfile,
 }: Props) {
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
@@ -67,8 +67,7 @@ export default function TimelineColumn({
           const newUnproccessedItems = await getUnprocessedItems();
           const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
           if (enoughUnprocessedItems) {
-            const allSignalsWorking = await checkSignalsWorking();
-            if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+            if (signalsHealthy) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
           }
         }
       } else if (processingData && !isMe(processingData.author)) {
@@ -105,8 +104,7 @@ export default function TimelineColumn({
       // after fetching new data, run processing check if unprocessed items still present
       const enoughUnprocessedItems = newUnproccessedItems.length >= minItemsToProcess + numberOfItemsDelay;
       if (enoughUnprocessedItems && !waitingForResponse.current) {
-        const allSignalsWorking = await checkSignalsWorking();
-        if (allSignalsWorking) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
+        if (signalsHealthy) runProcessingCheck(perspective, channelId, newUnproccessedItems, setProcessingData);
       }
     }
   }

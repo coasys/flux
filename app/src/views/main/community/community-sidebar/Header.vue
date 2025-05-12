@@ -81,7 +81,7 @@ const ui = useUIStore();
 const modals = useModalStore();
 const { showMainSidebar } = storeToRefs(ui);
 
-const { isSynced, isAuthor, community, communityLoading } = useCommunityService();
+const { isSynced, isAuthor, community } = useCommunityService();
 
 const showCommunityMenu = ref(false);
 

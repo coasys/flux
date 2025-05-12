@@ -219,11 +219,11 @@ export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
   activeAgents: ComputedRef<AgentState[]>;
+  callHealthy: Ref<boolean>;
 
   startSignalling: () => void;
   stopSignalling: () => void;
   setStatus: (status: AgentState["status"]) => void;
   setProcessing: (processing: boolean) => void;
   setCurrentRoute: (params: RouteParams) => void;
-  setInCall: (inCall: boolean) => void;
 }
