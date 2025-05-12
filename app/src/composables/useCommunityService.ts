@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/store/app";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
@@ -22,19 +22,16 @@ export async function createCommunityService() {
   perspective.ensureSDNASubjectClass(Topic);
 
   // Model subscriptions (Todo: singularise communities when singular useModel hook available)
-  const { entries: communities, loading: communityLoading } = useModel({ perspective, model: Community });
+  const { entries: communities } = useModel({ perspective, model: Community });
   const { entries: channels, loading: channelsLoading } = useModel({ perspective, model: Channel });
 
-  // General state
-  const isSynced = ref(perspective.state === PerspectiveState.Synced);
-  const syncStateListener = (state: PerspectiveState) => {
-    isSynced.value = (state === PerspectiveState.Synced) || (state === "\"Synced\"");
-  };
-  perspective.addSyncStateChangeListener(syncStateListener);
-  const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
-  const community = computed(() => communities.value[0] || null);
+  // Reactive state
   const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
+  const perspectiveState = ref(perspective.state);
+  const isSynced = computed(() => perspectiveState.value === PerspectiveState.Synced);
+  const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
+  const community = computed(() => communities.value[0] || null);
 
   // Getters
   async function getMembers() {
@@ -54,8 +51,16 @@ export async function createCommunityService() {
   }
 
   // Initialise the signalling service
-  const signallingService = useSignallingService(neighbourhood);
+  const signallingService = useSignallingService(perspective.uuid, neighbourhood);
   signallingService.startSignalling();
+
+  // // // Initialize sync state listener
+  // perspective.value.addSyncStateChangeListener((state: PerspectiveState) => {
+  //   console.log("***** state from listener: ", state);
+  //   // @ts-ignore
+  //   // isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
+  //   return null;
+  // });
 
   getMembers();
 
@@ -65,7 +70,6 @@ export async function createCommunityService() {
     isSynced,
     isAuthor,
     community,
-    communityLoading,
     members,
     membersLoading,
     channels,
