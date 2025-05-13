@@ -2,7 +2,7 @@ import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { useWebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
-import { MutableRef, useContext, useEffect, useRef, useState } from "preact/hooks";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import Debug from "../Debug";
@@ -21,7 +21,7 @@ type Props = {
   appStore: any;
   webrtcStore: any;
   currentView: string;
-  webrtcConnections?: MutableRef<string[]>;
+  router: any;
   setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -32,6 +32,7 @@ export default function Channel({
   agent: agentClient,
   webrtcStore,
   currentView,
+  router,
   setModalOpen,
   getProfile,
 }: Props) {
@@ -107,7 +108,8 @@ export default function Channel({
           setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
-          inAnotherRoom={!!webrtcStore.callRoute}
+          webrtcStore={webrtcStore}
+          router={router}
         />
       )}
 

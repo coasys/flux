@@ -1,6 +1,6 @@
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
-import { Profile, SignallingService } from "@coasys/flux-types";
+import { Profile } from "@coasys/flux-types";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
@@ -15,7 +15,7 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   webrtcStore: any;
-  signallingService: SignallingService;
+  router: any;
   getProfile: (did: string) => Promise<Profile>;
 };
 
@@ -25,7 +25,7 @@ export default function SynergyDemoView({
   source,
   appStore,
   webrtcStore,
-  signallingService,
+  router,
   getProfile,
 }: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
@@ -176,7 +176,7 @@ export default function SynergyDemoView({
             appStore={appStore}
             webrtcStore={webrtcStore}
             currentView="@coasys/flux-synergy-demo-view"
-            signallingService={signallingService}
+            router={router}
             getProfile={getProfile}
           />
         </div>

@@ -10,7 +10,8 @@ type Props = {
   did?: string;
   currentView: string;
   fullscreen?: boolean;
-  inAnotherRoom?: boolean;
+  webrtcStore: any;
+  router: any;
   onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
   joinRoom?: (e: any) => void;
@@ -23,7 +24,8 @@ export default function JoinScreen({
   did,
   currentView,
   fullscreen,
-  inAnotherRoom,
+  webrtcStore,
+  router,
   onToggleSettings,
   setFullscreen,
   joinRoom,
@@ -119,12 +121,26 @@ export default function JoinScreen({
       </j-box>
 
       <j-box pt="500">
-        {inAnotherRoom ? (
+        {!!webrtcStore.callRoute ? (
           <j-flex direction="column" gap="300" a="center">
             <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
-            <j-button variant="primary" size="lg" onClick={leaveRoom}>
-              Leave other call
-            </j-button>
+
+            <j-flex gap="500" a="center">
+              {/* @ts-ignore */}
+              <j-button variant="danger" size="lg" onClick={leaveRoom}>
+                <j-icon name="telephone-x" />
+                Leave other call
+              </j-button>
+
+              <j-button
+                variant="primary"
+                size="lg"
+                onClick={() => router.push({ name: "view", params: webrtcStore.callRoute })}
+              >
+                <j-icon name="arrow-up-circle" />
+                Go to other call
+              </j-button>
+            </j-flex>
           </j-flex>
         ) : (
           <j-button

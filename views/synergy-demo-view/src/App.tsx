@@ -1,6 +1,6 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile, SignallingService } from "@coasys/flux-types";
+import { Profile } from "@coasys/flux-types";
 import "@coasys/flux-ui/dist/main.d.ts";
 import styles from "./App.module.css";
 import SynergyDemoView from "./components/SynergyDemoView";
@@ -11,7 +11,7 @@ type Props = {
   source: string;
   appStore: any;
   webrtcStore: any;
-  signallingService: SignallingService;
+  router: any;
   getProfile: (did: string) => Promise<Profile>;
 };
 

@@ -1,7 +1,6 @@
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@coasys/flux-types";
-import { MutableRef } from "preact/hooks";
 import Channel from "./components/Channel";
 import { UiProvider } from "./context/UiContext";
 
@@ -12,7 +11,7 @@ type Props = {
   appStore: any;
   webrtcStore: any;
   currentView: string;
-  webrtcConnections?: MutableRef<string[]>;
+  router: any;
   setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
 };

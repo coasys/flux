@@ -19,6 +19,7 @@
       :appStore="app"
       :webrtcStore="webrtcStore"
       :signallingService="signallingService"
+      :router="router"
       :currentView="route.params.viewId"
       :setModalOpen="() => null"
       @click="onViewClick"

@@ -127,12 +127,11 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
   function checkCallHealth() {
     if (!instance.value) return;
-
     const now = Date.now();
     callHealthy.value = instance.value.connections.every((peer) => {
       const agent = agents.value[peer.did];
       const timeSinceLastUpdate = now - agent.lastUpdate;
-      return timeSinceLastUpdate <= HEARTBEAT_INTERVAL;
+      return timeSinceLastUpdate <= CALL_HEALTH_CHECK_INTERVAL;
     });
   }
 
@@ -148,7 +147,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     });
   });
 
-  // Handle callRoute updates when changed in the webrtc store
+  // Listen for callRoute updates in the webrtc store
   watch(
     () => callRoute.value,
     (newCallRoute) => {
@@ -157,7 +156,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
       agents.value[me.value.did] = myState.value;
       broadcastState();
 
-      // If a new call route is present, start the health check interval
+      // If in a call, start the call health check interval
       if (newCallRoute) callHealthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
       // Otherwise clear the existing interval (if present)
       else if (callHealthCheckInterval) {
@@ -171,10 +170,8 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   // Emit a custom event for webcomponents when the calls health changes
   watch(
     () => callHealthy.value,
-    (newHealthState) => {
-      console.log(`${communityId}-call-health-update`, newHealthState);
-      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newHealthState }));
-    },
+    (newHealthState) =>
+      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newHealthState })),
     { immediate: true, deep: true }
   );
 
