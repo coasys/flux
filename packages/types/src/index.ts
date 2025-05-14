@@ -207,11 +207,19 @@ export interface RouteParams {
   viewId?: string;
 }
 
+export interface ProcessingState {
+  step: number;
+  channelId?: string;
+  itemIds?: string[];
+  author?: string;
+}
+
 export interface AgentState {
   status: AgentStatus;
-  processing: boolean;
   currentRoute: RouteParams | null;
   callRoute: RouteParams | null;
+  processing: ProcessingState | null;
+  aiEnabled: boolean;
   lastUpdate: number;
 }
 
@@ -219,11 +227,9 @@ export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
   activeAgents: ComputedRef<AgentState[]>;
-  callHealthy: Ref<boolean>;
 
-  startSignalling: () => void;
-  stopSignalling: () => void;
-  setStatus: (status: AgentState["status"]) => void;
-  setProcessing: (processing: boolean) => void;
+  setProcessingState: (processing: ProcessingState) => void;
   setCurrentRoute: (params: RouteParams) => void;
+
+  getAgentState(did: string): AgentState | undefined;
 }

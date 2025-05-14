@@ -59,6 +59,7 @@ const appStore = useAppStore(pinia);
     const ad4mClient = await getAd4mClient();
     appStore.setAdamClient(ad4mClient);
     appStore.setMe(await ad4mClient.agent.me());
+    appStore.setAIEnabled(!!(await ad4mClient.ai.getDefaultModel("LLM")));
   } catch (error) {
     console.error("Failed to initialize Ad4m client:", error);
   }

@@ -21,6 +21,7 @@ export const useAppStore = defineStore("app", () => {
     updateState: "not-available",
     toast: { variant: undefined, message: "", open: false },
     notification: { globalNotification: false },
+    aiEnabled: false,
   });
 
   const myCommunities = ref<Record<string, Community>>({});
@@ -52,6 +53,10 @@ export const useAppStore = defineStore("app", () => {
 
   function setGlobalNotification(payload: boolean): void {
     state.notification.globalNotification = payload;
+  }
+
+  function setAIEnabled(payload: boolean): void {
+    state.aiEnabled = payload;
   }
 
   // Actions
@@ -103,6 +108,7 @@ export const useAppStore = defineStore("app", () => {
     showDangerToast,
     setUpdateState,
     setGlobalNotification,
+    setAIEnabled,
 
     // Actions
     changeNotificationState,

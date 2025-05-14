@@ -13,14 +13,9 @@ type Props = {
 export default function Avatar({ did, size = "sm", showName = false, style, getProfile }: Props) {
   const [profile, setProfile] = useState<Partial<Profile>>({});
 
-  async function getProfileData() {
-    const profile = await getProfile(did);
-    setProfile(profile);
-  }
-
   useEffect(() => {
-    if (getProfile) getProfileData();
-  }, [getProfile]);
+    getProfile(did).then((data) => setProfile(data));
+  }, []);
 
   return (
     <j-flex gap="300" a="center" style={style}>

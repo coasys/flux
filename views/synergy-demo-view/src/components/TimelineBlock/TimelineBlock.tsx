@@ -12,7 +12,7 @@ import {
   SynergyMatch,
   SynergyTopic,
 } from "@coasys/flux-utils";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../utils";
 import Avatar from "../Avatar";
 import PercentageRing from "../PercentageRing";
@@ -22,6 +22,7 @@ type Props = {
   agent: AgentClient;
   perspective: any;
   blockType: BlockType;
+  lastChild: boolean;
   data: any;
   timelineIndex: number;
   selectedTopicId: string;
@@ -43,6 +44,7 @@ export default function TimelineBlock({
   perspective,
   data,
   blockType,
+  lastChild,
   timelineIndex,
   zoom,
   refreshTrigger,
@@ -66,11 +68,31 @@ export default function TimelineBlock({
   const [selected, setSelected] = useState(false);
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
+  const firstLoad = useRef(true);
   const matchIndex = match ? (blockType === "conversation" ? matchIndexes.subgroup : matchIndexes.item) : null;
   const onMatchTree = match
     ? (blockType === "conversation" && index === matchIndexes.conversation) ||
       (blockType === "subgroup" && parentIndex === matchIndexes.conversation && index === matchIndexes.subgroup)
     : false;
+
+  const visibleChildren = useMemo(
+    () =>
+      children.filter((child: any, i) => {
+        child.parentIndex = index;
+        child.index = i;
+        if (onMatchTree) {
+          // skip if below match
+          if (zoom === "Conversations") return true;
+          if (zoom === "Subgroups" && blockType === "subgroup") return true;
+          // skip if collapsed
+          if (collapseBefore && collapseAfter) return i === matchIndex;
+          else if (collapseBefore) return i >= matchIndex;
+          else if (collapseAfter) return i <= matchIndex;
+        }
+        return true;
+      }),
+    [children, collapseBefore, collapseAfter, matchIndex, onMatchTree, zoom, blockType, index]
+  );
 
   async function getConversationStats() {
     const conversation = new Conversation(perspective, baseExpression);
@@ -159,13 +181,16 @@ export default function TimelineBlock({
     }
   }
 
-  // get stats on first load
+  // Get stats on first load and whenever refresh triggered if last child
   useEffect(() => {
-    if (blockType === "conversation") getConversationStats();
-    if (blockType === "subgroup") getSubgroupStats();
+    if (firstLoad.current || lastChild) {
+      firstLoad.current = false;
+      if (blockType === "conversation") getConversationStats();
+      if (blockType === "subgroup") getSubgroupStats();
+    }
   }, [refreshTrigger]);
 
-  // get data when expanding children
+  // Get data when expanding children or refresh triggered & children expanded
   useEffect(() => {
     // false on first load. updated when zoom useEffect below fires and later when children are expanded by user
     if (showChildren) {
@@ -287,43 +312,29 @@ export default function TimelineBlock({
               <div className={styles.curveTop}>
                 <CurveSVG />
               </div>
-              {children
-                .filter((child: any, i) => {
-                  child.parentIndex = index;
-                  child.index = i;
-                  if (onMatchTree) {
-                    // skip if below match
-                    if (zoom === "Conversations") return true;
-                    if (zoom === "Subgroups" && blockType === "subgroup") return true;
-                    // skip if collapsed
-                    if (collapseBefore && collapseAfter) return i === matchIndex;
-                    else if (collapseBefore) return i >= matchIndex;
-                    else if (collapseAfter) return i <= matchIndex;
-                  }
-                  return true;
-                })
-                .map((child) => (
-                  <TimelineBlock
-                    key={child.baseExpression}
-                    agent={agent}
-                    perspective={perspective}
-                    blockType={blockType === "conversation" ? "subgroup" : "item"}
-                    data={child}
-                    timelineIndex={timelineIndex}
-                    match={match}
-                    matchIndexes={matchIndexes}
-                    setMatchIndexes={setMatchIndexes}
-                    zoom={zoom}
-                    refreshTrigger={refreshTrigger}
-                    selectedTopicId={selectedTopicId}
-                    selectedItemId={selectedItemId}
-                    setSelectedItemId={setSelectedItemId}
-                    search={search}
-                    setLoading={setLoading}
-                    loading={loading}
-                    getProfile={getProfile}
-                  />
-                ))}
+              {visibleChildren.map((child, index) => (
+                <TimelineBlock
+                  key={child.baseExpression}
+                  agent={agent}
+                  perspective={perspective}
+                  blockType={blockType === "conversation" ? "subgroup" : "item"}
+                  lastChild={index === visibleChildren.length - 1}
+                  data={child}
+                  timelineIndex={timelineIndex}
+                  match={match}
+                  matchIndexes={matchIndexes}
+                  setMatchIndexes={setMatchIndexes}
+                  zoom={zoom}
+                  refreshTrigger={refreshTrigger}
+                  selectedTopicId={selectedTopicId}
+                  selectedItemId={selectedItemId}
+                  setSelectedItemId={setSelectedItemId}
+                  search={search}
+                  setLoading={setLoading}
+                  loading={loading}
+                  getProfile={getProfile}
+                />
+              ))}
               <div className={styles.curveBottom}>
                 <CurveSVG />
               </div>

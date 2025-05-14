@@ -28,6 +28,7 @@ export interface AppStore {
   updateState: UpdateState;
   toast: ToastState;
   notification: { globalNotification: boolean };
+  aiEnabled: boolean;
 }
 
 export interface ModalsStore {

@@ -90,7 +90,7 @@ import CommunityLayout from "@/layout/CommunityLayout.vue";
 import { useModalStore } from "@/store";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
 import { RouteParams } from "@coasys/flux-types";
-import { onBeforeUnmount, onMounted, provide, watch } from "vue";
+import { onMounted, provide, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "CommunityView" });
@@ -112,11 +112,7 @@ function navigateToChannel(channelId: string) {
   router.push({ name: "channel", params: { communityId, channelId } });
 }
 
-onMounted(async () => {
-  console.log("*** community mounted", communityId);
-});
-
-onBeforeUnmount(() => signallingService.stopSignalling());
+onMounted(() => console.log("*** community mounted", communityId));
 
 watch(
   () => route.params,

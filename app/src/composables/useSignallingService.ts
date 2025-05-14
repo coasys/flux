@@ -1,21 +1,21 @@
 import { useAppStore } from "@/store";
 import { useWebRTCStore } from "@/store/webrtc";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, AgentStatus, RouteParams, SignallingService } from "@coasys/flux-types";
+import { AgentState, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000;
 const CLEANUP_INTERVAL = 15000;
 const MAX_AGE = 30000;
 const CALL_HEALTH_CHECK_INTERVAL = 10000;
-const HEARTBEAT = "agent/heartbeat";
+const NEW_STATE = "agent/new-state";
 
 export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
-  const app = useAppStore();
+  const appStore = useAppStore();
   const webrtc = useWebRTCStore();
 
-  const { me } = storeToRefs(app);
+  const { me } = storeToRefs(appStore);
   const { instance, callRoute } = storeToRefs(webrtc);
 
   const signalling = ref(false);
@@ -23,24 +23,28 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     status: "active",
     currentRoute: null,
     callRoute: null,
-    processing: false,
+    processing: null,
+    aiEnabled: false,
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
   const callHealthy = ref(true);
 
-  let heartbeatInterval: NodeJS.Timeout | null = null;
+  let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
   let callHealthCheckInterval: NodeJS.Timeout | null = null;
 
-  function onSignal(signal: PerspectiveExpression) {
+  function onSignal(signal: PerspectiveExpression): void {
     const link = signal.data.links[0];
     if (!link || link.author === me.value.did) return;
 
     const { author, data } = link;
     const { predicate, source, target } = data;
 
-    if (predicate === HEARTBEAT) {
+    if (predicate === NEW_STATE) {
+      // If this is their first broadcast, immediately respond with my state so they dont have to wait for my next heartbeat
+      if (source === "first-broadcast") broadcastState();
+
       try {
         // Try to parse the agent's state and add it to the store
         const agentState = JSON.parse(target);
@@ -54,15 +58,15 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     }
   }
 
-  function broadcastState() {
+  function broadcastState(source: string = ""): void {
     // Broadcast my state to the neighbourhood
-    const myHeartbeatState = { source: me.value.did, predicate: HEARTBEAT, target: JSON.stringify(myState.value) };
+    const newState = { source, predicate: NEW_STATE, target: JSON.stringify(myState.value) };
     neighbourhood
-      .sendBroadcastU({ links: [myHeartbeatState] })
-      .catch((error) => console.error("Error sending heartbeat:", error));
+      .sendBroadcastU({ links: [newState] })
+      .catch((error) => console.error("Error sending broadcast:", error));
   }
 
-  function updateAgentStatuses() {
+  function updateAgentStatuses(): void {
     const now = Date.now();
     Object.keys(agents.value).forEach((did) => {
       // Skip if agent is me
@@ -78,65 +82,91 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     });
   }
 
-  function startSignalling() {
-    // Clean up previous signal handler if present
+  function scheduleNextHeartbeat(): void {
+    // Clear existing timer if present
+    if (heartbeatTimeout) {
+      clearTimeout(heartbeatTimeout);
+      heartbeatTimeout = null;
+    }
+
+    // Calculate time until next heartbeat
+    const timeSinceLastUpdate = Date.now() - myState.value.lastUpdate;
+    const timeUntilNextHeartbeat = Math.max(HEARTBEAT_INTERVAL - timeSinceLastUpdate, 0);
+
+    // Schedule next heartbeat
+    heartbeatTimeout = setTimeout(() => {
+      broadcastState();
+      scheduleNextHeartbeat();
+    }, timeUntilNextHeartbeat);
+  }
+
+  function startSignalling(): void {
     if (signalling.value) stopSignalling();
     signalling.value = true;
 
-    // Add the signal handler
+    // Add signal handler
     neighbourhood.addSignalHandler(onSignal);
 
-    // Start the intervals
-    heartbeatInterval = setInterval(broadcastState, HEARTBEAT_INTERVAL);
-    cleanupInterval = setInterval(updateAgentStatuses, CLEANUP_INTERVAL);
+    // Send first broadcast
+    broadcastState("first-broadcast");
 
-    // Broadcast my first heartbeat
-    broadcastState();
+    // Schedule first heartbeat
+    scheduleNextHeartbeat();
+
+    // Start the cleanup interval
+    cleanupInterval = setInterval(updateAgentStatuses, CLEANUP_INTERVAL);
   }
 
-  function stopSignalling() {
+  function stopSignalling(): void {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
-    // Clear the intervals
-    if (heartbeatInterval) {
-      clearInterval(heartbeatInterval);
-      heartbeatInterval = null;
-    }
-
+    // // Clear the intervals
     if (cleanupInterval) {
       clearInterval(cleanupInterval);
       cleanupInterval = null;
+    }
+
+    if (callHealthCheckInterval) {
+      clearInterval(callHealthCheckInterval);
+      callHealthCheckInterval = null;
     }
 
     // Mark signaling as inactive to allow future restarts
     signalling.value = false;
   }
 
-  function setStatus(status: AgentStatus) {
-    myState.value = { ...myState.value, status, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
-    broadcastState();
-  }
-
-  function setCurrentRoute(params: RouteParams) {
-    myState.value = { ...myState.value, currentRoute: params, status: "active", lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
-    broadcastState();
-  }
-
-  function checkCallHealth() {
+  function checkCallHealth(): void {
     if (!instance.value) return;
+
+    // Check the last update time of each peer to determine if the call is healthy
     const now = Date.now();
-    callHealthy.value = instance.value.connections.every((peer) => {
+    const healthy = instance.value.connections.every((peer) => {
       const agent = agents.value[peer.did];
       const timeSinceLastUpdate = now - agent.lastUpdate;
       return timeSinceLastUpdate <= CALL_HEALTH_CHECK_INTERVAL;
     });
+
+    // If the calls health has changed, updated the state and emit event for webcomponents
+    if (callHealthy.value !== healthy) {
+      callHealthy.value = healthy;
+      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: healthy }));
+    }
   }
 
-  function setProcessing(processing: boolean) {
-    myState.value = { ...myState.value, processing, status: "active", lastUpdate: Date.now() };
+  function getAgentState(did: string): AgentState | undefined {
+    return agents.value[did];
+  }
+
+  function setCurrentRoute(params: RouteParams): void {
+    myState.value = { ...myState.value, currentRoute: params, lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
+    broadcastState();
+  }
+
+  function setProcessingState(newState: ProcessingState): void {
+    const processing = newState ? { ...myState.value.processing, ...newState } : null;
+    myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
   }
@@ -167,27 +197,30 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     { immediate: true, deep: true }
   );
 
-  // Emit a custom event for webcomponents when the calls health changes
+  // Send updates to web components whenever the agents state map changes
   watch(
-    () => callHealthy.value,
-    (newHealthState) =>
-      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newHealthState })),
+    () => agents.value,
+    (newAgentsState) =>
+      window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
     { immediate: true, deep: true }
   );
+
+  onMounted(startSignalling);
+
+  onUnmounted(stopSignalling);
 
   return {
     // State
     signalling,
     agents,
     activeAgents,
-    callHealthy,
 
-    // Methods
-    startSignalling,
-    stopSignalling,
-    setStatus,
-    setProcessing,
+    // Setters
+    setProcessingState,
     setCurrentRoute,
+
+    // Getters
+    getAgentState,
   };
 }
 

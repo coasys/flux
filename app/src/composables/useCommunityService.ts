@@ -52,7 +52,6 @@ export async function createCommunityService() {
 
   // Initialise the signalling service
   const signallingService = useSignallingService(perspective.uuid, neighbourhood);
-  signallingService.startSignalling();
 
   // // // Initialize sync state listener
   // perspective.value.addSyncStateChangeListener((state: PerspectiveState) => {
