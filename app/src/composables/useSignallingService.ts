@@ -15,7 +15,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   const appStore = useAppStore();
   const webrtc = useWebRTCStore();
 
-  const { me } = storeToRefs(appStore);
+  const { me, aiEnabled } = storeToRefs(appStore);
   const { instance, callRoute } = storeToRefs(webrtc);
 
   const signalling = ref(false);
@@ -24,7 +24,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     currentRoute: null,
     callRoute: null,
     processing: null,
-    aiEnabled: false,
+    aiEnabled: aiEnabled.value,
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
@@ -93,11 +93,12 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
     // Schedule next heartbeat
     heartbeatTimeout = setTimeout(() => {
+      // If other broadcasts occured during the interval, delay the heartbeat until a full HEARTBEAT_INTERVAL has passed without updates
       const timeSinceLastUpdate = Date.now() - myState.value.lastUpdate;
-      if (timeSinceLastUpdate + 1000 < HEARTBEAT_INTERVAL) {
-        // If last update more recent than HEARTBEAT_INTERVAL, delay the heartbeat until a full interval has passed
+      const buffer = 1000; // Used to avoid rescheduling if the time until the next heartbeat is small (less than the buffer)
+      if (timeSinceLastUpdate + buffer < HEARTBEAT_INTERVAL)
         scheduleNextHeartbeat(HEARTBEAT_INTERVAL - timeSinceLastUpdate);
-      } else {
+      else {
         // Broadcast my state to the neighbourhood and schedule the next heartbeat
         myState.value = { ...myState.value, lastUpdate: Date.now() };
         agents.value[me.value.did] = myState.value;
@@ -202,6 +203,17 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
       }
     },
     { immediate: true, deep: true }
+  );
+
+  // Listen for aiEnabled updates in the app store
+  watch(
+    () => aiEnabled.value,
+    (newAiEnabledState) => {
+      // Update my AI state & broadcast it to the neighbourhood
+      myState.value = { ...myState.value, aiEnabled: newAiEnabledState, lastUpdate: Date.now() };
+      agents.value[me.value.did] = myState.value;
+      broadcastState();
+    }
   );
 
   // Send updates to web components whenever the agents state map changes
