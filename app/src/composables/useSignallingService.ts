@@ -3,7 +3,7 @@ import { useWebRTCStore } from "@/store/webrtc";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000;
 const CLEANUP_INTERVAL = 15000;
@@ -59,6 +59,8 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   }
 
   function broadcastState(source: string = ""): void {
+    if (signalling.value === false) return;
+
     // Broadcast my state to the neighbourhood
     const newState = { source, predicate: NEW_STATE, target: JSON.stringify(myState.value) };
     neighbourhood
@@ -82,22 +84,27 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     });
   }
 
-  function scheduleNextHeartbeat(): void {
+  function scheduleNextHeartbeat(delay: number): void {
     // Clear existing timer if present
     if (heartbeatTimeout) {
       clearTimeout(heartbeatTimeout);
       heartbeatTimeout = null;
     }
 
-    // Calculate time until next heartbeat
-    const timeSinceLastUpdate = Date.now() - myState.value.lastUpdate;
-    const timeUntilNextHeartbeat = Math.max(HEARTBEAT_INTERVAL - timeSinceLastUpdate, 0);
-
     // Schedule next heartbeat
     heartbeatTimeout = setTimeout(() => {
-      broadcastState();
-      scheduleNextHeartbeat();
-    }, timeUntilNextHeartbeat);
+      const timeSinceLastUpdate = Date.now() - myState.value.lastUpdate;
+      if (timeSinceLastUpdate + 1000 < HEARTBEAT_INTERVAL) {
+        // If last update more recent than HEARTBEAT_INTERVAL, delay the heartbeat until a full interval has passed
+        scheduleNextHeartbeat(HEARTBEAT_INTERVAL - timeSinceLastUpdate);
+      } else {
+        // Broadcast my state to the neighbourhood and schedule the next heartbeat
+        myState.value = { ...myState.value, lastUpdate: Date.now() };
+        agents.value[me.value.did] = myState.value;
+        broadcastState();
+        scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
+      }
+    }, delay);
   }
 
   function startSignalling(): void {
@@ -111,7 +118,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     broadcastState("first-broadcast");
 
     // Schedule first heartbeat
-    scheduleNextHeartbeat();
+    scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
 
     // Start the cleanup interval
     cleanupInterval = setInterval(updateAgentStatuses, CLEANUP_INTERVAL);
@@ -205,10 +212,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     { immediate: true, deep: true }
   );
 
-  onMounted(startSignalling);
-
-  onUnmounted(stopSignalling);
-
   return {
     // State
     signalling,
@@ -221,6 +224,9 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
     // Getters
     getAgentState,
+
+    startSignalling,
+    stopSignalling,
   };
 }
 

@@ -232,4 +232,7 @@ export interface SignallingService {
   setCurrentRoute: (params: RouteParams) => void;
 
   getAgentState(did: string): AgentState | undefined;
+
+  startSignalling: () => void;
+  stopSignalling: () => void;
 }
