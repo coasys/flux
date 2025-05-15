@@ -4,33 +4,32 @@ import { useContext, useState } from "preact/hooks";
 import { useEffect } from "react";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";
-import Avatar from "../Avatar";
 import styles from "./index.module.css";
 
 type Props = { agent: AgentClient; getProfile: (did: string) => Promise<Profile> };
 
 export default function Header({ agent, getProfile }: Props) {
   const { methods } = useContext(UIContext);
-  const [myDid, setMyDid] = useState("");
+  const [myProfile, setMyProfile] = useState<Profile | null>(null);
 
   function handlePostClick(type) {
     methods.toggleOverlay(true, type);
   }
 
-  async function getMyDid() {
+  async function getMyProfile() {
     const me = await agent.me();
-    setMyDid(me.did);
+    setMyProfile(await getProfile(me.did));
   }
 
   useEffect(() => {
-    getMyDid();
-  }, []);
+    if (getProfile) getMyProfile();
+  }, [getProfile]);
 
   return (
     <header className={styles.header}>
       <j-flex a="center" gap="500">
-        <a href={myDid}>
-          <Avatar size="lg" did={myDid} getProfile={getProfile} />
+        <a href={myProfile?.did}>
+          <j-avatar hash={myProfile?.did} src={myProfile?.profileThumbnailPicture || null} size="lg" />
         </a>
         <j-flex a="center" gap="200" style="width: 100%">
           <j-input onFocus={() => handlePostClick(PostOption.Text)} full size="lg" placeholder="Create a post" />

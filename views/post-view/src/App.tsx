@@ -34,7 +34,9 @@ function Main({ agent, perspective, source, getProfile }: Props) {
       return <Feed agent={agent} perspective={perspective} source={source} getProfile={getProfile} />;
     case View.Post:
       return (
-        UIState.currentPost && <Post agent={agent} perspective={perspective} source={source} id={UIState.currentPost} />
+        UIState.currentPost && (
+          <Post agent={agent} perspective={perspective} id={UIState.currentPost} getProfile={getProfile} />
+        )
       );
   }
 }

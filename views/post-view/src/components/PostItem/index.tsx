@@ -1,22 +1,14 @@
-import { useAgent } from "@coasys/ad4m-react-hooks";
 import { Profile } from "@coasys/flux-types";
-import { profileFormatter } from "@coasys/flux-utils";
 import { format, formatDistance } from "date-fns/esm";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { DisplayView } from "../../constants/options";
 import UIContext from "../../context/UIContext";
-import Avatar from "../Avatar";
 import styles from "./index.module.css";
 
-export default function PostItem({ agent, post, displayView, getProfile }) {
+export default function PostItem({ post, displayView, getProfile }) {
   const { methods: UIMehthods } = useContext(UIContext);
 
-  const { agent: author, profile } = useAgent<Profile>({
-    client: agent,
-    did: post.author,
-    formatter: profileFormatter,
-  });
-
+  const [author, setAuthor] = useState<Profile | null>(null);
   const [ogData, setOgData] = useState(null);
 
   async function fetchOgData(url) {
@@ -27,9 +19,11 @@ export default function PostItem({ agent, post, displayView, getProfile }) {
   }
 
   useEffect(() => {
-    if (post.url) {
-      fetchOgData(post.url);
-    }
+    if (post?.author) getProfile(post?.author).then((profile) => setAuthor(profile));
+  }, [post?.author]);
+
+  useEffect(() => {
+    if (post.url) fetchOgData(post.url);
   }, [post.image, post.url]);
 
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
@@ -55,15 +49,15 @@ export default function PostItem({ agent, post, displayView, getProfile }) {
 
         <j-box pt="400">
           <j-flex a="center" gap="300">
-            <a href={author?.did}>
-              <Avatar size="xxs" did={author?.did} getProfile={getProfile} />
+            <a href={author?.did} style={{ height: 20 }}>
+              <j-avatar hash={author?.did} src={author?.profileThumbnailPicture || null} size="xxs" />
             </a>
             <j-flex a="center" gap="200">
-              <a className={styles.authorName} href={author?.did}>
-                {profile?.username || <j-skeleton width="lg" height="text"></j-skeleton>}
+              <a href={author?.did} className={styles.authorName}>
+                {author ? author.username || "No name" : <j-skeleton width="lg" height="text" />}
               </a>
               <div className={styles.timestamp}>
-                <j-timestamp relative value={post.timestamp}></j-timestamp>
+                <j-timestamp relative value={post.timestamp} />
               </div>
             </j-flex>
           </j-flex>
@@ -72,7 +66,7 @@ export default function PostItem({ agent, post, displayView, getProfile }) {
         {showUrl && (
           <j-box pt="200">
             <div className={styles.postUrl}>
-              <j-icon size="xs" name="link"></j-icon>
+              <j-icon size="xs" name="link" />
               <a onClick={(e) => e.stopPropagation()} href={post.url} target="_blank">
                 {new URL(post.url).hostname}
               </a>
@@ -82,11 +76,11 @@ export default function PostItem({ agent, post, displayView, getProfile }) {
         {showDates && (
           <div className={styles.postDates}>
             <div className={styles.postDate}>
-              <j-icon size="xs" name="calendar-event"></j-icon>
+              <j-icon size="xs" name="calendar-event" />
               {format(new Date(post.startDate), "dd.MMMM HH:HH")}
             </div>
             <div className={styles.postDate}>
-              <j-icon size="xs" name="clock"></j-icon>
+              <j-icon size="xs" name="clock" />
               <j-tooltip title={format(new Date(post.endDate), "dd.MMMM HH:HH")}>
                 {formatDistance(new Date(post.startDate), new Date(post.endDate))}
               </j-tooltip>
@@ -95,7 +89,7 @@ export default function PostItem({ agent, post, displayView, getProfile }) {
         )}
         <j-box pt="500">
           <j-flex a="center" gap="200">
-            <j-icon size="xs" name="chat-left-text"></j-icon>
+            <j-icon size="xs" name="chat-left-text" />
             <span>{post.comments.length}</span>
           </j-flex>
         </j-box>
