@@ -24,7 +24,7 @@ export default function Avatar({ did, size = "sm", showName = false, style, getP
 
   return (
     <j-flex gap="300" a="center" style={style}>
-      <div className={styles.image}>
+      <div className={styles.image} style={{ height: size === "xs" ? 28 : 36 }}>
         <j-avatar size={size} src={profile.profileThumbnailPicture || null} hash={did} />
       </div>
       {showName && <j-text nomargin>{profile.username}</j-text>}
