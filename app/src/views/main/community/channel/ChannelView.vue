@@ -1,7 +1,11 @@
 <template>
-  <div class="channel-view" style="height: 100%" :class="{ expanded: isExpanded }">
+  <div
+    class="channel-view"
+    :class="{ expanded: isExpanded }"
+    :style="{ width: uiStore.showCallWindow ? `calc(100% - ${uiStore.callWindowWidth}` : '100%' }"
+  >
     <div class="channel-view__header">
-      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => ui.toggleCommunitySidebar()">
+      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
@@ -55,7 +59,13 @@
             </j-tooltip>
           </div>
 
-          <j-button size="sm" variant="primary" style="margin-left: 25px" :onClick="() => ui.setCallWindowOpen(true)">
+          <j-button
+            v-if="!showCallWindow"
+            size="sm"
+            variant="primary"
+            style="margin-left: 25px"
+            :onClick="() => uiStore.setCallWindowOpen(true)"
+          >
             <j-icon size="sm" name="telephone" style="margin-right: -5px" />
             Start call
           </j-button>
@@ -152,11 +162,15 @@ const { communityId, channelId, viewId } = defineProps({
 
 const router = useRouter();
 const route = useRoute();
-const app = useAppStore();
-const modals = useModalStore();
-const ui = useUIStore();
-const { me } = storeToRefs(app);
+
+const appStore = useAppStore();
+const modalStore = useModalStore();
+const uiStore = useUIStore();
+
 const { perspective, channels } = useCommunityService();
+
+const { me } = storeToRefs(appStore);
+const { showCallWindow } = storeToRefs(uiStore);
 
 const currentView = ref("");
 const webrtcModalOpen = ref(false);
@@ -186,7 +200,7 @@ const { entries: views } = useModel({
 });
 
 function goToEditChannel() {
-  modals.setShowEditChannel(true);
+  modalStore.setShowEditChannel(true);
 }
 
 function changeCurrentView(value: string) {
@@ -251,6 +265,7 @@ watch(views, (newVal, oldVal) => {
 .channel-view {
   position: relative;
   background: var(--app-channel-bg-color, transparent);
+  transition: width 0.5s ease-in-out;
 }
 
 .channel-view__header {

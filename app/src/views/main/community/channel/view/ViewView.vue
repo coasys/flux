@@ -13,11 +13,12 @@
       style="height: 100%"
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
       :source="channelId"
-      :agent="app.ad4mClient.agent"
+      :agent="appStore.ad4mClient.agent"
       :perspective="perspective"
       :getProfile="getCachedAgentProfile"
-      :appStore="app"
+      :appStore="appStore"
       :webrtcStore="webrtcStore"
+      :uiStore="uiStore"
       :signallingService="signallingService"
       :router="router"
       :currentView="route.params.viewId"
@@ -30,7 +31,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useWebRTCStore } from "@/store";
+import { useAppStore, useUIStore, useWebRTCStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
@@ -47,8 +48,9 @@ const { communityId, channelId, viewId } = defineProps({
 
 const router = useRouter();
 const route = useRoute();
-const app = useAppStore();
+const appStore = useAppStore();
 const webrtcStore = useWebRTCStore();
+const uiStore = useUIStore();
 const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);
@@ -78,7 +80,7 @@ function onAgentClick(did: string) {
 }
 
 async function onNeighbourhoodClick(url: any) {
-  const allMyPerspectives = await app.ad4mClient.perspective.all();
+  const allMyPerspectives = await appStore.ad4mClient.perspective.all();
   const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
 
   if (!neighbourhood) joinCommunityHandler(url);

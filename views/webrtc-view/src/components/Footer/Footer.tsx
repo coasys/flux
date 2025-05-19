@@ -1,14 +1,12 @@
 import { WebRTC } from "@coasys/flux-react-web";
-import { useContext, useRef } from "preact/hooks";
+import { useContext, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import styles from "./Footer.module.css";
 
 type Props = {
   webRTC: WebRTC;
+  uiStore: any;
   onToggleSettings: () => void;
-  // currentView: string;
-  fullscreen?: boolean;
-  setFullscreen?: (state: boolean) => void;
   leaveRoom?: () => void;
 };
 
@@ -41,7 +39,7 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, onToggleSettings, fullscreen, setFullscreen, leaveRoom }: Props) {
+export default function Footer({ webRTC, uiStore, onToggleSettings, leaveRoom }: Props) {
   const {
     hasJoined,
     localState,
@@ -54,11 +52,13 @@ export default function Footer({ webRTC, onToggleSettings, fullscreen, setFullsc
     onLeave,
   } = webRTC;
   const { video, audio, transcriber, screen } = localState.settings;
+
+  const [fullscreen, setFullscreen] = useState(false);
+
   const {
     state: { showSettings },
     methods: { toggleShowSettings },
   } = useContext(UiContext);
-
   const popOver = useRef<any>();
 
   const onEmojiClick = (event) => {
@@ -157,7 +157,15 @@ export default function Footer({ webRTC, onToggleSettings, fullscreen, setFullsc
 
         {/* {currentView !== "@coasys/flux-webrtc-view" && ( */}
         <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
-          <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+          <j-button
+            onClick={() => {
+              setFullscreen(!fullscreen);
+              uiStore.setCallWindowWidth(fullscreen ? "50%" : "100%");
+            }}
+            square
+            circle
+            size="lg"
+          >
             <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
           </j-button>
         </j-tooltip>

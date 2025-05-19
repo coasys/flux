@@ -10,18 +10,13 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   webrtcStore: any;
+  uiStore: any;
   getProfile: (did: string) => Promise<Profile>;
   close: () => void;
 };
 
 export default function App(props: Props) {
-  if (!props.perspective?.uuid || !props.source) {
-    return null;
-  }
+  if (!props.perspective?.uuid || !props.source) return null;
 
-  return (
-    <UiProvider>
-      <Channel {...props} />
-    </UiProvider>
-  );
+  return <UiProvider>{props.agent && <Channel {...props} />}</UiProvider>;
 }

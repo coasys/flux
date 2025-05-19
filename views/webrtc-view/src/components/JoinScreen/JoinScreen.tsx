@@ -7,10 +7,7 @@ type Props = {
   webRTC: WebRTC;
   profile?: Profile;
   did?: string;
-  // currentView: string;
   fullscreen?: boolean;
-  webrtcStore: any;
-  // router: any;
   onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
   joinRoom?: (e: any) => void;
@@ -21,14 +18,10 @@ export default function JoinScreen({
   webRTC,
   profile,
   did,
-  // currentView,
   fullscreen,
-  webrtcStore,
-  // router,
   onToggleSettings,
   setFullscreen,
   joinRoom,
-  leaveRoom,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -40,29 +33,13 @@ export default function JoinScreen({
   }, [videoRef, webRTC.localStream]);
 
   return (
-    <j-flex
-      a="center"
-      direction="column"
-      // style={{
-      //   width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
-      // }}
-    >
+    <j-flex a="center" direction="column">
       <h1>You haven't joined this room</h1>
 
       <j-text variant="body">Your microphone will be enabled.</j-text>
 
-      <j-box
-        pt="200"
-        // style={{
-        //   width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
-        // }}
-      >
-        <div
-          // className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
-          className={styles.preview}
-          data-camera-enabled={!!webRTC.localState.settings.video}
-          data-mirrored={true}
-        >
+      <j-box pt="200" style={{ width: "100%" }}>
+        <div className={styles.preview} data-camera-enabled={!!webRTC.localState.settings.video} data-mirrored={true}>
           <video ref={videoRef} className={styles.video} autoPlay playsInline />
 
           <div className={styles.details}>
@@ -96,13 +73,11 @@ export default function JoinScreen({
                   <j-icon name="gear"></j-icon>
                 </j-button>
               </j-tooltip>
-              {/* {currentView !== "@coasys/flux-webrtc-view" && ( */}
               <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
                 <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
                   <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
                 </j-button>
               </j-tooltip>
-              {/* )} */}
             </j-flex>
           </div>
         </div>
@@ -121,45 +96,16 @@ export default function JoinScreen({
       </j-box>
 
       <j-box pt="500">
-        {!!webrtcStore.callRoute ? (
-          <j-flex direction="column" gap="300" a="center">
-            <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
-
-            <j-flex gap="500" a="center">
-              {/* @ts-ignore */}
-              <j-button variant="danger" size="lg" onClick={leaveRoom}>
-                <j-icon name="telephone-x" />
-                Leave other call
-              </j-button>
-
-              <j-button
-                variant="primary"
-                size="lg"
-                // onClick={() => router.push({ name: "view", params: webrtcStore.callRoute })}
-              >
-                <j-icon name="arrow-up-circle" />
-                Go to other call
-              </j-button>
-            </j-flex>
-          </j-flex>
-        ) : (
-          <j-button
-            variant="primary"
-            size="lg"
-            loading={webRTC.isLoading}
-            disabled={!webRTC.audioPermissionGranted}
-            onClick={joinRoom}
-          >
-            Join room!
-          </j-button>
-        )}
+        <j-button
+          variant="primary"
+          size="lg"
+          loading={webRTC.isLoading}
+          disabled={!webRTC.audioPermissionGranted}
+          onClick={joinRoom}
+        >
+          Join room!
+        </j-button>
       </j-box>
-
-      {/* {currentView === "@coasys/flux-webrtc-view" && ( */}
-      {/* <j-box pt="400" style={{ positioon: abo}}>
-        <Disclaimer />
-      </j-box> */}
-      {/* // )} */}
 
       <>
         {!webRTC.audioPermissionGranted && (

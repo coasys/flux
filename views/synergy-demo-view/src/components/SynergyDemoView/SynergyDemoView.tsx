@@ -2,7 +2,6 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
 import { Profile, SignallingService } from "@coasys/flux-types";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
-import WebRTCView from "@coasys/flux-webrtc-view/src/App";
 import { cos_sim } from "@xenova/transformers";
 import { useEffect, useState } from "preact/hooks";
 import MatchColumn from "../MatchColumn";
@@ -14,8 +13,7 @@ type Props = {
   source: string;
   agent: AgentClient;
   appStore: any;
-  webrtcStore: any;
-  router: any;
+  uiStore: any;
   signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -25,8 +23,7 @@ export default function SynergyDemoView({
   agent,
   source,
   appStore,
-  webrtcStore,
-  router,
+  uiStore,
   signallingService,
   getProfile,
 }: Props) {
@@ -137,6 +134,8 @@ export default function SynergyDemoView({
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
+  useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? "33%" : "50%"), [showMatchColumn]);
+
   return (
     <div className={styles.wrapper}>
       <j-text uppercase size="500" weight="800" color="primary-500">
@@ -151,7 +150,8 @@ export default function SynergyDemoView({
       <j-flex className={styles.content}>
         <div
           style={{
-            width: showMatchColumn ? "33%" : "50%",
+            width: showMatchColumn ? "50%" : "100%",
+            maxWidth: 1200,
             transition: "width 0.5s ease-in-out",
           }}
         >
@@ -169,27 +169,12 @@ export default function SynergyDemoView({
         </div>
         <div
           style={{
-            width: showMatchColumn ? "33%" : "50%",
-            transition: "width 0.5s ease-in-out",
-          }}
-        >
-          <WebRTCView
-            perspective={perspective}
-            source={source}
-            agent={agent}
-            appStore={appStore}
-            webrtcStore={webrtcStore}
-            currentView="@coasys/flux-synergy-demo-view"
-            router={router}
-            getProfile={getProfile}
-          />
-        </div>
-        <div
-          style={{
-            width: showMatchColumn ? "33%" : "0%",
+            width: showMatchColumn ? "50%" : "0%",
             opacity: showMatchColumn ? "1" : "0",
             pointerEvents: showMatchColumn ? "all" : "none",
             transition: "all 0.5s ease-in-out",
+            maxWidth: 1200,
+            marginLeft: 40,
           }}
         >
           <MatchColumn

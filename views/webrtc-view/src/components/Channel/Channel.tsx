@@ -1,6 +1,6 @@
 import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { useWebRTC } from "@coasys/flux-react-web";
+import { useWebRTC, WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
@@ -21,11 +21,20 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   webrtcStore: any;
+  uiStore: any;
   getProfile: (did: string) => Promise<Profile>;
   close: () => void;
 };
 
-export default function Channel({ source, perspective, agent: agentClient, webrtcStore, getProfile, close }: Props) {
+export default function Channel({
+  source,
+  perspective,
+  agent: agentClient,
+  webrtcStore,
+  uiStore,
+  getProfile,
+  close,
+}: Props) {
   const [, forceUpdate] = useState({});
   const [agent, setAgent] = useState<Agent | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -33,6 +42,8 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   const wrapperEl = useRef<HTMLDivElement | null>(null);
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
+  const webRTCService = useRef<WebRTC | null>(null);
+  // const [webRTC, setWebRTC] = useState<WebRTC | null>(null);
 
   const {
     state: { showSettings, showDebug },
@@ -82,13 +93,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
         <Disclaimer />
       </j-box>
 
-      <button
-        className={styles.closeButton}
-        onClick={() => {
-          console.log("8889");
-          close();
-        }}
-      >
+      <button className={styles.closeButton} onClick={close}>
         <j-icon name="x" color="color-white" />
       </button>
 
@@ -98,13 +103,10 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
           profile={profile}
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
-          // currentView={currentView}
           fullscreen={fullscreen}
           setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
-          webrtcStore={webrtcStore}
-          // router={router}
         />
       )}
 
@@ -114,9 +116,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
-            // currentView={currentView}
-            fullscreen={fullscreen}
-            setFullscreen={setFullscreen}
+            uiStore={uiStore}
             leaveRoom={leaveRoom}
           />
           {webRTC.localState.settings.transcriber.on && (
