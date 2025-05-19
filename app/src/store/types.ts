@@ -51,10 +51,13 @@ export interface ThemeStore {
   currentTheme: string;
 }
 
+export type CallWindowWidth = "100%" | "50%" | "33%";
 export interface UIStore {
-  showSidebar: boolean;
-  showMainSidebar: boolean;
-  sidebarWidth: number;
+  showCommunitySidebar: boolean;
+  showAppSidebar: boolean;
+  communitySidebarWidth: number;
+  showCallWindow: boolean;
+  callWindowWidth: CallWindowWidth;
   showGlobalLoading: boolean;
   globalError: { show: boolean; message: string };
   windowState: WindowState;

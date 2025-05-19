@@ -1,36 +1,46 @@
-import type { UIStore } from "@/store/types";
+import type { CallWindowWidth, UIStore } from "@/store/types";
 import { defineStore } from "pinia";
 import { reactive, toRefs } from "vue";
 
 export const useUIStore = defineStore("ui", () => {
   const state = reactive<UIStore>({
-    showSidebar: true,
-    showMainSidebar: true,
-    sidebarWidth: 330,
+    showAppSidebar: true,
+    showCommunitySidebar: true,
+    communitySidebarWidth: 330,
+    showCallWindow: false,
+    callWindowWidth: "33%",
     showGlobalLoading: false,
     globalError: { show: false, message: "" },
     windowState: "visible",
   });
 
   // Mutations
-  function toggleSidebar(): void {
-    state.showSidebar = !state.showSidebar;
+  function toggleCommunitySidebar(): void {
+    state.showCommunitySidebar = !state.showCommunitySidebar;
   }
 
-  function toggleMainSidebar(): void {
-    state.showMainSidebar = !state.showMainSidebar;
+  function toggleAppSidebar(): void {
+    state.showAppSidebar = !state.showAppSidebar;
   }
 
-  function setMainSidebar(open: boolean): void {
-    state.showMainSidebar = open;
+  function setAppSidebarOpen(open: boolean): void {
+    state.showAppSidebar = open;
   }
 
-  function setSidebar(open: boolean): void {
-    state.showSidebar = open;
+  function setCommunitySidebarOpen(open: boolean): void {
+    state.showCommunitySidebar = open;
   }
 
-  function setSidebarWidth(width: number): void {
-    state.sidebarWidth = width;
+  function setCommunitySidebarWidth(width: number): void {
+    state.communitySidebarWidth = width;
+  }
+
+  function setCallWindowOpen(open: boolean): void {
+    state.showCallWindow = open;
+  }
+
+  function setCallWindowWidth(width: CallWindowWidth): void {
+    state.callWindowWidth = width;
   }
 
   function setWindowState(payload: "minimize" | "visible" | "foreground"): void {
@@ -50,11 +60,13 @@ export const useUIStore = defineStore("ui", () => {
     ...toRefs(state),
 
     // Mutations
-    toggleSidebar,
-    toggleMainSidebar,
-    setMainSidebar,
-    setSidebar,
-    setSidebarWidth,
+    toggleCommunitySidebar,
+    toggleAppSidebar,
+    setAppSidebarOpen,
+    setCommunitySidebarOpen,
+    setCommunitySidebarWidth,
+    setCallWindowOpen,
+    setCallWindowWidth,
     setWindowState,
     setGlobalLoading,
     setGlobalError,
