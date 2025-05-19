@@ -1,4 +1,4 @@
-import { useAppStore, useWebRTCStore } from "@/store";
+import { useAppStore, useUIStore, useWebRTCStore } from "@/store";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { createPinia, storeToRefs } from "pinia";
 import { createApp, h, watch } from "vue";
@@ -51,6 +51,13 @@ const vueApp = createApp({ render: () => h(App) })
 const webrtcStore = useWebRTCStore(pinia);
 const { callRoute } = storeToRefs(webrtcStore);
 callRoute.value = null;
+
+// Todo: remove
+// Reset call window state for now
+const uiStore = useUIStore(pinia);
+const { callWindowWidth, showCallWindow } = storeToRefs(uiStore);
+showCallWindow.value = false;
+callWindowWidth.value = "50%";
 
 // Initialize Ad4mClient
 const appStore = useAppStore(pinia);

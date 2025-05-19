@@ -1,4 +1,4 @@
-.outer {
+.wrapper {
   position: relative;
   display: grid;
   place-content: center;
@@ -8,9 +8,18 @@
   min-height: 100%;
   padding: var(--j-space-500);
 
+  .disclaimer {
+    position: absolute;
+    top: var(--j-space-500);
+    left: var(--j-space-500);
+  }
+
   .closeButton {
     all: unset;
     cursor: pointer;
+    position: absolute;
+    top: var(--j-space-500);
+    right: var(--j-space-500);
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -18,30 +27,27 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: 0;
-    right: 0;
     z-index: 5;
   }
 
-  &.fullscreen {
-    position: fixed;
-    width: calc(100vw - 100px);
-    height: 100vh;
-    top: 0;
-    left: 100px;
-    z-index: 1000;
-    background-color: var(--app-channel-bg-color);
+  // &.fullscreen {
+  //   position: fixed;
+  //   width: calc(100vw - 100px);
+  //   height: 100vh;
+  //   top: 0;
+  //   left: 100px;
+  //   z-index: 1000;
+  //   background-color: var(--app-channel-bg-color);
 
-    .closeButton {
-      top: var(--j-space-500);
-      right: var(--j-space-500);
-    }
-  }
+  //   .closeButton {
+  //     top: var(--j-space-500);
+  //     right: var(--j-space-500);
+  //   }
+  // }
 
-  &.synergy {
-    display: flex;
-    flex-direction: column;
-    place-content: unset;
-  }
+  // &.synergy {
+  //   display: flex;
+  //   flex-direction: column;
+  //   place-content: unset;
+  // }
 }

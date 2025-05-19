@@ -6,7 +6,7 @@ import MyComponent from "./App";
 
 const CustomElement = toCustomElement(
   MyComponent,
-  ["perspective", "agent", "source", "currentView", "setModalOpen", "appStore", "webrtcStore", "getProfile", "router"],
+  ["perspective", "agent", "source", "appStore", "webrtcStore", "getProfile", "close"],
   { shadow: false }
 );
 

@@ -6,6 +6,7 @@ import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import Debug from "../Debug";
+import Disclaimer from "../Disclaimer";
 import Footer from "../Footer";
 import JoinScreen from "../JoinScreen";
 import Notifications from "../Notifications";
@@ -20,22 +21,11 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   webrtcStore: any;
-  currentView: string;
-  router: any;
-  setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
+  close: () => void;
 };
 
-export default function Channel({
-  source,
-  perspective,
-  agent: agentClient,
-  webrtcStore,
-  currentView,
-  router,
-  setModalOpen,
-  getProfile,
-}: Props) {
+export default function Channel({ source, perspective, agent: agentClient, webrtcStore, getProfile, close }: Props) {
   const [, forceUpdate] = useState({});
   const [agent, setAgent] = useState<Agent | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -87,15 +77,20 @@ export default function Channel({
   }, [agent, getProfile]);
 
   return (
-    <section
-      className={`${styles.outer} ${fullscreen && styles.fullscreen} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
-      ref={wrapperEl}
-    >
-      {!["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(currentView) && setModalOpen && (
-        <button className={styles.closeButton} onClick={() => setModalOpen(false)}>
-          <j-icon name="x" color="color-white" />
-        </button>
-      )}
+    <section className={styles.wrapper} ref={wrapperEl}>
+      <j-box className={styles.disclaimer}>
+        <Disclaimer />
+      </j-box>
+
+      <button
+        className={styles.closeButton}
+        onClick={() => {
+          console.log("8889");
+          close();
+        }}
+      >
+        <j-icon name="x" color="color-white" />
+      </button>
 
       {!webRTC.hasJoined && profile && (
         <JoinScreen
@@ -103,13 +98,13 @@ export default function Channel({
           profile={profile}
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
-          currentView={currentView}
+          // currentView={currentView}
           fullscreen={fullscreen}
           setFullscreen={setFullscreen}
           joinRoom={joinRoom}
           leaveRoom={leaveRoom}
           webrtcStore={webrtcStore}
-          router={router}
+          // router={router}
         />
       )}
 
@@ -119,7 +114,7 @@ export default function Channel({
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
-            currentView={currentView}
+            // currentView={currentView}
             fullscreen={fullscreen}
             setFullscreen={setFullscreen}
             leaveRoom={leaveRoom}

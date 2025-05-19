@@ -123,7 +123,7 @@ function getIcon(view: ChannelView | string) {
 }
 
 function navigateToChannel() {
-  ui.setSidebar(false);
+  ui.setCommunitySidebarOpen(false);
 
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;

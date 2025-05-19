@@ -6,7 +6,7 @@ import styles from "./Footer.module.css";
 type Props = {
   webRTC: WebRTC;
   onToggleSettings: () => void;
-  currentView: string;
+  // currentView: string;
   fullscreen?: boolean;
   setFullscreen?: (state: boolean) => void;
   leaveRoom?: () => void;
@@ -41,7 +41,7 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, onToggleSettings, currentView, fullscreen, setFullscreen, leaveRoom }: Props) {
+export default function Footer({ webRTC, onToggleSettings, fullscreen, setFullscreen, leaveRoom }: Props) {
   const {
     hasJoined,
     localState,
@@ -155,13 +155,13 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
           </j-button>
         </j-tooltip>
 
-        {currentView !== "@coasys/flux-webrtc-view" && (
-          <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
-            <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
-              <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
-            </j-button>
-          </j-tooltip>
-        )}
+        {/* {currentView !== "@coasys/flux-webrtc-view" && ( */}
+        <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+          <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+            <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+          </j-button>
+        </j-tooltip>
+        {/* )} */}
 
         {/* 
         <j-tooltip placement="top" title="Experiments">

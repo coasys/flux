@@ -1,9 +1,9 @@
 <template>
   <div
     class="community-layout"
-    :class="{ 'community-layout--closed': !showSidebar, 'community-layout--is-dragging': isDragging }"
+    :class="{ 'community-layout--closed': !showCommunitySidebar, 'community-layout--is-dragging': isDragging }"
   >
-    <aside ref="sidebar" class="community-layout__drawer" :style="{ width: `${sidebarWidth}px` }">
+    <aside ref="sidebar" class="community-layout__drawer" :style="{ width: `${communitySidebarWidth}px` }">
       <span role="presentation" class="community-layout__resize-handle" @mousedown="startResize"></span>
       <slot name="sidebar"></slot>
     </aside>
@@ -20,7 +20,7 @@ import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 const ui = useUIStore();
-const { showSidebar, sidebarWidth } = storeToRefs(ui);
+const { showCommunitySidebar, communitySidebarWidth } = storeToRefs(ui);
 
 const sidebar = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
@@ -37,7 +37,7 @@ function startResize(e: any) {
 }
 
 function doResize(e: any) {
-  ui.setSidebarWidth(startWidth.value + (e.clientX - startX.value));
+  ui.setCommunitySidebarWidth(startWidth.value + (e.clientX - startX.value));
 }
 
 function stopResize() {

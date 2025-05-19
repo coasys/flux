@@ -3,9 +3,10 @@
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
     class="app-layout"
-    :class="{ 'app-layout--show-sidebar': showMainSidebar }"
+    :class="{ 'app-layout--show-sidebar': showAppSidebar }"
   >
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
+    <div class="app-layout__webrtc"><slot name="webrtc"></slot></div>
     <main class="app-layout__main"><slot></slot></main>
   </div>
 </template>
@@ -16,7 +17,7 @@ import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 const ui = useUIStore();
-const { showSidebar, showMainSidebar } = storeToRefs(ui);
+const { showCommunitySidebar, showAppSidebar } = storeToRefs(ui);
 
 const touchstartX = ref(0);
 const touchendX = ref(0);
@@ -34,18 +35,18 @@ function checkDirection() {
   const treshold = 70;
   // Left swipe
   if (touchendX.value + treshold < touchstartX.value) {
-    if (showMainSidebar) ui.setMainSidebar(false);
-    else ui.setSidebar(false);
+    if (showAppSidebar) ui.setAppSidebarOpen(false);
+    else ui.setCommunitySidebarOpen(false);
   }
   // Right swipe
   if (touchendX.value > touchstartX.value + treshold) {
-    if (!showMainSidebar && showSidebar) ui.setMainSidebar(true);
-    else ui.setSidebar(true);
+    if (!showAppSidebar && showCommunitySidebar) ui.setAppSidebarOpen(true);
+    else ui.setCommunitySidebarOpen(true);
   }
 }
 </script>
 
-<style>
+<style lang="scss">
 .app-layout {
   height: 100%;
   display: grid;
@@ -85,6 +86,16 @@ function checkDirection() {
   .app-layout__sidebar {
     z-index: 0;
   }
+}
+
+.app-layout__webrtc {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
 }
 
 .app-layout__main {

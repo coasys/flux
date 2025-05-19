@@ -1,8 +1,8 @@
 <template>
   <div class="sidebar-header">
     <div class="sidebar-header__top">
-      <j-button variant="ghost" size="sm" @click="ui.toggleMainSidebar">
-        <j-icon size="sm" :name="showMainSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
+      <j-button variant="ghost" size="sm" @click="ui.toggleAppSidebar">
+        <j-icon size="sm" :name="showAppSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
       </j-button>
 
       <j-popover
@@ -79,7 +79,7 @@ defineOptions({ name: "Header" });
 const app = useAppStore();
 const ui = useUIStore();
 const modals = useModalStore();
-const { showMainSidebar } = storeToRefs(ui);
+const { showAppSidebar } = storeToRefs(ui);
 
 const { isSynced, isAuthor, community } = useCommunityService();
 

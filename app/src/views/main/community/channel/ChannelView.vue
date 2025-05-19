@@ -1,7 +1,7 @@
 <template>
   <div class="channel-view" style="height: 100%" :class="{ expanded: isExpanded }">
     <div class="channel-view__header">
-      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => ui.toggleSidebar()">
+      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => ui.toggleCommunitySidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
@@ -54,6 +54,11 @@
               </j-button>
             </j-tooltip>
           </div>
+
+          <j-button size="sm" variant="primary" style="margin-left: 25px" :onClick="() => ui.setCallWindowOpen(true)">
+            <j-icon size="sm" name="telephone" style="margin-right: -5px" />
+            Start call
+          </j-button>
         </div>
       </div>
 

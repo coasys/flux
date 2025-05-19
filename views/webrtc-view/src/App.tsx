@@ -10,10 +10,8 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   webrtcStore: any;
-  currentView: string;
-  router: any;
-  setModalOpen?: (state: boolean) => void;
   getProfile: (did: string) => Promise<Profile>;
+  close: () => void;
 };
 
 export default function App(props: Props) {

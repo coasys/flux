@@ -1,17 +1,16 @@
 import { WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
 import { useEffect, useRef } from "preact/hooks";
-import Disclaimer from "../Disclaimer";
 import styles from "./JoinScreen.module.scss";
 
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
   did?: string;
-  currentView: string;
+  // currentView: string;
   fullscreen?: boolean;
   webrtcStore: any;
-  router: any;
+  // router: any;
   onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
   joinRoom?: (e: any) => void;
@@ -22,10 +21,10 @@ export default function JoinScreen({
   webRTC,
   profile,
   did,
-  currentView,
+  // currentView,
   fullscreen,
   webrtcStore,
-  router,
+  // router,
   onToggleSettings,
   setFullscreen,
   joinRoom,
@@ -44,9 +43,9 @@ export default function JoinScreen({
     <j-flex
       a="center"
       direction="column"
-      style={{
-        width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
-      }}
+      // style={{
+      //   width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
+      // }}
     >
       <h1>You haven't joined this room</h1>
 
@@ -54,12 +53,13 @@ export default function JoinScreen({
 
       <j-box
         pt="200"
-        style={{
-          width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
-        }}
+        // style={{
+        //   width: currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
+        // }}
       >
         <div
-          className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+          // className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
+          className={styles.preview}
           data-camera-enabled={!!webRTC.localState.settings.video}
           data-mirrored={true}
         >
@@ -96,13 +96,13 @@ export default function JoinScreen({
                   <j-icon name="gear"></j-icon>
                 </j-button>
               </j-tooltip>
-              {currentView !== "@coasys/flux-webrtc-view" && (
-                <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
-                  <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
-                    <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
-                  </j-button>
-                </j-tooltip>
-              )}
+              {/* {currentView !== "@coasys/flux-webrtc-view" && ( */}
+              <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+                <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+                  <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+                </j-button>
+              </j-tooltip>
+              {/* )} */}
             </j-flex>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function JoinScreen({
               <j-button
                 variant="primary"
                 size="lg"
-                onClick={() => router.push({ name: "view", params: webrtcStore.callRoute })}
+                // onClick={() => router.push({ name: "view", params: webrtcStore.callRoute })}
               >
                 <j-icon name="arrow-up-circle" />
                 Go to other call
@@ -155,11 +155,11 @@ export default function JoinScreen({
         )}
       </j-box>
 
-      {currentView === "@coasys/flux-webrtc-view" && (
-        <j-box pt="400">
-          <Disclaimer />
-        </j-box>
-      )}
+      {/* {currentView === "@coasys/flux-webrtc-view" && ( */}
+      {/* <j-box pt="400" style={{ positioon: abo}}>
+        <Disclaimer />
+      </j-box> */}
+      {/* // )} */}
 
       <>
         {!webRTC.audioPermissionGranted && (

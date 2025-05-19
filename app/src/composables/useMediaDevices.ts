@@ -91,6 +91,46 @@ export function useMediaDevices() {
     }
   }
 
+  function toggleTrack(type: "audio" | "video", enabled: boolean) {
+    if (!stream.value) return;
+
+    const tracks = type === "audio" ? stream.value.getAudioTracks() : stream.value.getVideoTracks();
+
+    tracks.forEach((track) => {
+      track.enabled = enabled;
+    });
+  }
+
+  async function startScreenShare() {
+    if (!navigator.mediaDevices.getDisplayMedia) {
+      throw new Error("Screen sharing not supported in this browser");
+    }
+
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+
+      // If we already have a stream, we need to keep audio tracks
+      if (stream.value) {
+        // Stop existing video tracks
+        stream.value.getVideoTracks().forEach((track) => track.stop());
+
+        // Add screen share track to existing stream
+        const videoTrack = screenStream.getVideoTracks()[0];
+        stream.value.addTrack(videoTrack);
+
+        // Return the mixed stream
+        return stream.value;
+      } else {
+        // Just return the screen stream if we don't have a stream yet
+        stream.value = screenStream;
+        return screenStream;
+      }
+    } catch (err) {
+      console.error("Screen sharing error:", err);
+      throw err;
+    }
+  }
+
   // Device change listener
   navigator.mediaDevices.addEventListener("devicechange", refreshDeviceList);
 
@@ -124,5 +164,8 @@ export function useMediaDevices() {
     selectMicrophone,
     stopStream,
     refreshDeviceList,
+    toggleTrack,
+    startScreenShare,
+    restartStream,
   };
 }

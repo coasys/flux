@@ -90,11 +90,11 @@ function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
   modals.setShowLeaveCommunity(show);
 }
 
-// Todo: investigate why toggleSidebar class applied in CommunityLayout doesn't change the UI
+// Todo: investigate why toggleCommunitySidebar class applied in CommunityLayout doesn't change the UI
 function handleCommunityClick(communityId: string) {
-  if (communityIsActive(communityId)) ui.toggleSidebar();
+  if (communityIsActive(communityId)) ui.toggleCommunitySidebar();
   else {
-    ui.setSidebar(true);
+    ui.setCommunitySidebarOpen(true);
     // Navigate back to the last route if saved
     const routeMemory = useRouteMemoryStore();
     const lastRoute = routeMemory.getLastRoute(communityId);

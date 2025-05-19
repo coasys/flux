@@ -8,7 +8,7 @@ export const useUIStore = defineStore("ui", () => {
     showCommunitySidebar: true,
     communitySidebarWidth: 330,
     showCallWindow: false,
-    callWindowWidth: "33%",
+    callWindowWidth: "50%",
     showGlobalLoading: false,
     globalError: { show: false, message: "" },
     windowState: "visible",

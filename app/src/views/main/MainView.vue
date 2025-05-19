@@ -5,6 +5,11 @@
       <MainSidebar />
     </template>
 
+    <!-- WebRTC component -->
+    <template v-slot:webrtc>
+      <WebRTC />
+    </template>
+
     <!-- Main content -->
     <RouterView v-slot="{ Component }">
       <KeepAlive :include="['CommunityView']" :max="5">
@@ -146,6 +151,7 @@
 
 <script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
+import WebRTC from "@/components/webrtc/WebRTC.vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";

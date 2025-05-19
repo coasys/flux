@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    <div class="sidebar" @click="() => ui.setMainSidebar(!ui.showMainSidebar)">
+    <div class="sidebar" @click="() => ui.setAppSidebarOpen(!ui.showAppSidebar)">
       <j-icon name="layout-sidebar" size="md"></j-icon>
     </div>
   </div>
