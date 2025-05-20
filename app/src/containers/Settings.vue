@@ -16,43 +16,20 @@
           </j-tab-item>
         </j-tabs>
         <div class="settings__content">
-          <theme-editor v-if="currentView === 'theme-editor'" @update="updateGlobalTheme" :theme="theme" />
-          <privacy v-if="currentView === 'privacy'" />
+          <ThemeEditor v-if="currentView === 'theme-editor'" />
+          <Privacy v-if="currentView === 'privacy'" />
         </div>
       </aside>
     </div>
   </j-box>
 </template>
 
-<script lang="ts">
-import { Theme, useThemeStore } from "@/store";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { ref } from "vue";
 import Privacy from "./Privacy.vue";
 import ThemeEditor from "./ThemeEditor.vue";
 
-export default defineComponent({
-  components: { ThemeEditor, Privacy },
-  setup() {
-    const theme = useThemeStore();
-
-    return { theme };
-  },
-  data() {
-    return {
-      currentView: "theme-editor",
-    };
-  },
-  methods: {
-    updateGlobalTheme(val: Theme) {
-      this.theme.updateGlobalTheme(val);
-    },
-  },
-  computed: {
-    theme(): Theme {
-      return this.theme.globalTheme;
-    },
-  },
-});
+const currentView = ref("theme-editor");
 </script>
 
 <style scoped>

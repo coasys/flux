@@ -13,14 +13,10 @@
             v-for="n in [0, 20, 50, 100, 150, 200, 220, 241, 270, 300, 340]"
             :key="n"
             class="color-button"
-            @click="() => updateTheme({ hue: n })"
+            @click="() => themeStore.updateGlobalTheme({ hue: n })"
             :style="`--hue: ${n}`"
           >
-            <j-icon
-              style="color: var(--j-color-white)"
-              v-if="theme.hue === n"
-              name="check"
-            />
+            <j-icon style="color: var(--j-color-white)" v-if="globalTheme.hue === n" name="check" />
           </button>
         </div>
       </j-box>
@@ -30,8 +26,8 @@
       <j-tabs
         variant="button"
         wrap
-        :value="theme.name"
-        @change="(e: any) => updateTheme({ name: e.target.value })"
+        :value="globalTheme.name"
+        @change="(e: any) => themeStore.updateGlobalTheme({ name: e.target.value })"
       >
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
@@ -48,8 +44,8 @@
       <j-tabs
         variant="button"
         wrap
-        :value="theme.fontFamily"
-        @change="(e: any) => updateTheme({ fontFamily: e.target.value })"
+        :value="globalTheme.fontFamily"
+        @change="(e: any) => themeStore.updateGlobalTheme({ fontFamily: e.target.value })"
       >
         <j-tab-item value="DM Sans">DM Sans</j-tab-item>
         <j-tab-item value="Poppins">Poppins</j-tab-item>
@@ -69,8 +65,8 @@
       <j-tabs
         variant="button"
         wrap
-        :value="theme.saturation.toString()"
-        @change="(e: any) => updateTheme({ saturation: e.target.value })"
+        :value="globalTheme.saturation.toString()"
+        @change="(e: any) => themeStore.updateGlobalTheme({ saturation: e.target.value })"
       >
         <j-tab-item value="30">Weak</j-tab-item>
         <j-tab-item value="60">Normal</j-tab-item>
@@ -84,8 +80,8 @@
       <j-tabs
         variant="button"
         wrap
-        :value="theme.fontSize.replace('px', '')"
-        @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
+        :value="globalTheme.fontSize.replace('px', '')"
+        @change="(e: any) => themeStore.updateGlobalTheme({ fontSize: e.target.value + 'px' })"
       >
         <j-tab-item value="15">Small</j-tab-item>
         <j-tab-item value="16">Medium</j-tab-item>
@@ -95,20 +91,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  emits: ["update"],
-  props: ["theme"],
-  methods: {
-    updateTheme(val: any) {
-      if (this.theme) {
-        this.$emit("update", val);
-      }
-    },
-  },
-});
+<script setup lang="ts">
+import { useThemeStore } from "@/store";
+import { storeToRefs } from "pinia";
+const themeStore = useThemeStore();
+const { globalTheme } = storeToRefs(themeStore);
 </script>
 
 <style scoped>

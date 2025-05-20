@@ -39,7 +39,7 @@ export const useThemeStore = defineStore("theme", () => {
     // Todo: Update community theme
   }
 
-  async function updateGlobalTheme(payload: Theme): Promise<void> {
+  async function updateGlobalTheme(payload: Partial<Theme>): Promise<void> {
     const mergedTheme = { ...state.globalTheme, ...payload };
     if (state.currentTheme === "global") setTheme(mergedTheme);
     setGlobalTheme(mergedTheme);
