@@ -5,6 +5,22 @@
   gap: 15px;
   height: calc(100vh - 320px);
 
+  .closeButton {
+    all: unset;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--j-color-ui-200);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+  }
+
   .results {
     height: 100%;
     overflow-y: scroll;

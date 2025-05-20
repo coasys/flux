@@ -87,9 +87,9 @@ export default function MatchColumn({
           >
             Include Channel
           </j-checkbox>
-          <j-button size="sm" onClick={close} style={{ position: "absolute", right: 0 }}>
-            <j-icon name="x" />
-          </j-button>
+          <button className={styles.closeButton} onClick={close}>
+            <j-icon name="x" color="color-white" />
+          </button>
         </j-flex>
         <h2>{matchText()}</h2>
       </j-flex>
