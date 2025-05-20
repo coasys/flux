@@ -89,9 +89,11 @@ export default function Channel({
 
   return (
     <section className={styles.wrapper} ref={wrapperEl}>
-      <j-box className={styles.disclaimer}>
-        <Disclaimer />
-      </j-box>
+      {!webRTC.hasJoined && (
+        <j-box className={styles.disclaimer}>
+          <Disclaimer />
+        </j-box>
+      )}
 
       <button className={styles.closeButton} onClick={close}>
         <j-icon name="x" color="color-white" />
