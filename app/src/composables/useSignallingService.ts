@@ -20,7 +20,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
-    status: "active",
+    status: agentStatus.value,
     currentRoute: null,
     callRoute: null,
     processing: null,
