@@ -80,7 +80,9 @@ const agentsInChannel = ref<AgentData[]>([]);
 const isChannelCreator = computed(() => channel.author === me.value.did);
 const activeAgents = computed(() =>
   agentsInChannel.value.filter(
-    (agent) => agent.status !== "offline" && (!agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
+    (agent) =>
+      !["offline", "invisible"].includes(agent.status) &&
+      (!agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
   )
 );
 const agentsInCall = computed(() =>
