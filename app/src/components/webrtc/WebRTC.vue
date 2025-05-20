@@ -145,6 +145,7 @@ onMounted(async () => {
     position: relative;
     display: flex;
     justify-content: flex-end;
+    overflow: hidden;
 
     .call-window {
       z-index: 1;
