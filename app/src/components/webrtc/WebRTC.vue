@@ -2,20 +2,86 @@
   <div class="wrapper">
     <div class="left-section" :style="{ width: `calc(${communitySidebarWidth}px + 100px)` }">
       <div class="controls">
-        <j-flex v-if="callRoute" j="between" a="center">
-          <j-text nomargin>In call: {{ callRoute.communityId }}</j-text>
+        <j-flex v-if="callRoute" direction="column">
+          <j-flex j="between" a="center">
+            <j-flex
+              direction="column"
+              gap="100"
+              @click="router.push({ name: 'view', params: callRoute })"
+              style="cursor: pointer"
+            >
+              <j-flex a="center">
+                <div class="connection-icon">
+                  <j-icon name="wifi" color="success-500" style="rotate: 45deg" />
+                </div>
+                <j-text color="success-500" nomargin> {{ connectiontext }} </j-text>
+              </j-flex>
+              <j-text nomargin size="400">
+                <b>{{ communityName }}</b> / {{ channelName }}
+              </j-text>
+            </j-flex>
+
+            <j-flex a="center" gap="500">
+              <j-icon :name="`mic${audioEnabled ? '' : '-mute'}`" color="ui-500" @click="webrtcStore.toggleAudio" />
+              <j-icon
+                :name="`camera-video${videoEnabled ? '' : '-off'}`"
+                color="ui-500"
+                @click="webrtcStore.toggleVideo"
+              />
+              <j-icon name="telephone-x" color="danger-500" @click="webrtcStore.leaveRoom" />
+            </j-flex>
+          </j-flex>
         </j-flex>
 
         <j-flex j="between" a="center">
           <j-flex a="center" gap="300">
-            <j-avatar :hash="appStore.me.did" :src="myProfile?.profileThumbnailPicture" />
-            <j-text nomargin>{{ myProfile?.username }}</j-text></j-flex
-          >
+            <j-avatar
+              :hash="appStore.me.did"
+              :src="myProfile?.profileThumbnailPicture"
+              @click="profileClick"
+              style="cursor: pointer"
+            />
 
-          <j-flex a="center" gap="400">
-            <j-icon name="mic" color="ui-500" @click="" />
-            <j-icon name="headset" color="ui-500" @click="" />
-            <j-icon name="gear" color="ui-500" @click="" />
+            <j-flex direction="column">
+              <j-text nomargin weight="600" @click="profileClick" style="cursor: pointer">
+                {{ myProfile?.username }}
+              </j-text>
+
+              <j-popover
+                :open="showAgentStatusMenu"
+                @toggle="(e: any) => (showAgentStatusMenu = e.target.open)"
+                event="click"
+                placement="top-end"
+                style="cursor: pointer; margin-top: 2px"
+              >
+                <j-flex slot="trigger" a="center" gap="100">
+                  <div class="agent-status" :class="agentStatus" />
+                  <j-text nomargin size="300">{{ agentStatus }}</j-text>
+                </j-flex>
+
+                <j-menu slot="content">
+                  <j-menu-item
+                    v-for="status in agentStatuses"
+                    @click="
+                      agentStatus = status;
+                      showAgentStatusMenu = false;
+                    "
+                  >
+                    <div slot="start" class="agent-status" :class="status" />
+                    {{ status }}
+                  </j-menu-item>
+                </j-menu>
+              </j-popover>
+            </j-flex>
+          </j-flex>
+
+          <j-flex a="center" gap="500">
+            <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
+            <j-icon
+              :name="`arrows-angle-${showCallWindow ? 'contract' : 'expand'}`"
+              color="ui-500"
+              @click="() => uiStore.setCallWindowOpen(!showCallWindow)"
+            />
           </j-flex>
         </j-flex>
       </div>
@@ -24,13 +90,13 @@
     <div class="right-section">
       <div
         class="call-window"
-        v-if="!loading && appStore.ad4mClient.agent"
         :style="{ width: showCallWindow ? callWindowWidth : 0, opacity: showCallWindow ? 1 : 0 }"
       >
         <component
-          :is="wcName"
+          v-if="ready && appStore.ad4mClient.agent"
+          :is="webcomponentName"
           :perspective="perspective"
-          :source="route.params.channelId"
+          :source="source"
           :agent="appStore.ad4mClient.agent"
           :appStore="appStore"
           :webrtcStore="webrtcStore"
@@ -45,15 +111,15 @@
 <script setup lang="ts">
 import { useAppStore, useUIStore } from "@/store";
 import { useWebRTCStore } from "@/store/webrtc";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Profile } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import "@coasys/flux-webrtc-view";
-import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { generateWCName } from "@coasys/flux-api";
+import { AgentStatus, Profile } from "@coasys/flux-types";
+import "@coasys/flux-webrtc-view";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
@@ -62,29 +128,29 @@ const uiStore = useUIStore();
 const webrtcStore = useWebRTCStore();
 
 const { communitySidebarWidth, showCallWindow, callWindowWidth } = storeToRefs(uiStore);
-const { callRoute } = storeToRefs(webrtcStore);
-
-// todo, update to be controlled by user
-const communityId = route.params.communityId as string;
-const channelId = route.params.channelId as string;
-
-// // State for UI controls
-// const isAudioEnabled = ref(true);
-// const isVideoEnabled = ref(true);
-// const isScreenSharing = ref(false);
-const perspective = shallowRef<PerspectiveProxy>();
-
-// const perspective = ref<PerspectiveProxy | null>(null);
+const { audioEnabled, videoEnabled, callRoute, communityName, channelName, preliminaryCallRoute, agentStatus } =
+  storeToRefs(webrtcStore);
 
 const myProfile = ref<Profile | null>(null);
+const webcomponentName = ref("");
+const perspective = shallowRef<PerspectiveProxy>();
+const source = ref("");
+const ready = ref(false);
+const showAgentStatusMenu = ref(false);
 
-const loading = ref(true);
-const wcName = ref<string>("");
+const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
-onMounted(async () => {
+const connectiontext = computed(() => {
+  if (audioEnabled.value && videoEnabled.value) return "Video connected";
+  else if (audioEnabled.value) return "Voice connected";
+  return "Connected";
+});
+
+async function getMyProfile() {
   myProfile.value = await getCachedAgentProfile(appStore.me.did);
-  perspective.value = (await appStore.ad4mClient.perspective.byUUID(communityId)) as PerspectiveProxy;
+}
 
+async function registerWebcomponent() {
   const generatedName = await generateWCName("@coasys/flux-webrtc-view");
 
   if (!customElements.get(generatedName)) {
@@ -98,9 +164,42 @@ onMounted(async () => {
     }
   }
 
-  wcName.value = generatedName;
-  loading.value = false;
+  webcomponentName.value = generatedName;
+}
+
+async function getPerspective() {
+  console.log("******** getting new call perspective");
+  // Get the community perspective
+  const communityId = route.params.communityId as string;
+  perspective.value = (await appStore.ad4mClient.perspective.byUUID(communityId)) as PerspectiveProxy;
+
+  // Set the channel ID as the source
+  source.value = route.params.channelId as string;
+
+  // Set the preliminary call route in the webrtc store
+  console.log("setting preliminary call route", route.params);
+  preliminaryCallRoute.value = route.params;
+
+  // Mark the component as ready
+  if (!ready.value) ready.value = true;
+}
+
+function profileClick() {
+  router.push({ name: "home", params: { did: appStore.me.did } });
+}
+
+onMounted(async () => {
+  getMyProfile();
+  registerWebcomponent();
 });
+
+watch(
+  () => route.params.communityId,
+  (newCommunityId, oldCommunityId) => {
+    if (!callRoute.value && newCommunityId && newCommunityId !== oldCommunityId) getPerspective();
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -108,6 +207,11 @@ onMounted(async () => {
   display: flex;
   width: 100%;
   height: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 20;
 
   .left-section {
     position: relative;
@@ -120,8 +224,10 @@ onMounted(async () => {
     flex-shrink: 0;
 
     .controls {
-      z-index: 2;
       pointer-events: auto;
+      gap: 20px;
+      display: flex;
+      flex-direction: column;
       margin: 20px;
       width: calc(100% - 40px);
       border-radius: 10px;
@@ -136,6 +242,39 @@ onMounted(async () => {
 
       j-icon {
         --j-icon-size: 22px;
+        cursor: pointer;
+      }
+
+      .connection-icon {
+        height: 26px;
+        margin: 0 5px 0 -7px;
+
+        j-icon {
+          --j-icon-size: 26px;
+        }
+      }
+
+      .agent-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--j-color-ui-200);
+
+        &.active {
+          background-color: var(--j-color-success-500);
+        }
+
+        &.asleep {
+          background-color: var(--j-color-warning-500);
+        }
+
+        &.busy {
+          background-color: var(--j-color-danger-500);
+        }
+
+        &.invisible {
+          border: 1px solid var(--j-color-ui-400);
+        }
       }
     }
   }
@@ -148,7 +287,6 @@ onMounted(async () => {
     overflow: hidden;
 
     .call-window {
-      z-index: 1;
       pointer-events: auto;
       height: 100%;
       background-color: #1c1a1f; // var(--j-color-ui-100);

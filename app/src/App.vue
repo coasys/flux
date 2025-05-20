@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <router-view></router-view>
+    <RouterView />
   </Suspense>
 
   <div class="global-modal" v-if="showGlobalLoading">

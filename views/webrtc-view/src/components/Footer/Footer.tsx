@@ -1,11 +1,12 @@
 import { WebRTC } from "@coasys/flux-react-web";
-import { useContext, useRef, useState } from "preact/hooks";
+import { useContext, useRef } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import styles from "./Footer.module.css";
 
 type Props = {
   webRTC: WebRTC;
   uiStore: any;
+  webrtcStore: any;
   onToggleSettings: () => void;
   leaveRoom?: () => void;
 };
@@ -39,21 +40,10 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, uiStore, onToggleSettings, leaveRoom }: Props) {
-  const {
-    hasJoined,
-    localState,
-    devices,
-    onReaction,
-    onToggleCamera,
-    onToggleAudio,
-    updateTranscriptionSetting,
-    onToggleScreenShare,
-    onLeave,
-  } = webRTC;
+export default function Footer({ webRTC, uiStore, webrtcStore, onToggleSettings, leaveRoom }: Props) {
+  const { hasJoined, localState, devices, onReaction, updateTranscriptionSetting, onToggleScreenShare, onLeave } =
+    webRTC;
   const { video, audio, transcriber, screen } = localState.settings;
-
-  const [fullscreen, setFullscreen] = useState(false);
 
   const {
     state: { showSettings },
@@ -72,7 +62,7 @@ export default function Footer({ webRTC, uiStore, onToggleSettings, leaveRoom }:
         <j-tooltip placement="top" title={video ? "Disable camera" : "Enable camera"}>
           <j-button
             variant={video ? "" : "primary"}
-            onClick={() => onToggleCamera(!video)}
+            onClick={webrtcStore.toggleVideo}
             square
             circle
             size="lg"
@@ -85,7 +75,7 @@ export default function Footer({ webRTC, uiStore, onToggleSettings, leaveRoom }:
         <j-tooltip placement="top" title={audio ? "Mute microphone" : "Unmute microphone"}>
           <j-button
             variant={audio ? "" : "primary"}
-            onClick={() => onToggleAudio(!audio)}
+            onClick={webrtcStore.toggleAudio}
             square
             circle
             size="lg"
@@ -155,21 +145,21 @@ export default function Footer({ webRTC, uiStore, onToggleSettings, leaveRoom }:
           </j-button>
         </j-tooltip>
 
-        {/* {currentView !== "@coasys/flux-webrtc-view" && ( */}
-        <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+        <j-tooltip placement="top" title={uiStore?.callWindowWidth === "100%" ? "Shrink screen" : "Full screen"}>
           <j-button
             onClick={() => {
-              setFullscreen(!fullscreen);
-              uiStore.setCallWindowWidth(fullscreen ? "50%" : "100%");
+              // setFullscreen(!fullscreen);
+              // uiStore.setCallWindowWidth(fullscreen ? "50%" : "100%");
+              console.log("uiStore: ", uiStore);
+              uiStore?.toggleCallFullscreen();
             }}
             square
             circle
             size="lg"
           >
-            <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+            <j-icon name={`arrows-angle-${uiStore?.callWindowWidth === "100%" ? "contract" : "expand"}`} />
           </j-button>
         </j-tooltip>
-        {/* )} */}
 
         {/* 
         <j-tooltip placement="top" title="Experiments">

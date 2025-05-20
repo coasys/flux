@@ -31,21 +31,15 @@ export default function Header({ agent, getProfile }: Props) {
         <a href={myProfile?.did}>
           <j-avatar hash={myProfile?.did} src={myProfile?.profileThumbnailPicture || null} size="lg" />
         </a>
-        <j-flex a="center" gap="200" style="width: 100%">
+        <j-flex a="center" gap="200" style={{ width: "100%" }}>
           <j-input onFocus={() => handlePostClick(PostOption.Text)} full size="lg" placeholder="Create a post" />
           <j-flex a="center" gap="200">
             {postOptions
               .filter((o) => o.value !== PostOption.Text)
               .map((option) => {
                 return (
-                  <j-button
-                    size="lg"
-                    square
-                    onClick={() => handlePostClick(option.value)}
-                    value={PostOption.Text}
-                    variant="ghost"
-                  >
-                    <j-icon slot="start" size="md" name={option.icon} />
+                  <j-button size="lg" square onClick={() => handlePostClick(option.value)} variant="ghost">
+                    <j-icon slot="start" name={option.icon} />
                   </j-button>
                 );
               })}

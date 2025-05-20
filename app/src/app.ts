@@ -49,8 +49,10 @@ const vueApp = createApp({ render: () => h(App) })
 
 // Reset call state if persisted from the last session
 const webrtcStore = useWebRTCStore(pinia);
-const { callRoute } = storeToRefs(webrtcStore);
+const { callRoute, audioEnabled, videoEnabled } = storeToRefs(webrtcStore);
 callRoute.value = null;
+audioEnabled.value = true;
+videoEnabled.value = false;
 
 // Todo: remove
 // Reset call window state for now

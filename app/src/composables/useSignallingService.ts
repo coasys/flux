@@ -16,7 +16,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   const webrtc = useWebRTCStore();
 
   const { me, aiEnabled } = storeToRefs(appStore);
-  const { instance, callRoute } = storeToRefs(webrtc);
+  const { instance, callRoute, agentStatus } = storeToRefs(webrtc);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
@@ -185,7 +185,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     });
   });
 
-  // Listen for callRoute updates in the webrtc store
+  // Watch for callRoute updates in the webrtc store
   watch(
     () => callRoute.value,
     (newCallRoute) => {
@@ -205,7 +205,18 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     { immediate: true, deep: true }
   );
 
-  // Listen for aiEnabled updates in the app store
+  // Watch for agent status updates in the webrtc store
+  watch(
+    () => agentStatus.value,
+    (newAgentStatus) => {
+      // Update my agent status & broadcast it to the neighbourhood
+      myState.value = { ...myState.value, status: newAgentStatus, lastUpdate: Date.now() };
+      agents.value[me.value.did] = myState.value;
+      broadcastState();
+    }
+  );
+
+  // Watch for aiEnabled updates in the app store
   watch(
     () => aiEnabled.value,
     (newAiEnabledState) => {

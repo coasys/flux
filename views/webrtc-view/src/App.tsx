@@ -8,7 +8,6 @@ type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
-  appStore: any;
   webrtcStore: any;
   uiStore: any;
   getProfile: (did: string) => Promise<Profile>;

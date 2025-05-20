@@ -55,6 +55,10 @@ export const useUIStore = defineStore("ui", () => {
     state.globalError = payload;
   }
 
+  function toggleCallFullscreen() {
+    state.callWindowWidth = state.callWindowWidth === "100%" ? "50%" : "100%";
+  }
+
   return {
     // State
     ...toRefs(state),
@@ -70,5 +74,7 @@ export const useUIStore = defineStore("ui", () => {
     setWindowState,
     setGlobalLoading,
     setGlobalError,
+
+    toggleCallFullscreen,
   };
 });

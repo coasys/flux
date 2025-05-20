@@ -70,7 +70,7 @@ export default function JoinScreen({
             <j-flex gap="400">
               <j-tooltip placement="top" title="Settings">
                 <j-button onClick={onToggleSettings} square circle size="lg">
-                  <j-icon name="gear"></j-icon>
+                  <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
               <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>

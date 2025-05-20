@@ -199,7 +199,7 @@ export interface WebLink {
   id: string;
 }
 
-export type AgentStatus = "active" | "asleep" | "offline" | "unknown";
+export type AgentStatus = "active" | "asleep" | "offline" | "invisible" | "busy" | "unknown";
 
 export interface RouteParams {
   communityId?: string;

@@ -60,7 +60,7 @@
           </div>
 
           <j-button
-            v-if="!showCallWindow"
+            v-if="!callRoute && !showCallWindow"
             size="sm"
             variant="primary"
             style="margin-left: 25px"
@@ -146,7 +146,7 @@
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import Profile from "@/containers/Profile.vue";
-import { useAppStore, useModalStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useUIStore, useWebRTCStore } from "@/store";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
@@ -166,11 +166,13 @@ const route = useRoute();
 const appStore = useAppStore();
 const modalStore = useModalStore();
 const uiStore = useUIStore();
+const webrtcStore = useWebRTCStore();
 
 const { perspective, channels } = useCommunityService();
 
 const { me } = storeToRefs(appStore);
 const { showCallWindow } = storeToRefs(uiStore);
+const { callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
 const webrtcModalOpen = ref(false);
@@ -193,22 +195,13 @@ const channel = computed(() => channels.value.find((c) => c.baseExpression === c
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
 
-const { entries: views } = useModel({
-  perspective,
-  model: App,
-  query: { source: channelId },
-});
+const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
 
 function goToEditChannel() {
   modalStore.setShowEditChannel(true);
 }
 
 function changeCurrentView(value: string) {
-  // If entering WebRTC or Synergy view, close WebRTC modal
-  if (["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(value)) webrtcModalOpen.value = false;
-  // Else if leaving WebRTC view & not small screen, open WebRTC modal
-  else if (currentView.value === "@coasys/flux-webrtc-view" && window.innerWidth > 900) webrtcModalOpen.value = true;
-
   router.push({ name: "view", params: { communityId, channelId, viewId: value } });
 }
 

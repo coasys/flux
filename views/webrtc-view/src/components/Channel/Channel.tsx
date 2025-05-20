@@ -19,7 +19,6 @@ type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
-  appStore: any;
   webrtcStore: any;
   uiStore: any;
   getProfile: (did: string) => Promise<Profile>;
@@ -74,10 +73,6 @@ export default function Channel({
     setProfile(myProfile);
   }
 
-  async function joinRoom() {
-    webrtcStore.joinRoom(webRTC);
-  }
-
   function leaveRoom() {
     webrtcStore.leaveRoom();
     setTimeout(() => forceUpdate({}), 100);
@@ -107,7 +102,7 @@ export default function Channel({
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           fullscreen={fullscreen}
           setFullscreen={setFullscreen}
-          joinRoom={joinRoom}
+          joinRoom={() => webrtcStore.joinRoom(webRTC)}
           leaveRoom={leaveRoom}
         />
       )}
@@ -119,6 +114,7 @@ export default function Channel({
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
             uiStore={uiStore}
+            webrtcStore={webrtcStore}
             leaveRoom={leaveRoom}
           />
           {webRTC.localState.settings.transcriber.on && (
