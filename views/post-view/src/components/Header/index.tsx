@@ -53,7 +53,7 @@ export default function Header({ agent, getProfile }: Props) {
         </j-flex>
       </j-flex>
 
-      <j-button
+      {/* <j-button
         onClick={() => handlePostClick(PostOption.Text)}
         className={styles.addButton}
         size="lg"
@@ -61,7 +61,7 @@ export default function Header({ agent, getProfile }: Props) {
       >
         New Post
         <j-icon slot="end" size="sm" name="chat" />
-      </j-button>
+      </j-button> */}
     </header>
   );
 }
