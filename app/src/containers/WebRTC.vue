@@ -92,6 +92,23 @@
         class="call-window"
         :style="{ width: callWindowOpen ? callWindowWidth : 0, opacity: callWindowOpen ? 1 : 0 }"
       >
+        <div class="call-window-header">
+          <j-text size="400" nomargin>Call window</j-text>
+          <button class="close-button" @click="() => uiStore.setCallWindowOpen(false)">
+            <j-icon name="x" color="color-white" />
+          </button>
+        </div>
+
+        <div class="disclaimer" v-if="true">
+          <j-flex a="center" gap="300">
+            <j-icon name="exclamation-circle" size="xs" color="warning-500" />
+            <j-text size="400" nomargin color="warning-500"> This is a beta feature </j-text>
+          </j-flex>
+          <j-text size="300" nomargin color="warning-500">
+            We use external STUN servers to establish the connection. Any further communication is peer-to-peer.
+          </j-text>
+        </div>
+
         <component
           v-if="ready && appStore.ad4mClient.agent"
           :is="webcomponentName"
@@ -291,6 +308,34 @@ watch(
       height: 100%;
       background-color: #1c1a1f; // var(--j-color-ui-100);
       transition: all 0.5s ease-in-out;
+
+      .close-button {
+        all: unset;
+        cursor: pointer;
+        position: absolute;
+        top: var(--j-space-500);
+        right: var(--j-space-500);
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: var(--j-color-ui-200);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 5;
+      }
+
+      .disclaimer {
+        display: flex;
+        flex-direction: column;
+        gap: var(--j-space-300);
+        background-color: var(--j-color-warning-50);
+        border: 1px solid var(--j-color-warning-500);
+        border-radius: var(--j-border-radius);
+        padding: var(--j-space-300);
+        max-width: 350px;
+        text-align: left;
+      }
     }
   }
 }

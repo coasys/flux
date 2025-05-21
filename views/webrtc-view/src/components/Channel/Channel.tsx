@@ -6,7 +6,6 @@ import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import Debug from "../Debug";
-import Disclaimer from "../Disclaimer";
 import Footer from "../Footer";
 import JoinScreen from "../JoinScreen";
 import Notifications from "../Notifications";
@@ -22,18 +21,9 @@ type Props = {
   webrtcStore: any;
   uiStore: any;
   getProfile: (did: string) => Promise<Profile>;
-  close: () => void;
 };
 
-export default function Channel({
-  source,
-  perspective,
-  agent: agentClient,
-  webrtcStore,
-  uiStore,
-  getProfile,
-  close,
-}: Props) {
+export default function Channel({ source, perspective, agent: agentClient, webrtcStore, uiStore, getProfile }: Props) {
   const [, forceUpdate] = useState({});
   const [agent, setAgent] = useState<Agent | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -84,16 +74,6 @@ export default function Channel({
 
   return (
     <section className={styles.wrapper} ref={wrapperEl}>
-      {!webRTC.hasJoined && (
-        <j-box className={styles.disclaimer}>
-          <Disclaimer />
-        </j-box>
-      )}
-
-      <button className={styles.closeButton} onClick={close}>
-        <j-icon name="x" color="color-white" />
-      </button>
-
       {!webRTC.hasJoined && profile && (
         <JoinScreen
           webRTC={webRTC}

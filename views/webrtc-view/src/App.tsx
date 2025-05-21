@@ -11,7 +11,6 @@ type Props = {
   webrtcStore: any;
   uiStore: any;
   getProfile: (did: string) => Promise<Profile>;
-  close: () => void;
 };
 
 export default function App(props: Props) {
