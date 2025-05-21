@@ -78,6 +78,7 @@
           <j-flex a="center" gap="500">
             <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
             <j-icon
+              v-if="callRoute || route.params.channelId"
               :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
               color="ui-500"
               @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
@@ -227,11 +228,11 @@ onMounted(async () => {
   registerWebcomponent();
 });
 
+// Get new data or close window on route changes
 watch(
   () => route.params,
   async (newParams) => {
-    // If in a community and not already in a call, fetch data
-    if (newParams.communityId && !callRoute.value) getData();
+    if (!callRoute.value) newParams.channelId ? getData() : uiStore.setCallWindowOpen(false);
   },
   { immediate: true }
 );
