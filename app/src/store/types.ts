@@ -56,7 +56,7 @@ export interface UIStore {
   showCommunitySidebar: boolean;
   showAppSidebar: boolean;
   communitySidebarWidth: number;
-  showCallWindow: boolean;
+  callWindowOpen: boolean;
   callWindowWidth: CallWindowWidth;
   showGlobalLoading: boolean;
   globalError: { show: boolean; message: string };

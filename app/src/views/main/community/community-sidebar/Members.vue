@@ -5,7 +5,12 @@
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
       <j-box px="500">
-        <avatar-group @click="() => modals.setShowCommunityMembers(true)" :loading="loading" :users="members" />
+        <AvatarGroup
+          @click="() => modals.setShowCommunityMembers(true)"
+          :loading="loading"
+          :users="members"
+          tooltip-title="See all members"
+        />
       </j-box>
     </j-menu-group>
   </j-box>

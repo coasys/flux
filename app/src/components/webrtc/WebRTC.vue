@@ -78,9 +78,9 @@
           <j-flex a="center" gap="500">
             <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
             <j-icon
-              :name="`arrows-angle-${showCallWindow ? 'contract' : 'expand'}`"
+              :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
               color="ui-500"
-              @click="() => uiStore.setCallWindowOpen(!showCallWindow)"
+              @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
             />
           </j-flex>
         </j-flex>
@@ -90,7 +90,7 @@
     <div class="right-section">
       <div
         class="call-window"
-        :style="{ width: showCallWindow ? callWindowWidth : 0, opacity: showCallWindow ? 1 : 0 }"
+        :style="{ width: callWindowOpen ? callWindowWidth : 0, opacity: callWindowOpen ? 1 : 0 }"
       >
         <component
           v-if="ready && appStore.ad4mClient.agent"
@@ -127,7 +127,7 @@ const appStore = useAppStore();
 const uiStore = useUIStore();
 const webrtcStore = useWebRTCStore();
 
-const { communitySidebarWidth, showCallWindow, callWindowWidth } = storeToRefs(uiStore);
+const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
 const { audioEnabled, videoEnabled, callRoute, communityName, channelName, preliminaryCallRoute, agentStatus } =
   storeToRefs(webrtcStore);
 

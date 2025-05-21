@@ -57,8 +57,8 @@ videoEnabled.value = false;
 // Todo: remove
 // Reset call window state for now
 const uiStore = useUIStore(pinia);
-const { callWindowWidth, showCallWindow } = storeToRefs(uiStore);
-showCallWindow.value = false;
+const { callWindowWidth, callWindowOpen } = storeToRefs(uiStore);
+callWindowOpen.value = false;
 callWindowWidth.value = "50%";
 
 // Initialize Ad4mClient

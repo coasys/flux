@@ -7,7 +7,7 @@ export const useUIStore = defineStore("ui", () => {
     showAppSidebar: true,
     showCommunitySidebar: true,
     communitySidebarWidth: 330,
-    showCallWindow: false,
+    callWindowOpen: false,
     callWindowWidth: "50%",
     showGlobalLoading: false,
     globalError: { show: false, message: "" },
@@ -36,7 +36,7 @@ export const useUIStore = defineStore("ui", () => {
   }
 
   function setCallWindowOpen(open: boolean): void {
-    state.showCallWindow = open;
+    state.callWindowOpen = open;
   }
 
   function setCallWindowWidth(width: CallWindowWidth): void {

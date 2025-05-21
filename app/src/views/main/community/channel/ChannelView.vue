@@ -2,7 +2,7 @@
   <div
     class="channel-view"
     :class="{ expanded: isExpanded }"
-    :style="{ width: uiStore.showCallWindow ? `calc(100% - ${uiStore.callWindowWidth}` : '100%' }"
+    :style="{ width: uiStore.callWindowOpen ? `calc(100% - ${uiStore.callWindowWidth}` : '100%' }"
   >
     <div class="channel-view__header">
       <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
@@ -59,16 +59,25 @@
             </j-tooltip>
           </div>
 
-          <j-button
-            v-if="!callRoute && !showCallWindow"
-            size="sm"
-            variant="primary"
-            style="margin-left: 25px"
-            :onClick="() => uiStore.setCallWindowOpen(true)"
-          >
-            <j-icon size="sm" name="telephone" style="margin-right: -5px" />
-            Start call
-          </j-button>
+          <template v-if="!callWindowOpen && (!callRoute || callRoute.channelId === channelId)">
+            <j-button
+              size="sm"
+              variant="primary"
+              style="margin-left: 25px"
+              :onClick="() => uiStore.setCallWindowOpen(true)"
+            >
+              <j-icon size="sm" name="telephone" style="margin-right: -5px" />
+              {{ `${callRoute ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
+            </j-button>
+
+            <AvatarGroup
+              v-if="agentsInCall.length"
+              @click="() => uiStore.setCallWindowOpen(true)"
+              :users="agentsInCall"
+              :tooltip-title="`${agentsInCall.length} agent${agentsInCall.length > 1 ? 's' : ''} in the call`"
+              size="xs"
+            />
+          </template>
         </div>
       </div>
 
@@ -102,7 +111,7 @@
       :open="showProfile"
       @toggle="(e: any) => toggleProfile(e.target.open, activeProfile)"
     >
-      <Profile :did="activeProfile" @openCompleteProfile="() => handleProfileClick(activeProfile)" />
+      <ProfileContainer :did="activeProfile" @openCompleteProfile="() => handleProfileClick(activeProfile)" />
     </j-modal>
 
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
@@ -143,12 +152,15 @@
 </template>
 
 <script setup lang="ts">
+import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import Profile from "@/containers/Profile.vue";
+import ProfileContainer from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUIStore, useWebRTCStore } from "@/store";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App } from "@coasys/flux-api";
+import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -168,17 +180,13 @@ const modalStore = useModalStore();
 const uiStore = useUIStore();
 const webrtcStore = useWebRTCStore();
 
-const { perspective, channels } = useCommunityService();
+const { perspective, channels, signallingService } = useCommunityService();
 
 const { me } = storeToRefs(appStore);
-const { showCallWindow } = storeToRefs(uiStore);
+const { callWindowOpen } = storeToRefs(uiStore);
 const { callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
-const webrtcModalOpen = ref(false);
-const showEditChannel = ref(false);
-const script = ref<HTMLElement | null>(null);
-const memberMentions = ref<MentionTrigger[]>([]);
 const activeProfile = ref<string>("");
 const showProfile = ref(false);
 const isJoiningCommunity = ref(false);
@@ -191,9 +199,12 @@ interface MentionTrigger {
   trigger: string;
 }
 
+type AgentData = Profile & AgentState;
+
 const channel = computed(() => channels.value.find((c) => c.baseExpression === channelId));
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
+const agentsInCall = ref<AgentData[]>([]); // computed(() => signallingService.getAgentsInCall(route.params.channelId as string));
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
 
@@ -243,6 +254,18 @@ watch(views, (newVal, oldVal) => {
   const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
   if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
 });
+
+// Watch for agent changes in the signalling service and update agentsInCall
+watch(
+  signallingService.agents.value,
+  async (newAgents) => {
+    const agentsInCallMap = Object.entries(newAgents).filter(([_, agent]) => agent.callRoute?.channelId === channelId);
+    agentsInCall.value = await Promise.all(
+      agentsInCallMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
+    );
+  },
+  { deep: true }
+);
 </script>
 
 <style>

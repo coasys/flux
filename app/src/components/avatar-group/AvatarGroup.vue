@@ -1,6 +1,6 @@
 <template>
-  <button @click="$emit('click')" class="avatar-group">
-    <j-tooltip title="See all members">
+  <button @click="emit('click')" class="avatar-group">
+    <j-tooltip :title="tooltipTitle">
       <div class="avatar-group__avatars">
         <j-spinner size="sm" v-if="loading" />
 
@@ -19,26 +19,23 @@
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-export default defineComponent({ emits: ["click"], props: ["loading", "users", "size"] });
+<script setup lang="ts">
+defineProps<{ users: any[]; loading?: boolean; size?: string; tooltipTitle?: string }>();
+const emit = defineEmits(["click"]);
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .avatar-group {
-  height: 42px;
   outline: 0;
   border: 0;
   background: none;
   cursor: pointer;
   display: flex;
-  min-height: var(--j-size-md);
 }
 
 .avatar-group__avatars {
   gap: var(--j-space-200);
   display: flex;
-  height: var(--j-size-md);
 }
 
 .avatar-group__avatars > *:not(:first-child) {
@@ -56,7 +53,6 @@ export default defineComponent({ emits: ["click"], props: ["loading", "users", "
   background: var(--j-color-ui-100);
   border: 1px solid transparent;
   border-radius: 50%;
-  height: var(--j-size-md);
   width: var(--j-size-md);
   font-size: var(--j-font-size-400);
   font-weight: 400;
