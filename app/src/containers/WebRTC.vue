@@ -17,7 +17,7 @@
                 <j-text color="success-500" nomargin> {{ connectiontext }} </j-text>
               </j-flex>
               <j-text nomargin size="400">
-                <b>{{ communityName }}</b> / {{ channelName }}
+                <b>{{ community?.name || "No community name" }}</b> / {{ channelName || "No channel name" }}
               </j-text>
             </j-flex>
 
@@ -92,14 +92,37 @@
         class="call-window"
         :style="{ width: callWindowOpen ? callWindowWidth : 0, opacity: callWindowOpen ? 1 : 0 }"
       >
-        <div class="call-window-header">
-          <j-text size="400" nomargin>Call window</j-text>
+        <j-flex j="between">
+          <j-flex direction="column" gap="300">
+            <j-text nomargin size="400">
+              <b>{{ community?.name }}</b> / {{ channelName }}
+            </j-text>
+
+            <j-flex a="center" gap="100" v-if="agentsInCall.length" style="margin-left: -6px">
+              <AvatarGroup :users="agentsInCall" size="xs" />
+              <j-text size="400" nomargin color="ui-500">{{
+                `${agentsInCall.length} agent${agentsInCall.length > 1 ? "s" : ""} in the call`
+              }}</j-text>
+            </j-flex>
+          </j-flex>
+
           <button class="close-button" @click="() => uiStore.setCallWindowOpen(false)">
             <j-icon name="x" color="color-white" />
           </button>
-        </div>
+        </j-flex>
 
-        <div class="disclaimer" v-if="true">
+        <component
+          v-if="ready"
+          :is="webcomponentName"
+          :perspective="perspective"
+          :source="channelId"
+          :agent="appStore.ad4mClient.agent"
+          :appStore="appStore"
+          :webrtcStore="webrtcStore"
+          :getProfile="getCachedAgentProfile"
+        />
+
+        <div class="disclaimer" v-if="!callRoute">
           <j-flex a="center" gap="300">
             <j-icon name="exclamation-circle" size="xs" color="warning-500" />
             <j-text size="400" nomargin color="warning-500"> This is a beta feature </j-text>
@@ -108,31 +131,20 @@
             We use external STUN servers to establish the connection. Any further communication is peer-to-peer.
           </j-text>
         </div>
-
-        <component
-          v-if="ready && appStore.ad4mClient.agent"
-          :is="webcomponentName"
-          :perspective="perspective"
-          :source="source"
-          :agent="appStore.ad4mClient.agent"
-          :appStore="appStore"
-          :webrtcStore="webrtcStore"
-          :getProfile="getCachedAgentProfile"
-          :close="() => uiStore.setCallWindowOpen(false)"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { useAppStore, useUIStore } from "@/store";
 import { useWebRTCStore } from "@/store/webrtc";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { generateWCName } from "@coasys/flux-api";
-import { AgentStatus, Profile } from "@coasys/flux-types";
+import { AgentState, AgentStatus, Profile } from "@coasys/flux-types";
 import "@coasys/flux-webrtc-view";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -145,17 +157,26 @@ const uiStore = useUIStore();
 const webrtcStore = useWebRTCStore();
 
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
-const { audioEnabled, videoEnabled, callRoute, communityName, channelName, preliminaryCallRoute, agentStatus } =
-  storeToRefs(webrtcStore);
-
-const myProfile = ref<Profile | null>(null);
-const webcomponentName = ref("");
-const perspective = shallowRef<PerspectiveProxy>();
-const source = ref("");
-const ready = ref(false);
-const showAgentStatusMenu = ref(false);
+const { audioEnabled, videoEnabled, callRoute, agentStatus, communityServices } = storeToRefs(webrtcStore);
 
 const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
+
+const perspective = shallowRef<PerspectiveProxy>();
+const communityId = ref("");
+const channelId = ref("");
+const myProfile = ref<Profile | null>(null);
+const webcomponentName = ref("");
+const ready = ref(false);
+const showAgentStatusMenu = ref(false);
+const agentsInCall = ref<AgentState[]>([]);
+
+const communityService = computed(() => communityServices.value[communityId.value]);
+const signallingService = computed(() => communityService.value?.signallingService);
+const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
+const community = computed(() => communityService.value?.community);
+const channelName = computed(
+  () => communityService.value?.channels.filter((c: any) => c.baseExpression === channelId.value)[0]?.name
+);
 
 const connectiontext = computed(() => {
   if (audioEnabled.value && videoEnabled.value) return "Video connected";
@@ -184,21 +205,17 @@ async function registerWebcomponent() {
   webcomponentName.value = generatedName;
 }
 
-async function getPerspective() {
-  console.log("******** getting new call perspective");
-  // Get the community perspective
-  const communityId = route.params.communityId as string;
-  perspective.value = (await appStore.ad4mClient.perspective.byUUID(communityId)) as PerspectiveProxy;
+async function getData() {
+  ready.value = false;
 
-  // Set the channel ID as the source
-  source.value = route.params.channelId as string;
+  // Update the route data
+  communityId.value = route.params.communityId as string;
+  channelId.value = route.params.channelId as string;
 
-  // Set the preliminary call route in the webrtc store
-  console.log("setting preliminary call route", route.params);
-  preliminaryCallRoute.value = route.params;
+  // Update the perspective
+  perspective.value = (await appStore.ad4mClient.perspective.byUUID(communityId.value)) as PerspectiveProxy;
 
-  // Mark the component as ready
-  if (!ready.value) ready.value = true;
+  ready.value = true;
 }
 
 function profileClick() {
@@ -211,11 +228,40 @@ onMounted(async () => {
 });
 
 watch(
-  () => route.params.communityId,
-  (newCommunityId, oldCommunityId) => {
-    if (!callRoute.value && newCommunityId && newCommunityId !== oldCommunityId) getPerspective();
+  () => route.params,
+  async (newParams) => {
+    // If in a community and not already in a call, fetch data
+    if (newParams.communityId && !callRoute.value) getData();
   },
   { immediate: true }
+);
+
+// Close call window and update state when exiting calls
+watch(
+  callRoute,
+  (newCallRoute) => {
+    if (!newCallRoute) {
+      // Close call window
+      uiStore.setCallWindowOpen(false);
+      // Fetch data for current route once closed
+      setTimeout(getData, 500);
+    }
+  },
+  { immediate: true }
+);
+
+// Update agentsInCall when signalling service agents change
+watch(
+  agents,
+  async (newAgents) => {
+    const agentsInCallMap = Object.entries(newAgents).filter(
+      ([_, agent]) => agent.callRoute?.channelId === channelId.value
+    );
+    agentsInCall.value = await Promise.all(
+      agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) }))
+    );
+  },
+  { deep: true }
 );
 </script>
 
@@ -306,15 +352,13 @@ watch(
     .call-window {
       pointer-events: auto;
       height: 100%;
+      padding: var(--j-space-500);
       background-color: #1c1a1f; // var(--j-color-ui-100);
       transition: all 0.5s ease-in-out;
 
       .close-button {
         all: unset;
         cursor: pointer;
-        position: absolute;
-        top: var(--j-space-500);
-        right: var(--j-space-500);
         width: 26px;
         height: 26px;
         border-radius: 50%;

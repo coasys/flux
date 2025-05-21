@@ -5,7 +5,7 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, inject, InjectionKey, onUnmounted, ref } from "vue";
+import { computed, inject, InjectionKey, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSignallingService } from "./useSignallingService";
 
@@ -20,6 +20,9 @@ export async function createCommunityService() {
 
   // Ensure required SDNA is installed (Todo: include other models here...)
   perspective.ensureSDNASubjectClass(Topic);
+
+  // Initialise the signalling service
+  const signallingService = useSignallingService(perspective.uuid, neighbourhood);
 
   // Model subscriptions (Todo: singularise communities when singular useModel hook available)
   const { entries: communities } = useModel({ perspective, model: Community });
@@ -50,10 +53,6 @@ export async function createCommunityService() {
     }
   }
 
-  // Initialise the signalling service
-  const signallingService = useSignallingService(perspective.uuid, neighbourhood);
-  signallingService.startSignalling();
-
   // // // Initialize sync state listener
   // perspective.value.addSyncStateChangeListener((state: PerspectiveState) => {
   //   console.log("***** state from listener: ", state);
@@ -63,8 +62,6 @@ export async function createCommunityService() {
   // });
 
   getMembers();
-
-  onUnmounted(() => signallingService.stopSignalling());
 
   return {
     perspective,

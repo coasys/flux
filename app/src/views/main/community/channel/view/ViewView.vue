@@ -114,8 +114,6 @@ function toggleProfile(open: boolean, did?: any): void {
 }
 
 onMounted(async () => {
-  console.log("*** view mounted", viewId);
-
   const generatedName = await generateWCName(viewId as string);
 
   if (!customElements.get(generatedName)) {

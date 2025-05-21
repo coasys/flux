@@ -162,7 +162,7 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App } from "@coasys/flux-api";
 import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelView" });
@@ -244,10 +244,6 @@ async function handleProfileClick(did: string) {
   if (did === me.value.did) router.push({ name: "home", params: { did } });
   else router.push({ name: "profile", params: { did, communityId } });
 }
-
-onMounted(() => {
-  console.log("*** channel mounted", channelId);
-});
 
 // Navigate to the first loaded view if no viewId set in the URL params
 watch(views, (newVal, oldVal) => {
