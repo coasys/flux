@@ -112,16 +112,17 @@
           </button>
         </j-flex>
 
-        <component
-          v-if="ready"
-          :is="webcomponentName"
-          :perspective="perspective"
-          :source="channelId"
-          :agent="appStore.ad4mClient.agent"
-          :appStore="appStore"
-          :webrtcStore="webrtcStore"
-          :getProfile="getCachedAgentProfile"
-        />
+        <div v-if="ready" style="height: 100%">
+          <component
+            :is="webcomponentName"
+            :perspective="perspective"
+            :source="channelId"
+            :agent="appStore.ad4mClient.agent"
+            :appStore="appStore"
+            :webrtcStore="webrtcStore"
+            :getProfile="getCachedAgentProfile"
+          />
+        </div>
 
         <div class="disclaimer" v-if="!callRoute">
           <j-flex a="center" gap="300">
@@ -352,6 +353,8 @@ watch(
 
     .call-window {
       pointer-events: auto;
+      display: flex;
+      flex-direction: column;
       height: 100%;
       padding: var(--j-space-500);
       background-color: #1c1a1f; // var(--j-color-ui-100);
