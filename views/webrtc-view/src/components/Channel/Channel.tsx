@@ -69,6 +69,10 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }
 
   useEffect(() => {
+    if (webrtcStore) webrtcStore.addInstance(webRTC);
+  }, [webrtcStore]);
+
+  useEffect(() => {
     if (!agent && getProfile) fetchAgentData();
   }, [agent, getProfile]);
 
@@ -82,7 +86,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           fullscreen={fullscreen}
           setFullscreen={setFullscreen}
-          joinRoom={() => webrtcStore.joinRoom(webRTC)}
+          webrtcStore={webrtcStore}
           leaveRoom={leaveRoom}
         />
       )}

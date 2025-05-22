@@ -8,9 +8,9 @@ type Props = {
   profile?: Profile;
   did?: string;
   fullscreen?: boolean;
+  webrtcStore: any;
   onToggleSettings: () => void;
   setFullscreen?: (state: boolean) => void;
-  joinRoom?: (e: any) => void;
   leaveRoom?: () => void;
 };
 
@@ -19,9 +19,9 @@ export default function JoinScreen({
   profile,
   did,
   fullscreen,
+  webrtcStore,
   onToggleSettings,
   setFullscreen,
-  joinRoom,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -89,7 +89,7 @@ export default function JoinScreen({
           disabled={
             webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== "videoinput")
           }
-          onChange={() => webRTC.onToggleCamera(!webRTC.localState.settings.video)}
+          onChange={webrtcStore.toggleVideo}
         >
           Join with camera!
         </j-toggle>
@@ -101,7 +101,7 @@ export default function JoinScreen({
           size="lg"
           loading={webRTC.isLoading}
           disabled={!webRTC.audioPermissionGranted}
-          onClick={joinRoom}
+          onClick={webrtcStore.joinRoom}
         >
           Join room!
         </j-button>
