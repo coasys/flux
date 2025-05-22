@@ -10,7 +10,7 @@ type Props = {
   fullscreen?: boolean;
   webrtcStore: any;
   onToggleSettings: () => void;
-  setFullscreen?: (state: boolean) => void;
+  toggleFullscreen?: () => void;
   leaveRoom?: () => void;
 };
 
@@ -20,8 +20,8 @@ export default function JoinScreen({
   did,
   fullscreen,
   webrtcStore,
+  toggleFullscreen,
   onToggleSettings,
-  setFullscreen,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -74,7 +74,7 @@ export default function JoinScreen({
                 </j-button>
               </j-tooltip>
               <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
-                <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
+                <j-button onClick={toggleFullscreen} square circle size="lg">
                   <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
                 </j-button>
               </j-tooltip>

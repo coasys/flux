@@ -120,6 +120,7 @@
             :agent="appStore.ad4mClient.agent"
             :appStore="appStore"
             :webrtcStore="webrtcStore"
+            :uiStore="uiStore"
             :getProfile="getCachedAgentProfile"
           />
         </div>

@@ -31,8 +31,6 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   const wrapperEl = useRef<HTMLDivElement | null>(null);
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
-  const webRTCService = useRef<WebRTC | null>(null);
-  // const [webRTC, setWebRTC] = useState<WebRTC | null>(null);
 
   const {
     state: { showSettings, showDebug },
@@ -68,6 +66,11 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
     setTimeout(() => forceUpdate({}), 100);
   }
 
+  function toggleFullscreen() {
+    setFullscreen(!fullscreen);
+    uiStore.toggleCallFullscreen()
+  }
+
   useEffect(() => {
     if (webrtcStore) webrtcStore.addInstance(webRTC);
   }, [webrtcStore]);
@@ -85,7 +88,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
           fullscreen={fullscreen}
-          setFullscreen={setFullscreen}
+          toggleFullscreen={toggleFullscreen}
           webrtcStore={webrtcStore}
           leaveRoom={leaveRoom}
         />
@@ -97,7 +100,8 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
-            uiStore={uiStore}
+            fullscreen={fullscreen}
+            toggleFullscreen={toggleFullscreen}
             webrtcStore={webrtcStore}
             leaveRoom={leaveRoom}
           />

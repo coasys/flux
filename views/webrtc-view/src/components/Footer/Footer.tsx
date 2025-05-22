@@ -5,8 +5,9 @@ import styles from "./Footer.module.css";
 
 type Props = {
   webRTC: WebRTC;
-  uiStore: any;
   webrtcStore: any;
+  fullscreen?: boolean;
+  toggleFullscreen?: () => void;
   onToggleSettings: () => void;
   leaveRoom?: () => void;
 };
@@ -40,7 +41,7 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, uiStore, webrtcStore, onToggleSettings, leaveRoom }: Props) {
+export default function Footer({ webRTC, webrtcStore, fullscreen, toggleFullscreen, onToggleSettings, leaveRoom }: Props) {
   const { hasJoined, localState, devices, onReaction, updateTranscriptionSetting, onToggleScreenShare, onLeave } =
     webRTC;
   const { video, audio, transcriber, screen } = localState.settings;
@@ -145,19 +146,14 @@ export default function Footer({ webRTC, uiStore, webrtcStore, onToggleSettings,
           </j-button>
         </j-tooltip>
 
-        <j-tooltip placement="top" title={uiStore?.callWindowWidth === "100%" ? "Shrink screen" : "Full screen"}>
+        <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
           <j-button
-            onClick={() => {
-              // setFullscreen(!fullscreen);
-              // uiStore.setCallWindowWidth(fullscreen ? "50%" : "100%");
-              console.log("uiStore: ", uiStore);
-              uiStore?.toggleCallFullscreen();
-            }}
+            onClick={toggleFullscreen}
             square
             circle
             size="lg"
           >
-            <j-icon name={`arrows-angle-${uiStore?.callWindowWidth === "100%" ? "contract" : "expand"}`} />
+            <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
           </j-button>
         </j-tooltip>
 
