@@ -1,5 +1,6 @@
 <template>
   <div
+    id="channel-view"
     class="channel-view"
     :class="{ expanded: isExpanded }"
     :style="{ width: uiStore.callWindowOpen ? `calc(100% - ${uiStore.callWindowWidth}` : '100%' }"

@@ -1,4 +1,4 @@
-import type { CallWindowWidth, UIStore } from "@/store/types";
+import type { UIStore } from "@/store/types";
 import { defineStore } from "pinia";
 import { reactive, toRefs } from "vue";
 
@@ -39,7 +39,7 @@ export const useUIStore = defineStore("ui", () => {
     state.callWindowOpen = open;
   }
 
-  function setCallWindowWidth(width: CallWindowWidth): void {
+  function setCallWindowWidth(width: string): void {
     state.callWindowWidth = width;
   }
 
@@ -56,7 +56,9 @@ export const useUIStore = defineStore("ui", () => {
   }
 
   function toggleCallFullscreen() {
-    state.callWindowWidth = state.callWindowWidth === "100%" ? "50%" : "100%";
+    // Use the channel view width to determine the full screen state incase manually resized
+    const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
+    state.callWindowWidth = channelViewWidth ? "100%" : "50%";
   }
 
   return {

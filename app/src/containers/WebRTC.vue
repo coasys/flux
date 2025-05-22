@@ -88,11 +88,13 @@
       </div>
     </div>
 
-    <div class="right-section">
+    <div ref="rightSection" class="right-section">
       <div
+        ref="callWindow"
         class="call-window"
         :style="{ width: callWindowOpen ? callWindowWidth : 0, opacity: callWindowOpen ? 1 : 0 }"
       >
+        <div class="resize-handle" @mousedown="startResize" />
         <j-flex j="between">
           <j-flex direction="column" gap="300">
             <j-text nomargin size="400">
@@ -180,12 +182,57 @@ const community = computed(() => communityService.value?.community);
 const channelName = computed(
   () => communityService.value?.channels.filter((c: any) => c.baseExpression === channelId.value)[0]?.name
 );
-
 const connectiontext = computed(() => {
   if (audioEnabled.value && videoEnabled.value) return "Video connected";
   else if (audioEnabled.value) return "Voice connected";
   return "Connected";
 });
+
+const callWindow = ref<HTMLElement | null>(null);
+const rightSection = ref<HTMLElement | null>(null);
+const isDragging = ref(false);
+const startX = ref(0);
+const startWidth = ref(0);
+
+function startResize(e: any) {
+  if (!callWindow.value) return;
+  startWidth.value = callWindow.value.getBoundingClientRect().width;
+  isDragging.value = true;
+  startX.value = e.clientX;
+
+  // Prevent text selection & width transitions during drag
+  const channelView = document.getElementById("channel-view");
+  if (channelView) channelView.style.transition = "none";
+  callWindow.value.style.transition = "none";
+  document.body.classList.add("text-selection-disabled");
+
+  // Add event listeners for mousemove and mouseup
+  document.addEventListener("mousemove", doResize, false);
+  document.addEventListener("mouseup", stopResize, false);
+}
+
+function doResize(e: any) {
+  if (!rightSection.value) return;
+  const minWidth = rightSection.value?.getBoundingClientRect().width / 3 || 0;
+  const newWidth = startWidth.value + (startX.value - e.clientX);
+  console.log("minWidth", minWidth);
+  uiStore.setCallWindowWidth(`${Math.max(minWidth, newWidth)}px`);
+}
+
+function stopResize() {
+  if (!callWindow.value) return;
+  isDragging.value = false;
+
+  // Reset the transition styles and remove the global resizing class
+  const channelView = document.getElementById("channel-view");
+  if (channelView) channelView.style.transition = "width 0.5s ease-in-out";
+  callWindow.value.style.transition = "all 0.5s ease-in-out";
+  document.body.classList.remove("text-selection-disabled");
+
+  // Remove event listeners for mousemove and mouseup
+  document.removeEventListener("mousemove", doResize);
+  document.addEventListener("mouseup", stopResize, false);
+}
 
 async function getMyProfile() {
   myProfile.value = await getCachedAgentProfile(appStore.me.did);
@@ -269,6 +316,16 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+// Used to prevent text selection during call window drag resizing
+:global(.text-selection-disabled) {
+  user-select: none !important;
+  cursor: col-resize !important;
+  * {
+    -webkit-user-drag: none !important;
+    pointer-events: none !important;
+  }
+}
+
 .wrapper {
   display: flex;
   width: 100%;
@@ -353,13 +410,30 @@ watch(
     overflow: hidden;
 
     .call-window {
+      position: relative;
       pointer-events: auto;
       display: flex;
       flex-direction: column;
       height: 100%;
       padding: var(--j-space-500);
-      background-color: #1c1a1f; // var(--j-color-ui-100);
+      background-color: #1c1a1f; // var(--app-drawer-bg-color); // var(--j-color-ui-50);
       transition: all 0.5s ease-in-out;
+
+      .resize-handle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background-color: var(--j-color-primary-500);
+        cursor: col-resize;
+        opacity: 0;
+        transition: opacity 0.2s;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
 
       .close-button {
         all: unset;

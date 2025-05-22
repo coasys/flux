@@ -4,7 +4,7 @@
     :class="{ 'community-layout--closed': !showCommunitySidebar, 'community-layout--is-dragging': isDragging }"
   >
     <aside ref="sidebar" class="community-layout__drawer" :style="{ width: `${communitySidebarWidth}px` }">
-      <span role="presentation" class="community-layout__resize-handle" @mousedown="startResize"></span>
+      <span role="presentation" class="community-layout__resize-handle" @mousedown="startResize" />
       <slot name="sidebar"></slot>
     </aside>
 

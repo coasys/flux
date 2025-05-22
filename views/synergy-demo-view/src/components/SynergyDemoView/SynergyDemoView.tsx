@@ -134,7 +134,7 @@ export default function SynergyDemoView({
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
-  useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? "33%" : "50%"), [showMatchColumn]);
+  useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? `${100 / 3}%` : "50%"), [showMatchColumn]);
 
   return (
     <div className={styles.wrapper}>
