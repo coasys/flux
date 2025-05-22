@@ -1,14 +1,14 @@
 import { useAppStore } from "@/store";
 import { useWebRTCStore } from "@/store/webrtc";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
+import { AgentState, CallHealth, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, ref, watch } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000;
 const CLEANUP_INTERVAL = 15000;
 const MAX_AGE = 30000;
-const CALL_HEALTH_CHECK_INTERVAL = 10000;
+const CALL_HEALTH_CHECK_INTERVAL = 6000;
 const NEW_STATE = "agent/new-state";
 
 export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
@@ -28,7 +28,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
-  const callHealthy = ref(true);
+  const callHealth = ref<CallHealth>("healthy");
 
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
@@ -149,16 +149,22 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
     // Check the last update time of each peer to determine if the call is healthy
     const now = Date.now();
-    const healthy = instance.value.connections.every((peer) => {
-      const agent = agents.value[peer.did];
-      const timeSinceLastUpdate = now - agent.lastUpdate;
-      return timeSinceLastUpdate <= CALL_HEALTH_CHECK_INTERVAL;
-    });
+    const { connectionsLost, warnings } = instance.value.connections.reduce(
+      (health, peer) => {
+        const agent = agents.value[peer.did];
+        const timeSinceLastUpdate = now - agent.lastUpdate;
+        if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL * 2) health.connectionsLost = true;
+        else if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL) health.warnings = true;
+        return health;
+      },
+      { connectionsLost: false, warnings: false }
+    );
+    const newCallHealth = connectionsLost ? "connections-lost" : warnings ? "warnings" : "healthy";
 
     // If the calls health has changed, updated the state and emit event for webcomponents
-    if (callHealthy.value !== healthy) {
-      callHealthy.value = healthy;
-      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: healthy }));
+    if (callHealth.value !== newCallHealth) {
+      callHealth.value = newCallHealth;
+      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newCallHealth }));
     }
   }
 
@@ -196,7 +202,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
       // If in a call, start the call health check interval
       if (newCallRoute) callHealthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
-      // Otherwise clear the existing interval (if present)
+      // Otherwise clear the existing interval if present
       else if (callHealthCheckInterval) {
         clearInterval(callHealthCheckInterval);
         callHealthCheckInterval = null;
@@ -240,6 +246,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     signalling,
     agents,
     activeAgents,
+    callHealth,
 
     // Setters
     setProcessingState,

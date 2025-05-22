@@ -121,7 +121,7 @@ export default function SynergyDemoView({
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;
-    const handleCallHealthUpdate = (event: CustomEvent) => setSignalsHealthy(event.detail);
+    const handleCallHealthUpdate = (event: CustomEvent) => setSignalsHealthy(event.detail === "healthy");
     window.addEventListener(eventName, handleCallHealthUpdate);
     return () => window.removeEventListener(eventName, handleCallHealthUpdate);
   }, []);

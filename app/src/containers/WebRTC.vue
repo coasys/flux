@@ -10,11 +10,14 @@
               @click="router.push({ name: 'view', params: callRoute })"
               style="cursor: pointer"
             >
-              <j-flex a="center">
+              <j-flex a="center" gap="200">
                 <div class="connection-icon">
-                  <j-icon name="wifi" color="success-500" style="rotate: 45deg" />
+                  <j-icon name="wifi" :color="callHealthColour" style="rotate: 45deg" />
                 </div>
-                <j-text color="success-500" nomargin> {{ connectiontext }} </j-text>
+                <j-text :color="callHealthColour" nomargin> {{ connectionText }} </j-text>
+                <j-text v-if="connectionWarning" :color="callHealthColour" nomargin>
+                  {{ connectionWarning }}
+                </j-text>
               </j-flex>
               <j-text nomargin size="400">
                 <b>{{ community?.name || "No community name" }}</b> / {{ channelName || "No channel name" }}
@@ -149,7 +152,7 @@ import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { generateWCName } from "@coasys/flux-api";
-import { AgentState, AgentStatus, Profile } from "@coasys/flux-types";
+import { AgentState, AgentStatus, CallHealth, Profile, SignallingService } from "@coasys/flux-types";
 import "@coasys/flux-webrtc-view";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -176,16 +179,27 @@ const showAgentStatusMenu = ref(false);
 const agentsInCall = ref<AgentState[]>([]);
 
 const communityService = computed(() => communityServices.value[communityId.value]);
-const signallingService = computed(() => communityService.value?.signallingService);
+const signallingService = computed<SignallingService | undefined>(() => communityService.value?.signallingService);
 const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
+const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
+const callHealthColour = computed(() => {
+  if (callHealth.value === "healthy") return "success-500";
+  else if (callHealth.value === "warnings") return "warning-500";
+  return "danger-500";
+});
 const community = computed(() => communityService.value?.community);
 const channelName = computed(
   () => communityService.value?.channels.filter((c: any) => c.baseExpression === channelId.value)[0]?.name
 );
-const connectiontext = computed(() => {
-  if (audioEnabled.value && videoEnabled.value) return "Video connected";
+const connectionText = computed(() => {
+  if (videoEnabled.value) return "Video connected";
   else if (audioEnabled.value) return "Voice connected";
   return "Connected";
+});
+const connectionWarning = computed(() => {
+  if (callHealth.value === "warnings") return "(unstable)";
+  else if (callHealth.value === "connections-lost") return "(lost peers)";
+  return "";
 });
 
 const callWindow = ref<HTMLElement | null>(null);
@@ -370,7 +384,7 @@ watch(
 
       .connection-icon {
         height: 26px;
-        margin: 0 5px 0 -7px;
+        margin-left: -7px;
 
         j-icon {
           --j-icon-size: 26px;
