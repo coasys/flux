@@ -193,7 +193,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
   // Watch for callRoute updates in the webrtc store
   watch(
-    () => callRoute.value,
+    callRoute,
     (newCallRoute) => {
       // Update my state & broadcast it to the neighbourhood
       myState.value = { ...myState.value, callRoute: newCallRoute, lastUpdate: Date.now() };
@@ -208,37 +208,31 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
         callHealthCheckInterval = null;
       }
     },
-    { immediate: true, deep: true }
+    { immediate: true }
   );
 
   // Watch for agent status updates in the webrtc store
-  watch(
-    () => agentStatus.value,
-    (newAgentStatus) => {
-      // Update my agent status & broadcast it to the neighbourhood
-      myState.value = { ...myState.value, status: newAgentStatus, lastUpdate: Date.now() };
-      agents.value[me.value.did] = myState.value;
-      broadcastState();
-    }
-  );
+  watch(agentStatus, (newAgentStatus) => {
+    // Update my agent status & broadcast it to the neighbourhood
+    myState.value = { ...myState.value, status: newAgentStatus, lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
+    broadcastState();
+  });
 
   // Watch for aiEnabled updates in the app store
-  watch(
-    () => aiEnabled.value,
-    (newAiEnabledState) => {
-      // Update my AI state & broadcast it to the neighbourhood
-      myState.value = { ...myState.value, aiEnabled: newAiEnabledState, lastUpdate: Date.now() };
-      agents.value[me.value.did] = myState.value;
-      broadcastState();
-    }
-  );
+  watch(aiEnabled, (newAiEnabledState) => {
+    // Update my AI state & broadcast it to the neighbourhood
+    myState.value = { ...myState.value, aiEnabled: newAiEnabledState, lastUpdate: Date.now() };
+    agents.value[me.value.did] = myState.value;
+    broadcastState();
+  });
 
   // Send updates to web components whenever the agents state map changes
   watch(
-    () => agents.value,
+    agents,
     (newAgentsState) =>
       window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
-    { immediate: true, deep: true }
+    { immediate: true }
   );
 
   return {
