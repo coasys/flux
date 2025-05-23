@@ -386,6 +386,56 @@ export default function useWebRTC({
   /**
    * Enable/disable video input
    */
+  // async function onToggleCamera(enabled: boolean) {    
+  //   // Update settings
+  //   const videoDeviceIdFromLocalStorage = getForVersion(version, "cameraDeviceId");
+  //   const newSettings = {
+  //     ...localStateRef.current.settings,
+  //     video: enabled
+  //       ? {
+  //           ...videoDimensions,
+  //           deviceId: videoDeviceIdFromLocalStorage || undefined,
+  //         }
+  //       : false,
+  //   };
+    
+  //   // If we already have a stream with video tracks, just toggle them
+  //   if (localStreamRef.current && localStreamRef.current.getVideoTracks().length > 0) {
+  //     localStreamRef.current.getVideoTracks().forEach(track => {
+  //       track.enabled = enabled;
+  //     });
+  //   } 
+  //   // If we're enabling video but don't have video tracks, we need to get them
+  //   else if (enabled && (!localStreamRef.current || localStreamRef.current.getVideoTracks().length === 0)) {
+  //     try {
+  //       const audioEnabled = localStreamRef.current?.getAudioTracks().some(track => track.enabled) || false;
+  //       const audioConstraints = audioEnabled ? localStateRef.current.settings.audio : false;
+
+  //       const newLocalStream = await navigator.mediaDevices.getUserMedia({
+  //         audio: audioConstraints,
+  //         video: newSettings.video,
+  //       });
+        
+  //       if (!localStreamRef.current) {
+  //         setLocalStream(newLocalStream);
+  //         localStreamRef.current = newLocalStream;
+  //       } else {
+  //         updateStream(newLocalStream);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error getting video stream:", error);
+  //     }
+  //   }
+  
+  //   // Handle video permissions
+  //   if (enabled && !videoPermissionGranted) {
+  //     setVideoPermissionGranted(true);
+  //   }
+  
+  //   // Notify others of state change
+  //   onChangeState({ ...localStateRef.current, settings: newSettings });
+  // }
+
   async function onToggleCamera(enabled: boolean) {    
     // Update settings
     const videoDeviceIdFromLocalStorage = getForVersion(version, "cameraDeviceId");
@@ -408,19 +458,19 @@ export default function useWebRTC({
     // If we're enabling video but don't have video tracks, we need to get them
     else if (enabled && (!localStreamRef.current || localStreamRef.current.getVideoTracks().length === 0)) {
       try {
-        const audioEnabled = localStreamRef.current?.getAudioTracks().some(track => track.enabled) || false;
-        const audioConstraints = audioEnabled ? localStateRef.current.settings.audio : false;
-
-        const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: audioConstraints,
+        // Request ONLY video tracks - don't touch audio
+        const newVideoOnlyStream = await navigator.mediaDevices.getUserMedia({
+          audio: false, // Don't request audio at all
           video: newSettings.video,
         });
         
         if (!localStreamRef.current) {
-          setLocalStream(newLocalStream);
-          localStreamRef.current = newLocalStream;
+          // If no existing stream, use this one directly
+          setLocalStream(newVideoOnlyStream);
+          localStreamRef.current = newVideoOnlyStream;
         } else {
-          updateStream(newLocalStream);
+          // If we have an existing stream, only update the video portion
+          updateStream(newVideoOnlyStream, { handleVideo: true, handleAudio: false });
         }
       } catch (error) {
         console.error("Error getting video stream:", error);
@@ -439,6 +489,48 @@ export default function useWebRTC({
   /**
    * Enable/disable audio input
    */
+  // async function onToggleAudio(enabled: boolean) {    
+  //   // Update settings
+  //   const newSettings = {
+  //     ...localStateRef.current.settings,
+  //     audio: enabled
+  //       ? (localStateRef.current.settings.audio || { deviceId: getForVersion(version, "audioDeviceId") })
+  //       : false,
+  //   };
+    
+  //   // If we already have a stream with audio tracks, just toggle them
+  //   if (localStreamRef.current && localStreamRef.current.getAudioTracks().length > 0) {
+  //     localStreamRef.current.getAudioTracks().forEach(track => {
+  //       track.enabled = enabled;
+  //     });
+  //   } 
+  //   // If we're enabling audio but don't have audio tracks, we need to get them
+  //   else if (enabled && (!localStreamRef.current || localStreamRef.current.getAudioTracks().length === 0)) {
+  //     // Check if video is currently enabled to include in constraints
+  //     const videoEnabled = localStreamRef.current?.getVideoTracks().some(track => track.enabled) || false;
+  //     const videoConstraints = videoEnabled ? localStateRef.current.settings.video : false;
+  
+  //     try {
+  //       const newLocalStream = await navigator.mediaDevices.getUserMedia({
+  //         audio: newSettings.audio,
+  //         video: videoConstraints,
+  //       });
+        
+  //       if (!localStreamRef.current) {
+  //         setLocalStream(newLocalStream);
+  //         localStreamRef.current = newLocalStream;
+  //       } else {
+  //         updateStream(newLocalStream);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error getting audio stream:", error);
+  //     }
+  //   }
+  
+  //   // Notify others of state change
+  //   onChangeState({ ...localStateRef.current, settings: newSettings });
+  // }
+
   async function onToggleAudio(enabled: boolean) {    
     // Update settings
     const newSettings = {
@@ -456,21 +548,20 @@ export default function useWebRTC({
     } 
     // If we're enabling audio but don't have audio tracks, we need to get them
     else if (enabled && (!localStreamRef.current || localStreamRef.current.getAudioTracks().length === 0)) {
-      // Check if video is currently enabled to include in constraints
-      const videoEnabled = localStreamRef.current?.getVideoTracks().some(track => track.enabled) || false;
-      const videoConstraints = videoEnabled ? localStateRef.current.settings.video : false;
-  
       try {
-        const newLocalStream = await navigator.mediaDevices.getUserMedia({
+        // Request ONLY audio tracks - don't touch video
+        const newAudioOnlyStream = await navigator.mediaDevices.getUserMedia({
           audio: newSettings.audio,
-          video: videoConstraints,
+          video: false, // Don't request video at all
         });
         
         if (!localStreamRef.current) {
-          setLocalStream(newLocalStream);
-          localStreamRef.current = newLocalStream;
+          // If no existing stream, use this one directly
+          setLocalStream(newAudioOnlyStream);
+          localStreamRef.current = newAudioOnlyStream;
         } else {
-          updateStream(newLocalStream);
+          // If we have an existing stream, only update the audio portion
+          updateStream(newAudioOnlyStream, { handleVideo: false, handleAudio: true });
         }
       } catch (error) {
         console.error("Error getting audio stream:", error);
@@ -608,11 +699,153 @@ export default function useWebRTC({
   //   }
   // }
 
-  async function updateStream(stream: MediaStream) {
+  // async function updateStream(stream: MediaStream) {
+  //   console.log("Update stream called with:", 
+  //     stream.getVideoTracks().length ? "video track" : "no video", 
+  //     stream.getAudioTracks().length ? "audio track" : "no audio");
+  
+  //   // If no local stream exists yet, just use the new stream directly
+  //   if (!localStreamRef.current) {
+  //     console.log("No existing stream, using new stream directly");
+  //     setLocalStream(stream);
+  //     localStreamRef.current = stream;
+  //     return;
+  //   }
+  
+  //   // Get new tracks
+  //   const videoTrack = stream.getVideoTracks()[0];
+  //   const audioTrack = stream.getAudioTracks()[0];
+    
+  //   // Get existing tracks
+  //   const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+  //   const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
+    
+  //   console.log("Existing tracks:", 
+  //     oldVideoTrack ? "has video" : "no video", 
+  //     oldAudioTrack ? "has audio" : "no audio");
+  
+  //   try {
+  //     // Always update the local stream first to ensure media displays correctly
+  //     // This is critical - update local media display before peer connections
+      
+  //     // Handle video track
+  //     if (videoTrack) {
+  //       if (oldVideoTrack) {
+  //         console.log("Removing old video track from local stream");
+  //         localStreamRef.current.removeTrack(oldVideoTrack);
+  //       }
+  //       console.log("Adding new video track to local stream");
+  //       localStreamRef.current.addTrack(videoTrack);
+  //     }
+      
+  //     // Handle audio track
+  //     if (audioTrack) {
+  //       if (oldAudioTrack) {
+  //         console.log("Removing old audio track from local stream");
+  //         localStreamRef.current.removeTrack(oldAudioTrack);
+  //       }
+  //       console.log("Adding new audio track to local stream");
+  //       localStreamRef.current.addTrack(audioTrack);
+  //     }
+  
+  //     // Now update all peer connections
+  //     for (let peer of connections) {
+  //       try {
+  //         console.log("Updating tracks for peer:", peer.did);
+  //         // Track changes that need signaling
+  //         let trackChanges = false;
+          
+  //         // Update video
+  //         if (videoTrack) {
+  //           trackChanges = true;
+  //           if (oldVideoTrack) {
+  //             try {
+  //               console.log('Replacing old video track for peer')
+  //               await peer.connection.peer.replaceTrack(
+  //                 oldVideoTrack,
+  //                 videoTrack,
+  //                 localStreamRef.current
+  //               );
+  //             } catch (err) {
+  //               console.error("Failed to replace old video track, trying to renegotiate", err);
+  //               peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+  //             }
+  //           } else {
+  //             console.log('Adding new video track to peer')
+  //             peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+  //           }
+  //         }
+          
+  //         // Update audio
+  //         if (audioTrack) {
+  //           trackChanges = true;
+  //           if (oldAudioTrack) {
+  //             try {
+  //               console.log("Replacing old audio track for peer");
+  //               await peer.connection.peer.replaceTrack(
+  //                 oldAudioTrack,
+  //                 audioTrack,
+  //                 localStreamRef.current
+  //               );
+  //             } catch (err) {
+  //               console.error("Failed to replace audio track, trying to renegotiate", err);
+  //               peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+  //             }
+  //           } else {
+  //             console.log("Adding new audio track to peer");
+  //             peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+  //           }
+  //         }
+
+  //         // If tracks changed significantly, trigger renegotiation
+  //         if (trackChanges) {
+  //           // Signal to the peer that we've changed tracks
+  //           manager.current?.sendMessage("tracks-changed", peer.did);
+  //         }
+  //       } catch (err) {
+  //         console.error("Error updating tracks for peer:", peer.did, err);
+  //       }
+  //     }
+      
+  //     // After successfully updating, stop old tracks to free resources
+  //     if (oldVideoTrack && videoTrack) {
+  //       console.log("Stopping old video track");
+  //       oldVideoTrack.stop();
+  //     }
+      
+  //     if (oldAudioTrack && audioTrack) {
+  //       console.log("Stopping old audio track");
+  //       oldAudioTrack.stop();
+  //     }
+      
+  //     // Clean up any unused tracks from the source stream
+  //     if (stream !== localStreamRef.current) {
+  //       console.log("Cleaning up original stream");
+  //       stream.getTracks().forEach(track => {
+  //         const isVideoAdded = track.kind === 'video' && localStreamRef.current.getVideoTracks().includes(track);
+  //         const isAudioAdded = track.kind === 'audio' && localStreamRef.current.getAudioTracks().includes(track);
+          
+  //         if (!isVideoAdded && !isAudioAdded) {
+  //           console.log(`Stopping unused ${track.kind} track from original stream`);
+  //           track.stop();
+  //         }
+  //       });
+  //     }
+      
+  //     // Force UI update by setting the stream state
+  //     setLocalStream(localStreamRef.current);
+      
+  //   } catch (err) {
+  //     console.error("Error in updateStream:", err);
+  //   }
+  // }
+
+  async function updateStream(stream: MediaStream, options = { handleVideo: true, handleAudio: true }) {
     console.log("Update stream called with:", 
       stream.getVideoTracks().length ? "video track" : "no video", 
-      stream.getAudioTracks().length ? "audio track" : "no audio");
-  
+      stream.getAudioTracks().length ? "audio track" : "no audio",
+      "options:", options);
+    
     // If no local stream exists yet, just use the new stream directly
     if (!localStreamRef.current) {
       console.log("No existing stream, using new stream directly");
@@ -620,10 +853,10 @@ export default function useWebRTC({
       localStreamRef.current = stream;
       return;
     }
-  
+    
     // Get new tracks
-    const videoTrack = stream.getVideoTracks()[0];
-    const audioTrack = stream.getAudioTracks()[0];
+    const videoTrack = options.handleVideo ? stream.getVideoTracks()[0] : null;
+    const audioTrack = options.handleAudio ? stream.getAudioTracks()[0] : null;
     
     // Get existing tracks
     const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
@@ -632,29 +865,30 @@ export default function useWebRTC({
     console.log("Existing tracks:", 
       oldVideoTrack ? "has video" : "no video", 
       oldAudioTrack ? "has audio" : "no audio");
-  
+    
     try {
       // Always update the local stream first to ensure media displays correctly
-      // This is critical - update local media display before peer connections
       
-      // Handle video track
-      if (videoTrack) {
-        console.log("Adding new video track to local stream");
+      // Handle video track if needed
+      if (videoTrack && options.handleVideo) {
         if (oldVideoTrack) {
+          console.log("Removing old video track from local stream");
           localStreamRef.current.removeTrack(oldVideoTrack);
         }
+        console.log("Adding new video track to local stream");
         localStreamRef.current.addTrack(videoTrack);
       }
       
-      // Handle audio track
-      if (audioTrack) {
-        console.log("Adding new audio track to local stream");
+      // Handle audio track if needed
+      if (audioTrack && options.handleAudio) {
         if (oldAudioTrack) {
+          console.log("Removing old audio track from local stream");
           localStreamRef.current.removeTrack(oldAudioTrack);
         }
+        console.log("Adding new audio track to local stream");
         localStreamRef.current.addTrack(audioTrack);
       }
-  
+      
       // Now update all peer connections
       for (let peer of connections) {
         try {
@@ -662,49 +896,48 @@ export default function useWebRTC({
           // Track changes that need signaling
           let trackChanges = false;
           
-          // Update video
-          if (videoTrack) {
+          // Update video if needed
+          if (videoTrack && options.handleVideo) {
             trackChanges = true;
             if (oldVideoTrack) {
               try {
+                console.log('Replacing old video track for peer')
                 await peer.connection.peer.replaceTrack(
                   oldVideoTrack,
                   videoTrack,
                   localStreamRef.current
                 );
-                console.log('*** video track replaced')
               } catch (err) {
-                console.error("Failed to replace video track, trying to renegotiate", err);
+                console.error("Failed to replace old video track, trying to renegotiate", err);
                 peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
               }
             } else {
-              console.log('*** adding new video track to peer')
+              console.log('Adding new video track to peer')
               peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
             }
           }
           
-          // Update audio
-          if (audioTrack) {
+          // Update audio if needed
+          if (audioTrack && options.handleAudio) {
             trackChanges = true;
             if (oldAudioTrack) {
               try {
-                console.log("Replacing audio track for peer");
+                console.log("Replacing old audio track for peer");
                 await peer.connection.peer.replaceTrack(
                   oldAudioTrack,
                   audioTrack,
                   localStreamRef.current
                 );
-                console.log('*** audio track replaced')
               } catch (err) {
                 console.error("Failed to replace audio track, trying to renegotiate", err);
                 peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
               }
             } else {
-              console.log("*** adding audio track to peer");
+              console.log("Adding new audio track to peer");
               peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
             }
           }
-
+  
           // If tracks changed significantly, trigger renegotiation
           if (trackChanges) {
             // Signal to the peer that we've changed tracks
@@ -716,12 +949,12 @@ export default function useWebRTC({
       }
       
       // After successfully updating, stop old tracks to free resources
-      if (oldVideoTrack && videoTrack) {
+      if (oldVideoTrack && videoTrack && options.handleVideo) {
         console.log("Stopping old video track");
         oldVideoTrack.stop();
       }
       
-      if (oldAudioTrack && audioTrack) {
+      if (oldAudioTrack && audioTrack && options.handleAudio) {
         console.log("Stopping old audio track");
         oldAudioTrack.stop();
       }
@@ -730,8 +963,8 @@ export default function useWebRTC({
       if (stream !== localStreamRef.current) {
         console.log("Cleaning up original stream");
         stream.getTracks().forEach(track => {
-          const isVideoAdded = track.kind === 'video' && localStreamRef.current.getVideoTracks().includes(track);
-          const isAudioAdded = track.kind === 'audio' && localStreamRef.current.getAudioTracks().includes(track);
+          const isVideoAdded = track.kind === 'video' && videoTrack === track;
+          const isAudioAdded = track.kind === 'audio' && audioTrack === track;
           
           if (!isVideoAdded && !isAudioAdded) {
             console.log(`Stopping unused ${track.kind} track from original stream`);
