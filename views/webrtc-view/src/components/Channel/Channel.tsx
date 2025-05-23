@@ -105,9 +105,9 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
             webrtcStore={webrtcStore}
             leaveRoom={leaveRoom}
           />
-          {webRTC.localState.settings.transcriber.on && (
+          {/* {webRTC.localState.settings.transcriber.on && (
             <Transcriber webRTC={webRTC} source={source} perspective={perspective} />
-          )}
+          )} */}
         </>
       )}
 
