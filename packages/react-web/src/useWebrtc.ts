@@ -139,6 +139,7 @@ export default function useWebRTC({
     async function getDevices() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log('devices: ', devices)
         setDevices(devices);
         devicesRef.current = devices;
       } catch (e) {}
@@ -200,32 +201,32 @@ export default function useWebRTC({
    *
    * Stop recording user input if user hasn't joined yet and goes to another view
    */
-  useEffect(() => {
-    async function TogglePreRecording() {
-      // Return if permission denied
-      if (!videoPermissionGranted) {
-        return;
-      }
+  // useEffect(() => {
+  //   async function TogglePreRecording() {
+  //     // Return if permission denied
+  //     if (!videoPermissionGranted) {
+  //       return;
+  //     }
 
-      if (enabled && !showPreview) {
-        const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: localStateRef.current.settings.audio,
-          video: localStateRef.current.settings.video,
-        });
-        setLocalStream(newLocalStream);
-        localStreamRef.current = newLocalStream;
-        setShowPreview(true);
-      }
+  //     if (enabled && !showPreview) {
+  //       const newLocalStream = await navigator.mediaDevices.getUserMedia({
+  //         audio: localStateRef.current.settings.audio,
+  //         video: localStateRef.current.settings.video,
+  //       });
+  //       setLocalStream(newLocalStream);
+  //       localStreamRef.current = newLocalStream;
+  //       setShowPreview(true);
+  //     }
 
-      if (!enabled && showPreview && localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach((track) => track.stop());
-        setShowPreview(false);
-      }
-    }
-    if (!hasJoined) {
-      TogglePreRecording();
-    }
-  }, [enabled, showPreview, videoPermissionGranted, hasJoined, localState]);
+  //     if (!enabled && showPreview && localStreamRef.current) {
+  //       localStreamRef.current.getTracks().forEach((track) => track.stop());
+  //       setShowPreview(false);
+  //     }
+  //   }
+  //   if (!hasJoined) {
+  //     TogglePreRecording();
+  //   }
+  // }, [enabled, showPreview, videoPermissionGranted, hasJoined, localState]);
 
   /**
    * Attach signal listeners
@@ -297,6 +298,12 @@ export default function useWebRTC({
                 newPeer,
               ];
             });
+          }
+
+          if (type === "tracks-changed" && senderDid !== agent.did) {
+            console.log('*** tracks changed from peer:', senderDid)
+            // Request updated state first
+            manager.current?.sendMessage("request-state", senderDid);
           }
         }
       );
@@ -401,8 +408,11 @@ export default function useWebRTC({
     // If we're enabling video but don't have video tracks, we need to get them
     else if (enabled && (!localStreamRef.current || localStreamRef.current.getVideoTracks().length === 0)) {
       try {
+        const audioEnabled = localStreamRef.current?.getAudioTracks().some(track => track.enabled) || false;
+        const audioConstraints = audioEnabled ? localStateRef.current.settings.audio : false;
+
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: localStreamRef.current ? !!localStreamRef.current.getAudioTracks().length : localStateRef.current.settings.audio,
+          audio: audioConstraints,
           video: newSettings.video,
         });
         
@@ -540,61 +550,201 @@ export default function useWebRTC({
     updateStream(newLocalStream);
   }
 
-  function updateStream(stream: MediaStream) {
-    const [videoTrack] = stream.getVideoTracks();
-    const [audioTrack] = stream.getAudioTracks();
+  // function updateStream(stream: MediaStream) {
+  //   const [videoTrack] = stream.getVideoTracks();
+  //   const [audioTrack] = stream.getAudioTracks();
 
-    // Update all peers (Important, as peer expects the same stream)
-    // -> https://github.com/feross/simple-peer/issues/634#issuecomment-621761586
-    for (let peer of connections) {
+  //   // Update all peers (Important, as peer expects the same stream)
+  //   // -> https://github.com/feross/simple-peer/issues/634#issuecomment-621761586
+  //   for (let peer of connections) {
+  //     if (videoTrack) {
+  //       const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+
+  //       if (oldVideoTrack) {
+  //         peer.connection.peer.replaceTrack(
+  //           oldVideoTrack,
+  //           videoTrack,
+  //           localStreamRef.current
+  //         );
+  //       } else {
+  //         peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+  //       }
+  //     }
+
+  //     if (audioTrack) {
+  //       const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
+
+  //       if (oldAudioTrack) {
+  //         peer.connection.peer.replaceTrack(
+  //           localStreamRef.current.getAudioTracks()[0],
+  //           audioTrack,
+  //           localStreamRef.current
+  //         );
+  //       } else {
+  //         peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+  //       }
+  //     }
+  //   }
+
+  //   // Update local state
+  //   if (videoTrack) {
+  //     const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+  //     if (oldVideoTrack) {
+  //       localStreamRef.current?.removeTrack(oldVideoTrack);
+  //       localStreamRef.current?.addTrack(videoTrack);
+  //     } else {
+  //       localStreamRef.current?.addTrack(videoTrack);
+  //     }
+  //   }
+
+  //   if (audioTrack) {
+  //     const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
+  //     if (oldAudioTrack) {
+  //       localStreamRef.current?.removeTrack(oldAudioTrack);
+  //       localStreamRef.current?.addTrack(audioTrack);
+  //     } else {
+  //       localStreamRef.current?.addTrack(audioTrack);
+  //     }
+  //   }
+  // }
+
+  async function updateStream(stream: MediaStream) {
+    console.log("Update stream called with:", 
+      stream.getVideoTracks().length ? "video track" : "no video", 
+      stream.getAudioTracks().length ? "audio track" : "no audio");
+  
+    // If no local stream exists yet, just use the new stream directly
+    if (!localStreamRef.current) {
+      console.log("No existing stream, using new stream directly");
+      setLocalStream(stream);
+      localStreamRef.current = stream;
+      return;
+    }
+  
+    // Get new tracks
+    const videoTrack = stream.getVideoTracks()[0];
+    const audioTrack = stream.getAudioTracks()[0];
+    
+    // Get existing tracks
+    const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+    const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
+    
+    console.log("Existing tracks:", 
+      oldVideoTrack ? "has video" : "no video", 
+      oldAudioTrack ? "has audio" : "no audio");
+  
+    try {
+      // Always update the local stream first to ensure media displays correctly
+      // This is critical - update local media display before peer connections
+      
+      // Handle video track
       if (videoTrack) {
-        const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
-
+        console.log("Adding new video track to local stream");
         if (oldVideoTrack) {
-          peer.connection.peer.replaceTrack(
-            oldVideoTrack,
-            videoTrack,
-            localStreamRef.current
-          );
-        } else {
-          peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+          localStreamRef.current.removeTrack(oldVideoTrack);
         }
+        localStreamRef.current.addTrack(videoTrack);
       }
-
+      
+      // Handle audio track
       if (audioTrack) {
-        const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
-
+        console.log("Adding new audio track to local stream");
         if (oldAudioTrack) {
-          peer.connection.peer.replaceTrack(
-            localStreamRef.current.getAudioTracks()[0],
-            audioTrack,
-            localStreamRef.current
-          );
-        } else {
-          peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+          localStreamRef.current.removeTrack(oldAudioTrack);
+        }
+        localStreamRef.current.addTrack(audioTrack);
+      }
+  
+      // Now update all peer connections
+      for (let peer of connections) {
+        try {
+          console.log("Updating tracks for peer:", peer.did);
+          // Track changes that need signaling
+          let trackChanges = false;
+          
+          // Update video
+          if (videoTrack) {
+            trackChanges = true;
+            if (oldVideoTrack) {
+              try {
+                await peer.connection.peer.replaceTrack(
+                  oldVideoTrack,
+                  videoTrack,
+                  localStreamRef.current
+                );
+                console.log('*** video track replaced')
+              } catch (err) {
+                console.error("Failed to replace video track, trying to renegotiate", err);
+                peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+              }
+            } else {
+              console.log('*** adding new video track to peer')
+              peer.connection.peer.addTrack(videoTrack, localStreamRef.current);
+            }
+          }
+          
+          // Update audio
+          if (audioTrack) {
+            trackChanges = true;
+            if (oldAudioTrack) {
+              try {
+                console.log("Replacing audio track for peer");
+                await peer.connection.peer.replaceTrack(
+                  oldAudioTrack,
+                  audioTrack,
+                  localStreamRef.current
+                );
+                console.log('*** audio track replaced')
+              } catch (err) {
+                console.error("Failed to replace audio track, trying to renegotiate", err);
+                peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+              }
+            } else {
+              console.log("*** adding audio track to peer");
+              peer.connection.peer.addTrack(audioTrack, localStreamRef.current);
+            }
+          }
+
+          // If tracks changed significantly, trigger renegotiation
+          if (trackChanges) {
+            // Signal to the peer that we've changed tracks
+            manager.current?.sendMessage("tracks-changed", peer.did);
+          }
+        } catch (err) {
+          console.error("Error updating tracks for peer:", peer.did, err);
         }
       }
-    }
-
-    // Update local state
-    if (videoTrack) {
-      const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
-      if (oldVideoTrack) {
-        localStreamRef.current?.removeTrack(oldVideoTrack);
-        localStreamRef.current?.addTrack(videoTrack);
-      } else {
-        localStreamRef.current?.addTrack(videoTrack);
+      
+      // After successfully updating, stop old tracks to free resources
+      if (oldVideoTrack && videoTrack) {
+        console.log("Stopping old video track");
+        oldVideoTrack.stop();
       }
-    }
-
-    if (audioTrack) {
-      const oldAudioTrack = localStreamRef.current.getAudioTracks()[0];
-      if (oldAudioTrack) {
-        localStreamRef.current?.removeTrack(oldAudioTrack);
-        localStreamRef.current?.addTrack(audioTrack);
-      } else {
-        localStreamRef.current?.addTrack(audioTrack);
+      
+      if (oldAudioTrack && audioTrack) {
+        console.log("Stopping old audio track");
+        oldAudioTrack.stop();
       }
+      
+      // Clean up any unused tracks from the source stream
+      if (stream !== localStreamRef.current) {
+        console.log("Cleaning up original stream");
+        stream.getTracks().forEach(track => {
+          const isVideoAdded = track.kind === 'video' && localStreamRef.current.getVideoTracks().includes(track);
+          const isAudioAdded = track.kind === 'audio' && localStreamRef.current.getAudioTracks().includes(track);
+          
+          if (!isVideoAdded && !isAudioAdded) {
+            console.log(`Stopping unused ${track.kind} track from original stream`);
+            track.stop();
+          }
+        });
+      }
+      
+      // Force UI update by setting the stream state
+      setLocalStream(localStreamRef.current);
+      
+    } catch (err) {
+      console.error("Error in updateStream:", err);
     }
   }
 
