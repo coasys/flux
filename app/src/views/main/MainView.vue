@@ -5,9 +5,9 @@
       <MainSidebar />
     </template>
 
-    <!-- WebRTC component -->
+    <!-- WebRTC call window -->
     <template v-slot:webrtc>
-      <WebRTC />
+      <CallWindow />
     </template>
 
     <!-- Main content -->
@@ -159,12 +159,12 @@
 <script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import CallWindow from "@/containers/CallWindow.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditChannel from "@/containers/EditChannel.vue";
 import EditCommunity from "@/containers/EditCommunity.vue";
-import WebRTC from "@/containers/WebRTC.vue";
 import AppLayout from "@/layout/AppLayout.vue";
 import { useAppStore, useModalStore } from "@/store";
 import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
