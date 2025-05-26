@@ -14,7 +14,7 @@ export interface CommunityService {
   neighbourhood: NeighbourhoodProxy;
   isSynced: ComputedRef<boolean>;
   isAuthor: ComputedRef<boolean>;
-  community: ComputedRef<Community | null>;
+  community: ComputedRef<Community>;
   members: Ref<Partial<Profile>[]>;
   membersLoading: Ref<boolean>;
   channels: Ref<Channel[]>;
@@ -48,7 +48,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const perspectiveState = ref(perspective.state);
   const isSynced = computed(() => perspectiveState.value === PerspectiveState.Synced);
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
-  const community = computed<Community | null>(() => communities.value[0] || null);
+  const community = computed<Community>(() => communities.value[0]);
 
   // Getters
   async function getMembers() {

@@ -152,11 +152,11 @@ import { useWebrtcStore } from "@/store/webrtcStore";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { generateWCName } from "@coasys/flux-api";
+import { Channel, Community, generateWCName } from "@coasys/flux-api";
 import { AgentState, AgentStatus, CallHealth, Profile, SignallingService } from "@coasys/flux-types";
 import "@coasys/flux-webrtc-view";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, ComputedRef, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -185,9 +185,9 @@ const signallingService = computed<SignallingService | undefined>(() => communit
 const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
 const callHealthColour = computed(findHealthColour);
-const community = computed(() => communityService.value?.community?.value || null);
+const community = computed(() => communityService.value?.community || null) as ComputedRef<Community | null>;
 const channel = computed(() =>
-  communityService.value?.channels?.value?.find((c) => c.baseExpression === channelId.value)
+  (communityService.value?.channels as any).find((c: Channel) => c.baseExpression === channelId.value)
 );
 const connectionText = computed(findConnectionText);
 const connectionWarning = computed(findConnectionWarning);
@@ -279,7 +279,7 @@ async function registerWebcomponent() {
 }
 
 async function getData() {
-  ready.value = false;
+  // ready.value = false;
 
   // Update the route data
   communityId.value = route.params.communityId as string;
