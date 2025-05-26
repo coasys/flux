@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { Theme, useThemeStore } from "@/store";
+import { Theme, useThemeStore } from "@/stores";
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
 

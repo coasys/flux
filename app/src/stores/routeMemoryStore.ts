@@ -12,13 +12,13 @@ export const useRouteMemoryStore = defineStore("routeMemoryStore", () => {
   // Map of last routes by community ID
   const lastRoutes = ref<Record<string, CommunityRouteMemory>>({});
 
-  // Save the last full route visited in a community
   function saveLastRoute(communityId: string, path: string, params: RouteParams) {
+    // Saves the last full route visited in a community
     lastRoutes.value[communityId] = { ...lastRoutes.value[communityId], path, params };
   }
 
-  // Save the last view visited in a channel
   function saveLastChannelView(communityId: string, channelId: string, viewId: string) {
+    // Saves the last view visited in a channel
     if (lastRoutes.value[communityId]) {
       lastRoutes.value[communityId].channels = lastRoutes.value[communityId].channels || {};
       lastRoutes.value[communityId].channels[channelId] = viewId;

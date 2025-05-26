@@ -1,5 +1,5 @@
-import { useThemeStore } from "@/store";
 import { useDataStore } from "@/store/data";
+import { useThemeStore } from "@/stores";
 import * as setTheme from "@/utils/themeHelper";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import community from "../../../fixtures/community.json";

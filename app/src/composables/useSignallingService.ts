@@ -1,5 +1,5 @@
-import { useAppStore } from "@/store";
-import { useWebrtcStore } from "@/store/webrtcStore";
+import { useAppStore } from "@/stores";
+import { useWebrtcStore } from "@/stores/webrtcStore";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, CallHealth, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";

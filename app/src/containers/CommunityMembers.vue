@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";

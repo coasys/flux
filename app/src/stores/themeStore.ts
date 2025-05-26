@@ -1,4 +1,4 @@
-import { Theme } from "@/store/types";
+import { Theme } from "@/stores/types";
 import { setTheme } from "@/utils/themeHelper";
 import { defineStore } from "pinia";
 import { ref } from "vue";

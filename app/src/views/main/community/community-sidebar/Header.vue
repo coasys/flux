@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore, useUiStore } from "@/store";
+import { useModalStore, useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 

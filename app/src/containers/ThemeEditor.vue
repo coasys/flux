@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { useThemeStore } from "@/store";
+import { useThemeStore } from "@/stores";
 import { storeToRefs } from "pinia";
 const themeStore = useThemeStore();
 const { globalTheme } = storeToRefs(themeStore);

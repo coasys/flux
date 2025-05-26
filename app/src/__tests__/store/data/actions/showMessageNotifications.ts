@@ -1,15 +1,15 @@
-import community from "../../../fixtures/community.json";
-import channel from "../../../fixtures/channel.json";
-import initAgentFixture from "../../../fixtures/initAgent.json";
-import getProfileFixture from "../../../fixtures/getProfile.json";
-import lockAgentFixture from "../../../fixtures/lockAgent.json";
-import { AgentStatus, Expression } from "@coasys/ad4m";
-import { ExpressionTypes, ProfileExpression } from "@/store/types";
-import { createPinia, Pinia, setActivePinia } from "pinia";
-import { useUserStore } from "@/store/user";
-import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
+import { useDataStore } from "@/store/data";
+import { useUserStore } from "@/store/user";
+import { ExpressionTypes, ProfileExpression } from "@/stores/types";
+import { AgentStatus, Expression } from "@coasys/ad4m";
+import { createPinia, Pinia, setActivePinia } from "pinia";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
+import channel from "../../../fixtures/channel.json";
+import community from "../../../fixtures/community.json";
+import getProfileFixture from "../../../fixtures/getProfile.json";
+import initAgentFixture from "../../../fixtures/initAgent.json";
+import lockAgentFixture from "../../../fixtures/lockAgent.json";
 
 const testProfile = {
   did: initAgentFixture.did,
@@ -22,18 +22,18 @@ describe("Show Message Notification", () => {
   let did: string;
   let profileLink: string;
 
-  beforeAll(async () => {  
+  beforeAll(async () => {
     Object.defineProperty(global, "Notification", {
       value: jest.fn(),
     });
 
     const staticMembers = {
       requestPermission: jest.fn().mockImplementation(async () => {
-        return 'granted';
+        return "granted";
       }),
-      permission: 'granted',
+      permission: "granted",
     };
-  
+
     Object.assign(global.Notification, staticMembers);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
@@ -46,26 +46,24 @@ describe("Show Message Notification", () => {
   });
 
   beforeEach(() => {
-    jest
-      .spyOn(ad4mClient.agent, "unlock")
-      .mockImplementation(async (password) => {
-        if (password === "test123") {
-          return lockAgentFixture as AgentStatus;
-        }
+    jest.spyOn(ad4mClient.agent, "unlock").mockImplementation(async (password) => {
+      if (password === "test123") {
+        return lockAgentFixture as AgentStatus;
+      }
 
-        throw new Error("Password doesn't match");
-      });
+      throw new Error("Password doesn't match");
+    });
 
     jest
       .spyOn(ad4mClient.agent, "byDID")
       // @ts-ignore
       .mockImplementation(async (did) => {
-        if (did.includes('101')) {
+        if (did.includes("101")) {
           return {
             perspective: {
-              links: []
-            }
-          }
+              links: [],
+            },
+          };
         }
         return agentByDIDLinksFixture;
       });
@@ -212,8 +210,7 @@ describe("Show Message Notification", () => {
       },
       perspectiveUuid: channel.id,
       authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC",
-      message:
-        '<p>hello <span data-id="did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaR">@jhon</span></p>',
+      message: '<p>hello <span data-id="did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaR">@jhon</span></p>',
     });
 
     expect(notification).not.toBeUndefined();

@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { viewOptions } from "@/constants";
-import { useAppStore } from "@/store/appStore";
+import { useAppStore } from "@/stores/appStore";
 import { ChannelView } from "@coasys/flux-types";
 import { defineComponent, ref } from "vue";
 

@@ -157,7 +157,7 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import ProfileContainer from "@/containers/Profile.vue";
-import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/store";
+import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App } from "@coasys/flux-api";

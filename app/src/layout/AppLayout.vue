@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from "@/store";
+import { useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 

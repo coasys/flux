@@ -1,4 +1,4 @@
-import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/store";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 
 describe("App Mutations", () => {

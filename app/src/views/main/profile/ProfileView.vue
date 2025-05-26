@@ -139,7 +139,7 @@
 
 <script setup lang="ts">
 import EditProfile from "@/containers/EditProfile.vue";
-import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/store";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";

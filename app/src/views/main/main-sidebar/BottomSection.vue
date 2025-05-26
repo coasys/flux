@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";

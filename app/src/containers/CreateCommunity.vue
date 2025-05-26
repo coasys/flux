@@ -171,7 +171,7 @@
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import HourGlass from "@/components/hourglass/Hourglass.vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { useAppStore, useModalStore } from "@/store";
+import { useAppStore, useModalStore } from "@/stores";
 import { isValid } from "@/utils/validation";
 import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect";

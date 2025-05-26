@@ -1,5 +1,5 @@
 import { ad4mConnect } from "@/ad4mConnect";
-import { useAppStore, useRouteMemoryStore } from "@/store";
+import { useAppStore, useRouteMemoryStore } from "@/stores";
 import { RouteParams } from "@coasys/flux-types";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 

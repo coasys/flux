@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useUiStore, useWebrtcStore } from "@/store";
+import { useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";

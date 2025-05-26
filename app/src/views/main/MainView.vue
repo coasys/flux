@@ -166,7 +166,7 @@ import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditChannel from "@/containers/EditChannel.vue";
 import EditCommunity from "@/containers/EditCommunity.vue";
 import AppLayout from "@/layout/AppLayout.vue";
-import { useAppStore, useModalStore } from "@/store";
+import { useAppStore, useModalStore } from "@/stores";
 import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { usePerspectives } from "@coasys/ad4m-vue-hooks";

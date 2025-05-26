@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/store";
+import { useModalStore } from "@/stores";
 import ChannelListItem from "@/views/main/community/community-sidebar/ChannelListItem.vue";
 import { defineOptions } from "vue";
 

@@ -53,7 +53,7 @@
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/store";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentState, ChannelView, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";

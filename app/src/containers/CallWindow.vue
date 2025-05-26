@@ -146,9 +146,9 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { useAppStore, useUiStore } from "@/store";
-import { useCommunityServiceStore } from "@/store/communityServiceStore";
-import { useWebrtcStore } from "@/store/webrtcStore";
+import { useAppStore, useUiStore } from "@/stores";
+import { useCommunityServiceStore } from "@/stores/communityServiceStore";
+import { useWebrtcStore } from "@/stores/webrtcStore";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy } from "@coasys/ad4m";
@@ -178,6 +178,8 @@ const myProfile = ref<Profile | null>(null);
 const webcomponentName = ref("");
 const ready = ref(false);
 const showAgentStatusMenu = ref(false);
+
+// TODO: move this into webrtcStore & access the signalling service there...
 const agentsInCall = ref<AgentState[]>([]);
 
 const communityService = computed(() => communityServiceStore.getCommunityService(communityId.value));

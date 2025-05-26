@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/store";
+import { useModalStore } from "@/stores";
 import { computed } from "vue";
 
 defineOptions({ name: "Members" });

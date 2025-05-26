@@ -1,19 +1,10 @@
-import { ThemeState } from "@/store/types";
+import { ThemeState } from "@/stores/types";
 
 export function setTheme(theme: ThemeState): void {
-  document.documentElement.style.setProperty(
-    "--j-color-primary-hue",
-    theme.hue.toString()
-  );
-  document.documentElement.style.setProperty(
-    "--j-color-saturation",
-    theme.saturation + "%"
-  );
+  document.documentElement.style.setProperty("--j-color-primary-hue", theme.hue.toString());
+  document.documentElement.style.setProperty("--j-color-saturation", theme.saturation + "%");
 
-  document.documentElement.style.setProperty(
-    "--j-font-base-size",
-    theme.fontSize
-  );
+  document.documentElement.style.setProperty("--j-font-base-size", theme.fontSize);
 
   document.documentElement.setAttribute("class", theme.name);
 

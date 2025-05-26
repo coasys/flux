@@ -53,7 +53,7 @@
 import { ad4mConnect } from "@/ad4mConnect";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import Logo from "@/components/logo/Logo.vue";
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { useValidation } from "@/utils/validation";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";

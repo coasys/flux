@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useThemeStore, useUiStore } from "@/store";
+import { useAppStore, useThemeStore, useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 

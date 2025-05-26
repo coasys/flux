@@ -1,4 +1,4 @@
-import { useAppStore, useUiStore, useWebrtcStore } from "@/store";
+import { useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { createPinia, storeToRefs } from "pinia";
 import { createApp, h, watch } from "vue";

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { getLiteralObjectLinks } from "@coasys/flux-utils";
 import { computed } from "vue";
 

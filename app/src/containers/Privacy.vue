@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({

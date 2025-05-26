@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store";
+import { useAppStore } from "@/stores";
 import { onMounted, ref, watch } from "vue";
 
 const props = defineProps({ address: { type: String, required: true } });

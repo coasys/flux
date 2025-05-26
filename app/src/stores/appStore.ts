@@ -1,6 +1,6 @@
 import iconPath from "@/assets/images/icon.png";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { ToastState, UpdateState } from "@/store/types";
+import { ToastState, UpdateState } from "@/stores/types";
 import { Ad4mClient, Agent } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
 import { defineStore } from "pinia";
@@ -32,6 +32,7 @@ export const useAppStore = defineStore("appStore", () => {
     me.value = newMe;
   }
 
+  // Todo: move toasts & notifications to ui store?
   function setToast(payload: ToastState): void {
     toast.value = { ...toast.value, ...payload };
   }
