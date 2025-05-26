@@ -90,40 +90,35 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useModalStore, useWebrtcStore } from "@/store";
+import { useModalStore } from "@/store";
+import { useCommunityServiceStore } from "@/store/communityServiceStore";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
 import { RouteParams } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, provide, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "CommunityView" });
 const { communityId, channelId } = defineProps({
-  communityId: { type: String },
+  communityId: { type: String, required: true },
   channelId: { type: String },
 });
 
 const route = useRoute();
 const router = useRouter();
 const modalStore = useModalStore();
-const webrtcStore = useWebrtcStore();
+const communityServiceStore = useCommunityServiceStore();
 
-const { communityServices } = storeToRefs(webrtcStore);
-
-// Initialize community service
+// Initialize the community service & add it to the community service store
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
+communityServiceStore.addCommunityService(communityId, communityService);
 const { community, isSynced, channels, signallingService } = communityService;
-
-// Register the community service in the webrtcstore
-communityServices.value[communityId!] = communityService;
 
 function navigateToChannel(channelId: string) {
   router.push({ name: "channel", params: { communityId, channelId } });
 }
 
 onMounted(() => signallingService.startSignalling());
-
 onUnmounted(() => signallingService.stopSignalling());
 
 watch(

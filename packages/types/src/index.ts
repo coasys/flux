@@ -224,14 +224,13 @@ export interface AgentState {
 }
 
 export type CallHealth = "healthy" | "warnings" | "connections-lost";
+
 export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
   callHealth: Ref<CallHealth>;
-
   setProcessingState: (processing: ProcessingState) => void;
   setCurrentRoute: (params: RouteParams) => void;
-
   getAgentState(did: string): AgentState | undefined;
 
   startSignalling: () => void;

@@ -1,15 +1,29 @@
 import { useAppStore } from "@/store/appStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
+import { NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
+import { Profile, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, inject, InjectionKey, ref } from "vue";
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref } from "vue";
 import { useRoute } from "vue-router";
 import { useSignallingService } from "./useSignallingService";
 
-export async function createCommunityService() {
+export interface CommunityService {
+  perspective: PerspectiveProxy;
+  neighbourhood: NeighbourhoodProxy;
+  isSynced: ComputedRef<boolean>;
+  isAuthor: ComputedRef<boolean>;
+  community: ComputedRef<Community | null>;
+  members: Ref<Partial<Profile>[]>;
+  membersLoading: Ref<boolean>;
+  channels: Ref<Channel[]>;
+  channelsLoading: Ref<boolean>;
+  signallingService: SignallingService;
+  getMembers: () => Promise<void>;
+}
+
+export async function createCommunityService(): Promise<CommunityService> {
   const route = useRoute();
   const app = useAppStore();
   const { me } = storeToRefs(app);
@@ -34,7 +48,7 @@ export async function createCommunityService() {
   const perspectiveState = ref(perspective.state);
   const isSynced = computed(() => perspectiveState.value === PerspectiveState.Synced);
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
-  const community = computed(() => communities.value[0] || null);
+  const community = computed<Community | null>(() => communities.value[0] || null);
 
   // Getters
   async function getMembers() {
@@ -78,8 +92,7 @@ export async function createCommunityService() {
   };
 }
 
-export const CommunityServiceKey: InjectionKey<Awaited<ReturnType<typeof createCommunityService>>> =
-  Symbol("FluxCommunityService");
+export const CommunityServiceKey: InjectionKey<Awaited<CommunityService>> = Symbol("FluxCommunityService");
 
 export function useCommunityService() {
   const service = inject(CommunityServiceKey);

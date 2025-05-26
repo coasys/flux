@@ -11,9 +11,6 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
   const audioEnabled = ref(true);
   const videoEnabled = ref(false);
   const agentStatus = ref<AgentStatus>("active");
-  const communityServices = ref<Record<string, any>>({});
-
-  // const currentCommunity
 
   async function addInstance(webRTC: WebRTC) {
     instance.value = webRTC;
@@ -50,8 +47,6 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     videoEnabled,
     audioEnabled,
     agentStatus,
-    communityServices,
-
     addInstance,
     joinRoom,
     leaveRoom,

@@ -20,7 +20,7 @@
                 </j-text>
               </j-flex>
               <j-text nomargin size="400">
-                <b>{{ community?.name || "No community name" }}</b> / {{ channelName || "No channel name" }}
+                <b>{{ community?.name || "No community name" }}</b> / {{ channel?.name || "No channel name" }}
               </j-text>
             </j-flex>
 
@@ -101,7 +101,7 @@
         <j-flex j="between">
           <j-flex direction="column" gap="300">
             <j-text nomargin size="400">
-              <b>{{ community?.name }}</b> / {{ channelName }}
+              <b>{{ community?.name || "No community name" }}</b> / {{ channel?.name || "No channel name" }}
             </j-text>
 
             <j-flex a="center" gap="100" v-if="agentsInCall.length" style="margin-left: -6px">
@@ -147,6 +147,7 @@
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { useAppStore, useUiStore } from "@/store";
+import { useCommunityServiceStore } from "@/store/communityServiceStore";
 import { useWebrtcStore } from "@/store/webrtcStore";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
@@ -163,9 +164,10 @@ const router = useRouter();
 const appStore = useAppStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
+const communityServiceStore = useCommunityServiceStore();
 
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
-const { audioEnabled, videoEnabled, callRoute, agentStatus, communityServices } = storeToRefs(webrtcStore);
+const { audioEnabled, videoEnabled, callRoute, agentStatus } = storeToRefs(webrtcStore);
 
 const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
@@ -178,13 +180,15 @@ const ready = ref(false);
 const showAgentStatusMenu = ref(false);
 const agentsInCall = ref<AgentState[]>([]);
 
-const communityService = computed(() => communityServices.value[communityId.value]);
+const communityService = computed(() => communityServiceStore.getCommunityService(communityId.value));
 const signallingService = computed<SignallingService | undefined>(() => communityService.value?.signallingService);
 const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
 const callHealthColour = computed(findHealthColour);
-const community = computed(() => communityService.value?.community);
-const channelName = computed(findChannelName);
+const community = computed(() => communityService.value?.community?.value || null);
+const channel = computed(() =>
+  communityService.value?.channels?.value?.find((c) => c.baseExpression === channelId.value)
+);
 const connectionText = computed(findConnectionText);
 const connectionWarning = computed(findConnectionWarning);
 
@@ -198,11 +202,6 @@ function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
   else if (callHealth.value === "warnings") return "warning-500";
   return "danger-500";
-}
-
-function findChannelName() {
-  const channel = communityService.value?.channels.find((c: any) => c.baseExpression === channelId.value);
-  return channel ? channel.name : "";
 }
 
 function findConnectionText() {

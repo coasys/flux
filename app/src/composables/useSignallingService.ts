@@ -231,18 +231,12 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   );
 
   return {
-    // State
     signalling,
     agents,
     callHealth,
-
-    // Setters
     setProcessingState,
     setCurrentRoute,
-
-    // Getters
     getAgentState,
-
     startSignalling,
     stopSignalling,
   };

@@ -7,6 +7,13 @@ import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
 export const useAppStore = defineStore("appStore", () => {
+  const me = ref<Agent>({ did: "" });
+  const updateState = ref<UpdateState>("not-available");
+  const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
+  const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
+  const aiEnabled = ref(false);
+  const myCommunities = ref<Record<string, Community>>({});
+
   // Store a shallow ref of the Ad4mClient so we retain access to its methods
   const ad4mClientRef = shallowRef<Ad4mClient | null>(null);
 
@@ -15,13 +22,6 @@ export const useAppStore = defineStore("appStore", () => {
     if (!ad4mClientRef.value) console.error("Trying to access Ad4mClient before initialization");
     return ad4mClientRef.value as Ad4mClient;
   });
-
-  const me = ref<Agent>({ did: "" });
-  const updateState = ref<UpdateState>("not-available");
-  const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
-  const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
-  const aiEnabled = ref(false);
-  const myCommunities = ref<Record<string, Community>>({});
 
   // Mutations
   function setAdamClient(client: Ad4mClient): void {

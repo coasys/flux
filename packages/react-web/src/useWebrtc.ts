@@ -139,7 +139,6 @@ export default function useWebRTC({
     async function getDevices() {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        console.log('devices: ', devices)
         setDevices(devices);
         devicesRef.current = devices;
       } catch (e) {}
