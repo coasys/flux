@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store/app";
+import { useAppStore } from "@/store/appStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
@@ -21,7 +21,7 @@ export async function createCommunityService() {
   // Ensure required SDNA is installed (Todo: include other models here...)
   perspective.ensureSDNASubjectClass(Topic);
 
-  // Initialise the signalling service
+  // Initialise the signalling service for the community
   const signallingService = useSignallingService(perspective.uuid, neighbourhood);
 
   // Model subscriptions (Todo: singularise communities when singular useModel hook available)

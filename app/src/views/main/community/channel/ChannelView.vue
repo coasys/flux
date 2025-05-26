@@ -157,7 +157,7 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import ProfileContainer from "@/containers/Profile.vue";
-import { useAppStore, useModalStore, useUIStore, useWebRTCStore } from "@/store";
+import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App } from "@coasys/flux-api";
@@ -178,8 +178,8 @@ const route = useRoute();
 
 const appStore = useAppStore();
 const modalStore = useModalStore();
-const uiStore = useUIStore();
-const webrtcStore = useWebRTCStore();
+const uiStore = useUiStore();
+const webrtcStore = useWebrtcStore();
 
 const { perspective, channels, signallingService } = useCommunityService();
 

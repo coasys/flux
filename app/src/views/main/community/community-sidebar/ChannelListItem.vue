@@ -37,7 +37,7 @@
   </div>
 
   <j-menu slot="content" v-if="isChannelCreator">
-    <j-menu-item @click="() => modals.setShowEditChannel(true)">
+    <j-menu-item @click="() => (modalStore.showEditChannel = true)">
       <j-icon size="xs" slot="start" name="pencil" />
       Edit Channel
     </j-menu-item>
@@ -53,7 +53,7 @@
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentState, ChannelView, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -67,11 +67,11 @@ const { channel } = defineProps({ channel: { type: Object, required: true } });
 
 const route = useRoute();
 const router = useRouter();
-const app = useAppStore();
-const modals = useModalStore();
-const ui = useUIStore();
-const routeMemory = useRouteMemoryStore();
-const { me } = storeToRefs(app);
+const appStore = useAppStore();
+const modalStore = useModalStore();
+const uiStore = useUiStore();
+const routeMemoryStore = useRouteMemoryStore();
+const { me } = storeToRefs(appStore);
 const { signallingService } = useCommunityService();
 const { agents } = signallingService;
 
@@ -125,12 +125,12 @@ function getIcon(view: ChannelView | string) {
 }
 
 function navigateToChannel() {
-  ui.setCommunitySidebarOpen(false);
+  uiStore.setCommunitySidebarOpen(false);
 
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
   const channelId = channel.baseExpression;
-  const lastViewId = routeMemory.getLastChannelView(communityId, channelId);
+  const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
   if (lastViewId) router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId } });
   else router.push({ name: "channel", params: { communityId, channelId } });
 }

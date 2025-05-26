@@ -74,7 +74,7 @@
             <j-text variant="label">Select a strategy</j-text>
             <select
               class="select"
-              @change="(e) => (selectedLang = e.target.value)"
+              @change="(e: any) => (selectedLang = e.target.value)"
               :value="selectedLang"
               size="lg"
               label="Select Language"
@@ -243,7 +243,9 @@ export default defineComponent({
       }, {});
     },
     hasAlreadyJoinedTestingCommunity(): boolean {
-      const p = Object.values(this.perspectives).find((p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD);
+      const p = Object.values(this.perspectives).find(
+        (p: PerspectiveProxy) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD
+      );
       return p ? true : false;
     },
     canJoin(): boolean {
@@ -287,12 +289,13 @@ export default defineComponent({
       }
     },
     async joinCommunity() {
-      const client = await getAd4mClient();
       this.isJoiningCommunity = true;
 
       const neighbourhoodUrl = this.joiningLink;
 
-      const existingPerspective = Object.values(this.perspectives).find((p) => p.sharedUrl === neighbourhoodUrl);
+      const existingPerspective = Object.values(this.perspectives).find(
+        (p: PerspectiveProxy) => p.sharedUrl === neighbourhoodUrl
+      );
 
       if (existingPerspective) {
         this.app.setToast({
@@ -301,7 +304,7 @@ export default defineComponent({
           open: true,
         });
         this.isJoiningCommunity = false;
-        this.modals.setShowCreateCommunity(false);
+        this.modals.showCreateCommunity = false;
         return;
       }
 

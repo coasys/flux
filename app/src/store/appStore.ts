@@ -1,12 +1,12 @@
 import iconPath from "@/assets/images/icon.png";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { AppStore, ToastState, UpdateState } from "@/store/types";
+import { ToastState, UpdateState } from "@/store/types";
 import { Ad4mClient, Agent } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
 import { defineStore } from "pinia";
-import { computed, reactive, ref, shallowRef, toRefs } from "vue";
+import { computed, ref, shallowRef } from "vue";
 
-export const useAppStore = defineStore("app", () => {
+export const useAppStore = defineStore("appStore", () => {
   // Store a shallow ref of the Ad4mClient so we retain access to its methods
   const ad4mClientRef = shallowRef<Ad4mClient | null>(null);
 
@@ -16,14 +16,11 @@ export const useAppStore = defineStore("app", () => {
     return ad4mClientRef.value as Ad4mClient;
   });
 
-  const state = reactive<AppStore>({
-    me: { did: "" },
-    updateState: "not-available",
-    toast: { variant: undefined, message: "", open: false },
-    notification: { globalNotification: false },
-    aiEnabled: false,
-  });
-
+  const me = ref<Agent>({ did: "" });
+  const updateState = ref<UpdateState>("not-available");
+  const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
+  const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
+  const aiEnabled = ref(false);
   const myCommunities = ref<Record<string, Community>>({});
 
   // Mutations
@@ -31,32 +28,32 @@ export const useAppStore = defineStore("app", () => {
     ad4mClientRef.value = client;
   }
 
-  function setMe(me: Agent): void {
-    state.me = me;
+  function setMe(newMe: Agent): void {
+    me.value = newMe;
   }
 
   function setToast(payload: ToastState): void {
-    state.toast = { ...state.toast, ...payload };
+    toast.value = { ...toast.value, ...payload };
   }
 
   function showSuccessToast(payload: { message: string }): void {
-    state.toast = { variant: "success", open: true, ...payload };
+    toast.value = { variant: "success", open: true, ...payload };
   }
 
   function showDangerToast(payload: { message: string }): void {
-    state.toast = { variant: "danger", open: true, ...payload };
+    toast.value = { variant: "danger", open: true, ...payload };
   }
 
-  function setUpdateState({ updateState }: { updateState: UpdateState }): void {
-    state.updateState = updateState;
+  function setUpdateState({ updateState: newUpdateState }: { updateState: UpdateState }): void {
+    updateState.value = newUpdateState;
   }
 
   function setGlobalNotification(payload: boolean): void {
-    state.notification.globalNotification = payload;
+    notification.value.globalNotification = payload;
   }
 
   function setAIEnabled(payload: boolean): void {
-    state.aiEnabled = payload;
+    aiEnabled.value = payload;
   }
 
   // Actions
@@ -96,8 +93,12 @@ export const useAppStore = defineStore("app", () => {
 
   return {
     // State
-    ...toRefs(state),
     ad4mClient,
+    me,
+    updateState,
+    toast,
+    notification,
+    aiEnabled,
     myCommunities,
 
     // Mutations

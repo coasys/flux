@@ -227,7 +227,6 @@ export type CallHealth = "healthy" | "warnings" | "connections-lost";
 export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
-  activeAgents: ComputedRef<AgentState[]>;
   callHealth: Ref<CallHealth>;
 
   setProcessingState: (processing: ProcessingState) => void;

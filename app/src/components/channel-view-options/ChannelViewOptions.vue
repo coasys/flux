@@ -19,10 +19,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useAppStore } from "@/store/app";
-import { ChannelView } from "@coasys/flux-types";
 import { viewOptions } from "@/constants";
+import { useAppStore } from "@/store/appStore";
+import { ChannelView } from "@coasys/flux-types";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: {

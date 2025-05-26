@@ -1,12 +1,12 @@
 <template>
   <j-box pt="500">
     <j-menu-group open :title="`Members ${loading ? '' : `(${members.length})`}`">
-      <j-button @click.prevent="() => modals.setShowInviteCode(true)" size="sm" slot="end" variant="ghost">
+      <j-button @click.prevent="() => (modalStore.showInviteCode = true)" size="sm" slot="end" variant="ghost">
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
       <j-box px="500">
         <AvatarGroup
-          @click="() => modals.setShowCommunityMembers(true)"
+          @click="() => (modalStore.showCommunityMembers = true)"
           :loading="loading"
           :users="members"
           tooltip-title="See all members"
@@ -24,7 +24,7 @@ import { computed } from "vue";
 
 defineOptions({ name: "Members" });
 
-const modals = useModalStore();
+const modalStore = useModalStore();
 const { membersLoading, members } = useCommunityService();
 
 const loading = computed(() => {

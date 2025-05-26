@@ -1,9 +1,9 @@
 import { useAppStore } from "@/store";
-import { useWebRTCStore } from "@/store/webrtc";
+import { useWebrtcStore } from "@/store/webrtcStore";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, CallHealth, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000;
 const CLEANUP_INTERVAL = 15000;
@@ -13,7 +13,7 @@ const NEW_STATE = "agent/new-state";
 
 export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
-  const webrtc = useWebRTCStore();
+  const webrtc = useWebrtcStore();
 
   const { me, aiEnabled } = storeToRefs(appStore);
   const { instance, callRoute, agentStatus } = storeToRefs(webrtc);
@@ -144,6 +144,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     signalling.value = false;
   }
 
+  // Todo: move into webrtc service
   function checkCallHealth(): void {
     if (!instance.value) return;
 
@@ -184,12 +185,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     agents.value[me.value.did] = myState.value;
     broadcastState();
   }
-
-  const activeAgents = computed(() => {
-    return Object.values(agents.value).filter((agent: AgentState) => {
-      return agent.status === "active";
-    });
-  });
 
   // Watch for callRoute updates in the webrtc store
   watch(
@@ -239,7 +234,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // State
     signalling,
     agents,
-    activeAgents,
     callHealth,
 
     // Setters

@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-header">
     <div class="sidebar-header__top">
-      <j-button variant="ghost" size="sm" @click="ui.toggleAppSidebar">
+      <j-button variant="ghost" size="sm" @click="uiStore.toggleAppSidebar">
         <j-icon size="sm" :name="showAppSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
       </j-button>
 
@@ -16,16 +16,16 @@
           <j-icon size="sm" name="sliders2"></j-icon>
         </j-button>
         <j-menu slot="content">
-          <j-menu-item v-if="isAuthor" @click="() => modals.setShowEditCommunity(true)">
+          <j-menu-item v-if="isAuthor" @click="() => (modalsStore.showEditCommunity = true)">
             <j-icon size="xs" slot="start" name="pencil" />
             Edit community
           </j-menu-item>
-          <j-menu-item @click="() => modals.setShowInviteCode(true)">
+          <j-menu-item @click="() => (modalsStore.showInviteCode = true)">
             <j-icon size="xs" slot="start" name="person-plus" />
             Invite people
           </j-menu-item>
           <j-divider />
-          <j-menu-item @click="() => modals.setShowCreateChannel(true)">
+          <j-menu-item @click="() => (modalsStore.showCreateChannel = true)">
             <j-icon size="xs" slot="start" name="plus" />
             Create channel
           </j-menu-item>
@@ -70,16 +70,15 @@
 <script setup lang="ts">
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useModalStore, useUIStore } from "@/store";
+import { useModalStore, useUiStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 defineOptions({ name: "Header" });
 
-const app = useAppStore();
-const ui = useUIStore();
-const modals = useModalStore();
-const { showAppSidebar } = storeToRefs(ui);
+const uiStore = useUiStore();
+const modalsStore = useModalStore();
+const { showAppSidebar } = storeToRefs(uiStore);
 
 const { isSynced, isAuthor, community } = useCommunityService();
 
@@ -95,11 +94,11 @@ function communityDescription() {
 }
 
 function goToLeaveCommunity() {
-  modals.setShowLeaveCommunity(true);
+  modalsStore.showLeaveCommunity = true;
 }
 
 function goToSettings() {
-  modals.setShowCommunitySettings(true);
+  modalsStore.showCommunitySettings = true;
   showCommunityMenu.value = false;
 }
 </script>

@@ -36,12 +36,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useThemeStore, useUIStore } from "@/store";
+import { useAppStore, useThemeStore, useUiStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
 const app = useAppStore();
-const ui = useUIStore();
+const ui = useUiStore();
 const theme = useThemeStore();
 
 const { toast } = storeToRefs(app);

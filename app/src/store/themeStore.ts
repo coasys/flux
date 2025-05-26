@@ -1,27 +1,25 @@
-import { Theme, ThemeStore } from "@/store/types";
+import { Theme } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
 import { defineStore } from "pinia";
-import { reactive, toRefs } from "vue";
+import { ref } from "vue";
 
-export const useThemeStore = defineStore("theme", () => {
-  const state = reactive<ThemeStore>({
-    globalTheme: { fontSize: "md", fontFamily: "DM Sans", name: "dark", hue: 270, saturation: 60 },
-    currentTheme: "global",
-  });
+export const useThemeStore = defineStore("themeStore", () => {
+  const globalTheme = ref<Theme>({ fontSize: "md", fontFamily: "DM Sans", name: "dark", hue: 270, saturation: 60 });
+  const currentTheme = ref("global");
 
   // Mutations
   function setCurrentTheme(payload: string): void {
-    state.currentTheme = payload;
+    currentTheme.value = payload;
   }
 
   function setGlobalTheme(payload: Theme): void {
-    state.globalTheme = { ...state.globalTheme, ...payload };
+    globalTheme.value = { ...globalTheme.value, ...payload };
   }
 
   // Actions
   async function changeCurrentTheme(payload: string): Promise<void> {
     if (payload === "global") {
-      setTheme(state.globalTheme);
+      setTheme(globalTheme.value);
       setCurrentTheme("global");
     } else {
       // Todo: Get local theme
@@ -35,19 +33,20 @@ export const useThemeStore = defineStore("theme", () => {
     const { communityId, theme } = payload;
     // Todo: Merge community theme
     const mergedTheme = { ...theme };
-    if (state.currentTheme === communityId) setTheme(mergedTheme);
+    if (currentTheme.value === communityId) setTheme(mergedTheme);
     // Todo: Update community theme
   }
 
   async function updateGlobalTheme(payload: Partial<Theme>): Promise<void> {
-    const mergedTheme = { ...state.globalTheme, ...payload };
-    if (state.currentTheme === "global") setTheme(mergedTheme);
+    const mergedTheme = { ...globalTheme.value, ...payload };
+    if (currentTheme.value === "global") setTheme(mergedTheme);
     setGlobalTheme(mergedTheme);
   }
 
   return {
     // State
-    ...toRefs(state),
+    globalTheme,
+    currentTheme,
 
     // Mutations
     setCurrentTheme,

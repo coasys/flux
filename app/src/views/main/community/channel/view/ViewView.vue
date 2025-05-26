@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useUIStore, useWebRTCStore } from "@/store";
+import { useAppStore, useUiStore, useWebrtcStore } from "@/store";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
@@ -49,8 +49,8 @@ const { communityId, channelId, viewId } = defineProps({
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
-const webrtcStore = useWebRTCStore();
-const uiStore = useUIStore();
+const webrtcStore = useWebrtcStore();
+const uiStore = useUiStore();
 const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);

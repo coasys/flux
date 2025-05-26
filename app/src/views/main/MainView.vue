@@ -20,42 +20,46 @@
     <!-- All Modals -->
     <j-modal
       size="sm"
-      :open="modals.showCreateCommunity"
-      @toggle="(e: any) => modals.setShowCreateCommunity(e.target.open)"
+      :open="modalStore.showCreateCommunity"
+      @toggle="(e: any) => (modalStore.showCreateCommunity = e.target.open)"
     >
       <CreateCommunity
-        v-if="modals.showCreateCommunity"
-        @submit="() => modals.setShowCreateCommunity(false)"
-        @cancel="() => modals.setShowCreateCommunity(false)"
+        v-if="modalStore.showCreateCommunity"
+        @submit="() => (modalStore.showCreateCommunity = false)"
+        @cancel="() => (modalStore.showCreateCommunity = false)"
       />
     </j-modal>
 
-    <j-modal :open="modals.showCreateChannel" @toggle="(e: any) => modals.setShowCreateChannel(e.target.open)">
+    <j-modal :open="modalStore.showCreateChannel" @toggle="(e: any) => (modalStore.showCreateChannel = e.target.open)">
       <CreateChannel
-        v-if="modals.showCreateChannel"
-        @submit="() => modals.setShowCreateChannel(false)"
-        @cancel="() => modals.setShowCreateChannel(false)"
+        v-if="modalStore.showCreateChannel"
+        @submit="() => (modalStore.showCreateChannel = false)"
+        @cancel="() => (modalStore.showCreateChannel = false)"
       />
     </j-modal>
 
-    <!-- <j-modal size="sm" :open="modals.showCommunityMembers" @toggle="(e: any) => setShowCommunityMembers(e.target.open)">
-      <CommunityMembers @close="() => setShowCommunityMembers(false)" v-if="modals.showCommunityMembers" />
+    <!-- <j-modal size="sm" :open="modalStore.showCommunityMembers" @toggle="(e: any) => setShowCommunityMembers(e.target.open)">
+      <CommunityMembers @close="() => setShowCommunityMembers(false)" v-if="modalStore.showCommunityMembers" />
     </j-modal> -->
 
     <j-modal
       size="sm"
-      :open="modals.showEditCommunity"
-      @toggle="(e: any) => modals.setShowEditCommunity(e.target.open)"
+      :open="modalStore.showEditCommunity"
+      @toggle="(e: any) => (modalStore.showEditCommunity = e.target.open)"
     >
       <EditCommunity
         :communityId="route.params.communityId"
-        v-if="modals.showEditCommunity"
-        @submit="() => modals.setShowEditCommunity(false)"
-        @cancel="() => modals.setShowEditCommunity(false)"
+        v-if="modalStore.showEditCommunity"
+        @submit="() => (modalStore.showEditCommunity = false)"
+        @cancel="() => (modalStore.showEditCommunity = false)"
       />
     </j-modal>
 
-    <j-modal size="sm" :open="modals.showInviteCode" @toggle="(e: any) => modals.setShowInviteCode(e.target.open)">
+    <j-modal
+      size="sm"
+      :open="modalStore.showInviteCode"
+      @toggle="(e: any) => (modalStore.showInviteCode = e.target.open)"
+    >
       <j-box p="800">
         <j-box pb="500">
           <j-text variant="heading">Invite people</j-text>
@@ -71,27 +75,30 @@
     </j-modal>
 
     <j-modal
-      v-if="modals.showEditChannel && route.params.channelId"
-      :open="modals.showEditChannel"
-      @toggle="(e: any) => modals.setShowEditChannel(e.target.open)"
+      v-if="modalStore.showEditChannel && route.params.channelId"
+      :open="modalStore.showEditChannel"
+      @toggle="(e: any) => (modalStore.showEditChannel = e.target.open)"
     >
       <EditChannel
-        v-if="modals.showEditChannel"
-        @cancel="() => modals.setShowEditChannel(false)"
-        @submit="() => modals.setShowEditChannel(false)"
+        v-if="modalStore.showEditChannel"
+        @cancel="() => (modalStore.showEditChannel = false)"
+        @submit="() => (modalStore.showEditChannel = false)"
         :channelId="route.params.channelId"
       />
     </j-modal>
 
-    <j-modal :open="modals.showCommunitySettings" @toggle="(e: any) => modals.setShowCommunitySettings(e.target.open)">
+    <j-modal
+      :open="modalStore.showCommunitySettings"
+      @toggle="(e: any) => (modalStore.showCommunitySettings = e.target.open)"
+    >
       <CommunitySettings />
     </j-modal>
 
     <j-modal
-      v-if="modals.showLeaveCommunity && activeCommunity"
+      v-if="modalStore.showLeaveCommunity && activeCommunity"
       size="sm"
-      :open="modals.showLeaveCommunity"
-      @toggle="(e: any) => modals.setShowLeaveCommunity(e.target.open)"
+      :open="modalStore.showLeaveCommunity"
+      @toggle="(e: any) => (modalStore.showLeaveCommunity = e.target.open)"
     >
       <j-box p="800">
         <j-box pb="900">
@@ -100,19 +107,19 @@
         </j-box>
 
         <j-flex j="end" gap="300">
-          <j-button @click="() => modals.setShowLeaveCommunity(false)" variant="link"> Cancel </j-button>
+          <j-button @click="() => (modalStore.showLeaveCommunity = false)" variant="link"> Cancel </j-button>
           <j-button variant="primary" @click="leaveCommunity"> Leave community </j-button>
         </j-flex>
       </j-box>
     </j-modal>
 
     <j-modal
-      v-if="modals.showDisclaimer"
-      :open="modals.showDisclaimer"
-      @toggle="(e: any) => modals.setShowDisclaimer(e.target.open)"
+      v-if="modalStore.showDisclaimer"
+      :open="modalStore.showDisclaimer"
+      @toggle="(e: any) => (modalStore.showDisclaimer = e.target.open)"
     >
       <j-box p="800">
-        <div v-if="modals.showDisclaimer">
+        <div v-if="modalStore.showDisclaimer">
           <j-box pb="500">
             <j-flex gap="400" a="center">
               <j-icon name="exclamation-diamond" size="lg" />
@@ -174,10 +181,10 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 
 const route = useRoute();
 const router = useRouter();
-const app = useAppStore();
-const modals = useModalStore();
+const appStore = useAppStore();
+const modalStore = useModalStore();
 
-const { perspectives, onLinkAdded } = usePerspectives(app.ad4mClient);
+const { perspectives, onLinkAdded } = usePerspectives(appStore.ad4mClient);
 
 const activeCommunity = ref<PerspectiveProxy | null>(null);
 const oldAuthState = ref(ad4mConnect.authState);
@@ -192,14 +199,14 @@ async function leaveCommunity() {
   const client = await getAd4mClient();
   await router.push({ name: "home" });
   await client.perspective.remove(route.params.communityId as string);
-  modals.setShowLeaveCommunity(false);
+  modalStore.showLeaveCommunity = false;
 }
 
 async function handleJoinTestingCommunity() {
   try {
     isJoining.value = true;
-    await app.joinTestingCommunity();
-    modals.setShowDisclaimer(false);
+    await appStore.joinTestingCommunity();
+    modalStore.showDisclaimer = false;
   } catch (e) {
     console.log(e);
   } finally {
@@ -234,13 +241,13 @@ function getInviteCode() {
   document.body.removeChild(el);
   hasCopied.value = true;
 
-  app.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
+  appStore.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
 }
 
 // Todo: move this initialisation into a composable or higher component?
 async function initializeApp() {
   // Add notification callback
-  await app.ad4mClient.runtime.addNotificationTriggeredCallback((notification: any) => {
+  await appStore.ad4mClient.runtime.addNotificationTriggeredCallback((notification: any) => {
     console.log("notification", notification);
     return null;
   });
@@ -249,7 +256,7 @@ async function initializeApp() {
   registerNotification();
 
   // Ensure LLM tasks are set up
-  ensureLLMTasks(app.ad4mClient.ai);
+  ensureLLMTasks(appStore.ad4mClient.ai);
 
   // Reload page if auth state changes
   ad4mConnect.addEventListener("authstatechange", async () => {
@@ -266,13 +273,13 @@ async function initializeApp() {
   });
 
   // Todo: Version checking for ad4m / flux compatibility
-  const { ad4mExecutorVersion } = await app.ad4mClient.runtime.info();
+  const { ad4mExecutorVersion } = await appStore.ad4mClient.runtime.info();
   const isIncompatible = semver.gt(dependencies["@coasys/ad4m"], ad4mExecutorVersion);
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }
 
-  app.getMyCommunities();
+  appStore.getMyCommunities();
 }
 
 onMounted(async () => initializeApp());
@@ -283,7 +290,9 @@ watch(
   () => route.params.communityId,
   async (newCommunityId) => {
     if (activeCommunity.value?.uuid !== newCommunityId) {
-      activeCommunity.value = (await app.ad4mClient.perspective.byUUID(newCommunityId as string)) as PerspectiveProxy;
+      activeCommunity.value = (await appStore.ad4mClient.perspective.byUUID(
+        newCommunityId as string
+      )) as PerspectiveProxy;
     }
   },
   { immediate: true }

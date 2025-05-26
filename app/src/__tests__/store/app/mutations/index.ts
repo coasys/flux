@@ -1,4 +1,4 @@
-import { useAppStore, useModalStore, useThemeStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/store";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 
 describe("App Mutations", () => {
@@ -14,7 +14,7 @@ describe("App Mutations", () => {
   });
 
   test("toggleCommunitySidebar", () => {
-    const uiStore = useUIStore();
+    const uiStore = useUiStore();
 
     expect(uiStore.showCommunitySidebar).toBeTruthy();
 
@@ -24,7 +24,7 @@ describe("App Mutations", () => {
   });
 
   test("setCommunitySidebarOpen", () => {
-    const uiStore = useUIStore();
+    const uiStore = useUiStore();
 
     expect(uiStore.showCommunitySidebar).toBeTruthy();
 
@@ -121,7 +121,7 @@ describe("App Mutations", () => {
   });
 
   test("setWindowState", () => {
-    const uiStore = useUIStore();
+    const uiStore = useUiStore();
 
     expect(uiStore.windowState).toBe("visible");
 
@@ -141,7 +141,7 @@ describe("App Mutations", () => {
   });
 
   test("setGlobalLoading", () => {
-    const uiStore = useUIStore();
+    const uiStore = useUiStore();
 
     expect(uiStore.showGlobalLoading).toBeFalsy();
 
@@ -151,7 +151,7 @@ describe("App Mutations", () => {
   });
 
   test("setGlobalError", () => {
-    const uiStore = useUIStore();
+    const uiStore = useUiStore();
 
     expect(uiStore.globalError.show).toBeFalsy();
     expect(uiStore.globalError.message).toBe("");
@@ -170,7 +170,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showCreateCommunity).toBeFalsy();
 
-    modalStore.setShowCreateCommunity(true);
+    modalStore.showCreateCommunity = true;
 
     expect(modalStore.showCreateCommunity).toBeTruthy();
   });
@@ -180,7 +180,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showEditCommunity).toBeFalsy();
 
-    modalStore.setShowEditCommunity(true);
+    modalStore.showEditCommunity = true;
 
     expect(modalStore.showEditCommunity).toBeTruthy();
   });
@@ -190,7 +190,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showCommunityMembers).toBeFalsy();
 
-    modalStore.setShowCommunityMembers(true);
+    modalStore.showCommunityMembers = true;
 
     expect(modalStore.showCommunityMembers).toBeTruthy();
   });
@@ -200,7 +200,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showCreateChannel).toBeFalsy();
 
-    modalStore.setShowCreateChannel(true);
+    modalStore.showCreateChannel = true;
 
     expect(modalStore.showCreateChannel).toBeTruthy();
   });
@@ -210,7 +210,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showEditProfile).toBeFalsy();
 
-    modalStore.setShowEditProfile(true);
+    modalStore.showEditProfile = true;
 
     expect(modalStore.showEditProfile).toBeTruthy();
   });
@@ -220,7 +220,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showDisclaimer).toBeTruthy();
 
-    modalStore.setShowDisclaimer(false);
+    modalStore.showDisclaimer = false;
 
     expect(modalStore.showDisclaimer).toBeFalsy();
   });
@@ -230,7 +230,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showSettings).toBeFalsy();
 
-    modalStore.setShowSettings(true);
+    modalStore.showSettings = true;
 
     expect(modalStore.showSettings).toBeTruthy();
   });
@@ -240,7 +240,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showCommunitySettings).toBeFalsy();
 
-    modalStore.setShowCommunitySettings(true);
+    modalStore.showCommunitySettings = true;
 
     expect(modalStore.showCommunitySettings).toBeTruthy();
   });
@@ -250,7 +250,7 @@ describe("App Mutations", () => {
 
     expect(modalStore.showInviteCode).toBeFalsy();
 
-    modalStore.setShowInviteCode(true);
+    modalStore.showInviteCode = true;
 
     expect(modalStore.showInviteCode).toBeTruthy();
   });

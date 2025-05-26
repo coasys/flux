@@ -146,8 +146,8 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { useAppStore, useUIStore } from "@/store";
-import { useWebRTCStore } from "@/store/webrtc";
+import { useAppStore, useUiStore } from "@/store";
+import { useWebrtcStore } from "@/store/webrtcStore";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveProxy } from "@coasys/ad4m";
@@ -161,8 +161,8 @@ import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
-const uiStore = useUIStore();
-const webrtcStore = useWebRTCStore();
+const uiStore = useUiStore();
+const webrtcStore = useWebrtcStore();
 
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
 const { audioEnabled, videoEnabled, callRoute, agentStatus, communityServices } = storeToRefs(webrtcStore);
@@ -182,31 +182,41 @@ const communityService = computed(() => communityServices.value[communityId.valu
 const signallingService = computed<SignallingService | undefined>(() => communityService.value?.signallingService);
 const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
-const callHealthColour = computed(() => {
-  if (callHealth.value === "healthy") return "success-500";
-  else if (callHealth.value === "warnings") return "warning-500";
-  return "danger-500";
-});
+const callHealthColour = computed(findHealthColour);
 const community = computed(() => communityService.value?.community);
-const channelName = computed(
-  () => communityService.value?.channels.filter((c: any) => c.baseExpression === channelId.value)[0]?.name
-);
-const connectionText = computed(() => {
-  if (videoEnabled.value) return "Video connected";
-  else if (audioEnabled.value) return "Voice connected";
-  return "Connected";
-});
-const connectionWarning = computed(() => {
-  if (callHealth.value === "warnings") return "(unstable)";
-  else if (callHealth.value === "connections-lost") return "(lost peers)";
-  return "";
-});
+const channelName = computed(findChannelName);
+const connectionText = computed(findConnectionText);
+const connectionWarning = computed(findConnectionWarning);
 
 const callWindow = ref<HTMLElement | null>(null);
 const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
+
+function findHealthColour() {
+  if (callHealth.value === "healthy") return "success-500";
+  else if (callHealth.value === "warnings") return "warning-500";
+  return "danger-500";
+}
+
+function findChannelName() {
+  const channel = communityService.value?.channels.find((c: any) => c.baseExpression === channelId.value);
+  return channel ? channel.name : "";
+}
+
+function findConnectionText() {
+  if (videoEnabled.value) return "Video connected";
+  else if (audioEnabled.value) return "Voice connected";
+  return "Connected";
+}
+
+function findConnectionWarning() {
+  if (callHealth.value === "healthy") return "";
+  else if (callHealth.value === "warnings") return "(unstable)";
+  else if (callHealth.value === "connections-lost") return "(lost peers)";
+  return "";
+}
 
 function startResize(e: any) {
   if (!callWindow.value) return;

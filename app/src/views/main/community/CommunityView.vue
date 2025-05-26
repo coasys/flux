@@ -18,10 +18,13 @@
     <j-modal
       size="sm"
       :style="{ height: 500 }"
-      :open="modals.showCommunityMembers"
-      @toggle="(e: any) => modals.setShowCommunityMembers(e.target.open)"
+      :open="modalStore.showCommunityMembers"
+      @toggle="(e: any) => (modalStore.showCommunityMembers = e.target.open)"
     >
-      <CommunityMembers @close="() => modals.setShowCommunityMembers(false)" v-if="modals.showCommunityMembers" />
+      <CommunityMembers
+        @close="() => (modalStore.showCommunityMembers = false)"
+        v-if="modalStore.showCommunityMembers"
+      />
     </j-modal>
 
     <div v-if="!isSynced && !route.params.channelId" class="center">
@@ -72,7 +75,7 @@
           <j-flex direction="column" a="center">
             <j-text nomargin color="black" size="700" weight="800"> No channels yet </j-text>
             <j-text size="400" weight="400">Be the first to make one!</j-text>
-            <j-button variant="primary" @click="() => modals.setShowCreateChannel(true)">
+            <j-button variant="primary" @click="() => (modalStore.showCreateChannel = true)">
               Create a new channel
             </j-button>
           </j-flex>
@@ -87,7 +90,7 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useModalStore, useWebRTCStore } from "@/store";
+import { useModalStore, useWebrtcStore } from "@/store";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
 import { RouteParams } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -102,8 +105,8 @@ const { communityId, channelId } = defineProps({
 
 const route = useRoute();
 const router = useRouter();
-const modals = useModalStore();
-const webrtcStore = useWebRTCStore();
+const modalStore = useModalStore();
+const webrtcStore = useWebrtcStore();
 
 const { communityServices } = storeToRefs(webrtcStore);
 

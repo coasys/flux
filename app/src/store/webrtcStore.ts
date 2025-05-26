@@ -1,19 +1,19 @@
-import { useAppStore } from "@/store";
 import { WebRTC } from "@coasys/flux-react-web";
 import { AgentStatus, RouteParams } from "@coasys/flux-types";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 
-export const useWebRTCStore = defineStore("webrtc", () => {
+export const useWebrtcStore = defineStore("webrtcStore", () => {
   const route = useRoute();
   const instance = ref<WebRTC | undefined>();
-  const preliminaryCallRoute = ref<RouteParams | null>();
   const callRoute = ref<RouteParams | null>(null);
   const audioEnabled = ref(true);
   const videoEnabled = ref(false);
   const agentStatus = ref<AgentStatus>("active");
   const communityServices = ref<Record<string, any>>({});
+
+  // const currentCommunity
 
   async function addInstance(webRTC: WebRTC) {
     instance.value = webRTC;
@@ -46,7 +46,6 @@ export const useWebRTCStore = defineStore("webrtc", () => {
 
   return {
     instance,
-    preliminaryCallRoute,
     callRoute,
     videoEnabled,
     audioEnabled,

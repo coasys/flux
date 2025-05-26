@@ -12,11 +12,11 @@
 </template>
 
 <script setup lang="ts">
-import { useUIStore } from "@/store";
+import { useUiStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
-const ui = useUIStore();
+const ui = useUiStore();
 const { showCommunitySidebar, showAppSidebar } = storeToRefs(ui);
 
 const touchstartX = ref(0);

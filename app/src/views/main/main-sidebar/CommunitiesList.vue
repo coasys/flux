@@ -35,7 +35,7 @@
     </j-tooltip>
 
     <j-tooltip title="Create or join community">
-      <j-button @click="() => modals.setShowCreateCommunity(true)" square circle variant="subtle">
+      <j-button @click="() => (modalStore.showCreateCommunity = true)" square circle variant="subtle">
         <j-icon size="md" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
@@ -44,21 +44,21 @@
 
 <script setup lang="ts">
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
-import { useAppStore, useModalStore, useRouteMemoryStore, useUIStore } from "@/store";
-import { useWebRTCStore } from "@/store/webrtc";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/store";
+import { useWebrtcStore } from "@/store/webrtcStore";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
 
-const app = useAppStore();
-const modals = useModalStore();
-const ui = useUIStore();
-const webrtc = useWebRTCStore();
+const appStore = useAppStore();
+const modalStore = useModalStore();
+const uiStore = useUiStore();
+const webrtcStore = useWebrtcStore();
 
-const { myCommunities } = storeToRefs(app);
-const { callRoute } = storeToRefs(webrtc);
+const { myCommunities } = storeToRefs(appStore);
+const { callRoute } = storeToRefs(webrtcStore);
 
 function isInCall(uuid: string) {
   return callRoute.value?.communityId === uuid;
@@ -87,14 +87,14 @@ function muteCommunity(id: string) {
 }
 
 function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
-  modals.setShowLeaveCommunity(show);
+  modalStore.showLeaveCommunity = show;
 }
 
 // Todo: investigate why toggleCommunitySidebar class applied in CommunityLayout doesn't change the UI
 function handleCommunityClick(communityId: string) {
-  if (communityIsActive(communityId)) ui.toggleCommunitySidebar();
+  if (communityIsActive(communityId)) uiStore.toggleCommunitySidebar();
   else {
-    ui.setCommunitySidebarOpen(true);
+    uiStore.setCommunitySidebarOpen(true);
     // Navigate back to the last route if saved
     const routeMemory = useRouteMemoryStore();
     const lastRoute = routeMemory.getLastRoute(communityId);

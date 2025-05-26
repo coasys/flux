@@ -7,7 +7,7 @@
         <div class="profile__info">
           <div class="profile__avatar">
             <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
-            <j-button v-if="sameAgent" variant="ghost" @click="() => modals.setShowEditProfile(true)">
+            <j-button v-if="sameAgent" variant="ghost" @click="() => (modalsStore.showEditProfile = true)">
               <j-icon size="sm" name="pen"></j-icon>
             </j-button>
           </div>
@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    <div class="sidebar" @click="() => ui.setAppSidebarOpen(!ui.showAppSidebar)">
+    <div class="sidebar" @click="() => uiStore.setAppSidebarOpen(!uiStore.showAppSidebar)">
       <j-icon name="layout-sidebar" size="md"></j-icon>
     </div>
   </div>
@@ -125,18 +125,21 @@
     ></ProfileJoinLink>
   </j-modal>
   <j-modal
-    v-if="modals.showEditProfile"
-    :open="modals.showEditProfile"
-    @toggle="(e: any) => modals.setShowEditProfile(e.target.open)"
+    v-if="modalsStore.showEditProfile"
+    :open="modalsStore.showEditProfile"
+    @toggle="(e: any) => (modalsStore.showEditProfile = e.target.open)"
   >
-    <edit-profile @submit="() => modals.setShowEditProfile(false)" @cancel="() => modals.setShowEditProfile(false)" />
+    <edit-profile
+      @submit="() => (modalsStore.showEditProfile = false)"
+      @cancel="() => (modalsStore.showEditProfile = false)"
+    />
   </j-modal>
   <router-view></router-view>
 </template>
 
 <script setup lang="ts">
 import EditProfile from "@/containers/EditProfile.vue";
-import { useAppStore, useModalStore, useThemeStore, useUIStore } from "@/store";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/store";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";
@@ -154,16 +157,16 @@ import { storeToRefs } from "pinia";
 
 defineOptions({ name: "ProfileView" });
 
-// Initialize state
 const route = useRoute();
 const router = useRouter();
-const app = useAppStore();
-const modals = useModalStore();
-const theme = useThemeStore();
-const ui = useUIStore();
 
-const { me } = storeToRefs(app);
-const { ad4mClient } = app;
+const appStore = useAppStore();
+const modalsStore = useModalStore();
+const themeStore = useThemeStore();
+const uiStore = useUiStore();
+
+const { me } = storeToRefs(appStore);
+const { ad4mClient } = appStore;
 
 const profile = ref<Profile | null>(null);
 const currentTab = ref("web3");
@@ -288,7 +291,7 @@ async function getAgentAreas() {
   weblinks.value = fetchedWebLinks;
 }
 
-onBeforeMount(() => theme.changeCurrentTheme("global"));
+onBeforeMount(() => themeStore.changeCurrentTheme("global"));
 
 // Watchers
 watch(showAddlinkModal, (val) => {
@@ -304,7 +307,7 @@ watch(showEditlinkModal, (val) => {
 });
 
 watch(
-  () => modals.showEditProfile,
+  () => modalsStore.showEditProfile,
   (val) => {
     if (!val) getAgentAreas();
   }

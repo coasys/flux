@@ -8,7 +8,7 @@ interface CommunityRouteMemory {
   channels: Record<string, string>; // Stores last viewId visited in each channel
 }
 
-export const useRouteMemoryStore = defineStore("routeMemory", () => {
+export const useRouteMemoryStore = defineStore("routeMemoryStore", () => {
   // Map of last routes by community ID
   const lastRoutes = ref<Record<string, CommunityRouteMemory>>({});
 
