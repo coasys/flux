@@ -47,14 +47,13 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
+// TODO: set up persistence settings in stores and remove these resets
+
 // Reset call state if persisted from the last session
 const webrtcStore = useWebrtcStore(pinia);
 const { callRoute, audioEnabled, videoEnabled } = storeToRefs(webrtcStore);
 callRoute.value = null;
-audioEnabled.value = true;
-videoEnabled.value = false;
 
-// Todo: remove
 // Reset call window state for now
 const uiStore = useUiStore(pinia);
 const { callWindowWidth, callWindowOpen } = storeToRefs(uiStore);

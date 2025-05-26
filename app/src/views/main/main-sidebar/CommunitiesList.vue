@@ -56,6 +56,7 @@ const appStore = useAppStore();
 const modalStore = useModalStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
+const routeMemoryStore = useRouteMemoryStore();
 
 const { myCommunities } = storeToRefs(appStore);
 const { callRoute } = storeToRefs(webrtcStore);
@@ -96,8 +97,7 @@ function handleCommunityClick(communityId: string) {
   else {
     uiStore.setCommunitySidebarOpen(true);
     // Navigate back to the last route if saved
-    const routeMemory = useRouteMemoryStore();
-    const lastRoute = routeMemory.getLastRoute(communityId);
+    const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
     router.push(lastRoute ? lastRoute.path : { name: "community", params: { communityId } });
   }
 }

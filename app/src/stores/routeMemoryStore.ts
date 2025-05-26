@@ -9,35 +9,40 @@ interface CommunityRouteMemory {
 }
 
 export const useRouteMemoryStore = defineStore("routeMemoryStore", () => {
-  // Map of last routes by community ID
-  const lastRoutes = ref<Record<string, CommunityRouteMemory>>({});
+  const currentRoute = ref<RouteParams>({});
+  const lastCommunityRoutes = ref<Record<string, CommunityRouteMemory>>({});
 
-  function saveLastRoute(communityId: string, path: string, params: RouteParams) {
-    // Saves the last full route visited in a community
-    lastRoutes.value[communityId] = { ...lastRoutes.value[communityId], path, params };
+  function setCurrentRoute(params: RouteParams) {
+    currentRoute.value = params;
   }
 
-  function saveLastChannelView(communityId: string, channelId: string, viewId: string) {
+  function setLastCommunityRoute(communityId: string, path: string, params: RouteParams) {
+    // Saves the last full route visited in a community
+    lastCommunityRoutes.value[communityId] = { ...lastCommunityRoutes.value[communityId], path, params };
+  }
+
+  function setLastChannelView(communityId: string, channelId: string, viewId: string) {
     // Saves the last view visited in a channel
-    if (lastRoutes.value[communityId]) {
-      lastRoutes.value[communityId].channels = lastRoutes.value[communityId].channels || {};
-      lastRoutes.value[communityId].channels[channelId] = viewId;
+    if (lastCommunityRoutes.value[communityId]) {
+      lastCommunityRoutes.value[communityId].channels = lastCommunityRoutes.value[communityId].channels || {};
+      lastCommunityRoutes.value[communityId].channels[channelId] = viewId;
     }
   }
 
-  function getLastRoute(communityId: string) {
-    return lastRoutes.value[communityId] || undefined;
+  function getLastCommunityRoute(communityId: string) {
+    return lastCommunityRoutes.value[communityId] || undefined;
   }
 
   function getLastChannelView(communityId: string, channelId: string) {
-    return lastRoutes.value[communityId]?.channels?.[channelId] || undefined;
+    return lastCommunityRoutes.value[communityId]?.channels?.[channelId] || undefined;
   }
 
   return {
-    lastRoutes,
-    saveLastRoute,
-    saveLastChannelView,
-    getLastRoute,
+    currentRoute,
+    setCurrentRoute,
+    setLastCommunityRoute,
+    setLastChannelView,
+    getLastCommunityRoute,
     getLastChannelView,
   };
 });

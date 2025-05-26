@@ -214,25 +214,23 @@ export interface ProcessingState {
   author?: string;
 }
 
+export type MediaSettings = { audio: boolean; video: boolean; screenshare: boolean };
 export interface AgentState {
   status: AgentStatus;
   currentRoute: RouteParams | null;
   callRoute: RouteParams | null;
+  mediaSettings: MediaSettings;
   processing: ProcessingState | null;
   aiEnabled: boolean;
   lastUpdate: number;
 }
 
 export type CallHealth = "healthy" | "warnings" | "connections-lost";
-
 export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
-  callHealth: Ref<CallHealth>;
   setProcessingState: (processing: ProcessingState) => void;
-  setCurrentRoute: (params: RouteParams) => void;
   getAgentState(did: string): AgentState | undefined;
-
   startSignalling: () => void;
   stopSignalling: () => void;
 }

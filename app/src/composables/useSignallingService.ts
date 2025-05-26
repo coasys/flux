@@ -1,38 +1,41 @@
-import { useAppStore } from "@/stores";
+import { useAppStore, useRouteMemoryStore } from "@/stores";
+import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
 import { useWebrtcStore } from "@/stores/webrtcStore";
 import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, CallHealth, ProcessingState, RouteParams, SignallingService } from "@coasys/flux-types";
+import { AgentState, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 
 const HEARTBEAT_INTERVAL = 5000;
 const CLEANUP_INTERVAL = 15000;
 const MAX_AGE = 30000;
-const CALL_HEALTH_CHECK_INTERVAL = 6000;
 const NEW_STATE = "agent/new-state";
 
 export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
-  const webrtc = useWebrtcStore();
+  const webrtcStore = useWebrtcStore();
+  const mediaDevicesStore = useMediaDevicesStore();
+  const routeMemoryStore = useRouteMemoryStore();
 
   const { me, aiEnabled } = storeToRefs(appStore);
-  const { instance, callRoute, agentStatus } = storeToRefs(webrtc);
+  const { callRoute, agentStatus } = storeToRefs(webrtcStore);
+  const { mediaSettings } = storeToRefs(mediaDevicesStore);
+  const { currentRoute } = storeToRefs(routeMemoryStore);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
+    currentRoute: currentRoute.value,
     status: agentStatus.value,
-    currentRoute: null,
-    callRoute: null,
-    processing: null,
+    callRoute: callRoute.value,
+    mediaSettings: mediaSettings.value,
     aiEnabled: aiEnabled.value,
+    processing: null,
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
-  const callHealth = ref<CallHealth>("healthy");
 
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
-  let callHealthCheckInterval: NodeJS.Timeout | null = null;
 
   function onSignal(signal: PerspectiveExpression): void {
     const link = signal.data.links[0];
@@ -68,7 +71,8 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
       .catch((error) => console.error("Error sending broadcast:", error));
   }
 
-  function updateAgentStatuses(): void {
+  // TODO: better distinguish between manually set agent status and signalling health
+  function evaluateAgents(): void {
     const now = Date.now();
     Object.keys(agents.value).forEach((did) => {
       // Skip if agent is me
@@ -122,61 +126,25 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
 
     // Start the cleanup interval
-    cleanupInterval = setInterval(updateAgentStatuses, CLEANUP_INTERVAL);
+    cleanupInterval = setInterval(evaluateAgents, CLEANUP_INTERVAL);
   }
 
   function stopSignalling(): void {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
-    // // Clear the intervals
+    // Clear the intervals
     if (cleanupInterval) {
       clearInterval(cleanupInterval);
       cleanupInterval = null;
-    }
-
-    if (callHealthCheckInterval) {
-      clearInterval(callHealthCheckInterval);
-      callHealthCheckInterval = null;
     }
 
     // Mark signaling as inactive to allow future restarts
     signalling.value = false;
   }
 
-  // Todo: move into webrtc service
-  function checkCallHealth(): void {
-    if (!instance.value) return;
-
-    // Check the last update time of each peer to determine if the call is healthy
-    const now = Date.now();
-    const { connectionsLost, warnings } = instance.value.connections.reduce(
-      (health, peer) => {
-        const agent = agents.value[peer.did];
-        const timeSinceLastUpdate = now - agent.lastUpdate;
-        if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL * 2) health.connectionsLost = true;
-        else if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL) health.warnings = true;
-        return health;
-      },
-      { connectionsLost: false, warnings: false }
-    );
-    const newCallHealth = connectionsLost ? "connections-lost" : warnings ? "warnings" : "healthy";
-
-    // If the calls health has changed, updated the state and emit event for webcomponents
-    if (callHealth.value !== newCallHealth) {
-      callHealth.value = newCallHealth;
-      window.dispatchEvent(new CustomEvent(`${communityId}-call-health-update`, { detail: newCallHealth }));
-    }
-  }
-
   function getAgentState(did: string): AgentState | undefined {
     return agents.value[did];
-  }
-
-  function setCurrentRoute(params: RouteParams): void {
-    myState.value = { ...myState.value, currentRoute: params, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
-    broadcastState();
   }
 
   function setProcessingState(newState: ProcessingState): void {
@@ -186,42 +154,19 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     broadcastState();
   }
 
-  // Watch for callRoute updates in the webrtc store
-  watch(
-    callRoute,
-    (newCallRoute) => {
-      // Update my state & broadcast it to the neighbourhood
-      myState.value = { ...myState.value, callRoute: newCallRoute, lastUpdate: Date.now() };
-      agents.value[me.value.did] = myState.value;
-      broadcastState();
-
-      // If in a call, start the call health check interval
-      if (newCallRoute) callHealthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
-      // Otherwise clear the existing interval if present
-      else if (callHealthCheckInterval) {
-        clearInterval(callHealthCheckInterval);
-        callHealthCheckInterval = null;
-      }
-    },
-    { immediate: true }
-  );
-
-  // Watch for agent status updates in the webrtc store
-  watch(agentStatus, (newAgentStatus) => {
-    // Update my agent status & broadcast it to the neighbourhood
-    myState.value = { ...myState.value, status: newAgentStatus, lastUpdate: Date.now() };
+  function updateMyState(key: string, value: any) {
+    myState.value = { ...myState.value, [key]: value, lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
-  });
+  }
 
-  // Watch for aiEnabled updates in the app store
-  watch(aiEnabled, (newAiEnabledState) => {
-    // Update my AI state & broadcast it to the neighbourhood
-    myState.value = { ...myState.value, aiEnabled: newAiEnabledState, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
-    broadcastState();
-  });
+  // Watch for state changes in the stores & broadcast updates to peers
+  watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
+  watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
+  watch(agentStatus, (newStatus) => updateMyState("status", newStatus));
+  watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
 
+  // TODO: remove
   // Send updates to web components whenever the agents state map changes
   watch(
     agents,
@@ -233,9 +178,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   return {
     signalling,
     agents,
-    callHealth,
     setProcessingState,
-    setCurrentRoute,
     getAgentState,
     startSignalling,
     stopSignalling,

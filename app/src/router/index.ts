@@ -63,6 +63,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({ history: createWebHashHistory(), routes });
+const routeMemoryStore = useRouteMemoryStore();
 
 // Handle login routing
 router.beforeEach(async (to, from, next) => {
@@ -88,17 +89,17 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-// Update the route memory store when navigating within a community
+// Update the route memory store on each route change
 router.afterEach((to) => {
   const { communityId, channelId, viewId } = to.params as RouteParams;
+
+  // Set the current route
+  routeMemoryStore.setCurrentRoute({ communityId, channelId, viewId });
+
+  // If navigating to a community store the last full route for the community & the last view visited in the channel
   if (communityId) {
-    const routeMemory = useRouteMemoryStore();
-
-    // Store the last full route for the community
-    routeMemory.saveLastRoute(communityId, to.path, to.params);
-
-    // Store the last view visited in the channel
-    if (channelId && viewId) routeMemory.saveLastChannelView(communityId, channelId, viewId);
+    routeMemoryStore.setLastCommunityRoute(communityId, to.path, to.params);
+    if (channelId && viewId) routeMemoryStore.setLastChannelView(communityId, channelId, viewId);
   }
 });
 
