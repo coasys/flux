@@ -1,5 +1,7 @@
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel } from "@coasys/flux-api";
+import { defaultIceServers } from "@coasys/flux-constants/src/videoSettings";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { getForVersion, setForVersion } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
@@ -11,6 +13,8 @@ import { useCommunityServiceStore } from "./communityServiceStore";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
+export const WEBRTC_SIGNAL = "webrtc/signal";
+const MAX_RECONNECTION_ATTEMPTS = 3;
 
 export type PeerConnection = {
   did: string;
@@ -48,18 +52,16 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
   const isConnected = ref<boolean>(false);
   const isConnecting = ref<boolean>(false);
   const agentStatus = ref<AgentStatus>("active");
-
-  // ICE servers configuration
-  const iceServers = ref([{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }]);
-
-  let healthCheckInterval: NodeJS.Timeout | null = null;
-
-  // Computed values for remote streams
   const remoteStreams = computed(() => {
     const streams: Record<string, MediaStream[]> = {};
     peerConnections.value.forEach((peer, did) => (streams[did] = peer.streams));
     return streams;
   });
+  const reconnectionAttempts = ref<Record<string, number>>({});
+  const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
+
+  const iceServers = ref(defaultIceServers); // [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }]
+  let healthCheckInterval: NodeJS.Timeout | null = null;
 
   function checkCallHealth(): void {
     // Check the last update time of each peer to determine if the call is healthy
@@ -87,67 +89,49 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
     console.log(`Creating ${initiator ? "initiator" : "receiver"} peer for ${did}`);
 
-    const peerOptions = { initiator, stream: localStream.value || undefined, config: { iceServers: iceServers.value } };
-    const peer = new SimplePeer(peerOptions);
+    const peer = new SimplePeer({
+      initiator,
+      stream: localStream.value || undefined,
+      config: { iceServers: iceServers.value },
+    });
 
-    // Set up event handlers
     peer.on("signal", (data) => {
-      // Send signal data through signaling service
-      if (!signallingService.value) {
-        console.error("No signalling service available");
+      // Forward signal data through through the signalling service
+      if (!signallingService.value) return;
+      signallingService.value.sendSignal({ source: did, predicate: WEBRTC_SIGNAL, target: JSON.stringify(data) });
+    });
+
+    peer.on("connect", () => console.log(`Connected to peer ${did}`));
+
+    peer.on("track", (track, stream) => {
+      console.log(`Received ${track.kind} track from peer ${did}:`, {
+        trackId: track.id,
+        streamId: stream.id,
+        enabled: track.enabled,
+        readyState: track.readyState,
+        trackCount: stream.getTracks().length,
+      });
+
+      // Find the peer connection
+      const peerConnection = peerConnections.value.get(did);
+      if (!peerConnection) {
+        console.warn(`Received track from ${did} but no peer connection exists`);
         return;
       }
 
-      signallingService.value.sendMessage(
-        "webrtc-signal",
-        {
-          targetDid: did,
-          signalData: data,
-        },
-        [did]
-      );
+      // Check if we already have the stream & update or add accordingly
+      const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
+      if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
+      else peerConnection.streams.push(stream);
+
+      // Monitor the track for debugging
+      track.onended = () => console.log(`Track ${track.id} ended from peer ${did}`);
+      track.onmute = () => console.log(`Track ${track.id} from ${did} muted`);
+      track.onunmute = () => console.log(`Track ${track.id} from ${did} unmuted`);
     });
 
-    peer.on("connect", () => {
-      console.log(`Connected to peer ${did}`);
-      // // Send current state
-      // peer.send(
-      //   JSON.stringify({
-      //     type: "state",
-      //     state: { audio: audioEnabled.value, video: videoEnabled.value, screen: false },
-      //   })
-      // );
-    });
-
-    peer.on("stream", (stream) => {
-      console.log(`Received stream from peer ${did}`);
-      const peerConnection = peerConnections.value.get(did);
-      if (peerConnection) {
-        peerConnection.streams = [stream]; // SimplePeer typically gives one combined stream
-        peerConnections.value.set(did, peerConnection);
-      }
-    });
-
-    peer.on("track", (track, stream) => {
-      console.log(`Received track from peer ${did}: ${track.kind}`);
-    });
-
-    // peer.on("data", (data) => {
-    //   try {
-    //     const message = JSON.parse(data.toString());
-    //     console.log(`Received message from peer ${did}:`, message);
-
-    //     if (message.type === "state" && signallingService.value) {
-    //       // Update the agent's state in the signaling service
-    //       const agentState = signallingService.value.agents[did];
-    //       if (agentState) {
-    //         agentState.mediaState = message.state;
-    //       }
-    //     }
-    //   } catch (e) {
-    //     console.error("Error parsing message from peer", e);
-    //   }
-    // });
+    // Could be used for direct webrtc signalling if needed in the future
+    // peer.on("data", (data) => {});
 
     peer.on("close", () => {
       console.log(`Connection closed with peer ${did}`);
@@ -157,6 +141,75 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     peer.on("error", (err) => {
       console.error(`Error in connection with peer ${did}:`, err);
       cleanupPeerConnection(did);
+    });
+
+    peer.on("iceStateChange", (state) => {
+      console.log(`ICE state change for ${did}: ${state}`);
+
+      // Handle disconnection states
+      if (state === "disconnected" || state === "failed") {
+        // Clear any existing reconnection timeout for this peer
+        if (reconnectionTimeouts.value[did]) {
+          clearTimeout(reconnectionTimeouts.value[did]);
+        }
+
+        // Get current attempts or initialize
+        const attempts = reconnectionAttempts.value[did] || 0;
+
+        if (attempts < MAX_RECONNECTION_ATTEMPTS) {
+          // Increment attempt counter
+          reconnectionAttempts.value[did] = attempts + 1;
+
+          // Use exponential backoff for retry timing
+          const delay = Math.min(1000 * Math.pow(2, attempts), 10000); // 1s, 2s, 4s, 8s, max 10s
+
+          console.log(
+            `ICE connection ${state} for ${did}. Attempting reconnection ${attempts + 1}/${MAX_RECONNECTION_ATTEMPTS} in ${delay}ms`
+          );
+
+          // Set timeout for reconnection
+          reconnectionTimeouts.value[did] = setTimeout(() => {
+            if (!isConnected.value) return; // Don't reconnect if we've left the call
+
+            console.log(`Attempting to reconnect to ${did}...`);
+
+            // Get the connection details
+            const existingConnection = peerConnections.value.get(did);
+            if (existingConnection) {
+              const wasInitiator = existingConnection.initiator;
+
+              // Clean up the existing connection
+              cleanupPeerConnection(did);
+
+              // Create a new connection with the same initiator status
+              createPeerConnection(did, wasInitiator);
+            }
+          }, delay);
+        } else {
+          console.log(`ICE connection ${state} for ${did}. Max reconnection attempts reached.`);
+
+          // Notify the user
+          appStore.showDangerToast({ message: "Connection to user lost after multiple attempts" });
+
+          // Clean up the connection
+          cleanupPeerConnection(did);
+
+          // Reset the counter for future attempts
+          delete reconnectionAttempts.value[did];
+        }
+      } else if (state === "connected" || state === "completed") {
+        // Connection is good, reset attempt counter
+        if (reconnectionAttempts.value[did]) {
+          console.log(`ICE connection restored to ${did} after ${reconnectionAttempts.value[did]} attempts`);
+          delete reconnectionAttempts.value[did];
+        }
+
+        // Clear any pending reconnection attempts
+        if (reconnectionTimeouts.value[did]) {
+          clearTimeout(reconnectionTimeouts.value[did]);
+          delete reconnectionTimeouts.value[did];
+        }
+      }
     });
 
     // Store the peer connection
@@ -189,8 +242,51 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     });
   }
 
+  function webrtcSignalHandler(signal: PerspectiveExpression) {
+    const link = signal.data.links[0];
+    if (!link || link.author === me.value.did) return;
+
+    const { author, data } = link;
+    const { source, predicate, target } = data;
+
+    if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
+      try {
+        // Parse the signal data
+        const signalData = JSON.parse(source);
+        if (!signalData || typeof signalData !== "object") {
+          console.warn(`Invalid signal data from ${author}`);
+          return;
+        }
+
+        // Skip if we're not in a call
+        if (!isConnected.value || !callRoute.value) {
+          console.debug(`Ignoring signal from ${author} - not in a call`);
+          return;
+        }
+
+        // Find or create peer connection
+        let peer: SimplePeer.Instance;
+        const existingConnection = peerConnections.value.get(author);
+
+        if (existingConnection) {
+          peer = existingConnection.peer;
+          console.log(`Processing signal for existing peer ${author}`);
+        } else {
+          console.log(`Creating new peer connection for ${author} (receiver)`);
+          peer = createPeerConnection(author, false);
+        }
+
+        // Process the signal
+        peer.signal(signalData);
+      } catch (e) {
+        console.error(`Error handling WebRTC signal from ${author}:`, e);
+        cleanupPeerConnection(author);
+      }
+    }
+  }
+
   // Call management functions
-  async function joinRoom(communityId?: string, channelId?: string) {
+  async function joinRoom() {
     if (isConnected.value) {
       console.log("Already in a call, leaving first");
       await leaveRoom();
@@ -199,18 +295,7 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     isConnecting.value = true;
 
     try {
-      // Set call route from params or arguments
-      const newCommunityId = communityId || (route.params.communityId as string);
-      const newChannelId = channelId || (route.params.channelId as string);
-
-      if (!newCommunityId || !newChannelId) {
-        throw new Error("Missing community or channel ID");
-      }
-
-      callRoute.value = {
-        communityId: newCommunityId,
-        channelId: newChannelId,
-      };
+      callRoute.value = route.params;
 
       // Wait for the signallingService to be available
       const maxAttempts = 10;
@@ -237,54 +322,22 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
         });
       }
 
-      // Set up signaling message handler
-      const messageHandler = (did: string, type: string, message: any) => {
-        if (type === "webrtc-signal" && did !== signallingService.value?.myDid) {
-          const peer = peerConnections.value.get(did)?.peer;
-          if (peer) {
-            try {
-              peer.signal(message.signalData);
-            } catch (e) {
-              console.error(`Error processing signal from ${did}:`, e);
-              cleanupPeerConnection(did);
-            }
-          } else {
-            // If we don't have a peer yet, create one as a receiver
-            const newPeer = createPeerConnection(did, false);
-            // Then process the signal
-            newPeer.signal(message.signalData);
-          }
-        }
-      };
+      // Add the signal handler to the signalling service
+      signallingService.value.addSignalHandler(webrtcSignalHandler);
 
-      signallingService.value.onMessage(messageHandler);
-
-      // Set the call route in signaling service
-      signallingService.value.setCallRoute({
-        communityId: newCommunityId,
-        channelId: newChannelId,
-      });
-
-      // Set agent status to active
-      setAgentStatus("active");
-
-      // Establish connections with existing peers
+      // Establish connections with the agents in the call
       if (agentsInCall.value.length > 0) {
-        console.log("Connecting to existing agents:", agentsInCall.value.length);
+        console.log("Connecting to agents in call:", agentsInCall.value);
         agentsInCall.value.forEach((agent) => {
-          if (agent.did !== signallingService.value?.myDid) {
-            // Create initiator connections to all peers alphabetically "less than" our did
-            // This prevents both sides from being initiators
-            const shouldInitiate = (signallingService.value?.myDid || "").localeCompare(agent.did) > 0;
+          if (agent.did !== me.value.did) {
+            // Create initiator connections to all peers alphabetically "less than" our did (prevents both sides from being initiators)
+            const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
             createPeerConnection(agent.did, shouldInitiate);
           }
         });
       }
 
       isConnected.value = true;
-
-      // Tell media devices store we're in a call
-      mediaDevicesStore.setActiveCall(`${newCommunityId}-${newChannelId}`);
     } catch (error) {
       console.error("Error joining call:", error);
       callRoute.value = null;
@@ -296,21 +349,17 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
   async function leaveRoom() {
     try {
       // Close all peer connections
-      peerConnections.value.forEach((peer, did) => {
-        cleanupPeerConnection(did);
-      });
+      peerConnections.value.forEach((peer, did) => cleanupPeerConnection(did));
 
-      // Clear the call route in signaling service
-      if (signallingService.value) {
-        signallingService.value.setCallRoute(null);
-      }
-
-      // Release media devices
-      mediaDevicesStore.setActiveCall(null);
+      // Remove the signal handler to the signalling service
+      signallingService.value?.removeSignalHandler(webrtcSignalHandler);
 
       // Reset state
       isConnected.value = false;
       callRoute.value = null;
+
+      // Release media devices
+      mediaDevicesStore.stopTracks();
     } catch (error) {
       console.error("Error leaving call:", error);
     }
@@ -344,14 +393,6 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
     // Save preference
     setForVersion("webrtc", "enableVideo", newState ? "true" : "false");
-  }
-
-  function setAgentStatus(status: AgentStatus) {
-    agentStatus.value = status;
-
-    if (signallingService.value) {
-      signallingService.value.setAgentStatus(status);
-    }
   }
 
   // Watch for media stream changes to update peer connections
@@ -429,16 +470,12 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
   // Clean up when store is no longer used
   onUnmounted(() => {
-    if (isConnected.value) {
-      leaveRoom();
-    }
+    if (isConnected.value) leaveRoom();
   });
 
   return {
     // Call state
     callRoute,
-    audioEnabled,
-    videoEnabled,
     agentStatus,
     isConnected,
     isConnecting,
@@ -458,97 +495,5 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     // Media controls
     toggleVideo,
     toggleAudio,
-    setAgentStatus,
-
-    // Signaling access (for advanced use cases)
-    signallingService,
   };
 });
-
-// import { getCachedAgentProfile } from "@/utils/userProfileCache";
-// import { Channel } from "@coasys/flux-api";
-// import { AgentState, AgentStatus, CallHealth, RouteParams } from "@coasys/flux-types";
-// import { defineStore, storeToRefs } from "pinia";
-// import { computed, ref, watch } from "vue";
-// import { useRoute } from "vue-router";
-// import { useCommunityServiceStore } from "./communityServiceStore";
-// import { useMediaDevicesStore } from "./mediaDevicesStore";
-
-// export const useWebrtcStore = defineStore("webrtcStore", () => {
-//   const route = useRoute();
-//   const mediaDevicesStore = useMediaDevicesStore();
-//   const communityServiceStore = useCommunityServiceStore();
-
-//   const { stream, audioEnabled, videoEnabled } = storeToRefs(mediaDevicesStore);
-//   const { getCommunityService } = communityServiceStore;
-
-//   // const instance = ref<WebRTC | undefined>();
-//   const callRoute = ref<RouteParams | null>(route.params);
-//   const communityService = computed(() => getCommunityService(callRoute.value?.communityId || ""));
-//   const signallingService = computed(() => communityService.value?.signallingService);
-//   const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
-//   const agentsInCall = ref<AgentState[]>([]);
-//   const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
-//   const community = computed(() => communityService.value?.community || null);
-//   const channel = computed(() =>
-//     (communityService.value?.channels as any).find((c: Channel) => c.baseExpression === callRoute.value?.channelId)
-//   );
-
-//   const agentStatus = ref<AgentStatus>("active");
-
-//   // async function addInstance(webRTC: WebRTC) {
-//   //   instance.value = webRTC;
-//   // }
-
-//   // async function joinRoom() {
-//   //   instance.value?.onJoin({});
-
-//   //   // // Todo: fix loading state in UI so this timeout is not needed
-//   //   setTimeout(() => {
-//   //     callRoute.value = route.params as RouteParams; // route.params as RouteParams;
-//   //   }, 100);
-//   // }
-
-//   // function leaveRoom() {
-//   //   instance.value?.onLeave();
-//   //   instance.value = undefined;
-//   //   callRoute.value = null;
-//   // }
-
-//   // function toggleAudio() {
-//   //   instance.value?.onToggleAudio(!audioEnabled.value);
-//   //   audioEnabled.value = !audioEnabled.value;
-//   // }
-
-//   // function toggleVideo() {
-//   //   instance.value?.onToggleCamera(!videoEnabled.value);
-//   //   videoEnabled.value = !videoEnabled.value;
-//   // }
-
-//   // Update agentsInCall when agents map in the signalling service changes
-//   watch(
-//     agents,
-//     async (newAgents) => {
-//       const agentsInCallMap = Object.entries(newAgents).filter(
-//         ([_, agent]) => agent.callRoute?.channelId === callRoute.value?.channelId
-//       );
-//       agentsInCall.value = await Promise.all(
-//         agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) }))
-//       );
-//     },
-//     { deep: true }
-//   );
-
-//   return {
-//     // instance,
-//     callRoute,
-//     videoEnabled,
-//     audioEnabled,
-//     agentStatus,
-//     // addInstance,
-//     // joinRoom,
-//     // leaveRoom,
-//     // toggleVideo,
-//     // toggleAudio,
-//   };
-// });

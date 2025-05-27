@@ -1,7 +1,7 @@
 import { useAppStore, useRouteMemoryStore } from "@/stores";
 import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
 import { useWebrtcStore } from "@/stores/webrtcStore";
-import { NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
+import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
@@ -33,24 +33,39 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     lastUpdate: Date.now(),
   });
   const agents = ref<Record<string, AgentState>>({});
+  const signalHandlers: Array<(signal: PerspectiveExpression) => void> = [];
 
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
+
+  function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
+    signalHandlers.push(handler);
+  }
+
+  function removeSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
+    const index = signalHandlers.indexOf(handler);
+    if (index !== -1) signalHandlers.splice(index, 1);
+    else console.warn("Signal handler not found:", handler);
+  }
+
+  function sendSignal(link: Link): void {
+    neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error("Error sending signal:", error));
+  }
 
   function onSignal(signal: PerspectiveExpression): void {
     const link = signal.data.links[0];
     if (!link || link.author === me.value.did) return;
 
     const { author, data } = link;
-    const { predicate, source, target } = data;
+    const { source, predicate, target } = data;
 
     if (predicate === NEW_STATE) {
-      // If this is their first broadcast, immediately respond with my state so they dont have to wait for my next heartbeat
-      if (source === "first-broadcast") broadcastState();
+      // If this is their first broadcast, immediately broadcast my state so they dont have to wait for my next heartbeat
+      if (target === "first-broadcast") broadcastState();
 
       try {
         // Try to parse the agent's state and add it to the store
-        const agentState = JSON.parse(target);
+        const agentState = JSON.parse(source);
         if (typeof agentState === "object" && agentState !== null) {
           agents.value[author] = { ...agents.value[author], ...agentState, lastUpdate: Date.now() };
         }
@@ -59,13 +74,16 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
         agents.value[author] = { ...agents.value[author], status: "unknown", lastUpdate: Date.now() };
       }
     }
+
+    // Forward signals to added signal handlers if present (used in the webrtc store)
+    signalHandlers.forEach((handler) => handler(signal));
   }
 
-  function broadcastState(source: string = ""): void {
-    if (signalling.value === false) return;
+  function broadcastState(target: string = ""): void {
+    if (!signalling.value) return;
 
     // Broadcast my state to the neighbourhood
-    const newState = { source, predicate: NEW_STATE, target: JSON.stringify(myState.value) };
+    const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
     neighbourhood
       .sendBroadcastU({ links: [newState] })
       .catch((error) => console.error("Error sending broadcast:", error));
@@ -182,6 +200,9 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     getAgentState,
     startSignalling,
     stopSignalling,
+    addSignalHandler,
+    removeSignalHandler,
+    sendSignal,
   };
 }
 

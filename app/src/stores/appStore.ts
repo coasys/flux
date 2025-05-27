@@ -87,7 +87,7 @@ export const useAppStore = defineStore("appStore", () => {
         .filter((p) => p.neighbourhood)
         .map(async (p) => {
           const community = (await Community.findAll(p))[0];
-          if (community && !myCommunities.value[p.uuid]) myCommunities.value[p.uuid] = community;
+          if (community) myCommunities.value[p.uuid] = community;
         })
     );
   }

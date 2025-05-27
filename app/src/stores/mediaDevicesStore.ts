@@ -20,7 +20,6 @@ export const useMediaDevicesStore = defineStore(
     const stream = ref<MediaStream | null>(null);
     const isLoading = ref(false);
     const error = ref<Error | null>(null);
-    const activeCallId = ref<string | null>(null); // Remove?
     const keepAlive = ref(false);
     const screenshareActive = ref(false);
 
@@ -173,20 +172,6 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    function setActiveCall(callId: string | null) {
-      activeCallId.value = callId;
-
-      // Stop tracks if no active call and not keeping alive
-      if (!callId && !keepAlive.value) stopTracks();
-    }
-
-    function setKeepAlive(keep: boolean) {
-      keepAlive.value = keep;
-
-      // Stop tracks if not keeping alive and no active call
-      if (!keep && !activeCallId.value) stopTracks();
-    }
-
     // Set up device change listener
     if (typeof window !== "undefined") {
       navigator.mediaDevices.addEventListener("devicechange", refreshDeviceList);
@@ -210,8 +195,7 @@ export const useMediaDevicesStore = defineStore(
       stream,
       isLoading,
       error,
-      activeCallId,
-      keepAlive,
+      screenshareActive,
 
       // Computed
       cameras,
@@ -219,7 +203,6 @@ export const useMediaDevicesStore = defineStore(
       hasActiveStream,
       videoEnabled,
       audioEnabled,
-      screenshareActive,
       mediaSettings,
 
       // Methods
@@ -231,8 +214,6 @@ export const useMediaDevicesStore = defineStore(
       toggleTrack,
       startScreenShare,
       restartStream,
-      setActiveCall,
-      setKeepAlive,
     };
   }
   // {

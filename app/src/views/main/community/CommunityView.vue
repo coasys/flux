@@ -93,8 +93,7 @@ import CommunityLayout from "@/layout/CommunityLayout.vue";
 import { useModalStore } from "@/stores";
 import { useCommunityServiceStore } from "@/stores/communityServiceStore";
 import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
-import { RouteParams } from "@coasys/flux-types";
-import { onMounted, onUnmounted, provide, watch } from "vue";
+import { onMounted, onUnmounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "CommunityView" });
@@ -120,14 +119,6 @@ function navigateToChannel(channelId: string) {
 
 onMounted(() => signallingService.startSignalling());
 onUnmounted(() => signallingService.stopSignalling());
-
-watch(
-  () => route.params,
-  (newParams: RouteParams) => {
-    if (newParams.communityId === communityId) signallingService.setCurrentRoute(newParams);
-  },
-  { immediate: true }
-);
 </script>
 
 <style scoped>

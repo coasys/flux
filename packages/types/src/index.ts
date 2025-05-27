@@ -1,3 +1,5 @@
+import { Link, PerspectiveExpression } from "@coasys/ad4m";
+
 // Ref types for reactive Vue.js properties
 export type Ref<T> = { value: T };
 export type ComputedRef<T> = { value: T };
@@ -233,4 +235,7 @@ export interface SignallingService {
   getAgentState(did: string): AgentState | undefined;
   startSignalling: () => void;
   stopSignalling: () => void;
+  addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  sendSignal: (link: Link) => void;
 }
