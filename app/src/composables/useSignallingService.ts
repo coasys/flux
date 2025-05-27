@@ -18,7 +18,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   const routeMemoryStore = useRouteMemoryStore();
 
   const { me, aiEnabled } = storeToRefs(appStore);
-  const { callRoute, agentStatus } = storeToRefs(webrtcStore);
+  const { inCall, callRoute, agentStatus } = storeToRefs(webrtcStore);
   const { mediaSettings } = storeToRefs(mediaDevicesStore);
   const { currentRoute } = storeToRefs(routeMemoryStore);
 
@@ -29,6 +29,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     callRoute: callRoute.value,
     mediaSettings: mediaSettings.value,
     aiEnabled: aiEnabled.value,
+    inCall: false,
     processing: null,
     lastUpdate: Date.now(),
   });
@@ -181,6 +182,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   // Watch for state changes in the stores & broadcast updates to peers
   watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
+  watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
   watch(agentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
 

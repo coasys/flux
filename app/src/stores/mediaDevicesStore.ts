@@ -1,3 +1,4 @@
+import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -20,7 +21,6 @@ export const useMediaDevicesStore = defineStore(
     const stream = ref<MediaStream | null>(null);
     const isLoading = ref(false);
     const error = ref<Error | null>(null);
-    const keepAlive = ref(false);
     const screenshareActive = ref(false);
 
     // Computed properties
@@ -53,7 +53,9 @@ export const useMediaDevicesStore = defineStore(
           audio: audio
             ? { deviceId: activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined }
             : false,
-          video: video ? { deviceId: activeCameraId.value ? { exact: activeCameraId.value } : undefined } : false,
+          video: video
+            ? { ...videoDimensions, deviceId: activeCameraId.value ? { exact: activeCameraId.value } : undefined }
+            : false,
         };
 
         stream.value = await navigator.mediaDevices.getUserMedia(constraints);
@@ -138,6 +140,37 @@ export const useMediaDevicesStore = defineStore(
       tracks.forEach((track) => (track.enabled = enabled));
     }
 
+    function toggleAudio() {
+      console.log("mediaPermissions", mediaPermissions.value);
+      if (mediaPermissions.value.microphone.granted || audioEnabled.value) {
+        // If we already have permission or we're disabling, just toggle
+        toggleTrack("audio", !audioEnabled.value);
+      } else {
+        // If we're enabling and don't have permission, request it
+        requestPermissions({ audio: true, video: videoEnabled.value });
+      }
+    }
+
+    function toggleVideo() {
+      console.log("mediaPermissions", mediaPermissions.value, stream.value);
+
+      // Request permission if not yet granted
+      if (!stream.value) requestPermissions({ video: true, audio: audioEnabled.value });
+      // if (!mediaPermissions.value.camera.granted) requestPermissions({ video: true, audio: audioEnabled.value });
+
+      // If disabling video toggle the track off
+      if (videoEnabled.value) toggleTrack("video", false);
+
+      // if (mediaPermissions.value.camera.granted || videoEnabled.value) {
+      //   // If we already have permission or we're disabling, just toggle the track
+      //   toggleTrack("video", !videoEnabled.value);
+      // } else {
+      //   // If we're enabling and don't have permission, request it
+      //   console.log("requesting video permission");
+      //   requestPermissions({ video: true, audio: audioEnabled.value });
+      // }
+    }
+
     async function startScreenShare() {
       if (!navigator.mediaDevices.getDisplayMedia) {
         throw new Error("Screen sharing not supported in this browser");
@@ -201,8 +234,6 @@ export const useMediaDevicesStore = defineStore(
       cameras,
       microphones,
       hasActiveStream,
-      videoEnabled,
-      audioEnabled,
       mediaSettings,
 
       // Methods
@@ -211,7 +242,8 @@ export const useMediaDevicesStore = defineStore(
       switchMicrophone,
       stopTracks,
       refreshDeviceList,
-      toggleTrack,
+      toggleAudio,
+      toggleVideo,
       startScreenShare,
       restartStream,
     };

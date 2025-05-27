@@ -1,9 +1,9 @@
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveExpression } from "@coasys/ad4m";
-import { Channel } from "@coasys/flux-api";
+import { Channel, Community } from "@coasys/flux-api";
 import { defaultIceServers } from "@coasys/flux-constants/src/videoSettings";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
-import { getForVersion, setForVersion } from "@coasys/flux-utils";
+import { getForVersion } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
 import SimplePeer from "simple-peer";
 import { computed, onUnmounted, ref, watch } from "vue";
@@ -11,6 +11,7 @@ import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
+import { useUiStore } from "./uiStore";
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
@@ -28,29 +29,35 @@ type AgentWithProfile = AgentState & Profile;
 export const useWebrtcStore = defineStore("webrtcStore", () => {
   const route = useRoute();
   const appStore = useAppStore();
+  const uiStore = useUiStore();
   const mediaDevicesStore = useMediaDevicesStore();
   const communityServiceStore = useCommunityServiceStore();
 
   const { me } = storeToRefs(appStore);
-  const { stream: localStream, audioEnabled, videoEnabled } = storeToRefs(mediaDevicesStore);
+  const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
   const { getCommunityService } = communityServiceStore;
 
   // Call state
-  const callRoute = ref<RouteParams | null>(route.params);
-  const communityService = computed(() => getCommunityService(callRoute.value?.communityId || ""));
+  const inCall = ref(false);
+  const callRoute = ref<RouteParams>(route.params);
+  const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
   const signallingService = computed(() => communityService.value?.signallingService);
   const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
   const agentsInCall = ref<AgentWithProfile[]>([]);
   const callHealth = ref<CallHealth>("healthy");
-  const community = computed(() => communityService.value?.community || null);
-  const channel = computed(() =>
-    (communityService.value?.channels as any)?.find((c: Channel) => c.baseExpression === callRoute.value?.channelId)
+  const callCommunityName = computed(
+    () => (communityService.value?.community as unknown as Community)?.name || "No community name"
   );
+  const callChannelName = computed(() => {
+    const callChannel = (communityService.value?.channels as any)?.find(
+      (c: Channel) => c.baseExpression === callRoute.value.channelId
+    );
+    return callChannel?.name || "No channel name";
+  });
 
   // Connection state
   const peerConnections = ref<Map<string, PeerConnection>>(new Map());
-  const isConnected = ref<boolean>(false);
-  const isConnecting = ref<boolean>(false);
+  const establishingConnection = ref(false);
   const agentStatus = ref<AgentStatus>("active");
   const remoteStreams = computed(() => {
     const streams: Record<string, MediaStream[]> = {};
@@ -169,7 +176,7 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
           // Set timeout for reconnection
           reconnectionTimeouts.value[did] = setTimeout(() => {
-            if (!isConnected.value) return; // Don't reconnect if we've left the call
+            if (!inCall.value) return; // Don't reconnect if we've left the call
 
             console.log(`Attempting to reconnect to ${did}...`);
 
@@ -259,7 +266,7 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
         }
 
         // Skip if we're not in a call
-        if (!isConnected.value || !callRoute.value) {
+        if (!inCall.value) {
           console.debug(`Ignoring signal from ${author} - not in a call`);
           return;
         }
@@ -287,12 +294,12 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
   // Call management functions
   async function joinRoom() {
-    if (isConnected.value) {
+    if (inCall.value) {
       console.log("Already in a call, leaving first");
       await leaveRoom();
     }
 
-    isConnecting.value = true;
+    establishingConnection.value = true;
 
     try {
       callRoute.value = route.params;
@@ -337,12 +344,12 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
         });
       }
 
-      isConnected.value = true;
+      inCall.value = true;
     } catch (error) {
       console.error("Error joining call:", error);
-      callRoute.value = null;
+      callRoute.value = {};
     } finally {
-      isConnecting.value = false;
+      establishingConnection.value = false;
     }
   }
 
@@ -354,50 +361,41 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
       // Remove the signal handler to the signalling service
       signallingService.value?.removeSignalHandler(webrtcSignalHandler);
 
-      // Reset state
-      isConnected.value = false;
-      callRoute.value = null;
-
       // Release media devices
       mediaDevicesStore.stopTracks();
+
+      // Reset state
+      inCall.value = false;
+      callRoute.value = {};
+
+      // Close the call window
+      uiStore.setCallWindowOpen(false);
     } catch (error) {
       console.error("Error leaving call:", error);
     }
   }
 
-  function toggleAudio() {
-    const newState = !audioEnabled.value;
-
-    if (mediaDevicesStore.mediaPermissions.microphone.granted || !newState) {
-      // If we already have permission or we're disabling, just toggle
-      mediaDevicesStore.toggleTrack("audio", newState);
-    } else {
-      // If we're enabling and don't have permission, request it
-      mediaDevicesStore.requestPermissions({ audio: true, video: false });
-    }
-
-    // Save preference
-    setForVersion("webrtc", "enableAudio", newState ? "true" : "false");
-  }
-
-  function toggleVideo() {
-    const newState = !videoEnabled.value;
-
-    if (mediaDevicesStore.mediaPermissions.camera.granted || !newState) {
-      // If we already have permission or we're disabling, just toggle
-      mediaDevicesStore.toggleTrack("video", newState);
-    } else {
-      // If we're enabling and don't have permission, request it
-      mediaDevicesStore.requestPermissions({ audio: false, video: true });
-    }
-
-    // Save preference
-    setForVersion("webrtc", "enableVideo", newState ? "true" : "false");
-  }
+  // Watch for route param changes
+  watch(
+    () => route.params,
+    async (newParams) => {
+      if (!inCall.value) {
+        // If not already in a call and entering a valid call route
+        if (newParams.channelId) {
+          // Update the call route
+          callRoute.value = newParams;
+        } else {
+          // Close the call window
+          uiStore.setCallWindowOpen(false);
+        }
+      }
+    },
+    { immediate: true }
+  );
 
   // Watch for media stream changes to update peer connections
   watch(localStream, () => {
-    if (isConnected.value) updatePeerConnectionsWithLocalStream();
+    if (inCall.value) updatePeerConnectionsWithLocalStream();
   });
 
   // Update agentsInCall when the agents map in the signalling service changes
@@ -405,7 +403,7 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     agentsInCommunity,
     async (newAgents) => {
       const agentsInCallMap = Object.entries(newAgents).filter(
-        ([_, agent]) => agent.callRoute?.channelId === callRoute.value?.channelId
+        ([_, agent]) => agent.inCall && agent.callRoute.channelId === callRoute.value.channelId
       );
       agentsInCall.value = await Promise.all(
         agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) }))
@@ -418,7 +416,7 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
   watch(
     agentsInCall,
     (newAgents) => {
-      if (!isConnected.value) return;
+      if (!inCall.value) return;
 
       const existingPeerDids = Array.from(peerConnections.value.keys());
 
@@ -455,10 +453,10 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
   // Start or stop the health check interval when the call route changes
   watch(
-    callRoute,
-    (newCallRoute) => {
+    inCall,
+    (nowInCall) => {
       // If in a call, start the health check interval
-      if (newCallRoute) healthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
+      if (nowInCall) healthCheckInterval = setInterval(checkCallHealth, CALL_HEALTH_CHECK_INTERVAL);
       // Otherwise clear the existing interval if present
       else if (healthCheckInterval) {
         clearInterval(healthCheckInterval);
@@ -470,19 +468,19 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
 
   // Clean up when store is no longer used
   onUnmounted(() => {
-    if (isConnected.value) leaveRoom();
+    if (inCall.value) leaveRoom();
   });
 
   return {
     // Call state
     callRoute,
     agentStatus,
-    isConnected,
-    isConnecting,
+    inCall,
+    establishingConnection,
     agentsInCall,
     callHealth,
-    community,
-    channel,
+    callCommunityName,
+    callChannelName,
 
     // WebRTC state
     peerConnections,
@@ -491,9 +489,5 @@ export const useWebrtcStore = defineStore("webrtcStore", () => {
     // Call management
     joinRoom,
     leaveRoom,
-
-    // Media controls
-    toggleVideo,
-    toggleAudio,
   };
 });

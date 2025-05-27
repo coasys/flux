@@ -82,11 +82,11 @@ const activeAgents = computed(() =>
   agentsInChannel.value.filter(
     (agent) =>
       !["offline", "invisible"].includes(agent.status) &&
-      (!agent.callRoute || agent.callRoute.channelId !== channel.baseExpression)
+      (!agent.inCall || agent.callRoute.channelId !== channel.baseExpression)
   )
 );
 const agentsInCall = computed(() =>
-  agentsInChannel.value.filter((agent) => agent.callRoute?.channelId === channel.baseExpression)
+  agentsInChannel.value.filter((agent) => agent.inCall && agent.callRoute.channelId === channel.baseExpression)
 );
 
 // // Commented out code for testing active agents UI
@@ -110,7 +110,7 @@ async function findAgentsInChannel() {
   // Include all agents with the channel ID in their currenRoute or their callRoute
   const agentsInChannelMap = Object.entries(agents.value).filter(([_, agent]) => {
     const inChannel = agent.currentRoute?.channelId === channel.baseExpression;
-    const inCall = agent.callRoute?.channelId === channel.baseExpression;
+    const inCall = agent.inCall && agent.callRoute.channelId === channel.baseExpression;
     return inChannel || inCall;
   });
 

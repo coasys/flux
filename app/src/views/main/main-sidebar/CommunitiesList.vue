@@ -59,10 +59,10 @@ const webrtcStore = useWebrtcStore();
 const routeMemoryStore = useRouteMemoryStore();
 
 const { myCommunities } = storeToRefs(appStore);
-const { callRoute } = storeToRefs(webrtcStore);
+const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 function isInCall(uuid: string) {
-  return callRoute.value?.communityId === uuid;
+  return inCall.value && callRoute.value.communityId === uuid;
 }
 
 function isPresent(uuid: string) {

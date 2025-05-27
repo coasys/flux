@@ -2,7 +2,7 @@
   <div class="wrapper">
     <div class="left-section" :style="{ width: `calc(${communitySidebarWidth}px + 100px)` }">
       <div class="controls">
-        <j-flex v-if="callRoute" direction="column">
+        <j-flex v-if="inCall" direction="column">
           <j-flex j="between" a="center">
             <j-flex
               direction="column"
@@ -20,16 +20,20 @@
                 </j-text>
               </j-flex>
               <j-text nomargin size="400">
-                <b>{{ community?.name || "No community name" }}</b> / {{ channel?.name || "No channel name" }}
+                <b>{{ callCommunityName }}</b> / {{ callChannelName }}
               </j-text>
             </j-flex>
 
             <j-flex a="center" gap="500">
-              <j-icon :name="`mic${audioEnabled ? '' : '-mute'}`" color="ui-500" @click="webrtcStore.toggleAudio" />
               <j-icon
-                :name="`camera-video${videoEnabled ? '' : '-off'}`"
+                :name="`mic${mediaSettings.audio ? '' : '-mute'}`"
                 color="ui-500"
-                @click="webrtcStore.toggleVideo"
+                @click="mediaDeviceStore.toggleAudio"
+              />
+              <j-icon
+                :name="`camera-video${mediaSettings.video ? '' : '-off'}`"
+                color="ui-500"
+                @click="mediaDeviceStore.toggleVideo"
               />
               <j-icon name="telephone-x" color="danger-500" @click="webrtcStore.leaveRoom" />
             </j-flex>
@@ -81,7 +85,7 @@
           <j-flex a="center" gap="500">
             <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
             <j-icon
-              v-if="callRoute || route.params.channelId"
+              v-if="inCall || route.params.channelId"
               :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
               color="ui-500"
               @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
@@ -101,7 +105,7 @@
         <j-flex j="between">
           <j-flex direction="column" gap="300">
             <j-text nomargin size="400">
-              <b>{{ community?.name || "No community name" }}</b> / {{ channel?.name || "No channel name" }}
+              <b>{{ callCommunityName }}</b> / {{ callChannelName }}
             </j-text>
 
             <j-flex a="center" gap="100" v-if="agentsInCall.length" style="margin-left: -6px">
@@ -117,20 +121,80 @@
           </button>
         </j-flex>
 
-        <div v-if="ready" style="height: 100%">
-          <component
-            :is="webcomponentName"
-            :perspective="perspective"
-            :source="channelId"
-            :agent="appStore.ad4mClient.agent"
-            :appStore="appStore"
-            :webrtcStore="webrtcStore"
-            :uiStore="uiStore"
-            :getProfile="getCachedAgentProfile"
-          />
+        <div style="display: flex; flex-direction: column; justify-content: center; height: 100%">
+          <!-- Join screen -->
+          <j-flex a="center" direction="column">
+            <h1>You haven't joined this room</h1>
+
+            <j-text variant="body">Your microphone will be enabled.</j-text>
+
+            <j-box pt="200" style="width: 100%">
+              <div class="preview">
+                <video :srcObject.prop="stream" :muted="!mediaSettings.audio" class="video" autoplay playsinline />
+
+                <div class="details">
+                  <div class="avatar">
+                    <j-avatar
+                      v-if="myProfile"
+                      :initials="myProfile?.username?.charAt(0) || '?'"
+                      size="xl"
+                      :src="myProfile?.profileThumbnailPicture || null"
+                      :hash="me.did"
+                    />
+                  </div>
+                </div>
+
+                <div class="username">
+                  <span>{{ myProfile?.username || "Unknown user" }}</span>
+                </div>
+
+                <!-- <div class="loading" v-if="">
+                  <j-spinner size="lg"></j-spinner>
+                  <j-text>{{ myProfile?.username }} connecting...</j-text>
+                </div> -->
+
+                <div class="settings">
+                  <j-flex gap="400">
+                    <j-tooltip placement="top" title="Settings">
+                      <j-button @click="toggleSettings" square circle size="lg">
+                        <j-icon name="gear" />
+                      </j-button>
+                    </j-tooltip>
+                    <j-tooltip placement="top" :title="callWindowOpen ? 'Shrink screen' : 'Full screen'">
+                      <j-button @click="() => uiStore.setCallWindowOpen(false)" square circle size="lg">
+                        <j-icon :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`" />
+                      </j-button>
+                    </j-tooltip>
+                  </j-flex>
+                </div>
+              </div>
+            </j-box>
+
+            <j-box pt="400">
+              <j-toggle :checked="mediaSettings.video" @change="() => mediaDeviceStore.toggleVideo()">
+                Join with camera!
+              </j-toggle>
+            </j-box>
+
+            <j-box pt="500">
+              <j-button
+                variant="primary"
+                size="lg"
+                :disabled="!mediaSettings.audio && !mediaSettings.video"
+                :loading="establishingConnection"
+                @click="webrtcStore.joinRoom"
+              >
+                Join room!
+              </j-button>
+            </j-box>
+
+            <j-box v-if="!mediaSettings.audio && !mediaSettings.video" pt="400">
+              <j-text color="warning-500">Please allow camera/microphone access to join.</j-text>
+            </j-box>
+          </j-flex>
         </div>
 
-        <div class="disclaimer" v-if="!callRoute">
+        <div class="disclaimer" v-if="!inCall">
           <j-flex a="center" gap="300">
             <j-icon name="exclamation-circle" size="xs" color="warning-500" />
             <j-text size="400" nomargin color="warning-500"> This is a beta feature </j-text>
@@ -147,16 +211,13 @@
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { useAppStore, useUiStore } from "@/stores";
-import { useCommunityServiceStore } from "@/stores/communityServiceStore";
+import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
 import { useWebrtcStore } from "@/stores/webrtcStore";
-import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { Channel, Community, generateWCName } from "@coasys/flux-api";
-import { AgentState, AgentStatus, CallHealth, Profile, SignallingService } from "@coasys/flux-types";
+import { AgentStatus, Profile } from "@coasys/flux-types";
 import "@coasys/flux-webrtc-view";
 import { storeToRefs } from "pinia";
-import { computed, ComputedRef, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -164,41 +225,37 @@ const router = useRouter();
 const appStore = useAppStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
-const communityServiceStore = useCommunityServiceStore();
+const mediaDeviceStore = useMediaDevicesStore();
 
+const { me } = storeToRefs(appStore);
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
-const { audioEnabled, videoEnabled, callRoute, agentStatus } = storeToRefs(webrtcStore);
+const {
+  inCall,
+  callRoute,
+  callHealth,
+  agentsInCall,
+  callCommunityName,
+  callChannelName,
+  agentStatus,
+  establishingConnection,
+} = storeToRefs(webrtcStore);
+const { stream, mediaSettings } = storeToRefs(mediaDeviceStore);
 
 const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
-const perspective = shallowRef<PerspectiveProxy>();
-const communityId = ref("");
-const channelId = ref("");
 const myProfile = ref<Profile | null>(null);
-const webcomponentName = ref("");
-const ready = ref(false);
 const showAgentStatusMenu = ref(false);
 
-// TODO: move this into webrtcStore & access the signalling service there...
-const agentsInCall = ref<AgentState[]>([]);
-
-const communityService = computed(() => communityServiceStore.getCommunityService(communityId.value));
-const signallingService = computed<SignallingService | undefined>(() => communityService.value?.signallingService);
-const agents = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
-const callHealth = computed(() => signallingService.value?.callHealth || ("healthy" as CallHealth));
 const callHealthColour = computed(findHealthColour);
-const community = computed(() => communityService.value?.community || null) as ComputedRef<Community | null>;
-const channel = computed(() =>
-  (communityService.value?.channels as any).find((c: Channel) => c.baseExpression === channelId.value)
-);
-const connectionText = computed(findConnectionText);
 const connectionWarning = computed(findConnectionWarning);
+const connectionText = computed(findConnectionText);
 
 const callWindow = ref<HTMLElement | null>(null);
 const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
+const videoElement = ref<HTMLVideoElement | null>(null);
 
 function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
@@ -206,17 +263,17 @@ function findHealthColour() {
   return "danger-500";
 }
 
-function findConnectionText() {
-  if (videoEnabled.value) return "Video connected";
-  else if (audioEnabled.value) return "Voice connected";
-  return "Connected";
-}
-
 function findConnectionWarning() {
   if (callHealth.value === "healthy") return "";
   else if (callHealth.value === "warnings") return "(unstable)";
   else if (callHealth.value === "connections-lost") return "(lost peers)";
   return "";
+}
+
+function findConnectionText() {
+  if (mediaSettings.value.video) return "Video connected";
+  else if (mediaSettings.value.audio) return "Voice connected";
+  return "Connected";
 }
 
 function startResize(e: any) {
@@ -259,85 +316,20 @@ function stopResize() {
   document.addEventListener("mouseup", stopResize, false);
 }
 
+function toggleSettings() {
+  console.log("toggle settings!");
+}
+
+// TODO: store my profile in the app store
 async function getMyProfile() {
-  myProfile.value = await getCachedAgentProfile(appStore.me.did);
-}
-
-async function registerWebcomponent() {
-  const generatedName = await generateWCName("@coasys/flux-webrtc-view");
-
-  if (!customElements.get(generatedName)) {
-    const module = await fetchFluxApp("@coasys/flux-webrtc-view");
-    if (module?.default) {
-      try {
-        await customElements.define(generatedName, module.default);
-      } catch (e) {
-        console.error(`Failed to define custom element ${generatedName}:`, e);
-      }
-    }
-  }
-
-  webcomponentName.value = generatedName;
-}
-
-async function getData() {
-  // ready.value = false;
-
-  // Update the route data
-  communityId.value = route.params.communityId as string;
-  channelId.value = route.params.channelId as string;
-
-  // Update the perspective
-  perspective.value = (await appStore.ad4mClient.perspective.byUUID(communityId.value)) as PerspectiveProxy;
-
-  ready.value = true;
+  myProfile.value = await getCachedAgentProfile(me.value.did);
 }
 
 function profileClick() {
-  router.push({ name: "home", params: { did: appStore.me.did } });
+  router.push({ name: "home", params: { did: me.value.did } });
 }
 
-onMounted(async () => {
-  getMyProfile();
-  registerWebcomponent();
-});
-
-// Get new data or close window on route changes
-watch(
-  () => route.params,
-  async (newParams) => {
-    if (!callRoute.value) newParams.channelId ? getData() : uiStore.setCallWindowOpen(false);
-  },
-  { immediate: true }
-);
-
-// Close call window and update state when exiting calls
-watch(
-  callRoute,
-  (newCallRoute) => {
-    if (!newCallRoute) {
-      // Close call window
-      uiStore.setCallWindowOpen(false);
-      // Fetch data for current route once closed
-      setTimeout(getData, 500);
-    }
-  },
-  { immediate: true }
-);
-
-// Update agentsInCall when signalling service agents change
-watch(
-  agents,
-  async (newAgents) => {
-    const agentsInCallMap = Object.entries(newAgents).filter(
-      ([_, agent]) => agent.callRoute?.channelId === channelId.value
-    );
-    agentsInCall.value = await Promise.all(
-      agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) }))
-    );
-  },
-  { deep: true }
-);
+onMounted(getMyProfile);
 </script>
 
 <style lang="scss" scoped>
@@ -487,4 +479,128 @@ watch(
     }
   }
 }
+
+.preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 80vh;
+  font-family: var(--j-font-family);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-50);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0;
+  transition:
+    max-width 0.3s ease-out,
+    box-shadow 0.2s ease;
+  aspect-ratio: 16/9;
+}
+
+@media (min-width: 800px) {
+  .Preview {
+    max-width: 50vw;
+    margin: 0 auto;
+  }
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.username {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin: var(--j-space-400);
+  padding: var(--j-space-200) var(--j-space-400);
+  color: white;
+  background: #0000002e;
+  border-radius: 10rem;
+}
+
+.avatar {
+  display: none;
+}
+
+.details,
+.reaction,
+.loading {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--j-space-300);
+  transition: all 0.3s ease;
+}
+
+.loading {
+  display: none;
+  gap: var(--j-space-500);
+}
+
+.preview[data-mirrored="true"] video {
+  transform: scaleX(-1);
+}
+
+.preview[data-camera-enabled="true"] .video {
+  opacity: 1;
+}
+.preview[data-camera-enabled="true"]:hover .details {
+  opacity: 1;
+}
+.preview[data-camera-enabled="false"] .details {
+  background: var(--j-color-ui-50);
+}
+.preview[data-camera-enabled="false"] .avatar {
+  display: block;
+}
+
+.settings {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  padding: var(--j-space-400);
+}
+
+@keyframes appear {
+  0% {
+    transform: scale(8);
+    opacity: 0;
+  }
+}
+
+@keyframes appear-inner {
+  0% {
+    transform: scale(0);
+  }
+}
 </style>
+
+<!-- async function registerWebcomponent() {
+  const generatedName = await generateWCName("@coasys/flux-webrtc-view");
+
+  if (!customElements.get(generatedName)) {
+    const module = await fetchFluxApp("@coasys/flux-webrtc-view");
+    if (module?.default) {
+      try {
+        await customElements.define(generatedName, module.default);
+      } catch (e) {
+        console.error(`Failed to define custom element ${generatedName}:`, e);
+      }
+    }
+  }
+
+  webcomponentName.value = generatedName;
+} -->

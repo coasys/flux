@@ -60,7 +60,7 @@
             </j-tooltip>
           </div>
 
-          <template v-if="!callWindowOpen && (!callRoute || callRoute.channelId === channelId)">
+          <template v-if="!callWindowOpen && (!inCall || callRoute.channelId === channelId)">
             <j-button
               size="sm"
               variant="primary"
@@ -68,7 +68,7 @@
               :onClick="() => uiStore.setCallWindowOpen(true)"
             >
               <j-icon size="sm" name="telephone" style="margin-right: -5px" />
-              {{ `${callRoute ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
+              {{ `${inCall ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
             </j-button>
 
             <AvatarGroup
@@ -185,7 +185,7 @@ const { perspective, channels, signallingService } = useCommunityService();
 
 const { me } = storeToRefs(appStore);
 const { callWindowOpen } = storeToRefs(uiStore);
-const { callRoute } = storeToRefs(webrtcStore);
+const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
 const activeProfile = ref<string>("");
@@ -210,7 +210,7 @@ const agentsInCall = ref<AgentData[]>([]); // computed(() => signallingService.g
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
 
 function goToEditChannel() {
-  modalStore.setShowEditChannel(true);
+  modalStore.showEditChannel = true;
 }
 
 function changeCurrentView(value: string) {
@@ -256,7 +256,9 @@ watch(views, (newVal, oldVal) => {
 watch(
   signallingService.agents.value,
   async (newAgents) => {
-    const agentsInCallMap = Object.entries(newAgents).filter(([_, agent]) => agent.callRoute?.channelId === channelId);
+    const agentsInCallMap = Object.entries(newAgents).filter(
+      ([_, agent]) => agent.inCall && agent.callRoute.channelId === channelId
+    );
     agentsInCall.value = await Promise.all(
       agentsInCallMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
     );

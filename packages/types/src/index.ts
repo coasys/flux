@@ -219,10 +219,11 @@ export interface ProcessingState {
 export type MediaSettings = { audio: boolean; video: boolean; screenshare: boolean };
 export interface AgentState {
   status: AgentStatus;
-  currentRoute: RouteParams | null;
-  callRoute: RouteParams | null;
+  currentRoute: RouteParams;
+  callRoute: RouteParams;
   mediaSettings: MediaSettings;
   processing: ProcessingState | null;
+  inCall: boolean;
   aiEnabled: boolean;
   lastUpdate: number;
 }
