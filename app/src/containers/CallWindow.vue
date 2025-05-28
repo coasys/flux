@@ -130,28 +130,30 @@
 
             <j-box pt="200" style="width: 100%">
               <div class="preview">
-                <video :srcObject.prop="stream" :muted="!mediaSettings.audio" class="video" autoplay playsinline />
+                <video
+                  class="video"
+                  :style="{ opacity: mediaSettings.video ? 1 : 0 }"
+                  :srcObject.prop="stream"
+                  :muted="!mediaSettings.audio"
+                  autoplay
+                  playsinline
+                />
 
-                <div class="details">
-                  <div class="avatar">
-                    <j-avatar
-                      v-if="myProfile"
-                      :initials="myProfile?.username?.charAt(0) || '?'"
-                      size="xl"
-                      :src="myProfile?.profileThumbnailPicture || null"
-                      :hash="me.did"
-                    />
-                  </div>
+                <div class="avatar-wrapper" v-if="myProfile && !mediaSettings.video">
+                  <j-avatar
+                    :initials="myProfile?.username?.charAt(0) || '?'"
+                    size="xl"
+                    :src="myProfile?.profileThumbnailPicture || null"
+                    :hash="me.did"
+                  />
                 </div>
 
                 <div class="username">
-                  <span>{{ myProfile?.username || "Unknown user" }}</span>
+                  <span
+                    >{{ myProfile?.username || "Unknown user" }}
+                    {{ mediaSettings.video ? "video on" : "video off" }}</span
+                  >
                 </div>
-
-                <!-- <div class="loading" v-if="">
-                  <j-spinner size="lg"></j-spinner>
-                  <j-text>{{ myProfile?.username }} connecting...</j-text>
-                </div> -->
 
                 <div class="settings">
                   <j-flex gap="400">
@@ -255,7 +257,6 @@ const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
-const videoElement = ref<HTMLVideoElement | null>(null);
 
 function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
@@ -465,6 +466,52 @@ onMounted(getMyProfile);
         z-index: 5;
       }
 
+      .preview {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+        max-height: 80vh;
+        font-family: var(--j-font-family);
+        border-radius: var(--j-border-radius);
+        background: var(--j-color-ui-50);
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0;
+        transition:
+          max-width 0.3s ease-out,
+          box-shadow 0.2s ease;
+        aspect-ratio: 16/9;
+
+        .video {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .avatar-wrapper {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .username {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          margin: var(--j-space-400);
+          padding: var(--j-space-200) var(--j-space-400);
+          color: white;
+          background: #0000002e;
+          border-radius: 10rem;
+        }
+      }
+
       .disclaimer {
         display: flex;
         flex-direction: column;
@@ -477,113 +524,6 @@ onMounted(getMyProfile);
         text-align: left;
       }
     }
-  }
-}
-
-.preview {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 80vh;
-  font-family: var(--j-font-family);
-  border-radius: var(--j-border-radius);
-  background: var(--j-color-ui-50);
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0;
-  transition:
-    max-width 0.3s ease-out,
-    box-shadow 0.2s ease;
-  aspect-ratio: 16/9;
-}
-
-@media (min-width: 800px) {
-  .Preview {
-    max-width: 50vw;
-    margin: 0 auto;
-  }
-}
-
-.video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.username {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  margin: var(--j-space-400);
-  padding: var(--j-space-200) var(--j-space-400);
-  color: white;
-  background: #0000002e;
-  border-radius: 10rem;
-}
-
-.avatar {
-  display: none;
-}
-
-.details,
-.reaction,
-.loading {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: var(--j-space-300);
-  transition: all 0.3s ease;
-}
-
-.loading {
-  display: none;
-  gap: var(--j-space-500);
-}
-
-.preview[data-mirrored="true"] video {
-  transform: scaleX(-1);
-}
-
-.preview[data-camera-enabled="true"] .video {
-  opacity: 1;
-}
-.preview[data-camera-enabled="true"]:hover .details {
-  opacity: 1;
-}
-.preview[data-camera-enabled="false"] .details {
-  background: var(--j-color-ui-50);
-}
-.preview[data-camera-enabled="false"] .avatar {
-  display: block;
-}
-
-.settings {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  display: flex;
-  padding: var(--j-space-400);
-}
-
-@keyframes appear {
-  0% {
-    transform: scale(8);
-    opacity: 0;
-  }
-}
-
-@keyframes appear-inner {
-  0% {
-    transform: scale(0);
   }
 }
 </style>
