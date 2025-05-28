@@ -2,11 +2,6 @@ import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
-interface MediaPermissionOptions {
-  audio?: boolean;
-  video?: boolean;
-}
-
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
@@ -22,50 +17,43 @@ export const useMediaDevicesStore = defineStore(
     const isLoading = ref(false);
     const error = ref<Error | null>(null);
     const screenshareActive = ref(false);
+    const audioActive = ref(false);
+    const videoActive = ref(false);
 
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === "videoinput"));
     const microphones = computed(() => availableDevices.value.filter((device) => device.kind === "audioinput"));
-    const hasActiveStream = computed(() => stream.value !== null);
-    const audioEnabled = computed(() => {
-      if (!stream.value) return false;
-      const audioTracks = stream.value.getAudioTracks();
-      return audioTracks.length > 0 && audioTracks.some((track) => track.enabled);
-    });
-    const videoEnabled = computed(() => {
-      if (!stream.value) return false;
-      const videoTracks = stream.value.getVideoTracks();
-      return videoTracks.length > 0 && videoTracks.some((track) => track.enabled);
-    });
     const mediaSettings = computed(() => ({
-      audio: audioEnabled.value,
-      video: videoEnabled.value,
+      audio: audioActive.value,
+      video: videoActive.value,
       screenshare: screenshareActive.value,
     }));
 
     // Methods
-    async function requestPermissions({ audio = true, video = true }: MediaPermissionOptions) {
+    async function getStream({ audio = true, video = true }: { audio?: boolean; video?: boolean }) {
       isLoading.value = true;
       error.value = null;
 
       try {
-        const constraints = {
-          audio: audio
-            ? { deviceId: activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined }
-            : false,
-          video: video
-            ? { ...videoDimensions, deviceId: activeCameraId.value ? { exact: activeCameraId.value } : undefined }
-            : false,
-        };
+        // Generate the constraints
+        const audioDeviceId = activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined;
+        const videoDeviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+        const audioConstraints = audio ? { deviceId: audioDeviceId } : false;
+        const videoConstraints = video ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
-        stream.value = await navigator.mediaDevices.getUserMedia(constraints);
+        // Get the stream
+        stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
 
+        // Update active states
+        audioActive.value = audio && !!stream.value.getAudioTracks().length;
+        videoActive.value = video && !!stream.value.getVideoTracks().length;
+
+        // Update media permissions
         const { camera, microphone } = mediaPermissions.value;
-        camera.requested = video;
-        camera.granted = video && !!stream.value.getVideoTracks().length;
-
         microphone.requested = audio;
-        microphone.granted = audio && !!stream.value.getAudioTracks().length;
+        microphone.granted = audioActive.value;
+        camera.requested = video;
+        camera.granted = videoActive.value;
 
         // Update available devices after permissions granted
         await refreshDeviceList();
@@ -118,7 +106,7 @@ export const useMediaDevicesStore = defineStore(
     async function restartStream() {
       if (stream.value) {
         stopTracks();
-        await requestPermissions({
+        await getStream({
           audio: mediaPermissions.value.microphone.granted,
           video: mediaPermissions.value.camera.granted,
         });
@@ -132,43 +120,26 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    function toggleTrack(kind: "audio" | "video", enabled: boolean) {
-      if (!stream.value) return;
-
-      const tracks = kind === "audio" ? stream.value.getAudioTracks() : stream.value.getVideoTracks();
-
-      tracks.forEach((track) => (track.enabled = enabled));
-    }
-
     function toggleAudio() {
-      console.log("mediaPermissions", mediaPermissions.value);
-      if (mediaPermissions.value.microphone.granted || audioEnabled.value) {
-        // If we already have permission or we're disabling, just toggle
-        toggleTrack("audio", !audioEnabled.value);
-      } else {
-        // If we're enabling and don't have permission, request it
-        requestPermissions({ audio: true, video: videoEnabled.value });
+      // Request a stream if it doesn't exist
+      if (!stream.value) getStream({ audio: true, video: videoActive.value });
+      else {
+        // Otherwise just toggle the audio tracks
+        const tracks = stream.value.getAudioTracks();
+        tracks.forEach((track) => (track.enabled = !audioActive.value));
+        audioActive.value = !audioActive.value;
       }
     }
 
     function toggleVideo() {
-      console.log("mediaPermissions", mediaPermissions.value, stream.value);
-
-      // Request permission if not yet granted
-      if (!stream.value) requestPermissions({ video: true, audio: audioEnabled.value });
-      // if (!mediaPermissions.value.camera.granted) requestPermissions({ video: true, audio: audioEnabled.value });
-
-      // If disabling video toggle the track off
-      if (videoEnabled.value) toggleTrack("video", false);
-
-      // if (mediaPermissions.value.camera.granted || videoEnabled.value) {
-      //   // If we already have permission or we're disabling, just toggle the track
-      //   toggleTrack("video", !videoEnabled.value);
-      // } else {
-      //   // If we're enabling and don't have permission, request it
-      //   console.log("requesting video permission");
-      //   requestPermissions({ video: true, audio: audioEnabled.value });
-      // }
+      // Request a stream if it doesn't exist
+      if (!stream.value) getStream({ video: true, audio: audioActive.value });
+      else {
+        // Otherwise just toggle the video tracks
+        const tracks = stream.value.getVideoTracks();
+        tracks.forEach((track) => (track.enabled = !videoActive.value));
+        videoActive.value = !videoActive.value;
+      }
     }
 
     async function startScreenShare() {
@@ -228,16 +199,14 @@ export const useMediaDevicesStore = defineStore(
       stream,
       isLoading,
       error,
-      screenshareActive,
 
       // Computed
       cameras,
       microphones,
-      hasActiveStream,
       mediaSettings,
 
       // Methods
-      requestPermissions,
+      getStream,
       switchCamera,
       switchMicrophone,
       stopTracks,
