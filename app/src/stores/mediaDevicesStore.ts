@@ -14,10 +14,10 @@ export const useMediaDevicesStore = defineStore(
     const activeMicrophoneId = ref<string | null>(null);
     const availableDevices = ref<MediaDeviceInfo[]>([]);
     const stream = ref<MediaStream | null>(null);
-    const isLoading = ref(false);
+    const streamLoading = ref(false);
     const error = ref<Error | null>(null);
     const screenshareActive = ref(false);
-    const audioActive = ref(false);
+    const audioActive = ref(true);
     const videoActive = ref(false);
 
     // Computed properties
@@ -30,45 +30,44 @@ export const useMediaDevicesStore = defineStore(
     }));
 
     // Methods
-    async function getStream({ audio = true, video = true }: { audio?: boolean; video?: boolean }) {
-      isLoading.value = true;
+    async function getStream() {
+      const { camera, microphone } = mediaPermissions.value;
+
+      streamLoading.value = true;
       error.value = null;
 
       try {
         // Generate the constraints
         const audioDeviceId = activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined;
         const videoDeviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
-        const audioConstraints = audio ? { deviceId: audioDeviceId } : false;
-        const videoConstraints = video ? { ...videoDimensions, deviceId: videoDeviceId } : false;
+        const audioConstraints = audioActive.value ? { deviceId: audioDeviceId } : false;
+        const videoConstraints = videoActive.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
         // Get the stream
         stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
 
-        // Update active states
-        audioActive.value = audio && !!stream.value.getAudioTracks().length;
-        videoActive.value = video && !!stream.value.getVideoTracks().length;
+        // Update requested states
+        microphone.requested = microphone.requested || audioActive.value;
+        camera.requested = camera.requested || videoActive.value;
 
-        // Update media permissions
-        const { camera, microphone } = mediaPermissions.value;
-        microphone.requested = audio;
-        microphone.granted = audioActive.value;
-        camera.requested = video;
-        camera.granted = videoActive.value;
-
-        // Update available devices after permissions granted
-        await refreshDeviceList();
-
-        return stream.value;
+        // Update available devices & permissions
+        await findAvailableDevices();
+        await checkPermissions();
       } catch (err) {
-        error.value = err as Error;
         console.error("Media permissions error:", err);
+
+        // Update media permission and error states
+        microphone.requested = microphone.requested || audioActive.value;
+        camera.requested = camera.requested || videoActive.value;
+        error.value = err as Error;
+
         throw err;
       } finally {
-        isLoading.value = false;
+        streamLoading.value = false;
       }
     }
 
-    async function refreshDeviceList() {
+    async function findAvailableDevices() {
       try {
         availableDevices.value = await navigator.mediaDevices.enumerateDevices();
 
@@ -82,6 +81,28 @@ export const useMediaDevicesStore = defineStore(
         }
       } catch (err) {
         console.error("Failed to get device list:", err);
+      }
+    }
+
+    async function checkPermissions() {
+      try {
+        if (navigator.permissions) {
+          // Check camera and microphone permissions using the Permissions API
+          const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
+          const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+
+          mediaPermissions.value.camera.granted = cameraPermission.state === "granted";
+          mediaPermissions.value.microphone.granted = microphonePermission.state === "granted";
+        } else {
+          // Fallback to checking device labels
+          const cameras = availableDevices.value.filter((d) => d.kind === "videoinput");
+          const mics = availableDevices.value.filter((d) => d.kind === "audioinput");
+
+          mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
+          mediaPermissions.value.microphone.granted = mics.some((d) => !!d.label);
+        }
+      } catch (error) {
+        console.error("Error checking media permissions:", error);
       }
     }
 
@@ -106,10 +127,7 @@ export const useMediaDevicesStore = defineStore(
     async function restartStream() {
       if (stream.value) {
         stopTracks();
-        await getStream({
-          audio: mediaPermissions.value.microphone.granted,
-          video: mediaPermissions.value.camera.granted,
-        });
+        await getStream();
       }
     }
 
@@ -121,24 +139,28 @@ export const useMediaDevicesStore = defineStore(
     }
 
     function toggleAudio() {
-      // Request a stream if it doesn't exist
-      if (!stream.value) getStream({ audio: true, video: videoActive.value });
+      audioActive.value = !audioActive.value;
+
+      // Request a new stream if toggling audio on and no stream or no audio tracks found
+      const needsNewStream = audioActive.value && (!stream.value || !stream.value.getAudioTracks().length);
+      if (needsNewStream) getStream();
       else {
-        // Otherwise just toggle the audio tracks
-        const tracks = stream.value.getAudioTracks();
-        tracks.forEach((track) => (track.enabled = !audioActive.value));
-        audioActive.value = !audioActive.value;
+        // Otherwise just toggle the tracks
+        const tracks = stream.value?.getAudioTracks() || [];
+        tracks.forEach((track) => (track.enabled = audioActive.value));
       }
     }
 
     function toggleVideo() {
-      // Request a stream if it doesn't exist
-      if (!stream.value) getStream({ video: true, audio: audioActive.value });
+      videoActive.value = !videoActive.value;
+
+      // Request a new stream if toggling video on and no stream or no video tracks found
+      const needsNewStream = videoActive.value && (!stream.value || !stream.value.getVideoTracks().length);
+      if (needsNewStream) getStream();
       else {
         // Otherwise just toggle the video tracks
-        const tracks = stream.value.getVideoTracks();
-        tracks.forEach((track) => (track.enabled = !videoActive.value));
-        videoActive.value = !videoActive.value;
+        const tracks = stream.value?.getVideoTracks() || [];
+        tracks.forEach((track) => (track.enabled = videoActive.value));
       }
     }
 
@@ -176,19 +198,18 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
+    // Get initial device list
+    findAvailableDevices();
+
+    // Check permissions
+    checkPermissions();
+
     // Set up device change listener
-    if (typeof window !== "undefined") {
-      navigator.mediaDevices.addEventListener("devicechange", refreshDeviceList);
-
-      // Cleanup on app unmount
-      window.addEventListener("beforeunload", () => {
-        stopTracks();
-        navigator.mediaDevices.removeEventListener("devicechange", refreshDeviceList);
-      });
-
-      // Initial device list
-      refreshDeviceList();
-    }
+    navigator.mediaDevices.addEventListener("devicechange", findAvailableDevices);
+    window.addEventListener("beforeunload", () => {
+      stopTracks();
+      navigator.mediaDevices.removeEventListener("devicechange", findAvailableDevices);
+    });
 
     return {
       // State
@@ -197,7 +218,7 @@ export const useMediaDevicesStore = defineStore(
       activeMicrophoneId,
       availableDevices,
       stream,
-      isLoading,
+      streamLoading,
       error,
 
       // Computed
@@ -210,18 +231,12 @@ export const useMediaDevicesStore = defineStore(
       switchCamera,
       switchMicrophone,
       stopTracks,
-      refreshDeviceList,
+      findAvailableDevices,
       toggleAudio,
       toggleVideo,
       startScreenShare,
       restartStream,
     };
-  }
-  // {
-  //   // Persistence options
-  //   persist: {
-  //     enabled: true,
-  //     properties: ['activeCameraId', 'activeMicrophoneId']
-  //   }
-  // }
+  },
+  { persist: true } // { pick: ['', ''] }
 );

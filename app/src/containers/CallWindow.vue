@@ -134,26 +134,35 @@
                   class="video"
                   :style="{ opacity: mediaSettings.video ? 1 : 0 }"
                   :srcObject.prop="stream"
-                  :muted="!mediaSettings.audio"
+                  muted
                   autoplay
                   playsinline
                 />
 
-                <div class="avatar-wrapper" v-if="myProfile && !mediaSettings.video">
+                <div class="centered-content">
                   <j-avatar
-                    :initials="myProfile?.username?.charAt(0) || '?'"
+                    v-if="myProfile && !mediaSettings.video"
                     size="xl"
+                    :initials="myProfile?.username?.charAt(0) || '?'"
                     :src="myProfile?.profileThumbnailPicture || null"
                     :hash="me.did"
                   />
+
+                  <j-flex
+                    direction="column"
+                    a="center"
+                    gap="200"
+                    v-if="mediaSettings.video && mediaPermissions.camera.requested && !mediaPermissions.camera.granted"
+                  >
+                    <j-icon name="camera-video-off" size="xl" />
+                    <j-text size="600" nomargin>Camera access denied</j-text>
+                    <j-text size="400" nomargin>Please enable camera access in the browser</j-text>
+                  </j-flex>
                 </div>
 
-                <div class="username">
-                  <span
-                    >{{ myProfile?.username || "Unknown user" }}
-                    {{ mediaSettings.video ? "video on" : "video off" }}</span
-                  >
-                </div>
+                <span class="username">
+                  {{ myProfile?.username || "Unknown user" }}
+                </span>
 
                 <div class="settings">
                   <j-flex gap="400">
@@ -173,7 +182,11 @@
             </j-box>
 
             <j-box pt="400">
-              <j-toggle :checked="mediaSettings.video" @change="() => mediaDeviceStore.toggleVideo()">
+              <j-toggle
+                :checked="mediaSettings.video"
+                :disabled="!mediaPermissions.microphone.granted"
+                @change="() => mediaDeviceStore.toggleVideo()"
+              >
                 Join with camera!
               </j-toggle>
             </j-box>
@@ -182,7 +195,7 @@
               <j-button
                 variant="primary"
                 size="lg"
-                :disabled="!mediaSettings.audio && !mediaSettings.video"
+                :disabled="!mediaPermissions.camera.granted && !mediaPermissions.microphone.granted"
                 :loading="establishingConnection"
                 @click="webrtcStore.joinRoom"
               >
@@ -190,8 +203,10 @@
               </j-button>
             </j-box>
 
-            <j-box v-if="!mediaSettings.audio && !mediaSettings.video" pt="400">
-              <j-text color="warning-500">Please allow camera/microphone access to join.</j-text>
+            <j-box v-if="!mediaPermissions.microphone.granted" pt="800">
+              <j-flex direction="column" a="center">
+                <j-text color="warning-500">Please allow microphone access to join.</j-text>
+              </j-flex>
             </j-box>
           </j-flex>
         </div>
@@ -230,6 +245,7 @@ const webrtcStore = useWebrtcStore();
 const mediaDeviceStore = useMediaDevicesStore();
 
 const { me } = storeToRefs(appStore);
+// TODO add callWindowFullscreen
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
 const {
   inCall,
@@ -241,7 +257,7 @@ const {
   agentStatus,
   establishingConnection,
 } = storeToRefs(webrtcStore);
-const { stream, mediaSettings } = storeToRefs(mediaDeviceStore);
+const { stream, streamLoading, mediaSettings, mediaPermissions } = storeToRefs(mediaDeviceStore);
 
 const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
@@ -491,7 +507,7 @@ onMounted(getMyProfile);
           object-fit: contain;
         }
 
-        .avatar-wrapper {
+        .centered-content {
           position: absolute;
           width: 100%;
           height: 100%;
