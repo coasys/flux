@@ -510,6 +510,14 @@ onMounted(getMyProfile);
           background: #0000002e;
           border-radius: 10rem;
         }
+
+        .settings {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          display: flex;
+          padding: var(--j-space-400);
+        }
       }
 
       .disclaimer {
