@@ -1,11 +1,15 @@
-import { defineStore } from "pinia";
+import { defineStore, storeToRefs } from "pinia";
 import { ref } from "vue";
+import { useMediaDevicesStore } from "./mediaDevicesStore";
 
 export type WindowState = "minimize" | "visible" | "foreground";
 
 export const useUiStore = defineStore(
   "uiStore",
   () => {
+    const mediaDevicesStore = useMediaDevicesStore();
+    const { mediaPermissions, mediaSettings, stream } = storeToRefs(mediaDevicesStore);
+
     const showAppSidebar = ref(true);
     const showCommunitySidebar = ref(true);
     const communitySidebarWidth = ref(330);
@@ -38,6 +42,16 @@ export const useUiStore = defineStore(
 
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
+
+      // Request media permissions when opened if not already granted or requested
+      if (open) {
+        // !stream.value &&
+        console.log("mediaPermissions.value", mediaPermissions.value);
+        // const { camera, microphone } = mediaPermissions.value;
+        // const needsRequested = !camera.granted && !camera.requested && !microphone.granted && !microphone.requested;
+        // if (needsRequested) mediaDevicesStore.getStream();
+        if (!stream.value) mediaDevicesStore.getStream();
+      }
     }
 
     function setCallWindowWidth(width: string): void {
@@ -86,11 +100,6 @@ export const useUiStore = defineStore(
       setGlobalError,
       toggleCallFullscreen,
     };
-  }
-  // {
-  //   persist: {
-  //     enabled: true,
-  //     properties: ["showAppSidebar", "showCommunitySidebar", "communitySidebarWidth", "callWindowWidth"],
-  //   },
-  // }
+  },
+  { persist: true }
 );

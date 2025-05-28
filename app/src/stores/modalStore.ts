@@ -48,12 +48,6 @@ export const useModalStore = defineStore(
 
       closeAllModals,
     };
-  }
-  // {
-  //   // Persistence configuration
-  //   persist: {
-  //     enabled: true,
-  //     properties: ["showDisclaimer"], // Only persist showDisclaimer across sessions
-  //   },
-  // }
+  },
+  { persist: true }
 );

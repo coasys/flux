@@ -1,7 +1,8 @@
-import { useAppStore, useUiStore, useWebrtcStore } from "@/stores";
+import { useAppStore } from "@/stores";
 import { getAd4mClient } from "@coasys/ad4m-connect";
-import { createPinia, storeToRefs } from "pinia";
-import { createApp, h, watch } from "vue";
+import { createPinia } from "pinia";
+import { createPersistedState } from "pinia-plugin-persistedstate";
+import { createApp, h } from "vue";
 import { version } from "../package.json";
 import "./ad4mConnect";
 import App from "./App.vue";
@@ -19,47 +20,21 @@ import "./themes/themes.css";
 
 export const pinia = createPinia();
 
-pinia.use(({ store }) => {
-  // Common plugin functionality for all stores
-  const key = `${store.$id}-${version}`;
-  const localState = localStorage.getItem(key);
-  if (localState) {
-    store.$patch(JSON.parse(localState));
-    localStorage.setItem(key, JSON.stringify(store.$state));
-  }
-
-  // Watch for changes in the store and save to localStorage
-  watch(
-    store.$state,
-    (state) => {
-      try {
-        localStorage.setItem(`${store.$id}-${version}`, JSON.stringify(state));
-      } catch (error) {
-        console.error(`Error persisting state for ${store.$id}:`, error);
-      }
+pinia.use(
+  createPersistedState({
+    key: (id) => `${id}-${version}`,
+    storage: localStorage,
+    serializer: {
+      serialize: JSON.stringify,
+      deserialize: JSON.parse,
     },
-    { deep: true }
-  );
-});
+  })
+);
 
 // Create and mount Vue application
 const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
-
-// TODO: set up persistence settings in stores and remove these resets
-
-// Reset call state if persisted from the last session
-const webrtcStore = useWebrtcStore(pinia);
-const { callRoute, inCall } = storeToRefs(webrtcStore);
-callRoute.value = {};
-inCall.value = false;
-
-// Reset call window state for now
-const uiStore = useUiStore(pinia);
-const { callWindowWidth, callWindowOpen } = storeToRefs(uiStore);
-callWindowOpen.value = false;
-callWindowWidth.value = "50%";
 
 // Initialize Ad4mClient
 const appStore = useAppStore(pinia);
