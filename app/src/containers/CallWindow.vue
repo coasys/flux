@@ -35,6 +35,12 @@
                 color="ui-500"
                 @click="mediaDeviceStore.toggleVideo"
               />
+              <j-icon
+                v-if="mediaSettings.screenShareEnabled"
+                name="display"
+                color="ui-500"
+                @click="mediaDeviceStore.toggleScreenShare"
+              />
               <j-icon name="telephone-x" color="danger-500" @click="webrtcStore.leaveRoom" />
             </j-flex>
           </j-flex>
