@@ -123,7 +123,7 @@
 
         <div style="display: flex; flex-direction: column; justify-content: center; height: 100%">
           <!-- Join screen -->
-          <j-flex a="center" direction="column">
+          <j-flex v-if="!inCall" a="center" direction="column">
             <h1>You haven't joined this room</h1>
 
             <j-text variant="body">Your microphone will be enabled.</j-text>
@@ -132,7 +132,7 @@
               <div class="preview">
                 <video
                   class="video"
-                  :style="{ opacity: mediaSettings.video ? 1 : 0 }"
+                  :style="{ opacity: mediaSettings.video || mediaSettings.screenShare ? 1 : 0 }"
                   :srcObject.prop="stream"
                   muted
                   autoplay
@@ -141,7 +141,7 @@
 
                 <div class="centered-content">
                   <j-avatar
-                    v-if="myProfile && !mediaSettings.video"
+                    v-if="myProfile && !mediaSettings.video && !mediaSettings.screenShare"
                     size="xl"
                     :initials="myProfile?.username?.charAt(0) || '?'"
                     :src="myProfile?.profileThumbnailPicture || null"
@@ -185,7 +185,7 @@
               <j-toggle
                 :checked="mediaSettings.video"
                 :disabled="!mediaPermissions.microphone.granted"
-                @change="() => mediaDeviceStore.toggleVideo()"
+                @change="mediaDeviceStore.toggleVideo"
               >
                 Join with camera!
               </j-toggle>
@@ -208,6 +208,188 @@
                 <j-text color="warning-500">Please allow microphone access to join.</j-text>
               </j-flex>
             </j-box>
+          </j-flex>
+
+          <!-- Call screen -->
+          <j-flex v-if="inCall" a="center" direction="column">
+            <j-box pt="200" style="width: 100%">
+              <div class="preview">
+                <video
+                  class="video"
+                  :srcObject.prop="stream"
+                  muted
+                  autoplay
+                  playsinline
+                  :style="{ opacity: mediaSettings.video || mediaSettings.screenShare ? 1 : 0 }"
+                />
+
+                <div class="centered-content">
+                  <j-avatar
+                    v-if="myProfile && !mediaSettings.video && !mediaSettings.screenShare"
+                    size="xl"
+                    :initials="myProfile?.username?.charAt(0) || '?'"
+                    :src="myProfile?.profileThumbnailPicture || null"
+                    :hash="me.did"
+                  />
+
+                  <j-flex
+                    direction="column"
+                    a="center"
+                    gap="200"
+                    v-if="mediaSettings.video && mediaPermissions.camera.requested && !mediaPermissions.camera.granted"
+                  >
+                    <j-icon name="camera-video-off" size="xl" />
+                    <j-text size="600" nomargin>Camera access denied</j-text>
+                    <j-text size="400" nomargin>Please enable camera access in the browser</j-text>
+                  </j-flex>
+                </div>
+
+                <span class="username">
+                  {{ myProfile?.username || "Unknown user" }}
+                </span>
+
+                <!-- <div class="media-state-icons">
+                  <j-icon name="mic-mute" />
+                </div> -->
+
+                <div class="settings">
+                  <j-icon v-if="!mediaSettings.audio" name="mic-mute" />
+                  <j-icon v-if="mediaSettings.screenShare" name="display" />
+                  <!-- <j-flex gap="400">
+                    <j-tooltip placement="top" title="Settings">
+                      <j-button @click="toggleSettings" square circle size="lg">
+                        <j-icon name="gear" />
+                      </j-button>
+                    </j-tooltip>
+                    <j-tooltip placement="top" :title="callWindowOpen ? 'Shrink screen' : 'Full screen'">
+                      <j-button @click="() => uiStore.setCallWindowOpen(false)" square circle size="lg">
+                        <j-icon :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`" />
+                      </j-button>
+                    </j-tooltip>
+                  </j-flex> -->
+                </div>
+              </div>
+            </j-box>
+
+            <!-- <j-box pt="400">
+              <j-toggle
+                :checked="mediaSettings.video"
+                :disabled="!mediaPermissions.microphone.granted"
+                @change="() => mediaDeviceStore.toggleVideo()"
+              >
+                Join with camera!
+              </j-toggle>
+            </j-box>
+
+            <j-box pt="500">
+              <j-button
+                variant="primary"
+                size="lg"
+                :disabled="!mediaPermissions.camera.granted && !mediaPermissions.microphone.granted"
+                :loading="establishingConnection"
+                @click="webrtcStore.joinRoom"
+              >
+                Join room!
+              </j-button>
+            </j-box>
+
+            <j-box v-if="!mediaPermissions.microphone.granted" pt="800">
+              <j-flex direction="column" a="center">
+                <j-text color="warning-500">Please allow microphone access to join.</j-text>
+              </j-flex>
+            </j-box> -->
+
+            <!-- Footer controls -->
+            <div class="footer-wrapper">
+              <div class="footer">
+                <j-tooltip :placement="'top'" :title="mediaSettings.audio ? 'Mute microphone' : 'Unmute microphone'">
+                  <j-button
+                    :variant="mediaSettings.audio ? '' : 'primary'"
+                    @click="mediaDeviceStore.toggleAudio"
+                    square
+                    circle
+                    size="lg"
+                  >
+                    <j-icon :name="mediaSettings.audio ? 'mic' : 'mic-mute'" />
+                  </j-button>
+                </j-tooltip>
+
+                <j-tooltip :placement="'top'" :title="mediaSettings.video ? 'Disable camera' : 'Enable camera'">
+                  <j-button
+                    :variant="mediaSettings.video ? '' : 'primary'"
+                    @click="mediaDeviceStore.toggleVideo"
+                    square
+                    circle
+                    size="lg"
+                    :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
+                  >
+                    <j-icon :name="mediaSettings.video ? 'camera-video' : 'camera-video-off'" />
+                  </j-button>
+                </j-tooltip>
+
+                <!-- <j-tooltip
+                  :placement="'top'"
+                  :title="transcriber.on ? 'Disable transcription' : 'Enable transcription'"
+                >
+                  <j-button
+                    :variant="transcriber.on ? '' : 'primary'"
+                    @click="updateTranscriptionSetting('on', !transcriber.on)"
+                    square
+                    circle
+                    size="lg"
+                    :disabled="!inCall"
+                  >
+                    <component :is="transcriptionIcon" />
+                  </j-button>
+                </j-tooltip> -->
+
+                <j-tooltip :placement="'top'" :title="mediaSettings.screenShare ? 'Stop sharing' : 'Share screen'">
+                  <j-button
+                    :variant="mediaSettings.screenShare ? 'primary' : ''"
+                    @click="mediaDeviceStore.toggleScreenShare"
+                    square
+                    circle
+                    size="lg"
+                    :disabled="!inCall"
+                  >
+                    <j-icon name="display" />
+                  </j-button>
+                </j-tooltip>
+
+                <!-- <j-popover ref="popoverRef" placement="top">
+                  <template #trigger>
+                    <j-tooltip placement="top" title="Send reaction">
+                      <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
+                        <j-icon name="emoji-neutral" />
+                      </j-button>
+                    </j-tooltip>
+                  </template>
+                  <template #content>
+                    <j-emoji-picker class="picker" @change="onEmojiClick" />
+                  </template>
+                </j-popover> -->
+
+                <j-tooltip placement="top" title="Leave">
+                  <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
+                    <j-icon name="telephone-x" />
+                  </j-button>
+                </j-tooltip>
+
+                <j-tooltip placement="top" title="Debug">
+                  <j-button @click="toggleSettings" square circle size="lg">
+                    <j-icon name="gear" />
+                  </j-button>
+                </j-tooltip>
+
+                <!-- TODO: fix fullscreen detection approach -->
+
+                <!-- <j-tooltip placement="top" :title="'isFullscreen' ? 'Shrink screen' : 'Full screen'">
+                  <j-button @click="uiStore.toggleCallFullscreen" square circle size="lg">
+                    <j-icon :name="`arrows-angle-${'isFullscreen' ? 'contract' : 'expand'}`" />
+                  </j-button>
+                </j-tooltip> -->
+              </div>
+            </div>
           </j-flex>
         </div>
 
@@ -257,7 +439,7 @@ const {
   agentStatus,
   establishingConnection,
 } = storeToRefs(webrtcStore);
-const { stream, streamLoading, mediaSettings, mediaPermissions } = storeToRefs(mediaDeviceStore);
+const { stream, streamLoading, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 
 const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
@@ -534,6 +716,18 @@ onMounted(getMyProfile);
           display: flex;
           padding: var(--j-space-400);
         }
+      }
+
+      .footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: var(--j-space-400);
+        padding: var(--j-space-400);
+        font-family: var(--j-font-family);
+        border-radius: var(--j-border-radius);
+        background-color: #ffffff08;
       }
 
       .disclaimer {

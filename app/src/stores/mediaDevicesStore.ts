@@ -1,6 +1,15 @@
-import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
+// import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+
+// TODO: create return type for store?
+
+const videoDimensions = {
+  aspectRatio: 1.777, // 16:9
+  width: { min: 640, ideal: 1280, max: 1920 },
+  height: { min: 360, ideal: 720, max: 1080 },
+  frameRate: { min: 5, ideal: 15, max: 20 },
+};
 
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
@@ -16,7 +25,7 @@ export const useMediaDevicesStore = defineStore(
     const stream = ref<MediaStream | null>(null);
     const streamLoading = ref(false);
     const error = ref<Error | null>(null);
-    const screenshareActive = ref(false);
+    const screenShareActive = ref(false);
     const audioActive = ref(true);
     const videoActive = ref(false);
 
@@ -26,11 +35,13 @@ export const useMediaDevicesStore = defineStore(
     const mediaSettings = computed(() => ({
       audio: audioActive.value,
       video: videoActive.value,
-      screenshare: screenshareActive.value,
+      screenShare: screenShareActive.value,
     }));
 
+    let savedVideoTrack: MediaStreamTrack | null = null;
+
     // Methods
-    async function getStream() {
+    async function createStream() {
       const { camera, microphone } = mediaPermissions.value;
 
       streamLoading.value = true;
@@ -43,10 +54,10 @@ export const useMediaDevicesStore = defineStore(
         const audioConstraints = audioActive.value ? { deviceId: audioDeviceId } : false;
         const videoConstraints = videoActive.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
-        // Get the stream
+        // Create the stream
         stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
 
-        // Update requested states
+        // Update request states
         microphone.requested = microphone.requested || audioActive.value;
         camera.requested = camera.requested || videoActive.value;
 
@@ -127,7 +138,7 @@ export const useMediaDevicesStore = defineStore(
     async function restartStream() {
       if (stream.value) {
         stopTracks();
-        await getStream();
+        await createStream();
       }
     }
 
@@ -139,63 +150,104 @@ export const useMediaDevicesStore = defineStore(
     }
 
     function toggleAudio() {
+      if (!stream.value) return;
+
       audioActive.value = !audioActive.value;
 
-      // Request a new stream if toggling audio on and no stream or no audio tracks found
-      const needsNewStream = audioActive.value && (!stream.value || !stream.value.getAudioTracks().length);
-      if (needsNewStream) getStream();
+      // Request a new stream if toggling audio on and no audio tracks found
+      if (audioActive.value && !stream.value.getAudioTracks().length) createStream();
       else {
         // Otherwise just toggle the tracks
-        const tracks = stream.value?.getAudioTracks() || [];
+        const tracks = stream.value.getAudioTracks();
         tracks.forEach((track) => (track.enabled = audioActive.value));
       }
     }
 
     function toggleVideo() {
+      if (!stream.value) return;
+
       videoActive.value = !videoActive.value;
 
-      // Request a new stream if toggling video on and no stream or no video tracks found
-      const needsNewStream = videoActive.value && (!stream.value || !stream.value.getVideoTracks().length);
-      if (needsNewStream) getStream();
+      // Skip if screen sharing is active
+      if (screenShareActive.value) return;
+
+      // Request a new stream if toggling video on and no video tracks found
+      if (videoActive.value && !stream.value.getVideoTracks().length) createStream();
       else {
         // Otherwise just toggle the video tracks
-        const tracks = stream.value?.getVideoTracks() || [];
+        const tracks = stream.value.getVideoTracks();
         tracks.forEach((track) => (track.enabled = videoActive.value));
       }
     }
 
-    async function startScreenShare() {
-      if (!navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("Screen sharing not supported in this browser");
-      }
+    async function turnOnScreenShare() {
+      if (!stream.value) return;
 
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        screenshareActive.value = true;
+      // Get the screen share track
+      const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const screenShareTrack = screenShareStream.getVideoTracks()[0];
 
-        // Handle screen share end event
-        const videoTrack = screenStream.getVideoTracks()[0];
-        videoTrack.onended = () => (screenshareActive.value = false);
-
-        // If we already have a stream, we need to keep audio tracks
-        if (stream.value) {
-          // Stop existing video tracks
-          stream.value.getVideoTracks().forEach((track) => track.stop());
-
-          // Add screen share track to existing stream
-          stream.value.addTrack(videoTrack);
-
-          // Return the mixed stream
-          return stream.value;
-        } else {
-          // Just return the screen stream if we don't have a stream yet
-          stream.value = screenStream;
-          return screenStream;
+      // Add onended handler to detect when the user stops sharing via browser UI
+      screenShareTrack.onended = () => {
+        if (screenShareActive.value) {
+          screenShareActive.value = false;
+          turnOffScreenShare();
         }
-      } catch (err) {
-        console.error("Screen sharing error:", err);
-        throw err;
+      };
+
+      // Save existing video track if present
+      const existingVideoTrack = stream.value.getVideoTracks()[0];
+      if (existingVideoTrack) {
+        savedVideoTrack = existingVideoTrack;
+        existingVideoTrack.enabled = false;
       }
+
+      // Create a new stream
+      const newStream = new MediaStream();
+
+      // Transfer audio tracks to the new stream
+      stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
+
+      // Add the new screen share track
+      newStream.addTrack(screenShareTrack);
+
+      // Replace stream
+      stream.value = newStream;
+    }
+
+    async function turnOffScreenShare() {
+      if (!stream.value) return;
+
+      // Stop current video tracks
+      stream.value.getVideoTracks().forEach((track) => track.stop());
+
+      // Create new stream
+      const newStream = new MediaStream();
+
+      // Transfer audio tracks to the new stream
+      stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
+
+      // Restore saved camera track if available
+      if (savedVideoTrack) {
+        savedVideoTrack.enabled = videoActive.value;
+        newStream.addTrack(savedVideoTrack);
+        savedVideoTrack = null;
+      }
+
+      // Replace the stream
+      stream.value = newStream;
+    }
+
+    async function toggleScreenShare() {
+      if (!stream.value) return;
+      if (!navigator.mediaDevices.getDisplayMedia) throw new Error("Screen sharing not supported in this browser");
+
+      // Update screen share state
+      screenShareActive.value = !screenShareActive.value;
+
+      // Handle stream updates
+      if (screenShareActive.value) turnOnScreenShare();
+      else turnOffScreenShare();
     }
 
     // Get initial device list
@@ -227,14 +279,14 @@ export const useMediaDevicesStore = defineStore(
       mediaSettings,
 
       // Methods
-      getStream,
+      createStream,
       switchCamera,
       switchMicrophone,
       stopTracks,
       findAvailableDevices,
       toggleAudio,
       toggleVideo,
-      startScreenShare,
+      toggleScreenShare,
       restartStream,
     };
   },

@@ -3,7 +3,6 @@ import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel, Community } from "@coasys/flux-api";
 import { defaultIceServers } from "@coasys/flux-constants/src/videoSettings";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
-import { getForVersion } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
 import SimplePeer from "simple-peer";
 import { computed, onUnmounted, ref, watch } from "vue";
@@ -306,39 +305,15 @@ export const useWebrtcStore = defineStore(
       try {
         callRoute.value = route.params;
 
-        // Wait for the signallingService to be available
-        const maxAttempts = 10;
-        let attempts = 0;
-
-        while (!signallingService.value && attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          attempts++;
-        }
-
-        if (!signallingService.value) {
-          throw new Error("Signalling service not available after waiting");
-        }
-
-        // Enable media devices depending on stored preferences
-        const shouldEnableAudio = getForVersion("webrtc", "enableAudio") !== "false";
-        const shouldEnableVideo = getForVersion("webrtc", "enableVideo") === "true";
-
-        // Request permissions and get media stream
-        if (shouldEnableAudio || shouldEnableVideo) {
-          await mediaDevicesStore.requestPermissions({
-            audio: shouldEnableAudio,
-            video: shouldEnableVideo,
-          });
-        }
-
         // Add the signal handler to the signalling service
-        signallingService.value.addSignalHandler(webrtcSignalHandler);
+        signallingService.value?.addSignalHandler(webrtcSignalHandler);
 
         // Establish connections with the agents in the call
         if (agentsInCall.value.length > 0) {
           console.log("Connecting to agents in call:", agentsInCall.value);
           agentsInCall.value.forEach((agent) => {
             if (agent.did !== me.value.did) {
+              console.log(`Creating peer connection for agent ${agent.did}`);
               // Create initiator connections to all peers alphabetically "less than" our did (prevents both sides from being initiators)
               const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
               createPeerConnection(agent.did, shouldInitiate);
@@ -382,7 +357,6 @@ export const useWebrtcStore = defineStore(
       () => route.params,
       async (newParams) => {
         if (!inCall.value) {
-          // If not already in a call and entering a valid call route
           if (newParams.channelId) {
             // Update the call route
             callRoute.value = newParams;
@@ -475,10 +449,9 @@ export const useWebrtcStore = defineStore(
 
     return {
       // Call state
+      inCall,
       callRoute,
       agentStatus,
-      inCall,
-      establishingConnection,
       agentsInCall,
       callHealth,
       callCommunityName,
@@ -487,8 +460,9 @@ export const useWebrtcStore = defineStore(
       // WebRTC state
       peerConnections,
       remoteStreams,
+      establishingConnection,
 
-      // Call management
+      // Actions
       joinRoom,
       leaveRoom,
     };

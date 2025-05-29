@@ -43,15 +43,8 @@ export const useUiStore = defineStore(
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
 
-      // Request media permissions when opened if not already granted or requested
-      if (open) {
-        // !stream.value &&
-        console.log("mediaPermissions.value", mediaPermissions.value);
-        // const { camera, microphone } = mediaPermissions.value;
-        // const needsRequested = !camera.granted && !camera.requested && !microphone.granted && !microphone.requested;
-        // if (needsRequested) mediaDevicesStore.getStream();
-        if (!stream.value) mediaDevicesStore.getStream();
-      }
+      // Get the stream if opened without one
+      if (open && !stream.value) mediaDevicesStore.createStream();
     }
 
     function setCallWindowWidth(width: string): void {
@@ -101,5 +94,5 @@ export const useUiStore = defineStore(
       toggleCallFullscreen,
     };
   },
-  { persist: true }
+  { persist: { omit: ["callWindowOpen", "callWindowWidth"] } }
 );
