@@ -216,7 +216,7 @@ export interface ProcessingState {
   author?: string;
 }
 
-export type MediaSettings = { audio: boolean; video: boolean; screenShare: boolean };
+export type MediaSettings = { audioEnabled: boolean; videoEnabled: boolean; screenShareEnabled: boolean };
 export interface AgentState {
   status: AgentStatus;
   currentRoute: RouteParams;

@@ -11,31 +11,38 @@ const videoDimensions = {
   frameRate: { min: 5, ideal: 15, max: 20 },
 };
 
+export type MediaPermissions = {
+  camera: { granted: boolean; requested: boolean };
+  microphone: { granted: boolean; requested: boolean };
+};
+
+export const defaultMediaPermissions: MediaPermissions = {
+  camera: { granted: false, requested: false },
+  microphone: { granted: false, requested: false },
+};
+
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
     // State
-    const mediaPermissions = ref({
-      camera: { granted: false, requested: false },
-      microphone: { granted: false, requested: false },
-    });
+    const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
     const activeCameraId = ref<string | null>(null);
     const activeMicrophoneId = ref<string | null>(null);
     const availableDevices = ref<MediaDeviceInfo[]>([]);
     const stream = ref<MediaStream | null>(null);
     const streamLoading = ref(false);
     const error = ref<Error | null>(null);
-    const screenShareActive = ref(false);
-    const audioActive = ref(true);
-    const videoActive = ref(false);
+    const screenShareEnabled = ref(false);
+    const audioEnabled = ref(true);
+    const videoEnabled = ref(false);
 
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === "videoinput"));
     const microphones = computed(() => availableDevices.value.filter((device) => device.kind === "audioinput"));
     const mediaSettings = computed(() => ({
-      audio: audioActive.value,
-      video: videoActive.value,
-      screenShare: screenShareActive.value,
+      audioEnabled: audioEnabled.value,
+      videoEnabled: videoEnabled.value,
+      screenShareEnabled: screenShareEnabled.value,
     }));
 
     let savedVideoTrack: MediaStreamTrack | null = null;
@@ -51,15 +58,15 @@ export const useMediaDevicesStore = defineStore(
         // Generate the constraints
         const audioDeviceId = activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined;
         const videoDeviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
-        const audioConstraints = audioActive.value ? { deviceId: audioDeviceId } : false;
-        const videoConstraints = videoActive.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
+        const audioConstraints = audioEnabled.value ? { deviceId: audioDeviceId } : false;
+        const videoConstraints = videoEnabled.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
         // Create the stream
         stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
 
         // Update request states
-        microphone.requested = microphone.requested || audioActive.value;
-        camera.requested = camera.requested || videoActive.value;
+        microphone.requested = microphone.requested || audioEnabled.value;
+        camera.requested = camera.requested || videoEnabled.value;
 
         // Update available devices & permissions
         await findAvailableDevices();
@@ -68,8 +75,8 @@ export const useMediaDevicesStore = defineStore(
         console.error("Media permissions error:", err);
 
         // Update media permission and error states
-        microphone.requested = microphone.requested || audioActive.value;
-        camera.requested = camera.requested || videoActive.value;
+        microphone.requested = microphone.requested || audioEnabled.value;
+        camera.requested = camera.requested || videoEnabled.value;
         error.value = err as Error;
 
         throw err;
@@ -152,31 +159,31 @@ export const useMediaDevicesStore = defineStore(
     function toggleAudio() {
       if (!stream.value) return;
 
-      audioActive.value = !audioActive.value;
+      audioEnabled.value = !audioEnabled.value;
 
       // Request a new stream if toggling audio on and no audio tracks found
-      if (audioActive.value && !stream.value.getAudioTracks().length) createStream();
+      if (audioEnabled.value && !stream.value.getAudioTracks().length) createStream();
       else {
         // Otherwise just toggle the tracks
         const tracks = stream.value.getAudioTracks();
-        tracks.forEach((track) => (track.enabled = audioActive.value));
+        tracks.forEach((track) => (track.enabled = audioEnabled.value));
       }
     }
 
     function toggleVideo() {
       if (!stream.value) return;
 
-      videoActive.value = !videoActive.value;
+      videoEnabled.value = !videoEnabled.value;
 
       // Skip if screen sharing is active
-      if (screenShareActive.value) return;
+      if (screenShareEnabled.value) return;
 
       // Request a new stream if toggling video on and no video tracks found
-      if (videoActive.value && !stream.value.getVideoTracks().length) createStream();
+      if (videoEnabled.value && !stream.value.getVideoTracks().length) createStream();
       else {
         // Otherwise just toggle the video tracks
         const tracks = stream.value.getVideoTracks();
-        tracks.forEach((track) => (track.enabled = videoActive.value));
+        tracks.forEach((track) => (track.enabled = videoEnabled.value));
       }
     }
 
@@ -189,8 +196,8 @@ export const useMediaDevicesStore = defineStore(
 
       // Add onended handler to detect when the user stops sharing via browser UI
       screenShareTrack.onended = () => {
-        if (screenShareActive.value) {
-          screenShareActive.value = false;
+        if (screenShareEnabled.value) {
+          screenShareEnabled.value = false;
           turnOffScreenShare();
         }
       };
@@ -229,7 +236,7 @@ export const useMediaDevicesStore = defineStore(
 
       // Restore saved camera track if available
       if (savedVideoTrack) {
-        savedVideoTrack.enabled = videoActive.value;
+        savedVideoTrack.enabled = videoEnabled.value;
         newStream.addTrack(savedVideoTrack);
         savedVideoTrack = null;
       }
@@ -243,10 +250,10 @@ export const useMediaDevicesStore = defineStore(
       if (!navigator.mediaDevices.getDisplayMedia) throw new Error("Screen sharing not supported in this browser");
 
       // Update screen share state
-      screenShareActive.value = !screenShareActive.value;
+      screenShareEnabled.value = !screenShareEnabled.value;
 
       // Handle stream updates
-      if (screenShareActive.value) turnOnScreenShare();
+      if (screenShareEnabled.value) turnOnScreenShare();
       else turnOffScreenShare();
     }
 
