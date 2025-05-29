@@ -191,35 +191,41 @@ export const useMediaDevicesStore = defineStore(
       if (!stream.value) return;
 
       // Get the screen share track
-      const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-      const screenShareTrack = screenShareStream.getVideoTracks()[0];
+      try {
+        const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenShareTrack = screenShareStream.getVideoTracks()[0];
 
-      // Add onended handler to detect when the user stops sharing via browser UI
-      screenShareTrack.onended = () => {
-        if (screenShareEnabled.value) {
-          screenShareEnabled.value = false;
-          turnOffScreenShare();
+        // Add onended handler to detect when the user stops sharing via browser UI
+        screenShareTrack.onended = () => {
+          if (screenShareEnabled.value) {
+            screenShareEnabled.value = false;
+            turnOffScreenShare();
+          }
+        };
+
+        // Save existing video track if present
+        const existingVideoTrack = stream.value.getVideoTracks()[0];
+        if (existingVideoTrack) {
+          savedVideoTrack = existingVideoTrack;
+          existingVideoTrack.enabled = false;
         }
-      };
 
-      // Save existing video track if present
-      const existingVideoTrack = stream.value.getVideoTracks()[0];
-      if (existingVideoTrack) {
-        savedVideoTrack = existingVideoTrack;
-        existingVideoTrack.enabled = false;
+        // Create a new stream
+        const newStream = new MediaStream();
+
+        // Transfer audio tracks to the new stream
+        stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
+
+        // Add the new screen share track
+        newStream.addTrack(screenShareTrack);
+
+        // Replace stream
+        stream.value = newStream;
+      } catch (error) {
+        console.error("Error starting screen share:", error);
+
+        screenShareEnabled.value = false;
       }
-
-      // Create a new stream
-      const newStream = new MediaStream();
-
-      // Transfer audio tracks to the new stream
-      stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
-
-      // Add the new screen share track
-      newStream.addTrack(screenShareTrack);
-
-      // Replace stream
-      stream.value = newStream;
     }
 
     async function turnOffScreenShare() {
