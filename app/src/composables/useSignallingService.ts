@@ -18,14 +18,14 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   const routeMemoryStore = useRouteMemoryStore();
 
   const { me, aiEnabled } = storeToRefs(appStore);
-  const { inCall, callRoute, agentStatus } = storeToRefs(webrtcStore);
+  const { inCall, callRoute, myAgentStatus } = storeToRefs(webrtcStore);
   const { mediaSettings } = storeToRefs(mediaDevicesStore);
   const { currentRoute } = storeToRefs(routeMemoryStore);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
     currentRoute: currentRoute.value,
-    status: agentStatus.value,
+    status: myAgentStatus.value,
     callRoute: callRoute.value,
     mediaSettings: mediaSettings.value,
     aiEnabled: aiEnabled.value,
@@ -183,7 +183,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
   watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
-  watch(agentStatus, (newStatus) => updateMyState("status", newStatus));
+  watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
 
   // TODO: remove

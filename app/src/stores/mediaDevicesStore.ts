@@ -11,6 +11,12 @@ const videoDimensions = {
   frameRate: { min: 5, ideal: 15, max: 20 },
 };
 
+export type MediaSettings = {
+  audioEnabled: boolean;
+  videoEnabled: boolean;
+  screenShareEnabled: boolean;
+};
+
 export type MediaPermissions = {
   camera: { granted: boolean; requested: boolean };
   microphone: { granted: boolean; requested: boolean };
@@ -39,7 +45,7 @@ export const useMediaDevicesStore = defineStore(
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === "videoinput"));
     const microphones = computed(() => availableDevices.value.filter((device) => device.kind === "audioinput"));
-    const mediaSettings = computed(() => ({
+    const mediaSettings = computed<MediaSettings>(() => ({
       audioEnabled: audioEnabled.value,
       videoEnabled: videoEnabled.value,
       screenShareEnabled: screenShareEnabled.value,
@@ -162,7 +168,8 @@ export const useMediaDevicesStore = defineStore(
       audioEnabled.value = !audioEnabled.value;
 
       // Request a new stream if toggling audio on and no audio tracks found
-      if (audioEnabled.value && !stream.value.getAudioTracks().length) createStream();
+      const needsNewStream = audioEnabled.value && !stream.value.getAudioTracks().length;
+      if (needsNewStream) createStream();
       else {
         // Otherwise just toggle the tracks
         const tracks = stream.value.getAudioTracks();
@@ -170,7 +177,7 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    function toggleVideo() {
+    async function toggleVideo() {
       if (!stream.value) return;
 
       videoEnabled.value = !videoEnabled.value;
@@ -179,11 +186,14 @@ export const useMediaDevicesStore = defineStore(
       if (screenShareEnabled.value) return;
 
       // Request a new stream if toggling video on and no video tracks found
-      if (videoEnabled.value && !stream.value.getVideoTracks().length) createStream();
+      const needsNewStream = videoEnabled.value && !stream.value.getVideoTracks().length;
+      if (needsNewStream) createStream();
       else {
-        // Otherwise just toggle the video tracks
-        const tracks = stream.value.getVideoTracks();
-        tracks.forEach((track) => (track.enabled = videoEnabled.value));
+        // If toggling video off, delay track removal until fade out animation completes
+        if (!videoEnabled.value) await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Toggle the video tracks
+        stream.value.getVideoTracks().forEach((track) => (track.enabled = videoEnabled.value));
       }
     }
 

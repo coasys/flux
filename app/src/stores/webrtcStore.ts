@@ -35,10 +35,11 @@ export const useWebrtcStore = defineStore(
     const communityServiceStore = useCommunityServiceStore();
 
     const { me } = storeToRefs(appStore);
-    const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
+    const { stream: localStream } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
 
     // Call state
+    const joiningCall = ref(false);
     const inCall = ref(false);
     const callRoute = ref<RouteParams>(route.params);
     const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
@@ -58,17 +59,11 @@ export const useWebrtcStore = defineStore(
 
     // Connection state
     const peerConnections = ref<Map<string, PeerConnection>>(new Map());
-    const establishingConnection = ref(false);
-    const agentStatus = ref<AgentStatus>("active");
-    const remoteStreams = computed(() => {
-      const streams: Record<string, MediaStream[]> = {};
-      peerConnections.value.forEach((peer, did) => (streams[did] = peer.streams));
-      return streams;
-    });
+    const myAgentStatus = ref<AgentStatus>("active");
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
 
-    const iceServers = ref(defaultIceServers); // [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }]
+    const iceServers = ref(defaultIceServers);
     let healthCheckInterval: NodeJS.Timeout | null = null;
 
     function checkCallHealth(): void {
@@ -238,15 +233,24 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    function updatePeerConnectionsWithLocalStream() {
-      if (!localStream.value) return;
-
+    function updatePeersWithNewStream(newStream: MediaStream, oldStream: MediaStream) {
       peerConnections.value.forEach((peerConnection, did) => {
-        // With SimplePeer, we need to recreate the peer to update the stream
-        peerConnection.peer.destroy();
+        try {
+          // Remove old tracks
+          oldStream.getTracks().forEach((track) => peerConnection.peer.removeTrack(track, oldStream));
 
-        // Create a new peer with the updated stream
-        createPeerConnection(did, peerConnection.initiator);
+          // Add new tracks
+          newStream.getTracks().forEach((track) => peerConnection.peer.addTrack(track, newStream));
+
+          console.log(`Stream update complete for peer ${did}`);
+        } catch (error) {
+          console.error(`Error updating tracks for peer ${did}:`, error);
+
+          // Fall back to recreating the peer if track replacement fails
+          console.log(`Falling back to recreating peer connection for ${did}`);
+          peerConnection.peer.destroy();
+          createPeerConnection(did, peerConnection.initiator);
+        }
       });
     }
 
@@ -259,16 +263,16 @@ export const useWebrtcStore = defineStore(
 
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
         try {
+          // Skip if we're not in a call
+          if (!inCall.value) {
+            console.debug(`Ignoring signal from ${author} - not in a call`);
+            return;
+          }
+
           // Parse the signal data
           const signalData = JSON.parse(source);
           if (!signalData || typeof signalData !== "object") {
             console.warn(`Invalid signal data from ${author}`);
-            return;
-          }
-
-          // Skip if we're not in a call
-          if (!inCall.value) {
-            console.debug(`Ignoring signal from ${author} - not in a call`);
             return;
           }
 
@@ -293,14 +297,8 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    // Call management functions
     async function joinRoom() {
-      if (inCall.value) {
-        console.log("Already in a call, leaving first");
-        await leaveRoom();
-      }
-
-      establishingConnection.value = true;
+      joiningCall.value = true;
 
       try {
         callRoute.value = route.params;
@@ -326,7 +324,7 @@ export const useWebrtcStore = defineStore(
         console.error("Error joining call:", error);
         callRoute.value = {};
       } finally {
-        establishingConnection.value = false;
+        joiningCall.value = false;
       }
     }
 
@@ -370,8 +368,8 @@ export const useWebrtcStore = defineStore(
     );
 
     // Watch for media stream changes to update peer connections
-    watch(localStream, () => {
-      if (inCall.value) updatePeerConnectionsWithLocalStream();
+    watch(localStream, (newStream, oldStream) => {
+      if (inCall.value && newStream && oldStream) updatePeersWithNewStream(newStream, oldStream);
     });
 
     // Update agentsInCall when the agents map in the signalling service changes
@@ -451,7 +449,7 @@ export const useWebrtcStore = defineStore(
       // Call state
       inCall,
       callRoute,
-      agentStatus,
+      myAgentStatus,
       agentsInCall,
       callHealth,
       callCommunityName,
@@ -459,8 +457,7 @@ export const useWebrtcStore = defineStore(
 
       // WebRTC state
       peerConnections,
-      remoteStreams,
-      establishingConnection,
+      joiningCall,
 
       // Actions
       joinRoom,

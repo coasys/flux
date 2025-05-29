@@ -68,15 +68,15 @@
                 style="cursor: pointer; margin-top: 2px"
               >
                 <j-flex slot="trigger" a="center" gap="100">
-                  <div class="agent-status" :class="agentStatus" />
-                  <j-text nomargin size="300">{{ agentStatus }}</j-text>
+                  <div class="agent-status" :class="myAgentStatus" />
+                  <j-text nomargin size="300">{{ myAgentStatus }}</j-text>
                 </j-flex>
 
                 <j-menu slot="content">
                   <j-menu-item
-                    v-for="status in agentStatuses"
+                    v-for="status in statusStates"
                     @click="
-                      agentStatus = status;
+                      myAgentStatus = status;
                       showAgentStatusMenu = false;
                     "
                   >
@@ -136,16 +136,22 @@
             </j-flex>
           </j-box>
 
-          <div style="width: 100%">
+          <div class="video-grid">
             <MediaPlayer
               isMe
-              :profile="myProfile"
+              :did="me.did"
               :inCall="inCall"
               :stream="stream || undefined"
-              :audioEnabled="mediaSettings.audioEnabled"
-              :videoEnabled="mediaSettings.videoEnabled"
-              :screenShareEnabled="mediaSettings.screenShareEnabled"
+              :mediaSettings="mediaSettings"
               :mediaPermissions="mediaPermissions"
+            />
+
+            <MediaPlayer
+              v-for="peer in peers"
+              inCall
+              :did="peer.did"
+              :stream="peer.streams[0] || undefined"
+              :mediaSettings="peer.agentState?.mediaSettings"
             />
           </div>
 
@@ -161,7 +167,7 @@
               variant="primary"
               size="lg"
               :disabled="!mediaPermissions.microphone.granted"
-              :loading="establishingConnection"
+              :loading="joiningCall"
               @click="webrtcStore.joinRoom"
             >
               Join room!
@@ -266,31 +272,38 @@ const { me } = storeToRefs(appStore);
 // TODO add callWindowFullscreen
 const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
 const {
+  joiningCall,
   inCall,
   callRoute,
   callHealth,
   agentsInCall,
   callCommunityName,
   callChannelName,
-  agentStatus,
-  establishingConnection,
+  myAgentStatus,
+  peerConnections,
 } = storeToRefs(webrtcStore);
-const { stream, streamLoading, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
+const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 
-const agentStatuses = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
+const statusStates = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
 const myProfile = ref<Profile | null>(null);
 const showAgentStatusMenu = ref(false);
-
-const callHealthColour = computed(findHealthColour);
-const connectionWarning = computed(findConnectionWarning);
-const connectionText = computed(findConnectionText);
-
 const callWindow = ref<HTMLElement | null>(null);
 const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
+
+const callHealthColour = computed(findHealthColour);
+const connectionWarning = computed(findConnectionWarning);
+const connectionText = computed(findConnectionText);
+// TODO: add agent state from signalling service to peers
+const peers = computed(() =>
+  Array.from(peerConnections.value.values()).map((peer) => {
+    const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
+    return { ...peer, agentState };
+  })
+);
 
 function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
@@ -515,58 +528,11 @@ onMounted(getMyProfile);
         height: 100%;
         gap: var(--j-space-500);
 
-        .preview {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 1rem;
-          max-height: 80vh;
-          font-family: var(--j-font-family);
-          border-radius: var(--j-border-radius);
-          background: var(--j-color-ui-50);
-          overflow: hidden;
-          cursor: pointer;
-          box-shadow: 0;
-          transition:
-            max-width 0.3s ease-out,
-            box-shadow 0.2s ease;
-          aspect-ratio: 16/9;
-
-          .video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
-
-          .centered-content {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .username {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            margin: var(--j-space-400);
-            padding: var(--j-space-200) var(--j-space-400);
-            color: white;
-            background: #0000002e;
-            border-radius: 10rem;
-          }
-
-          .settings {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            display: flex;
-            padding: var(--j-space-400);
-          }
+        .video-grid {
+          display: grid;
+          grid-template-columns: repeat(var(--grid-col-size), 1fr);
+          grid-gap: var(--j-space-500);
+          width: 100%;
         }
 
         .footer {

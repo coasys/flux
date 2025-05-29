@@ -1,7 +1,5 @@
-<!-- MediaPlayer.vue -->
 <template>
   <div class="media-player">
-    <!-- Video element -->
     <video
       class="video"
       :srcObject.prop="stream"
@@ -13,11 +11,11 @@
 
     <div class="centered-content">
       <j-avatar
-        v-if="profile && !hasVisibleStream && !showMicDisabledWarning && !showCameraDisabledWarning"
-        :initials="profile.username?.charAt(0) || '?'"
-        :src="profile.profileThumbnailPicture || null"
-        :hash="profile.did"
+        :initials="profile?.username?.charAt(0) || '?'"
+        :src="profile?.profileThumbnailPicture || null"
+        :hash="profile?.did"
         size="xl"
+        style="z-index: 1"
       />
 
       <j-flex v-if="showMicDisabledWarning" direction="column" a="center" gap="400">
@@ -32,66 +30,81 @@
       </j-flex>
     </div>
 
-    <span class="username">
-      {{ profile?.username || "Unknown user" }}
-    </span>
+    <j-flex class="footer" j="between" a="end">
+      <span class="username">
+        {{ profile?.username || "Unknown user" }}
+      </span>
 
-    <div class="settings" v-if="!inCall">
-      <j-flex gap="400">
-        <j-tooltip placement="top" title="Settings">
-          <j-button @click="toggleSettings" square circle size="lg">
-            <j-icon name="gear" />
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="top">
-          <j-button @click="() => null" square circle size="lg">
-            <j-icon :name="`arrows-angle-${true ? 'contract' : 'expand'}`" />
-          </j-button>
-        </j-tooltip>
-        <!-- <j-tooltip placement="top" :title="'callWindowOpen' ? 'Shrink screen' : 'Full screen'">
+      <div class="settings" v-if="!inCall">
+        <j-flex gap="400">
+          <j-tooltip placement="top" title="Settings">
+            <j-button @click="toggleSettings" square circle size="lg">
+              <j-icon name="gear" />
+            </j-button>
+          </j-tooltip>
+          <j-tooltip placement="top">
+            <j-button @click="() => null" square circle size="lg">
+              <j-icon :name="`arrows-angle-${true ? 'contract' : 'expand'}`" />
+            </j-button>
+          </j-tooltip>
+          <!-- <j-tooltip placement="top" :title="'callWindowOpen' ? 'Shrink screen' : 'Full screen'">
           <j-button @click="() => uiStore.setCallWindowOpen(false)" square circle size="lg">
             <j-icon :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`" />
           </j-button>
         </j-tooltip> -->
-      </j-flex>
-    </div>
+        </j-flex>
+      </div>
 
-    <div class="settings" v-if="inCall">
-      <j-icon v-if="!audioEnabled" name="mic-mute" />
-      <j-icon v-if="screenShareEnabled" name="display" />
-    </div>
+      <j-flex v-if="inCall" class="settings" gap="500">
+        <j-icon v-if="!mediaSettings.audioEnabled" name="mic-mute" />
+        <j-icon v-if="mediaSettings.screenShareEnabled" name="display" />
+      </j-flex>
+    </j-flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defaultMediaPermissions, MediaPermissions } from "@/stores/mediaDevicesStore";
+import { defaultMediaPermissions, MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
-import { computed, PropType } from "vue";
+import { computed, onMounted, PropType, ref, toRefs } from "vue";
 
-const { isMe, profile, stream, audioEnabled, videoEnabled, screenShareEnabled, mediaPermissions } = defineProps({
+const props = defineProps({
   isMe: { type: Boolean, default: false },
-  profile: { type: Object as PropType<Profile | null>, default: null },
+  did: { type: String, default: "" },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
-  audioEnabled: { type: Boolean, default: true },
-  videoEnabled: { type: Boolean, default: true },
-  screenShareEnabled: { type: Boolean, default: true },
+  mediaSettings: {
+    type: Object as PropType<MediaSettings>,
+    default: { audioEnabled: true, videoEnabled: true, screenShareEnabled: false },
+  },
   mediaPermissions: { type: Object as PropType<MediaPermissions>, default: defaultMediaPermissions },
 });
+const { isMe, did, stream, mediaSettings, mediaPermissions } = toRefs(props);
 
-// // Computed properties
-const hasVisibleStream = computed(() => stream && (videoEnabled || screenShareEnabled));
+const profile = ref<Profile>();
+
+const hasVisibleStream = computed(
+  () => stream && (mediaSettings.value.videoEnabled || mediaSettings.value.screenShareEnabled)
+);
 const showMicDisabledWarning = computed(
-  () => isMe && mediaPermissions?.microphone.requested && !mediaPermissions?.microphone.granted
+  () => isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted
 );
 const showCameraDisabledWarning = computed(
-  () => isMe && videoEnabled && mediaPermissions?.camera.requested && !mediaPermissions?.camera.granted
+  () =>
+    isMe &&
+    mediaSettings.value.videoEnabled &&
+    mediaPermissions.value?.camera.requested &&
+    !mediaPermissions.value?.camera.granted
 );
 
 // TODO: implement settings toggle
 function toggleSettings() {
   console.log("toggle settings!");
 }
+
+// Get profile on mopunt
+onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
 </script>
 
 <style lang="scss" scoped>
@@ -117,6 +130,9 @@ function toggleSettings() {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    z-index: 2;
+
+    transition: opacity 0.3s ease;
   }
 
   .centered-content {
@@ -128,23 +144,23 @@ function toggleSettings() {
     justify-content: center;
   }
 
-  .username {
+  .footer {
     position: absolute;
     bottom: 0;
     left: 0;
-    margin: var(--j-space-400);
-    padding: var(--j-space-200) var(--j-space-400);
-    color: white;
-    background: #0000002e;
-    border-radius: 10rem;
-  }
-
-  .settings {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    display: flex;
+    width: 100%;
     padding: var(--j-space-400);
+    z-index: 3;
+
+    .username {
+      padding: var(--j-space-200) var(--j-space-400);
+      color: white;
+      background: #0000002e;
+      border-radius: 10rem;
+    }
+
+    .settings {
+    }
   }
 }
 </style>
