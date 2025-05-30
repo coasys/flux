@@ -44,6 +44,7 @@
     "construct-style-sheets-polyfill": "^3.1.0",
     "date-fns": "^2.29.3",
     "dexie": "^3.2.2",
+    "events": "^3.3.0",
     "level": "^7.0.1",
     "nanoid": "^3.1.30",
     "pinia": "^3.0.2",
