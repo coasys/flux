@@ -4,13 +4,19 @@ import { Channel, Community } from "@coasys/flux-api";
 import { defaultIceServers } from "@coasys/flux-constants/src/videoSettings";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { defineStore, storeToRefs } from "pinia";
-import SimplePeer from "simple-peer";
 import { computed, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
 import { useUiStore } from "./uiStore";
+
+// @ts-ignore
+import global from "global";
+import * as process from "process";
+global.process = process;
+
+import SimplePeer from "simple-peer";
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
@@ -91,11 +97,13 @@ export const useWebrtcStore = defineStore(
       }
 
       console.log(`Creating ${initiator ? "initiator" : "receiver"} peer for ${did}`);
+      console.log("localStream.value:", localStream.value);
 
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
         config: { iceServers: iceServers.value },
+        // trickle: true,
       });
 
       peer.on("signal", (data) => {
@@ -303,7 +311,7 @@ export const useWebrtcStore = defineStore(
       try {
         callRoute.value = route.params;
 
-        // Add the signal handler to the signalling service
+        // Add the webrtc signal handler to the signalling service
         signallingService.value?.addSignalHandler(webrtcSignalHandler);
 
         // Establish connections with the agents in the call
@@ -331,9 +339,9 @@ export const useWebrtcStore = defineStore(
     async function leaveRoom() {
       try {
         // Close all peer connections
-        peerConnections.value.forEach((peer, did) => cleanupPeerConnection(did));
+        peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
 
-        // Remove the signal handler to the signalling service
+        // Remove the webrtc signal handler from the signalling service
         signallingService.value?.removeSignalHandler(webrtcSignalHandler);
 
         // Release media devices
@@ -367,12 +375,12 @@ export const useWebrtcStore = defineStore(
       { immediate: true }
     );
 
-    // Watch for media stream changes to update peer connections
+    // Watch for media stream changes and update peers
     watch(localStream, (newStream, oldStream) => {
       if (inCall.value && newStream && oldStream) updatePeersWithNewStream(newStream, oldStream);
     });
 
-    // Update agentsInCall when the agents map in the signalling service changes
+    // Update agentsInCall state when the agent states in the signalling service change
     watch(
       agentsInCommunity,
       async (newAgents) => {
