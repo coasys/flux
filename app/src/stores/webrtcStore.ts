@@ -109,6 +109,8 @@ export const useWebrtcStore = defineStore(
       peer.on("signal", (data) => {
         // Forward signal data through through the signalling service
         if (!signallingService.value) return;
+
+        console.log('peer.on("signal") : sending webrtc signal data: ', data);
         signallingService.value.sendSignal({ source: did, predicate: WEBRTC_SIGNAL, target: JSON.stringify(data) });
       });
 
@@ -270,6 +272,7 @@ export const useWebrtcStore = defineStore(
       const { source, predicate, target } = data;
 
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
+        console.log(`Received WebRTC signal from ${author}:`, source);
         try {
           // Skip if we're not in a call
           if (!inCall.value) {
