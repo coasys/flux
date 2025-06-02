@@ -11,12 +11,9 @@ import { useCommunityServiceStore } from "./communityServiceStore";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
 import { useUiStore } from "./uiStore";
 
+import type { Instance } from "simple-peer";
 // @ts-ignore
-import global from "global";
-import * as process from "process";
-global.process = process;
-
-import SimplePeer from "simple-peer";
+import SimplePeer from "simple-peer/simplepeer.min.js";
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
@@ -104,7 +101,7 @@ export const useWebrtcStore = defineStore(
         stream: localStream.value || undefined,
         config: { iceServers: iceServers.value },
         trickle: true,
-      });
+      }) as Instance;
 
       peer.on("signal", (data) => {
         // Forward signal data through through the signalling service
@@ -134,8 +131,13 @@ export const useWebrtcStore = defineStore(
 
         // Check if we already have the stream & update or add accordingly
         const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
-        if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
-        else peerConnection.streams.push(stream);
+        if (existingStreamIndex >= 0) {
+          console.log(`Updating existing stream for peer ${did}:`, stream.id);
+          peerConnection.streams[existingStreamIndex] = stream;
+        } else {
+          console.log(`Adding new stream for peer ${did}:`, stream.id);
+          peerConnection.streams.push(stream);
+        }
 
         // Monitor the track for debugging
         track.onended = () => console.log(`Track ${track.id} ended from peer ${did}`);
@@ -275,7 +277,6 @@ export const useWebrtcStore = defineStore(
       console.log(`*** Received signal from ${author}:`, { source, predicate, target });
 
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
-        console.log(`*** Received WebRTC signal from ${author}:`, source);
         try {
           // Skip if we're not in a call
           if (!inCall.value) {

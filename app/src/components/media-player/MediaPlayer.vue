@@ -67,7 +67,7 @@
 import { defaultMediaPermissions, MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
-import { computed, onMounted, PropType, ref, toRefs } from "vue";
+import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
 
 const props = defineProps({
   isMe: { type: Boolean, default: false },
@@ -83,6 +83,10 @@ const props = defineProps({
 const { isMe, did, stream, mediaSettings, mediaPermissions } = toRefs(props);
 
 const profile = ref<Profile>();
+
+// const audioEnabled = computed(() => props.mediaSettings?.audioEnabled ?? true);
+// const videoEnabled = computed(() => props.mediaSettings?.videoEnabled ?? false);
+// const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnabled ?? false);
 
 const hasVisibleStream = computed(
   () => stream && (mediaSettings.value.videoEnabled || mediaSettings.value.screenShareEnabled)
@@ -105,6 +109,16 @@ function toggleSettings() {
 
 // Get profile on mopunt
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
+
+watch(
+  () => mediaPermissions,
+  async (newMediaPermissions) => {
+    if (!isMe.value) {
+      console.log("Media permissions for other agent", newMediaPermissions.value);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

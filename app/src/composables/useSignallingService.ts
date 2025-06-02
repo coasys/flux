@@ -66,10 +66,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   let cleanupInterval: NodeJS.Timeout | null = null;
 
   function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
-    console.log("*** Adding signal handler:", handler);
     signalHandlers.value.push(handler);
-
-    console.log("*** signalHandlers after adding:", signalHandlers.value);
   }
 
   function removeSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
@@ -107,7 +104,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     }
 
     // Forward signals to added signal handlers if present (used in the webrtc store)
-    console.log("*** signalHandlers:", signalHandlers.value);
     signalHandlers.value.forEach((handler) => handler(signal));
   }
 

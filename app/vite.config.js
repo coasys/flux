@@ -140,7 +140,6 @@ export default ({ mode }) => {
           __dirname,
           "../node_modules/@coasys/nillion-file-store/dist/main.js"
         ),
-        "readable-stream": "vite-compatible-readable-stream",
       },
     },
     server: {
