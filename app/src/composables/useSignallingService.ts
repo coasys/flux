@@ -66,7 +66,10 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   let cleanupInterval: NodeJS.Timeout | null = null;
 
   function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
+    console.log("*** Adding signal handler:", handler);
     signalHandlers.value.push(handler);
+
+    console.log("*** signalHandlers after adding:", signalHandlers.value);
   }
 
   function removeSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
@@ -76,6 +79,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   }
 
   function sendSignal(link: Link): void {
+    console.log("*** Sending signal:", link, neighbourhood);
     neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error("Error sending signal:", error));
   }
 
