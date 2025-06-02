@@ -110,7 +110,7 @@ watch(
   () => props.mediaSettings,
   async (newMediaSettings) => {
     if (props.mediaSettings && !isMe?.value) {
-      console.log("Media settings for other agent", newMediaSettings);
+      console.log("New media settings for other agent", newMediaSettings);
     }
   },
   { immediate: true }

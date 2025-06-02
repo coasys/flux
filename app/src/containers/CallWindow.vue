@@ -297,11 +297,10 @@ const startWidth = ref(0);
 const callHealthColour = computed(findHealthColour);
 const connectionWarning = computed(findConnectionWarning);
 const connectionText = computed(findConnectionText);
-// TODO: add agent state from signalling service to peers
 const peers = computed(() =>
   Array.from(peerConnections.value.values()).map((peer) => {
     const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
-    console.log("*** agent in call: ", { ...peer, agentState });
+    console.log("*** peer streams", peer.streams);
     return { ...peer, agentState };
   })
 );

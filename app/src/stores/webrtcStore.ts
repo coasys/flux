@@ -17,6 +17,7 @@ import SimplePeer from "simple-peer/simplepeer.min.js";
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
+export const WEBRTC_STREAM_REQUEST = "webrtc/stream-request";
 const MAX_RECONNECTION_ATTEMPTS = 3;
 
 export type PeerConnection = {
@@ -111,7 +112,17 @@ export const useWebrtcStore = defineStore(
         signallingService.value.sendSignal({ source: JSON.stringify(data), predicate: WEBRTC_SIGNAL, target: did });
       });
 
-      peer.on("connect", () => console.log(`Connected to peer ${did}`));
+      peer.on("connect", () => {
+        console.log(`Connected to peer ${did}`);
+
+        setTimeout(() => {
+          const peerConnection = peerConnections.value.get(did);
+          if (peerConnection && !peerConnection.streams.length) {
+            console.log("*** Peer connection established but no stream found, requesting stream from peer");
+            signallingService.value?.sendSignal({ source: "", predicate: WEBRTC_STREAM_REQUEST, target: did });
+          }
+        }, 1000); // Allow time for connection to stabilize
+      });
 
       peer.on("track", (track, stream) => {
         console.log(`Received ${track.kind} track from peer ${did}:`, {
@@ -310,6 +321,22 @@ export const useWebrtcStore = defineStore(
           cleanupPeerConnection(author);
         }
       }
+
+      if (predicate === WEBRTC_STREAM_REQUEST && target === me.value.did) {
+        // Handle stream request from a peer
+        console.log(`*** Stream request from ${author}, sending local stream`);
+        if (localStream.value) {
+          const peerConnection = peerConnections.value.get(author);
+          if (peerConnection) {
+            localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+            console.log(`*** ${localStream.value.getTracks().length} tracks sent to ${author}`);
+          } else {
+            console.warn(`*** No peer connection found for ${author} to send stream`);
+          }
+        } else {
+          console.warn(`*** No local stream available to send to ${author}`);
+        }
+      }
     }
 
     async function joinRoom() {
@@ -427,7 +454,7 @@ export const useWebrtcStore = defineStore(
             createPeerConnection(agent.did, shouldInitiate);
           } else {
             // We already have a connection - might want to check its health
-            console.log("Existing peer connection found for:", agent.did);
+            // console.log("Existing peer connection found for:", agent.did);
           }
         });
 
