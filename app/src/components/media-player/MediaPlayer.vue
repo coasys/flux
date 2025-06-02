@@ -90,10 +90,9 @@ const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnable
 const mediaPermissions = computed(() => props.mediaPermissions ?? null);
 
 const hasVisibleStream = computed(() => stream && (videoEnabled.value || screenShareEnabled.value));
-const showMicDisabledWarning = computed(() => {
-  console.log("mediaPermissions: ", mediaPermissions);
-  return isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted;
-});
+const showMicDisabledWarning = computed(
+  () => isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted
+);
 const showCameraDisabledWarning = computed(
   () =>
     isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
@@ -108,7 +107,7 @@ function toggleSettings() {
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
 
 watch(
-  props.mediaSettings,
+  () => props.mediaSettings,
   async (newMediaSettings) => {
     if (props.mediaSettings && !isMe?.value) {
       console.log("Media settings for other agent", newMediaSettings);
