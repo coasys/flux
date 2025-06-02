@@ -1,13 +1,8 @@
 <template>
   <div class="media-player">
-    <video
-      class="video"
-      :srcObject.prop="stream"
-      :muted="isMe"
-      :style="{ opacity: hasVisibleStream ? 1 : 0 }"
-      autoplay
-      playsinline
-    />
+    <video class="video" :srcObject.prop="stream" :muted="isMe" autoplay playsinline />
+
+    <!-- :style="{ opacity: hasVisibleStream ? 1 : 0 }" -->
 
     <div class="centered-content">
       <j-avatar
@@ -111,10 +106,10 @@ function toggleSettings() {
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
 
 watch(
-  () => mediaPermissions,
-  async (newMediaPermissions) => {
+  mediaSettings,
+  async (newMediaSettings) => {
     if (!isMe.value) {
-      console.log("Media permissions for other agent", newMediaPermissions.value);
+      console.log("Media settings for other agent", newMediaSettings);
     }
   },
   { immediate: true }

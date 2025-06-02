@@ -12,9 +12,7 @@ export const useCommunityServiceStore = defineStore(
     }
 
     function getCommunityService(communityId: string): CommunityService | undefined {
-      const service = communityServices.value[communityId];
-      if (!service) console.warn(`No community service found for ID: ${communityId}`);
-      return service;
+      return communityServices.value[communityId];
     }
 
     function deleteCommunityService(communityId: string) {
