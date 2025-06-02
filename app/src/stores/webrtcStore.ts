@@ -97,13 +97,13 @@ export const useWebrtcStore = defineStore(
       }
 
       console.log(`Creating ${initiator ? "initiator" : "receiver"} peer for ${did}`);
-      console.log("localStream.value:", localStream.value);
+      console.log("localStream.value:", localStream.value, iceServers.value);
 
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
         config: { iceServers: iceServers.value },
-        // trickle: true,
+        trickle: true,
       });
 
       peer.on("signal", (data) => {
@@ -271,19 +271,21 @@ export const useWebrtcStore = defineStore(
       const { author, data } = link;
       const { source, predicate, target } = data;
 
+      console.log(`*** Received signal from ${author}:`, { source, predicate, target });
+
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
-        console.log(`Received WebRTC signal from ${author}:`, source);
+        console.log(`*** Received WebRTC signal from ${author}:`, source);
         try {
           // Skip if we're not in a call
           if (!inCall.value) {
-            console.debug(`Ignoring signal from ${author} - not in a call`);
+            console.debug(`*** Ignoring signal from ${author} - not in a call`);
             return;
           }
 
           // Parse the signal data
           const signalData = JSON.parse(source);
           if (!signalData || typeof signalData !== "object") {
-            console.warn(`Invalid signal data from ${author}`);
+            console.warn(`*** Invalid signal data from ${author}`);
             return;
           }
 
@@ -293,16 +295,16 @@ export const useWebrtcStore = defineStore(
 
           if (existingConnection) {
             peer = existingConnection.peer;
-            console.log(`Processing signal for existing peer ${author}`);
+            console.log(`*** Processing signal for existing peer ${author}`);
           } else {
-            console.log(`Creating new peer connection for ${author} (receiver)`);
+            console.log(`*** Creating new peer connection for ${author} (receiver)`);
             peer = createPeerConnection(author, false);
           }
 
           // Process the signal
           peer.signal(signalData);
         } catch (e) {
-          console.error(`Error handling WebRTC signal from ${author}:`, e);
+          console.error(`*** Error handling WebRTC signal from ${author}:`, e);
           cleanupPeerConnection(author);
         }
       }

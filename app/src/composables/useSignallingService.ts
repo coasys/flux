@@ -33,19 +33,45 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     processing: null,
     lastUpdate: Date.now(),
   });
+
+  // const sampleAgents = {
+  //   abc: {
+  //     aiEnabled: true,
+  //     callRoute: {
+  //       communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+  //       channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+  //       viewId: "@coasys/flux-chat-view",
+  //     },
+  //     currentRoute: {
+  //       communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+  //       channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+  //       viewId: "@coasys/flux-chat-view",
+  //     },
+  //     inCall: true,
+  //     lastUpdate: 1748628324292,
+  //     mediaSettings: {
+  //       audioEnabled: true,
+  //       videoEnabled: false,
+  //       screenShareEnabled: false,
+  //     },
+  //     processing: null,
+  //     status: "active",
+  //   } as AgentState,
+  // };
+
   const agents = ref<Record<string, AgentState>>({});
-  const signalHandlers: Array<(signal: PerspectiveExpression) => void> = [];
+  const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
 
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
 
   function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
-    signalHandlers.push(handler);
+    signalHandlers.value.push(handler);
   }
 
   function removeSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
-    const index = signalHandlers.indexOf(handler);
-    if (index !== -1) signalHandlers.splice(index, 1);
+    const index = signalHandlers.value.indexOf(handler);
+    if (index !== -1) signalHandlers.value.splice(index, 1);
     else console.warn("Signal handler not found:", handler);
   }
 
@@ -77,11 +103,14 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     }
 
     // Forward signals to added signal handlers if present (used in the webrtc store)
-    signalHandlers.forEach((handler) => handler(signal));
+    console.log("*** signalHandlers:", signalHandlers.value);
+    signalHandlers.value.forEach((handler) => handler(signal));
   }
 
   function broadcastState(target: string = ""): void {
     if (!signalling.value) return;
+
+    // console.log("myState.value:", myState.value);
 
     // Broadcast my state to the neighbourhood
     const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
