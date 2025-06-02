@@ -136,7 +136,7 @@ export const useWebrtcStore = defineStore(
           peerConnection.streams[existingStreamIndex] = stream;
         } else {
           console.log(`Adding new stream for peer ${did}:`, stream.id);
-          peerConnection.streams.push(stream);
+          peerConnection.streams = [stream];
         }
 
         // Monitor the track for debugging
