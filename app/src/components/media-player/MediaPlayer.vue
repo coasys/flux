@@ -56,15 +56,15 @@
       </div>
 
       <j-flex v-if="inCall" class="settings" gap="500">
-        <j-icon v-if="!audioEnabled" name="mic-mute" />
-        <j-icon v-if="screenShareEnabled" name="display" />
+        <j-icon v-if="!mediaSettings.audioEnabled" name="mic-mute" />
+        <j-icon v-if="mediaSettings.screenShareEnabled" name="display" />
       </j-flex>
     </j-flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
+import { defaultMediaPermissions, MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
@@ -76,26 +76,30 @@ const props = defineProps({
   stream: { type: MediaStream, default: null },
   mediaSettings: {
     type: Object as PropType<MediaSettings>,
-    default: null,
+    default: { audioEnabled: true, videoEnabled: true, screenShareEnabled: false },
   },
-  mediaPermissions: { type: Object as PropType<MediaPermissions>, default: null },
+  mediaPermissions: { type: Object as PropType<MediaPermissions>, default: defaultMediaPermissions },
 });
-const { isMe, did, stream } = toRefs(props);
+const { isMe, did, stream, mediaSettings, mediaPermissions } = toRefs(props);
 
 const profile = ref<Profile>();
 
-const audioEnabled = computed(() => props.mediaSettings?.audioEnabled ?? true);
-const videoEnabled = computed(() => props.mediaSettings?.videoEnabled ?? false);
-const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnabled ?? false);
-const mediaPermissions = computed(() => props.mediaPermissions ?? null);
+// const audioEnabled = computed(() => props.mediaSettings?.audioEnabled ?? true);
+// const videoEnabled = computed(() => props.mediaSettings?.videoEnabled ?? false);
+// const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnabled ?? false);
 
-const hasVisibleStream = computed(() => stream && (videoEnabled.value || screenShareEnabled.value));
+const hasVisibleStream = computed(
+  () => stream && (mediaSettings.value.videoEnabled || mediaSettings.value.screenShareEnabled)
+);
 const showMicDisabledWarning = computed(
   () => isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted
 );
 const showCameraDisabledWarning = computed(
   () =>
-    isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
+    isMe &&
+    mediaSettings.value.videoEnabled &&
+    mediaPermissions.value?.camera.requested &&
+    !mediaPermissions.value?.camera.granted
 );
 
 // TODO: implement settings toggle
@@ -107,10 +111,10 @@ function toggleSettings() {
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
 
 watch(
-  () => props.mediaSettings,
-  async (newMediaSettings) => {
-    if (props.mediaSettings && !isMe?.value) {
-      console.log("Media settings for other agent", newMediaSettings);
+  () => mediaPermissions,
+  async (newMediaPermissions) => {
+    if (!isMe.value) {
+      console.log("Media permissions for other agent", newMediaPermissions.value);
     }
   },
   { immediate: true }

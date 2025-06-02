@@ -94,7 +94,7 @@ export const useWebrtcStore = defineStore(
       }
 
       console.log(`Creating ${initiator ? "initiator" : "receiver"} peer for ${did}`);
-      // console.log("localStream.value:", localStream.value, iceServers.value);
+      console.log("localStream.value:", localStream.value, iceServers.value);
 
       const peer = new SimplePeer({
         initiator,
@@ -107,7 +107,7 @@ export const useWebrtcStore = defineStore(
         // Forward signal data through through the signalling service
         if (!signallingService.value) return;
 
-        // console.log('peer.on("signal") : sending webrtc signal data: ', data);
+        console.log('peer.on("signal") : sending webrtc signal data: ', data);
         signallingService.value.sendSignal({ source: JSON.stringify(data), predicate: WEBRTC_SIGNAL, target: did });
       });
 
@@ -274,7 +274,7 @@ export const useWebrtcStore = defineStore(
       const { source, predicate, target } = data;
       // source = data, target = did of the peer we want to signal
 
-      // console.log(`*** Received signal from ${author}:`, { source, predicate, target });
+      console.log(`*** Received signal from ${author}:`, { source, predicate, target });
 
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
         try {
@@ -297,7 +297,7 @@ export const useWebrtcStore = defineStore(
 
           if (existingConnection) {
             peer = existingConnection.peer;
-            // console.log(`*** Processing signal for existing peer ${author}`);
+            console.log(`*** Processing signal for existing peer ${author}`);
           } else {
             console.log(`*** Creating new peer connection for ${author} (receiver)`);
             peer = createPeerConnection(author, false);
