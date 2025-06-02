@@ -301,6 +301,7 @@ const connectionText = computed(findConnectionText);
 const peers = computed(() =>
   Array.from(peerConnections.value.values()).map((peer) => {
     const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
+    console.log("*** agent in call: ", { ...peer, agentState });
     return { ...peer, agentState };
   })
 );

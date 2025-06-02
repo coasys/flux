@@ -76,7 +76,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   }
 
   function sendSignal(link: Link): void {
-    console.log("*** Sending signal:", link, neighbourhood);
+    // console.log("*** Sending signal:", link, neighbourhood);
     neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error("Error sending signal:", error));
   }
 
@@ -214,6 +214,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
+  watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
 
   // TODO: remove
   // Send updates to web components whenever the agents state map changes
