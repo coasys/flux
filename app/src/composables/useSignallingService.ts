@@ -34,31 +34,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     lastUpdate: Date.now(),
   });
 
-  // const sampleAgents = {
-  //   abc: {
-  //     aiEnabled: true,
-  //     callRoute: {
-  //       communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
-  //       channelId: "literal://string:hltcycxtxxseyyurfessjzid",
-  //       viewId: "@coasys/flux-chat-view",
-  //     },
-  //     currentRoute: {
-  //       communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
-  //       channelId: "literal://string:hltcycxtxxseyyurfessjzid",
-  //       viewId: "@coasys/flux-chat-view",
-  //     },
-  //     inCall: true,
-  //     lastUpdate: 1748628324292,
-  //     mediaSettings: {
-  //       audioEnabled: true,
-  //       videoEnabled: false,
-  //       screenShareEnabled: false,
-  //     },
-  //     processing: null,
-  //     status: "active",
-  //   } as AgentState,
-  // };
-
   const agents = ref<Record<string, AgentState>>({});
   const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
 
@@ -72,11 +47,9 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   function removeSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
     const index = signalHandlers.value.indexOf(handler);
     if (index !== -1) signalHandlers.value.splice(index, 1);
-    else console.warn("Signal handler not found:", handler);
   }
 
   function sendSignal(link: Link): void {
-    // console.log("*** Sending signal:", link, neighbourhood);
     neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error("Error sending signal:", error));
   }
 
@@ -109,8 +82,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
   function broadcastState(target: string = ""): void {
     if (!signalling.value) return;
-
-    // console.log("myState.value:", myState.value);
 
     // Broadcast my state to the neighbourhood
     const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
@@ -215,15 +186,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
-
-  // TODO: remove
-  // Send updates to web components whenever the agents state map changes
-  watch(
-    agents,
-    (newAgentsState) =>
-      window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
-    { immediate: true }
-  );
 
   return {
     signalling,

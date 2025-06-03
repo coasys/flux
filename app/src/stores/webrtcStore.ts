@@ -94,9 +94,6 @@ export const useWebrtcStore = defineStore(
         peerConnections.value.delete(did);
       }
 
-      console.log(`Creating ${initiator ? "initiator" : "receiver"} peer for ${did}`);
-      // console.log("localStream.value:", localStream.value, iceServers.value);
-
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
@@ -105,79 +102,41 @@ export const useWebrtcStore = defineStore(
       }) as Instance;
 
       peer.on("signal", (data) => {
-        // Forward signal data through through the signalling service
         if (!signallingService.value) return;
-
-        // console.log('peer.on("signal") : sending webrtc signal data: ', data);
+        // Forward signal data through through the signalling service
         signallingService.value.sendSignal({ source: JSON.stringify(data), predicate: WEBRTC_SIGNAL, target: did });
       });
 
       peer.on("connect", () => {
-        console.log(`Connected to peer ${did}`);
-
+        // If no stream found after connection established, request it from the peer
         setTimeout(() => {
           const peerConnection = peerConnections.value.get(did);
           if (peerConnection && !peerConnection.streams.length) {
-            console.log("*** Peer connection established but no stream found, requesting stream from peer");
             signallingService.value?.sendSignal({ source: "", predicate: WEBRTC_STREAM_REQUEST, target: did });
           }
-        }, 1000); // Allow time for connection to stabilize
+        }, 1000);
       });
 
       peer.on("track", (track, stream) => {
-        console.log(`Received ${track.kind} track from peer ${did}:`, {
-          trackId: track.id,
-          streamId: stream.id,
-          enabled: track.enabled,
-          readyState: track.readyState,
-          trackCount: stream.getTracks().length,
-        });
-
         // Find the peer connection
         const peerConnection = peerConnections.value.get(did);
-        if (!peerConnection) {
-          console.warn(`Received track from ${did} but no peer connection exists`);
-          return;
-        }
+        if (!peerConnection) return;
 
         // Check if we already have the stream & update or add accordingly
         const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
-        if (existingStreamIndex >= 0) {
-          console.log(`Updating existing stream for peer ${did}:`, stream.id);
-          peerConnection.streams[existingStreamIndex] = stream;
-        } else {
-          console.log(`Adding new stream for peer ${did}:`, stream.id);
-          peerConnection.streams = [stream];
-        }
-
-        // Monitor the track for debugging
-        track.onended = () => console.log(`Track ${track.id} ended from peer ${did}`);
-        track.onmute = () => console.log(`Track ${track.id} from ${did} muted`);
-        track.onunmute = () => console.log(`Track ${track.id} from ${did} unmuted`);
+        if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
+        else peerConnection.streams = [stream];
       });
 
-      // Could be used for direct webrtc signalling if needed in the future
-      // peer.on("data", (data) => {});
+      peer.on("close", () => cleanupPeerConnection(did));
 
-      peer.on("close", () => {
-        console.log(`Connection closed with peer ${did}`);
-        cleanupPeerConnection(did);
-      });
-
-      peer.on("error", (err) => {
-        console.error(`Error in connection with peer ${did}:`, err);
-        cleanupPeerConnection(did);
-      });
+      peer.on("error", () => cleanupPeerConnection(did));
 
       peer.on("iceStateChange", (state) => {
-        console.log(`ICE state change for ${did}: ${state}`);
-
         // Handle disconnection states
         if (state === "disconnected" || state === "failed") {
-          // Clear any existing reconnection timeout for this peer
-          if (reconnectionTimeouts.value[did]) {
-            clearTimeout(reconnectionTimeouts.value[did]);
-          }
+          // Clear existing reconnection timeout for peer if present
+          if (reconnectionTimeouts.value[did]) clearTimeout(reconnectionTimeouts.value[did]);
 
           // Get current attempts or initialize
           const attempts = reconnectionAttempts.value[did] || 0;
@@ -189,15 +148,9 @@ export const useWebrtcStore = defineStore(
             // Use exponential backoff for retry timing
             const delay = Math.min(1000 * Math.pow(2, attempts), 10000); // 1s, 2s, 4s, 8s, max 10s
 
-            console.log(
-              `ICE connection ${state} for ${did}. Attempting reconnection ${attempts + 1}/${MAX_RECONNECTION_ATTEMPTS} in ${delay}ms`
-            );
-
             // Set timeout for reconnection
             reconnectionTimeouts.value[did] = setTimeout(() => {
               if (!inCall.value) return; // Don't reconnect if we've left the call
-
-              console.log(`Attempting to reconnect to ${did}...`);
 
               // Get the connection details
               const existingConnection = peerConnections.value.get(did);
@@ -212,8 +165,6 @@ export const useWebrtcStore = defineStore(
               }
             }, delay);
           } else {
-            console.log(`ICE connection ${state} for ${did}. Max reconnection attempts reached.`);
-
             // Notify the user
             appStore.showDangerToast({ message: "Connection to user lost after multiple attempts" });
 
@@ -225,10 +176,7 @@ export const useWebrtcStore = defineStore(
           }
         } else if (state === "connected" || state === "completed") {
           // Connection is good, reset attempt counter
-          if (reconnectionAttempts.value[did]) {
-            console.log(`ICE connection restored to ${did} after ${reconnectionAttempts.value[did]} attempts`);
-            delete reconnectionAttempts.value[did];
-          }
+          if (reconnectionAttempts.value[did]) delete reconnectionAttempts.value[did];
 
           // Clear any pending reconnection attempts
           if (reconnectionTimeouts.value[did]) {
@@ -246,31 +194,29 @@ export const useWebrtcStore = defineStore(
 
     function cleanupPeerConnection(did: string) {
       const peerConnection = peerConnections.value.get(did);
-      if (peerConnection) {
-        try {
-          peerConnection.peer.destroy();
-        } catch (e) {
-          console.error(`Error destroying peer ${did}:`, e);
-        }
-        peerConnections.value.delete(did);
+      if (!peerConnection) return;
+
+      try {
+        // Destroy the peer connection
+        peerConnection.peer.destroy();
+      } catch (e) {
+        console.error(`Error destroying peer ${did}:`, e);
       }
+
+      // Remove the peer entry from the map
+      peerConnections.value.delete(did);
     }
 
     function updatePeersWithNewStream(newStream: MediaStream, oldStream: MediaStream) {
       peerConnections.value.forEach((peerConnection, did) => {
         try {
-          // Remove old tracks
+          // Remove old tracks and add new ones
           oldStream.getTracks().forEach((track) => peerConnection.peer.removeTrack(track, oldStream));
-
-          // Add new tracks
           newStream.getTracks().forEach((track) => peerConnection.peer.addTrack(track, newStream));
-
-          console.log(`Stream update complete for peer ${did}`);
         } catch (error) {
           console.error(`Error updating tracks for peer ${did}:`, error);
 
           // Fall back to recreating the peer if track replacement fails
-          console.log(`Falling back to recreating peer connection for ${did}`);
           peerConnection.peer.destroy();
           createPeerConnection(did, peerConnection.initiator);
         }
@@ -283,36 +229,22 @@ export const useWebrtcStore = defineStore(
 
       const { author, data } = link;
       const { source, predicate, target } = data;
-      // source = data, target = did of the peer we want to signal
-
-      // console.log(`*** Received signal from ${author}:`, { source, predicate, target });
 
       if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
         try {
           // Skip if we're not in a call
-          if (!inCall.value) {
-            console.debug(`*** Ignoring signal from ${author} - not in a call`);
-            return;
-          }
+          if (!inCall.value) return;
 
           // Parse the signal data
           const signalData = JSON.parse(source);
-          if (!signalData || typeof signalData !== "object") {
-            console.warn(`*** Invalid signal data from ${author}`);
-            return;
-          }
+          if (!signalData || typeof signalData !== "object") return;
 
           // Find or create peer connection
           let peer: SimplePeer.Instance;
           const existingConnection = peerConnections.value.get(author);
 
-          if (existingConnection) {
-            peer = existingConnection.peer;
-            // console.log(`*** Processing signal for existing peer ${author}`);
-          } else {
-            console.log(`*** Creating new peer connection for ${author} (receiver)`);
-            peer = createPeerConnection(author, false);
-          }
+          if (existingConnection) peer = existingConnection.peer;
+          else peer = createPeerConnection(author, false);
 
           // Process the signal
           peer.signal(signalData);
@@ -323,19 +255,14 @@ export const useWebrtcStore = defineStore(
       }
 
       if (predicate === WEBRTC_STREAM_REQUEST && target === me.value.did) {
-        // Handle stream request from a peer
-        console.log(`*** Stream request from ${author}, sending local stream`);
-        if (localStream.value) {
-          const peerConnection = peerConnections.value.get(author);
-          if (peerConnection) {
-            localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
-            console.log(`*** ${localStream.value.getTracks().length} tracks sent to ${author}`);
-          } else {
-            console.warn(`*** No peer connection found for ${author} to send stream`);
-          }
-        } else {
-          console.warn(`*** No local stream available to send to ${author}`);
-        }
+        // Handle stream request from peer
+        if (!localStream.value) return;
+
+        const peerConnection = peerConnections.value.get(author);
+        if (!peerConnection) return;
+
+        // Add local stream tracks to the peer connection
+        localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
       }
     }
 
@@ -343,23 +270,20 @@ export const useWebrtcStore = defineStore(
       joiningCall.value = true;
 
       try {
+        // Update the call route
         callRoute.value = route.params;
-
-        console.log("*** Joining room");
 
         // Add the webrtc signal handler to the signalling service
         signallingService.value?.addSignalHandler(webrtcSignalHandler);
 
         // Establish connections with the agents in the call
         if (agentsInCall.value.length > 0) {
-          console.log("Connecting to agents in call:", agentsInCall.value);
           agentsInCall.value.forEach((agent) => {
-            if (agent.did !== me.value.did) {
-              console.log(`Creating peer connection for agent ${agent.did}`);
-              // Create initiator connections to all peers alphabetically "less than" our did (prevents both sides from being initiators)
-              const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
-              createPeerConnection(agent.did, shouldInitiate);
-            }
+            if (agent.did === me.value.did) return;
+
+            // Create initiator connections to all peers alphabetically "less than" our did (prevents both sides from being initiators)
+            const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
+            createPeerConnection(agent.did, shouldInitiate);
           });
         }
 
@@ -394,19 +318,17 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    // Watch for route param changes
+    // Update the call route or close call window on route param changes if not already in a call
     watch(
       () => route.params,
       async (newParams) => {
-        if (!inCall.value) {
-          if (newParams.channelId) {
-            // Update the call route
-            callRoute.value = newParams;
-          } else {
-            // Close the call window
-            uiStore.setCallWindowOpen(false);
-          }
-        }
+        // Skip if we're already in a call
+        if (inCall.value) return;
+
+        // If channle id present in the params update the call route
+        if (newParams.channelId) callRoute.value = newParams;
+        // Otherwise, close the call window
+        else uiStore.setCallWindowOpen(false);
       },
       { immediate: true }
     );
@@ -416,13 +338,14 @@ export const useWebrtcStore = defineStore(
       if (inCall.value && newStream && oldStream) updatePeersWithNewStream(newStream, oldStream);
     });
 
-    // Update agentsInCall state when the agent states in the signalling service change
+    // Update agents in call state when the agent states in the signalling service change
     watch(
       agentsInCommunity,
       async (newAgents) => {
         const agentsInCallMap = Object.entries(newAgents).filter(
           ([_, agent]) => agent.inCall && agent.callRoute.channelId === callRoute.value.channelId
         );
+        // Merge the agent states with their profiles
         agentsInCall.value = await Promise.all(
           agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) }))
         );
@@ -440,30 +363,20 @@ export const useWebrtcStore = defineStore(
 
         // Handle new agents
         newAgents.forEach((agent) => {
-          // const agentDid = agent.did;
-
           // Skip ourselves
           if (agent.did === me.value.did) return;
 
-          // If we don't already have a peer connection with this agent, create one
-          if (!peerConnections.value.has(agent.did)) {
-            console.log("New peer connection needed for:", agent.did);
+          // Skip if we already have a connection with this agent
+          if (peerConnections.value.has(agent.did)) return;
 
-            // Determine whether we should be the initiator
-            const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
-            createPeerConnection(agent.did, shouldInitiate);
-          } else {
-            // We already have a connection - might want to check its health
-            // console.log("Existing peer connection found for:", agent.did);
-          }
+          // Create a new peer connection
+          const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
+          createPeerConnection(agent.did, shouldInitiate);
         });
 
-        // Handle agents that left the call or are no longer active
+        // Remove agents that left the call or are no longer active
         existingPeerDids.forEach((did) => {
-          if (!newAgents.map((a) => a.did).includes(did)) {
-            console.log("Cleaning up peer connection for:", did);
-            cleanupPeerConnection(did);
-          }
+          if (!newAgents.map((a) => a.did).includes(did)) cleanupPeerConnection(did);
         });
       },
       { deep: true }

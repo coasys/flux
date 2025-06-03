@@ -41,6 +41,7 @@ export const useMediaDevicesStore = defineStore(
     const screenShareEnabled = ref(false);
     const audioEnabled = ref(true);
     const videoEnabled = ref(false);
+    let savedVideoTrack: MediaStreamTrack | null = null;
 
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === "videoinput"));
@@ -50,8 +51,6 @@ export const useMediaDevicesStore = defineStore(
       videoEnabled: videoEnabled.value,
       screenShareEnabled: screenShareEnabled.value,
     }));
-
-    let savedVideoTrack: MediaStreamTrack | null = null;
 
     // Methods
     async function createStream() {
@@ -89,6 +88,12 @@ export const useMediaDevicesStore = defineStore(
       } finally {
         streamLoading.value = false;
       }
+    }
+
+    async function restartStream() {
+      if (!stream.value) return;
+      stopTracks();
+      await createStream();
     }
 
     async function findAvailableDevices() {
@@ -134,32 +139,22 @@ export const useMediaDevicesStore = defineStore(
       const previousId = activeCameraId.value;
       activeCameraId.value = deviceId;
 
-      if (stream.value && mediaPermissions.value.camera.granted && previousId !== deviceId) {
-        restartStream();
-      }
+      const newStreamRequired = stream.value && mediaPermissions.value.camera.granted && previousId !== deviceId;
+      if (newStreamRequired) restartStream();
     }
 
     function switchMicrophone(deviceId: string) {
       const previousId = activeMicrophoneId.value;
       activeMicrophoneId.value = deviceId;
 
-      if (stream.value && mediaPermissions.value.microphone.granted && previousId !== deviceId) {
-        restartStream();
-      }
-    }
-
-    async function restartStream() {
-      if (stream.value) {
-        stopTracks();
-        await createStream();
-      }
+      const newStreamRequired = stream.value && mediaPermissions.value.microphone.granted && previousId !== deviceId;
+      if (newStreamRequired) restartStream();
     }
 
     function stopTracks() {
-      if (stream.value) {
-        stream.value.getTracks().forEach((track) => track.stop());
-        stream.value = null;
-      }
+      if (!stream.value) return;
+      stream.value.getTracks().forEach((track) => track.stop());
+      stream.value = null;
     }
 
     function toggleAudio() {
@@ -172,8 +167,7 @@ export const useMediaDevicesStore = defineStore(
       if (needsNewStream) createStream();
       else {
         // Otherwise just toggle the tracks
-        const tracks = stream.value.getAudioTracks();
-        tracks.forEach((track) => (track.enabled = audioEnabled.value));
+        stream.value.getAudioTracks().forEach((track) => (track.enabled = audioEnabled.value));
       }
     }
 
@@ -207,10 +201,9 @@ export const useMediaDevicesStore = defineStore(
 
         // Add onended handler to detect when the user stops sharing via browser UI
         screenShareTrack.onended = () => {
-          if (screenShareEnabled.value) {
-            screenShareEnabled.value = false;
-            turnOffScreenShare();
-          }
+          if (!screenShareEnabled.value) return;
+          screenShareEnabled.value = false;
+          turnOffScreenShare();
         };
 
         // Save existing video track if present

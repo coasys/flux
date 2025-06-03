@@ -1,14 +1,13 @@
 import { defineStore, storeToRefs } from "pinia";
 import { ref } from "vue";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
-
-export type WindowState = "minimize" | "visible" | "foreground";
+import { WindowState } from "./types";
 
 export const useUiStore = defineStore(
   "uiStore",
   () => {
     const mediaDevicesStore = useMediaDevicesStore();
-    const { mediaPermissions, mediaSettings, stream } = storeToRefs(mediaDevicesStore);
+    const { stream } = storeToRefs(mediaDevicesStore);
 
     const showAppSidebar = ref(true);
     const showCommunitySidebar = ref(true);
@@ -80,7 +79,7 @@ export const useUiStore = defineStore(
       globalError,
       windowState,
 
-      // Mutations
+      // Actions
       toggleCommunitySidebar,
       toggleAppSidebar,
       setAppSidebarOpen,
