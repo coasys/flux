@@ -11,6 +11,7 @@
 
     <div class="centered-content">
       <j-avatar
+        v-if="!showMicDisabledWarning && !showCameraDisabledWarning"
         :initials="profile?.username?.charAt(0) || '?'"
         :src="profile?.profileThumbnailPicture || null"
         :hash="profile?.did"
@@ -42,16 +43,11 @@
               <j-icon name="gear" />
             </j-button>
           </j-tooltip>
-          <j-tooltip placement="top">
-            <j-button @click="() => null" square circle size="lg">
-              <j-icon :name="`arrows-angle-${true ? 'contract' : 'expand'}`" />
+          <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
+            <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
+              <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
             </j-button>
           </j-tooltip>
-          <!-- <j-tooltip placement="top" :title="'callWindowOpen' ? 'Shrink screen' : 'Full screen'">
-          <j-button @click="() => uiStore.setCallWindowOpen(false)" square circle size="lg">
-            <j-icon :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`" />
-          </j-button>
-        </j-tooltip> -->
         </j-flex>
       </div>
 
@@ -65,8 +61,10 @@
 
 <script setup lang="ts">
 import { MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
+import { useUiStore } from "@/stores/uiStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
 
 const props = defineProps({
@@ -81,6 +79,9 @@ const props = defineProps({
   mediaPermissions: { type: Object as PropType<MediaPermissions>, default: null },
 });
 const { isMe, did, stream } = toRefs(props);
+
+const uiStore = useUiStore();
+const { callWindowFullscreen } = storeToRefs(uiStore);
 
 const profile = ref<Profile>();
 

@@ -228,6 +228,12 @@
                   <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
+
+              <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
+                <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
+                  <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
+                </j-button>
+              </j-tooltip>
             </div>
           </div>
         </div>
@@ -269,8 +275,8 @@ const webrtcStore = useWebrtcStore();
 const mediaDeviceStore = useMediaDevicesStore();
 
 const { me } = storeToRefs(appStore);
-// TODO add callWindowFullscreen
-const { communitySidebarWidth, callWindowOpen, callWindowWidth } = storeToRefs(uiStore);
+const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
+const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 const {
   joiningCall,
   inCall,
@@ -282,7 +288,6 @@ const {
   myAgentStatus,
   peerConnections,
 } = storeToRefs(webrtcStore);
-const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 
 const statusStates = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
 
@@ -300,7 +305,6 @@ const connectionText = computed(findConnectionText);
 const peers = computed(() =>
   Array.from(peerConnections.value.values()).map((peer) => {
     const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
-    console.log("*** peer streams", peer.streams);
     return { ...peer, agentState };
   })
 );
@@ -345,13 +349,16 @@ function doResize(e: any) {
   if (!rightSection.value) return;
   const minWidth = rightSection.value?.getBoundingClientRect().width / 3 || 0;
   const newWidth = startWidth.value + (startX.value - e.clientX);
-  console.log("minWidth", minWidth);
   uiStore.setCallWindowWidth(`${Math.max(minWidth, newWidth)}px`);
 }
 
 function stopResize() {
   if (!callWindow.value) return;
   isDragging.value = false;
+
+  // Update the call window fullscreen state in the UI store based on the channel view width after resize
+  const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
+  uiStore.setCallWindowFullscreen(channelViewWidth === 0);
 
   // Reset the transition styles and remove the global resizing class
   const channelView = document.getElementById("channel-view");

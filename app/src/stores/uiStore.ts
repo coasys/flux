@@ -13,6 +13,7 @@ export const useUiStore = defineStore(
     const showCommunitySidebar = ref(true);
     const communitySidebarWidth = ref(330);
     const callWindowOpen = ref(false);
+    const callWindowFullscreen = ref(false);
     const callWindowWidth = ref("50%");
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
@@ -42,8 +43,18 @@ export const useUiStore = defineStore(
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
 
-      // Get the stream if opened without one
+      // Initialise a stream if the call window is opened without one
       if (open && !stream.value) mediaDevicesStore.createStream();
+    }
+
+    function setCallWindowFullscreen(isFullscreen: boolean): void {
+      callWindowFullscreen.value = isFullscreen;
+    }
+
+    function toggleCallWindowFullscreen(): void {
+      callWindowFullscreen.value = !callWindowFullscreen.value;
+      if (callWindowFullscreen.value) callWindowWidth.value = "100%";
+      else callWindowWidth.value = "50%";
     }
 
     function setCallWindowWidth(width: string): void {
@@ -62,18 +73,13 @@ export const useUiStore = defineStore(
       globalError.value = error;
     }
 
-    function toggleCallFullscreen() {
-      // Use the channel view width to determine the full screen state incase manually resized
-      const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
-      callWindowWidth.value = channelViewWidth ? "100%" : "50%";
-    }
-
     return {
       // State
       showAppSidebar,
       showCommunitySidebar,
       communitySidebarWidth,
       callWindowOpen,
+      callWindowFullscreen,
       callWindowWidth,
       showGlobalLoading,
       globalError,
@@ -86,11 +92,12 @@ export const useUiStore = defineStore(
       setCommunitySidebarOpen,
       setCommunitySidebarWidth,
       setCallWindowOpen,
+      toggleCallWindowFullscreen,
       setCallWindowWidth,
       setWindowState,
       setGlobalLoading,
       setGlobalError,
-      toggleCallFullscreen,
+      setCallWindowFullscreen,
     };
   },
   { persist: { omit: ["callWindowOpen", "callWindowWidth"] } }
