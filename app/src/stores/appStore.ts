@@ -13,7 +13,6 @@ export const useAppStore = defineStore(
     const updateState = ref<UpdateState>("not-available");
     const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
-    const aiEnabled = ref(false);
     const myCommunities = ref<Record<string, Community>>({});
 
     // Store a shallow ref of the Ad4mClient so we retain access to its methods
@@ -53,10 +52,6 @@ export const useAppStore = defineStore(
 
     function setGlobalNotification(payload: boolean): void {
       notification.value.globalNotification = payload;
-    }
-
-    function setAIEnabled(payload: boolean): void {
-      aiEnabled.value = payload;
     }
 
     // Actions
@@ -102,7 +97,6 @@ export const useAppStore = defineStore(
       updateState,
       toast,
       notification,
-      aiEnabled,
       myCommunities,
 
       // Mutations
@@ -113,7 +107,6 @@ export const useAppStore = defineStore(
       showDangerToast,
       setUpdateState,
       setGlobalNotification,
-      setAIEnabled,
 
       // Actions
       changeNotificationState,

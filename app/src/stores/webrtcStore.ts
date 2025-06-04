@@ -1,7 +1,6 @@
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel, Community } from "@coasys/flux-api";
-import { defaultIceServers } from "@coasys/flux-constants/src/videoSettings";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { defineStore, storeToRefs } from "pinia";
 import { computed, onUnmounted, ref, watch } from "vue";
@@ -19,6 +18,30 @@ export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
 export const WEBRTC_STREAM_REQUEST = "webrtc/stream-request";
 const MAX_RECONNECTION_ATTEMPTS = 3;
+const defaultIceServers = [
+  {
+    urls: "stun:relay.ad4m.dev:3478",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+  {
+    urls: "turn:relay.ad4m.dev:443",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+  {
+    urls: "stun:stun.l.google.com:19302",
+  },
+  {
+    urls: "stun:global.stun.twilio.com:3478",
+  },
+] as IceServer[];
+
+export type IceServer = {
+  urls: string;
+  username?: string;
+  credential?: string;
+};
 
 export type PeerConnection = {
   did: string;
@@ -266,6 +289,18 @@ export const useWebrtcStore = defineStore(
       }
     }
 
+    function addIceServer(newIceServer: IceServer) {
+      iceServers.value = [...iceServers.value, newIceServer];
+    }
+
+    function removeIceServer(url: string) {
+      iceServers.value = iceServers.value.filter((server) => server.urls !== url);
+    }
+
+    function resetIceServers() {
+      iceServers.value = defaultIceServers;
+    }
+
     async function joinRoom() {
       joiningCall.value = true;
 
@@ -403,7 +438,6 @@ export const useWebrtcStore = defineStore(
     });
 
     return {
-      // Call state
       inCall,
       callRoute,
       myAgentStatus,
@@ -411,12 +445,12 @@ export const useWebrtcStore = defineStore(
       callHealth,
       callCommunityName,
       callChannelName,
-
-      // WebRTC state
       peerConnections,
       joiningCall,
-
-      // Actions
+      iceServers,
+      addIceServer,
+      removeIceServer,
+      resetIceServers,
       joinRoom,
       leaveRoom,
     };

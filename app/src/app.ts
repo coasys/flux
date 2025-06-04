@@ -16,6 +16,7 @@ import "@coasys/flux-ui/dist/themes/black.css";
 import "@coasys/flux-ui/dist/themes/cyberpunk.css";
 import "@coasys/flux-ui/dist/themes/dark.css";
 import "@coasys/flux-ui/dist/themes/retro.css";
+import { useAiStore } from "./stores/aiStore";
 import "./themes/themes.css";
 
 export const pinia = createPinia();
@@ -38,12 +39,13 @@ const vueApp = createApp({ render: () => h(App) })
 
 // Initialize Ad4mClient
 const appStore = useAppStore(pinia);
+const aiStore = useAiStore(pinia);
 (async () => {
   try {
     const ad4mClient = await getAd4mClient();
     appStore.setAdamClient(ad4mClient);
     appStore.setMe(await ad4mClient.agent.me());
-    appStore.setAIEnabled(!!(await ad4mClient.ai.getDefaultModel("LLM")));
+    aiStore.setAIEnabled(!!(await ad4mClient.ai.getDefaultModel("LLM")));
   } catch (error) {
     console.error("Failed to initialize Ad4m client:", error);
   }

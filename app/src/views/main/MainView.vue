@@ -153,11 +153,20 @@
         </j-box>
       </j-box>
     </j-modal>
+
+    <j-modal
+      size="lg"
+      :open="modalStore.showWebrtcSettings"
+      @toggle="(e: any) => (modalStore.showWebrtcSettings = e.target.open)"
+    >
+      <WebrtcSettingsModal />
+    </j-modal>
   </AppLayout>
 </template>
 
 <script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
+import WebrtcSettingsModal from "@/components/webrtc-settings-modal/WebrtcSettingsModal.vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import CallWindow from "@/containers/CallWindow.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";

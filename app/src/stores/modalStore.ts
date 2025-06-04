@@ -16,6 +16,7 @@ export const useModalStore = defineStore(
     const showInviteCode = ref(false);
     const showCommunityTweaks = ref(false);
     const showLeaveCommunity = ref(false);
+    const showWebrtcSettings = ref(false);
 
     function closeAllModals(): void {
       showDisclaimer.value = false;
@@ -30,6 +31,7 @@ export const useModalStore = defineStore(
       showInviteCode.value = false;
       showCommunityTweaks.value = false;
       showLeaveCommunity.value = false;
+      showWebrtcSettings.value = false;
     }
 
     return {
@@ -45,6 +47,7 @@ export const useModalStore = defineStore(
       showInviteCode,
       showCommunityTweaks,
       showLeaveCommunity,
+      showWebrtcSettings,
 
       closeAllModals,
     };

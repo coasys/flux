@@ -39,7 +39,7 @@
       <div class="settings" v-if="!inCall">
         <j-flex gap="400">
           <j-tooltip placement="top" title="Settings">
-            <j-button @click="toggleSettings" square circle size="lg">
+            <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle size="lg">
               <j-icon name="gear" />
             </j-button>
           </j-tooltip>
@@ -60,12 +60,13 @@
 </template>
 
 <script setup lang="ts">
+import { useModalStore } from "@/stores";
 import { MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
 import { useUiStore } from "@/stores/uiStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
+import { computed, onMounted, PropType, ref, toRefs } from "vue";
 
 const props = defineProps({
   isMe: { type: Boolean, default: false },
@@ -81,6 +82,8 @@ const props = defineProps({
 const { isMe, did, stream } = toRefs(props);
 
 const uiStore = useUiStore();
+const modalStore = useModalStore();
+
 const { callWindowFullscreen } = storeToRefs(uiStore);
 
 const profile = ref<Profile>();
@@ -99,23 +102,8 @@ const showCameraDisabledWarning = computed(
     isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
 );
 
-// TODO: implement settings toggle
-function toggleSettings() {
-  console.log("toggle settings!");
-}
-
 // Get profile on mopunt
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
-
-watch(
-  () => props.mediaSettings,
-  async (newMediaSettings) => {
-    if (props.mediaSettings && !isMe?.value) {
-      console.log("New media settings for other agent", newMediaSettings);
-    }
-  },
-  { immediate: true }
-);
 </script>
 
 <style lang="scss" scoped>

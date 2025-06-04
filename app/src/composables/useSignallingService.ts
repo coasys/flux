@@ -1,4 +1,5 @@
 import { useAppStore, useRouteMemoryStore } from "@/stores";
+import { useAiStore } from "@/stores/aiStore";
 import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
 import { useWebrtcStore } from "@/stores/webrtcStore";
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
@@ -16,11 +17,13 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();
   const routeMemoryStore = useRouteMemoryStore();
+  const aiStore = useAiStore();
 
-  const { me, aiEnabled } = storeToRefs(appStore);
+  const { me } = storeToRefs(appStore);
   const { inCall, callRoute, myAgentStatus } = storeToRefs(webrtcStore);
   const { mediaSettings } = storeToRefs(mediaDevicesStore);
   const { currentRoute } = storeToRefs(routeMemoryStore);
+  const { aiEnabled } = storeToRefs(aiStore);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({

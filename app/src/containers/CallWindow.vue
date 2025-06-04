@@ -225,7 +225,12 @@
               </j-tooltip>
 
               <j-tooltip placement="top" title="Debug">
-                <j-button @click="toggleSettings" square circle size="lg">
+                <j-button
+                  @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings"
+                  square
+                  circle
+                  size="lg"
+                >
                   <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
@@ -258,7 +263,7 @@
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import MediaPlayer from "@/components/media-player/MediaPlayer.vue";
-import { useAppStore, useUiStore } from "@/stores";
+import { useAppStore, useModalStore, useUiStore } from "@/stores";
 import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
 import { useWebrtcStore } from "@/stores/webrtcStore";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
@@ -274,6 +279,7 @@ const appStore = useAppStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 const mediaDeviceStore = useMediaDevicesStore();
+const modalStore = useModalStore();
 
 const { me } = storeToRefs(appStore);
 const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
@@ -411,7 +417,6 @@ function stopResize() {
 
   // Update the call window fullscreen state in the UI store based on the channel view width after resize
   const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
-  console.log("channelViewWidth: ", channelViewWidth);
   uiStore.setCallWindowFullscreen(channelViewWidth === 0);
 
   // Reset the transition styles and remove the global resizing class
