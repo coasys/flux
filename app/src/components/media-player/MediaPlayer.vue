@@ -131,16 +131,15 @@ watch(
   background: var(--j-color-ui-50);
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0;
-  transition:
-    max-width 0.3s ease-out,
-    box-shadow 0.2s ease;
   aspect-ratio: 16/9;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
 
   .video {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     z-index: 2;
 
     transition: opacity 0.3s ease;

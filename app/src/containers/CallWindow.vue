@@ -105,7 +105,7 @@
       <div
         ref="callWindow"
         class="call-window"
-        :style="{ width: callWindowOpen ? callWindowWidth : 0, opacity: callWindowOpen ? 1 : 0 }"
+        :style="{ width: `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
       >
         <div class="resize-handle" @mousedown="startResize" />
 
@@ -136,7 +136,8 @@
             </j-flex>
           </j-box>
 
-          <div class="video-grid">
+          <div ref="videoGrid" class="video-grid" :style="{ '--number-of-columns': numberOfColumns }">
+            <!-- :class="[`video-count-${peers.length + 1}`, { fullscreen: callWindowFullscreen }]"  :class="`video-count-${peers.length + 1}`"-->
             <MediaPlayer
               isMe
               :did="me.did"
@@ -308,6 +309,58 @@ const peers = computed(() =>
     return { ...peer, agentState };
   })
 );
+// const videoGrid = ref<HTMLElement | null>(null);
+const numberOfColumns = computed(() => {
+  // Constraints:
+  // + if we base it purely on the number of participants it doesnt stack properly when the call window is small (3x3 grid when it should be 1x9 column etc.)
+  // + if we base it purely on the screen size, it doesn't account for the number of participants (3 columns on full screen even when there's only 2 participants)
+  const userCount = peers.value.length + 1;
+
+  // const videoGridWidth = videoGrid.value?.getBoundingClientRect().width || 0;
+
+  if (!inCall.value || userCount === 1 || callWindowWidth.value <= 600) return 1;
+  else if ((userCount > 1 && userCount < 5) || (callWindowWidth.value > 600 && callWindowWidth.value <= 1200)) return 2;
+  else if (userCount > 4 && userCount < 9) return 3;
+  else if (userCount > 8 && userCount < 13) return 4;
+  // else if (videoGridWidth < 300) return 1;
+  // else if (videoGridWidth < 600) return 2;
+  // else if (videoGridWidth < 900) return 3;
+  // else if (videoGridWidth < 1200) return 4;
+  // return 5;
+});
+
+// watch(numberOfColumns, (newValue) => {
+//   console.log("numberOfColumns: ", newValue);
+// });
+
+// const gridColumnSize = computed(() => {
+//   const userCount = peers.value.length;
+//   return window.innerWidth <= 768
+//     ? 1
+//     : !inCall.value
+//       ? 1
+//       : userCount === 1
+//         ? 1
+//         : userCount > 1 && userCount <= 4
+//           ? 2
+//           : userCount > 4 && userCount <= 9
+//             ? 3
+//             : 4;
+// });
+
+// const userCount = peers.value.length;
+// const gridColumnSize =
+//   window.innerWidth <= 768
+//     ? 1
+//     : false
+//       ? 1
+//       : userCount === 1
+//         ? 1
+//         : userCount > 1 && userCount <= 4
+//           ? 2
+//           : userCount > 4 && userCount <= 9
+//             ? 3
+//             : 4;
 
 function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
@@ -347,9 +400,9 @@ function startResize(e: any) {
 
 function doResize(e: any) {
   if (!rightSection.value) return;
-  const minWidth = rightSection.value?.getBoundingClientRect().width / 3 || 0;
+  const minWidth = rightSection.value?.getBoundingClientRect().width / 5 || 0;
   const newWidth = startWidth.value + (startX.value - e.clientX);
-  uiStore.setCallWindowWidth(`${Math.max(minWidth, newWidth)}px`);
+  uiStore.setCallWindowWidth(Math.max(minWidth, newWidth));
 }
 
 function stopResize() {
@@ -358,6 +411,7 @@ function stopResize() {
 
   // Update the call window fullscreen state in the UI store based on the channel view width after resize
   const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
+  console.log("channelViewWidth: ", channelViewWidth);
   uiStore.setCallWindowFullscreen(channelViewWidth === 0);
 
   // Reset the transition styles and remove the global resizing class
@@ -535,12 +589,291 @@ onMounted(getMyProfile);
         height: 100%;
         gap: var(--j-space-500);
 
+        // .video-grid {
+        //   display: grid;
+        //   grid-template-columns: repeat(var(--number-of-columns), 1fr);
+        //   grid-gap: var(--j-space-500);
+        //   width: 100%;
+        //   justify-content: center;
+        //   align-items: center;
+        // }
+
+        // .video-grid {
+        //   display: flex;
+        //   gap: var(--j-space-500);
+        //   width: 100%;
+        //   height: 100%;
+        //   flex-wrap: wrap;
+        //   justify-content: center;
+
+        //   > div {
+        //     min-width: 300px; /* Minimum width for each video */
+        //     max-width: calc((100% / var(--number-of-columns)) - 30px);
+        //     // width: calc(100% / var(--number-of-columns));
+        //   }
+        // }
+
+        // .video-grid {
+        //   display: grid;
+        //   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        //   grid-auto-rows: minmax(0, 1fr); /* Rows share available height */
+        //   gap: 10px;
+        //   min-width: 200px;
+        //   width: 100%; /* Adjustable by user */
+        //   max-width: 100%;
+        //   height: 100vh; /* Full height, adjust as needed */
+        //   box-sizing: border-box;
+        //   padding: 10px;
+        //   background: #f0f0f0;
+        //   resize: horizontal;
+        //   overflow: auto;
+        //   container-type: size; /* For container queries */
+        // }
+
+        // .video-grid:has(div:nth-child(1):nth-last-child(1)) {
+        //   grid-template-columns: 1fr;
+        // }
+
+        // /* Two videos: side by side if wider, stacked if taller */
+        // .video-grid:has(div:nth-child(2):nth-last-child(1)) {
+        //   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        // }
+
+        // /* Three videos: 2x2 grid, with bottom right empty */
+        // .video-grid:has(div:nth-child(3):nth-last-child(1)) {
+        //   grid-template-columns: repeat(2, minmax(200px, 1fr));
+        //   grid-template-rows: repeat(2, minmax(112.5px, auto)); /* 112.5px = 200px * (9/16) for 16:9 aspect */
+        // }
+        // .video-grid:has(div:nth-child(3):nth-last-child(1)) div:nth-child(3) {
+        //   grid-column: 1 / 3; /* Center the third video */
+        //   justify-self: center;
+        //   max-width: 200px; /* Maintain consistent size */
+        // }
+
+        // /* Handle aspect-based stacking for two videos using container queries */
+        // @container (min-aspect-ratio: 1/1) {
+        //   .video-grid:has(div:nth-child(2):nth-last-child(1)) {
+        //     grid-template-columns: repeat(2, minmax(200px, 1fr));
+        //   }
+        // }
+        // @container (max-aspect-ratio: 1/1) {
+        //   .video-grid:has(div:nth-child(2):nth-last-child(1)) {
+        //     grid-template-columns: 1fr;
+        //   }
+        // }
+
+        // .video-grid {
+        //   display: grid;
+        //   gap: var(--j-space-500);
+        //   width: 100%;
+        //   justify-content: center;
+
+        //   /* This is the magic - creates responsive columns */
+        //   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+
+        //   /* For all video containers */
+        //   & > * {
+        //     aspect-ratio: 16/9;
+        //     width: 100%;
+        //     position: relative;
+        //     overflow: hidden;
+        //   }
+
+        //   /* Special case for single video to prevent max-width issues */
+        //   &.video-count-1 {
+        //     grid-template-columns: minmax(0, 1fr);
+        //   }
+
+        //   /* Special case for 3 videos to center the last one */
+        //   &.video-count-3 {
+        //     & > :last-child {
+        //       grid-column: 1 / -1; /* Span all columns */
+        //       // max-width: min(100%, 600px);
+        //       width: min(100%, 600px);
+        //       justify-self: center;
+        //       margin-left: auto; /* Additional centering */
+        //       margin-right: auto; /* Additional centering */
+        //     }
+
+        //     // /* If wide enough for 3 columns, reset layout */
+        //     // @media (min-width: 900px) {
+        //     //   & > :last-child {
+        //     //     grid-column: auto;
+        //     //     max-width: none;
+        //     //   }
+        //     // }
+        //   }
+
+        //   /* When videos-5 and 2 columns, center the last one */
+        //   &.video-count-5 {
+        //     & > :last-child:nth-child(odd) {
+        //       justify-self: center;
+        //     }
+        //   }
+        // }
+
+        // .video-grid {
+        //   display: flex;
+        //   flex-wrap: wrap;
+        //   gap: var(--j-space-500);
+        //   width: 100%;
+        //   justify-content: center;
+
+        //   /* Each video */
+        //   & > * {
+        //     flex: 1 1 300px; /* Grow, shrink, base width */
+        //     min-width: 300px; /* Min width before wrapping */
+        //     max-width: 100%;
+        //     aspect-ratio: 16/9;
+        //     position: relative;
+        //     overflow: hidden;
+        //   }
+
+        //   /* Force single column on small screens */
+        //   @media (max-width: 500px) {
+        //     & > * {
+        //       flex-basis: 100%;
+        //       min-width: 100%;
+        //     }
+        //   }
+        // }
+
+        // very close
         .video-grid {
-          display: grid;
-          grid-template-columns: repeat(var(--grid-col-size), 1fr);
-          grid-gap: var(--j-space-500);
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--j-space-500);
           width: 100%;
+          justify-content: center;
+          align-items: center; /* Center vertically */
+
+          /* Each video container */
+          & > * {
+            /* Base sizing - consistent for all videos */
+            flex: 0 0 auto; /* Don't grow, don't shrink, use calculated width */
+            aspect-ratio: 16/9;
+
+            /* For positioning of content inside */
+            position: relative;
+            overflow: hidden;
+
+            /* Default sizing - one per row */
+            width: min(100%, 600px); /* Cap maximum size even in large windows */
+          }
+
+          /* When sidebar is narrow - stack vertically at full width */
+          @container (max-width: 400px) {
+            & > * {
+              width: 100%;
+            }
+          }
+
+          /* Small screens or 1 participant */
+          @container (min-width: 401px) and (max-width: 700px) {
+            & > * {
+              width: min(100%, 500px); /* Cap size on small screens */
+            }
+          }
+
+          /* Medium screens with 2-4 participants */
+          @container (min-width: 701px) and (max-width: 1200px) {
+            & > * {
+              width: calc(50% - var(--j-space-500) / 2); /* Two per row */
+            }
+
+            /* For odd numbers of participants, center the last one */
+            &:has(> :nth-child(odd):last-child) > :last-child {
+              /* If we have 1, 3, 5 participants, center the last one */
+              margin-left: auto;
+              margin-right: auto;
+            }
+          }
+
+          /* Large screens with 5+ participants */
+          @container (min-width: 1201px) {
+            & > * {
+              width: calc(33.333% - var(--j-space-500) * 2 / 3); /* Three per row */
+            }
+
+            /* If there's a remainder when dividing by 3, center the last row */
+            &:has(> :nth-child(3n + 1):last-child) > :last-child {
+              /* If we have 1, 4, 7, etc. participants (remainder 1) */
+              margin-left: auto;
+              margin-right: auto;
+            }
+
+            &:has(> :nth-child(3n + 2):last-child) {
+              /* If we have 2, 5, 8, etc. participants (remainder 2) */
+              & > :nth-last-child(2),
+              & > :last-child {
+                /* Center the last two */
+                margin-left: auto;
+                margin-right: auto;
+              }
+            }
+          }
         }
+
+        // .video-grid {
+        //   display: flex;
+        //   flex-wrap: wrap;
+        //   gap: var(--j-space-500);
+        //   width: 100%;
+        //   justify-content: center;
+
+        //   /* Each video container */
+        //   & > * {
+        //     /* Responsive sizing with min width and aspect ratio */
+        //     flex: 1 1 280px;
+        //     min-width: 280px; /* Minimum width before wrapping */
+        //     aspect-ratio: 16/9;
+
+        //     /* Ensure the container doesn't get too big */
+        //     max-width: 100%;
+
+        //     /* For positioning of content inside */
+        //     position: relative;
+        //     overflow: hidden;
+        //   }
+
+        //   /* When sidebar is narrow - stack vertically */
+        //   @container (max-width: 400px) {
+        //     & > * {
+        //       flex-basis: 100%;
+        //       min-width: 100%;
+        //     }
+        //   }
+
+        //   /* Optimize for 2 participants - always side by side if enough space */
+        //   &:has(> :nth-child(2):last-child) > * {
+        //     @container (min-width: 600px) {
+        //       flex-basis: calc(50% - var(--j-space-500) / 2);
+        //       max-width: calc(50% - var(--j-space-500) / 2);
+        //     }
+        //   }
+
+        //   /* Optimize for 3-4 participants - 2×2 grid if enough space */
+        //   &:has(> :nth-child(3)),
+        //   &:has(> :nth-child(4):last-child) {
+        //     @container (min-width: 600px) {
+        //       & > * {
+        //         flex-basis: calc(50% - var(--j-space-500) / 2);
+        //         max-width: calc(50% - var(--j-space-500) / 2);
+        //       }
+        //     }
+        //   }
+
+        //   /* For 5-6 participants - 3×2 grid if enough space */
+        //   &:has(> :nth-child(5)),
+        //   &:has(> :nth-child(6):last-child) {
+        //     @container (min-width: 900px) {
+        //       & > * {
+        //         flex-basis: calc(33.33% - var(--j-space-500) * 2 / 3);
+        //         max-width: calc(33.33% - var(--j-space-500) * 2 / 3);
+        //       }
+        //     }
+        //   }
+        // }
 
         .footer {
           display: flex;
