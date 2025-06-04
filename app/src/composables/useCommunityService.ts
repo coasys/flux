@@ -36,7 +36,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   perspective.ensureSDNASubjectClass(Topic);
 
   // Initialise the signalling service for the community
-  const signallingService = useSignallingService(perspective.uuid, neighbourhood);
+  const signallingService = useSignallingService(neighbourhood);
 
   // Model subscriptions (Todo: singularise communities when singular useModel hook available)
   const { entries: communities } = useModel({ perspective, model: Community });

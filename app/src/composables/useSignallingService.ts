@@ -11,7 +11,7 @@ const CLEANUP_INTERVAL = 15000;
 const MAX_AGE = 30000;
 const NEW_STATE = "agent/new-state";
 
-export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
+export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();
@@ -34,7 +34,142 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     lastUpdate: Date.now(),
   });
 
-  const agents = ref<Record<string, AgentState>>({});
+  const sampleAgents = {
+    // 1: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+    // 2: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+    // 3: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+    // 4: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+    // 5: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+    // 6: {
+    //   aiEnabled: true,
+    //   callRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   currentRoute: {
+    //     communityId: "a02bea89-bea5-44e7-b5bd-addbca5d14a5",
+    //     channelId: "literal://string:hltcycxtxxseyyurfessjzid",
+    //     viewId: "@coasys/flux-chat-view",
+    //   },
+    //   inCall: true,
+    //   lastUpdate: 1748628324292,
+    //   mediaSettings: {
+    //     audioEnabled: true,
+    //     videoEnabled: false,
+    //     screenShareEnabled: false,
+    //   },
+    //   processing: null,
+    //   status: "active",
+    // } as AgentState,
+  };
+
+  const agents = ref<Record<string, AgentState>>(sampleAgents);
   const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
 
   let heartbeatTimeout: NodeJS.Timeout | null = null;
@@ -134,6 +269,9 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   function startSignalling(): void {
     if (signalling.value) stopSignalling();
     signalling.value = true;
+
+    // Add my agent state to the agents map
+    agents.value[me.value.did] = myState.value;
 
     // Add signal handler
     neighbourhood.addSignalHandler(onSignal);
