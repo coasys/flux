@@ -443,6 +443,8 @@ export const useWebrtcStore = defineStore(
       myAgentStatus,
       agentsInCall,
       callHealth,
+      communityService,
+      // callPerspective,
       callCommunityName,
       callChannelName,
       peerConnections,
