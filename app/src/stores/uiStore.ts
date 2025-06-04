@@ -14,7 +14,7 @@ export const useUiStore = defineStore(
     const communitySidebarWidth = ref(330);
     const callWindowOpen = ref(false);
     const callWindowFullscreen = ref(false);
-    const callWindowWidth = ref("50%");
+    const callWindowWidth = ref(0);
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
     const windowState = ref<WindowState>("visible");
@@ -43,6 +43,10 @@ export const useUiStore = defineStore(
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
 
+      // Update the call window width
+      const fullWidth = window.innerWidth - communitySidebarWidth.value;
+      setCallWindowWidth(open ? fullWidth / 2 : 0);
+
       // Initialise a stream if the call window is opened without one
       if (open && !stream.value) mediaDevicesStore.createStream();
     }
@@ -53,11 +57,13 @@ export const useUiStore = defineStore(
 
     function toggleCallWindowFullscreen(): void {
       callWindowFullscreen.value = !callWindowFullscreen.value;
-      if (callWindowFullscreen.value) callWindowWidth.value = "100%";
-      else callWindowWidth.value = "50%";
+
+      // Update the call window width
+      const fullWidth = window.innerWidth - communitySidebarWidth.value;
+      callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
     }
 
-    function setCallWindowWidth(width: string): void {
+    function setCallWindowWidth(width: number): void {
       callWindowWidth.value = width;
     }
 
@@ -100,5 +106,5 @@ export const useUiStore = defineStore(
       setCallWindowFullscreen,
     };
   },
-  { persist: { omit: ["callWindowOpen", "callWindowWidth"] } }
+  { persist: { omit: ["callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
 );

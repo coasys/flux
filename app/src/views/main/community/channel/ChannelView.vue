@@ -3,7 +3,7 @@
     id="channel-view"
     class="channel-view"
     :class="{ expanded: isExpanded }"
-    :style="{ width: uiStore.callWindowOpen ? `calc(100% - ${uiStore.callWindowWidth}` : '100%' }"
+    :style="{ width: uiStore.callWindowOpen ? `calc(100% - ${uiStore.callWindowWidth}px` : '100%' }"
   >
     <div class="channel-view__header">
       <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
