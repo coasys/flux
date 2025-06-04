@@ -16,6 +16,7 @@ type Props = {
   signalsHealthy: boolean;
   signallingService: SignallingService;
   appStore: any;
+  aiStore: any;
   search: (type: SearchType, id: string) => void;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -44,6 +45,7 @@ export default function TimelineColumn({
   signalsHealthy,
   signallingService,
   appStore,
+  aiStore,
   search,
   getProfile,
 }: Props) {
@@ -189,7 +191,7 @@ export default function TimelineColumn({
 
   async function checkIfWeShouldStartProcessing(items: SynergyItem[]) {
     // Skip if processing already in progress, signals are unhealthy, our AI is disabled, or we're in another channel
-    if (processing.current || !signalsHealthy || !appStore.aiEnabled) return;
+    if (processing.current || !signalsHealthy || !aiStore.aiEnabled) return;
 
     // Skip if not enough unprocessed items
     const enoughItems = items.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;

@@ -12,7 +12,7 @@ const CLEANUP_INTERVAL = 15000;
 const MAX_AGE = 30000;
 const NEW_STATE = "agent/new-state";
 
-export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
+export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();
@@ -327,6 +327,14 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
+
+  // Dispatch custom event when agents map changes for webcomponent plugins to listen to
+  watch(
+    agents,
+    (newAgentsState) =>
+      window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
+    { deep: true, immediate: true }
+  );
 
   return {
     signalling,

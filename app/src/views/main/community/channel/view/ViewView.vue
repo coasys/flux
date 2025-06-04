@@ -19,6 +19,7 @@
       :appStore="appStore"
       :webrtcStore="webrtcStore"
       :uiStore="uiStore"
+      :aiStore="aiStore"
       :signallingService="signallingService"
       :router="router"
       :currentView="route.params.viewId"
@@ -31,7 +32,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useUiStore, useWebrtcStore } from "@/stores";
+import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
@@ -51,6 +52,7 @@ const route = useRoute();
 const appStore = useAppStore();
 const webrtcStore = useWebrtcStore();
 const uiStore = useUiStore();
+const aiStore = useAiStore();
 const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);

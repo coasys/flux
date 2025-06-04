@@ -14,6 +14,7 @@ type Props = {
   agent: AgentClient;
   appStore: any;
   uiStore: any;
+  aiStore: any;
   signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
 };
@@ -24,6 +25,7 @@ export default function SynergyDemoView({
   source,
   appStore,
   uiStore,
+  aiStore,
   signallingService,
   getProfile,
 }: Props) {
@@ -134,7 +136,8 @@ export default function SynergyDemoView({
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
-  useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? `${100 / 3}%` : "50%"), [showMatchColumn]);
+  // TODO: fix now that width must be number
+  // useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? `${100 / 3}%` : "50%"), [showMatchColumn]);
 
   return (
     <div className={styles.wrapper}>
@@ -163,6 +166,7 @@ export default function SynergyDemoView({
             signallingService={signallingService}
             signalsHealthy={signalsHealthy}
             appStore={appStore}
+            aiStore={aiStore}
             search={search}
             getProfile={getProfile}
           />
