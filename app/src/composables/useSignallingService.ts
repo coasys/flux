@@ -354,34 +354,3 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     sendSignal,
   };
 }
-
-// // Alternative aproach if sending each state value as a separate link instead of using a stringified object for all the values
-// const IS_ACTIVE = "agent/is-active";
-// const IS_PROCESSING = "agent/is-processing";
-// const IN_COMMUNITY = "agent/in-community";
-// const IN_CHANNEL = "agent/in-channel";
-// const IN_CALL = "agent/in-call";
-
-// if (signal.links.length > 1) {
-//   // Process heatbeat signal
-//   const author = signal.links[0]?.author;
-//   if (!author || author === me.did) return;
-
-//   // Reduce links into an object
-//   const state = signal.links.reduce(
-//     (acc: any, link: any) => {
-//       if (link.data.predicate === IS_ACTIVE) acc.state = link.target;
-//       if (link.data.predicate === IS_PROCESSING) acc.processing = link.target === "true";
-//       if (link.data.predicate === IN_COMMUNITY) acc.communityId = link.target;
-//       if (link.data.predicate === IN_CHANNEL) acc.channelId = link.target;
-//       if (link.data.predicate === IN_CALL) acc.inCall = link.target === "true";
-//       return acc;
-//     },
-//     { did: author }
-//   );
-
-//   // Update the agents state in the store
-//   agents.value[author] = { ...agents.value[author], ...state, lastSeen: Date.now() };
-// } else {
-//   // Process other signals
-// }
