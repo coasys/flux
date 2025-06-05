@@ -1,12 +1,13 @@
 import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from "@/stores";
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, ProcessingState, SignallingService } from "@coasys/flux-types";
+import { AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 
-const HEARTBEAT_INTERVAL = 5000;
-const CLEANUP_INTERVAL = 15000;
-const MAX_AGE = 30000;
+const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
+const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
+const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
+const MAX_AGE = 60000; // 60 seconds before "offline"
 const NEW_STATE = "agent/new-state";
 
 export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
@@ -235,10 +236,18 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
       // Mark agents as asleep or offline if their last update is older than the HEARTBEAT_INTERVAL
       const agent = agents.value[did];
       const timeSinceLastUpdate = now - agent.lastUpdate;
-      if (timeSinceLastUpdate <= HEARTBEAT_INTERVAL) return;
 
-      const status = timeSinceLastUpdate < MAX_AGE ? "asleep" : "offline";
-      if (status !== agent.status) agents.value[did] = { ...agent, status };
+      // Only evaluate if needed - don't change active to active
+      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD && agent.status === "active") return;
+
+      // Determine status based on time since last update
+      let newStatus: AgentStatus;
+      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD) newStatus = "active";
+      else if (timeSinceLastUpdate < MAX_AGE) newStatus = "asleep";
+      else newStatus = "offline";
+
+      // Only update if status changed
+      if (newStatus !== agent.status) agents.value[did] = { ...agent, status: newStatus };
     });
   }
 
