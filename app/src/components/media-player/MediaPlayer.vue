@@ -31,6 +31,12 @@
       </j-flex>
     </div>
 
+    <j-flex v-if="emojis.length" class="emojis" gap="400">
+      <div class="emoji" v-for="emoji in emojis">
+        {{ emoji.emoji }}
+      </div>
+    </j-flex>
+
     <j-flex class="footer" j="between" a="end">
       <span class="username">
         {{ profile?.username || "Unknown user" }}
@@ -60,9 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { useModalStore } from "@/stores";
-import { MediaPermissions, MediaSettings } from "@/stores/mediaDevicesStore";
-import { useUiStore } from "@/stores/uiStore";
+import { CallEmoji, MediaPermissions, MediaSettings, useModalStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -73,11 +77,9 @@ const props = defineProps({
   did: { type: String, default: "" },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
-  mediaSettings: {
-    type: Object as PropType<MediaSettings>,
-    default: null,
-  },
+  mediaSettings: { type: Object as PropType<MediaSettings>, default: null },
   mediaPermissions: { type: Object as PropType<MediaPermissions>, default: null },
+  emojis: { type: Array as PropType<CallEmoji[]>, default: [] },
 });
 const { isMe, did, stream } = toRefs(props);
 
@@ -102,7 +104,7 @@ const showCameraDisabledWarning = computed(
     isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
 );
 
-// Get profile on mopunt
+// Get profile on mount
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
 </script>
 
@@ -140,6 +142,17 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .emojis {
+    position: absolute;
+    left: var(--j-space-400);
+    top: var(--j-space-400);
+    z-index: 3;
+
+    .emoji {
+      font-size: 3rem;
+    }
   }
 
   .footer {

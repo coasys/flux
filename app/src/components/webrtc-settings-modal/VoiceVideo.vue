@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
+import { useMediaDevicesStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import Select from "./Select.vue";

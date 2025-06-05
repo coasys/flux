@@ -1,7 +1,4 @@
-import { useAppStore, useRouteMemoryStore } from "@/stores";
-import { useAiStore } from "@/stores/aiStore";
-import { useMediaDevicesStore } from "@/stores/mediaDevicesStore";
-import { useWebrtcStore } from "@/stores/webrtcStore";
+import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from "@/stores";
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
 import { AgentState, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -193,12 +190,12 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
 
   function onSignal(signal: PerspectiveExpression): void {
     const link = signal.data.links[0];
-    if (!link || link.author === me.value.did) return;
+    if (!link) return;
 
     const { author, data } = link;
     const { source, predicate, target } = data;
 
-    if (predicate === NEW_STATE) {
+    if (predicate === NEW_STATE && link.author === me.value.did) {
       // If this is their first broadcast, immediately broadcast my state so they dont have to wait for my next heartbeat
       if (target === "first-broadcast") broadcastState();
 

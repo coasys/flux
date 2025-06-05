@@ -145,6 +145,7 @@
               :stream="stream || undefined"
               :mediaSettings="mediaSettings"
               :mediaPermissions="mediaPermissions"
+              :emojis="callEmojis.filter((emoji) => emoji.author === me.did)"
             />
 
             <MediaPlayer
@@ -153,6 +154,7 @@
               :did="peer.did"
               :stream="peer.streams[0] || undefined"
               :mediaSettings="peer.agentState?.mediaSettings"
+              :emojis="callEmojis.filter((emoji) => emoji.author === peer.did)"
             />
           </div>
 
@@ -257,13 +259,24 @@
                 </j-button>
               </j-tooltip>
 
-              <j-tooltip placement="top" title="Leave">
+              <j-popover ref="emojiPopover" placement="top">
+                <j-tooltip slot="trigger" placement="top" title="Send reaction">
+                  <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
+                    <j-icon name="emoji-neutral" />
+                  </j-button>
+                </j-tooltip>
+                <div slot="content">
+                  <j-emoji-picker class="emoji-picker" @change="onEmojiClick" />
+                </div>
+              </j-popover>
+
+              <j-tooltip placement="top" title="Leave call">
                 <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
                   <j-icon name="telephone-x" />
                 </j-button>
               </j-tooltip>
 
-              <j-tooltip placement="top" title="Debug">
+              <j-tooltip placement="top" title="Call settings">
                 <j-button
                   @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings"
                   square
@@ -305,8 +318,15 @@
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import MediaPlayer from "@/components/media-player/MediaPlayer.vue";
 import Transcriber from "@/components/transcriber/Transcriber.vue";
-import { useAiStore, useAppStore, useMediaDevicesStore, useModalStore, useUiStore } from "@/stores";
-import { useWebrtcStore } from "@/stores/webrtcStore";
+import {
+  useAiStore,
+  useAppStore,
+  useMediaDevicesStore,
+  useModalStore,
+  useUiStore,
+  useWebrtcStore,
+  WEBRTC_EMOJI,
+} from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentStatus, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
@@ -331,6 +351,7 @@ const {
   inCall,
   callRoute,
   callHealth,
+  callEmojis,
   agentsInCall,
   callCommunityName,
   callChannelName,
@@ -347,6 +368,7 @@ const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
+const emojiPopover = ref<HTMLElement | null>(null);
 
 const callHealthColour = computed(findHealthColour);
 const connectionWarning = computed(findConnectionWarning);
@@ -479,6 +501,13 @@ async function getMyProfile() {
 
 function profileClick() {
   router.push({ name: "home", params: { did: me.value.did } });
+}
+
+function onEmojiClick(event: any) {
+  webrtcStore.messageAgentsInCall(WEBRTC_EMOJI, event.detail.native);
+  webrtcStore.displayEmoji(event.detail.native, me.value.did);
+
+  emojiPopover.value?.removeAttribute("open");
 }
 
 onMounted(getMyProfile);

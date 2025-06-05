@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { transcriptionModels, useAiStore } from "@/stores/aiStore";
+import { transcriptionModels, useAiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 
 const aiStore = useAiStore();

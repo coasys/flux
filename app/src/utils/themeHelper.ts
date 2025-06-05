@@ -1,6 +1,6 @@
-import { ThemeState } from "@/stores/types";
+import { Theme } from "@/stores";
 
-export function setTheme(theme: ThemeState): void {
+export function setTheme(theme: Theme): void {
   document.documentElement.style.setProperty("--j-color-primary-hue", theme.hue.toString());
   document.documentElement.style.setProperty("--j-color-saturation", theme.saturation + "%");
 

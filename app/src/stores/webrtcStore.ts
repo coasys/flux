@@ -1,7 +1,12 @@
+import guitarWav from "@/assets/audio/guitar.wav";
+import kissWav from "@/assets/audio/kiss.wav";
+import pigWav from "@/assets/audio/pig.wav";
+import popWav from "@/assets/audio/pop.wav";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel, Community } from "@coasys/flux-api";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
+import { Howl } from "howler";
 import { defineStore, storeToRefs } from "pinia";
 import { computed, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -17,6 +22,7 @@ import SimplePeer from "simple-peer/simplepeer.min.js";
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = "webrtc/signal";
 export const WEBRTC_STREAM_REQUEST = "webrtc/stream-request";
+export const WEBRTC_EMOJI = "webrtc/emoji";
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -37,20 +43,10 @@ const defaultIceServers = [
   },
 ] as IceServer[];
 
-export type IceServer = {
-  urls: string;
-  username?: string;
-  credential?: string;
-};
-
-export type PeerConnection = {
-  did: string;
-  peer: SimplePeer.Instance;
-  streams: MediaStream[];
-  initiator: boolean;
-};
-
-type AgentWithProfile = AgentState & Profile;
+export type IceServer = { urls: string; username?: string; credential?: string };
+export type PeerConnection = { did: string; peer: SimplePeer.Instance; streams: MediaStream[]; initiator: boolean };
+export type AgentWithProfile = AgentState & Profile;
+export type CallEmoji = { id: string; author: string; emoji: string };
 
 export const useWebrtcStore = defineStore(
   "webrtcStore",
@@ -74,6 +70,7 @@ export const useWebrtcStore = defineStore(
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
     const agentsInCall = ref<AgentWithProfile[]>([]);
     const callHealth = ref<CallHealth>("healthy");
+    const callEmojis = ref<CallEmoji[]>([]);
     const callCommunityName = computed(
       () => (communityService.value?.community as unknown as Community)?.name || "No community name"
     );
@@ -92,6 +89,21 @@ export const useWebrtcStore = defineStore(
 
     const iceServers = ref(defaultIceServers);
     let healthCheckInterval: NodeJS.Timeout | null = null;
+
+    const popSound = new Howl({ src: [popWav] });
+    const guitarSound = new Howl({ src: [guitarWav] });
+    const kissSound = new Howl({ src: [kissWav] });
+    const pigSound = new Howl({ src: [pigWav] });
+
+    function messageAgent(did: string, predicate: string, data?: any): void {
+      const source = data ? JSON.stringify(data) : "";
+      signallingService.value?.sendSignal({ source, predicate, target: JSON.stringify([did]) });
+    }
+
+    function messageAgentsInCall(predicate: string, data: any): void {
+      const target = JSON.stringify(agentsInCall.value.map((agent) => agent.did));
+      signallingService.value?.sendSignal({ source: JSON.stringify(data), predicate, target });
+    }
 
     function checkCallHealth(): void {
       // Check the last update time of each peer to determine if the call is healthy
@@ -124,19 +136,13 @@ export const useWebrtcStore = defineStore(
         trickle: true,
       }) as Instance;
 
-      peer.on("signal", (data) => {
-        if (!signallingService.value) return;
-        // Forward signal data through through the signalling service
-        signallingService.value.sendSignal({ source: JSON.stringify(data), predicate: WEBRTC_SIGNAL, target: did });
-      });
+      peer.on("signal", (data) => messageAgent(did, WEBRTC_SIGNAL, data));
 
       peer.on("connect", () => {
         // If no stream found after connection established, request it from the peer
         setTimeout(() => {
           const peerConnection = peerConnections.value.get(did);
-          if (peerConnection && !peerConnection.streams.length) {
-            signallingService.value?.sendSignal({ source: "", predicate: WEBRTC_STREAM_REQUEST, target: did });
-          }
+          if (peerConnection && !peerConnection.streams.length) messageAgent(did, WEBRTC_STREAM_REQUEST);
         }, 1000);
       });
 
@@ -220,13 +226,13 @@ export const useWebrtcStore = defineStore(
       if (!peerConnection) return;
 
       try {
-        // Destroy the peer connection
+        // Destory their connection
         peerConnection.peer.destroy();
       } catch (e) {
         console.error(`Error destroying peer ${did}:`, e);
       }
 
-      // Remove the peer entry from the map
+      // Remove their entry in the peerConnections map
       peerConnections.value.delete(did);
     }
 
@@ -246,21 +252,34 @@ export const useWebrtcStore = defineStore(
       });
     }
 
+    function displayEmoji(emoji: string, author: string) {
+      // Push the emoji to the call emojis array
+      const emojiId = crypto.randomUUID();
+      callEmojis.value.push({ id: emojiId, author, emoji });
+
+      // Remove the emoji after a timeout
+      setTimeout(() => (callEmojis.value = callEmojis.value.filter((emoji) => emoji.id !== emojiId)), 3500);
+
+      // Play emoji sound
+      if (emoji === "💋" || emoji === "😘") kissSound.play();
+      else if (emoji === "🎸") guitarSound.play();
+      else if (emoji === "🐷" || emoji === "🐖") pigSound.play();
+      else popSound.play();
+    }
+
     function webrtcSignalHandler(signal: PerspectiveExpression) {
       const link = signal.data.links[0];
-      if (!link || link.author === me.value.did) return;
+      if (!inCall.value || !link) return;
 
       const { author, data } = link;
       const { source, predicate, target } = data;
 
-      if (predicate === WEBRTC_SIGNAL && target === me.value.did) {
+      if (predicate === WEBRTC_SIGNAL && link.author !== me.value.did) {
         try {
-          // Skip if we're not in a call
-          if (!inCall.value) return;
-
           // Parse the signal data
           const signalData = JSON.parse(source);
-          if (!signalData || typeof signalData !== "object") return;
+          const recipients = JSON.parse(target) as string[];
+          if (!signalData || typeof signalData !== "object" || !recipients.includes(me.value.did)) return;
 
           // Find or create peer connection
           let peer: SimplePeer.Instance;
@@ -277,7 +296,10 @@ export const useWebrtcStore = defineStore(
         }
       }
 
-      if (predicate === WEBRTC_STREAM_REQUEST && target === me.value.did) {
+      if (predicate === WEBRTC_STREAM_REQUEST && link.author !== me.value.did) {
+        const recipients = JSON.parse(target) as string[];
+        if (!recipients.includes(me.value.did)) return;
+
         // Handle stream request from peer
         if (!localStream.value) return;
 
@@ -286,6 +308,19 @@ export const useWebrtcStore = defineStore(
 
         // Add local stream tracks to the peer connection
         localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+      }
+
+      if (predicate === WEBRTC_EMOJI) {
+        // Handle emoji reaction from peer
+        try {
+          const recipients = JSON.parse(target) as string[];
+          if (!recipients.includes(me.value.did)) return;
+
+          const emoji = JSON.parse(source);
+          displayEmoji(emoji, author);
+        } catch (e) {
+          console.error(`*** Error handling WebRTC emoji from ${author}:`, e);
+        }
       }
     }
 
@@ -443,8 +478,8 @@ export const useWebrtcStore = defineStore(
       myAgentStatus,
       agentsInCall,
       callHealth,
+      callEmojis,
       communityService,
-      // callPerspective,
       callCommunityName,
       callChannelName,
       peerConnections,
@@ -455,6 +490,9 @@ export const useWebrtcStore = defineStore(
       resetIceServers,
       joinRoom,
       leaveRoom,
+      messageAgent,
+      messageAgentsInCall,
+      displayEmoji,
     };
   },
   { persist: false }

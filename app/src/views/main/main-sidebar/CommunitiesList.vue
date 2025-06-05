@@ -44,8 +44,7 @@
 
 <script setup lang="ts">
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
-import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/stores";
-import { useWebrtcStore } from "@/stores/webrtcStore";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
