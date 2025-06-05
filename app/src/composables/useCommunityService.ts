@@ -12,7 +12,7 @@ import { useSignallingService } from "./useSignallingService";
 export interface CommunityService {
   perspective: PerspectiveProxy;
   neighbourhood: NeighbourhoodProxy;
-  isSynced: ComputedRef<boolean>;
+  isSynced: Ref<boolean>;
   isAuthor: ComputedRef<boolean>;
   community: ComputedRef<Community>;
   members: Ref<Partial<Profile>[]>;
@@ -45,8 +45,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   // Reactive state
   const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
-  const perspectiveState = ref(perspective.state);
-  const isSynced = computed(() => perspectiveState.value === PerspectiveState.Synced);
+  const isSynced = ref(true);
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
   const community = computed<Community>(() => communities.value[0]);
 
@@ -67,13 +66,12 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   }
 
-  // // // Initialize sync state listener
-  // perspective.value.addSyncStateChangeListener((state: PerspectiveState) => {
-  //   console.log("***** state from listener: ", state);
-  //   // @ts-ignore
-  //   // isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
-  //   return null;
-  // });
+  // Initialize sync state listener
+  perspective.addSyncStateChangeListener((state: PerspectiveState) => {
+    // @ts-ignore
+    isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
+    return null;
+  });
 
   getMembers();
 
