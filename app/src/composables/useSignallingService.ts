@@ -195,7 +195,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     const { author, data } = link;
     const { source, predicate, target } = data;
 
-    if (predicate === NEW_STATE && link.author === me.value.did) {
+    if (predicate === NEW_STATE && link.author !== me.value.did) {
       // If this is their first broadcast, immediately broadcast my state so they dont have to wait for my next heartbeat
       if (target === "first-broadcast") broadcastState();
 
