@@ -136,26 +136,60 @@
             </j-flex>
           </j-box>
 
-          <div ref="videoGrid" class="video-grid" :style="{ '--number-of-columns': numberOfColumns }">
-            <!-- :class="[`video-count-${peers.length + 1}`, { fullscreen: callWindowFullscreen }]"  :class="`video-count-${peers.length + 1}`"-->
-            <MediaPlayer
-              isMe
-              :did="me.did"
-              :inCall="inCall"
-              :stream="stream || undefined"
-              :mediaSettings="mediaSettings"
-              :mediaPermissions="mediaPermissions"
-              :emojis="callEmojis.filter((emoji) => emoji.author === me.did)"
-            />
+          <div
+            ref="videoGrid"
+            class="video-grid"
+            :class="selectedVideoLayout.class"
+            :style="{ '--number-of-columns': numberOfColumns }"
+          >
+            <!-- Focused layout -->
+            <template v-if="selectedVideoLayout.label === 'Focused'">
+              <!-- Main focused video -->
+              <MediaPlayer
+                :isMe="focusedParticipant.isMe"
+                :did="focusedParticipant.did"
+                :inCall="focusedParticipant.isMe ? inCall : true"
+                :stream="focusedParticipant.stream"
+                :mediaSettings="focusedParticipant.mediaSettings"
+                :mediaPermissions="focusedParticipant.mediaPermissions"
+                :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
+                @click="focusOnVideo(focusedParticipant.did)"
+              />
 
-            <MediaPlayer
-              v-for="peer in peers"
-              inCall
-              :did="peer.did"
-              :stream="peer.streams[0] || undefined"
-              :mediaSettings="peer.agentState?.mediaSettings"
-              :emojis="callEmojis.filter((emoji) => emoji.author === peer.did)"
-            />
+              <!-- Non-focused videos -->
+              <j-flex v-if="unfocusedParticipants.length" j="center">
+                <div class="bottom-row">
+                  <MediaPlayer
+                    v-for="participant in unfocusedParticipants"
+                    :key="participant.did"
+                    :isMe="participant.isMe"
+                    :did="participant.did"
+                    :inCall="participant.isMe ? inCall : true"
+                    :stream="participant.stream"
+                    :mediaSettings="participant.mediaSettings"
+                    :mediaPermissions="participant.mediaPermissions"
+                    :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
+                    @click="focusOnVideo(participant.did)"
+                  />
+                </div>
+              </j-flex>
+            </template>
+
+            <!-- Other layouts (fixed aspect ratio, flexible) -->
+            <template v-else>
+              <MediaPlayer
+                v-for="participant in allParticipants"
+                :key="participant.did"
+                :isMe="participant.isMe"
+                :did="participant.did"
+                :inCall="participant.isMe ? inCall : true"
+                :stream="participant.stream"
+                :mediaSettings="participant.mediaSettings"
+                :mediaPermissions="participant.mediaPermissions"
+                :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
+                @click="focusOnVideo(participant.did)"
+              />
+            </template>
           </div>
 
           <template v-if="!inCall">
@@ -177,122 +211,132 @@
             </j-button>
           </template>
 
-          <div v-if="inCall" class="footer-wrapper">
-            <div class="footer">
-              <j-tooltip
-                :placement="'top'"
-                :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'"
+          <div v-if="inCall" class="call-controls">
+            <j-tooltip :placement="'top'" :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'">
+              <j-button
+                :variant="mediaSettings.audioEnabled ? '' : 'primary'"
+                @click="mediaDeviceStore.toggleAudio"
+                square
+                circle
+                size="lg"
               >
-                <j-button
-                  :variant="mediaSettings.audioEnabled ? '' : 'primary'"
-                  @click="mediaDeviceStore.toggleAudio"
-                  square
-                  circle
-                  size="lg"
+                <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" />
+              </j-button>
+            </j-tooltip>
+
+            <j-tooltip :placement="'top'" :title="mediaSettings.videoEnabled ? 'Disable camera' : 'Enable camera'">
+              <j-button
+                :variant="mediaSettings.videoEnabled ? '' : 'primary'"
+                @click="mediaDeviceStore.toggleVideo"
+                square
+                circle
+                size="lg"
+                :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
+              >
+                <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" />
+              </j-button>
+            </j-tooltip>
+
+            <j-tooltip :placement="'top'" :title="mediaSettings.screenShareEnabled ? 'Stop sharing' : 'Share screen'">
+              <j-button
+                :variant="mediaSettings.screenShareEnabled ? 'primary' : ''"
+                @click="mediaDeviceStore.toggleScreenShare"
+                square
+                circle
+                size="lg"
+                :disabled="!inCall"
+              >
+                <j-icon name="display" />
+              </j-button>
+            </j-tooltip>
+
+            <j-tooltip placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
+              <j-button
+                :variant="transcriptionEnabled ? '' : 'primary'"
+                :disabled="!inCall"
+                @click="aiStore.toggleTranscriptionEnabled"
+                square
+                circle
+                size="lg"
+              >
+                <svg
+                  v-if="transcriptionEnabled"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="26"
+                  height="26"
+                  fill="var(--j-color-primary-600)"
+                  className="bi bi-type"
+                  viewBox="0 0 16 16"
                 >
-                  <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" />
-                </j-button>
-              </j-tooltip>
-
-              <j-tooltip :placement="'top'" :title="mediaSettings.videoEnabled ? 'Disable camera' : 'Enable camera'">
-                <j-button
-                  :variant="mediaSettings.videoEnabled ? '' : 'primary'"
-                  @click="mediaDeviceStore.toggleVideo"
-                  square
-                  circle
-                  size="lg"
-                  :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
+                  <path
+                    d="M 2.244,12.681 3.187,9.878 H 6.66 l 0.944,2.803 H 8.86 L 5.54,3.35 H 4.322 L 1,12.681 Z M 4.944,4.758 6.34,8.914 H 3.51 l 1.4,-4.156 z m 9.146,7.027 h 0.035 v 0.896 h 1.128 V 7.725 c 0,-1.51 -1.114,-2.345 -2.646,-2.345 -1.736,0 -2.59,0.916 -2.666,2.174 h 1.108 c 0.068,-0.718 0.595,-1.19 1.517,-1.19 0.971,0 1.518,0.52 1.518,1.464 V 8.559 H 12.19 c -1.647,0.007 -2.522,0.8 -2.522,2.058 0,1.319 0.957,2.18 2.345,2.18 1.06,0 1.716,-0.43 2.078,-1.011 z m -1.763,0.035 c -0.752,0 -1.456,-0.397 -1.456,-1.244 0,-0.65 0.424,-1.115 1.408,-1.115 h 1.805 v 0.834 c 0,0.896 -0.752,1.525 -1.757,1.525"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="26"
+                  height="26"
+                  fill="000"
+                  className="bi bi-type"
+                  viewBox="0 0 16 16"
                 >
-                  <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" />
+                  <path
+                    d="M 12.607422 5.3808594 C 10.871424 5.3808594 10.017406 6.2966888 9.9414062 7.5546875 L 11.048828 7.5546875 C 11.116828 6.8366882 11.644407 6.3632812 12.566406 6.3632812 C 13.537405 6.3632812 14.083984 6.8841259 14.083984 7.828125 L 14.083984 8.5585938 L 12.189453 8.5585938 C 11.72128 8.5605836 11.32347 8.6322675 10.982422 8.7539062 L 11.75 9.5214844 C 11.905681 9.4849042 12.077836 9.4609375 12.279297 9.4609375 L 14.083984 9.4609375 L 14.083984 10.294922 C 14.083984 10.732791 13.902511 11.104958 13.601562 11.373047 L 14.058594 11.830078 C 14.068779 11.814645 14.082041 11.800814 14.091797 11.785156 L 14.125 11.785156 L 14.125 11.896484 L 14.910156 12.681641 L 15.253906 12.681641 L 15.253906 7.7246094 C 15.253906 6.2146109 14.13942 5.3808594 12.607422 5.3808594 z M 3.4824219 5.7109375 L 1 12.681641 L 2.2441406 12.681641 L 3.1875 9.8789062 L 6.6601562 9.8789062 L 7.6035156 12.681641 L 8.859375 12.681641 L 7.9785156 10.207031 L 6.1640625 8.3925781 L 6.3398438 8.9140625 L 3.5097656 8.9140625 L 4.3105469 6.5390625 L 3.4824219 5.7109375 z"
+                  />
+                  <path d="m 1.7879982,2.4928069 11.9999998,12.0000001 0.708,-0.708 -11.9999998,-12 z" />
+                </svg>
+              </j-button>
+            </j-tooltip>
+
+            <j-popover ref="emojiPopover" placement="top">
+              <j-tooltip slot="trigger" placement="top" title="Send reaction">
+                <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
+                  <j-icon name="emoji-neutral" />
                 </j-button>
               </j-tooltip>
+              <div slot="content">
+                <j-emoji-picker class="emoji-picker" @change="onEmojiClick" />
+              </div>
+            </j-popover>
 
-              <j-tooltip :placement="'top'" :title="mediaSettings.screenShareEnabled ? 'Stop sharing' : 'Share screen'">
-                <j-button
-                  :variant="mediaSettings.screenShareEnabled ? 'primary' : ''"
-                  @click="mediaDeviceStore.toggleScreenShare"
-                  square
-                  circle
-                  size="lg"
-                  :disabled="!inCall"
+            <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
+              <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
+                <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
+              </j-button>
+            </j-tooltip>
+
+            <j-popover ref="videoLayoutPopover" placement="top">
+              <j-tooltip slot="trigger" placement="top" title="Video layout options">
+                <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
+                  <j-icon name="grid" />
+                </j-button>
+              </j-tooltip>
+              <j-menu slot="content">
+                <j-menu-item
+                  v-for="option in videoLayoutOptions"
+                  @click="() => selectVideoLayout(option)"
+                  :selected="option.label === selectedVideoLayout.label"
                 >
-                  <j-icon name="display" />
-                </j-button>
-              </j-tooltip>
+                  <j-flex a="center" gap="400">
+                    <j-icon :name="option.icon" color="ui-500" />
+                    <j-text nomargin>{{ option.label }}</j-text>
+                  </j-flex>
+                </j-menu-item>
+              </j-menu>
+            </j-popover>
 
-              <j-tooltip placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
-                <j-button
-                  :variant="transcriptionEnabled ? '' : 'primary'"
-                  :disabled="!inCall"
-                  @click="aiStore.toggleTranscriptionEnabled"
-                  square
-                  circle
-                  size="lg"
-                >
-                  <svg
-                    v-if="transcriptionEnabled"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="26"
-                    height="26"
-                    fill="var(--j-color-primary-600)"
-                    className="bi bi-type"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M 2.244,12.681 3.187,9.878 H 6.66 l 0.944,2.803 H 8.86 L 5.54,3.35 H 4.322 L 1,12.681 Z M 4.944,4.758 6.34,8.914 H 3.51 l 1.4,-4.156 z m 9.146,7.027 h 0.035 v 0.896 h 1.128 V 7.725 c 0,-1.51 -1.114,-2.345 -2.646,-2.345 -1.736,0 -2.59,0.916 -2.666,2.174 h 1.108 c 0.068,-0.718 0.595,-1.19 1.517,-1.19 0.971,0 1.518,0.52 1.518,1.464 V 8.559 H 12.19 c -1.647,0.007 -2.522,0.8 -2.522,2.058 0,1.319 0.957,2.18 2.345,2.18 1.06,0 1.716,-0.43 2.078,-1.011 z m -1.763,0.035 c -0.752,0 -1.456,-0.397 -1.456,-1.244 0,-0.65 0.424,-1.115 1.408,-1.115 h 1.805 v 0.834 c 0,0.896 -0.752,1.525 -1.757,1.525"
-                    />
-                  </svg>
-                  <svg
-                    v-else
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="26"
-                    height="26"
-                    fill="000"
-                    className="bi bi-type"
-                    viewBox="0 0 16 16"
-                  >
-                    <path
-                      d="M 12.607422 5.3808594 C 10.871424 5.3808594 10.017406 6.2966888 9.9414062 7.5546875 L 11.048828 7.5546875 C 11.116828 6.8366882 11.644407 6.3632812 12.566406 6.3632812 C 13.537405 6.3632812 14.083984 6.8841259 14.083984 7.828125 L 14.083984 8.5585938 L 12.189453 8.5585938 C 11.72128 8.5605836 11.32347 8.6322675 10.982422 8.7539062 L 11.75 9.5214844 C 11.905681 9.4849042 12.077836 9.4609375 12.279297 9.4609375 L 14.083984 9.4609375 L 14.083984 10.294922 C 14.083984 10.732791 13.902511 11.104958 13.601562 11.373047 L 14.058594 11.830078 C 14.068779 11.814645 14.082041 11.800814 14.091797 11.785156 L 14.125 11.785156 L 14.125 11.896484 L 14.910156 12.681641 L 15.253906 12.681641 L 15.253906 7.7246094 C 15.253906 6.2146109 14.13942 5.3808594 12.607422 5.3808594 z M 3.4824219 5.7109375 L 1 12.681641 L 2.2441406 12.681641 L 3.1875 9.8789062 L 6.6601562 9.8789062 L 7.6035156 12.681641 L 8.859375 12.681641 L 7.9785156 10.207031 L 6.1640625 8.3925781 L 6.3398438 8.9140625 L 3.5097656 8.9140625 L 4.3105469 6.5390625 L 3.4824219 5.7109375 z"
-                    />
-                    <path d="m 1.7879982,2.4928069 11.9999998,12.0000001 0.708,-0.708 -11.9999998,-12 z" />
-                  </svg>
-                </j-button>
-              </j-tooltip>
+            <j-tooltip placement="top" title="Call settings">
+              <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle size="lg">
+                <j-icon name="gear" />
+              </j-button>
+            </j-tooltip>
 
-              <j-popover ref="emojiPopover" placement="top">
-                <j-tooltip slot="trigger" placement="top" title="Send reaction">
-                  <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
-                    <j-icon name="emoji-neutral" />
-                  </j-button>
-                </j-tooltip>
-                <div slot="content">
-                  <j-emoji-picker class="emoji-picker" @change="onEmojiClick" />
-                </div>
-              </j-popover>
-
-              <j-tooltip placement="top" title="Leave call">
-                <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
-                  <j-icon name="telephone-x" />
-                </j-button>
-              </j-tooltip>
-
-              <j-tooltip placement="top" title="Call settings">
-                <j-button
-                  @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings"
-                  square
-                  circle
-                  size="lg"
-                >
-                  <j-icon name="gear" />
-                </j-button>
-              </j-tooltip>
-
-              <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
-                <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
-                  <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
-                </j-button>
-              </j-tooltip>
-            </div>
+            <j-tooltip placement="top" title="Leave call">
+              <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
+                <j-icon name="telephone-x" />
+              </j-button>
+            </j-tooltip>
           </div>
 
           <Transcriber v-if="inCall && transcriptionEnabled" />
@@ -330,7 +374,7 @@ import {
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentStatus, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -359,16 +403,26 @@ const {
   peerConnections,
 } = storeToRefs(webrtcStore);
 
-const statusStates = ["active", "asleep", "busy", "invisible"] as AgentStatus[];
+type LayoutOption = { label: string; class: string; icon: string };
+
+const statusStates: AgentStatus[] = ["active", "asleep", "busy", "invisible"];
+const videoLayoutOptions: LayoutOption[] = [
+  { label: "16/9 aspect ratio", class: "16-by-9", icon: "aspect-ratio" },
+  { label: "Flexible aspect ratio", class: "flexible", icon: "arrows-fullscreen" },
+  { label: "Focused", class: "focused", icon: "person-video2" },
+];
 
 const myProfile = ref<Profile | null>(null);
-const showAgentStatusMenu = ref(false);
 const callWindow = ref<HTMLElement | null>(null);
 const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
 const startX = ref(0);
 const startWidth = ref(0);
+const showAgentStatusMenu = ref(false);
+const selectedVideoLayout = ref(videoLayoutOptions[0]);
+const focusedVideoId = ref("");
 const emojiPopover = ref<HTMLElement | null>(null);
+const videoLayoutPopover = ref<HTMLElement | null>(null);
 
 const callHealthColour = computed(findHealthColour);
 const connectionWarning = computed(findConnectionWarning);
@@ -379,58 +433,41 @@ const peers = computed(() =>
     return { ...peer, agentState };
   })
 );
-// const videoGrid = ref<HTMLElement | null>(null);
-const numberOfColumns = computed(() => {
-  // Constraints:
-  // + if we base it purely on the number of participants it doesnt stack properly when the call window is small (3x3 grid when it should be 1x9 column etc.)
-  // + if we base it purely on the screen size, it doesn't account for the number of participants (3 columns on full screen even when there's only 2 participants)
-  const userCount = peers.value.length + 1;
-
-  // const videoGridWidth = videoGrid.value?.getBoundingClientRect().width || 0;
-
-  if (!inCall.value || userCount === 1 || callWindowWidth.value <= 600) return 1;
-  else if ((userCount > 1 && userCount < 5) || (callWindowWidth.value > 600 && callWindowWidth.value <= 1200)) return 2;
-  else if (userCount > 4 && userCount < 9) return 3;
-  else if (userCount > 8 && userCount < 13) return 4;
-  // else if (videoGridWidth < 300) return 1;
-  // else if (videoGridWidth < 600) return 2;
-  // else if (videoGridWidth < 900) return 3;
-  // else if (videoGridWidth < 1200) return 4;
-  // return 5;
+const allParticipants = computed(() => {
+  const myAgent = {
+    isMe: true,
+    did: me.value.did,
+    stream: stream.value || undefined,
+    mediaSettings: mediaSettings.value,
+    agentState: null,
+    mediaPermissions: mediaPermissions.value,
+  };
+  const otherAgents = peers.value.map((peer) => ({
+    isMe: false,
+    did: peer.did,
+    stream: peer.streams?.[0] || undefined,
+    mediaSettings: peer.agentState?.mediaSettings,
+    agentState: peer.agentState,
+    mediaPermissions: undefined,
+  }));
+  return [myAgent, ...otherAgents];
 });
-
-// watch(numberOfColumns, (newValue) => {
-//   console.log("numberOfColumns: ", newValue);
-// });
-
-// const gridColumnSize = computed(() => {
-//   const userCount = peers.value.length;
-//   return window.innerWidth <= 768
-//     ? 1
-//     : !inCall.value
-//       ? 1
-//       : userCount === 1
-//         ? 1
-//         : userCount > 1 && userCount <= 4
-//           ? 2
-//           : userCount > 4 && userCount <= 9
-//             ? 3
-//             : 4;
-// });
-
-// const userCount = peers.value.length;
-// const gridColumnSize =
-//   window.innerWidth <= 768
-//     ? 1
-//     : false
-//       ? 1
-//       : userCount === 1
-//         ? 1
-//         : userCount > 1 && userCount <= 4
-//           ? 2
-//           : userCount > 4 && userCount <= 9
-//             ? 3
-//             : 4;
+const focusedParticipant = computed(() => {
+  const focusedId = focusedVideoId.value || me.value.did;
+  return allParticipants.value.find((p) => p.did === focusedId) || allParticipants.value[0];
+});
+const unfocusedParticipants = computed(() => {
+  const focusedId = focusedVideoId.value || me.value.did;
+  return allParticipants.value.filter((p) => p.did !== focusedId);
+});
+const numberOfColumns = computed(() => {
+  const userCount = peers.value.length + 1;
+  if (userCount === 1 || callWindowWidth.value <= 600 || selectedVideoLayout.value.label === "Focused") return 1;
+  else if ((userCount > 1 && userCount < 5) || (callWindowWidth.value > 600 && callWindowWidth.value <= 1200)) return 2;
+  else if (userCount > 4 && userCount < 10) return 3;
+  else if (userCount > 8 && userCount < 17) return 4;
+  return 5;
+});
 
 function findHealthColour() {
   if (callHealth.value === "healthy") return "success-500";
@@ -509,6 +546,29 @@ function onEmojiClick(event: any) {
 
   emojiPopover.value?.removeAttribute("open");
 }
+
+function selectVideoLayout(layout: LayoutOption) {
+  selectedVideoLayout.value = layout;
+  videoLayoutPopover.value?.removeAttribute("open");
+}
+
+function focusOnVideo(did: string) {
+  if (!inCall.value) return;
+
+  focusedVideoId.value = did;
+  if (selectedVideoLayout.value.label !== "Focused") {
+    selectedVideoLayout.value = videoLayoutOptions[2];
+  }
+}
+
+// Reset layout & focused video when the call window opens
+// TODO: based this on leaving the call, not just opening the window, & store preferences in the webrtc store
+watch(callWindowOpen, (open) => {
+  if (open) {
+    selectedVideoLayout.value = videoLayoutOptions[0];
+    focusedVideoId.value = "";
+  }
+});
 
 onMounted(getMyProfile);
 </script>
@@ -637,6 +697,7 @@ onMounted(getMyProfile);
       .call-window-header {
         display: flex;
         justify-content: space-between;
+        margin-bottom: var(--j-space-400);
 
         .close-button {
           all: unset;
@@ -657,296 +718,71 @@ onMounted(getMyProfile);
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100%;
+        height: calc(100% - 80px);
         gap: var(--j-space-500);
 
-        // .video-grid {
-        //   display: grid;
-        //   grid-template-columns: repeat(var(--number-of-columns), 1fr);
-        //   grid-gap: var(--j-space-500);
-        //   width: 100%;
-        //   justify-content: center;
-        //   align-items: center;
-        // }
-
-        // .video-grid {
-        //   display: flex;
-        //   gap: var(--j-space-500);
-        //   width: 100%;
-        //   height: 100%;
-        //   flex-wrap: wrap;
-        //   justify-content: center;
-
-        //   > div {
-        //     min-width: 300px; /* Minimum width for each video */
-        //     max-width: calc((100% / var(--number-of-columns)) - 30px);
-        //     // width: calc(100% / var(--number-of-columns));
-        //   }
-        // }
-
-        // .video-grid {
-        //   display: grid;
-        //   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        //   grid-auto-rows: minmax(0, 1fr); /* Rows share available height */
-        //   gap: 10px;
-        //   min-width: 200px;
-        //   width: 100%; /* Adjustable by user */
-        //   max-width: 100%;
-        //   height: 100vh; /* Full height, adjust as needed */
-        //   box-sizing: border-box;
-        //   padding: 10px;
-        //   background: #f0f0f0;
-        //   resize: horizontal;
-        //   overflow: auto;
-        //   container-type: size; /* For container queries */
-        // }
-
-        // .video-grid:has(div:nth-child(1):nth-last-child(1)) {
-        //   grid-template-columns: 1fr;
-        // }
-
-        // /* Two videos: side by side if wider, stacked if taller */
-        // .video-grid:has(div:nth-child(2):nth-last-child(1)) {
-        //   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        // }
-
-        // /* Three videos: 2x2 grid, with bottom right empty */
-        // .video-grid:has(div:nth-child(3):nth-last-child(1)) {
-        //   grid-template-columns: repeat(2, minmax(200px, 1fr));
-        //   grid-template-rows: repeat(2, minmax(112.5px, auto)); /* 112.5px = 200px * (9/16) for 16:9 aspect */
-        // }
-        // .video-grid:has(div:nth-child(3):nth-last-child(1)) div:nth-child(3) {
-        //   grid-column: 1 / 3; /* Center the third video */
-        //   justify-self: center;
-        //   max-width: 200px; /* Maintain consistent size */
-        // }
-
-        // /* Handle aspect-based stacking for two videos using container queries */
-        // @container (min-aspect-ratio: 1/1) {
-        //   .video-grid:has(div:nth-child(2):nth-last-child(1)) {
-        //     grid-template-columns: repeat(2, minmax(200px, 1fr));
-        //   }
-        // }
-        // @container (max-aspect-ratio: 1/1) {
-        //   .video-grid:has(div:nth-child(2):nth-last-child(1)) {
-        //     grid-template-columns: 1fr;
-        //   }
-        // }
-
-        // .video-grid {
-        //   display: grid;
-        //   gap: var(--j-space-500);
-        //   width: 100%;
-        //   justify-content: center;
-
-        //   /* This is the magic - creates responsive columns */
-        //   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-
-        //   /* For all video containers */
-        //   & > * {
-        //     aspect-ratio: 16/9;
-        //     width: 100%;
-        //     position: relative;
-        //     overflow: hidden;
-        //   }
-
-        //   /* Special case for single video to prevent max-width issues */
-        //   &.video-count-1 {
-        //     grid-template-columns: minmax(0, 1fr);
-        //   }
-
-        //   /* Special case for 3 videos to center the last one */
-        //   &.video-count-3 {
-        //     & > :last-child {
-        //       grid-column: 1 / -1; /* Span all columns */
-        //       // max-width: min(100%, 600px);
-        //       width: min(100%, 600px);
-        //       justify-self: center;
-        //       margin-left: auto; /* Additional centering */
-        //       margin-right: auto; /* Additional centering */
-        //     }
-
-        //     // /* If wide enough for 3 columns, reset layout */
-        //     // @media (min-width: 900px) {
-        //     //   & > :last-child {
-        //     //     grid-column: auto;
-        //     //     max-width: none;
-        //     //   }
-        //     // }
-        //   }
-
-        //   /* When videos-5 and 2 columns, center the last one */
-        //   &.video-count-5 {
-        //     & > :last-child:nth-child(odd) {
-        //       justify-self: center;
-        //     }
-        //   }
-        // }
-
-        // .video-grid {
-        //   display: flex;
-        //   flex-wrap: wrap;
-        //   gap: var(--j-space-500);
-        //   width: 100%;
-        //   justify-content: center;
-
-        //   /* Each video */
-        //   & > * {
-        //     flex: 1 1 300px; /* Grow, shrink, base width */
-        //     min-width: 300px; /* Min width before wrapping */
-        //     max-width: 100%;
-        //     aspect-ratio: 16/9;
-        //     position: relative;
-        //     overflow: hidden;
-        //   }
-
-        //   /* Force single column on small screens */
-        //   @media (max-width: 500px) {
-        //     & > * {
-        //       flex-basis: 100%;
-        //       min-width: 100%;
-        //     }
-        //   }
-        // }
-
-        // very close
         .video-grid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: var(--j-space-500);
+          display: grid;
+          grid-template-columns: repeat(var(--number-of-columns), 1fr);
+          grid-gap: var(--j-space-400);
           width: 100%;
-          justify-content: center;
-          align-items: center; /* Center vertically */
+          max-height: 100%;
+          overflow-y: auto;
+          grid-auto-rows: min-content;
 
-          /* Each video container */
-          & > * {
-            /* Base sizing - consistent for all videos */
-            flex: 0 0 auto; /* Don't grow, don't shrink, use calculated width */
+          > div {
             aspect-ratio: 16/9;
-
-            /* For positioning of content inside */
-            position: relative;
-            overflow: hidden;
-
-            /* Default sizing - one per row */
-            width: min(100%, 600px); /* Cap maximum size even in large windows */
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            border-radius: 10px;
           }
 
-          /* When sidebar is narrow - stack vertically at full width */
-          @container (max-width: 400px) {
-            & > * {
+          &.flexible {
+            height: 100%;
+            grid-auto-rows: unset;
+
+            > div {
               width: 100%;
+              height: 100%;
+              aspect-ratio: unset;
+              min-height: 260px;
             }
           }
 
-          /* Small screens or 1 participant */
-          @container (min-width: 401px) and (max-width: 700px) {
-            & > * {
-              width: min(100%, 500px); /* Cap size on small screens */
-            }
-          }
+          &.focused {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            contain: strict;
 
-          /* Medium screens with 2-4 participants */
-          @container (min-width: 701px) and (max-width: 1200px) {
-            & > * {
-              width: calc(50% - var(--j-space-500) / 2); /* Two per row */
-            }
+            > div {
+              flex: 1;
+              width: 100%;
+              height: 100%;
+              aspect-ratio: unset;
+              max-height: calc(100% - 140px);
 
-            /* For odd numbers of participants, center the last one */
-            &:has(> :nth-child(odd):last-child) > :last-child {
-              /* If we have 1, 3, 5 participants, center the last one */
-              margin-left: auto;
-              margin-right: auto;
-            }
-          }
-
-          /* Large screens with 5+ participants */
-          @container (min-width: 1201px) {
-            & > * {
-              width: calc(33.333% - var(--j-space-500) * 2 / 3); /* Three per row */
+              &.no-bottom-row {
+                max-height: calc(100% - 20px);
+              }
             }
 
-            /* If there's a remainder when dividing by 3, center the last row */
-            &:has(> :nth-child(3n + 1):last-child) > :last-child {
-              /* If we have 1, 4, 7, etc. participants (remainder 1) */
-              margin-left: auto;
-              margin-right: auto;
-            }
+            .bottom-row {
+              display: flex;
+              overflow-x: auto;
+              gap: var(--j-space-400);
+              height: 120px;
 
-            &:has(> :nth-child(3n + 2):last-child) {
-              /* If we have 2, 5, 8, etc. participants (remainder 2) */
-              & > :nth-last-child(2),
-              & > :last-child {
-                /* Center the last two */
-                margin-left: auto;
-                margin-right: auto;
+              > div {
+                flex: 0 0 auto;
               }
             }
           }
         }
 
-        // .video-grid {
-        //   display: flex;
-        //   flex-wrap: wrap;
-        //   gap: var(--j-space-500);
-        //   width: 100%;
-        //   justify-content: center;
-
-        //   /* Each video container */
-        //   & > * {
-        //     /* Responsive sizing with min width and aspect ratio */
-        //     flex: 1 1 280px;
-        //     min-width: 280px; /* Minimum width before wrapping */
-        //     aspect-ratio: 16/9;
-
-        //     /* Ensure the container doesn't get too big */
-        //     max-width: 100%;
-
-        //     /* For positioning of content inside */
-        //     position: relative;
-        //     overflow: hidden;
-        //   }
-
-        //   /* When sidebar is narrow - stack vertically */
-        //   @container (max-width: 400px) {
-        //     & > * {
-        //       flex-basis: 100%;
-        //       min-width: 100%;
-        //     }
-        //   }
-
-        //   /* Optimize for 2 participants - always side by side if enough space */
-        //   &:has(> :nth-child(2):last-child) > * {
-        //     @container (min-width: 600px) {
-        //       flex-basis: calc(50% - var(--j-space-500) / 2);
-        //       max-width: calc(50% - var(--j-space-500) / 2);
-        //     }
-        //   }
-
-        //   /* Optimize for 3-4 participants - 2×2 grid if enough space */
-        //   &:has(> :nth-child(3)),
-        //   &:has(> :nth-child(4):last-child) {
-        //     @container (min-width: 600px) {
-        //       & > * {
-        //         flex-basis: calc(50% - var(--j-space-500) / 2);
-        //         max-width: calc(50% - var(--j-space-500) / 2);
-        //       }
-        //     }
-        //   }
-
-        //   /* For 5-6 participants - 3×2 grid if enough space */
-        //   &:has(> :nth-child(5)),
-        //   &:has(> :nth-child(6):last-child) {
-        //     @container (min-width: 900px) {
-        //       & > * {
-        //         flex-basis: calc(33.33% - var(--j-space-500) * 2 / 3);
-        //         max-width: calc(33.33% - var(--j-space-500) * 2 / 3);
-        //       }
-        //     }
-        //   }
-        // }
-
-        .footer {
+        .call-controls {
           display: flex;
           flex-wrap: wrap;
           align-items: center;
@@ -960,6 +796,8 @@ onMounted(getMyProfile);
       }
 
       .call-window-footer {
+        margin-top: var(--j-space-500);
+
         .disclaimer {
           display: flex;
           flex-direction: column;
@@ -976,20 +814,3 @@ onMounted(getMyProfile);
   }
 }
 </style>
-
-<!-- async function registerWebcomponent() {
-  const generatedName = await generateWCName("@coasys/flux-webrtc-view");
-
-  if (!customElements.get(generatedName)) {
-    const module = await fetchFluxApp("@coasys/flux-webrtc-view");
-    if (module?.default) {
-      try {
-        await customElements.define(generatedName, module.default);
-      } catch (e) {
-        console.error(`Failed to define custom element ${generatedName}:`, e);
-      }
-    }
-  }
-
-  webcomponentName.value = generatedName;
-} -->

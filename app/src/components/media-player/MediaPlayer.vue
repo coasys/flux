@@ -1,5 +1,5 @@
 <template>
-  <div class="media-player">
+  <div class="media-player" @click="onClick">
     <video
       class="video"
       :srcObject.prop="stream"
@@ -30,6 +30,10 @@
         <j-text size="400" color="warning-500" nomargin>Please enable it in the browser</j-text>
       </j-flex>
     </div>
+
+    <!-- <div class="loading">
+      <j-spinner />
+    </div> -->
 
     <j-flex v-if="emojis.length" class="emojis" gap="400">
       <div class="emoji" v-for="emoji in emojis">
@@ -80,6 +84,7 @@ const props = defineProps({
   mediaSettings: { type: Object as PropType<MediaSettings>, default: null },
   mediaPermissions: { type: Object as PropType<MediaPermissions>, default: null },
   emojis: { type: Array as PropType<CallEmoji[]>, default: [] },
+  onClick: { type: Function as PropType<(event: MouseEvent) => void>, default: () => {} },
 });
 const { isMe, did, stream } = toRefs(props);
 
@@ -121,17 +126,12 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
   background: var(--j-color-ui-50);
   overflow: hidden;
   cursor: pointer;
-  aspect-ratio: 16/9;
-  width: 100%;
-  height: auto;
-  max-height: 100%;
 
   .video {
     width: 100%;
     height: 100%;
     object-fit: cover;
     z-index: 2;
-
     transition: opacity 0.3s ease;
   }
 
@@ -142,6 +142,17 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .loading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--j-color-ui-50);
+    z-index: 3;
   }
 
   .emojis {
