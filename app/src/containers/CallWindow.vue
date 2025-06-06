@@ -154,6 +154,7 @@
                 :mediaPermissions="focusedParticipant.mediaPermissions"
                 :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
                 @click="focusOnVideo(focusedParticipant.did)"
+                :style="{ maxHeight: unfocusedParticipants.length ? 'calc(100% - 140px)' : 'none' }"
               />
 
               <!-- Non-focused videos -->
@@ -762,7 +763,6 @@ onMounted(getMyProfile);
               width: 100%;
               height: 100%;
               aspect-ratio: unset;
-              max-height: calc(100% - 140px);
 
               &.no-bottom-row {
                 max-height: calc(100% - 20px);
