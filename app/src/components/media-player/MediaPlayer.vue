@@ -4,7 +4,7 @@
       class="video"
       :srcObject.prop="stream"
       :muted="isMe"
-      :style="{ opacity: hasVisibleStream ? 1 : 0 }"
+      :style="{ opacity: hasVisibleStream ? 1 : 0, transform: isMe && !screenShareEnabled ? 'scaleX(-1)' : 'none' }"
       autoplay
       playsinline
     />
