@@ -374,8 +374,9 @@ export const useWebrtcStore = defineStore(
         // Remove the webrtc signal handler from the signalling service
         signallingService.value?.removeSignalHandler(webrtcSignalHandler);
 
-        // Release media devices
+        // Release media devices and reset stream
         mediaDevicesStore.stopTracks();
+        localStream.value = null;
 
         // Reset state
         inCall.value = false;

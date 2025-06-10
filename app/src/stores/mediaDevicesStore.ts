@@ -154,7 +154,6 @@ export const useMediaDevicesStore = defineStore(
     function stopTracks() {
       if (!stream.value) return;
       stream.value.getTracks().forEach((track) => track.stop());
-      stream.value = null;
     }
 
     function toggleAudio() {
@@ -279,6 +278,7 @@ export const useMediaDevicesStore = defineStore(
     navigator.mediaDevices.addEventListener("devicechange", findAvailableDevices);
     window.addEventListener("beforeunload", () => {
       stopTracks();
+      stream.value = null;
       navigator.mediaDevices.removeEventListener("devicechange", findAvailableDevices);
     });
 
