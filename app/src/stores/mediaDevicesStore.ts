@@ -194,10 +194,13 @@ export const useMediaDevicesStore = defineStore(
     async function turnOnScreenShare() {
       if (!stream.value) return;
 
-      // Get the screen share track
       try {
+        // Get the screen share track
         const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenShareTrack = screenShareStream.getVideoTracks()[0];
+
+        // Update my media settings
+        screenShareEnabled.value = true;
 
         // Add onended handler to detect when the user stops sharing via browser UI
         screenShareTrack.onended = () => {
@@ -234,6 +237,9 @@ export const useMediaDevicesStore = defineStore(
     async function turnOffScreenShare() {
       if (!stream.value) return;
 
+      // Update my media settings
+      screenShareEnabled.value = false;
+
       // Stop current video tracks
       stream.value.getVideoTracks().forEach((track) => track.stop());
 
@@ -258,11 +264,8 @@ export const useMediaDevicesStore = defineStore(
       if (!stream.value) return;
       if (!navigator.mediaDevices.getDisplayMedia) throw new Error("Screen sharing not supported in this browser");
 
-      // Update screen share state
-      screenShareEnabled.value = !screenShareEnabled.value;
-
       // Handle stream updates
-      if (screenShareEnabled.value) turnOnScreenShare();
+      if (!screenShareEnabled.value) turnOnScreenShare();
       else turnOffScreenShare();
     }
 
@@ -306,5 +309,5 @@ export const useMediaDevicesStore = defineStore(
       restartStream,
     };
   },
-  { persist: true } // { pick: ['', ''] }
+  { persist: true }
 );

@@ -31,9 +31,10 @@
       </j-flex>
     </div>
 
-    <!-- <div class="loading">
+    <div v-if="loading" class="loading">
       <j-spinner />
-    </div> -->
+      <j-text>{{ loadingMessage }}</j-text>
+    </div>
 
     <j-flex v-if="emojis.length" class="emojis" gap="400">
       <div class="emoji" v-for="emoji in emojis">
@@ -74,7 +75,7 @@ import { CallEmoji, MediaPermissions, MediaSettings, useModalStore, useUiStore }
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, PropType, ref, toRefs } from "vue";
+import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
 
 const props = defineProps({
   isMe: { type: Boolean, default: false },
@@ -94,12 +95,13 @@ const modalStore = useModalStore();
 const { callWindowFullscreen } = storeToRefs(uiStore);
 
 const profile = ref<Profile>();
+const loading = ref(false);
+const loadingMessage = ref("");
 
 const audioEnabled = computed(() => props.mediaSettings?.audioEnabled ?? true);
 const videoEnabled = computed(() => props.mediaSettings?.videoEnabled ?? false);
 const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnabled ?? false);
 const mediaPermissions = computed(() => props.mediaPermissions ?? null);
-
 const hasVisibleStream = computed(() => stream && (videoEnabled.value || screenShareEnabled.value));
 const showMicDisabledWarning = computed(
   () => isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted
@@ -107,6 +109,59 @@ const showMicDisabledWarning = computed(
 const showCameraDisabledWarning = computed(
   () =>
     isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
+);
+
+watch(
+  () => props.mediaSettings,
+  (newMediaSettings, oldMediaSettings) => {
+    if (isMe.value) return;
+
+    console.log("*** Media settings changed in MediaPlayer, checking loading state");
+
+    // Detect when someone enables video, screenshare, or audio
+    const videoLoading = !oldMediaSettings?.videoEnabled && newMediaSettings?.videoEnabled;
+    const screenShareLoading = !oldMediaSettings?.screenShareEnabled && newMediaSettings?.screenShareEnabled;
+    const audioLoading = !oldMediaSettings?.audioEnabled && newMediaSettings?.audioEnabled;
+
+    if (videoLoading || screenShareLoading || audioLoading) {
+      console.log("*** Media settings changed, setting loading state");
+
+      // Display loading message
+      loading.value = true;
+      let newLoadingMessage = "";
+      if (videoLoading) newLoadingMessage = "Video loading...";
+      else if (screenShareLoading) newLoadingMessage = "Screenshare loading...";
+      else if (audioLoading) newLoadingMessage = "Audio loading...";
+      loadingMessage.value = newLoadingMessage;
+    }
+  },
+  { deep: true }
+);
+
+watch(
+  () => props.stream,
+  (newStream) => {
+    if (isMe.value || !newStream || !loading.value) return;
+
+    console.log("*** New stream detected in MediaPlayer, checking loading state");
+
+    // Check if the expected tracks are now present
+    const hasVideo = newStream.getVideoTracks().length > 0;
+    const hasAudio = newStream.getAudioTracks().length > 0;
+
+    const expectsVideo = props.mediaSettings?.videoEnabled || props.mediaSettings?.screenShareEnabled;
+    const expectsAudio = props.mediaSettings?.audioEnabled;
+
+    // If we have the tracks we're waiting for, clear loading
+    if ((expectsVideo && hasVideo) || (expectsAudio && hasAudio)) {
+      console.log("*** Loading complete, clearing loading state");
+      loading.value = false;
+      loadingMessage.value = "";
+    } else {
+      console.log("*** Still loading, waiting for tracks to be ready");
+    }
+  },
+  { deep: true }
 );
 
 // Get profile on mount
@@ -149,8 +204,10 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
     width: 100%;
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: var(--j-space-400);
     background: var(--j-color-ui-50);
     z-index: 3;
   }
