@@ -1,4 +1,5 @@
 // import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
+import { useWebrtcStore } from "@/stores";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -30,6 +31,8 @@ export const defaultMediaPermissions: MediaPermissions = {
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
+    const webrtcStore = useWebrtcStore();
+
     // State
     const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
     const activeCameraId = ref<string | null>(null);
@@ -90,12 +93,6 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    async function restartStream() {
-      if (!stream.value) return;
-      stopTracks();
-      await createStream();
-    }
-
     async function findAvailableDevices() {
       try {
         availableDevices.value = await navigator.mediaDevices.enumerateDevices();
@@ -135,38 +132,128 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    function switchCamera(deviceId: string) {
+    async function switchCamera(deviceId: string) {
       const previousId = activeCameraId.value;
       activeCameraId.value = deviceId;
 
-      const newStreamRequired = stream.value && mediaPermissions.value.camera.granted && previousId !== deviceId;
-      if (newStreamRequired) restartStream();
+      if (!stream.value || !mediaPermissions.value.camera.granted || previousId === deviceId) {
+        return;
+      }
+
+      try {
+        // Get new video track
+        const videoConstraints = {
+          ...videoDimensions,
+          deviceId: { exact: deviceId },
+        };
+        const tempStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+        const newVideoTrack = tempStream.getVideoTracks()[0];
+
+        // Get old video track
+        const oldVideoTrack = stream.value.getVideoTracks()[0];
+
+        // Update local stream
+        if (oldVideoTrack) {
+          stream.value.removeTrack(oldVideoTrack);
+          oldVideoTrack.stop();
+        }
+        stream.value.addTrack(newVideoTrack);
+
+        // Update all peer connections directly
+        await webrtcStore.replaceVideoTrack(newVideoTrack, oldVideoTrack);
+
+        console.log("✅ Successfully switched camera");
+      } catch (error) {
+        console.error("❌ Failed to switch camera:", error);
+        activeCameraId.value = previousId;
+      }
     }
 
-    function switchMicrophone(deviceId: string) {
+    async function switchMicrophone(deviceId: string) {
       const previousId = activeMicrophoneId.value;
       activeMicrophoneId.value = deviceId;
 
-      const newStreamRequired = stream.value && mediaPermissions.value.microphone.granted && previousId !== deviceId;
-      if (newStreamRequired) restartStream();
+      if (!stream.value || !mediaPermissions.value.microphone.granted || previousId === deviceId) {
+        return;
+      }
+
+      try {
+        // Get new audio track
+        const audioConstraints = { deviceId: { exact: deviceId } };
+        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+        const newAudioTrack = tempStream.getAudioTracks()[0];
+
+        // Get old audio track
+        const oldAudioTrack = stream.value.getAudioTracks()[0];
+
+        // Update local stream
+        if (oldAudioTrack) {
+          stream.value.removeTrack(oldAudioTrack);
+          oldAudioTrack.stop();
+        }
+        stream.value.addTrack(newAudioTrack);
+
+        // Update all peer connections directly
+        await webrtcStore.replaceAudioTrack(newAudioTrack, oldAudioTrack);
+
+        console.log("✅ Successfully switched microphone");
+      } catch (error) {
+        console.error("❌ Failed to switch microphone:", error);
+        activeMicrophoneId.value = previousId;
+      }
     }
 
-    function stopTracks() {
+    function resetMediaDevices() {
       if (!stream.value) return;
+
+      // Stop all tracks
       stream.value.getTracks().forEach((track) => track.stop());
+
+      // Reset state
+      stream.value = null;
+      if (screenShareEnabled.value) {
+        screenShareEnabled.value = false;
+        savedVideoTrack = null;
+      }
     }
 
-    function toggleAudio() {
+    async function toggleAudio() {
       if (!stream.value) return;
 
       audioEnabled.value = !audioEnabled.value;
 
-      // Request a new stream if toggling audio on and no audio tracks found
-      const needsNewStream = audioEnabled.value && !stream.value.getAudioTracks().length;
-      if (needsNewStream) createStream();
-      else {
-        // Otherwise just toggle the tracks
-        stream.value.getAudioTracks().forEach((track) => (track.enabled = audioEnabled.value));
+      if (audioEnabled.value) {
+        // Enabling audio
+        const existingAudioTracks = stream.value.getAudioTracks();
+
+        if (existingAudioTracks.length === 0) {
+          // Need to add audio track
+          const audioConstraints = {
+            deviceId: activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined,
+          };
+
+          try {
+            const tempStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+            const newAudioTrack = tempStream.getAudioTracks()[0];
+
+            stream.value.addTrack(newAudioTrack);
+            await webrtcStore.addTrack(newAudioTrack, stream.value);
+
+            console.log("✅ Added new audio track");
+          } catch (error) {
+            console.error("❌ Failed to add audio track:", error);
+            // Revert the state if it failed
+            audioEnabled.value = false;
+          }
+        } else {
+          // Just enable existing tracks
+          existingAudioTracks.forEach((track) => (track.enabled = true));
+          console.log("✅ Enabled existing audio tracks");
+        }
+      } else {
+        // Disabling audio - just disable tracks (don't remove them)
+        stream.value.getAudioTracks().forEach((track) => (track.enabled = false));
+        console.log("✅ Disabled audio tracks");
       }
     }
 
@@ -176,17 +263,45 @@ export const useMediaDevicesStore = defineStore(
       videoEnabled.value = !videoEnabled.value;
 
       // Skip if screen sharing is active
-      if (screenShareEnabled.value) return;
+      if (screenShareEnabled.value) {
+        console.log("📺 Skipping video toggle - screen share is active");
+        return;
+      }
 
-      // Request a new stream if toggling video on and no video tracks found
-      const needsNewStream = videoEnabled.value && !stream.value.getVideoTracks().length;
-      if (needsNewStream) createStream();
-      else {
-        // If toggling video off, delay track removal until fade out animation completes
-        if (!videoEnabled.value) await new Promise((resolve) => setTimeout(resolve, 300));
+      if (videoEnabled.value) {
+        // Enabling video
+        const existingVideoTracks = stream.value.getVideoTracks();
 
-        // Toggle the video tracks
-        stream.value.getVideoTracks().forEach((track) => (track.enabled = videoEnabled.value));
+        if (existingVideoTracks.length === 0) {
+          // Need to add video track
+          const videoConstraints = {
+            ...videoDimensions,
+            deviceId: activeCameraId.value ? { exact: activeCameraId.value } : undefined,
+          };
+
+          try {
+            const tempStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+            const newVideoTrack = tempStream.getVideoTracks()[0];
+
+            stream.value.addTrack(newVideoTrack);
+            await webrtcStore.addTrack(newVideoTrack, stream.value);
+
+            console.log("✅ Added new video track");
+          } catch (error) {
+            console.error("❌ Failed to add video track:", error);
+            // Revert the state if it failed
+            videoEnabled.value = false;
+          }
+        } else {
+          // Just enable existing tracks
+          existingVideoTracks.forEach((track) => (track.enabled = true));
+          console.log("✅ Enabled existing video tracks");
+        }
+      } else {
+        // Disabling video - disable tracks with animation delay
+        await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
+        stream.value.getVideoTracks().forEach((track) => (track.enabled = false));
+        console.log("✅ Disabled video tracks");
       }
     }
 
@@ -208,27 +323,25 @@ export const useMediaDevicesStore = defineStore(
           turnOffScreenShare();
         };
 
-        // Save existing video track if present
+        // Get existing video track if present
         const existingVideoTrack = stream.value.getVideoTracks()[0];
+
+        // Save existing video track for later restoration
         if (existingVideoTrack) {
           savedVideoTrack = existingVideoTrack;
-          existingVideoTrack.enabled = false;
+          // Remove existing video track from stream
+          stream.value.removeTrack(existingVideoTrack);
         }
 
-        // Create a new stream
-        const newStream = new MediaStream();
+        // Add screen share track to existing stream
+        stream.value.addTrack(screenShareTrack);
 
-        // Transfer audio tracks to the new stream
-        stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
+        // Update all peer connections directly
+        await webrtcStore.replaceVideoTrack(screenShareTrack, existingVideoTrack);
 
-        // Add the new screen share track
-        newStream.addTrack(screenShareTrack);
-
-        // Replace stream
-        stream.value = newStream;
+        console.log("✅ Successfully started screen share");
       } catch (error) {
-        console.error("Error starting screen share:", error);
-
+        console.error("❌ Error starting screen share:", error);
         screenShareEnabled.value = false;
       }
     }
@@ -236,36 +349,52 @@ export const useMediaDevicesStore = defineStore(
     async function turnOffScreenShare() {
       if (!stream.value) return;
 
-      // Update my media settings
-      screenShareEnabled.value = false;
+      try {
+        // Get current screen share track
+        const screenShareTrack = stream.value.getVideoTracks()[0];
 
-      // Stop current video tracks
-      stream.value.getVideoTracks().forEach((track) => track.stop());
+        // Remove screen share track from stream
+        if (screenShareTrack) {
+          stream.value.removeTrack(screenShareTrack);
+          screenShareTrack.stop();
+        }
 
-      // Create new stream
-      const newStream = new MediaStream();
+        // Update media settings
+        screenShareEnabled.value = false;
 
-      // Transfer audio tracks to the new stream
-      stream.value.getAudioTracks().forEach((track) => newStream.addTrack(track));
+        // Restore saved video track if it exists
+        if (savedVideoTrack) {
+          // Re-enable the saved track if video should be enabled
+          savedVideoTrack.enabled = videoEnabled.value;
+          stream.value.addTrack(savedVideoTrack);
 
-      // Restore saved camera track if available
-      if (savedVideoTrack) {
-        savedVideoTrack.enabled = videoEnabled.value;
-        newStream.addTrack(savedVideoTrack);
-        savedVideoTrack = null;
+          // Update all peer connections
+          await webrtcStore.replaceVideoTrack(savedVideoTrack, screenShareTrack);
+
+          savedVideoTrack = null; // Clear the saved track
+        } else {
+          // No saved track - just remove screen share from peers
+          await webrtcStore.removeTrack(screenShareTrack);
+        }
+
+        console.log("✅ Successfully stopped screen share");
+      } catch (error) {
+        console.error("❌ Error stopping screen share:", error);
       }
-
-      // Replace the stream
-      stream.value = newStream;
     }
 
     async function toggleScreenShare() {
       if (!stream.value) return;
-      if (!navigator.mediaDevices.getDisplayMedia) throw new Error("Screen sharing not supported in this browser");
+      if (!navigator.mediaDevices.getDisplayMedia) {
+        throw new Error("Screen sharing not supported in this browser");
+      }
 
       // Handle stream updates
-      if (!screenShareEnabled.value) turnOnScreenShare();
-      else turnOffScreenShare();
+      if (!screenShareEnabled.value) {
+        await turnOnScreenShare();
+      } else {
+        await turnOffScreenShare();
+      }
     }
 
     // Get initial device list
@@ -277,8 +406,7 @@ export const useMediaDevicesStore = defineStore(
     // Set up device change listener
     navigator.mediaDevices.addEventListener("devicechange", findAvailableDevices);
     window.addEventListener("beforeunload", () => {
-      stopTracks();
-      stream.value = null;
+      resetMediaDevices();
       navigator.mediaDevices.removeEventListener("devicechange", findAvailableDevices);
     });
 
@@ -291,6 +419,7 @@ export const useMediaDevicesStore = defineStore(
       stream,
       streamLoading,
       error,
+      screenShareEnabled,
 
       // Computed
       cameras,
@@ -301,12 +430,11 @@ export const useMediaDevicesStore = defineStore(
       createStream,
       switchCamera,
       switchMicrophone,
-      stopTracks,
+      resetMediaDevices,
       findAvailableDevices,
       toggleAudio,
       toggleVideo,
       toggleScreenShare,
-      restartStream,
     };
   },
   { persist: true }

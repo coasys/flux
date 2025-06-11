@@ -236,20 +236,107 @@ export const useWebrtcStore = defineStore(
       peerConnections.value.delete(did);
     }
 
-    function updatePeersWithNewStream(newStream: MediaStream, oldStream: MediaStream) {
-      peerConnections.value.forEach((peerConnection, did) => {
-        try {
-          // Remove old tracks and add new ones
-          oldStream.getTracks().forEach((track) => peerConnection.peer.removeTrack(track, oldStream));
-          newStream.getTracks().forEach((track) => peerConnection.peer.addTrack(track, newStream));
-        } catch (error) {
-          console.error(`Error updating tracks for peer ${did}:`, error);
+    async function addTrack(newTrack: MediaStreamTrack, stream: MediaStream) {
+      if (!inCall.value) return;
 
-          // Fall back to recreating the peer if track replacement fails
-          peerConnection.peer.destroy();
-          createPeerConnection(did, peerConnection.initiator);
+      console.log(`➕ Adding ${newTrack.kind} track for all peers`);
+
+      for (const [did, peerConnection] of peerConnections.value) {
+        try {
+          peerConnection.peer.addTrack(newTrack, stream);
+          console.log(`✅ Added ${newTrack.kind} track for peer ${did}`);
+        } catch (error) {
+          console.error(`❌ Failed to add ${newTrack.kind} track for peer ${did}:`, error);
+        }
+      }
+    }
+
+    async function removeTrack(trackToRemove: MediaStreamTrack) {
+      if (!inCall.value) return;
+
+      console.log(`🗑️ Removing ${trackToRemove.kind} track for all peers`);
+
+      for (const [did, peerConnection] of peerConnections.value) {
+        try {
+          const pc = peerConnection.peer._pc;
+          const senders = pc.getSenders();
+
+          // Find sender for the track and replace with null (removes it)
+          const sender = senders.find((s: any) => s.track === trackToRemove);
+          if (sender) {
+            await sender.replaceTrack(null);
+            console.log(`✅ Removed ${trackToRemove.kind} track for peer ${did}`);
+          }
+        } catch (error) {
+          console.error(`❌ Failed to remove ${trackToRemove.kind} track for peer ${did}:`, error);
+        }
+      }
+    }
+
+    async function replaceAudioTrack(newTrack: MediaStreamTrack, oldTrack?: MediaStreamTrack) {
+      if (!inCall.value) return;
+
+      console.log("🎤 Replacing audio track for all peers");
+
+      const updatePromises = Array.from(peerConnections.value.entries()).map(async ([did, peerConnection]) => {
+        try {
+          const pc = peerConnection.peer._pc;
+          const senders = pc.getSenders();
+
+          if (oldTrack) {
+            // Find sender for old track and replace it
+            const audioSender = senders.find((s: any) => s.track === oldTrack);
+            if (audioSender) {
+              await audioSender.replaceTrack(newTrack);
+              console.log(`✅ Replaced audio track for peer ${did}`);
+              return;
+            }
+          }
+
+          // If no old track or sender not found, add new track
+          peerConnection.peer.addTrack(newTrack, localStream.value!);
+          console.log(`➕ Added new audio track for peer ${did}`);
+        } catch (error) {
+          console.error(`❌ Failed to replace audio track for peer ${did}:`, error);
         }
       });
+
+      // Wait for all peer updates to complete
+      await Promise.all(updatePromises);
+      console.log("🎉 Finished updating audio tracks for all peers");
+    }
+
+    async function replaceVideoTrack(newTrack: MediaStreamTrack, oldTrack?: MediaStreamTrack) {
+      if (!inCall.value) return;
+
+      console.log("📹 Replacing video track for all peers");
+
+      const updatePromises = Array.from(peerConnections.value.entries()).map(async ([did, peerConnection]) => {
+        try {
+          const pc = peerConnection.peer._pc;
+          const senders = pc.getSenders();
+
+          if (oldTrack) {
+            // Find sender for old track and replace it
+            const videoSender = senders.find((s: any) => s.track === oldTrack);
+            if (videoSender) {
+              await videoSender.replaceTrack(newTrack);
+              console.log(`✅ Replaced video track for peer ${did}`);
+              return;
+            }
+          }
+
+          // If no old track or sender not found, add new track
+          peerConnection.peer.addTrack(newTrack, localStream.value!);
+          console.log(`➕ Added new video track for peer ${did}`);
+        } catch (error) {
+          console.error(`❌ Failed to replace video track for peer ${did}:`, error);
+        }
+      });
+
+      // Wait for all peer updates to complete
+      await Promise.all(updatePromises);
+      console.log("🎉 Finished updating video tracks for all peers");
     }
 
     function displayEmoji(emoji: string, author: string) {
@@ -374,9 +461,8 @@ export const useWebrtcStore = defineStore(
         // Remove the webrtc signal handler from the signalling service
         signallingService.value?.removeSignalHandler(webrtcSignalHandler);
 
-        // Release media devices and reset stream
-        mediaDevicesStore.stopTracks();
-        localStream.value = null;
+        // Release media devices
+        mediaDevicesStore.resetMediaDevices();
 
         // Reset state
         inCall.value = false;
@@ -396,18 +482,12 @@ export const useWebrtcStore = defineStore(
         // Skip if we're already in a call
         if (inCall.value) return;
 
-        // If channle id present in the params update the call route
+        // If channel id present in the params update the call route
         if (newParams.channelId) callRoute.value = newParams;
         // Otherwise, close the call window
         else uiStore.setCallWindowOpen(false);
-      },
-      { immediate: true }
+      }
     );
-
-    // Watch for media stream changes and update peers
-    watch(localStream, (newStream, oldStream) => {
-      if (inCall.value && newStream && oldStream) updatePeersWithNewStream(newStream, oldStream);
-    });
 
     // Update agents in call state when the agent states in the signalling service change
     watch(
@@ -486,6 +566,10 @@ export const useWebrtcStore = defineStore(
       peerConnections,
       joiningCall,
       iceServers,
+      addTrack,
+      removeTrack,
+      replaceAudioTrack,
+      replaceVideoTrack,
       addIceServer,
       removeIceServer,
       resetIceServers,
