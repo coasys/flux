@@ -508,6 +508,16 @@ export const useWebrtcStore = defineStore(
     watch(
       agentsInCall,
       (newAgents) => {
+        console.log("Watcher fired with:", {
+          newAgents,
+          inCallExists: !!inCall,
+          inCallValue: inCall?.value,
+          meExists: !!me,
+          meValue: me?.value,
+          peerConnectionsExists: !!peerConnections,
+          peerConnectionsValue: peerConnections?.value,
+        });
+
         if (!inCall.value) return;
 
         const existingPeerDids = Array.from(peerConnections.value.keys());
