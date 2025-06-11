@@ -30,8 +30,6 @@ export const defaultMediaPermissions: MediaPermissions = {
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
-    // const webrtcStore = useWebrtcStore();
-
     // State
     const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
     const activeCameraId = ref<string | null>(null);
@@ -141,12 +139,9 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Get new video track
-        const videoConstraints = {
-          ...videoDimensions,
-          deviceId: { exact: deviceId },
-        };
-        const tempStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
-        const newVideoTrack = tempStream.getVideoTracks()[0];
+        const videoConstraints = { ...videoDimensions, deviceId: { exact: deviceId } };
+        const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+        const newVideoTrack = newStream.getVideoTracks()[0];
 
         // Get old video track
         const oldVideoTrack = stream.value.getVideoTracks()[0];
@@ -158,7 +153,7 @@ export const useMediaDevicesStore = defineStore(
         }
         stream.value.addTrack(newVideoTrack);
 
-        // Update all peer connections directly
+        // Update peer connections (lazy import to avoid circular dependency)
         const { useWebrtcStore } = await import("./webrtcStore");
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(newVideoTrack, oldVideoTrack);
@@ -174,15 +169,13 @@ export const useMediaDevicesStore = defineStore(
       const previousId = activeMicrophoneId.value;
       activeMicrophoneId.value = deviceId;
 
-      if (!stream.value || !mediaPermissions.value.microphone.granted || previousId === deviceId) {
-        return;
-      }
+      if (!stream.value || !mediaPermissions.value.microphone.granted || previousId === deviceId) return;
 
       try {
         // Get new audio track
         const audioConstraints = { deviceId: { exact: deviceId } };
-        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-        const newAudioTrack = tempStream.getAudioTracks()[0];
+        const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+        const newAudioTrack = newStream.getAudioTracks()[0];
 
         // Get old audio track
         const oldAudioTrack = stream.value.getAudioTracks()[0];
@@ -194,7 +187,7 @@ export const useMediaDevicesStore = defineStore(
         }
         stream.value.addTrack(newAudioTrack);
 
-        // Update all peer connections directly
+        // Update peer connections
         const { useWebrtcStore } = await import("./webrtcStore");
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceAudioTrack(newAudioTrack, oldAudioTrack);
@@ -237,10 +230,12 @@ export const useMediaDevicesStore = defineStore(
           };
 
           try {
-            const tempStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-            const newAudioTrack = tempStream.getAudioTracks()[0];
+            const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+            const newAudioTrack = newStream.getAudioTracks()[0];
 
             stream.value.addTrack(newAudioTrack);
+
+            // Update peer connections
             const { useWebrtcStore } = await import("./webrtcStore");
             const webrtcStore = useWebrtcStore();
             await webrtcStore.addTrack(newAudioTrack, stream.value);
@@ -286,10 +281,12 @@ export const useMediaDevicesStore = defineStore(
           };
 
           try {
-            const tempStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
-            const newVideoTrack = tempStream.getVideoTracks()[0];
+            const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+            const newVideoTrack = newStream.getVideoTracks()[0];
 
             stream.value.addTrack(newVideoTrack);
+
+            // Update peer connections
             const { useWebrtcStore } = await import("./webrtcStore");
             const webrtcStore = useWebrtcStore();
             await webrtcStore.addTrack(newVideoTrack, stream.value);
@@ -344,7 +341,7 @@ export const useMediaDevicesStore = defineStore(
         // Add screen share track to existing stream
         stream.value.addTrack(screenShareTrack);
 
-        // Update all peer connections directly
+        // Update peer connections
         const { useWebrtcStore } = await import("./webrtcStore");
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(screenShareTrack, existingVideoTrack);
@@ -378,7 +375,7 @@ export const useMediaDevicesStore = defineStore(
           savedVideoTrack.enabled = videoEnabled.value;
           stream.value.addTrack(savedVideoTrack);
 
-          // Update all peer connections
+          // Update peer connections
           const { useWebrtcStore } = await import("./webrtcStore");
           const webrtcStore = useWebrtcStore();
           await webrtcStore.replaceVideoTrack(savedVideoTrack, screenShareTrack);

@@ -80,15 +80,6 @@ export const useWebrtcStore = defineStore(
       );
       return callChannel?.name || "No channel name";
     });
-    // const streamTracks = computed(() => {
-    //   if (!localStream.value) return [];
-    //   return localStream.value.getTracks().map((track) => ({
-    //     id: track.id,
-    //     kind: track.kind,
-    //     enabled: track.enabled,
-    //     track,
-    //   }));
-    // });
 
     // Connection state
     const peerConnections = ref<Map<string, PeerConnection>>(new Map());
@@ -98,7 +89,6 @@ export const useWebrtcStore = defineStore(
 
     const iceServers = ref(defaultIceServers);
     let healthCheckInterval: NodeJS.Timeout | null = null;
-    // let currentStreamListeners = new Set<() => void>();
 
     const popSound = new Howl({ src: [popWav] });
     const guitarSound = new Howl({ src: [guitarWav] });
@@ -349,31 +339,6 @@ export const useWebrtcStore = defineStore(
       console.log("🎉 Finished updating video tracks for all peers");
     }
 
-    // function handleStreamChange(newStream: MediaStream, oldStream: MediaStream) {
-    //   const oldTracks = oldStream.getTracks();
-    //   const newTracks = newStream.getTracks();
-
-    //   console.log("Handling stream change...");
-
-    //   // Handle each track type
-    //   ["video", "audio"].forEach((kind) => {
-    //     const oldTrack = oldTracks.find((t) => t.kind === kind);
-    //     const newTrack = newTracks.find((t) => t.kind === kind);
-
-    //     if (oldTrack && newTrack && oldTrack.id !== newTrack.id) {
-    //       // Track was replaced
-    //       if (kind === "video") replaceVideoTrack(newTrack, oldTrack);
-    //       else replaceAudioTrack(newTrack, oldTrack);
-    //     } else if (!oldTrack && newTrack) {
-    //       // Track was added
-    //       addTrack(newTrack, newStream);
-    //     } else if (oldTrack && !newTrack) {
-    //       // Track was removed
-    //       removeTrack(oldTrack);
-    //     }
-    //   });
-    // }
-
     function displayEmoji(emoji: string, author: string) {
       // Push the emoji to the call emojis array
       const emojiId = crypto.randomUUID();
@@ -510,120 +475,6 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    // Watch for changes to the local stream in the media devices store and update tracks accordings
-    // watch(
-    //   streamTracks,
-    //   (newTracks, oldTracks) => {
-    //     if (!inCall.value || !oldTracks) return;
-
-    //     console.log("Track composition changed:", {
-    //       old: oldTracks.map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
-    //       new: newTracks.map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
-    //     });
-
-    //     const oldTrackIds = oldTracks.map((t) => t.id);
-    //     const newTrackIds = newTracks.map((t) => t.id);
-
-    //     // Find added tracks
-    //     const addedTracks = newTracks.filter((t) => !oldTrackIds.includes(t.id));
-    //     addedTracks.forEach((trackInfo) => {
-    //       console.log(`➕ Track ${trackInfo.kind} added: ${trackInfo.id.slice(0, 8)}`);
-
-    //       // Check if this is replacing an existing track of the same kind
-    //       const oldSameKindTrack = oldTracks.find((t) => t.kind === trackInfo.kind);
-
-    //       if (oldSameKindTrack) {
-    //         // This is a replacement
-    //         console.log(`🔄 Replacing ${trackInfo.kind} track`);
-    //         if (trackInfo.kind === "video") {
-    //           replaceVideoTrack(trackInfo.track, oldSameKindTrack.track);
-    //         } else if (trackInfo.kind === "audio") {
-    //           replaceAudioTrack(trackInfo.track, oldSameKindTrack.track);
-    //         }
-    //       } else {
-    //         // This is a new track
-    //         console.log(`➕ Adding new ${trackInfo.kind} track`);
-    //         addTrack(trackInfo.track, localStream.value!);
-    //       }
-    //     });
-
-    //     // Find removed tracks (that weren't replaced)
-    //     const removedTracks = oldTracks.filter((t) => !newTrackIds.includes(t.id));
-    //     removedTracks.forEach((trackInfo) => {
-    //       const stillHasSameKind = newTracks.some((t) => t.kind === trackInfo.kind);
-    //       if (!stillHasSameKind) {
-    //         console.log(`🗑️ Removing ${trackInfo.kind} track: ${trackInfo.id.slice(0, 8)}`);
-    //         removeTrack(trackInfo.track);
-    //       }
-    //     });
-    //   },
-    //   { deep: true }
-    // );
-    // watch(
-    //   localStream,
-    //   (newStream) => {
-    //     // Clean up old listeners
-    //     currentStreamListeners.forEach((cleanup) => cleanup());
-    //     currentStreamListeners.clear();
-
-    //     if (!newStream) return;
-
-    //     console.log("*** add track handling to stream");
-
-    //     // Set up track event listeners for smooth replacements
-    //     const handleTrackAdded = (event: MediaStreamTrackEvent) => {
-    //       console.log(`➕ Track ${event.track.kind} added`);
-    //       if (!inCall.value) return;
-
-    //       const newTrack = event.track;
-    //       const existingTracks = newStream.getTracks().filter((t) => t.kind === newTrack.kind && t.id !== newTrack.id);
-
-    //       if (existingTracks.length > 0) {
-    //         // This is likely a replacement - use smooth replaceTrack
-    //         const oldTrack = existingTracks[0];
-    //         console.log(`🔄 Replacing ${newTrack.kind} track smoothly`);
-
-    //         if (newTrack.kind === "video") {
-    //           replaceVideoTrack(newTrack, oldTrack);
-    //         } else if (newTrack.kind === "audio") {
-    //           replaceAudioTrack(newTrack, oldTrack);
-    //         }
-    //       } else {
-    //         // This is a genuinely new track
-    //         console.log(`➕ Adding new ${newTrack.kind} track`);
-    //         addTrack(newTrack, newStream);
-    //       }
-    //     };
-
-    //     const handleTrackRemoved = (event: MediaStreamTrackEvent) => {
-    //       console.log(`🗑️ Track ${event.track.kind} removed`);
-    //       if (!inCall.value) return;
-
-    //       const removedTrack = event.track;
-    //       console.log(`🗑️ Track ${removedTrack.kind} removed`);
-
-    //       // Only remove from peers if it's not being replaced soon
-    //       setTimeout(() => {
-    //         const stillHasSameKind = newStream.getTracks().some((t) => t.kind === removedTrack.kind);
-    //         if (!stillHasSameKind) {
-    //           removeTrack(removedTrack);
-    //         }
-    //       }, 100); // Small delay to check for replacements
-    //     };
-
-    //     // Add listeners
-    //     newStream.addEventListener("addtrack", handleTrackAdded);
-    //     newStream.addEventListener("removetrack", handleTrackRemoved);
-
-    //     // Store cleanup functions
-    //     currentStreamListeners.add(() => {
-    //       newStream.removeEventListener("addtrack", handleTrackAdded);
-    //       newStream.removeEventListener("removetrack", handleTrackRemoved);
-    //     });
-    //   },
-    //   { immediate: true }
-    // );
-
     // Update the call route or close call window on route param changes if not already in a call
     watch(
       () => route.params,
@@ -638,7 +489,7 @@ export const useWebrtcStore = defineStore(
       }
     );
 
-    // Update agents in call state when the agent states in the signalling service change
+    // Update agents in call when the agent states in the signalling service change
     watch(
       agentsInCommunity,
       async (newAgents) => {
@@ -657,16 +508,6 @@ export const useWebrtcStore = defineStore(
     watch(
       agentsInCall,
       (newAgents) => {
-        // console.log("Watcher fired with:", {
-        //   newAgents,
-        //   inCallExists: !!inCall,
-        //   inCallValue: inCall?.value,
-        //   meExists: !!me,
-        //   meValue: me?.value,
-        //   peerConnectionsExists: !!peerConnections,
-        //   peerConnectionsValue: peerConnections?.value,
-        // });
-
         if (!inCall.value) return;
 
         const existingPeerDids = Array.from(peerConnections.value.keys());
