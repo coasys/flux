@@ -31,10 +31,10 @@
     "turbo": "latest"
   },
   "resolutions": {
-    "@coasys/ad4m": "0.10.1-release-candidate-3-test-2",
-    "@coasys/ad4m-connect": "0.10.1-release-candidate-3-test-2",
-    "@coasys/ad4m-vue-hooks": "0.10.1-release-candidate-3-test-2",
-    "@coasys/ad4m-react-hooks": "0.10.1-release-candidate-3-test-2"
+    "@coasys/ad4m": "0.10.1-release-candidate-4-test",
+    "@coasys/ad4m-connect": "0.10.1-release-candidate-4-test",
+    "@coasys/ad4m-vue-hooks": "0.10.1-release-candidate-4-test",
+    "@coasys/ad4m-react-hooks": "0.10.1-release-candidate-4-test"
   },
   "engines": {
     "node": ">=18.16.0"
