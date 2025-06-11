@@ -486,7 +486,8 @@ export const useWebrtcStore = defineStore(
         if (newParams.channelId) callRoute.value = newParams;
         // Otherwise, close the call window
         else uiStore.setCallWindowOpen(false);
-      }
+      },
+      { immediate: true }
     );
 
     // Update agents in call state when the agent states in the signalling service change
