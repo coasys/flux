@@ -1,5 +1,4 @@
 // import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
-import { useWebrtcStore } from "@/stores";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -31,7 +30,7 @@ export const defaultMediaPermissions: MediaPermissions = {
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
-    const webrtcStore = useWebrtcStore();
+    // const webrtcStore = useWebrtcStore();
 
     // State
     const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
@@ -160,6 +159,8 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(newVideoTrack);
 
         // Update all peer connections directly
+        const { useWebrtcStore } = await import("./webrtcStore");
+        const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(newVideoTrack, oldVideoTrack);
 
         console.log("✅ Successfully switched camera");
@@ -194,6 +195,8 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(newAudioTrack);
 
         // Update all peer connections directly
+        const { useWebrtcStore } = await import("./webrtcStore");
+        const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceAudioTrack(newAudioTrack, oldAudioTrack);
 
         console.log("✅ Successfully switched microphone");
@@ -204,6 +207,7 @@ export const useMediaDevicesStore = defineStore(
     }
 
     function resetMediaDevices() {
+      console.log("*** resetMediaDevices called", stream.value);
       if (!stream.value) return;
 
       // Stop all tracks
@@ -237,6 +241,8 @@ export const useMediaDevicesStore = defineStore(
             const newAudioTrack = tempStream.getAudioTracks()[0];
 
             stream.value.addTrack(newAudioTrack);
+            const { useWebrtcStore } = await import("./webrtcStore");
+            const webrtcStore = useWebrtcStore();
             await webrtcStore.addTrack(newAudioTrack, stream.value);
 
             console.log("✅ Added new audio track");
@@ -284,6 +290,8 @@ export const useMediaDevicesStore = defineStore(
             const newVideoTrack = tempStream.getVideoTracks()[0];
 
             stream.value.addTrack(newVideoTrack);
+            const { useWebrtcStore } = await import("./webrtcStore");
+            const webrtcStore = useWebrtcStore();
             await webrtcStore.addTrack(newVideoTrack, stream.value);
 
             console.log("✅ Added new video track");
@@ -337,6 +345,8 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(screenShareTrack);
 
         // Update all peer connections directly
+        const { useWebrtcStore } = await import("./webrtcStore");
+        const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(screenShareTrack, existingVideoTrack);
 
         console.log("✅ Successfully started screen share");
@@ -369,11 +379,15 @@ export const useMediaDevicesStore = defineStore(
           stream.value.addTrack(savedVideoTrack);
 
           // Update all peer connections
+          const { useWebrtcStore } = await import("./webrtcStore");
+          const webrtcStore = useWebrtcStore();
           await webrtcStore.replaceVideoTrack(savedVideoTrack, screenShareTrack);
 
           savedVideoTrack = null; // Clear the saved track
         } else {
           // No saved track - just remove screen share from peers
+          const { useWebrtcStore } = await import("./webrtcStore");
+          const webrtcStore = useWebrtcStore();
           await webrtcStore.removeTrack(screenShareTrack);
         }
 
