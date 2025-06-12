@@ -4,14 +4,14 @@
       class="video"
       :srcObject.prop="stream"
       :muted="isMe"
-      :style="{ opacity: hasVisibleStream ? 1 : 0, transform: isMe && !screenShareEnabled ? 'scaleX(-1)' : 'none' }"
+      :style="{ opacity: showVideo ? 1 : 0, transform: flipVideo ? 'scaleX(-1)' : 'none' }"
       autoplay
       playsinline
     />
 
     <div class="centered-content">
       <j-avatar
-        v-if="!showMicDisabledWarning && !showCameraDisabledWarning"
+        v-if="!warning"
         :initials="profile?.username?.charAt(0) || '?'"
         :src="profile?.profileThumbnailPicture || null"
         :hash="profile?.did"
@@ -19,19 +19,19 @@
         style="z-index: 1"
       />
 
-      <j-flex v-if="showMicDisabledWarning" direction="column" a="center" gap="400">
+      <j-flex v-if="warning === 'mic-disabled'" direction="column" a="center" gap="400">
         <j-icon name="mic-mute" size="xl" color="warning-500" />
         <j-text size="500" color="warning-500" nomargin>Please allow microphone access to join</j-text>
       </j-flex>
 
-      <j-flex v-if="showCameraDisabledWarning" direction="column" a="center" gap="300">
+      <j-flex v-if="warning === 'camera-disabled'" direction="column" a="center" gap="300">
         <j-icon name="camera-video-off" size="xl" color="warning-500" />
         <j-text size="600" color="warning-500" nomargin>Camera access denied</j-text>
         <j-text size="400" color="warning-500" nomargin>Please enable it in the browser</j-text>
       </j-flex>
     </div>
 
-    <div v-if="loading" class="loading">
+    <div v-if="loadingMessage" class="loading-message">
       <j-spinner />
       <j-text>{{ loadingMessage }}</j-text>
     </div>
@@ -63,31 +63,35 @@
       </div>
 
       <j-flex v-if="inCall" class="settings" gap="500">
-        <j-icon v-if="!audioEnabled" name="mic-mute" />
-        <j-icon v-if="screenShareEnabled" name="display" />
+        <j-icon v-if="audioState !== 'on'" name="mic-mute" />
+        <j-icon v-if="screenShareState === 'on'" name="display" />
       </j-flex>
     </j-flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CallEmoji, MediaPermissions, MediaSettings, useModalStore, useUiStore } from "@/stores";
+import { CallEmoji, MediaState, useModalStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, PropType, ref, toRefs, watch } from "vue";
+import { computed, onMounted, PropType, ref, toRefs } from "vue";
+
+export type MediaPlayerWarning = "" | "mic-disabled" | "camera-disabled";
 
 const props = defineProps({
-  isMe: { type: Boolean, default: false },
   did: { type: String, default: "" },
+  isMe: { type: Boolean, default: false },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
-  mediaSettings: { type: Object as PropType<MediaSettings>, default: null },
-  mediaPermissions: { type: Object as PropType<MediaPermissions>, default: null },
+  audioState: { type: String as PropType<MediaState>, default: "on" },
+  videoState: { type: String as PropType<MediaState>, default: "off" },
+  screenShareState: { type: String as PropType<MediaState>, default: "off" },
+  warning: { type: String as PropType<MediaPlayerWarning>, default: "" },
   emojis: { type: Array as PropType<CallEmoji[]>, default: [] },
   onClick: { type: Function as PropType<(event: MouseEvent) => void>, default: () => {} },
 });
-const { isMe, did, stream } = toRefs(props);
+const { did, stream } = toRefs(props);
 
 const uiStore = useUiStore();
 const modalStore = useModalStore();
@@ -95,74 +99,14 @@ const modalStore = useModalStore();
 const { callWindowFullscreen } = storeToRefs(uiStore);
 
 const profile = ref<Profile>();
-const loading = ref(false);
-const loadingMessage = ref("");
 
-const audioEnabled = computed(() => props.mediaSettings?.audioEnabled ?? true);
-const videoEnabled = computed(() => props.mediaSettings?.videoEnabled ?? false);
-const screenShareEnabled = computed(() => props.mediaSettings?.screenShareEnabled ?? false);
-const mediaPermissions = computed(() => props.mediaPermissions ?? null);
-const hasVisibleStream = computed(() => stream && (videoEnabled.value || screenShareEnabled.value));
-const showMicDisabledWarning = computed(
-  () => isMe && mediaPermissions.value?.microphone.requested && !mediaPermissions.value?.microphone.granted
-);
-const showCameraDisabledWarning = computed(
-  () =>
-    isMe && videoEnabled.value && mediaPermissions.value?.camera.requested && !mediaPermissions.value?.camera.granted
-);
-
-watch(
-  () => props.mediaSettings,
-  (newMediaSettings, oldMediaSettings) => {
-    if (isMe.value) return;
-
-    console.log("*** Media settings changed in MediaPlayer, checking loading state");
-
-    // Detect when someone enables video, screenshare, or audio
-    const videoLoading = !oldMediaSettings?.videoEnabled && newMediaSettings?.videoEnabled;
-    const screenShareLoading = !oldMediaSettings?.screenShareEnabled && newMediaSettings?.screenShareEnabled;
-    const audioLoading = !oldMediaSettings?.audioEnabled && newMediaSettings?.audioEnabled;
-
-    if (videoLoading || screenShareLoading || audioLoading) {
-      console.log("*** Media settings changed, setting loading state");
-
-      // Display loading message
-      loading.value = true;
-      let newLoadingMessage = "";
-      if (videoLoading) newLoadingMessage = "Video loading...";
-      else if (screenShareLoading) newLoadingMessage = "Screenshare loading...";
-      else if (audioLoading) newLoadingMessage = "Audio loading...";
-      loadingMessage.value = newLoadingMessage;
-    }
-  },
-  { deep: true }
-);
-
-watch(
-  () => props.stream,
-  (newStream) => {
-    if (isMe.value || !newStream || !loading.value) return;
-
-    console.log("*** New stream detected in MediaPlayer, checking loading state");
-
-    // Check if the expected tracks are now present
-    const hasVideo = newStream.getVideoTracks().length > 0;
-    const hasAudio = newStream.getAudioTracks().length > 0;
-
-    const expectsVideo = props.mediaSettings?.videoEnabled || props.mediaSettings?.screenShareEnabled;
-    const expectsAudio = props.mediaSettings?.audioEnabled;
-
-    // If we have the tracks we're waiting for, clear loading
-    if ((expectsVideo && hasVideo) || (expectsAudio && hasAudio)) {
-      console.log("*** Loading complete, clearing loading state");
-      loading.value = false;
-      loadingMessage.value = "";
-    } else {
-      console.log("*** Still loading, waiting for tracks to be ready");
-    }
-  },
-  { deep: true }
-);
+const showVideo = computed(() => stream && (props.videoState === "on" || props.screenShareState === "on"));
+const flipVideo = computed(() => props.isMe && props.screenShareState !== "on");
+const loadingMessage = computed(() => {
+  if (props.videoState === "loading") return "Video loading...";
+  else if (props.screenShareState === "loading") return "Screenshare loading...";
+  return "";
+});
 
 // Get profile on mount
 onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
@@ -199,7 +143,7 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
     justify-content: center;
   }
 
-  .loading {
+  .loading-message {
     position: absolute;
     width: 100%;
     height: 100%;

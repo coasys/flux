@@ -146,12 +146,14 @@
             <template v-if="selectedVideoLayout.label === 'Focused'">
               <!-- Main focused video -->
               <MediaPlayer
-                :isMe="focusedParticipant.isMe"
                 :did="focusedParticipant.did"
-                :inCall="focusedParticipant.isMe ? inCall : true"
+                :isMe="focusedParticipant.isMe"
+                :inCall="focusedParticipant.inCall"
                 :stream="focusedParticipant.stream"
-                :mediaSettings="focusedParticipant.mediaSettings"
-                :mediaPermissions="focusedParticipant.mediaPermissions"
+                :audioState="focusedParticipant.audioState"
+                :videoState="focusedParticipant.videoState"
+                :screenShareState="focusedParticipant.screenShareState"
+                :warning="focusedParticipant.warning"
                 :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
                 @click="focusOnVideo(focusedParticipant.did)"
                 :style="{ maxHeight: unfocusedParticipants.length ? 'calc(100% - 140px)' : 'none' }"
@@ -163,12 +165,14 @@
                   <MediaPlayer
                     v-for="participant in unfocusedParticipants"
                     :key="participant.did"
-                    :isMe="participant.isMe"
                     :did="participant.did"
-                    :inCall="participant.isMe ? inCall : true"
+                    :isMe="participant.isMe"
+                    :inCall="participant.inCall"
                     :stream="participant.stream"
-                    :mediaSettings="participant.mediaSettings"
-                    :mediaPermissions="participant.mediaPermissions"
+                    :audioState="participant.audioState"
+                    :videoState="participant.videoState"
+                    :screenShareState="participant.screenShareState"
+                    :warning="participant.warning"
                     :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
                     @click="focusOnVideo(participant.did)"
                   />
@@ -181,12 +185,14 @@
               <MediaPlayer
                 v-for="participant in allParticipants"
                 :key="participant.did"
-                :isMe="participant.isMe"
                 :did="participant.did"
-                :inCall="participant.isMe ? inCall : true"
+                :isMe="participant.isMe"
+                :inCall="participant.inCall"
                 :stream="participant.stream"
-                :mediaSettings="participant.mediaSettings"
-                :mediaPermissions="participant.mediaPermissions"
+                :audioState="participant.audioState"
+                :videoState="participant.videoState"
+                :screenShareState="participant.screenShareState"
+                :warning="participant.warning"
                 :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
                 @click="focusOnVideo(participant.did)"
               />
@@ -361,9 +367,10 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import MediaPlayer from "@/components/media-player/MediaPlayer.vue";
+import MediaPlayer, { MediaPlayerWarning } from "@/components/media-player/MediaPlayer.vue";
 import Transcriber from "@/components/transcriber/Transcriber.vue";
 import {
+  MediaState,
   useAiStore,
   useAppStore,
   useMediaDevicesStore,
@@ -429,28 +436,34 @@ const videoLayoutPopover = ref<HTMLElement | null>(null);
 const callHealthColour = computed(findHealthColour);
 const connectionWarning = computed(findConnectionWarning);
 const connectionText = computed(findConnectionText);
-const peers = computed(() =>
-  Array.from(peerConnections.value.values()).map((peer) => {
-    const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
-    return { ...peer, agentState };
-  })
-);
+const peers = computed(() => Array.from(peerConnections.value.values()));
 const allParticipants = computed(() => {
+  const { microphone, camera } = mediaPermissions.value;
+  const { audioEnabled, videoEnabled, screenShareEnabled } = mediaSettings.value;
+  let warning = "" as MediaPlayerWarning;
+  if (microphone.requested && !microphone.granted) warning = "mic-disabled";
+  else if (videoEnabled && camera.requested && !camera.granted) warning = "camera-disabled";
+
   const myAgent = {
     isMe: true,
     did: me.value.did,
+    inCall: inCall.value,
     stream: stream.value || undefined,
-    mediaSettings: mediaSettings.value,
-    agentState: null,
-    mediaPermissions: mediaPermissions.value,
+    audioState: (audioEnabled ? "on" : "off") as MediaState,
+    videoState: (videoEnabled ? "on" : "off") as MediaState,
+    screenShareState: (screenShareEnabled ? "on" : "off") as MediaState,
+    warning,
   };
+
   const otherAgents = peers.value.map((peer) => ({
     isMe: false,
     did: peer.did,
+    inCall: true,
     stream: peer.streams?.[0] || undefined,
-    mediaSettings: peer.agentState?.mediaSettings,
-    agentState: peer.agentState,
-    mediaPermissions: undefined,
+    audioState: peer.audioState,
+    videoState: peer.videoState,
+    screenShareState: peer.screenShareState,
+    warning: "" as MediaPlayerWarning,
   }));
   return [myAgent, ...otherAgents];
 });
@@ -533,7 +546,7 @@ function stopResize() {
   document.addEventListener("mouseup", stopResize, false);
 }
 
-// TODO: store my profile in the app store
+// TODO: store my profile in the app store?
 async function getMyProfile() {
   myProfile.value = await getCachedAgentProfile(me.value.did);
 }
@@ -543,7 +556,7 @@ function profileClick() {
 }
 
 function onEmojiClick(event: any) {
-  webrtcStore.messageAgentsInCall(WEBRTC_EMOJI, event.detail.native);
+  webrtcStore.signalAgentsInCall(WEBRTC_EMOJI, event.detail.native);
   webrtcStore.displayEmoji(event.detail.native, me.value.did);
 
   emojiPopover.value?.removeAttribute("open");

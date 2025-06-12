@@ -39,13 +39,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 1: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -61,13 +61,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 2: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -83,13 +83,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 3: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -105,13 +105,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 4: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -127,13 +127,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 5: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -149,13 +149,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // 6: {
     //   aiEnabled: true,
     //   callRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
-    //     communityId: "c3150522-8f76-4db9-a020-58c15a513419",
-    //     channelId: "literal://string:jgjevdfyossnaqgycllmozes",
+    //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
+    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
