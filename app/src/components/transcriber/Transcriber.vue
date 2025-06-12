@@ -1,10 +1,55 @@
 <template>
   <div class="transcriber">
-    <j-box mb="400">
+    <j-box v-if="transcripts.length || previewText" mb="300">
+      <j-flex direction="column" gap="400">
+        <span
+          v-if="!transcripts.length && previewText"
+          :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
+        >
+          {{ previewText }}
+        </span>
+        <div
+          v-for="transcript in transcripts"
+          :key="transcript.id"
+          :id="`transcript-${transcript.id}`"
+          class="transcript"
+        >
+          <j-flex direction="column" gap="300">
+            <j-text nomargin>
+              <j-timestamp :value="transcript.timestamp" dateStyle="short" timeStyle="short" size="sm" />
+            </j-text>
+            <j-text nomargin size="500" color="ui-white">
+              {{ transcript.text }}
+              <span
+                v-if="previewText && transcript.id === transcriptId"
+                :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
+              >
+                {{ previewText }}
+              </span>
+            </j-text>
+            <j-flex v-if="transcript.state === 'transcribing'" gap="400" a="center">
+              <j-spinner size="xxs" />
+              <j-text nomargin size="500" color="primary-600"> Transcribing... </j-text>
+            </j-flex>
+            <j-flex v-if="transcript.state === 'saved'" gap="400" a="center">
+              <j-icon name="check-circle" color="success-600" size="xs" />
+              <j-text nomargin size="500" color="success-600"> Saved </j-text>
+            </j-flex>
+            <j-flex v-if="transcript.state === 'aborted'" gap="400" a="center">
+              <j-icon name="x-circle" color="danger-600" size="xs" />
+              <j-text nomargin size="500" color="danger-600"> Aborted </j-text>
+            </j-flex>
+          </j-flex>
+        </div>
+      </j-flex>
+    </j-box>
+    <j-box mb="300">
       <j-flex gap="400" j="between" a="center">
         <j-text nomargin uppercase size="400" weight="800" color="primary-500"> Transcriber </j-text>
         <template v-if="browser === 'chrome'">
-          <j-checkbox :checked="useRemoteService" @change="toggleRemoteService"> Use Google transcription </j-checkbox>
+          <j-checkbox :checked="useRemoteService" @change="toggleRemoteService" size="sm">
+            <j-text nomargin>Use Google transcription</j-text>
+          </j-checkbox>
         </template>
         <template v-else>
           <j-text>Google transcription available in Chrome</j-text>
@@ -22,48 +67,6 @@
       <j-icon name="mic-mute" />
       <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }"> Audio muted </j-text>
     </j-flex>
-
-    <j-box v-if="transcripts.length || previewText" mt="600">
-      <j-flex direction="column" gap="400">
-        <span
-          v-if="!transcripts.length && previewText"
-          :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
-        >
-          {{ previewText }}
-        </span>
-        <div
-          v-for="transcript in transcripts"
-          :key="transcript.id"
-          :id="`transcript-${transcript.id}`"
-          class="transcript"
-        >
-          <j-flex direction="column" gap="300">
-            <j-timestamp :value="transcript.timestamp" dateStyle="short" timeStyle="short" />
-            <j-text nomargin size="600">
-              {{ transcript.text }}
-              <span
-                v-if="previewText && transcript.id === transcriptId"
-                :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
-              >
-                {{ previewText }}
-              </span>
-            </j-text>
-            <j-flex v-if="transcript.state === 'transcribing'" gap="400" a="center">
-              <j-spinner size="xs" />
-              <j-text nomargin size="600" color="primary-600"> Transcribing... </j-text>
-            </j-flex>
-            <j-flex v-if="transcript.state === 'saved'" gap="400" a="center">
-              <j-icon name="check-circle" color="success-600" />
-              <j-text nomargin size="600" color="success-600"> Saved </j-text>
-            </j-flex>
-            <j-flex v-if="transcript.state === 'aborted'" gap="400" a="center">
-              <j-icon name="x-circle" color="danger-600" />
-              <j-text nomargin size="600" color="danger-600"> Aborted </j-text>
-            </j-flex>
-          </j-flex>
-        </div>
-      </j-flex>
-    </j-box>
   </div>
 </template>
 
@@ -143,7 +146,7 @@ async function saveMessage() {
 
   if (text) {
     if (transcriptCard) {
-      transcriptCard.classList.add("slideLeft");
+      transcriptCard.classList.add("slideRight");
       setTimeout(() => {
         transcriptCard.classList.add("hide");
         setTimeout(() => {
@@ -157,7 +160,7 @@ async function saveMessage() {
     await newMessage.save();
   } else {
     if (transcriptCard) {
-      transcriptCard.classList.add("slideRight");
+      transcriptCard.classList.add("slideLeft");
       setTimeout(() => {
         transcriptCard.classList.add("hide");
         setTimeout(() => {
@@ -423,9 +426,7 @@ onMounted(() => {
   if (mediaSettings.value.audioEnabled) startListening();
 });
 
-onUnmounted(() => {
-  stopListening();
-});
+onUnmounted(() => stopListening());
 
 // Watch for audio state changes
 watch(
@@ -449,13 +450,12 @@ watch(useRemoteService, () => {
 
 <style lang="scss" scoped>
 .transcriber {
-  border: 1px solid var(--j-color-ui-200);
+  pointer-events: auto;
   border-radius: var(--j-border-radius);
-  background-color: var(--j-color-ui-50);
-  margin: var(--j-space-400) auto 0 auto;
-  padding: var(--j-space-500);
-  width: 100%;
-  max-width: 1000px;
+  margin: 20px 20px 0 20px;
+  background-color: var(--j-color-ui-100);
+  padding: var(--j-space-400);
+  width: calc(100% - 40px);
 
   .volumeThreshold {
     position: relative;
@@ -473,10 +473,9 @@ watch(useRemoteService, () => {
   }
 
   .transcript {
-    border: 1px solid var(--j-color-ui-200);
     border-radius: var(--j-border-radius);
     padding: var(--j-space-400);
-    background-color: var(--j-color-ui-100);
+    background-color: var(--j-color-ui-50);
     width: 100%;
     margin-left: 0;
     opacity: 1;

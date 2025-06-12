@@ -1,6 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="left-section" :style="{ width: `calc(${communitySidebarWidth}px + 100px)` }">
+      <Transcriber v-if="inCall && transcriptionEnabled" />
       <div class="controls">
         <j-flex v-if="inCall" direction="column">
           <j-flex j="between" a="center">
@@ -345,8 +346,6 @@
               </j-button>
             </j-tooltip>
           </div>
-
-          <Transcriber v-if="inCall && transcriptionEnabled" />
         </div>
 
         <div class="call-window-footer">
