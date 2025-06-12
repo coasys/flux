@@ -249,8 +249,14 @@ export const useWebrtcStore = defineStore(
             peer.audioState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("audio", peer);
           } else if (data.type === "video") {
-            peer.videoState = data.enabled ? "loading" : "off";
-            if (data.enabled) startLoadingCheck("video", peer);
+            const existingVideoTrack = peer.streams[0].getVideoTracks().some((track) => !isScreenShareTrack(track));
+            // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading screen
+            if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
+              peer.videoState = "on";
+            } else {
+              peer.videoState = data.enabled ? "loading" : "off";
+              if (data.enabled) startLoadingCheck("video", peer);
+            }
           } else if (data.type === "screenShare") {
             peer.screenShareState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("screenShare", peer);
