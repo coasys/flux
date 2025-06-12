@@ -150,7 +150,7 @@ async function saveMessage() {
       setTimeout(() => {
         transcriptCard.classList.add("hide");
         setTimeout(() => {
-          transcripts.value = transcripts.value.filter((t) => t.id !== previousId);
+          transcripts.value = [];
         }, 500);
       }, 500);
     }
@@ -164,7 +164,7 @@ async function saveMessage() {
       setTimeout(() => {
         transcriptCard.classList.add("hide");
         setTimeout(() => {
-          transcripts.value = transcripts.value.filter((t) => t.id !== previousId);
+          transcripts.value = [];
         }, 500);
       }, 500);
     }
@@ -183,12 +183,7 @@ function addCurrentTranscript(text?: string) {
   } else {
     // Otherwise initialise new transcript
     transcriptId.value = uuidv4();
-    transcripts.value.push({
-      id: transcriptId.value,
-      timestamp: new Date(),
-      state: "transcribing",
-      text,
-    });
+    transcripts.value = [{ id: transcriptId.value, timestamp: new Date(), state: "transcribing", text }];
   }
 }
 
@@ -258,12 +253,7 @@ function startRemoteTranscription() {
         if (!transcriptId.value) {
           const id = uuidv4();
           transcriptId.value = id;
-          transcripts.value.push({
-            id,
-            text: accumulatedText + interim,
-            timestamp: new Date(),
-            done: false,
-          });
+          transcripts.value = [{ id, text: accumulatedText + interim, timestamp: new Date(), done: false }];
         } else {
           const index = transcripts.value.findIndex((t) => t.id === transcriptId.value);
           if (index >= 0) {
@@ -359,11 +349,8 @@ function startListening() {
     })
     .then(async (stream) => {
       audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
-      if (useRemoteService.value) {
-        startRemoteTranscription();
-      } else {
-        startLocalTransciption(stream);
-      }
+      if (useRemoteService.value) startRemoteTranscription();
+      else startLocalTransciption(stream);
 
       // Set up analyser to render volume
       if (audioContext.value) {
@@ -479,7 +466,7 @@ watch(useRemoteService, () => {
     width: 100%;
     margin-left: 0;
     opacity: 1;
-    max-height: 500px;
+    max-height: 1000px;
     transition: all 1s;
 
     &.slideLeft {
@@ -493,7 +480,7 @@ watch(useRemoteService, () => {
     }
 
     &.hide {
-      max-height: 0;
+      max-height: 0px;
     }
   }
 }
