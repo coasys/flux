@@ -81,18 +81,6 @@
           </template>
         </div>
       </div>
-
-      <div v-if="!isMobile" class="channel-view__header-right">
-        <j-tooltip placement="auto" :title="isExpanded ? 'Minimize' : 'Fullsize'">
-          <j-button size="sm" variant="ghost">
-            <j-icon
-              size="sm"
-              :name="isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'"
-              @click="isExpanded = !isExpanded"
-            />
-          </j-button>
-        </j-tooltip>
-      </div>
     </div>
 
     <RouterView v-slot="{ Component }">
