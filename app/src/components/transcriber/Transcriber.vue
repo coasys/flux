@@ -45,7 +45,7 @@
     </j-box>
     <j-box mb="300">
       <j-flex gap="400" j="between" a="center">
-        <j-text nomargin uppercase size="400" weight="800" color="primary-500"> Transcriber </j-text>
+        <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
         <template v-if="browser === 'chrome'">
           <j-checkbox :checked="useRemoteService" @change="toggleRemoteService" size="sm">
             <j-text nomargin>Use Google transcription</j-text>
@@ -56,16 +56,16 @@
         </template>
       </j-flex>
     </j-box>
-    <j-flex v-if="mediaSettings.audioEnabled" gap="400" a="center">
-      <RecordingIcon :size="30" :style="{ flexShrink: 0 }" />
-      <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }"> Listening for speech... </j-text>
+    <j-flex v-if="mediaSettings.audioEnabled" gap="300" a="center">
+      <RecordingIcon :size="30" :style="{ flexShrink: 0, marginLeft: '-5px' }" />
+      <j-text nomargin :style="{ flexShrink: 0, marginRight: '10px' }">Listening...</j-text>
       <div class="volumeThreshold">
         <div id="volume" class="volume"></div>
       </div>
     </j-flex>
     <j-flex v-else gap="400" a="center">
       <j-icon name="mic-mute" />
-      <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }"> Audio muted </j-text>
+      <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }">Audio muted</j-text>
     </j-flex>
   </div>
 </template>
