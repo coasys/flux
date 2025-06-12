@@ -8,7 +8,7 @@ import { Channel, Community } from "@coasys/flux-api";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { Howl } from "howler";
 import { defineStore, storeToRefs } from "pinia";
-import { computed, onUnmounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
@@ -72,16 +72,28 @@ export const useWebrtcStore = defineStore(
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
 
-    // Call state
+    const popSound = new Howl({ src: [popWav] });
+    const guitarSound = new Howl({ src: [guitarWav] });
+    const kissSound = new Howl({ src: [kissWav] });
+    const pigSound = new Howl({ src: [pigWav] });
+
     const joiningCall = ref(false);
     const inCall = ref(false);
     const callRoute = ref<RouteParams>(route.params);
-    const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
-    const signallingService = computed(() => communityService.value?.signallingService);
-    const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
     const agentsInCall = ref<AgentWithProfile[]>([]);
     const callHealth = ref<CallHealth>("healthy");
     const callEmojis = ref<CallEmoji[]>([]);
+    const peerConnections = ref<Map<string, PeerConnection>>(new Map());
+    const myAgentStatus = ref<AgentStatus>("active");
+    const reconnectionAttempts = ref<Record<string, number>>({});
+    const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
+    const iceServers = ref(defaultIceServers);
+    let healthCheckInterval: NodeJS.Timeout | null = null;
+
+    const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
+    const signallingService = computed(() => communityService.value?.signallingService);
+    const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
+    // TODO: Get these when call window is opened instead to avoid complex computed properties?
     const callCommunityName = computed(
       () => (communityService.value?.community as unknown as Community)?.name || "No community name"
     );
@@ -91,20 +103,6 @@ export const useWebrtcStore = defineStore(
       );
       return callChannel?.name || "No channel name";
     });
-
-    // Connection state
-    const peerConnections = ref<Map<string, PeerConnection>>(new Map());
-    const myAgentStatus = ref<AgentStatus>("active");
-    const reconnectionAttempts = ref<Record<string, number>>({});
-    const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
-
-    const iceServers = ref(defaultIceServers);
-    let healthCheckInterval: NodeJS.Timeout | null = null;
-
-    const popSound = new Howl({ src: [popWav] });
-    const guitarSound = new Howl({ src: [guitarWav] });
-    const kissSound = new Howl({ src: [kissWav] });
-    const pigSound = new Howl({ src: [pigWav] });
 
     function signalAgent(did: string, predicate: string, data?: any): void {
       // Signals a specific agent via the holochain signalling service
@@ -147,6 +145,7 @@ export const useWebrtcStore = defineStore(
     }
 
     function isScreenShareTrack(track: MediaStreamTrack): boolean {
+      // Checks the labels on a track to see if its a screen share track
       const label = track.label.toLowerCase();
       return (
         label.includes("screen") ||
@@ -158,6 +157,7 @@ export const useWebrtcStore = defineStore(
     }
 
     function startLoadingCheck(mediaType: "audio" | "video" | "screenShare", peer: PeerConnection): void {
+      // Polls for expected tracks after peer media changes because track replacement doesn't trigger an event we can listen for
       const maxAttempts = 20;
 
       // Clear previous loading check if it exists
@@ -173,7 +173,7 @@ export const useWebrtcStore = defineStore(
 
         let hasMedia = false;
 
-        // Check for the specific media type
+        // Look for the expected media track in the stream
         switch (mediaType) {
           case "audio":
             hasMedia = stream.getAudioTracks().length > 0;
@@ -187,7 +187,7 @@ export const useWebrtcStore = defineStore(
         }
 
         if (hasMedia || attempts >= maxAttempts) {
-          // Update the appropriate state
+          // Update the media state
           if (mediaType === "audio") peer.audioState = hasMedia ? "on" : "off";
           else if (mediaType === "video") peer.videoState = hasMedia ? "on" : "off";
           else if (mediaType === "screenShare") peer.screenShareState = hasMedia ? "on" : "off";
@@ -204,6 +204,8 @@ export const useWebrtcStore = defineStore(
     }
 
     function createPeerConnection(did: string, initiator: boolean): SimplePeer.Instance {
+      console.log(`🌐 Creating peer connection for ${did} (initiator: ${initiator})`);
+
       // Check if we already have a connection for this peer
       const existingPeer = peerConnections.value.get(did);
       if (existingPeer) {
@@ -211,6 +213,7 @@ export const useWebrtcStore = defineStore(
         peerConnections.value.delete(did);
       }
 
+      // Create a new SimplePeer instance
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
@@ -218,10 +221,11 @@ export const useWebrtcStore = defineStore(
         trickle: true,
       }) as Instance;
 
+      // Handle peer events
       peer.on("signal", (data) => signalAgent(did, WEBRTC_SIGNAL, data));
 
       peer.on("connect", () => {
-        // Set initial media settings for peer from agent state (updated later via direct webrtc signals)
+        // Set initial media settings for peer from their agent state in the signalling service (updated later via direct webrtc signals)
         const peerConnection = peerConnections.value.get(did);
         const agent = agentsInCall.value.find((a) => a.did === did);
         if (peerConnection && agent) {
@@ -238,22 +242,34 @@ export const useWebrtcStore = defineStore(
       });
 
       peer.on("data", (signal) => {
-        const parsedSignal = JSON.parse(signal);
+        let parsedSignal;
+        try {
+          parsedSignal = JSON.parse(signal);
+        } catch (error) {
+          console.error(`Invalid JSON from peer ${did}:`, error);
+          return;
+        }
+
         const { type, data } = parsedSignal;
+
         if (type === WEBRTC_MEDIA_SETTINGS_CHANGED) {
-          // Find the peer in the connections map, update their media state, and start loading check if necessary
+          console.log(`Received media settings change from ${did}:`, data);
+
+          // Find the peer
           const peer = peerConnections.value.get(did);
           if (!peer) return;
 
+          // Update their media state and start loading checks if necessary
           if (data.type === "audio") {
             peer.audioState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("audio", peer);
           } else if (data.type === "video") {
             const existingVideoTrack = peer.streams[0].getVideoTracks().some((track) => !isScreenShareTrack(track));
-            // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading screen
+            // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading state
             if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
               peer.videoState = "on";
             } else {
+              // Otherwise handle normally
               peer.videoState = data.enabled ? "loading" : "off";
               if (data.enabled) startLoadingCheck("video", peer);
             }
@@ -293,6 +309,8 @@ export const useWebrtcStore = defineStore(
           const attempts = reconnectionAttempts.value[did] || 0;
 
           if (attempts < MAX_RECONNECTION_ATTEMPTS) {
+            console.warn(`🔄 Reconnection attempt ${attempts + 1} for peer ${did}`);
+
             // Increment attempt counter
             reconnectionAttempts.value[did] = attempts + 1;
 
@@ -356,8 +374,10 @@ export const useWebrtcStore = defineStore(
       const peerConnection = peerConnections.value.get(did);
       if (!peerConnection) return;
 
+      console.log(`🗑️ Cleaning up peer connection for ${did}`);
+
       try {
-        // Clear loading check intervals
+        // Clear any loading check intervals
         peerConnection.loadingChecks.forEach((interval) => clearInterval(interval));
         peerConnection.loadingChecks.clear();
         // Destory their connection
@@ -366,7 +386,7 @@ export const useWebrtcStore = defineStore(
         console.error(`Error destroying peer ${did}:`, e);
       }
 
-      // Remove their entry in the peerConnections map
+      // Remove their entry from the peerConnections map
       peerConnections.value.delete(did);
     }
 
@@ -474,21 +494,22 @@ export const useWebrtcStore = defineStore(
     }
 
     function displayEmoji(emoji: string, author: string) {
-      // Push the emoji to the call emojis array
+      // Push the emoji to the call emojis array so it can be displayed in the UI
       const emojiId = crypto.randomUUID();
       callEmojis.value.push({ id: emojiId, author, emoji });
 
-      // Remove the emoji after a timeout
-      setTimeout(() => (callEmojis.value = callEmojis.value.filter((emoji) => emoji.id !== emojiId)), 3500);
-
-      // Play emoji sound
+      // Play the emoji sound
       if (emoji === "💋" || emoji === "😘") kissSound.play();
       else if (emoji === "🎸") guitarSound.play();
       else if (emoji === "🐷" || emoji === "🐖") pigSound.play();
       else popSound.play();
+
+      // Remove the emoji after a timeout
+      setTimeout(() => (callEmojis.value = callEmojis.value.filter((emoji) => emoji.id !== emojiId)), 3500);
     }
 
     function webrtcSignalHandler(signal: PerspectiveExpression) {
+      // Listens for signals in the holochain signalling service used by the webRTC store
       const link = signal.data.links[0];
       if (!inCall.value || !link) return;
 
@@ -509,26 +530,26 @@ export const useWebrtcStore = defineStore(
           if (existingConnection) peer = existingConnection.peer;
           else peer = createPeerConnection(author, false);
 
-          // Process the signal
+          // Handle the signal data
           peer.signal(signalData);
         } catch (e) {
-          console.error(`*** Error handling WebRTC signal from ${author}:`, e);
+          console.error(`❌ Error handling WebRTC signal from ${author}:`, e);
           cleanupPeerConnection(author);
         }
       }
 
       if (predicate === WEBRTC_STREAM_REQUEST && link.author !== me.value.did) {
-        const recipients = JSON.parse(target) as string[];
-        if (!recipients.includes(me.value.did)) return;
-
         // Handle stream request from peer
-        if (!localStream.value) return;
+        try {
+          const recipients = JSON.parse(target) as string[];
+          const peerConnection = peerConnections.value.get(author);
+          if (!localStream.value || !peerConnection || !recipients.includes(me.value.did)) return;
 
-        const peerConnection = peerConnections.value.get(author);
-        if (!peerConnection) return;
-
-        // Add local stream tracks to the peer connection
-        localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+          // Add local stream tracks to the peer connection
+          localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+        } catch (e) {
+          console.error(`❌ Error handling WebRTC stream request from ${author}:`, e);
+        }
       }
 
       if (predicate === WEBRTC_EMOJI) {
@@ -540,7 +561,7 @@ export const useWebrtcStore = defineStore(
           const emoji = JSON.parse(source);
           displayEmoji(emoji, author);
         } catch (e) {
-          console.error(`*** Error handling WebRTC emoji from ${author}:`, e);
+          console.error(`❌ Error handling WebRTC emoji from ${author}:`, e);
         }
       }
     }
@@ -702,11 +723,6 @@ export const useWebrtcStore = defineStore(
       },
       { immediate: true }
     );
-
-    // Clean up when store is no longer used
-    onUnmounted(() => {
-      if (inCall.value) leaveRoom();
-    });
 
     return {
       inCall,
