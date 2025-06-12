@@ -54,6 +54,7 @@ export type PeerConnection = {
   audioState: MediaState;
   videoState: MediaState;
   screenShareState: MediaState;
+  loadingChecks: Map<string, NodeJS.Timeout>;
 };
 export type AgentWithProfile = AgentState & Profile;
 export type CallEmoji = { id: string; author: string; emoji: string };
@@ -145,6 +146,63 @@ export const useWebrtcStore = defineStore(
       if (callHealth.value !== newCallHealth) callHealth.value = newCallHealth;
     }
 
+    function isScreenShareTrack(track: MediaStreamTrack): boolean {
+      const label = track.label.toLowerCase();
+      return (
+        label.includes("screen") ||
+        label.includes("display") ||
+        label.includes("window") ||
+        label.includes("tab") ||
+        label.includes("desktop")
+      );
+    }
+
+    function startLoadingCheck(mediaType: "audio" | "video" | "screenShare", peer: PeerConnection): void {
+      const maxAttempts = 20;
+
+      // Clear previous loading check if it exists
+      const existingCheck = peer.loadingChecks.get(mediaType);
+      if (existingCheck) clearInterval(existingCheck);
+
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+
+        const stream = peer.streams[0];
+        if (!stream) return;
+
+        let hasMedia = false;
+
+        // Check for the specific media type
+        switch (mediaType) {
+          case "audio":
+            hasMedia = stream.getAudioTracks().length > 0;
+            break;
+          case "video":
+            hasMedia = stream.getVideoTracks().some((track) => !isScreenShareTrack(track));
+            break;
+          case "screenShare":
+            hasMedia = stream.getVideoTracks().some((track) => isScreenShareTrack(track));
+            break;
+        }
+
+        if (hasMedia || attempts >= maxAttempts) {
+          // Update the appropriate state
+          if (mediaType === "audio") peer.audioState = hasMedia ? "on" : "off";
+          else if (mediaType === "video") peer.videoState = hasMedia ? "on" : "off";
+          else if (mediaType === "screenShare") peer.screenShareState = hasMedia ? "on" : "off";
+
+          clearInterval(checkInterval);
+          peer.loadingChecks.delete(mediaType);
+
+          if (hasMedia) console.log(`✅ ${mediaType} loaded for peer ${peer.did}`);
+          else console.warn(`❌ ${mediaType} failed to load for peer ${peer.did} after ${maxAttempts} attempts`);
+        }
+      }, 500);
+
+      peer.loadingChecks.set(mediaType, checkInterval);
+    }
+
     function createPeerConnection(did: string, initiator: boolean): SimplePeer.Instance {
       // Check if we already have a connection for this peer
       const existingPeer = peerConnections.value.get(did);
@@ -183,13 +241,20 @@ export const useWebrtcStore = defineStore(
         const parsedSignal = JSON.parse(signal);
         const { type, data } = parsedSignal;
         if (type === WEBRTC_MEDIA_SETTINGS_CHANGED) {
-          // Finf the peer in the connections map and update their media state
+          // Find the peer in the connections map, update their media state, and start loading check if necessary
           const peer = peerConnections.value.get(did);
           if (!peer) return;
 
-          if (data.type === "audio") peer.audioState = data.enabled ? "loading" : "off";
-          else if (data.type === "video") peer.videoState = data.enabled ? "loading" : "off";
-          else if (data.type === "screenShare") peer.screenShareState = data.enabled ? "loading" : "off";
+          if (data.type === "audio") {
+            peer.audioState = data.enabled ? "loading" : "off";
+            if (data.enabled) startLoadingCheck("audio", peer);
+          } else if (data.type === "video") {
+            peer.videoState = data.enabled ? "loading" : "off";
+            if (data.enabled) startLoadingCheck("video", peer);
+          } else if (data.type === "screenShare") {
+            peer.screenShareState = data.enabled ? "loading" : "off";
+            if (data.enabled) startLoadingCheck("screenShare", peer);
+          }
 
           console.log(`Peer ${did} updated media settings:`, data);
         }
@@ -206,22 +271,6 @@ export const useWebrtcStore = defineStore(
         const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
         if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
         else peerConnection.streams = [stream];
-
-        // Update loading state if applicable
-        if (peerConnection.audioState === "loading" && track.kind === "audio") {
-          peerConnection.audioState = "on";
-          console.log(`✅ Audio track loaded for peer ${did}`);
-        }
-
-        if (peerConnection.videoState === "loading" && track.kind === "video") {
-          peerConnection.videoState = "on";
-          console.log(`✅ Video track loaded for peer ${did}`);
-        }
-
-        if (peerConnection.screenShareState === "loading" && track.kind === "video") {
-          peerConnection.screenShareState = "on";
-          console.log(`✅ Screen share track loaded for peer ${did}`);
-        }
       });
 
       peer.on("close", () => cleanupPeerConnection(did));
@@ -291,6 +340,7 @@ export const useWebrtcStore = defineStore(
         audioState: "on",
         videoState: "off",
         screenShareState: "off",
+        loadingChecks: new Map<string, NodeJS.Timeout>(),
       });
 
       return peer;
@@ -301,6 +351,9 @@ export const useWebrtcStore = defineStore(
       if (!peerConnection) return;
 
       try {
+        // Clear loading check intervals
+        peerConnection.loadingChecks.forEach((interval) => clearInterval(interval));
+        peerConnection.loadingChecks.clear();
         // Destory their connection
         peerConnection.peer.destroy();
       } catch (e) {
