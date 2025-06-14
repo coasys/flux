@@ -44,7 +44,7 @@ export const useUiStore = defineStore(
       callWindowOpen.value = open;
 
       // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value;
+      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
       setCallWindowWidth(open ? fullWidth / 2 : 0);
 
       // Initialise a stream if the call window is opened without one
@@ -59,7 +59,7 @@ export const useUiStore = defineStore(
       callWindowFullscreen.value = !callWindowFullscreen.value;
 
       // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value;
+      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
       callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
     }
 

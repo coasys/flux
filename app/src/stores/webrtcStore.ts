@@ -88,7 +88,6 @@ export const useWebrtcStore = defineStore(
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
     const iceServers = ref(defaultIceServers);
-    let healthCheckInterval: NodeJS.Timeout | null = null;
 
     const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
     const signallingService = computed(() => communityService.value?.signallingService);
@@ -103,6 +102,8 @@ export const useWebrtcStore = defineStore(
       );
       return callChannel?.name || "No channel name";
     });
+
+    let healthCheckInterval: NodeJS.Timeout | null = null;
 
     function signalAgent(did: string, predicate: string, data?: any): void {
       // Signals a specific agent via the holochain signalling service

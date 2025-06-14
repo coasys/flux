@@ -1,10 +1,5 @@
 <template>
-  <div
-    id="channel-view"
-    class="channel-view"
-    :class="{ expanded: isExpanded }"
-    :style="{ width: uiStore.callWindowOpen ? `calc(100% - ${uiStore.callWindowWidth}px` : '100%' }"
-  >
+  <div id="channel-view" class="channel-view">
     <div class="channel-view__header">
       <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
@@ -182,12 +177,6 @@ const isJoiningCommunity = ref(false);
 const isExpanded = ref(false);
 const isChangeChannel = ref(false);
 
-interface MentionTrigger {
-  label: string;
-  id: string;
-  trigger: string;
-}
-
 type AgentData = Profile & AgentState;
 
 const channel = computed(() => channels.value.find((c) => c.baseExpression === channelId));
@@ -256,19 +245,10 @@ watch(
 </script>
 
 <style>
-.expanded {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: 999999;
-}
-
 .channel-view {
   position: relative;
   background: var(--app-channel-bg-color, transparent);
-  transition: width 0.5s ease-in-out;
+  width: 100%;
 }
 
 .channel-view__header {

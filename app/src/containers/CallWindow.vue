@@ -519,8 +519,8 @@ function startResize(e: any) {
   startX.value = e.clientX;
 
   // Prevent text selection & width transitions during drag
-  const channelView = document.getElementById("channel-view");
-  if (channelView) channelView.style.transition = "none";
+  const mainAppLayout = document.getElementById("app-layout-main");
+  if (mainAppLayout) mainAppLayout.style.transition = "none";
   callWindow.value.style.transition = "none";
   document.body.classList.add("text-selection-disabled");
 
@@ -532,21 +532,23 @@ function startResize(e: any) {
 function doResize(e: any) {
   if (!rightSection.value) return;
   const minWidth = rightSection.value?.getBoundingClientRect().width / 5 || 0;
+  const maxWidth = window.innerWidth - communitySidebarWidth.value - 100;
   const newWidth = startWidth.value + (startX.value - e.clientX);
-  uiStore.setCallWindowWidth(Math.max(minWidth, newWidth));
+  uiStore.setCallWindowWidth(Math.min(Math.max(minWidth, newWidth), maxWidth));
 }
 
 function stopResize() {
   if (!callWindow.value) return;
   isDragging.value = false;
 
-  // Update the call window fullscreen state in the UI store based on the channel view width after resize
-  const channelViewWidth = document.getElementById("channel-view")?.getBoundingClientRect().width;
-  uiStore.setCallWindowFullscreen(channelViewWidth === 0);
+  // Update the call window fullscreen state in the UI store after resize
+  const fullWindowWidth = window.innerWidth;
+  const isFullscreen = fullWindowWidth - callWindowWidth.value <= communitySidebarWidth.value + 100;
+  uiStore.setCallWindowFullscreen(isFullscreen);
 
   // Reset the transition styles and remove the global resizing class
-  const channelView = document.getElementById("channel-view");
-  if (channelView) channelView.style.transition = "width 0.5s ease-in-out";
+  const mainAppLayout = document.getElementById("app-layout-main");
+  if (mainAppLayout) mainAppLayout.style.transition = "width 0.5s ease-in-out";
   callWindow.value.style.transition = "all 0.5s ease-in-out";
   document.body.classList.remove("text-selection-disabled");
 

@@ -7,20 +7,33 @@
   >
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
     <div class="app-layout__webrtc"><slot name="webrtc"></slot></div>
-    <main class="app-layout__main"><slot></slot></main>
+    <main
+      class="app-layout__main"
+      id="app-layout-main"
+      :style="{ width: mainWidth, minWidth: `${communitySidebarWidth}px` }"
+    >
+      <slot></slot>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
-const ui = useUiStore();
-const { showCommunitySidebar, showAppSidebar } = storeToRefs(ui);
+const uiStore = useUiStore();
+const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth } =
+  storeToRefs(uiStore);
 
 const touchstartX = ref(0);
 const touchendX = ref(0);
+
+const mainWidth = computed(() =>
+  callWindowOpen.value
+    ? `calc(100% - ${callWindowWidth.value}px - var(--app-main-sidebar-width))`
+    : "calc(100% - var(--app-main-sidebar-width))"
+);
 
 function handleTouchStart(e: any) {
   touchstartX.value = e.changedTouches[0].screenX;
@@ -35,13 +48,13 @@ function checkDirection() {
   const treshold = 70;
   // Left swipe
   if (touchendX.value + treshold < touchstartX.value) {
-    if (showAppSidebar) ui.setAppSidebarOpen(false);
-    else ui.setCommunitySidebarOpen(false);
+    if (showAppSidebar) uiStore.setAppSidebarOpen(false);
+    else uiStore.setCommunitySidebarOpen(false);
   }
   // Right swipe
   if (touchendX.value > touchstartX.value + treshold) {
-    if (!showAppSidebar && showCommunitySidebar) ui.setAppSidebarOpen(true);
-    else ui.setCommunitySidebarOpen(true);
+    if (!showAppSidebar && showCommunitySidebar) uiStore.setAppSidebarOpen(true);
+    else uiStore.setCommunitySidebarOpen(true);
   }
 }
 </script>
@@ -103,7 +116,7 @@ function checkDirection() {
   background: var(--app-main-bg-color);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: all 0.3s ease;
+  transition: width 0.5s ease-in-out;
   margin-left: 0;
 }
 </style>
