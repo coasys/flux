@@ -200,7 +200,6 @@ export const useMediaDevicesStore = defineStore(
     }
 
     function resetMediaDevices() {
-      console.log("*** resetMediaDevices called", stream.value);
       if (!stream.value) return;
 
       // Stop all tracks
@@ -208,6 +207,11 @@ export const useMediaDevicesStore = defineStore(
 
       // Reset state
       stream.value = null;
+
+      // Re-enable audio if off to avoid error starting a stream without any media
+      if (!audioEnabled.value) audioEnabled.value = true;
+
+      // Reset screen share state
       if (screenShareEnabled.value) {
         screenShareEnabled.value = false;
         savedVideoTrack = null;
