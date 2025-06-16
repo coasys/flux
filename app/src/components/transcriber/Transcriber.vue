@@ -46,14 +46,44 @@
     <j-box mb="300">
       <j-flex gap="400" j="between" a="center">
         <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
-        <template v-if="browser === 'chrome'">
-          <j-checkbox :checked="useRemoteService" @change="toggleRemoteService" size="sm">
-            <j-text nomargin>Use Google transcription</j-text>
-          </j-checkbox>
-        </template>
-        <template v-else>
-          <j-text>Google transcription available in Chrome</j-text>
-        </template>
+        <j-flex a="center">
+          <j-tooltip
+            :placement="'top'"
+            :title="`${browser === 'chrome' ? 'Use' : 'Using'} local AI for transcription`"
+            style="margin-right: 12px; height: 22px"
+            :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
+          >
+            <Ad4mLogo
+              width="22"
+              height="22"
+              :color="`var(--j-color-primary-${useRemoteService ? 300 : 500})`"
+              @click="browser === 'chrome' && toggleRemoteService()"
+            />
+          </j-tooltip>
+          <j-toggle
+            :checked="browser === 'chrome' && useRemoteService"
+            :disabled="browser !== 'chrome'"
+            @change="toggleRemoteService"
+            size="sm"
+          />
+          <j-tooltip
+            :placement="'top'"
+            :title="
+              browser === 'chrome'
+                ? 'Use Google AI for transcription'
+                : 'Open Flux in Chrome to enable Google AI transcription'
+            "
+            style="margin-left: -5px; height: 22px"
+            :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
+          >
+            <j-icon
+              name="google"
+              size="sm"
+              :color="useRemoteService ? 'primary-500' : 'primary-300'"
+              @click="browser === 'chrome' && toggleRemoteService()"
+            />
+          </j-tooltip>
+        </j-flex>
       </j-flex>
     </j-box>
     <j-flex v-if="mediaSettings.audioEnabled" gap="300" a="center">
@@ -71,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useAiStore, useMediaDevicesStore, useWebrtcStore } from "@/stores";
 import { PerspectiveProxy } from "@coasys/ad4m";
