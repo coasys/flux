@@ -2,7 +2,7 @@
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
       <j-button size="lg" circle square variant="ghost" @click="goToSettings">
-        <j-icon size="md" name="gear"></j-icon>
+        <j-icon size="md" name="gear" />
       </j-button>
     </j-tooltip>
 
@@ -28,12 +28,12 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const app = useAppStore();
-const { me } = storeToRefs(app);
+const appStore = useAppStore();
+const { me } = storeToRefs(appStore);
 const profile = ref<Profile | null>(null);
 const showBottomOptions = ref(false);
 
-// Todo: Implement logout logic
+// TODO: Implement logout logic
 function logOut(): void {
   // router.replace({ name: "login" });
 }

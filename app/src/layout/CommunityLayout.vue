@@ -19,8 +19,8 @@ import { useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
-const ui = useUiStore();
-const { showCommunitySidebar, communitySidebarWidth } = storeToRefs(ui);
+const uiStore = useUiStore();
+const { showCommunitySidebar, communitySidebarWidth } = storeToRefs(uiStore);
 
 const sidebar = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
@@ -37,7 +37,7 @@ function startResize(e: any) {
 }
 
 function doResize(e: any) {
-  ui.setCommunitySidebarWidth(startWidth.value + (e.clientX - startX.value));
+  uiStore.setCommunitySidebarWidth(startWidth.value + (e.clientX - startX.value));
 }
 
 function stopResize() {

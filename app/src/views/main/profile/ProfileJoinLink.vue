@@ -25,7 +25,6 @@ const emit = defineEmits(["cancel", "submit"]);
 
 const isJoiningCommunity = ref(false);
 
-// Methods
 function handleJoinCommunity() {
   isJoiningCommunity.value = true;
 

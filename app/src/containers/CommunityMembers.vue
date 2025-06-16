@@ -54,9 +54,9 @@ import { useRoute, useRouter } from "vue-router";
 const emit = defineEmits(["close", "submit"]);
 const route = useRoute();
 const router = useRouter();
-const app = useAppStore();
-const { me } = storeToRefs(app);
-const { members, membersLoading, getMembers } = useCommunityService();
+const appStore = useAppStore();
+const { me } = storeToRefs(appStore);
+const { members, getMembers } = useCommunityService();
 
 const searchInput = ref("");
 

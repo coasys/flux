@@ -33,44 +33,32 @@
   </j-box>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { Theme, useThemeStore } from "@/stores";
-import { defineComponent } from "vue";
-import ThemeEditor from "./ThemeEditor.vue";
+import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 
-export default defineComponent({
-  components: { ThemeEditor },
-  setup() {
-    const theme = useThemeStore();
+const route = useRoute();
+const theme = useThemeStore();
 
-    return { theme };
-  },
-  data() {
-    return {
-      currentView: "theme-editor",
-    };
-  },
-  methods: {
-    setuseLocalTheme(val: boolean) {
-      const id = this.$route.params.communityId as string;
-      // TODO: Set local theme
-      // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
-      this.theme.changeCurrentTheme(val ? id : "global");
-    },
-    updateCommunityTheme(val: Theme) {
-      const id = this.$route.params.communityId as string;
-      this.theme.updateCommunityTheme({
-        communityId: id,
-        theme: { ...val },
-      });
-    },
-  },
-  computed: {
-    showEditor(): boolean {
-      return this.currentView === "theme-editor";
-    },
-  },
-});
+const currentView = ref("theme-editor");
+
+const showEditor = computed(() => currentView.value === "theme-editor");
+
+function setuseLocalTheme(val: boolean) {
+  const id = route.params.communityId as string;
+  // TODO: Set local theme
+  // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
+  theme.changeCurrentTheme(val ? id : "global");
+}
+
+function updateCommunityTheme(val: Theme) {
+  const id = route.params.communityId as string;
+  theme.updateCommunityTheme({
+    communityId: id,
+    theme: { ...val },
+  });
+}
 </script>
 
 <style scoped>

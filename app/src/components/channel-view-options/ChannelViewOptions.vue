@@ -1,11 +1,11 @@
 <template>
   <div class="view-options">
-    <label class="view-option" v-for="view in viewOptions">
+    <label class="view-option" v-for="view in viewOptions" :key="view.type">
       <input type="checkbox" :value="view.type" v-model="proxySel" />
-      <j-icon class="view-option__checkmark" size="xs" name="check"></j-icon>
+      <j-icon class="view-option__checkmark" size="xs" name="check" />
       <j-flex a="center" gap="500">
         <div class="view-option__icon">
-          <j-icon size="lg" :name="view.icon"></j-icon>
+          <j-icon size="lg" :name="view.icon" />
         </div>
         <div>
           <div class="view-option__title">{{ view.title }}</div>
@@ -18,40 +18,28 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { viewOptions } from "@/constants";
-import { useAppStore } from "@/stores";
 import { ChannelView } from "@coasys/flux-types";
-import { defineComponent, ref } from "vue";
+import { ref, watch } from "vue";
 
-export default defineComponent({
-  props: {
-    views: Array,
+interface Props {
+  views?: ChannelView[];
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{ change: [value: ChannelView[]] }>();
+const proxySel = ref<ChannelView[]>([]);
+
+watch(
+  () => props.views,
+  (val) => {
+    if (val) proxySel.value = val;
   },
-  emits: ["change"],
-  setup() {
-    return {
-      proxySel: ref<ChannelView[]>([]),
-      appStore: useAppStore(),
-    };
-  },
-  watch: {
-    views: {
-      handler: function (val) {
-        this.proxySel = val;
-      },
-      immediate: true,
-    },
-    proxySel(val) {
-      this.$emit("change", val);
-    },
-  },
-  computed: {
-    viewOptions() {
-      return viewOptions;
-    },
-  },
-});
+  { immediate: true }
+);
+
+watch(proxySel, (val) => emit("change", val));
 </script>
 
 <style scoped>

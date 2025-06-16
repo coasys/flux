@@ -4,10 +4,10 @@
   </Suspense>
 
   <div class="global-modal" v-if="showGlobalLoading">
-    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__backdrop" />
     <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-spinner size="lg"> </j-spinner>
+        <j-spinner size="lg" />
         <j-text size="700">Please wait...</j-text>
       </j-flex>
     </div>
@@ -17,7 +17,7 @@
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-icon name="exclamation-triangle" size="xl" color="danger-500"></j-icon>
+        <j-icon name="exclamation-triangle" size="xl" color="danger-500" />
         <j-text color="danger-500" weight="600" size="700">
           {{ globalError.message }}
         </j-text>
@@ -29,7 +29,7 @@
     autohide="5"
     :variant="toast.variant"
     :open="toast.open"
-    @toggle="(e: any) => app.setToast({ open: e.target.open })"
+    @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
     {{ toast.message }}
   </j-toast>
@@ -40,14 +40,14 @@ import { useAppStore, useThemeStore, useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 
-const app = useAppStore();
-const ui = useUiStore();
-const theme = useThemeStore();
+const appStore = useAppStore();
+const uiStore = useUiStore();
+const themeStore = useThemeStore();
 
-const { toast } = storeToRefs(app);
-const { globalError, showGlobalLoading } = storeToRefs(ui);
+const { toast } = storeToRefs(appStore);
+const { globalError, showGlobalLoading } = storeToRefs(uiStore);
 
-onMounted(async () => theme.changeCurrentTheme("global"));
+onMounted(async () => themeStore.changeCurrentTheme("global"));
 </script>
 
 <style>
@@ -70,7 +70,7 @@ html {
   font-size: var(--j-font-base-size);
 }
 
-/* Style the scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 12px;
 }

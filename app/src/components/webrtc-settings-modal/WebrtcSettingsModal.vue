@@ -26,7 +26,6 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-
 import Connection from "./Connection.vue";
 import Debug from "./Debug.vue";
 import Transcription from "./Transcription.vue";

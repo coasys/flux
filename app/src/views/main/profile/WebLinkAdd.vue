@@ -38,7 +38,7 @@
       />
 
       <j-flex gap="400">
-        <j-button full style="width: 100%" size="lg" @click="$emit('cancel')"> Cancel </j-button>
+        <j-button full style="width: 100%" size="lg" @click="emit('cancel')"> Cancel </j-button>
         <j-button
           style="width: 100%"
           full

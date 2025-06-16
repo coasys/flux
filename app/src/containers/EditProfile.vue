@@ -2,34 +2,34 @@
   <j-box p="800" :style="{ display: hideContainer ? 'none' : 'block' }">
     <j-flex direction="column" gap="700">
       <j-text variant="heading-sm">Edit profile</j-text>
-      <img-upload
+      <ImgUpload
         :value="profileBackground"
-        @change="(url) => (profileBackground = url)"
+        @change="(url) => (profileBackground = url || '')"
         @hide="(val) => (hideContainer = val)"
-      ></img-upload>
-      <avatar-upload :hash="me?.did" :value="profilePicture" @change="(url) => (profilePicture = url)"></avatar-upload>
+      />
+      <AvatarUpload :hash="me?.did" :value="profilePicture" @change="(url) => (profilePicture = url || '')" />
       <j-input
         size="lg"
         label="Username"
-        @keydown.enter="updateProfile"
-        :value="profile?.username"
-        @input="(e: any) => (username = e.target.value)"
-      ></j-input>
+        @keydown.enter="updateProfileMethod"
+        :value="username"
+        @input="(e: Event) => (username = (e.target as HTMLInputElement).value)"
+      />
       <j-input
         size="lg"
         label="Bio"
-        @keydown.enter="updateProfile"
+        @keydown.enter="updateProfileMethod"
         :value="bio"
-        @input="(e: any) => (bio = e.target.value)"
-      ></j-input>
+        @input="(e: Event) => (bio = (e.target as HTMLInputElement).value)"
+      />
       <j-flex gap="200">
-        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
+        <j-button size="lg" @click="emit('cancel')"> Cancel </j-button>
         <j-button
           :disabled="isUpdatingProfile"
           size="lg"
           :loading="isUpdatingProfile"
           variant="primary"
-          @click="updateProfile"
+          @click="updateProfileMethod"
         >
           Save
         </j-button>
@@ -38,65 +38,69 @@
   </j-box>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getProfile, updateProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";
-import { defineComponent } from "vue";
+import { onMounted, ref, watch } from "vue";
 
-export default defineComponent({
-  emits: ["cancel", "submit"],
-  components: { AvatarUpload, ImgUpload },
-  async setup() {
-    const client = await getAd4mClient();
-    const { profile, me } = useMe(client.agent, profileFormatter);
-    return {
-      me,
-      profile,
-    };
-  },
-  data() {
-    return {
-      isUpdatingProfile: false,
-      username: "",
-      bio: "",
-      profileBackground: "",
-      profilePicture: "",
-      hideContainer: false,
-    };
-  },
-  async mounted() {
-    console.log(this.profile);
-    if (this.me?.did) {
-      getProfile(this.me?.did).then((profile) => {
-        this.profilePicture = profile.profilePicture || "";
-        this.profileBackground = profile.profileBackground || "";
-      });
-      this.username = this.profile?.username || "";
-      this.bio = this.profile?.bio || "";
+const emit = defineEmits<{ cancel: []; submit: [] }>();
+
+const isUpdatingProfile = ref(false);
+const username = ref("");
+const bio = ref("");
+const profileBackground = ref("");
+const profilePicture = ref("");
+const hideContainer = ref(false);
+
+// Setup AD4M client and profile
+const client = await getAd4mClient();
+const { profile, me } = useMe(client.agent, profileFormatter);
+
+// Methods
+async function updateProfileMethod() {
+  isUpdatingProfile.value = true;
+
+  try {
+    await updateProfile({
+      username: username.value,
+      profilePicture: profilePicture.value,
+      bio: bio.value,
+      profileBackground: profileBackground.value,
+    });
+
+    emit("submit");
+  } catch (e) {
+    console.error("Error updating profile:", e);
+  } finally {
+    isUpdatingProfile.value = false;
+  }
+}
+
+// Load profile data when component mounts and when profile/me changes
+async function loadProfileData() {
+  if (me.value?.did) {
+    try {
+      const profileData = await getProfile(me.value.did);
+      profilePicture.value = profileData.profilePicture || "";
+      profileBackground.value = profileData.profileBackground || "";
+    } catch (error) {
+      console.error("Error loading profile:", error);
     }
-  },
-  methods: {
-    async updateProfile() {
-      this.isUpdatingProfile = true;
 
-      try {
-        await updateProfile({
-          username: this.username,
-          profilePicture: this.profilePicture,
-          bio: this.bio,
-          profileBackground: this.profileBackground,
-        });
-      } catch (e) {
-      } finally {
-        this.isUpdatingProfile = false;
-      }
-    },
-  },
-});
+    username.value = profile.value?.username || "";
+    bio.value = profile.value?.bio || "";
+  }
+}
+
+// Watch for changes in profile and me data
+watch([profile, me], loadProfileData, { immediate: true });
+
+// Also load data on mount as fallback
+onMounted(() => loadProfileData());
 </script>
 
 <style scoped>

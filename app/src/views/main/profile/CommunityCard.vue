@@ -11,12 +11,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
-  uuid: { type: String },
-  name: { type: String },
-  url: { type: String },
-  description: { type: String },
-});
+defineProps({ uuid: { type: String }, name: { type: String }, url: { type: String }, description: { type: String } });
 </script>
 
 <style scoped>

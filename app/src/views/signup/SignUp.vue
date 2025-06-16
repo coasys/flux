@@ -67,7 +67,6 @@ import SignUpCarousel from "./SignUpCarousel.vue";
 const router = useRouter();
 const appStore = useAppStore();
 
-// Reactive state
 const showSignup = ref(false);
 const profilePicture = ref();
 const isCreatingUser = ref(false);
@@ -78,8 +77,6 @@ const email = ref("");
 // Initialize Ad4m client
 let clientInstance: any;
 const hasUser = ref<Boolean>(false);
-
-// Initialize immediately
 (async () => {
   clientInstance = await getAd4mClient();
   const { status } = useMe(clientInstance.agent, profileFormatter);

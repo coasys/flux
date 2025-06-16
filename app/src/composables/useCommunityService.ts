@@ -25,11 +25,13 @@ export interface CommunityService {
 
 export async function createCommunityService(): Promise<CommunityService> {
   const route = useRoute();
-  const app = useAppStore();
-  const { me } = storeToRefs(app);
+  const appStore = useAppStore();
+  const { me } = storeToRefs(appStore);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = (await app.ad4mClient.perspective.byUUID(route.params.communityId as string)) as PerspectiveProxy;
+  const perspective = (await appStore.ad4mClient.perspective.byUUID(
+    route.params.communityId as string
+  )) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure required SDNA is installed (Todo: include other models here...)

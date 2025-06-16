@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ users: any[]; loading?: boolean; size?: string; tooltipTitle?: string }>();
+defineProps<{ users: any[]; loading?: boolean; size?: string; tooltipTitle?: string }>();
 const emit = defineEmits(["click"]);
 </script>
 

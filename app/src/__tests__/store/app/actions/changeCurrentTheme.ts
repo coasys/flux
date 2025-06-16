@@ -16,22 +16,21 @@ describe("Change Current Theme", () => {
   });
 
   test("Change to global theme", () => {
-    const theme = useThemeStore();
+    const themeStore = useThemeStore();
     const dataStore = useDataStore();
 
     // @ts-ignore
     dataStore.addCommunity(community);
 
-    expect(theme.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe("global");
 
-    theme.changeCurrentTheme("global");
+    themeStore.changeCurrentTheme("global");
 
-    expect(theme.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe("global");
   });
 
   test("Change to local theme for community", async () => {
     const theme = useThemeStore();
-    const dataStore = useDataStore();
 
     // @ts-ignore
     await theme.addCommunity(community);

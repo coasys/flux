@@ -1,11 +1,11 @@
 <template>
-  <Orb class="orb"></Orb>
+  <Orb class="orb" />
   <div class="wrapper">
     <j-button class="first" v-if="!isAtStart" variant="ghost" @click="scrollToPrevious">
-      <j-icon name="chevron-left"></j-icon>
+      <j-icon name="chevron-left" />
     </j-button>
     <j-button class="last" variant="ghost" v-if="!isAtEnd" @click="scrollToNext">
-      <j-icon name="chevron-right"></j-icon>
+      <j-icon name="chevron-right" />
     </j-button>
     <div class="slider" @scroll="handleScroll">
       <div id="first" class="slider__slide">
@@ -51,7 +51,7 @@
           :variant="deferredPrompt ? 'secondary' : 'primary'"
           @click="connect"
         >
-          <j-icon :size="deferredPrompt ? 'xs' : 'sm'" slot="end" name="arrow-repeat"></j-icon>
+          <j-icon :size="deferredPrompt ? 'xs' : 'sm'" slot="end" name="arrow-repeat" />
           Connect to AD4M
         </j-button>
       </j-flex>
@@ -66,20 +66,10 @@ import Logo from "@/components/logo/Logo.vue";
 import { onMounted, ref } from "vue";
 import Orb from "./Orb.vue";
 
-// State
 const deferredPrompt = ref<any>(null);
 const isAtEnd = ref(false);
 const isAtStart = ref(true);
 
-// Event listeners
-onMounted(() => {
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt.value = e;
-  });
-});
-
-// Methods
 function scrollToNext() {
   const container = document.querySelector(".slider");
 
@@ -135,6 +125,13 @@ async function downloadPWA() {
     }
   }
 }
+
+onMounted(() => {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt.value = e;
+  });
+});
 </script>
 
 <style scoped>

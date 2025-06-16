@@ -73,7 +73,7 @@
 
         <j-box mt="500">
           <j-flex direction="row" j="end" gap="300">
-            <j-button size="lg" variant="link" @click="() => $emit('cancel')"> Cancel </j-button>
+            <j-button size="lg" variant="link" @click="emit('cancel')"> Cancel </j-button>
             <j-button
               size="lg"
               :loading="isCreatingChannel"
@@ -99,10 +99,7 @@ import semver from "semver";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const emit = defineEmits<{
-  cancel: [];
-  submit: [];
-}>();
+const emit = defineEmits<{ cancel: []; submit: [] }>();
 
 const route = useRoute();
 const router = useRouter();
