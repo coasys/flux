@@ -124,9 +124,12 @@
               <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
             </j-tooltip>
 
-            <j-tooltip :placement="'top'" :title="`${callWindowOpen ? 'Hide' : 'Show'} call window`">
+            <j-tooltip
+              v-if="inCall || route.params.channelId"
+              :placement="'top'"
+              :title="`${callWindowOpen ? 'Hide' : 'Show'} call window`"
+            >
               <j-icon
-                v-if="inCall || route.params.channelId"
                 :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
                 color="ui-500"
                 @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
