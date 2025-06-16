@@ -56,9 +56,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   }, [perspective, agent]);
 
   const getAllAgents = useCallback(async () => {
-    if (allAgents.current.length === 0) {
-      await initAllAgents();
-    }
+    if (allAgents.current.length === 0) await initAllAgents();
     return allAgents.current;
   }, [initAllAgents]);
 
@@ -67,20 +65,6 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     const profiles = await Promise.all(agents.map(getCachedProfile));
     return profiles;
   }, [getAllAgents, getCachedProfile]);
-
-  useEffect(() => {
-    initAllAgents();
-  }, [initAllAgents]);
-
-  useEffect(() => {
-    perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
-      if (!hasTask) {
-        perspective
-          .addSdna("Task", taskSDNA, "subject_class")
-          .then(() => getClasses(perspective, source).then(setClasses));
-      }
-    });
-  }, [perspective.uuid]);
 
   const { entries } = useModel({ perspective, model: selectedClass, query: { source } });
 
@@ -94,25 +78,6 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       });
     });
   }
-
-  useEffect(() => {
-    setSelectedClass(classes[0] || "");
-  }, [classes.length]);
-
-  useEffect(() => {
-    //console.log("changed entries:", entries);
-    setTasks(entries);
-  }, [JSON.stringify(entries), perspective.uuid]);
-
-  useEffect(() => {
-    getClasses(perspective, source).then((classes) => {
-      setClasses(classes);
-    });
-  }, [perspective.uuid, selectedClass]);
-
-  useEffect(() => {
-    loadColumns();
-  }, [perspective.uuid, selectedClass]);
 
   const data = useMemo(() => {
     return transformData(tasks, selectedProperty, namedOptions[selectedProperty] || []);
@@ -178,16 +143,135 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     setShowAddColumn(false);
   }
 
+  function transformData(tasks: Ad4mModel[], property: string, options: NamedOption[]) {
+    const defaultColumns = options.reduce(
+      (acc, opt) => {
+        return {
+          ...acc,
+          [opt.value]: {
+            id: opt.value,
+            title: opt.label,
+            taskIds: [],
+          },
+        };
+      },
+      {
+        Unkown: {
+          id: "unknown",
+          title: "unknown",
+          taskIds: [],
+        },
+      }
+    );
+
+    // Create a map of task IDs to their full Ad4mModel instances
+    const taskMap = tasks.reduce((acc, task) => {
+      acc[task.baseExpression] = task;
+      return acc;
+    }, {});
+
+    // Organize tasks into columns while preserving the full Ad4mModel instances
+    const columns = tasks.reduce((acc, task) => {
+      const columnId = task[property] || "unknown";
+      if (!acc[columnId]) {
+        acc[columnId] = {
+          id: columnId,
+          title: columnId,
+          taskIds: [],
+        };
+      }
+      acc[columnId].taskIds.push(task.baseExpression);
+      return acc;
+    }, defaultColumns);
+
+    return {
+      tasks: taskMap, // This now contains the full Ad4mModel instances
+      columns,
+      columnOrder: options.map((c) => c.value),
+    };
+  }
+
+  async function getNamedOptions(perspective, className): Promise<NamedOptions> {
+    return perspective
+      .infer(`subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`)
+      .then((res) => {
+        if (res?.length) {
+          return res.reduce((acc, option) => {
+            return {
+              ...acc,
+              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
+            };
+          }, {});
+        } else {
+          return {};
+        }
+      });
+  }
+
+  function addTaskToColumn(columns, task, propertyName) {
+    return Object.keys(columns).reduce((acc, key) => {
+      const column = columns[key];
+      return {
+        ...acc,
+        [key]: {
+          ...column,
+          taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
+        },
+      };
+    }, {});
+  }
+
+  function getClasses(perspective: PerspectiveProxy, source) {
+    return perspective
+      .infer(`subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`)
+      .then((result) => {
+        if (Array.isArray(result)) {
+          const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
+          return uniqueClasses;
+        } else {
+          return [];
+        }
+      });
+  }
+
+  useEffect(() => {
+    initAllAgents();
+  }, [initAllAgents]);
+
+  useEffect(() => {
+    perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
+      if (!hasTask) {
+        perspective
+          .addSdna("Task", taskSDNA, "subject_class")
+          .then(() => getClasses(perspective, source).then(setClasses));
+      }
+    });
+  }, [perspective.uuid]);
+
+  useEffect(() => {
+    setSelectedClass(classes[0] || "");
+  }, [classes.length]);
+
+  useEffect(() => {
+    //console.log("changed entries:", entries);
+    setTasks(entries);
+  }, [JSON.stringify(entries), perspective.uuid]);
+
+  useEffect(() => {
+    getClasses(perspective, source).then((classes) => {
+      setClasses(classes);
+    });
+  }, [perspective.uuid, selectedClass]);
+
+  useEffect(() => {
+    loadColumns();
+  }, [perspective.uuid, selectedClass]);
+
   return (
     <>
       <j-box pb="500">
         <j-flex gap="300">
-          <select
-            placeholder="Select a class"
-            className={styles.select}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            value={selectedClass}
-          >
+          <select className={styles.select} onChange={(e) => setSelectedClass(e.target.value)} value={selectedClass}>
             <option disabled selected>
               Select type
             </option>
@@ -202,6 +286,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
           </select>
         </j-flex>
       </j-box>
+
       <div className={styles.board}>
         <div className={styles.columns}>
           <DragDropContext onDragEnd={onDragEnd}>
@@ -238,7 +323,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                                     onClick={() => setCurrentTask(task)}
                                     task={task}
                                     getProfile={getCachedProfile}
-                                  ></Card>
+                                  />
                                 </div>
                               )}
                             </Draggable>
@@ -251,7 +336,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                   <footer className={styles.columnFooter}>
                     <j-button variant="link" onClick={() => createNewTodo(selectedProperty, columnId)}>
                       Add card
-                      <j-icon name="plus" size="md" slot="start"></j-icon>
+                      <j-icon name="plus" slot="start" />
                     </j-button>
                   </footer>
                 </div>
@@ -260,7 +345,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
             {selectedClass && (
               <div>
                 <j-button variant="subtle" onClick={() => setShowAddColumn(true)}>
-                  <j-icon name="plus" size="sm" slot="start"></j-icon>
+                  <j-icon name="plus" size="sm" slot="start" />
                 </j-button>
               </div>
             )}
@@ -270,6 +355,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       {currentTask && (
         <j-modal
           open={currentTask ? true : false}
+          // @ts-ignore
           onToggle={(e) => setCurrentTask(e.currentTarget.open ? currentTask : null)}
         >
           <CardDetails
@@ -283,6 +369,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
           />
         </j-modal>
       )}
+      {/* @ts-ignore */}
       <j-modal open={showAddColumn} onToggle={(e) => setShowAddColumn(e.currentTarget.open)}>
         <j-box px="800" py="600">
           <j-box pb="800">
@@ -295,10 +382,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
               placeholder="Name"
               size="lg"
               value={columnName}
-              onInput={(e: Event) => {
-                setColumnName(e.target.value);
-              }}
-            ></j-input>
+              onInput={(e: any) => setColumnName(e.target.value)}
+            />
             <j-button variant="primary" onClick={addColumn} full size="lg">
               Create
             </j-button>
@@ -307,95 +392,4 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       </j-modal>
     </>
   );
-}
-
-function transformData(tasks: Ad4mModel[], property: string, options: NamedOption[]) {
-  const defaultColumns = options.reduce(
-    (acc, opt) => {
-      return {
-        ...acc,
-        [opt.value]: {
-          id: opt.value,
-          title: opt.label,
-          taskIds: [],
-        },
-      };
-    },
-    {
-      Unkown: {
-        id: "unknown",
-        title: "unknown",
-        taskIds: [],
-      },
-    }
-  );
-
-  // Create a map of task IDs to their full Ad4mModel instances
-  const taskMap = tasks.reduce((acc, task) => {
-    acc[task.baseExpression] = task;
-    return acc;
-  }, {});
-
-  // Organize tasks into columns while preserving the full Ad4mModel instances
-  const columns = tasks.reduce((acc, task) => {
-    const columnId = task[property] || "unknown";
-    if (!acc[columnId]) {
-      acc[columnId] = {
-        id: columnId,
-        title: columnId,
-        taskIds: [],
-      };
-    }
-    acc[columnId].taskIds.push(task.baseExpression);
-    return acc;
-  }, defaultColumns);
-
-  return {
-    tasks: taskMap, // This now contains the full Ad4mModel instances
-    columns,
-    columnOrder: options.map((c) => c.value),
-  };
-}
-
-async function getNamedOptions(perspective, className): Promise<NamedOptions> {
-  return perspective
-    .infer(`subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`)
-    .then((res) => {
-      if (res?.length) {
-        return res.reduce((acc, option) => {
-          return {
-            ...acc,
-            [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
-          };
-        }, {});
-      } else {
-        return {};
-      }
-    });
-}
-
-function addTaskToColumn(columns, task, propertyName) {
-  return Object.keys(columns).reduce((acc, key) => {
-    const column = columns[key];
-    return {
-      ...acc,
-      [key]: {
-        ...column,
-        taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
-      },
-    };
-  }, {});
-}
-
-function getClasses(perspective: PerspectiveProxy, source) {
-  return perspective
-    .infer(`subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`)
-    .then((result) => {
-      if (Array.isArray(result)) {
-        const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
-        return uniqueClasses;
-      } else {
-        return [];
-      }
-    });
 }
