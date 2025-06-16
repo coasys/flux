@@ -6,6 +6,6 @@ import App from "./App";
 
 if (!customElements.get("comment-section")) customElements.define("comment-section", CommentSection);
 
-const CustomElement = toCustomElement(App, ["perspective", "agent", "source"], { shadow: false });
+const CustomElement = toCustomElement(App, ["perspective", "agent", "source", "getProfile"], { shadow: false });
 
 export default CustomElement;

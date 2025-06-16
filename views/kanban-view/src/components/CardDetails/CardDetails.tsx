@@ -1,17 +1,17 @@
 import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@coasys/flux-types";
-import { useEffect, useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import Entry from "../Entry";
 import styles from "./CardDetails.module.css";
 
 type Props = {
-  task: Ad4mModel;
+  task: Ad4mModel & { assignees: string[] };
   perspective: PerspectiveProxy;
   channelId: string;
   selectedClass: string;
   agent: AgentClient;
-  allProfiles: () => Promise<Profile[]>;
+  agentProfiles: Profile[];
   onDeleted: () => void;
 };
 
@@ -22,52 +22,33 @@ export default function CardDetails({
   onDeleted = () => {},
   perspective,
   channelId,
-  allProfiles,
+  agentProfiles,
 }: Props) {
   const [showAssign, setShowAssign] = useState(false);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
 
-  async function fetchProfiles() {
-    setProfiles(await allProfiles());
-  }
-
-  useEffect(() => {
-    if (perspective.sharedUrl) {
-      fetchProfiles();
-    }
-  }, [perspective.uuid]);
+  const assignedProfiles = useMemo(() => {
+    const assigneeSet = new Set(task.assignees);
+    return agentProfiles.filter((p) => assigneeSet.has(p.did));
+  }, [task.assignees, agentProfiles]);
 
   async function onDelete() {
     try {
       task.delete();
       onDeleted();
-    } catch (e) {
-      // Todo: error handling
-      console.log(e);
+    } catch (error) {
+      console.log("Error deleting task", error);
     }
   }
 
-  function toggleAssignee(val: boolean, did: string) {
-    if (val) {
-      // @ts-ignore
-      if (!task.assignees.includes(did)) {
-        // @ts-ignore
-        task.assignees.push(did);
-      }
-      // @ts-ignore
+  function toggleAssignee(toggleOn: boolean, did: string) {
+    if (toggleOn) {
+      if (!task.assignees.includes(did)) task.assignees.push(did);
       task.update();
     } else {
-      // @ts-ignore
       task.assignees = task.assignees.filter((d) => d !== did);
-      // @ts-ignore
       task.update();
     }
   }
-
-  const assignedProfiles = profiles.filter((p) =>
-    // @ts-ignore
-    task.assignees.some((l) => l === p.did)
-  );
 
   return (
     <div className={styles.cardDetails}>
@@ -84,12 +65,13 @@ export default function CardDetails({
             </j-text>
           </j-flex>
         </j-box>
+        {/* @ts-ignore */}
         <comment-section
           className={styles.commentSection}
           perspective={perspective}
           source={task.baseExpression}
           agent={agent}
-        ></comment-section>
+        />
       </div>
       <aside className={styles.cardSidebar}>
         <j-box pt="800">
@@ -109,12 +91,12 @@ export default function CardDetails({
                   <j-icon name="search" slot="start" color="ui-500" size="xs"></j-icon>
                 </j-input>
                 <j-box pt="300">
-                  {profiles.map((profile) => (
+                  {agentProfiles.map((profile) => (
                     <j-menu-item key={profile.did}>
                       <j-checkbox
                         full
                         checked={task.assignees.some((a) => a === profile.did)}
-                        onChange={(e) => toggleAssignee(e.target.checked, profile.did)}
+                        onChange={(e: any) => toggleAssignee(e.target.checked, profile.did)}
                         size="sm"
                         slot="start"
                       >

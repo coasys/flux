@@ -1,9 +1,9 @@
 import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { getProfile } from "@coasys/flux-api";
+import { Profile } from "home/james/Desktop/Coding/flux/packages/types/src";
 import { useEffect, useMemo } from "preact/hooks";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import Card from "../Card";
 import CardDetails from "../CardDetails";
@@ -16,55 +16,28 @@ type BoardProps = {
   perspective: PerspectiveProxy;
   source: string;
   agent: AgentClient;
+  getProfile: (did: string) => Promise<Profile>;
 };
-
-type NamedOption = {
-  value: string;
-  label: string;
-};
-
+type NamedOption = { value: string; label: string };
 type NamedOptions = Record<string, NamedOption[]>;
 
-export default function Board({ perspective, source, agent }: BoardProps) {
+export default function Board({ perspective, source, agent, getProfile }: BoardProps) {
   const [showAddColumn, setShowAddColumn] = useState(false);
-  const [currentTask, setCurrentTask] = useState<Ad4mModel | null>(null);
+  const [currentTask, setCurrentTask] = useState<(Ad4mModel & { assignees: string[] }) | null>(null);
   const [columnName, setColumnName] = useState("");
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedProperty, setSelectedProperty] = useState("");
   const [namedOptions, setNamedOptions] = useState<NamedOptions>({});
   const [tasks, setTasks] = useState([]);
+  const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
 
-  const cachedProfiles = useRef({});
-  const allAgents = useRef([]);
-
-  const getCachedProfile = useCallback(async (did: string) => {
-    if (cachedProfiles.current[did]) {
-      return cachedProfiles.current[did];
-    }
-
-    const profile = await getProfile(did);
-    cachedProfiles.current[did] = profile;
-    return profile;
-  }, []);
-
-  const initAllAgents = useCallback(async () => {
+  async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
-    allAgents.current = [me.did, ...others];
-    return allAgents.current;
-  }, [perspective, agent]);
-
-  const getAllAgents = useCallback(async () => {
-    if (allAgents.current.length === 0) await initAllAgents();
-    return allAgents.current;
-  }, [initAllAgents]);
-
-  const getAllProfiles = useCallback(async () => {
-    const agents = await getAllAgents();
-    const profiles = await Promise.all(agents.map(getCachedProfile));
-    return profiles;
-  }, [getAllAgents, getCachedProfile]);
+    const profiles = await Promise.all([me.did, ...others].map(getProfile));
+    setAgentProfiles(profiles);
+  }
 
   const { entries } = useModel({ perspective, model: selectedClass, query: { source } });
 
@@ -97,18 +70,14 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     await perspective.addLinks([{ source, predicate: "ad4m://has_child", target: baseExpression }]);
   }
 
-  const onDragEnd = async (result) => {
+  async function onDragEnd(result) {
     const { destination, source, draggableId } = result;
 
     // If there is no destination, do not do anything
-    if (!destination) {
-      return;
-    }
+    if (!destination) return;
 
     // If the draggable is dropped in its original position, do not do anything
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
-      return;
-    }
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
     const status = destination.droppableId;
 
@@ -126,7 +95,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     // update state
     const model = await perspective.getSubjectProxy(draggableId, selectedClass);
     await setValue(model, selectedProperty, status);
-  };
+  }
 
   async function addColumn() {
     const res = await perspective.infer(`subject_class("${selectedClass}", Atom)`);
@@ -145,23 +114,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
   function transformData(tasks: Ad4mModel[], property: string, options: NamedOption[]) {
     const defaultColumns = options.reduce(
-      (acc, opt) => {
-        return {
-          ...acc,
-          [opt.value]: {
-            id: opt.value,
-            title: opt.label,
-            taskIds: [],
-          },
-        };
-      },
-      {
-        Unkown: {
-          id: "unknown",
-          title: "unknown",
-          taskIds: [],
-        },
-      }
+      (acc, opt) => ({ ...acc, [opt.value]: { id: opt.value, title: opt.label, taskIds: [] } }),
+      { Unkown: { id: "unknown", title: "unknown", taskIds: [] } }
     );
 
     // Create a map of task IDs to their full Ad4mModel instances
@@ -173,13 +127,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     // Organize tasks into columns while preserving the full Ad4mModel instances
     const columns = tasks.reduce((acc, task) => {
       const columnId = task[property] || "unknown";
-      if (!acc[columnId]) {
-        acc[columnId] = {
-          id: columnId,
-          title: columnId,
-          taskIds: [],
-        };
-      }
+      if (!acc[columnId]) acc[columnId] = { id: columnId, title: columnId, taskIds: [] };
       acc[columnId].taskIds.push(task.baseExpression);
       return acc;
     }, defaultColumns);
@@ -235,8 +183,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   }
 
   useEffect(() => {
-    initAllAgents();
-  }, [initAllAgents]);
+    if (getProfile) getProfiles();
+  }, [perspective.uuid, getProfile]);
 
   useEffect(() => {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
@@ -322,7 +270,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                                     perspective={perspective}
                                     onClick={() => setCurrentTask(task)}
                                     task={task}
-                                    getProfile={getCachedProfile}
+                                    agentProfiles={agentProfiles}
                                   />
                                 </div>
                               )}
@@ -365,7 +313,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
             task={currentTask}
             selectedClass={selectedClass}
             onDeleted={() => setCurrentTask(null)}
-            allProfiles={getAllProfiles}
+            agentProfiles={agentProfiles}
           />
         </j-modal>
       )}
