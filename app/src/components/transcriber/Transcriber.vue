@@ -288,12 +288,13 @@ function startRemoteTranscription() {
   };
 
   recognition.value.onerror = (event: any) => {
+    if (event.error === "no-speech") return; // Ignore no-speech errors (fires whenever user stops speaking)
     console.error("Speech recognition error:", event.error);
   };
 
   recognition.value.onend = () => {
     // Restart if ended due to timeout (not user toggling to local service)
-    if (usingRemoteService.value) recognition.value.start();
+    if (usingRemoteService.value && recognition.value) recognition.value.start();
   };
 
   recognition.value.start();
@@ -344,9 +345,7 @@ async function startLocalTransciption(stream: MediaStream) {
 function startListening() {
   listening.value = true;
   navigator.mediaDevices
-    .getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true },
-    })
+    .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
     .then(async (stream) => {
       audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
       if (useRemoteService.value) startRemoteTranscription();
