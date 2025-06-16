@@ -1,10 +1,10 @@
-import { Ad4mModel, PerspectiveProxy, Literal, makeRandomPrologAtom } from "@coasys/ad4m";
+import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { getProfile } from "@coasys/flux-api";
 import { useEffect, useMemo } from "preact/hooks";
 import { useCallback, useRef, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { getProfile } from "@coasys/flux-api";
 import Card from "../Card";
 import CardDetails from "../CardDetails";
 import styles from "./Board.module.css";
@@ -42,7 +42,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     if (cachedProfiles.current[did]) {
       return cachedProfiles.current[did];
     }
-    
+
     const profile = await getProfile(did);
     cachedProfiles.current[did] = profile;
     return profile;
@@ -115,11 +115,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   }, [perspective.uuid, selectedClass]);
 
   const data = useMemo(() => {
-    return transformData(
-      tasks,
-      selectedProperty,
-      namedOptions[selectedProperty] || []
-    );
+    return transformData(tasks, selectedProperty, namedOptions[selectedProperty] || []);
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
   async function setValue(model, property, value) {
@@ -130,7 +126,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   async function createNewTodo(property, value) {
     const baseExpression = Literal.from(makeRandomPrologAtom(24)).toUrl();
     //@ts-ignore
-    const model = await perspective.createSubject(selectedClass, baseExpression) as Ad4mModel;
+    const model = (await perspective.createSubject(selectedClass, baseExpression)) as Ad4mModel;
     await setValue(model, property, value);
     // link to channel
     await perspective.addLinks([{ source, predicate: "ad4m://has_child", target: baseExpression }]);
@@ -145,25 +141,20 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     }
 
     // If the draggable is dropped in its original position, do not do anything
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
       return;
     }
 
     const status = destination.droppableId;
 
     setTasks((oldTasks) => {
-      const changedTask = oldTasks.find((t) => t.baseExpression === draggableId)
-      if (changedTask) { 
+      const changedTask = oldTasks.find((t) => t.baseExpression === draggableId);
+      if (changedTask) {
         changedTask[selectedProperty] = status;
         changedTask.update();
       }
 
-      const newTasks = oldTasks.map((t) =>
-        t.baseExpression === draggableId ? changedTask : t
-      );
+      const newTasks = oldTasks.map((t) => (t.baseExpression === draggableId ? changedTask : t));
       return newTasks;
     });
 
@@ -173,9 +164,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   };
 
   async function addColumn() {
-    const res = await perspective.infer(
-      `subject_class("${selectedClass}", Atom)`
-    );
+    const res = await perspective.infer(`subject_class("${selectedClass}", Atom)`);
 
     if (res?.length) {
       const atom = res[0].Atom;
@@ -206,10 +195,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
               <option value={className}>{className}</option>
             ))}
           </select>
-          <select
-            className={styles.select}
-            onChange={(e) => setSelectedProperty(e.target.value)}
-          >
+          <select className={styles.select} onChange={(e) => setSelectedProperty(e.target.value)}>
             {Object.keys(namedOptions).map((property) => (
               <option value={property}>{property}</option>
             ))}
@@ -236,24 +222,16 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`${styles.tasks} ${
-                            snapshot.isDraggingOver ? styles.isDraggingOver : ""
-                          }`}
+                          className={`${styles.tasks} ${snapshot.isDraggingOver ? styles.isDraggingOver : ""}`}
                         >
                           {tasks.map((task, index) => (
-                            <Draggable
-                              key={task.baseExpression}
-                              draggableId={task.baseExpression}
-                              index={index}
-                            >
+                            <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index}>
                               {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`${styles.task} ${
-                                    snapshot.isDragging ? styles.isDragging : ""
-                                  }`}
+                                  className={`${styles.task} ${snapshot.isDragging ? styles.isDragging : ""}`}
                                 >
                                   <Card
                                     perspective={perspective}
@@ -271,10 +249,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
                     </Droppable>
                   </div>
                   <footer className={styles.columnFooter}>
-                    <j-button
-                      variant="link"
-                      onClick={() => createNewTodo(selectedProperty, columnId)}
-                    >
+                    <j-button variant="link" onClick={() => createNewTodo(selectedProperty, columnId)}>
                       Add card
                       <j-icon name="plus" size="md" slot="start"></j-icon>
                     </j-button>
@@ -284,10 +259,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
             })}
             {selectedClass && (
               <div>
-                <j-button
-                  variant="subtle"
-                  onClick={() => setShowAddColumn(true)}
-                >
+                <j-button variant="subtle" onClick={() => setShowAddColumn(true)}>
                   <j-icon name="plus" size="sm" slot="start"></j-icon>
                 </j-button>
               </div>
@@ -298,9 +270,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       {currentTask && (
         <j-modal
           open={currentTask ? true : false}
-          onToggle={(e) =>
-            setCurrentTask(e.currentTarget.open ? currentTask : null)
-          }
+          onToggle={(e) => setCurrentTask(e.currentTarget.open ? currentTask : null)}
         >
           <CardDetails
             agent={agent}
@@ -313,10 +283,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
           />
         </j-modal>
       )}
-      <j-modal
-        open={showAddColumn}
-        onToggle={(e) => setShowAddColumn(e.currentTarget.open)}
-      >
+      <j-modal open={showAddColumn} onToggle={(e) => setShowAddColumn(e.currentTarget.open)}>
         <j-box px="800" py="600">
           <j-box pb="800">
             <j-text nomargin variant="heading">
@@ -384,7 +351,7 @@ function transformData(tasks: Ad4mModel[], property: string, options: NamedOptio
   }, defaultColumns);
 
   return {
-    tasks: taskMap,  // This now contains the full Ad4mModel instances
+    tasks: taskMap, // This now contains the full Ad4mModel instances
     columns,
     columnOrder: options.map((c) => c.value),
   };
@@ -392,18 +359,13 @@ function transformData(tasks: Ad4mModel[], property: string, options: NamedOptio
 
 async function getNamedOptions(perspective, className): Promise<NamedOptions> {
   return perspective
-    .infer(
-      `subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`
-    )
+    .infer(`subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`)
     .then((res) => {
       if (res?.length) {
         return res.reduce((acc, option) => {
           return {
             ...acc,
-            [option.Property]: [
-              ...(acc[option.Property] || []),
-              { label: option.Label, value: option.Value },
-            ],
+            [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
           };
         }, {});
       } else {
@@ -419,10 +381,7 @@ function addTaskToColumn(columns, task, propertyName) {
       ...acc,
       [key]: {
         ...column,
-        taskIds:
-          task[propertyName] === column.id
-            ? [...column.taskIds, task.baseExpression]
-            : column.taskIds,
+        taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
       },
     };
   }, {});
@@ -430,9 +389,7 @@ function addTaskToColumn(columns, task, propertyName) {
 
 function getClasses(perspective: PerspectiveProxy, source) {
   return perspective
-    .infer(
-      `subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`
-    )
+    .infer(`subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`)
     .then((result) => {
       if (Array.isArray(result)) {
         const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];

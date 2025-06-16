@@ -1,5 +1,4 @@
 import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
 import { useEffect, useState } from "preact/hooks";
 import DisplayValue from "../DisplayValue";
 
@@ -11,29 +10,18 @@ type Props = {
   onUrlClick?: Function;
 };
 
-export default function Entry({
-  perspective,
-  task,
-  channelId,
-  selectedClass,
-  onUrlClick = () => {},
-}: Props) {
+export default function Entry({ perspective, task, channelId, selectedClass, onUrlClick = () => {} }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
 
   useEffect(() => {
     perspective
-      .infer(
-        `subject_class("${selectedClass}", Atom), property_named_option(Atom, Property, Value, Label).`
-      )
+      .infer(`subject_class("${selectedClass}", Atom), property_named_option(Atom, Property, Value, Label).`)
       .then((res) => {
         if (res?.length) {
           const options = res.reduce((acc, option) => {
             return {
               ...acc,
-              [option.Property]: [
-                ...(acc[option.Property] || []),
-                { label: option.Label, value: option.Value },
-              ],
+              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
             };
           }, {});
           setNamedOptions(options);
@@ -48,20 +36,10 @@ export default function Entry({
 
   if (task) {
     const properties = Object.entries(task).filter(([key, value]) => {
-      return !(
-        key === "author" ||
-        key === "timestamp" ||
-        key === "id" ||
-        key === "title" ||
-        key === "name"
-      );
+      return !(key === "author" || key === "timestamp" || key === "id" || key === "title" || key === "name");
     });
 
-    const titleName = task.hasOwnProperty("name")
-      ? "name"
-      : task.hasOwnProperty("title")
-        ? "title"
-        : "";
+    const titleName = task.hasOwnProperty("name") ? "name" : task.hasOwnProperty("title") ? "title" : "";
 
     // @ts-ignore
     const defaultName = task?.name || task?.title || "";
@@ -73,12 +51,7 @@ export default function Entry({
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
                 <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
-                <j-text
-                  style="text-transform: capitalize"
-                  size="500"
-                  weight="500"
-                  nomargin
-                >
+                <j-text style="text-transform: capitalize" size="500" weight="500" nomargin>
                   {titleName}
                 </j-text>
               </j-flex>
@@ -98,12 +71,7 @@ export default function Entry({
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
                 <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
-                <j-text
-                  style="text-transform: capitalize"
-                  size="500"
-                  weight="600"
-                  nomargin
-                >
+                <j-text style="text-transform: capitalize" size="500" weight="600" nomargin>
                   {key}
                 </j-text>
               </j-flex>

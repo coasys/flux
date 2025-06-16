@@ -1,24 +1,18 @@
-import { useEffect, useState } from "preact/hooks";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import styles from "./Card.module.css";
 import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
-import { useAssociations } from "../../hooks/useAssociations";
-import { Profile } from "@coasys/flux-types";
+import { useModel } from "@coasys/ad4m-react-hooks";
 import { Message } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
+import { useEffect, useState } from "preact/hooks";
+import styles from "./Card.module.css";
 
 type Props = {
-  task: Ad4mModel
+  task: Ad4mModel;
   onClick: () => void;
   perspective: PerspectiveProxy;
   getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function Card({
-  task,
-  onClick,
-  perspective,
-  getProfile,
-}: Props) {
+export default function Card({ task, onClick, perspective, getProfile }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
   console.log("task", task);
 
@@ -73,24 +67,14 @@ export default function Card({
           <j-box pt="400">
             <j-flex className={styles.assignees} wrap gap="200">
               {assignedProfiles.map((p) => (
-                <j-avatar
-                  key={p.did}
-                  size="xs"
-                  src={p?.profileThumbnailPicture}
-                  hash={p.did}
-                ></j-avatar>
+                <j-avatar key={p.did} size="xs" src={p?.profileThumbnailPicture} hash={p.did}></j-avatar>
               ))}
             </j-flex>
           </j-box>
         )}
       </j-flex>
 
-      <j-icon
-        color="ui-400"
-        className={styles.editIcon}
-        size="xs"
-        name="pencil-square"
-      ></j-icon>
+      <j-icon color="ui-400" className={styles.editIcon} size="xs" name="pencil-square"></j-icon>
     </div>
   );
 }

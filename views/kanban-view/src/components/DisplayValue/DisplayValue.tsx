@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "preact/hooks";
 import { Literal } from "@coasys/ad4m";
-import styles from "./DisplayValue.module.css";
-import type { Profile } from "@coasys/flux-types";
 import { getProfile } from "@coasys/flux-api";
+import type { Profile } from "@coasys/flux-types";
+import { useEffect, useRef, useState } from "preact/hooks";
+import styles from "./DisplayValue.module.css";
 
 export function isValidUrl(string) {
   try {
@@ -20,12 +20,7 @@ type Props = {
   onUpdate?: (value: string) => void;
 };
 
-export default function DisplayValue({
-  value,
-  options,
-  onUpdate,
-  onUrlClick = () => {},
-}: Props) {
+export default function DisplayValue({ value, options, onUpdate, onUrlClick = () => {} }: Props) {
   const inputRef = useRef();
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
@@ -80,11 +75,7 @@ export default function DisplayValue({
   if (options) {
     return (
       <div className={styles.selectWrapper}>
-        <select
-          className={styles.select}
-          value={localValue}
-          onChange={(e) => onUpdate(e.target.value)}
-        >
+        <select className={styles.select} value={localValue} onChange={(e) => onUpdate(e.target.value)}>
           {options.map((option) => (
             <option value={option.value}>{option.label}</option>
           ))}
@@ -114,10 +105,7 @@ export default function DisplayValue({
       return <Profile did={localValue}></Profile>;
     }
 
-    if (localValue.length > 1000)
-      return (
-        <img className={styles.img} src={`data:image/png;base64,${localValue}`} />
-      );
+    if (localValue.length > 1000) return <img className={styles.img} src={`data:image/png;base64,${localValue}`} />;
     if (isValidUrl(localValue)) {
       if (localValue.startsWith("literal://")) {
         return (
@@ -191,11 +179,7 @@ function ShowObjectInfo({ value }) {
         Show
       </j-button>
       {open && (
-        <j-modal
-          open={open}
-          onClick={(e) => e.stopImmediatePropagation()}
-          onToggle={(e) => setOpen(e.target.open)}
-        >
+        <j-modal open={open} onClick={(e) => e.stopImmediatePropagation()} onToggle={(e) => setOpen(e.target.open)}>
           <j-box p="500">
             <j-flex p="500" direction="column" gap="400">
               {properties.map(([key, value]) => (
@@ -223,11 +207,7 @@ function Profile({ did }: { did: string }) {
 
   return (
     <j-tooltip strategy="fixed" title={profile?.username}>
-      <j-avatar
-        size="xs"
-        hash={did}
-        src={profile?.profileThumbnailPicture}
-      ></j-avatar>
+      <j-avatar size="xs" hash={did} src={profile?.profileThumbnailPicture}></j-avatar>
     </j-tooltip>
   );
 }

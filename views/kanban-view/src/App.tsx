@@ -1,7 +1,7 @@
-import styles from "./App.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import TodoView from "./components/Board";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import styles from "./App.module.css";
+import KanbanView from "./components/Board";
 
 type Props = {
   agent: AgentClient;
@@ -14,11 +14,7 @@ export default function App({ agent, perspective, source }: Props) {
 
   return (
     <div className={styles.appContainer}>
-      <TodoView
-        agent={agent}
-        perspective={perspective}
-        source={source}
-      ></TodoView>
+      <KanbanView agent={agent} perspective={perspective} source={source} />
     </div>
   );
 }

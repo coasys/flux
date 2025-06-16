@@ -1,10 +1,7 @@
-import { PerspectiveProxy, Ad4mModel, SubjectProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { getProfile } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { useEffect, useState } from "preact/hooks";
-import { useAssociations } from "../../hooks/useAssociations";
 import Entry from "../Entry";
 import styles from "./CardDetails.module.css";
 
@@ -14,7 +11,7 @@ type Props = {
   channelId: string;
   selectedClass: string;
   agent: AgentClient;
-  allProfiles: ()=>Promise<Profile[]>;
+  allProfiles: () => Promise<Profile[]>;
   onDeleted: () => void;
 };
 
@@ -76,12 +73,7 @@ export default function CardDetails({
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
         <j-box pb="800">
-          <Entry
-            task={task}
-            perspective={perspective}
-            selectedClass={selectedClass}
-            channelId={channelId}
-          />
+          <Entry task={task} perspective={perspective} selectedClass={selectedClass} channelId={channelId} />
         </j-box>
 
         <j-box pb="500">
@@ -106,10 +98,7 @@ export default function CardDetails({
           </j-text>
         </j-box>
         <j-box pt="300">
-          <button
-            className={styles.actionButton}
-            onClick={() => setShowAssign(!showAssign)}
-          >
+          <button className={styles.actionButton} onClick={() => setShowAssign(!showAssign)}>
             <j-icon name="people" slot="start" size="xs"></j-icon>
             <span>Assign</span>
           </button>
@@ -117,33 +106,20 @@ export default function CardDetails({
             <j-menu className={styles.menu}>
               <j-box p="200">
                 <j-input size="sm" type="search">
-                  <j-icon
-                    name="search"
-                    slot="start"
-                    color="ui-500"
-                    size="xs"
-                  ></j-icon>
+                  <j-icon name="search" slot="start" color="ui-500" size="xs"></j-icon>
                 </j-input>
                 <j-box pt="300">
                   {profiles.map((profile) => (
                     <j-menu-item key={profile.did}>
                       <j-checkbox
                         full
-                        checked={task.assignees.some(
-                          (a) => a === profile.did
-                        )}
-                        onChange={(e) =>
-                          toggleAssignee(e.target.checked, profile.did)
-                        }
+                        checked={task.assignees.some((a) => a === profile.did)}
+                        onChange={(e) => toggleAssignee(e.target.checked, profile.did)}
                         size="sm"
                         slot="start"
                       >
                         <div className={styles.suggestion}>
-                          <j-avatar
-                            size="xs"
-                            src={profile.profileThumbnailPicture}
-                            hash={profile.did}
-                          ></j-avatar>
+                          <j-avatar size="xs" src={profile.profileThumbnailPicture} hash={profile.did}></j-avatar>
                           <j-text nomargin size="400" color="ui-800">
                             {profile.username}
                           </j-text>
@@ -160,11 +136,7 @@ export default function CardDetails({
               {assignedProfiles.map((p) => (
                 <j-box pt="300" key={p.did}>
                   <j-flex a="center" gap="300">
-                    <j-avatar
-                      size="xs"
-                      src={p?.profileThumbnailPicture}
-                      hash={p.did}
-                    ></j-avatar>
+                    <j-avatar size="xs" src={p?.profileThumbnailPicture} hash={p.did}></j-avatar>
                     <j-text nomargin size="400" color="ui-700">
                       {p?.username}
                     </j-text>
