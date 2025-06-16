@@ -1,3 +1,9 @@
+import { Link, PerspectiveExpression } from "@coasys/ad4m";
+
+// Ref types for reactive Vue.js properties
+export type Ref<T> = { value: T };
+export type ComputedRef<T> = { value: T };
+
 export interface NeighbourhoodMeta {
   name: string;
   description: string;
@@ -193,4 +199,44 @@ export interface WebLink {
   image: string;
   url: string;
   id: string;
+}
+
+export type AgentStatus = "active" | "asleep" | "offline" | "invisible" | "busy" | "unknown";
+
+export interface RouteParams {
+  communityId?: string;
+  channelId?: string;
+  viewId?: string;
+}
+
+export interface ProcessingState {
+  step: number;
+  channelId?: string;
+  itemIds?: string[];
+  author?: string;
+}
+
+export type MediaSettings = { audioEnabled: boolean; videoEnabled: boolean; screenShareEnabled: boolean };
+export interface AgentState {
+  status: AgentStatus;
+  currentRoute: RouteParams;
+  callRoute: RouteParams;
+  mediaSettings: MediaSettings;
+  processing: ProcessingState | null;
+  inCall: boolean;
+  aiEnabled: boolean;
+  lastUpdate: number;
+}
+
+export type CallHealth = "healthy" | "warnings" | "connections-lost";
+export interface SignallingService {
+  signalling: Ref<boolean>;
+  agents: Ref<Record<string, AgentState>>;
+  setProcessingState: (processing: ProcessingState) => void;
+  getAgentState(did: string): AgentState | undefined;
+  startSignalling: () => void;
+  stopSignalling: () => void;
+  addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  sendSignal: (link: Link) => void;
 }

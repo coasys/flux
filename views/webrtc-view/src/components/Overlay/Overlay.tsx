@@ -1,8 +1,8 @@
+import { WebRTC } from "@coasys/flux-react-web";
+import { Profile } from "@coasys/flux-types";
 import { useContext } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import Settings from "../Settings";
-import { Profile } from "@coasys/flux-types";
-import { WebRTC } from "@coasys/flux-react-web";
 
 type Props = {
   webRTC: WebRTC;
@@ -23,8 +23,9 @@ export default function Overlay({ webRTC, profile }: Props) {
 
   return (
     <j-modal
-      size="l"
+      size="lg"
       open={uiState.showSettings}
+      // @ts-ignore
       onToggle={(e) => UIMethods.toggleShowSettings(e.target.open)}
     >
       {uiState.showSettings && <Settings webRTC={webRTC} profile={profile} />}

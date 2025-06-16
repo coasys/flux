@@ -1,8 +1,8 @@
-import community from "../../../fixtures/community.json";
+import { useDataStore } from "@/store/data";
+import { useThemeStore } from "@/stores";
 import * as setTheme from "@/utils/themeHelper";
 import { createPinia, Pinia, setActivePinia } from "pinia";
-import { useDataStore } from "@/store/data";
-import { useAppStore } from "@/store/app";
+import community from "../../../fixtures/community.json";
 
 describe("Change Current Theme", () => {
   let store: Pinia;
@@ -16,30 +16,29 @@ describe("Change Current Theme", () => {
   });
 
   test("Change to global theme", () => {
-    const appStore = useAppStore();
+    const themeStore = useThemeStore();
     const dataStore = useDataStore();
 
     // @ts-ignore
     dataStore.addCommunity(community);
 
-    expect(appStore.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe("global");
 
-    appStore.changeCurrentTheme("global");
+    themeStore.changeCurrentTheme("global");
 
-    expect(appStore.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe("global");
   });
 
   test("Change to local theme for community", async () => {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
+    const theme = useThemeStore();
 
     // @ts-ignore
-    await dataStore.addCommunity(community);
+    await theme.addCommunity(community);
 
-    expect(appStore.currentTheme).toBe("global");
+    expect(theme.currentTheme).toBe("global");
 
-    await appStore.changeCurrentTheme(community.state.perspectiveUuid);
+    await theme.changeCurrentTheme(community.state.perspectiveUuid);
 
-    expect(appStore.currentTheme).toBe(community.state.perspectiveUuid);
+    expect(theme.currentTheme).toBe(community.state.perspectiveUuid);
   });
 });

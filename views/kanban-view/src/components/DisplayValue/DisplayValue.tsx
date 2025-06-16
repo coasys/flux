@@ -28,6 +28,7 @@ export default function DisplayValue({
 }: Props) {
   const inputRef = useRef();
   const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -35,19 +36,27 @@ export default function DisplayValue({
     }
   }, [isEditing]);
 
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   function onKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
       setIsEditing(false);
+      onUpdate(e.target.value);
+      setLocalValue(e.target.value);
     }
     if (e.key === "Escape") {
       e.stopPropagation();
       setIsEditing(false);
+      setLocalValue(value);
     }
   }
 
   function onBlur(e) {
     onUpdate(e.target.value);
+    setLocalValue(e.target.value);
     setIsEditing(false);
   }
 
@@ -56,12 +65,12 @@ export default function DisplayValue({
     setIsEditing(true);
   }
 
-  const isCollection = Array.isArray(value);
+  const isCollection = Array.isArray(localValue);
 
   if (isCollection) {
     return (
       <j-flex gap="200" wrap>
-        {value.map((v, index) => {
+        {localValue.map((v, index) => {
           return <DisplayValue onUrlClick={onUrlClick} value={v} />;
         })}
       </j-flex>
@@ -73,7 +82,7 @@ export default function DisplayValue({
       <div className={styles.selectWrapper}>
         <select
           className={styles.select}
-          value={value}
+          value={localValue}
           onChange={(e) => onUpdate(e.target.value)}
         >
           {options.map((option) => (
@@ -95,32 +104,32 @@ export default function DisplayValue({
         onClick={(e) => e.stopPropagation()}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        value={value}
+        value={localValue}
       ></input>
     );
   }
 
-  if (typeof value === "string") {
-    if (value.startsWith("did:key")) {
-      return <Profile did={value}></Profile>;
+  if (typeof localValue === "string") {
+    if (localValue.startsWith("did:key")) {
+      return <Profile did={localValue}></Profile>;
     }
 
-    if (value.length > 1000)
+    if (localValue.length > 1000)
       return (
-        <img className={styles.img} src={`data:image/png;base64,${value}`} />
+        <img className={styles.img} src={`data:image/png;base64,${localValue}`} />
       );
-    if (isValidUrl(value)) {
-      if (value.startsWith("literal://")) {
+    if (isValidUrl(localValue)) {
+      if (localValue.startsWith("literal://")) {
         return (
           <a
             className={styles.entryUrl}
-            href={value}
+            href={localValue}
             onClick={(e) => {
               e.stopPropagation();
-              onUrlClick(value);
+              onUrlClick(localValue);
             }}
           >
-            {Literal.fromUrl(value).get()}
+            {Literal.fromUrl(localValue).get()}
           </a>
         );
       }
@@ -128,13 +137,13 @@ export default function DisplayValue({
       return (
         <a
           className={styles.entryUrl}
-          href={value}
+          href={localValue}
           onClick={(e) => {
             e.stopPropagation();
-            onUrlClick(value);
+            onUrlClick(localValue);
           }}
         >
-          {value}
+          {localValue}
         </a>
       );
     }
@@ -142,19 +151,19 @@ export default function DisplayValue({
     return (
       <j-flex gap="500" a="center">
         <div className={styles.value} onClick={onStartEdit}>
-          {value}
+          {localValue}
         </div>
       </j-flex>
     );
   }
 
-  if (value?.constructor?.name === "Object") {
-    return <ShowObjectInfo value={value} />;
+  if (localValue?.constructor?.name === "Object") {
+    return <ShowObjectInfo value={localValue} />;
   }
 
-  if (value === true) return <j-toggle size="sm" checked></j-toggle>;
+  if (localValue === true) return <j-toggle size="sm" checked></j-toggle>;
 
-  if (value === false)
+  if (localValue === false)
     return onUpdate ? (
       <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
         <j-icon size="xs" name="pencil"></j-icon>
@@ -163,7 +172,7 @@ export default function DisplayValue({
       <span></span>
     );
 
-  return value === null ? <span></span> : value;
+  return localValue === null ? <span></span> : localValue;
 }
 
 function ShowObjectInfo({ value }) {

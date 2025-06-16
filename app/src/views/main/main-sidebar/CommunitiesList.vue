@@ -1,24 +1,22 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-tooltip
-      v-for="(community, uuid) in communities"
-      :key="uuid"
-      :title="community.name || 'Unknown Community'"
-    >
+    <j-tooltip v-for="(community, uuid) in myCommunities" :key="uuid" :title="community.name || 'Unknown Community'">
       <j-popover event="contextmenu">
-        <Avatar
-          slot="trigger"
-          class="left-nav__community-item"
-          :selected="communityIsActive(uuid as string)"
-          :online="false"
-          :src="community.image || undefined"
-          :initials="`${community?.name}`.charAt(0).toUpperCase()"
-          @click="() => handleCommunityClick(uuid as string)"
-        ></Avatar>
+        <div slot="trigger" :class="getAvatarClasses(uuid)">
+          <div v-if="isInCall(uuid)" class="recording-icon">
+            <RecordingIcon :size="30" />
+          </div>
+
+          <j-avatar
+            class="left-nav__community-item"
+            :src="community.image || null"
+            :initials="`${community?.name}`.charAt(0).toUpperCase()"
+            @click="() => handleCommunityClick(uuid as string)"
+          />
+        </div>
+
         <j-menu slot="content">
-          <j-menu-item
-            @click="() => setShowLeaveCommunity(true, uuid as string)"
-          >
+          <j-menu-item @click="() => handleSetShowLeaveCommunity(true, uuid as string)">
             <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
             Leave community
           </j-menu-item>
@@ -27,6 +25,7 @@
             ><j-icon size="xs" slot="start" name="bell" />
             Mute Community
           </j-menu-item>
+
           <j-menu-item @click="() => toggleHideMutedChannels(uuid as string)">
             <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
@@ -34,75 +33,73 @@
         </j-menu>
       </j-popover>
     </j-tooltip>
+
     <j-tooltip title="Create or join community">
-      <j-button
-        @click="() => appStore.setShowCreateCommunity(true)"
-        square
-        circle
-        variant="subtle"
-      >
+      <j-button @click="() => (modalStore.showCreateCommunity = true)" square circle variant="subtle">
         <j-icon size="md" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
   </div>
 </template>
 
-<script lang="ts">
-import Avatar from "@/components/avatar/Avatar.vue";
-import { useAppStore } from "@/store/app";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { useCommunities } from "@coasys/flux-vue";
-import { defineComponent, ref } from "vue";
+<script setup lang="ts">
+import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from "@/stores";
+import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 
-export default defineComponent({
-  components: {
-    Avatar,
-  },
-  async setup() {
-    const appStore = useAppStore();
+const route = useRoute();
+const router = useRouter();
 
-    const client = await getAd4mClient();
+const appStore = useAppStore();
+const modalStore = useModalStore();
+const uiStore = useUiStore();
+const webrtcStore = useWebrtcStore();
+const routeMemoryStore = useRouteMemoryStore();
 
-    const { neighbourhoods } = usePerspectives(client);
-    const { communities } = useCommunities(neighbourhoods);
+const { myCommunities } = storeToRefs(appStore);
+const { inCall, callRoute } = storeToRefs(webrtcStore);
 
-    return {
-      communities,
-      showLeaveCommunity: ref(false),
-      appStore,
-    };
-  },
-  methods: {
-    toggleHideMutedChannels(id: string) {
-      /*
-      this.dataStore.toggleHideMutedChannels({ communityId: id });
-      */
-    },
-    muteCommunity(id: string) {
-      /*
-      this.dataStore.toggleCommunityMute({ communityId: id });
-      */
-    },
-    setShowLeaveCommunity(show: boolean, uuid: string) {
-      this.appStore.setActiveCommunity(uuid);
-      this.appStore.setShowLeaveCommunity(show);
-    },
-    handleCommunityClick(communityId: string) {
-      if (this.communityIsActive(communityId)) {
-        this.appStore.toggleSidebar;
-      } else {
-        this.appStore.setSidebar(true);
-        this.$router.push({ name: "community", params: { communityId } });
-      }
-    },
-  },
-  computed: {
-    communityIsActive() {
-      return (id: string) => this.$route.params.communityId === id;
-    },
-  },
-});
+function isInCall(uuid: string) {
+  return inCall.value && callRoute.value.communityId === uuid;
+}
+
+function isPresent(uuid: string) {
+  return route.params.communityId === uuid;
+}
+
+function getAvatarClasses(uuid: string) {
+  return { "avatar-wrapper": true, "in-call": isInCall(uuid), present: isPresent(uuid) };
+}
+
+function communityIsActive(communityId: string) {
+  return route.params.communityId === communityId;
+}
+
+// Todo: Implement hidding muted channels
+function toggleHideMutedChannels(id: string) {
+  // this.dataStore.toggleHideMutedChannels({ communityId: id });
+}
+
+// Todo: Implement mute community
+function muteCommunity(id: string) {
+  // toggleCommunityMute({ communityId: id });
+}
+
+function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
+  modalStore.showLeaveCommunity = show;
+}
+
+// Todo: investigate why toggleCommunitySidebar class applied in CommunityLayout doesn't change the UI
+function handleCommunityClick(communityId: string) {
+  if (communityIsActive(communityId)) uiStore.toggleCommunitySidebar();
+  else {
+    uiStore.setCommunitySidebarOpen(true);
+    // Navigate back to the last route if saved
+    const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
+    router.push(lastRoute ? lastRoute.path : { name: "community", params: { communityId } });
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -124,5 +121,29 @@ export default defineComponent({
 
 .left-nav__community-item {
   cursor: pointer;
+}
+
+.avatar-wrapper {
+  border-radius: 50%;
+
+  &.present {
+    box-shadow: 0 0 0 2px var(--j-color-primary-500);
+  }
+
+  &.in-call {
+    box-shadow: 0 0 0 2px var(--j-color-danger-400);
+
+    &.present {
+      box-shadow: 0 0 0 3px var(--j-color-danger-400);
+    }
+  }
+
+  .recording-icon {
+    position: absolute;
+    z-index: 5;
+    bottom: -4.8px;
+    right: -4.8px;
+    pointer-events: none;
+  }
 }
 </style>

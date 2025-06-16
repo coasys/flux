@@ -3,9 +3,7 @@
     <j-flex direction="column" gap="700">
       <div>
         <j-text variant="heading-sm">Create Channel</j-text>
-        <j-text variant="body">
-          Channels are ways to organize your conversations by topics.
-        </j-text>
+        <j-text variant="body"> Channels are ways to organize your conversations by topics. </j-text>
       </div>
       <j-flex direction="column" gap="400">
         <j-input
@@ -27,36 +25,23 @@
             <j-text variant="label">Select at least one plugin</j-text>
             <j-text size="300" variant="label">
               Can't find a suitable plugin?
-              <a
-                target="_blank"
-                style="color: var(--j-color-black)"
-                href="https://docs.fluxsocial.io"
-                >Create one</a
-              >
+              <a target="_blank" style="color: var(--j-color-black)" href="https://docs.fluxsocial.io">Create one</a>
             </j-text>
           </j-box>
 
-          <j-box v-if="isLoading" align="center" p="500">
-            <j-spinner></j-spinner>
+          <j-box v-if="isLoading" p="500">
+            <j-spinner />
           </j-box>
 
           <j-box v-else pb="500">
-            <j-tabs
-              class="tabs"
-              :value="tab"
-              @change="(e) => (tab = e.target.value)"
-            >
+            <j-tabs class="tabs" :value="tab" @change="(e: any) => (tab = e.target.value)">
               <j-tab-item value="official">Official</j-tab-item>
               <j-tab-item value="community">Community</j-tab-item>
             </j-tabs>
           </j-box>
 
           <div class="app-grid" v-if="!isLoading">
-            <div
-              class="app-card"
-              v-for="app in filteredPackages"
-              :key="app.name"
-            >
+            <div class="app-card" v-for="app in filteredPackages" :key="app.name">
               <j-flex a="center" direction="row" j="between" gap="500">
                 <j-flex gap="500" a="center" j="center">
                   <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
@@ -65,13 +50,7 @@
                       <j-text variant="heading-sm">
                         {{ app.name }}
                       </j-text>
-                      <j-badge
-                        size="sm"
-                        v-if="app.pkg.startsWith('@coasys')"
-                        variant="success"
-                      >
-                        Official App
-                      </j-badge>
+                      <j-badge size="sm" v-if="app.pkg.startsWith('@coasys')" variant="success"> Official App </j-badge>
                     </j-flex>
                     <j-text nomargin>
                       {{ app.description }}
@@ -81,11 +60,7 @@
                 <div>
                   <j-button
                     :loading="loadedPlugins[app.pkg] === 'loading'"
-                    :variant="
-                      isSelected(app) && loadedPlugins[app.pkg] === 'loaded'
-                        ? ''
-                        : 'primary'
-                    "
+                    :variant="isSelected(app) && loadedPlugins[app.pkg] === 'loaded' ? '' : 'primary'"
                     @click="() => toggleView(app)"
                   >
                     {{ isSelected(app) ? "Remove" : "Add" }}
@@ -98,9 +73,7 @@
 
         <j-box mt="500">
           <j-flex direction="row" j="end" gap="300">
-            <j-button size="lg" variant="link" @click="() => $emit('cancel')">
-              Cancel
-            </j-button>
+            <j-button size="lg" variant="link" @click="emit('cancel')"> Cancel </j-button>
             <j-button
               size="lg"
               :loading="isCreatingChannel"
@@ -117,173 +90,143 @@
   </j-box>
 </template>
 
-<script lang="ts">
-import { ref } from "vue";
-import { useRoute } from "vue-router";
-import {
-  Channel,
-  getAllFluxApps,
-  FluxApp,
-  App,
-  generateWCName,
-  getOfflineFluxApps,
-} from "@coasys/flux-api";
-import semver from "semver";
-import { usePerspective } from "@coasys/ad4m-vue-hooks";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { getAd4mClient } from "@coasys/ad4m-connect";
+import { usePerspective } from "@coasys/ad4m-vue-hooks";
+import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from "@coasys/flux-api";
+import semver from "semver";
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-export default defineComponent({
-  emits: ["cancel", "submit"],
-  async created() {
-    this.isLoading = true;
+const emit = defineEmits<{ cancel: []; submit: [] }>();
 
-    // Fetch apps from npm, use local apps if request fails
-    try {
-      const res = await getAllFluxApps();
+const route = useRoute();
+const router = useRouter();
 
-      this.isLoading = false;
+const tab = ref<"official" | "community">("official");
+const isLoading = ref(false);
+const packages = ref<FluxApp[]>([]);
+const selectedViews = ref<string[]>([]);
+const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
+const channelName = ref("");
+const isCreatingChannel = ref(false);
 
-      const filtered = res.filter((pkg) => {
-        try {
-          return semver.gte(
-            semver.coerce(pkg?.ad4mVersion || "0.0.0"),
-            "0.8.1"
-          );
-        } catch (error) {
-          return false;
-        }
-      });
+const client = await getAd4mClient();
+const { data } = usePerspective(client, () => route.params.communityId);
+const perspective = computed(() => data.value.perspective);
 
-      this.packages = filtered;
-    } catch (error) {
-      console.info("Flux is offline, using fallback apps");
+const hasName = computed(() => channelName.value?.length >= 3);
+const validSelectedViews = computed(() => selectedViews.value.length >= 1);
+const canSubmit = computed(() => hasName.value && validSelectedViews.value);
+const selectedPlugins = computed(() => packages.value.filter((p) => selectedViews.value.includes(p.pkg)));
+const officialApps = computed(() =>
+  packages.value.filter((p) => p.pkg.startsWith("@coasys/") && p.pkg !== "@coasys/flux-webrtc-view")
+);
+const communityApps = computed(() => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
+const filteredPackages = computed(() => (tab.value === "official" ? officialApps.value : communityApps.value));
 
-      const offlineApps = await getOfflineFluxApps();
-      this.packages = offlineApps;
-      this.isLoading = false;
+// Methods
+function isSelected(pkg: FluxApp) {
+  return selectedViews.value.some((view) => view === pkg.pkg);
+}
+
+function toggleView(pkg: FluxApp) {
+  const isSelected = selectedViews.value.some((view) => view === pkg.pkg);
+  selectedViews.value = isSelected
+    ? selectedViews.value.filter((n) => n !== pkg.pkg)
+    : [...selectedViews.value, pkg.pkg];
+
+  // Preload view when selected to remove loading on submit
+  if (!isSelected) fetchFluxApp(pkg.pkg);
+}
+
+async function createChannel() {
+  const communityId = route.params.communityId as string;
+  const name = channelName.value;
+  isCreatingChannel.value = true;
+
+  try {
+    if (!perspective.value) {
+      throw new Error("Cannot create a channel because perspective is undefined.");
     }
-  },
-  async setup() {
-    const route = useRoute();
-    const client = await getAd4mClient();
-    const { data } = usePerspective(client, () => route.params.communityId);
 
-    return { perspective: data.value.perspective };
-  },
-  data() {
-    return {
-      tab: ref<"official" | "community">("official"),
-      isLoading: false,
-      packages: [] as FluxApp[],
-      selectedViews: [] as string[],
-      loadedPlugins: {} as Record<
-        string,
-        "loaded" | "loading" | undefined | null
-      >,
-      channelView: "chat",
-      channelName: "",
-      isCreatingChannel: false,
-    };
-  },
-  computed: {
-    hasName(): boolean {
-      return this.channelName?.length >= 3;
-    },
-    canSubmit(): boolean {
-      return this.hasName && this.validSelectedViews;
-    },
-    selectedPlugins(): FluxApp[] {
-      return this.packages.filter((p) => this.selectedViews.includes(p.pkg));
-    },
-    officialApps(): FluxApp[] {
-      return this.packages.filter((p) => p.pkg.startsWith("@coasys/"));
-    },
-    communityApps(): FluxApp[] {
-      return this.packages.filter((p) => !p.pkg.startsWith("@coasys/"));
-    },
-    filteredPackages(): FluxApp[] {
-      return this.tab === "official" ? this.officialApps : this.communityApps;
-    },
-    validSelectedViews() {
-      return this.selectedViews.length >= 1;
-    },
-  },
-  watch: {
-    selectedPlugins: {
-      handler: async function (apps: FluxApp[]) {
-        apps?.forEach(async (app) => {
-          const wcName = await generateWCName(app.pkg);
-          if (customElements.get(wcName)) {
-            this.loadedPlugins[app.pkg] = "loaded";
-          } else {
-            this.loadedPlugins[app.pkg] = "loading";
-            const module = await fetchFluxApp(app.pkg);
-            if (module) {
-              customElements.define(wcName, module.default);
-            }
+    const channel = new Channel(perspective.value);
+    channel.name = name;
+    await channel.save();
 
-            this.loadedPlugins[app.pkg] = "loaded";
-            this.$forceUpdate();
-          }
-        });
+    await perspective.value.ensureSDNASubjectClass(App);
+
+    await Promise.all(
+      selectedPlugins.value.map(async (app) => {
+        const appInstance = new App(perspective.value!, undefined, channel.baseExpression);
+        appInstance.name = app.name;
+        appInstance.description = app.description;
+        appInstance.icon = app.icon;
+        appInstance.pkg = app.pkg;
+        await appInstance.save();
+      })
+    );
+
+    emit("submit");
+    channelName.value = "";
+    router.push({
+      name: "channel",
+      params: {
+        communityId: communityId.toString(),
+        channelId: channel.baseExpression,
       },
-      deep: true,
-      immediate: true,
-    },
-  },
-  methods: {
-    isSelected(pkg: FluxApp) {
-      return this.selectedViews.some((view) => view === pkg.pkg);
-    },
-    toggleView(pkg: FluxApp) {
-      const isSelected = this.selectedViews.some((view) => view === pkg.pkg);
-      this.selectedViews = isSelected
-        ? this.selectedViews.filter((n) => n !== pkg.pkg)
-        : [...this.selectedViews, pkg.pkg];
+    });
+  } finally {
+    isCreatingChannel.value = false;
+  }
+}
 
-      // Preload view when selected to remove loading on submit
-      if (!isSelected) fetchFluxApp(pkg.pkg);
-    },
-    async createChannel() {
-      const communityId = this.$route.params.communityId as string;
-      const name = this.channelName;
-      this.isCreatingChannel = true;
-
-      try {
-        if (!this.perspective) {
-          throw new Error("Cannot create a channel because perspective is undefined.");
+// Watch selectedPlugins for loading behavior
+watch(
+  selectedPlugins,
+  async (apps: FluxApp[]) => {
+    apps?.forEach(async (app) => {
+      const wcName = await generateWCName(app.pkg);
+      if (customElements.get(wcName)) {
+        loadedPlugins[app.pkg] = "loaded";
+      } else {
+        loadedPlugins[app.pkg] = "loading";
+        const module = await fetchFluxApp(app.pkg);
+        if (module) {
+          customElements.define(wcName, module.default);
         }
-        const channel = new Channel(this.perspective!);
-        channel.name = name;
-        await channel.save();
-
-        await this.perspective!.ensureSDNASubjectClass(App);
-
-        await Promise.all(this.selectedPlugins.map(async (app) => {
-          const appInstance = new App(this.perspective!, undefined, channel.baseExpression);
-          appInstance.name = app.name;
-          appInstance.description = app.description;
-          appInstance.icon = app.icon;
-          appInstance.pkg = app.pkg;
-          await appInstance.save();
-        }))
-
-        this.$emit("submit");
-        this.channelName = "";
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: communityId.toString(),
-            channelId: channel.baseExpression,
-          },
-        });
-      } finally {
-        this.isCreatingChannel = false;
+        loadedPlugins[app.pkg] = "loaded";
       }
-    },
+    });
   },
+  { deep: true, immediate: true }
+);
+
+// Initialize data on mount
+onMounted(async () => {
+  isLoading.value = true;
+
+  // Fetch apps from npm, use local apps if request fails
+  try {
+    const res = await getAllFluxApps();
+    isLoading.value = false;
+
+    const filtered = res.filter((pkg) => {
+      try {
+        return semver.gte(semver.coerce(pkg?.ad4mVersion || "0.0.0") || "0.0.0", "0.8.1");
+      } catch (error) {
+        return false;
+      }
+    });
+
+    packages.value = filtered;
+  } catch (error) {
+    console.info("Flux is offline, using fallback apps");
+    const offlineApps = await getOfflineFluxApps();
+    packages.value = offlineApps;
+    isLoading.value = false;
+  }
 });
 </script>
 

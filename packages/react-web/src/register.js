@@ -1,4 +1,4 @@
-import { createElement as h, cloneElement, render, hydrate } from "react";
+import { cloneElement, createElement as h, hydrate, render } from "react";
 
 export function toCustomElement(Component, propNames, options) {
   function PreactElement() {
@@ -10,9 +10,33 @@ export function toCustomElement(Component, propNames, options) {
   }
   PreactElement.prototype = Object.create(HTMLElement.prototype);
   PreactElement.prototype.constructor = PreactElement;
-  PreactElement.prototype.connectedCallback = connectedCallback;
   PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
-  PreactElement.prototype.disconnectedCallback = disconnectedCallback;
+  PreactElement.prototype.connectedCallback = function() {
+    // Check if we already have a VDOM
+    if (this._vdom) {
+      // We're reconnecting an existing component
+      this._isConnected = true;
+
+      // If we have stored props, update the VDOM with them
+      if (this._props) {
+        // Update props on existing VDOM
+        const newProps = { ...this._props };
+        for (const key in newProps) this._vdom.props[key] = newProps[key];
+
+        // Re-render with existing VDOM structure instead of recreating
+        render(this._vdom, this._root);
+      }
+    } else {
+      // First mount, use original behavior
+      this._isConnected = true;
+      connectedCallback.call(this);
+    }
+  }; 
+  PreactElement.prototype.disconnectedCallback = function() {
+    // Don't destroy the VDOM, just mark as disconnected
+    this._isConnected = false;
+    // Intentionally NOT calling the original disconnectedCallback() which would null-render
+  };
 
   propNames =
     propNames ||
@@ -24,7 +48,7 @@ export function toCustomElement(Component, propNames, options) {
   propNames.forEach((name) => {
     Object.defineProperty(PreactElement.prototype, name, {
       get() {
-        return this._vdom.props[name];
+        return this._vdom?.props[name];
       },
       set(v) {
         if (this._vdom) {

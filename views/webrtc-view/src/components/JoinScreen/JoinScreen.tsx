@@ -1,34 +1,27 @@
 import { WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
 import { useEffect, useRef } from "preact/hooks";
-import Avatar from "../Avatar";
-import Disclaimer from "../Disclaimer";
 import styles from "./JoinScreen.module.scss";
 
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
-  onToggleSettings: () => void;
   did?: string;
-  currentView: string;
-  inAnotherRoom?: boolean;
   fullscreen?: boolean;
-  setFullscreen?: (state: boolean) => void;
-  joinRoom?: () => void;
+  webrtcStore: any;
+  onToggleSettings: () => void;
+  toggleFullscreen?: () => void;
   leaveRoom?: () => void;
 };
 
 export default function JoinScreen({
   webRTC,
   profile,
-  onToggleSettings,
   did,
-  currentView,
-  inAnotherRoom,
   fullscreen,
-  setFullscreen,
-  joinRoom,
-  leaveRoom
+  webrtcStore,
+  toggleFullscreen,
+  onToggleSettings,
 }: Props) {
   const videoRef = useRef(null);
 
@@ -40,42 +33,23 @@ export default function JoinScreen({
   }, [videoRef, webRTC.localStream]);
 
   return (
-    <j-flex
-      a="center"
-      direction="column"
-      style={{
-        width:
-          currentView === "@coasys/flux-synergy-demo-view" ? "100%" : undefined,
-      }}
-    >
+    <j-flex a="center" direction="column">
       <h1>You haven't joined this room</h1>
 
       <j-text variant="body">Your microphone will be enabled.</j-text>
 
-      <j-box
-        pt="200"
-        style={{
-          width:
-            currentView === "@coasys/flux-synergy-demo-view"
-              ? "100%"
-              : undefined,
-        }}
-      >
-        <div
-          className={`${styles.preview} ${currentView === "@coasys/flux-synergy-demo-view" && styles.synergy}`}
-          data-camera-enabled={!!webRTC.localState.settings.video}
-          data-mirrored={true}
-        >
+      <j-box pt="200" style={{ width: "100%" }}>
+        <div className={styles.preview} data-camera-enabled={!!webRTC.localState.settings.video} data-mirrored={true}>
           <video ref={videoRef} className={styles.video} autoPlay playsInline />
 
           <div className={styles.details}>
             <div className={styles.avatar}>
               <>
                 {profile && (
-                  <Avatar
+                  <j-avatar
                     initials={profile?.username?.charAt(0) || "?"}
                     size="xl"
-                    profileAddress={profile?.profileThumbnailPicture}
+                    src={profile?.profileThumbnailPicture || null}
                     hash={did}
                   />
                 )}
@@ -96,16 +70,14 @@ export default function JoinScreen({
             <j-flex gap="400">
               <j-tooltip placement="top" title="Settings">
                 <j-button onClick={onToggleSettings} square circle size="lg">
-                  <j-icon name="gear"></j-icon>
+                  <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
-              {currentView !== "@coasys/flux-webrtc-view" && (
-                <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
-                  <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
-                    <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
-                  </j-button>
-                </j-tooltip>
-              )}
+              <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+                <j-button onClick={toggleFullscreen} square circle size="lg">
+                  <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+                </j-button>
+              </j-tooltip>
             </j-flex>
           </div>
         </div>
@@ -115,55 +87,30 @@ export default function JoinScreen({
         <j-toggle
           checked={webRTC.localState.settings.video ? true : false}
           disabled={
-            webRTC.isLoading ||
-            !webRTC.audioPermissionGranted ||
-            webRTC.devices.every((d) => d.kind !== "videoinput")
+            webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== "videoinput")
           }
-          onChange={() =>
-            webRTC.onToggleCamera(!webRTC.localState.settings.video)
-          }
+          onChange={webrtcStore.toggleVideo}
         >
           Join with camera!
         </j-toggle>
       </j-box>
 
       <j-box pt="500">
-        {inAnotherRoom  ? (
-          <j-flex direction="column" gap="300" a="center">
-            <j-text>You're currently in another call! You'll need to leave that one before joining here.</j-text>
-            <j-button
-              variant="primary"
-              size="lg"
-              onClick={leaveRoom}
-            >
-              Leave other call
-            </j-button>
-          </j-flex>
-        ) : (
-          <j-button
-            variant="primary"
-            size="lg"
-            loading={webRTC.isLoading}
-            disabled={!webRTC.audioPermissionGranted}
-            onClick={joinRoom}
-          >
-            Join room!
-          </j-button>
-        )}
+        <j-button
+          variant="primary"
+          size="lg"
+          loading={webRTC.isLoading}
+          disabled={!webRTC.audioPermissionGranted}
+          onClick={webrtcStore.joinRoom}
+        >
+          Join room!
+        </j-button>
       </j-box>
-
-      {currentView === "@coasys/flux-webrtc-view" && (
-        <j-box pt="400">
-          <Disclaimer />
-        </j-box>
-      )}
 
       <>
         {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
-            <j-text variant="warning">
-              Please allow camera/microphone access to join.
-            </j-text>
+            <j-text color="warning-500">Please allow camera/microphone access to join.</j-text>
           </j-box>
         )}
       </>

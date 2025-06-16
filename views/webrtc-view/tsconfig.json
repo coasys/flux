@@ -11,9 +11,7 @@
     "paths": {
       "react": ["node_modules/preact/compat"],
       "react-dom": ["node_modules/preact/compat"]
-    },
-    "moduleResolution": "node16",
-    "module": "Node16"
+    }
   },
   "include": ["./globals.d.ts", "src/**/*.tsx", "src/**/*.ts"]
 }

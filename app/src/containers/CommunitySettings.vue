@@ -5,11 +5,7 @@
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
-        <j-tabs
-          full
-          :value="currentView"
-          @change="(e: any) => (currentView = e.target.value)"
-        >
+        <j-tabs full :value="currentView" @change="(e: any) => (currentView = e.target.value)">
           <j-tab-item variant="button" value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Apperance
@@ -37,47 +33,32 @@
   </j-box>
 </template>
 
-<script lang="ts">
-import { useAppStore } from "@/store/app";
-import { ThemeState } from "@/store/types";
-import { defineComponent } from "vue";
-import ThemeEditor from "./ThemeEditor.vue";
+<script setup lang="ts">
+import { Theme, useThemeStore } from "@/stores";
+import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 
-export default defineComponent({
-  components: { ThemeEditor },
-  setup() {
-    const appStore = useAppStore();
+const route = useRoute();
+const theme = useThemeStore();
 
-    return {
-      appStore,
-    };
-  },
-  data() {
-    return {
-      currentView: "theme-editor",
-    };
-  },
-  methods: {
-    setuseLocalTheme(val: boolean) {
-      const id = this.$route.params.communityId as string;
-      // TODO: Set local theme
-      // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
-      this.appStore.changeCurrentTheme(val ? id : "global");
-    },
-    updateCommunityTheme(val: ThemeState) {
-      const id = this.$route.params.communityId as string;
-      this.appStore.updateCommunityTheme({
-        communityId: id,
-        theme: { ...val },
-      });
-    },
-  },
-  computed: {
-    showEditor(): boolean {
-      return this.currentView === "theme-editor";
-    },
-  },
-});
+const currentView = ref("theme-editor");
+
+const showEditor = computed(() => currentView.value === "theme-editor");
+
+function setuseLocalTheme(val: boolean) {
+  const id = route.params.communityId as string;
+  // TODO: Set local theme
+  // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
+  theme.changeCurrentTheme(val ? id : "global");
+}
+
+function updateCommunityTheme(val: Theme) {
+  const id = route.params.communityId as string;
+  theme.updateCommunityTheme({
+    communityId: id,
+    theme: { ...val },
+  });
+}
 </script>
 
 <style scoped>

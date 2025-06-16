@@ -5,11 +5,7 @@
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
-        <j-tabs
-          full
-          :value="currentView"
-          @change="(e: any) => (currentView = e.target.value)"
-        >
+        <j-tabs full :value="currentView" @change="(e: any) => (currentView = e.target.value)">
           <j-tab-item value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Appearance
@@ -19,51 +15,21 @@
             Notifications
           </j-tab-item>
         </j-tabs>
-      <div class="settings__content">
-        <theme-editor
-          v-if="currentView === 'theme-editor'"
-          @update="updateGlobalTheme"
-          :theme="theme"
-        />
-        <privacy v-if="currentView === 'privacy'" />
-      </div>
+        <div class="settings__content">
+          <ThemeEditor v-if="currentView === 'theme-editor'" />
+          <Privacy v-if="currentView === 'privacy'" />
+        </div>
       </aside>
     </div>
   </j-box>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { ThemeState } from "@/store/types";
-import ThemeEditor from "./ThemeEditor.vue";
+<script setup lang="ts">
+import { ref } from "vue";
 import Privacy from "./Privacy.vue";
-import { useAppStore } from "@/store/app";
+import ThemeEditor from "./ThemeEditor.vue";
 
-export default defineComponent({
-  components: { ThemeEditor, Privacy },
-  setup() {
-    const appStore = useAppStore();
-
-    return {
-      appStore,
-    };
-  },
-  data() {
-    return {
-      currentView: "theme-editor",
-    };
-  },
-  methods: {
-    updateGlobalTheme(val: ThemeState) {
-      this.appStore.updateGlobalTheme(val);
-    },
-  },
-  computed: {
-    theme(): ThemeState {
-      return this.appStore.globalTheme;
-    },
-  },
-});
+const currentView = ref("theme-editor");
 </script>
 
 <style scoped>

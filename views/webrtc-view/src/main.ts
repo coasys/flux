@@ -1,12 +1,12 @@
 import "preact/debug";
 
-import { toCustomElement } from "@coasys/ad4m-react-hooks";
+import { toCustomElement } from "@coasys/flux-react-web";
 import "@coasys/flux-ui/dist/main.d.ts";
 import MyComponent from "./App";
 
 const CustomElement = toCustomElement(
   MyComponent,
-  ["perspective", "agent", "source", "currentView", "setModalOpen", "appStore"],
+  ["perspective", "agent", "source", "webrtcStore", "uiStore", "getProfile"],
   { shadow: false }
 );
 

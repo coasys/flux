@@ -1,7 +1,7 @@
-import { ProfileWithDID } from "@/store/types";
+import { ad4mClient } from "@/app";
+import { ProfileWithDID } from "@/stores/types";
 import { getProfile } from "@coasys/flux-api";
 import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
-import { ad4mClient } from "@/app";
 
 const testProfile = {
   did: "did:key:zQ3shsHqvZpPJzvm2PDc8kbJzWHsVhHcYSzY9KJzkxSyVpDYG101",

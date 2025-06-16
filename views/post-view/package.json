@@ -41,6 +41,7 @@
     "@coasys/flux-api": "0.10.1-rc3",
     "@coasys/flux-comment-section": "0.10.1-rc3",
     "@coasys/flux-editor": "0.10.1-rc3",
+    "@coasys/flux-react-web": "0.10.1-rc3",
     "@coasys/flux-ui": "0.10.1-rc3",
     "@coasys/flux-utils": "0.10.1-rc3",
     "classnames": "^2.3.2",

@@ -2,70 +2,49 @@
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
       <j-button size="lg" circle square variant="ghost" @click="goToSettings">
-        <j-icon size="md" name="gear"></j-icon>
+        <j-icon size="md" name="gear" />
       </j-button>
     </j-tooltip>
-    <router-link
-      :to="{
-        name: 'home',
-      }"
-      custom
-      v-slot="{ navigate }"
-    >
+
+    <RouterLink :to="{ name: 'home' }" v-slot="{ navigate }" custom>
       <j-tooltip title="Profile">
-        <Avatar
+        <j-avatar
           class="left-nav__profile-icon"
-          :did="me?.did"
-          :url="profile?.profileThumbnailPicture"
+          :hash="profile?.did"
+          :src="profile?.profileThumbnailPicture"
           @click="() => navigate()"
-        ></Avatar>
+        />
       </j-tooltip>
-    </router-link>
+    </RouterLink>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { useAppStore } from "@/store/app";
-import { mapActions, mapState } from "pinia";
-import Avatar from "@/components/avatar/Avatar.vue";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { profileFormatter } from "@coasys/flux-utils";
+<script setup lang="ts">
+import { useAppStore } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { Profile } from "@coasys/flux-types";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default defineComponent({
-  components: {
-    Avatar,
-  },
-  async setup() {
-    const appStore = useAppStore();
+const router = useRouter();
+const appStore = useAppStore();
+const { me } = storeToRefs(appStore);
+const profile = ref<Profile | null>(null);
+const showBottomOptions = ref(false);
 
-    const client = await getAd4mClient();
+// TODO: Implement logout logic
+function logOut(): void {
+  // router.replace({ name: "login" });
+}
 
-    const { profile, me } = useMe(client.agent, profileFormatter);
+function goToSettings(): void {
+  router.push({ name: "settings" });
+  showBottomOptions.value = false;
+}
 
-    return {
-      me,
-      profile,
-      appStore,
-    };
-  },
-  data() {
-    return {
-      showBottomOptions: false,
-    };
-  },
-
-  methods: {
-    ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
-    logOut(): void {
-      this.$router.replace({ name: "login" });
-    },
-    goToSettings() {
-      this.$router.push({ name: "settings" });
-      this.showBottomOptions = false;
-    },
-  },
+onMounted(async () => {
+  profile.value = await getCachedAgentProfile(me.value.did);
 });
 </script>
 

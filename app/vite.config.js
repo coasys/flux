@@ -1,11 +1,11 @@
-import { defineConfig, loadEnv } from "vite";
-import vue from "@vitejs/plugin-vue";
-import { VitePWA } from "vite-plugin-pwa";
-import path from "path";
-import babel from "vite-plugin-babel-compiler";
-import worker from 'vite-plugin-worker';
-import fs from "fs-extra";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import vue from "@vitejs/plugin-vue";
+import fs from "fs-extra";
+import path from "path";
+import { defineConfig, loadEnv } from "vite";
+import babel from "vite-plugin-babel-compiler";
+import { VitePWA } from "vite-plugin-pwa";
+import worker from "vite-plugin-worker";
 
 function copyNillionFileStore() {
   return {
@@ -28,10 +28,7 @@ export default ({ mode }) => {
       babel({
         babel: {
           plugins: [
-            [
-              "@babel/plugin-proposal-decorators",
-              { decoratorsBeforeExport: true },
-            ],
+            ["@babel/plugin-proposal-decorators", { decoratorsBeforeExport: true }],
             "@babel/plugin-proposal-class-properties",
           ],
         },
@@ -70,11 +67,7 @@ export default ({ mode }) => {
           globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
           maximumFileSizeToCacheInBytes: 5000000, // cache files upto 5mb since our index.js is around 3.4mb
         },
-        includeAssets: [
-          "favicon.ico",
-          "apple-touch-icon.png",
-          "masked-icon.svg",
-        ],
+        includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
         manifest: {
           name: "Flux",
           short_name: "Flux",

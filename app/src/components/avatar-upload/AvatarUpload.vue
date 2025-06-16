@@ -3,17 +3,10 @@
     <j-flex direction="column" gap="400" a="center">
       <div class="avatar-upload__avatar" :style="{ width: size, height: size }">
         <img :src="value" v-if="value" />
-        <j-icon
-          v-else
-          class="avatar-upload__icon"
-          :name="icon"
-          size="lg"
-        ></j-icon>
+        <j-icon v-else class="avatar-upload__icon" :name="icon" size="lg" />
       </div>
       <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-      <j-button variant="link" v-if="value" @click="removeImage" size="sm">
-        Remove image
-      </j-button>
+      <j-button variant="link" v-if="value" @click="removeImage" size="sm"> Remove image </j-button>
     </j-flex>
   </div>
   <input
@@ -34,7 +27,7 @@
       :stencil-props="{
         aspectRatio: 12 / 12,
       }"
-    ></cropper>
+    />
     <j-box pt="300">
       <j-button @click="clearImage">Cancel</j-button>
       <j-button variant="primary" @click="selectImage">Crop</j-button>
@@ -42,72 +35,71 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref } from "vue";
 import "vue-advanced-cropper";
+import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import "vue-advanced-cropper/dist/theme.bubble.css";
-import { defineComponent } from "vue";
-import { Cropper } from "vue-advanced-cropper";
 
-export default defineComponent({
-  components: { Cropper },
-  emits: ["change"],
-  props: {
-    value: String,
-    disabled: Boolean,
-    hash: String,
-    size: {
-      default: "7rem",
-      type: String,
-    },
-    icon: {
-      default: "person-fill",
-      type: String,
-    },
-  },
-  data() {
-    return {
-      tempProfileImage: null,
-    };
-  },
-  methods: {
-    onFileClick() {
-      // @ts-ignore
-      this.$refs.fileInput.click();
-    },
-    selectFile(e: any) {
-      const files = e.target.files || e.dataTransfer.files;
-      if (!files.length) return;
+interface Props {
+  value?: string;
+  disabled?: boolean;
+  hash?: string;
+  size?: string;
+  icon?: string;
+}
 
-      var reader = new FileReader();
+withDefaults(defineProps<Props>(), { size: "7rem", icon: "person-fill" });
 
-      reader.onload = (e) => {
-        const temp: any = e.target?.result;
-        this.tempProfileImage = temp;
-      };
+const emit = defineEmits<{ change: [value: string | null] }>();
 
-      reader.readAsDataURL(files[0]);
-    },
-    removeImage(e: any) {
-      e.preventDefault();
-      e.stopPropagation();
-      // @ts-ignore
-      this.$refs.fileInput.value = "";
-      this.$emit("change", null);
-    },
-    clearImage() {
-      // @ts-ignore
-      this.$refs.fileInput.value = "";
-      this.tempProfileImage = null;
-    },
-    selectImage() {
-      const result = (this.$refs.cropper as any).getResult();
-      const data = result.canvas.toDataURL();
-      this.tempProfileImage = null;
-      this.$emit("change", data);
-    },
-  },
-});
+const fileInput = ref<HTMLInputElement>();
+const cropper = ref<InstanceType<typeof Cropper>>();
+const tempProfileImage = ref<string | null>(null);
+
+function onFileClick() {
+  fileInput.value?.click();
+}
+
+function selectFile(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const files = target.files || (e as any).dataTransfer?.files;
+  if (!files?.length) return;
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const temp = e.target?.result as string;
+    tempProfileImage.value = temp;
+  };
+
+  reader.readAsDataURL(files[0]);
+}
+
+function removeImage(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (fileInput.value) fileInput.value.value = "";
+  emit("change", null);
+}
+
+function clearImage() {
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+  tempProfileImage.value = null;
+}
+
+function selectImage() {
+  if (!cropper.value) return;
+
+  const result = cropper.value.getResult();
+  const data = result.canvas.toDataURL();
+  tempProfileImage.value = null;
+  emit("change", data);
+}
 </script>
 
 <style lang="scss" scoped>

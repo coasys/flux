@@ -1,27 +1,25 @@
 <template>
   <Suspense>
-    <router-view></router-view>
+    <RouterView />
   </Suspense>
-  <div class="global-modal" v-if="ui.showGlobalLoading">
-    <div class="global-modal__backdrop"></div>
+
+  <div class="global-modal" v-if="showGlobalLoading">
+    <div class="global-modal__backdrop" />
     <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-spinner size="lg"> </j-spinner>
+        <j-spinner size="lg" />
         <j-text size="700">Please wait...</j-text>
       </j-flex>
     </div>
   </div>
-  <div class="global-modal" v-if="ui.globalError.show">
+
+  <div class="global-modal" v-if="globalError.show">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-icon
-          name="exclamation-triangle"
-          size="xl"
-          color="danger-500"
-        ></j-icon>
+        <j-icon name="exclamation-triangle" size="xl" color="danger-500" />
         <j-text color="danger-500" weight="600" size="700">
-          {{ ui.globalError.message }}
+          {{ globalError.message }}
         </j-text>
       </j-flex>
     </div>
@@ -29,43 +27,27 @@
 
   <j-toast
     autohide="5"
-    :variant="ui.toast.variant"
-    :open="ui.toast.open"
+    :variant="toast.variant"
+    :open="toast.open"
     @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
-    {{ ui.toast.message }}
+    {{ toast.message }}
   </j-toast>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useAppStore } from "./store/app";
-import { ApplicationState, ModalsState } from "@/store/types";
+<script setup lang="ts">
+import { useAppStore, useThemeStore, useUiStore } from "@/stores";
+import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
 
-export default defineComponent({
-  name: "App",
-  setup() {
-    const appStore = useAppStore();
+const appStore = useAppStore();
+const uiStore = useUiStore();
+const themeStore = useThemeStore();
 
-    return {
-      appStore,
-    };
-  },
-  async created() {
-    this.appStore.changeCurrentTheme("global");
-  },
-  computed: {
-    modals(): ModalsState {
-      return this.appStore.modals;
-    },
-    ui(): ApplicationState {
-      return this.appStore.$state;
-    },
-    appDomain() {
-      return window.location.origin;
-    },
-  },
-});
+const { toast } = storeToRefs(appStore);
+const { globalError, showGlobalLoading } = storeToRefs(uiStore);
+
+onMounted(async () => themeStore.changeCurrentTheme("global"));
 </script>
 
 <style>
@@ -88,7 +70,7 @@ html {
   font-size: var(--j-font-base-size);
 }
 
-/* Style the scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 12px;
 }

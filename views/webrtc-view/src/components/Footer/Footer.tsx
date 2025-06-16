@@ -5,10 +5,11 @@ import styles from "./Footer.module.css";
 
 type Props = {
   webRTC: WebRTC;
-  onToggleSettings: () => void;
-  currentView: string;
+  webrtcStore: any;
   fullscreen?: boolean;
-  setFullscreen?: (state: boolean) => void;
+  toggleFullscreen?: () => void;
+  onToggleSettings: () => void;
+  leaveRoom?: () => void;
 };
 
 function transcriptionSVG(on: boolean) {
@@ -40,25 +41,16 @@ function transcriptionSVG(on: boolean) {
   );
 }
 
-export default function Footer({ webRTC, onToggleSettings, currentView, fullscreen, setFullscreen }: Props) {
-  const {
-    hasJoined,
-    localState,
-    devices,
-    onReaction,
-    onToggleCamera,
-    onToggleAudio,
-    updateTranscriptionSetting,
-    onToggleScreenShare,
-    onLeave,
-  } = webRTC;
+export default function Footer({ webRTC, webrtcStore, fullscreen, toggleFullscreen, onToggleSettings, leaveRoom }: Props) {
+  const { hasJoined, localState, devices, onReaction, updateTranscriptionSetting, onToggleScreenShare, onLeave } =
+    webRTC;
   const { video, audio, transcriber, screen } = localState.settings;
+
   const {
     state: { showSettings },
     methods: { toggleShowSettings },
   } = useContext(UiContext);
-
-  const popOver = useRef();
+  const popOver = useRef<any>();
 
   const onEmojiClick = (event) => {
     onReaction(event.detail.native);
@@ -68,31 +60,23 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
-        <j-tooltip
-          placement="top"
-          title={video ? "Disable camera" : "Enable camera"}
-        >
+        <j-tooltip placement="top" title={video ? "Disable camera" : "Enable camera"}>
           <j-button
-            variant={video ? "secondary" : "primary"}
-            onClick={() => onToggleCamera(!video)}
+            variant={video ? "" : "primary"}
+            onClick={webrtcStore.toggleVideo}
             square
             circle
             size="lg"
-            disabled={
-              !hasJoined || devices.every((d) => d.kind !== "videoinput")
-            }
+            disabled={!hasJoined || devices.every((d) => d.kind !== "videoinput")}
           >
             <j-icon name={video ? "camera-video" : "camera-video-off"} />
           </j-button>
         </j-tooltip>
 
-        <j-tooltip
-          placement="top"
-          title={audio ? "Mute microphone" : "Unmute microphone"}
-        >
+        <j-tooltip placement="top" title={audio ? "Mute microphone" : "Unmute microphone"}>
           <j-button
-            variant={audio ? "secondary" : "primary"}
-            onClick={() => onToggleAudio(!audio)}
+            variant={audio ? "" : "primary"}
+            onClick={webrtcStore.toggleAudio}
             square
             circle
             size="lg"
@@ -102,14 +86,9 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
           </j-button>
         </j-tooltip>
 
-        <j-tooltip
-          placement="top"
-          title={
-            transcriber.on ? "Disable transcription" : "Enable transcription"
-          }
-        >
+        <j-tooltip placement="top" title={transcriber.on ? "Disable transcription" : "Enable transcription"}>
           <j-button
-            variant={transcriber.on ? "secondary" : "primary"}
+            variant={transcriber.on ? "" : "primary"}
             onClick={() => updateTranscriptionSetting("on", !transcriber.on)}
             square
             circle
@@ -120,12 +99,9 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
           </j-button>
         </j-tooltip>
 
-        <j-tooltip
-          placement="top"
-          title={screen ? "Stop sharing" : "Share screen"}
-        >
+        <j-tooltip placement="top" title={screen ? "Stop sharing" : "Share screen"}>
           <j-button
-            variant={screen ? "primary" : "secondary"}
+            variant={screen ? "primary" : ""}
             onClick={() => onToggleScreenShare(!screen)}
             square
             circle
@@ -138,13 +114,7 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
 
         <j-popover ref={popOver} placement="top">
           <j-tooltip slot="trigger" placement="top" title="Send reaction">
-            <j-button
-              variant="transparent"
-              square
-              circle
-              disabled={!hasJoined}
-              size="lg"
-            >
+            <j-button variant="transparent" square circle disabled={!hasJoined} size="lg">
               <j-icon name="emoji-neutral" />
             </j-button>
           </j-tooltip>
@@ -155,8 +125,12 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
 
         <j-tooltip placement="top" title="Leave">
           <j-button
+            // @ts-ignore
             variant="danger"
-            onClick={onLeave}
+            onClick={() => {
+              leaveRoom();
+              onLeave();
+            }}
             square
             circle
             size="lg"
@@ -167,24 +141,21 @@ export default function Footer({ webRTC, onToggleSettings, currentView, fullscre
         </j-tooltip>
 
         <j-tooltip placement="top" title="Debug">
-          <j-button
-            variant="secondary"
-            onClick={onToggleSettings}
-            square
-            circle
-            size="lg"
-          >
+          <j-button onClick={onToggleSettings} square circle size="lg">
             <j-icon name="gear" />
           </j-button>
         </j-tooltip>
 
-        {currentView !== "@coasys/flux-webrtc-view" && (
-          <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
-            <j-button onClick={() => setFullscreen(!fullscreen)} square circle size="lg">
-              <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
-            </j-button>
-          </j-tooltip>
-        )}
+        <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+          <j-button
+            onClick={toggleFullscreen}
+            square
+            circle
+            size="lg"
+          >
+            <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+          </j-button>
+        </j-tooltip>
 
         {/* 
         <j-tooltip placement="top" title="Experiments">

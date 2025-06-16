@@ -1,59 +1,62 @@
 import { useEffect, useState } from "preact/hooks";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import styles from "./Card.module.css";
-import { PerspectiveProxy } from "@coasys/ad4m";
+import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
 import { Profile } from "@coasys/flux-types";
-import { Message, getProfile } from "@coasys/flux-api";
+import { Message } from "@coasys/flux-api";
 
 type Props = {
-  id: string;
+  task: Ad4mModel
   onClick: () => void;
   perspective: PerspectiveProxy;
-  selectedClass: string;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 export default function Card({
-  id,
+  task,
   onClick,
-  selectedClass,
   perspective,
+  getProfile,
 }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
-
-  const { entries } = useModel({
-    perspective,
-    model: selectedClass,
-    query: { source: id },
-  });
+  console.log("task", task);
 
   const { entries: comments } = useModel({
     perspective,
     model: Message,
-    query: { source: id },
+    query: { source: task.baseExpression },
   });
 
-  const { associations } = useAssociations({
-    source: id,
-    perspective,
-    predicate: "rdf://has_assignee",
-  });
+  console.log("comments", comments);
 
   async function fetchProfiles() {
+    // @ts-ignore
+    console.log("fetching profiles", task.assignees);
+    // @ts-ignore
+    if (!task.assignees) {
+      console.log("no assignees");
+      setAssignedProfiles([]);
+      return;
+    }
+
     const profiles = await Promise.all(
-      associations.map((l) => getProfile(l.data.target))
+      // @ts-ignore
+      task.assignees?.map((l) => getProfile(l))
     );
     setAssignedProfiles(profiles);
   }
 
   useEffect(() => {
     fetchProfiles();
-  }, [associations.length]);
+    // @ts-ignore
+  }, [task.assignees?.length]);
 
   return (
     <div className={styles.card} onClick={onClick}>
       <j-text size="500" color="ui-800" nomargin>
-        {entries[0]?.name || entries[0]?.title || "Unnamed"}
+        {/* @ts-ignore */}
+        {task?.name || task?.title || "<Unnamed>"}
       </j-text>
 
       <j-flex full a="center" j="between">

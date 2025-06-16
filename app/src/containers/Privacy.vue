@@ -9,12 +9,10 @@
           class="toggle"
           size="lg"
           :checked="appStore.notification.globalNotification"
-          @change="(e: any) => changeNotificationState()"
+          @change="changeNotificationState"
         >
           <div>
-            <j-text nomargin color="black" weight="600" size="500">
-              Enable Desktop Notifications
-            </j-text>
+            <j-text nomargin color="black" weight="600" size="500"> Enable Desktop Notifications </j-text>
           </div>
         </j-toggle>
       </j-flex>
@@ -22,27 +20,14 @@
   </j-box>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useAppStore } from "@/store/app";
+<script setup lang="ts">
+import { useAppStore } from "@/stores";
 
-export default defineComponent({
-  setup() {
-    const appStore = useAppStore();
+const appStore = useAppStore();
 
-    return {
-      appStore,
-      showConfirm: ref(false),
-    };
-  },
-  methods: {
-    changeNotificationState() {
-      this.appStore.changeNotificationState(
-        !this.appStore.notification.globalNotification
-      );
-    },
-  },
-});
+function changeNotificationState() {
+  appStore.changeNotificationState(!appStore.notification.globalNotification);
+}
 </script>
 
 <style scoped>

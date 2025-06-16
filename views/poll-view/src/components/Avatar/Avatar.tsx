@@ -1,5 +1,4 @@
-import { getProfile } from "@coasys/flux-api";
-import { getImage } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
 import { useEffect, useState } from "preact/hooks";
 import styles from "./Avatar.module.scss";
 
@@ -8,29 +7,27 @@ type Props = {
   size?: "sm" | "xs" | "lg" | "xl" | "xxs" | "xxl";
   showName?: boolean;
   style?: any;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function Avatar({ did, size = "sm", showName = false, style }: Props) {
-  const [image, setImage] = useState("");
-  const [name, setName] = useState("");
+export default function Avatar({ did, size = "sm", showName = false, style, getProfile }: Props) {
+  const [profile, setProfile] = useState<Partial<Profile>>({});
 
-  async function getData() {
-    const { username, profileThumbnailPicture: picture } = await getProfile(did);
-    setName(username);
-    if (picture && picture.includes("base64")) setImage(picture);
-    else setImage((await getImage(picture)) || "");
+  async function getProfileData() {
+    const profile = await getProfile(did);
+    setProfile(profile);
   }
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (getProfile) getProfileData();
+  }, [getProfile]);
 
   return (
     <j-flex gap="300" a="center" style={style}>
-      <div className={styles.image}>
-        <j-avatar size={size} src={image} hash={did} />
+      <div className={styles.image} style={{ height: size === "xs" ? 28 : 36 }}>
+        <j-avatar size={size} src={profile.profileThumbnailPicture || null} hash={did} />
       </div>
-      {showName && name && <j-text nomargin>{name}</j-text>}
+      {showName && <j-text nomargin>{profile.username}</j-text>}
     </j-flex>
   );
 }

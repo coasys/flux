@@ -1,4 +1,5 @@
 import { useModel } from "@coasys/ad4m-react-hooks";
+import { Profile } from "@coasys/flux-types";
 import { useEffect, useRef, useState } from "preact/hooks";
 import Vote from "../../models/Vote";
 import Avatar from "../Avatar";
@@ -15,8 +16,10 @@ export default function AnswerCard(props: {
   preview?: boolean;
   vote?: (answerId: string, value?: number) => void;
   removeAnswer?: (index: number) => void;
+  getProfile: (did: string) => Promise<Profile>;
 }) {
-  const { perspective, myDid, answer, index, color, percentage, voteType, preview, vote, removeAnswer } = props;
+  const { perspective, myDid, answer, index, color, percentage, voteType, preview, vote, removeAnswer, getProfile } =
+    props;
   const { author, text, myPoints } = answer;
   const [hasVoted, setHasVoted] = useState(false);
   const [points, setPoints] = useState(myPoints);
@@ -44,7 +47,7 @@ export default function AnswerCard(props: {
           <div className={styles.index} style={{ backgroundColor: color }}>
             {index + 1}
           </div>
-          <Avatar size="sm" did={preview ? myDid : author} showName />
+          <Avatar size="sm" did={preview ? myDid : author} getProfile={getProfile} showName />
         </j-flex>
 
         <j-flex gap="400" a="center">
@@ -57,7 +60,13 @@ export default function AnswerCard(props: {
               <div className={styles.voters}>
                 {votes.length > 0 &&
                   votes.map((vote, i) => (
-                    <Avatar key={vote.author} did={vote.author} size="xs" style={{ marginLeft: i > 0 ? -10 : 0 }} />
+                    <Avatar
+                      key={vote.author}
+                      did={vote.author}
+                      getProfile={getProfile}
+                      size="xs"
+                      style={{ marginLeft: i > 0 ? -10 : 0 }}
+                    />
                   ))}
                 <j-text size="500" nomargin>
                   {percentage}%

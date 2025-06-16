@@ -1,7 +1,7 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <SignUpCarousel></SignUpCarousel>
+      <SignUpCarousel />
     </div>
 
     <div class="signup-view__flow" v-else>
@@ -19,12 +19,7 @@
 
         <j-text variant="heading"> Create a user </j-text>
 
-        <avatar-upload
-          icon="camera"
-          :value="profilePicture"
-          @change="(url) => (profilePicture = url)"
-        >
-        </avatar-upload>
+        <avatar-upload icon="camera" :value="profilePicture" @change="(url) => (profilePicture = url)"> </avatar-upload>
         <j-input
           label="Username"
           size="xl"
@@ -34,12 +29,7 @@
           :errortext="usernameErrorMessage"
           @blur="(e: any) => validateUsername()"
         ></j-input>
-        <j-toggle
-          style="width: 100%"
-          full
-          size="lg"
-          variant="primary"
-          @change="allowNotifications"
+        <j-toggle style="width: 100%" full size="lg" variant="primary" @change="allowNotifications"
           >Allow Notifications</j-toggle
         >
         <j-button
@@ -59,164 +49,125 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
-import { defineComponent, ref } from "vue";
-import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useValidation } from "@/utils/validation";
-import ad4mLogo from "@/assets/images/ad4mLogo.svg";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
-import { useAppStore } from "@/store/app";
-import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
-import SignUpCarousel from "./SignUpCarousel.vue";
-import { createProfile, getAd4mProfile } from "@coasys/flux-api";
+import { useAppStore } from "@/stores";
+import { useValidation } from "@/utils/validation";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
+import { createProfile, getAd4mProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
+import SignUpCarousel from "./SignUpCarousel.vue";
 
-export default defineComponent({
-  name: "SignUp",
-  components: {
-    AvatarUpload,
-    Carousel,
-    Logo,
-    Ad4mLogo,
-    SignUpCarousel,
-  },
-  async setup() {
-    const showSignup = ref(false);
-    const profilePicture = ref();
-    const modalOpen = ref(false);
-    const isCreatingUser = ref(false);
-    const isLoggingIn = ref(false);
-    const showPassword = ref(false);
-    const appStore = useAppStore();
+const router = useRouter();
+const appStore = useAppStore();
 
-    const client = await getAd4mClient();
+const showSignup = ref(false);
+const profilePicture = ref();
+const isCreatingUser = ref(false);
+const name = ref("");
+const familyName = ref("");
+const email = ref("");
 
-    const { status } = useMe(client.agent, profileFormatter);
+// Initialize Ad4m client
+let clientInstance: any;
+const hasUser = ref<Boolean>(false);
+(async () => {
+  clientInstance = await getAd4mClient();
+  const { status } = useMe(clientInstance.agent, profileFormatter);
+  hasUser.value = status.value.isInitialized;
+})();
 
-    const {
-      value: username,
-      error: usernameError,
-      errorMessage: usernameErrorMessage,
-      isValid: usernameIsValid,
-      validate: validateUsername,
-    } = useValidation({
-      initialValue: "",
-      rules: [
-        {
-          check: (value: string) => (value ? false : true),
-          message: "Username is required",
-        },
-        {
-          check: (value: string) => value.length < 3,
-          message: "Should be 3 or more characters",
-        },
-      ],
+// Form validation
+const {
+  value: username,
+  error: usernameError,
+  errorMessage: usernameErrorMessage,
+  isValid: usernameIsValid,
+  validate: validateUsername,
+} = useValidation({
+  initialValue: "",
+  rules: [
+    {
+      check: (value: string) => (value ? false : true),
+      message: "Username is required",
+    },
+    {
+      check: (value: string) => value.length < 3,
+      message: "Should be 3 or more characters",
+    },
+  ],
+});
+
+// Computed properties
+const canSignUp = computed(() => usernameIsValid.value);
+
+// Methods
+async function checkIfHasFluxProfile() {
+  const client = await getAd4mClient();
+  const { perspective } = await client.agent.me();
+  const fluxLinksFound = perspective?.links.find((e) => e.data.source.startsWith("flux://"));
+  return fluxLinksFound ? true : false;
+}
+
+async function autoFillUser() {
+  try {
+    const hasFluxProfile = await checkIfHasFluxProfile();
+    if (hasFluxProfile) {
+      router.push("/home");
+      return;
+    }
+
+    showSignup.value = true;
+
+    const ad4mProfile = await getAd4mProfile();
+
+    username.value = ad4mProfile.username || "";
+    name.value = ad4mProfile.name || "";
+    familyName.value = ad4mProfile.familyName || "";
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function createUser() {
+  isCreatingUser.value = true;
+
+  createProfile({
+    givenName: name.value,
+    familyName: familyName.value,
+    email: email.value,
+    username: username.value,
+    profilePicture: profilePicture.value,
+  })
+    .then(() => {
+      router.push("/");
+      registerNotification();
+    })
+    .finally(() => {
+      isCreatingUser.value = false;
+      appStore.changeNotificationState(true);
     });
+}
 
-    const name = ref("");
+async function allowNotifications(value: any) {
+  appStore.changeNotificationState(!appStore.notification.globalNotification);
+}
 
-    const familyName = ref("");
+onMounted(() => {
+  const authStateChangeHandler = async () => {
+    if (ad4mConnect.authState === "authenticated") {
+      autoFillUser();
+    }
+  };
 
-    const email = ref("");
-
-    const logInError = ref(false);
-
-    return {
-      ad4mLogo,
-      showSignup,
-      isLoggingIn,
-      profilePicture,
-      hasUser: status.value.isInitialized,
-      modalOpen,
-      isCreatingUser,
-      name,
-      username,
-      usernameError,
-      usernameErrorMessage,
-      usernameIsValid,
-      validateUsername,
-      showPassword,
-      email,
-      familyName,
-      logInError,
-      appStore,
-    };
-  },
-  async mounted() {
-    ad4mConnect.addEventListener("authstatechange", async (e) => {
-      if (ad4mConnect.authState === "authenticated") {
-        this.autoFillUser();
-      }
-    });
-  },
-  computed: {
-    canSignUp(): boolean {
-      return this.usernameIsValid;
-    },
-  },
-  methods: {
-    async checkIfHasFluxProfile() {
-      const client = await getAd4mClient();
-
-      const { perspective } = await client.agent.me();
-
-      const fluxLinksFound = perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
-
-      return fluxLinksFound ? true : false;
-    },
-    async autoFillUser() {
-      try {
-        const hasFluxProfile = await this.checkIfHasFluxProfile();
-        if (hasFluxProfile) {
-          this.$router.push("/home");
-          return;
-        }
-
-        this.showSignup = true;
-
-        const ad4mProfile = await getAd4mProfile();
-
-        this.username = ad4mProfile.username || "";
-        this.name = ad4mProfile.name || "";
-        this.familyName = ad4mProfile.familyName || "";
-      } catch (e) {
-        console.log(e);
-      }
-    },
-    async createUser() {
-      this.isCreatingUser = true;
-
-      createProfile({
-        givenName: this.name,
-        familyName: this.familyName,
-        email: this.email,
-        username: this.username,
-        profilePicture: this.profilePicture,
-      })
-        .then(() => {
-          this.$router.push("/");
-
-          registerNotification();
-        })
-        .finally(() => {
-          this.isCreatingUser = false;
-          this.appStore.changeNotificationState(true);
-        });
-    },
-    //@ts-ignore
-    async allowNotifications(value) {
-      this.appStore.changeNotificationState(
-        !this.appStore.notification.globalNotification
-      );
-    },
-  },
+  ad4mConnect.addEventListener("authstatechange", authStateChangeHandler);
+  onBeforeUnmount(() => ad4mConnect.removeEventListener("authstatechange", authStateChangeHandler));
 });
 </script>
 

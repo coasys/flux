@@ -9,49 +9,29 @@ import Entry from "../Entry";
 import styles from "./CardDetails.module.css";
 
 type Props = {
-  id: string;
+  task: Ad4mModel;
   perspective: PerspectiveProxy;
   channelId: string;
   selectedClass: string;
   agent: AgentClient;
+  allProfiles: ()=>Promise<Profile[]>;
   onDeleted: () => void;
 };
 
 export default function CardDetails({
   agent,
-  id,
+  task,
   selectedClass,
   onDeleted = () => {},
   perspective,
   channelId,
+  allProfiles,
 }: Props) {
-
-  const { entries } = useModel({
-    perspective,
-    model: selectedClass,
-    query: { source: id },
-  });
-
-  const {
-    associations: assignees,
-    add: addAssignee,
-    remove: removeAssignee,
-  } = useAssociations({
-    perspective,
-    source: id,
-    predicate: "rdf://has_assignee",
-  });
-
   const [showAssign, setShowAssign] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
 
   async function fetchProfiles() {
-    const n = await perspective.getNeighbourhoodProxy();
-    const dids = await n.otherAgents();
-    const me = await agent.me();
-    const allAgents = [me.did, ...dids];
-    const profiles = await Promise.all(allAgents.map((d) => getProfile(d)));
-    setProfiles(profiles);
+    setProfiles(await allProfiles());
   }
 
   useEffect(() => {
@@ -62,9 +42,7 @@ export default function CardDetails({
 
   async function onDelete() {
     try {
-      const model = await perspective.getSubjectProxy(entries[0]?.baseExpression, selectedClass) as any;
-      const entry = new model(perspective, entries[0]?.baseExpression, id);
-      entry.delete();
+      task.delete();
       onDeleted();
     } catch (e) {
       // Todo: error handling
@@ -74,14 +52,24 @@ export default function CardDetails({
 
   function toggleAssignee(val: boolean, did: string) {
     if (val) {
-      addAssignee(did);
+      // @ts-ignore
+      if (!task.assignees.includes(did)) {
+        // @ts-ignore
+        task.assignees.push(did);
+      }
+      // @ts-ignore
+      task.update();
     } else {
-      removeAssignee(did);
+      // @ts-ignore
+      task.assignees = task.assignees.filter((d) => d !== did);
+      // @ts-ignore
+      task.update();
     }
   }
 
   const assignedProfiles = profiles.filter((p) =>
-    assignees.some((l) => l.data.target === p.did)
+    // @ts-ignore
+    task.assignees.some((l) => l === p.did)
   );
 
   return (
@@ -89,7 +77,7 @@ export default function CardDetails({
       <div className={styles.cardMain}>
         <j-box pb="800">
           <Entry
-            id={id}
+            task={task}
             perspective={perspective}
             selectedClass={selectedClass}
             channelId={channelId}
@@ -107,7 +95,7 @@ export default function CardDetails({
         <comment-section
           className={styles.commentSection}
           perspective={perspective}
-          source={id}
+          source={task.baseExpression}
           agent={agent}
         ></comment-section>
       </div>
@@ -141,8 +129,8 @@ export default function CardDetails({
                     <j-menu-item key={profile.did}>
                       <j-checkbox
                         full
-                        checked={assignees.some(
-                          (l) => l.data.target === profile.did
+                        checked={task.assignees.some(
+                          (a) => a === profile.did
                         )}
                         onChange={(e) =>
                           toggleAssignee(e.target.checked, profile.did)
