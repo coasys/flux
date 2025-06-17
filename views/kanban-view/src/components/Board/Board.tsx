@@ -94,7 +94,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       // Create a new column with the given name
       const value = `task://${columnName.toLowerCase()}`;
       const sdnaCode = `property_named_option(${atom}, "${selectedProperty}", "${value}", "${columnName}").`;
-      await perspective.addSdna("Column", sdnaCode, "custom");
+      await perspective.addSdna(columnName, sdnaCode, "custom");
 
       // Reload the columns
       loadColumns();
