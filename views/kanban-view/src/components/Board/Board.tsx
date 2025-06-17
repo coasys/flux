@@ -41,17 +41,6 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
 
   const { entries } = useModel({ perspective, model: selectedClass, query: { source } });
 
-  function loadColumns() {
-    getNamedOptions(perspective, selectedClass).then((namedOpts) => {
-      setNamedOptions(namedOpts);
-      Object.keys(namedOpts).forEach((key, index) => {
-        if (index === 0) {
-          setSelectedProperty(key);
-        }
-      });
-    });
-  }
-
   const data = useMemo(() => {
     return transformData(tasks, selectedProperty, namedOptions[selectedProperty] || []);
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
@@ -98,16 +87,22 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }
 
   async function addColumn() {
+    // Get the atom for the selected class ("Task", "Todo", etc.)
     const res = await perspective.infer(`subject_class("${selectedClass}", Atom)`);
+    const atom = res?.[0]?.Atom;
+    if (atom) {
+      // Create a new column with the given name
+      const value = `task://${columnName.toLowerCase()}`;
+      const sdnaCode = `property_named_option(${atom}, "${selectedProperty}", "${value}", "${columnName}").`;
+      await perspective.addSdna("Column", sdnaCode, "custom");
 
-    if (res?.length) {
-      const atom = res[0].Atom;
-      await perspective.addSdna(
-        `property_named_option(${atom}, "${selectedProperty}", "${columnName}", "${columnName}").`
-      );
+      // Reload the columns
       loadColumns();
+    } else {
+      throw new Error(`No atom found for class "${selectedClass}"`);
     }
 
+    // Reset the column name and hide the modal
     setColumnName("");
     setShowAddColumn(false);
   }
@@ -156,6 +151,15 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       });
   }
 
+  function loadColumns() {
+    getNamedOptions(perspective, selectedClass).then((namedOpts) => {
+      setNamedOptions(namedOpts);
+      Object.keys(namedOpts).forEach((key, index) => {
+        if (index === 0) setSelectedProperty(key);
+      });
+    });
+  }
+
   function addTaskToColumn(columns, task, propertyName) {
     return Object.keys(columns).reduce((acc, key) => {
       const column = columns[key];
@@ -197,23 +201,17 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }, [perspective.uuid]);
 
   useEffect(() => {
-    setSelectedClass(classes[0] || "");
-  }, [classes.length]);
-
-  useEffect(() => {
-    //console.log("changed entries:", entries);
     setTasks(entries);
   }, [JSON.stringify(entries), perspective.uuid]);
 
   useEffect(() => {
-    getClasses(perspective, source).then((classes) => {
-      setClasses(classes);
-    });
+    getClasses(perspective, source).then((classes) => setClasses(classes));
+    loadColumns();
   }, [perspective.uuid, selectedClass]);
 
   useEffect(() => {
-    loadColumns();
-  }, [perspective.uuid, selectedClass]);
+    setSelectedClass(classes[0] || "");
+  }, [classes.length]);
 
   return (
     <>
