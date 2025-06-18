@@ -5,12 +5,11 @@ import DisplayValue from "../DisplayValue";
 type Props = {
   perspective: PerspectiveProxy;
   task: Ad4mModel;
-  channelId: string;
   selectedClass: string;
   onUrlClick?: Function;
 };
 
-export default function Entry({ perspective, task, channelId, selectedClass, onUrlClick = () => {} }: Props) {
+export default function Entry({ perspective, task, selectedClass, onUrlClick = () => {} }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
 
   useEffect(() => {
@@ -51,7 +50,7 @@ export default function Entry({ perspective, task, channelId, selectedClass, onU
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
                 <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
-                <j-text style="text-transform: capitalize" size="500" weight="500" nomargin>
+                <j-text size="500" weight="500" nomargin>
                   {titleName}
                 </j-text>
               </j-flex>
@@ -71,7 +70,7 @@ export default function Entry({ perspective, task, channelId, selectedClass, onU
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
                 <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
-                <j-text style="text-transform: capitalize" size="500" weight="600" nomargin>
+                <j-text size="500" weight="600" nomargin>
                   {key}
                 </j-text>
               </j-flex>

@@ -21,14 +21,12 @@ type Props = {
 };
 
 export default function DisplayValue({ value, options, onUpdate, onUrlClick = () => {} }: Props) {
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement>();
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (isEditing) inputRef.current?.focus();
   }, [isEditing]);
 
   useEffect(() => {
@@ -65,9 +63,9 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
   if (isCollection) {
     return (
       <j-flex gap="200" wrap>
-        {localValue.map((v, index) => {
-          return <DisplayValue onUrlClick={onUrlClick} value={v} />;
-        })}
+        {localValue.map((v) => (
+          <DisplayValue onUrlClick={onUrlClick} value={v} />
+        ))}
       </j-flex>
     );
   }
@@ -89,20 +87,19 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
     return (
       <input
         ref={inputRef}
-        size="sm"
         className={styles.input}
         autoFocus
         onClick={(e) => e.stopPropagation()}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         value={localValue}
-      ></input>
+      />
     );
   }
 
   if (typeof localValue === "string") {
     if (localValue.startsWith("did:key")) {
-      return <Profile did={localValue}></Profile>;
+      return <Profile did={localValue} />;
     }
 
     if (localValue.length > 1000) return <img className={styles.img} src={`data:image/png;base64,${localValue}`} />;
@@ -181,7 +178,7 @@ function ShowObjectInfo({ value }) {
       {open && (
         <j-modal open={open} onClick={(e) => e.stopImmediatePropagation()} onToggle={(e) => setOpen(e.target.open)}>
           <j-box p="500">
-            <j-flex p="500" direction="column" gap="400">
+            <j-flex direction="column" gap="400">
               {properties.map(([key, value]) => (
                 <j-flex gap="100" direction="column">
                   <j-text size="300" uppercase nomargin>
