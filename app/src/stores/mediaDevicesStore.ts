@@ -218,6 +218,18 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
+    function isScreenShareTrack(track: MediaStreamTrack): boolean {
+      // Checks the labels on a track to see if it's a screen share track
+      const label = track.label.toLowerCase();
+      return (
+        label.includes("screen") ||
+        label.includes("display") ||
+        label.includes("window") ||
+        label.includes("tab") ||
+        label.includes("desktop")
+      );
+    }
+
     async function toggleAudio() {
       if (!stream.value) return;
 
@@ -267,33 +279,35 @@ export const useMediaDevicesStore = defineStore(
 
       videoEnabled.value = !videoEnabled.value;
 
-      // Skip if screen sharing is active
-      if (screenShareEnabled.value) {
-        console.log("📺 Skipping video toggle - screen share is active");
-        return;
-      }
+      const existingVideoTracks = stream.value.getVideoTracks().filter((track) => !isScreenShareTrack(track));
+      console.log("existingVideoTracks", existingVideoTracks);
 
       if (videoEnabled.value) {
         // Enabling video
-        const existingVideoTracks = stream.value.getVideoTracks();
-
-        if (existingVideoTracks.length === 0) {
+        if (existingVideoTracks.length) {
+          // Enable existing tracks
+          existingVideoTracks.forEach((track) => (track.enabled = true));
+          console.log("✅ Enabled existing video tracks");
+        } else {
           // Need to add video track
-          const videoConstraints = {
-            ...videoDimensions,
-            deviceId: activeCameraId.value ? { exact: activeCameraId.value } : undefined,
-          };
+          const deviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+          const videoConstraints = { ...videoDimensions, deviceId };
 
           try {
             const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
             const newVideoTrack = newStream.getVideoTracks()[0];
 
-            stream.value.addTrack(newVideoTrack);
+            // If screen sharing is enabled, save the new track for later restoration
+            if (screenShareEnabled.value) savedVideoTrack = newVideoTrack;
+            else {
+              // Otherwise, add the new track directly to the stream
+              stream.value.addTrack(newVideoTrack);
 
-            // Update peer connections
-            const { useWebrtcStore } = await import("./webrtcStore");
-            const webrtcStore = useWebrtcStore();
-            await webrtcStore.addTrack(newVideoTrack, stream.value);
+              // Update peer connections
+              const { useWebrtcStore } = await import("./webrtcStore");
+              const webrtcStore = useWebrtcStore();
+              await webrtcStore.addTrack(newVideoTrack, stream.value);
+            }
 
             console.log("✅ Added new video track");
           } catch (error) {
@@ -301,15 +315,11 @@ export const useMediaDevicesStore = defineStore(
             // Revert the state if it failed
             videoEnabled.value = false;
           }
-        } else {
-          // Just enable existing tracks
-          existingVideoTracks.forEach((track) => (track.enabled = true));
-          console.log("✅ Enabled existing video tracks");
         }
       } else {
         // Disabling video - disable tracks with animation delay
         await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
-        stream.value.getVideoTracks().forEach((track) => (track.enabled = false));
+        existingVideoTracks.forEach((track) => (track.enabled = false));
         console.log("✅ Disabled video tracks");
       }
     }
@@ -447,6 +457,7 @@ export const useMediaDevicesStore = defineStore(
       switchMicrophone,
       resetMediaDevices,
       findAvailableDevices,
+      isScreenShareTrack,
       toggleAudio,
       toggleVideo,
       toggleScreenShare,

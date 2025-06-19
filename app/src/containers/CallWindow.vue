@@ -185,10 +185,12 @@
             <template v-if="selectedVideoLayout.label === 'Focused'">
               <!-- Main focused video -->
               <MediaPlayer
+                :key="focusedParticipant.did"
                 :did="focusedParticipant.did"
                 :isMe="focusedParticipant.isMe"
                 :inCall="focusedParticipant.inCall"
                 :stream="focusedParticipant.stream"
+                :streamReady="focusedParticipant.streamReady"
                 :audioState="focusedParticipant.audioState"
                 :videoState="focusedParticipant.videoState"
                 :screenShareState="focusedParticipant.screenShareState"
@@ -208,6 +210,7 @@
                     :isMe="participant.isMe"
                     :inCall="participant.inCall"
                     :stream="participant.stream"
+                    :streamReady="participant.streamReady"
                     :audioState="participant.audioState"
                     :videoState="participant.videoState"
                     :screenShareState="participant.screenShareState"
@@ -228,6 +231,7 @@
                 :isMe="participant.isMe"
                 :inCall="participant.inCall"
                 :stream="participant.stream"
+                :streamReady="participant.streamReady"
                 :audioState="participant.audioState"
                 :videoState="participant.videoState"
                 :screenShareState="participant.screenShareState"
@@ -461,6 +465,7 @@ const allParticipants = computed(() => {
     did: me.value.did,
     inCall: inCall.value,
     stream: stream.value || undefined,
+    streamReady: true,
     audioState: (audioEnabled ? "on" : "off") as MediaState,
     videoState: (videoEnabled ? "on" : "off") as MediaState,
     screenShareState: (screenShareEnabled ? "on" : "off") as MediaState,
@@ -472,6 +477,7 @@ const allParticipants = computed(() => {
     did: peer.did,
     inCall: true,
     stream: peer.streams?.[0] || undefined,
+    streamReady: peer.streamReady,
     audioState: peer.audioState,
     videoState: peer.videoState,
     screenShareState: peer.screenShareState,

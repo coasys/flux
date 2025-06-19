@@ -84,6 +84,7 @@ const props = defineProps({
   isMe: { type: Boolean, default: false },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
+  streamReady: { type: Boolean, default: false },
   audioState: { type: String as PropType<MediaState>, default: "on" },
   videoState: { type: String as PropType<MediaState>, default: "off" },
   screenShareState: { type: String as PropType<MediaState>, default: "off" },
@@ -103,6 +104,7 @@ const profile = ref<Profile>();
 const showVideo = computed(() => stream && (props.videoState === "on" || props.screenShareState === "on"));
 const flipVideo = computed(() => props.isMe && props.screenShareState !== "on");
 const loadingMessage = computed(() => {
+  if (!props.streamReady) return "Loading...";
   if (props.videoState === "loading") return "Video loading...";
   else if (props.screenShareState === "loading") return "Screenshare loading...";
   return "";
@@ -180,9 +182,6 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
       color: white;
       background: #0000002e;
       border-radius: 10rem;
-    }
-
-    .settings {
     }
   }
 }

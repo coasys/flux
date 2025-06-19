@@ -4,7 +4,7 @@ import { AgentState, AgentStatus, ProcessingState, SignallingService } from "@co
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 
-const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
+export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
 const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
 const MAX_AGE = 60000; // 60 seconds before "offline"
