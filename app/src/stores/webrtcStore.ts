@@ -2,20 +2,20 @@ import guitarWav from "@/assets/audio/guitar.wav";
 import kissWav from "@/assets/audio/kiss.wav";
 import pigWav from "@/assets/audio/pig.wav";
 import popWav from "@/assets/audio/pop.wav";
+import { HEARTBEAT_INTERVAL } from "@/composables/useSignallingService";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveExpression } from "@coasys/ad4m";
 import { Channel, Community } from "@coasys/flux-api";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { Howl } from "howler";
 import { defineStore, storeToRefs } from "pinia";
+import type { Instance } from "simple-peer";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
 import { useUiStore } from "./uiStore";
-
-import type { Instance } from "simple-peer";
 // @ts-ignore
 import SimplePeer from "simple-peer/simplepeer.min.js";
 
@@ -51,6 +51,7 @@ export type PeerConnection = {
   peer: SimplePeer.Instance;
   streams: MediaStream[];
   initiator: boolean;
+  streamReady: boolean;
   audioState: MediaState;
   videoState: MediaState;
   screenShareState: MediaState;
@@ -88,6 +89,7 @@ export const useWebrtcStore = defineStore(
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
     const iceServers = ref(defaultIceServers);
+    const disconnectedAgents = ref<string[]>([]);
 
     const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
     const signallingService = computed(() => communityService.value?.signallingService);
@@ -145,21 +147,10 @@ export const useWebrtcStore = defineStore(
       if (callHealth.value !== newCallHealth) callHealth.value = newCallHealth;
     }
 
-    function isScreenShareTrack(track: MediaStreamTrack): boolean {
-      // Checks the labels on a track to see if its a screen share track
-      const label = track.label.toLowerCase();
-      return (
-        label.includes("screen") ||
-        label.includes("display") ||
-        label.includes("window") ||
-        label.includes("tab") ||
-        label.includes("desktop")
-      );
-    }
-
     function startLoadingCheck(mediaType: "audio" | "video" | "screenShare", peer: PeerConnection): void {
       // Polls for expected tracks after peer media changes because track replacement doesn't trigger an event we can listen for
-      const maxAttempts = 20;
+      const interval = 500; // Check every 500ms
+      const maxAttempts = 20; // Give up after 20 attempts (10 seconds with 500ms intervals)
 
       // Clear previous loading check if it exists
       const existingCheck = peer.loadingChecks.get(mediaType);
@@ -180,14 +171,18 @@ export const useWebrtcStore = defineStore(
             hasMedia = stream.getAudioTracks().length > 0;
             break;
           case "video":
-            hasMedia = stream.getVideoTracks().some((track) => !isScreenShareTrack(track));
+            hasMedia = stream.getVideoTracks().some((track) => !mediaDevicesStore.isScreenShareTrack(track));
             break;
           case "screenShare":
-            hasMedia = stream.getVideoTracks().some((track) => isScreenShareTrack(track));
+            hasMedia = stream.getVideoTracks().some((track) => mediaDevicesStore.isScreenShareTrack(track));
             break;
         }
 
         if (hasMedia || attempts >= maxAttempts) {
+          console.log(
+            `🔄 Loading check finished for ${mediaType} track for peer ${peer.did}: attempt ${attempts}, hasMedia: ${hasMedia}`
+          );
+
           // Update the media state
           if (mediaType === "audio") peer.audioState = hasMedia ? "on" : "off";
           else if (mediaType === "video") peer.videoState = hasMedia ? "on" : "off";
@@ -199,7 +194,7 @@ export const useWebrtcStore = defineStore(
           if (hasMedia) console.log(`✅ ${mediaType} loaded for peer ${peer.did}`);
           else console.warn(`❌ ${mediaType} failed to load for peer ${peer.did} after ${maxAttempts} attempts`);
         }
-      }, 500);
+      }, interval);
 
       peer.loadingChecks.set(mediaType, checkInterval);
     }
@@ -226,6 +221,8 @@ export const useWebrtcStore = defineStore(
       peer.on("signal", (data) => signalAgent(did, WEBRTC_SIGNAL, data));
 
       peer.on("connect", () => {
+        console.log(`✅ Peer connection established with ${did}`);
+
         // Set initial media settings for peer from their agent state in the signalling service (updated later via direct webrtc signals)
         const peerConnection = peerConnections.value.get(did);
         const agent = agentsInCall.value.find((a) => a.did === did);
@@ -235,11 +232,11 @@ export const useWebrtcStore = defineStore(
           peerConnection.screenShareState = agent.mediaSettings.screenShareEnabled ? "on" : "off";
         }
 
-        // If no stream found after connection established, request it from the peer
-        setTimeout(() => {
-          const peerConnection = peerConnections.value.get(did);
-          if (peerConnection && !peerConnection.streams.length) signalAgent(did, WEBRTC_STREAM_REQUEST);
-        }, 1000);
+        // // If no stream found after connection established, request it from the peer
+        // setTimeout(() => {
+        //   const peerConnection = peerConnections.value.get(did);
+        //   if (peerConnection && !peerConnection.streams.length) signalAgent(did, WEBRTC_STREAM_REQUEST);
+        // }, 1000);
       });
 
       peer.on("data", (signal) => {
@@ -265,7 +262,9 @@ export const useWebrtcStore = defineStore(
             peer.audioState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("audio", peer);
           } else if (data.type === "video") {
-            const existingVideoTrack = peer.streams[0].getVideoTracks().some((track) => !isScreenShareTrack(track));
+            const existingVideoTrack = peer.streams[0]
+              .getVideoTracks()
+              .some((track) => !mediaDevicesStore.isScreenShareTrack(track));
             // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading state
             if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
               peer.videoState = "on";
@@ -284,7 +283,9 @@ export const useWebrtcStore = defineStore(
       });
 
       peer.on("track", (track, stream) => {
-        console.log(`🎵 New ${track.kind} track from ${did}`);
+        let trackType = track.kind;
+        if (mediaDevicesStore.isScreenShareTrack(track)) trackType = "screenShare";
+        console.log(`🎞️ New ${trackType} track from ${did}`, track);
 
         // Find the peer connection
         const peerConnection = peerConnections.value.get(did);
@@ -294,6 +295,9 @@ export const useWebrtcStore = defineStore(
         const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
         if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
         else peerConnection.streams = [stream];
+
+        // Mark the stream as ready if not already set
+        if (!peerConnection.streamReady) peerConnection.streamReady = true;
       });
 
       peer.on("close", () => cleanupPeerConnection(did));
@@ -362,6 +366,7 @@ export const useWebrtcStore = defineStore(
         peer,
         streams: [],
         initiator,
+        streamReady: false,
         audioState: "on",
         videoState: "off",
         screenShareState: "off",
@@ -378,9 +383,17 @@ export const useWebrtcStore = defineStore(
       console.log(`🗑️ Cleaning up peer connection for ${did}`);
 
       try {
+        // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
+        disconnectedAgents.value.push(did);
+        setTimeout(
+          () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
+          HEARTBEAT_INTERVAL + 1000
+        );
+
         // Clear any loading check intervals
         peerConnection.loadingChecks.forEach((interval) => clearInterval(interval));
         peerConnection.loadingChecks.clear();
+
         // Destory their connection
         peerConnection.peer.destroy();
       } catch (e) {
@@ -464,7 +477,8 @@ export const useWebrtcStore = defineStore(
     async function replaceVideoTrack(newTrack: MediaStreamTrack, oldTrack?: MediaStreamTrack) {
       if (!inCall.value) return;
 
-      console.log("📹 Replacing video track for all peers");
+      console.log("📹 Replacing video track for all peers", newTrack);
+      console.log("is screenshare track: ", mediaDevicesStore.isScreenShareTrack(newTrack));
 
       const updatePromises = Array.from(peerConnections.value.entries()).map(async ([did, peerConnection]) => {
         try {
@@ -675,6 +689,9 @@ export const useWebrtcStore = defineStore(
 
           // Skip if we already have a connection with this agent
           if (peerConnections.value.has(agent.did)) return;
+
+          // Skip if the agent has just disconnected in the last HEARTBEAT_INTERVAL
+          if (disconnectedAgents.value.includes(agent.did)) return;
 
           // Create a new peer connection
           const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
