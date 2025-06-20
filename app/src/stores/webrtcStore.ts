@@ -14,7 +14,7 @@ import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
-import { useMediaDevicesStore } from "./mediaDevicesStore";
+import { FluxTrack, useMediaDevicesStore } from "./mediaDevicesStore";
 import { useUiStore } from "./uiStore";
 // @ts-ignore
 import SimplePeer from "simple-peer/simplepeer.min.js";
@@ -147,7 +147,7 @@ export const useWebrtcStore = defineStore(
       if (callHealth.value !== newCallHealth) callHealth.value = newCallHealth;
     }
 
-    function startLoadingCheck(mediaType: "audio" | "video" | "screenShare", peer: PeerConnection): void {
+    function startLoadingCheck(mediaType: "audio" | "video" | "screenshare", peer: PeerConnection): void {
       // Polls for expected tracks after peer media changes because track replacement doesn't trigger an event we can listen for
       const interval = 500; // Check every 500ms
       const maxAttempts = 20; // Give up after 20 attempts (10 seconds with 500ms intervals)
@@ -171,10 +171,10 @@ export const useWebrtcStore = defineStore(
             hasMedia = stream.getAudioTracks().length > 0;
             break;
           case "video":
-            hasMedia = stream.getVideoTracks().some((track) => !mediaDevicesStore.isScreenShareTrack(track));
+            hasMedia = stream.getVideoTracks().some((track: FluxTrack) => track.mediaType === "camera");
             break;
-          case "screenShare":
-            hasMedia = stream.getVideoTracks().some((track) => mediaDevicesStore.isScreenShareTrack(track));
+          case "screenshare":
+            hasMedia = stream.getVideoTracks().some((track: FluxTrack) => track.mediaType === "screenshare");
             break;
         }
 
@@ -186,7 +186,7 @@ export const useWebrtcStore = defineStore(
           // Update the media state
           if (mediaType === "audio") peer.audioState = hasMedia ? "on" : "off";
           else if (mediaType === "video") peer.videoState = hasMedia ? "on" : "off";
-          else if (mediaType === "screenShare") peer.screenShareState = hasMedia ? "on" : "off";
+          else if (mediaType === "screenshare") peer.screenShareState = hasMedia ? "on" : "off";
 
           clearInterval(checkInterval);
           peer.loadingChecks.delete(mediaType);
@@ -264,7 +264,7 @@ export const useWebrtcStore = defineStore(
           } else if (data.type === "video") {
             const existingVideoTrack = peer.streams[0]
               .getVideoTracks()
-              .some((track) => !mediaDevicesStore.isScreenShareTrack(track));
+              .some((track: FluxTrack) => track.mediaType === "camera");
             // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading state
             if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
               peer.videoState = "on";
@@ -275,7 +275,7 @@ export const useWebrtcStore = defineStore(
             }
           } else if (data.type === "screenShare") {
             peer.screenShareState = data.enabled ? "loading" : "off";
-            if (data.enabled) startLoadingCheck("screenShare", peer);
+            if (data.enabled) startLoadingCheck("screenshare", peer);
           }
 
           console.log(`Peer ${did} updated media settings:`, data);
@@ -283,9 +283,7 @@ export const useWebrtcStore = defineStore(
       });
 
       peer.on("track", (track, stream) => {
-        let trackType = track.kind;
-        if (mediaDevicesStore.isScreenShareTrack(track)) trackType = "screenShare";
-        console.log(`🎞️ New ${trackType} track from ${did}`, track);
+        console.log(`🎞️ New ${(track as FluxTrack).mediaType} track from ${did}`, track);
 
         // Find the peer connection
         const peerConnection = peerConnections.value.get(did);
@@ -474,11 +472,10 @@ export const useWebrtcStore = defineStore(
       console.log("🎉 Finished updating audio tracks for all peers");
     }
 
-    async function replaceVideoTrack(newTrack: MediaStreamTrack, oldTrack?: MediaStreamTrack) {
+    async function replaceVideoTrack(newTrack: FluxTrack, oldTrack?: FluxTrack) {
       if (!inCall.value) return;
 
       console.log("📹 Replacing video track for all peers", newTrack);
-      console.log("is screenshare track: ", mediaDevicesStore.isScreenShareTrack(newTrack));
 
       const updatePromises = Array.from(peerConnections.value.entries()).map(async ([did, peerConnection]) => {
         try {
