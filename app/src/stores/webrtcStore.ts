@@ -24,6 +24,7 @@ export const WEBRTC_SIGNAL = "webrtc/signal";
 export const WEBRTC_STREAM_REQUEST = "webrtc/stream-request";
 export const WEBRTC_EMOJI = "webrtc/emoji";
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = "webrtc/media-settings-changed";
+export const WEBRTC_LEAVING_CALL = "webrtc/leaving-call";
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -119,9 +120,9 @@ export const useWebrtcStore = defineStore(
       signallingService.value?.sendSignal({ source: JSON.stringify(data), predicate, target });
     }
 
-    function signalPeers(type: string, data: any): void {
+    function signalPeers(type: string, data?: any): void {
       // Signals all connected peers via their WebRTC data channels
-      const signal = JSON.stringify({ type, data });
+      const signal = JSON.stringify({ type, data: data || {} });
       peerConnections.value.forEach((connection, did) => {
         try {
           if (connection.peer._channel?.readyState === "open") connection.peer.send(signal);
@@ -280,6 +281,21 @@ export const useWebrtcStore = defineStore(
 
           console.log(`Peer ${did} updated media settings:`, data);
         }
+
+        if (type === WEBRTC_LEAVING_CALL) {
+          console.log(`Peer ${did} is leaving the call`);
+
+          // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
+          disconnectedAgents.value.push(did);
+          setTimeout(
+            () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
+            HEARTBEAT_INTERVAL + 1000
+          );
+
+          // Clean up the peer connection
+          cleanupPeerConnection(did);
+          appStore.showDangerToast({ message: `${did} has left the call` });
+        }
       });
 
       peer.on("track", (track, stream) => {
@@ -381,13 +397,6 @@ export const useWebrtcStore = defineStore(
       console.log(`🗑️ Cleaning up peer connection for ${did}`);
 
       try {
-        // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
-        disconnectedAgents.value.push(did);
-        setTimeout(
-          () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
-          HEARTBEAT_INTERVAL + 1000
-        );
-
         // Clear any loading check intervals
         peerConnection.loadingChecks.forEach((interval) => clearInterval(interval));
         peerConnection.loadingChecks.clear();
@@ -622,6 +631,9 @@ export const useWebrtcStore = defineStore(
 
     async function leaveRoom() {
       try {
+        // Signal all peers that we're leaving the call
+        signalPeers(WEBRTC_LEAVING_CALL);
+
         // Close all peer connections
         peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
 
@@ -752,6 +764,7 @@ export const useWebrtcStore = defineStore(
       peerConnections,
       joiningCall,
       iceServers,
+      disconnectedAgents,
       addTrack,
       removeTrack,
       replaceAudioTrack,

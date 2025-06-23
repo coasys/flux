@@ -426,6 +426,7 @@ const {
   callChannelName,
   myAgentStatus,
   peerConnections,
+  disconnectedAgents,
 } = storeToRefs(webrtcStore);
 
 type LayoutOption = { label: string; class: string; icon: string };
@@ -602,6 +603,13 @@ watch(callWindowOpen, (open) => {
   if (open) {
     selectedVideoLayout.value = videoLayoutOptions[0];
     focusedVideoId.value = "";
+  }
+});
+
+watch(disconnectedAgents, (disconnected) => {
+  // Reset focused video if the disconnected agent was focused
+  if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) {
+    focusedVideoId.value = me.value.did;
   }
 });
 
