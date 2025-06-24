@@ -27,10 +27,6 @@ export type MediaPermissions = {
   microphone: { granted: boolean; requested: boolean };
 };
 
-export interface FluxTrack extends MediaStreamTrack {
-  mediaType?: "microphone" | "camera" | "screenshare";
-}
-
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
@@ -72,10 +68,6 @@ export const useMediaDevicesStore = defineStore(
 
         // Create the stream
         stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
-
-        // Set the media type on each track
-        stream.value.getAudioTracks().forEach((track: FluxTrack) => (track.mediaType = "microphone"));
-        stream.value.getVideoTracks().forEach((track: FluxTrack) => (track.mediaType = "camera"));
 
         // Update request states
         microphone.requested = microphone.requested || audioEnabled.value;
@@ -149,8 +141,7 @@ export const useMediaDevicesStore = defineStore(
         // Get new video track
         const videoConstraints = { ...videoDimensions, deviceId: { exact: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
-        const newVideoTrack = newStream.getVideoTracks()[0] as FluxTrack;
-        newVideoTrack.mediaType = "camera";
+        const newVideoTrack = newStream.getVideoTracks()[0];
 
         // Get old video track
         const oldVideoTrack = stream.value.getVideoTracks()[0];
@@ -184,8 +175,7 @@ export const useMediaDevicesStore = defineStore(
         // Get new audio track
         const audioConstraints = { deviceId: { exact: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-        const newAudioTrack = newStream.getAudioTracks()[0] as FluxTrack;
-        newAudioTrack.mediaType = "microphone";
+        const newAudioTrack = newStream.getAudioTracks()[0];
 
         // Get old audio track
         const oldAudioTrack = stream.value.getAudioTracks()[0];
@@ -245,8 +235,7 @@ export const useMediaDevicesStore = defineStore(
 
           try {
             const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-            const newAudioTrack = newStream.getAudioTracks()[0] as FluxTrack;
-            newAudioTrack.mediaType = "microphone";
+            const newAudioTrack = newStream.getAudioTracks()[0];
 
             stream.value.addTrack(newAudioTrack);
 
@@ -278,9 +267,7 @@ export const useMediaDevicesStore = defineStore(
 
       videoEnabled.value = !videoEnabled.value;
 
-      const existingVideoTracks = stream.value
-        .getVideoTracks()
-        .filter((track: FluxTrack) => track.mediaType === "camera");
+      const existingVideoTracks = stream.value.getVideoTracks();
 
       if (videoEnabled.value) {
         // Enabling video
@@ -295,8 +282,7 @@ export const useMediaDevicesStore = defineStore(
 
           try {
             const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
-            const newVideoTrack = newStream.getVideoTracks()[0] as FluxTrack;
-            newVideoTrack.mediaType = "camera";
+            const newVideoTrack = newStream.getVideoTracks()[0];
 
             // If screen sharing is enabled, save the new track for later restoration
             if (screenShareEnabled.value) savedVideoTrack = newVideoTrack;
@@ -331,8 +317,7 @@ export const useMediaDevicesStore = defineStore(
       try {
         // Get the screen share track
         const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const screenShareTrack = screenShareStream.getVideoTracks()[0] as FluxTrack;
-        screenShareTrack.mediaType = "screenshare";
+        const screenShareTrack = screenShareStream.getVideoTracks()[0];
 
         // Update my media settings
         screenShareEnabled.value = true;
@@ -417,11 +402,8 @@ export const useMediaDevicesStore = defineStore(
       }
 
       // Handle stream updates
-      if (!screenShareEnabled.value) {
-        await turnOnScreenShare();
-      } else {
-        await turnOffScreenShare();
-      }
+      if (!screenShareEnabled.value) await turnOnScreenShare();
+      else await turnOffScreenShare();
     }
 
     // Get initial device list

@@ -14,7 +14,7 @@ import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "./appStore";
 import { useCommunityServiceStore } from "./communityServiceStore";
-import { FluxTrack, useMediaDevicesStore } from "./mediaDevicesStore";
+import { useMediaDevicesStore } from "./mediaDevicesStore";
 import { useUiStore } from "./uiStore";
 // @ts-ignore
 import SimplePeer from "simple-peer/simplepeer.min.js";
@@ -172,10 +172,10 @@ export const useWebrtcStore = defineStore(
             hasMedia = stream.getAudioTracks().length > 0;
             break;
           case "video":
-            hasMedia = stream.getVideoTracks().some((track: FluxTrack) => track.mediaType === "camera");
+            hasMedia = stream.getVideoTracks().some((track) => track.enabled);
             break;
           case "screenshare":
-            hasMedia = stream.getVideoTracks().some((track: FluxTrack) => track.mediaType === "screenshare");
+            hasMedia = stream.getVideoTracks().some((track) => track.enabled);
             break;
         }
 
@@ -263,9 +263,7 @@ export const useWebrtcStore = defineStore(
             peer.audioState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("audio", peer);
           } else if (data.type === "video") {
-            const existingVideoTrack = peer.streams[0]
-              .getVideoTracks()
-              .some((track: FluxTrack) => track.mediaType === "camera");
+            const existingVideoTrack = peer.streams[0].getVideoTracks().some((track) => track.enabled);
             // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading state
             if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
               peer.videoState = "on";
@@ -299,7 +297,7 @@ export const useWebrtcStore = defineStore(
       });
 
       peer.on("track", (track, stream) => {
-        console.log(`🎞️ New ${(track as FluxTrack).mediaType} track from ${did}`, track);
+        console.log(`🎞️ New ${track.kind} track from ${did}`, track);
 
         // Find the peer connection
         const peerConnection = peerConnections.value.get(did);
@@ -481,7 +479,7 @@ export const useWebrtcStore = defineStore(
       console.log("🎉 Finished updating audio tracks for all peers");
     }
 
-    async function replaceVideoTrack(newTrack: FluxTrack, oldTrack?: FluxTrack) {
+    async function replaceVideoTrack(newTrack: MediaStreamTrack, oldTrack?: MediaStreamTrack) {
       if (!inCall.value) return;
 
       console.log("📹 Replacing video track for all peers", newTrack);
