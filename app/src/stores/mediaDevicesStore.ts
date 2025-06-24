@@ -318,7 +318,7 @@ export const useMediaDevicesStore = defineStore(
             videoEnabled.value = false;
           }
         }
-      } else {
+      } else if (!screenShareEnabled.value) {
         // Disabling video - disable tracks with animation delay
         await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
         existingVideoTracks.forEach((track) => (track.enabled = false));
