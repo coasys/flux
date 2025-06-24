@@ -597,20 +597,20 @@ function focusOnVideo(did: string) {
   }
 }
 
+function closeFocusedVideoLayout() {
+  selectedVideoLayout.value = videoLayoutOptions[0];
+  focusedVideoId.value = "";
+}
+
 // Reset layout & focused video when the call window opens
 // TODO: based this on leaving the call, not just opening the window, & store preferences in the webrtc store
 watch(callWindowOpen, (open) => {
-  if (open) {
-    selectedVideoLayout.value = videoLayoutOptions[0];
-    focusedVideoId.value = "";
-  }
+  if (open) closeFocusedVideoLayout();
 });
 
 watch(disconnectedAgents, (disconnected) => {
-  // Reset focused video if the disconnected agent was focused
-  if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) {
-    focusedVideoId.value = me.value.did;
-  }
+  // Toggle off the focused video layout if the disconnected agent was focused
+  if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) closeFocusedVideoLayout();
 });
 
 onMounted(getMyProfile);
