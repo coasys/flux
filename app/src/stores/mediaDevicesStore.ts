@@ -61,8 +61,8 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Generate the constraints
-        const audioDeviceId = activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined;
-        const videoDeviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+        const audioDeviceId = activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined;
+        const videoDeviceId = activeCameraId.value ? { ideal: activeCameraId.value } : undefined;
         const audioConstraints = audioEnabled.value ? { deviceId: audioDeviceId } : false;
         const videoConstraints = videoEnabled.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
@@ -139,7 +139,7 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Get new video track
-        const videoConstraints = { ...videoDimensions, deviceId: { exact: deviceId } };
+        const videoConstraints = { ...videoDimensions, deviceId: { ideal: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
         const newVideoTrack = newStream.getVideoTracks()[0];
 
@@ -173,7 +173,7 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Get new audio track
-        const audioConstraints = { deviceId: { exact: deviceId } };
+        const audioConstraints = { deviceId: { ideal: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
         const newAudioTrack = newStream.getAudioTracks()[0];
 
@@ -230,7 +230,7 @@ export const useMediaDevicesStore = defineStore(
         if (existingAudioTracks.length === 0) {
           // Need to add audio track
           const audioConstraints = {
-            deviceId: activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined,
+            deviceId: activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined,
           };
 
           try {
@@ -277,7 +277,7 @@ export const useMediaDevicesStore = defineStore(
           console.log("✅ Enabled existing video tracks");
         } else {
           // Need to add video track
-          const deviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+          const deviceId = activeCameraId.value ? { ideal: activeCameraId.value } : undefined;
           const videoConstraints = { ...videoDimensions, deviceId };
 
           try {
@@ -298,6 +298,21 @@ export const useMediaDevicesStore = defineStore(
 
             console.log("✅ Added new video track");
           } catch (error) {
+            if (error.name === "OverconstrainedError") {
+              console.error("❌ Overconstrained:", {
+                constraint: error.constraint, // Which constraint failed
+                message: error.message,
+                requestedConstraints: videoConstraints,
+              });
+
+              // Log available devices for debugging
+              const devices = await navigator.mediaDevices.enumerateDevices();
+              console.log(
+                "Available video devices:",
+                devices.filter((d) => d.kind === "videoinput")
+              );
+            }
+
             console.error("❌ Failed to add video track:", error);
             // Revert the state if it failed
             videoEnabled.value = false;
