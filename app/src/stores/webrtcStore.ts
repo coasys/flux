@@ -285,6 +285,7 @@ export const useWebrtcStore = defineStore(
 
           // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
           disconnectedAgents.value.push(did);
+          console.log("*** New disconnected agents in webrtc store:", disconnectedAgents.value);
           setTimeout(
             () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
             HEARTBEAT_INTERVAL + 1000

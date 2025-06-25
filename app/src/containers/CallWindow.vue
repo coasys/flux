@@ -598,6 +598,7 @@ function focusOnVideo(did: string) {
 }
 
 function closeFocusedVideoLayout() {
+  console.log("*** closeFocusedVideoLayout called");
   selectedVideoLayout.value = videoLayoutOptions[0];
   focusedVideoId.value = "";
 }
@@ -610,6 +611,8 @@ watch(callWindowOpen, (open) => {
 
 watch(disconnectedAgents, (disconnected) => {
   // Toggle off the focused video layout if the disconnected agent was focused
+  console.log("*** Disconnected agents updated in call window:", disconnected);
+  console.log("*** focusedVideoId.value:", focusedVideoId.value);
   if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) closeFocusedVideoLayout();
 });
 
