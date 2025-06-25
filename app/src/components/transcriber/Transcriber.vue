@@ -116,7 +116,7 @@ const mediaDevicesStore = useMediaDevicesStore();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 
-const { mediaSettings } = storeToRefs(mediaDevicesStore);
+const { mediaSettings, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
 const { transcriptionMessageTimeout } = storeToRefs(aiStore);
 const { callRoute } = storeToRefs(webrtcStore);
 
@@ -438,7 +438,6 @@ function toggleRemoteService() {
   useRemoteService.value = !useRemoteService.value;
 }
 
-// Lifecycle hooks
 onMounted(() => {
   if (mediaSettings.value.audioEnabled) startListening();
 });
@@ -462,6 +461,16 @@ watch(useRemoteService, () => {
     stopListening();
     startListening();
   }
+});
+
+// Watch for microphone changes
+watch(activeMicrophoneId, () => {
+  console.log("Microphone change detected in the transcriber");
+  // Restart listening with new microphone
+  stopListening();
+  setTimeout(() => {
+    if (mediaSettings.value.audioEnabled) startListening();
+  }, 1000);
 });
 </script>
 
