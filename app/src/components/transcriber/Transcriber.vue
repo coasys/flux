@@ -376,7 +376,13 @@ async function startLocalTransciption(stream: MediaStream) {
 function startListening() {
   listening.value = true;
   navigator.mediaDevices
-    .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+    .getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        deviceId: activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined,
+      },
+    })
     .then(async (stream) => {
       audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
       if (useRemoteService.value) startRemoteTranscription();
@@ -438,6 +444,12 @@ function toggleRemoteService() {
   useRemoteService.value = !useRemoteService.value;
 }
 
+function restartListening() {
+  console.log("Restarting listening with new settings");
+  stopListening();
+  startListening();
+}
+
 onMounted(() => {
   if (mediaSettings.value.audioEnabled) startListening();
 });
@@ -456,22 +468,11 @@ watch(
 // Watch for remote service changes
 watch(useRemoteService, () => {
   // Skip on first run by checking if audio context is present
-  if (audioContext.value) {
-    // Restart listening with new settings
-    stopListening();
-    startListening();
-  }
+  if (audioContext.value) restartListening();
 });
 
-// Watch for microphone changes
-watch(activeMicrophoneId, () => {
-  console.log("Microphone change detected in the transcriber");
-  // Restart listening with new microphone
-  stopListening();
-  setTimeout(() => {
-    if (mediaSettings.value.audioEnabled) startListening();
-  }, 1000);
-});
+// Watch for microphone changes and restart listening
+watch(activeMicrophoneId, restartListening);
 </script>
 
 <style lang="scss" scoped>
