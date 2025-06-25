@@ -21,7 +21,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   const { inCall, callRoute, myAgentStatus } = storeToRefs(webrtcStore);
   const { mediaSettings } = storeToRefs(mediaDevicesStore);
   const { currentRoute } = storeToRefs(routeMemoryStore);
-  const { aiEnabled } = storeToRefs(aiStore);
+  const { defaultLLM } = storeToRefs(aiStore);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
@@ -29,7 +29,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     status: myAgentStatus.value,
     callRoute: callRoute.value,
     mediaSettings: mediaSettings.value,
-    aiEnabled: aiEnabled.value,
+    aiEnabled: !!defaultLLM.value,
     inCall: false,
     processing: null,
     lastUpdate: Date.now(),
@@ -331,7 +331,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
   watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
-  watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
+  watch(defaultLLM, (newDefaultLLM) => updateMyState("aiEnabled", !!newDefaultLLM));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
 
   // Dispatch custom event when agents map changes for webcomponent plugins to listen to

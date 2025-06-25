@@ -1,5 +1,8 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { useAppStore, useRouteMemoryStore } from "@/stores";
+import { AIModelLoadingStatus, AITask } from "@coasys/ad4m";
+import { Model } from "@coasys/ad4m/lib/src/ai/AIResolver";
+import { defineStore, storeToRefs } from "pinia";
+import { ref, watch } from "vue";
 
 export const transcriptionModels = [
   "Tiny", // The tiny model.
@@ -24,19 +27,22 @@ export const transcriptionModels = [
 export const useAiStore = defineStore(
   "aiStore",
   () => {
-    const aiEnabled = ref(false);
+    const appStore = useAppStore();
+    const routeMemoryStore = useRouteMemoryStore();
+
+    const { ad4mClient } = storeToRefs(appStore);
+    const { currentRoute } = storeToRefs(routeMemoryStore);
+
+    const allModels = ref<Model[]>([]);
+    const allTasks = ref<AITask[]>([]);
+    const defaultLLM = ref<Model | null>(null);
+    const llmLoadingStatus = ref<AIModelLoadingStatus | null>(null);
+    const whisperLoadingStatus = ref<AIModelLoadingStatus | null>(null);
+    const whisperTinyLoadingStatus = ref<AIModelLoadingStatus | null>(null);
     const transcriptionEnabled = ref(true);
     const transcriptionModel = ref("Base");
     const transcriptionPreviewTimeout = ref(0.4);
     const transcriptionMessageTimeout = ref(5);
-
-    function setAIEnabled(payload: boolean): void {
-      aiEnabled.value = payload;
-    }
-
-    function toggleAIEnabled(): void {
-      aiEnabled.value = !aiEnabled.value;
-    }
 
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
@@ -58,19 +64,59 @@ export const useAiStore = defineStore(
       transcriptionMessageTimeout.value = payload;
     }
 
+    async function loadAIData() {
+      allModels.value = await ad4mClient.value.ai.getModels();
+      allTasks.value = await ad4mClient.value.ai.tasks();
+      defaultLLM.value = await ad4mClient.value.ai.getDefaultModel("LLM");
+
+      // Get model statuses
+      const llm = allModels.value.find((model) => model.modelType === "LLM");
+      if (llm) llmLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(llm.id);
+
+      const whisper = allModels.value.find((model) => model.name === "Whisper");
+      if (whisper) whisperLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisper.id);
+
+      const whisperTiny = allModels.value.find((model) => model.name === "Whisper tiny quantized");
+      if (whisperTiny) whisperTinyLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisperTiny.id);
+    }
+
+    // Load AI data when the ad4mClient is initialized
+    watch(
+      ad4mClient,
+      (newClient) => {
+        if (newClient) loadAIData();
+      },
+      { immediate: true }
+    );
+
+    // Watch for route changes & reload AI data when navigating to the synergy view
+    watch(
+      currentRoute,
+      (newRoute, oldRoute) => {
+        const isNewRoute = JSON.stringify(newRoute) !== JSON.stringify(oldRoute);
+        const enteringSynergyView = newRoute.viewId === "@coasys/flux-synergy-demo-view";
+        if (isNewRoute && enteringSynergyView) loadAIData();
+      },
+      { immediate: true }
+    );
+
     return {
-      aiEnabled,
+      allModels,
+      allTasks,
+      defaultLLM,
+      llmLoadingStatus,
+      whisperLoadingStatus,
+      whisperTinyLoadingStatus,
       transcriptionEnabled,
       transcriptionModel,
       transcriptionPreviewTimeout,
       transcriptionMessageTimeout,
-      setAIEnabled,
-      toggleAIEnabled,
       setTranscriptionEnabled,
       toggleTranscriptionEnabled,
       setTranscriptionModel,
       setTranscriptionPreviewTimeout,
       setTranscriptionMessageTimeout,
+      loadAIData,
     };
   },
   { persist: true }
