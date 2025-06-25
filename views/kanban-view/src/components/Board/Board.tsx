@@ -31,6 +31,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   const [namedOptions, setNamedOptions] = useState<NamedOptions>({});
   const [tasks, setTasks] = useState([]);
   const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
+  const [isNeighbourhoodAuthor, setIsNeighbourhoodAuthor] = useState(false);
 
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
@@ -186,11 +187,16 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       });
   }
 
-  useEffect(() => {
-    if (getProfile) getProfiles();
-  }, [perspective.uuid, getProfile]);
+  async function checkNeighbourhoodAuthor() {
+    const me = await agent.me();
+    setIsNeighbourhoodAuthor(perspective.neighbourhood.author === me.did);
+  }
 
   useEffect(() => {
+    // Check and display the add column button if we are the neighbourhood author
+    checkNeighbourhoodAuthor();
+
+    // Add the Task SDNA if it doesn't exist
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
       if (!hasTask) {
         perspective
@@ -199,6 +205,10 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       }
     });
   }, [perspective.uuid]);
+
+  useEffect(() => {
+    if (getProfile) getProfiles();
+  }, [perspective.uuid, getProfile]);
 
   useEffect(() => {
     setTasks(entries);
@@ -288,7 +298,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
                 </div>
               );
             })}
-            {selectedClass && (
+            {isNeighbourhoodAuthor && selectedClass && (
               <div>
                 <j-button variant="subtle" onClick={() => setShowAddColumn(true)}>
                   <j-icon name="plus" size="sm" slot="start" />
