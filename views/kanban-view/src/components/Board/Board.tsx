@@ -23,7 +23,9 @@ type NamedOptions = Record<string, NamedOption[]>;
 
 export default function Board({ perspective, source, agent, getProfile }: BoardProps) {
   const [showAddColumn, setShowAddColumn] = useState(false);
-  const [currentTask, setCurrentTask] = useState<(Ad4mModel & { assignees: string[] }) | null>(null);
+  const [currentTask, setCurrentTask] = useState<
+    (Ad4mModel & { assignees: string[]; name: string; title: string }) | null
+  >(null);
   const [columnName, setColumnName] = useState("");
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
@@ -109,24 +111,20 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }
 
   function transformData(tasks: Ad4mModel[], property: string, options: NamedOption[]) {
-    const defaultColumns = options.reduce(
-      (acc, opt) => ({ ...acc, [opt.value]: { id: opt.value, title: opt.label, taskIds: [] } }),
-      { Unkown: { id: "unknown", title: "unknown", taskIds: [] } }
-    );
+    const defaultColumns = { Unknown: { id: "unknown", title: "unknown", taskIds: [] } };
+    options.forEach((opt) => (defaultColumns[opt.value] = { id: opt.value, title: opt.label, taskIds: [] }));
 
     // Create a map of task IDs to their full Ad4mModel instances
-    const taskMap = tasks.reduce((acc, task) => {
-      acc[task.baseExpression] = task;
-      return acc;
-    }, {});
+    const taskMap = {};
+    tasks.forEach((task) => (taskMap[task.baseExpression] = task));
 
     // Organize tasks into columns while preserving the full Ad4mModel instances
-    const columns = tasks.reduce((acc, task) => {
+    const columns = { ...defaultColumns };
+    tasks.forEach((task) => {
       const columnId = task[property] || "unknown";
-      if (!acc[columnId]) acc[columnId] = { id: columnId, title: columnId, taskIds: [] };
-      acc[columnId].taskIds.push(task.baseExpression);
-      return acc;
-    }, defaultColumns);
+      if (!columns[columnId]) columns[columnId] = { id: columnId, title: columnId, taskIds: [] };
+      columns[columnId].taskIds.push(task.baseExpression);
+    });
 
     return {
       tasks: taskMap, // This now contains the full Ad4mModel instances
@@ -140,12 +138,12 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       .infer(`subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`)
       .then((res) => {
         if (res?.length) {
-          return res.reduce((acc, option) => {
-            return {
-              ...acc,
-              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
-            };
-          }, {});
+          const result = {};
+          res.forEach((option) => {
+            if (!result[option.Property]) result[option.Property] = [];
+            result[option.Property].push({ label: option.Label, value: option.Value });
+          });
+          return result;
         } else {
           return {};
         }
@@ -232,12 +230,16 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
               Select type
             </option>
             {classes.map((className) => (
-              <option value={className}>{className}</option>
+              <option key={className} value={className}>
+                {className}
+              </option>
             ))}
           </select>
           <select className={styles.select} onChange={(e) => setSelectedProperty(e.target.value)}>
             {Object.keys(namedOptions).map((property) => (
-              <option value={property}>{property}</option>
+              <option key={property} value={property}>
+                {property}
+              </option>
             ))}
           </select>
         </j-flex>

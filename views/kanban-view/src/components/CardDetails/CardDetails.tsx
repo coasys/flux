@@ -6,7 +6,7 @@ import Entry from "../Entry";
 import styles from "./CardDetails.module.css";
 
 type Props = {
-  task: Ad4mModel & { assignees: string[] };
+  task: Ad4mModel & { assignees: string[]; name: string; title: string };
   perspective: PerspectiveProxy;
   channelId: string;
   selectedClass: string;
@@ -58,7 +58,7 @@ export default function CardDetails({
 
         <j-box pb="500">
           <j-flex a="center" gap="300">
-            <j-icon size="xs" color="ui-500" name="chat-left"></j-icon>
+            <j-icon size="xs" color="ui-500" name="chat-left" />
             <j-text nomargin size="500" weight="700">
               Comments
             </j-text>
@@ -80,14 +80,14 @@ export default function CardDetails({
         </j-box>
         <j-box pt="300">
           <button className={styles.actionButton} onClick={() => setShowAssign(!showAssign)}>
-            <j-icon name="people" slot="start" size="xs"></j-icon>
+            <j-icon name="people" slot="start" size="xs" />
             <span>Assign</span>
           </button>
           {showAssign && (
             <j-menu className={styles.menu}>
               <j-box p="200">
                 <j-input size="sm" type="search">
-                  <j-icon name="search" slot="start" color="ui-500" size="xs"></j-icon>
+                  <j-icon name="search" slot="start" color="ui-500" size="xs" />
                 </j-input>
                 <j-box pt="300">
                   {agentProfiles.map((profile) => (
@@ -100,7 +100,7 @@ export default function CardDetails({
                         slot="start"
                       >
                         <div className={styles.suggestion}>
-                          <j-avatar size="xs" src={profile.profileThumbnailPicture} hash={profile.did}></j-avatar>
+                          <j-avatar size="xs" src={profile.profileThumbnailPicture} hash={profile.did} />
                           <j-text nomargin size="400" color="ui-800">
                             {profile.username}
                           </j-text>
@@ -117,7 +117,7 @@ export default function CardDetails({
               {assignedProfiles.map((p) => (
                 <j-box pt="300" key={p.did}>
                   <j-flex a="center" gap="300">
-                    <j-avatar size="xs" src={p?.profileThumbnailPicture} hash={p.did}></j-avatar>
+                    <j-avatar size="xs" src={p?.profileThumbnailPicture} hash={p.did} />
                     <j-text nomargin size="400" color="ui-700">
                       {p?.username}
                     </j-text>
@@ -129,7 +129,7 @@ export default function CardDetails({
         </j-box>
         <j-box pt="300">
           <button className={styles.dangerActionButton} onClick={onDelete}>
-            <j-icon name="trash" slot="start" size="xs"></j-icon>
+            <j-icon name="trash" slot="start" size="xs" />
             <span>Delete</span>
           </button>
         </j-box>

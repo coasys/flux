@@ -63,8 +63,8 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
   if (isCollection) {
     return (
       <j-flex gap="200" wrap>
-        {localValue.map((v) => (
-          <DisplayValue onUrlClick={onUrlClick} value={v} />
+        {localValue.map((v, index) => (
+          <DisplayValue key={index} onUrlClick={onUrlClick} value={v} />
         ))}
       </j-flex>
     );
@@ -78,7 +78,7 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
             <option value={option.value}>{option.label}</option>
           ))}
         </select>
-        <j-icon name="chevron-down" size="xs"></j-icon>
+        <j-icon name="chevron-down" size="xs" />
       </div>
     );
   }
@@ -146,12 +146,12 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
     return <ShowObjectInfo value={localValue} />;
   }
 
-  if (localValue === true) return <j-toggle size="sm" checked></j-toggle>;
+  if (localValue === true) return <j-toggle size="sm" checked />;
 
   if (localValue === false)
     return onUpdate ? (
       <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
-        <j-icon size="xs" name="pencil"></j-icon>
+        <j-icon size="xs" name="pencil" />
       </j-button>
     ) : (
       <span></span>
@@ -176,7 +176,12 @@ function ShowObjectInfo({ value }) {
         Show
       </j-button>
       {open && (
-        <j-modal open={open} onClick={(e) => e.stopImmediatePropagation()} onToggle={(e) => setOpen(e.target.open)}>
+        <j-modal
+          open={open}
+          onClick={(e: any) => e.stopImmediatePropagation()}
+          // @ts-ignore
+          onToggle={(e) => setOpen(e.target.open)}
+        >
           <j-box p="500">
             <j-flex direction="column" gap="400">
               {properties.map(([key, value]) => (
@@ -204,7 +209,7 @@ function Profile({ did }: { did: string }) {
 
   return (
     <j-tooltip strategy="fixed" title={profile?.username}>
-      <j-avatar size="xs" hash={did} src={profile?.profileThumbnailPicture}></j-avatar>
+      <j-avatar size="xs" hash={did} src={profile?.profileThumbnailPicture} />
     </j-tooltip>
   );
 }

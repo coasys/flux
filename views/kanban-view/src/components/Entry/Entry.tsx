@@ -4,7 +4,7 @@ import DisplayValue from "../DisplayValue";
 
 type Props = {
   perspective: PerspectiveProxy;
-  task: Ad4mModel;
+  task: Ad4mModel & { name: string; title: string };
   selectedClass: string;
   onUrlClick?: Function;
 };
@@ -18,10 +18,9 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
       .then((res) => {
         if (res?.length) {
           const options = res.reduce((acc, option) => {
-            return {
-              ...acc,
-              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
-            };
+            if (!acc[option.Property]) acc[option.Property] = [];
+            acc[option.Property].push({ label: option.Label, value: option.Value });
+            return acc;
           }, {});
           setNamedOptions(options);
         }
@@ -38,9 +37,7 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
       return !(key === "author" || key === "timestamp" || key === "id" || key === "title" || key === "name");
     });
 
-    const titleName = task.hasOwnProperty("name") ? "name" : task.hasOwnProperty("title") ? "title" : "";
-
-    // @ts-ignore
+    const titleName = Object.hasOwn(task, "name") ? "name" : Object.hasOwn(task, "title") ? "title" : "";
     const defaultName = task?.name || task?.title || "";
 
     return (
@@ -49,7 +46,7 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
           <j-box pt="100" pb="800">
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
-                <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
+                <j-icon name="justify-left" color="ui-500" size="xs" />
                 <j-text size="500" weight="500" nomargin>
                   {titleName}
                 </j-text>
@@ -69,7 +66,7 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
           {properties.map(([key, value]) => (
             <j-flex gap="400" direction="column">
               <j-flex gap="300" a="center">
-                <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
+                <j-icon name="justify-left" color="ui-500" size="xs" />
                 <j-text size="500" weight="600" nomargin>
                   {key}
                 </j-text>
