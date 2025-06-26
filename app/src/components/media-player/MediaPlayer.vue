@@ -33,7 +33,7 @@
 
     <div v-if="loadingMessage" class="loading-message">
       <j-spinner />
-      <j-text>{{ loadingMessage }}</j-text>
+      <j-text nomargin>{{ loadingMessage }}</j-text>
     </div>
 
     <j-flex v-if="emojis.length" class="emojis" gap="400">
@@ -153,7 +153,7 @@ onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--j-space-400);
+    gap: var(--j-space-500);
     background: var(--j-color-ui-50);
     z-index: 3;
   }

@@ -426,6 +426,7 @@ const {
   callChannelName,
   myAgentStatus,
   peerConnections,
+  disconnectedAgents,
 } = storeToRefs(webrtcStore);
 
 type LayoutOption = { label: string; class: string; icon: string };
@@ -596,14 +597,25 @@ function focusOnVideo(did: string) {
   }
 }
 
+function closeFocusedVideoLayout() {
+  selectedVideoLayout.value = videoLayoutOptions[0];
+  focusedVideoId.value = "";
+}
+
 // Reset layout & focused video when the call window opens
 // TODO: based this on leaving the call, not just opening the window, & store preferences in the webrtc store
 watch(callWindowOpen, (open) => {
-  if (open) {
-    selectedVideoLayout.value = videoLayoutOptions[0];
-    focusedVideoId.value = "";
-  }
+  if (open) closeFocusedVideoLayout();
 });
+
+// Watch disconnected agents and toggle off the focused video layout if the disconnected agent was focused
+watch(
+  disconnectedAgents,
+  (disconnected) => {
+    if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) closeFocusedVideoLayout();
+  },
+  { deep: true }
+);
 
 onMounted(getMyProfile);
 </script>

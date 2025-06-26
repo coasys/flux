@@ -11,6 +11,11 @@ const videoDimensions = {
   frameRate: { min: 5, ideal: 15, max: 20 },
 };
 
+export const defaultMediaPermissions: MediaPermissions = {
+  camera: { granted: false, requested: false },
+  microphone: { granted: false, requested: false },
+};
+
 export type MediaSettings = {
   audioEnabled: boolean;
   videoEnabled: boolean;
@@ -20,11 +25,6 @@ export type MediaSettings = {
 export type MediaPermissions = {
   camera: { granted: boolean; requested: boolean };
   microphone: { granted: boolean; requested: boolean };
-};
-
-export const defaultMediaPermissions: MediaPermissions = {
-  camera: { granted: false, requested: false },
-  microphone: { granted: false, requested: false },
 };
 
 export const useMediaDevicesStore = defineStore(
@@ -61,8 +61,8 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Generate the constraints
-        const audioDeviceId = activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined;
-        const videoDeviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+        const audioDeviceId = activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined;
+        const videoDeviceId = activeCameraId.value ? { ideal: activeCameraId.value } : undefined;
         const audioConstraints = audioEnabled.value ? { deviceId: audioDeviceId } : false;
         const videoConstraints = videoEnabled.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
@@ -139,7 +139,7 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Get new video track
-        const videoConstraints = { ...videoDimensions, deviceId: { exact: deviceId } };
+        const videoConstraints = { ...videoDimensions, deviceId: { ideal: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
         const newVideoTrack = newStream.getVideoTracks()[0];
 
@@ -173,7 +173,7 @@ export const useMediaDevicesStore = defineStore(
 
       try {
         // Get new audio track
-        const audioConstraints = { deviceId: { exact: deviceId } };
+        const audioConstraints = { deviceId: { ideal: deviceId } };
         const newStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
         const newAudioTrack = newStream.getAudioTracks()[0];
 
@@ -218,18 +218,6 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    function isScreenShareTrack(track: MediaStreamTrack): boolean {
-      // Checks the labels on a track to see if it's a screen share track
-      const label = track.label.toLowerCase();
-      return (
-        label.includes("screen") ||
-        label.includes("display") ||
-        label.includes("window") ||
-        label.includes("tab") ||
-        label.includes("desktop")
-      );
-    }
-
     async function toggleAudio() {
       if (!stream.value) return;
 
@@ -242,7 +230,7 @@ export const useMediaDevicesStore = defineStore(
         if (existingAudioTracks.length === 0) {
           // Need to add audio track
           const audioConstraints = {
-            deviceId: activeMicrophoneId.value ? { exact: activeMicrophoneId.value } : undefined,
+            deviceId: activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined,
           };
 
           try {
@@ -279,8 +267,7 @@ export const useMediaDevicesStore = defineStore(
 
       videoEnabled.value = !videoEnabled.value;
 
-      const existingVideoTracks = stream.value.getVideoTracks().filter((track) => !isScreenShareTrack(track));
-      console.log("existingVideoTracks", existingVideoTracks);
+      const existingVideoTracks = stream.value.getVideoTracks();
 
       if (videoEnabled.value) {
         // Enabling video
@@ -290,7 +277,7 @@ export const useMediaDevicesStore = defineStore(
           console.log("✅ Enabled existing video tracks");
         } else {
           // Need to add video track
-          const deviceId = activeCameraId.value ? { exact: activeCameraId.value } : undefined;
+          const deviceId = activeCameraId.value ? { ideal: activeCameraId.value } : undefined;
           const videoConstraints = { ...videoDimensions, deviceId };
 
           try {
@@ -316,7 +303,7 @@ export const useMediaDevicesStore = defineStore(
             videoEnabled.value = false;
           }
         }
-      } else {
+      } else if (!screenShareEnabled.value) {
         // Disabling video - disable tracks with animation delay
         await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
         existingVideoTracks.forEach((track) => (track.enabled = false));
@@ -415,11 +402,8 @@ export const useMediaDevicesStore = defineStore(
       }
 
       // Handle stream updates
-      if (!screenShareEnabled.value) {
-        await turnOnScreenShare();
-      } else {
-        await turnOffScreenShare();
-      }
+      if (!screenShareEnabled.value) await turnOnScreenShare();
+      else await turnOffScreenShare();
     }
 
     // Get initial device list
@@ -457,7 +441,6 @@ export const useMediaDevicesStore = defineStore(
       switchMicrophone,
       resetMediaDevices,
       findAvailableDevices,
-      isScreenShareTrack,
       toggleAudio,
       toggleVideo,
       toggleScreenShare,

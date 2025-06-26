@@ -221,7 +221,7 @@ const mediaDevicesStore = useMediaDevicesStore();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 
-const { mediaSettings } = storeToRefs(mediaDevicesStore);
+const { mediaSettings, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
 const { loadingAIData, whisperLoadingStatus, whisperTinyLoadingStatus, transcriptionMessageTimeout } =
   storeToRefs(aiStore);
 const { callRoute } = storeToRefs(webrtcStore);
@@ -487,7 +487,13 @@ async function startLocalTransciption(stream: MediaStream) {
 function startListening() {
   listening.value = true;
   navigator.mediaDevices
-    .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+    .getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        deviceId: activeMicrophoneId.value ? { ideal: activeMicrophoneId.value } : undefined,
+      },
+    })
     .then(async (stream) => {
       audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
       if (useRemoteService.value) startRemoteTranscription();
@@ -549,7 +555,12 @@ function toggleRemoteService() {
   useRemoteService.value = !useRemoteService.value;
 }
 
-// Lifecycle hooks
+function restartListening() {
+  console.log("Restarting listening with new settings");
+  stopListening();
+  startListening();
+}
+
 onMounted(() => {
   if (mediaSettings.value.audioEnabled) startListening();
 });
@@ -568,12 +579,11 @@ watch(
 // Watch for remote service changes
 watch(useRemoteService, () => {
   // Skip on first run by checking if audio context is present
-  if (audioContext.value) {
-    // Restart listening with new settings
-    stopListening();
-    startListening();
-  }
+  if (audioContext.value) restartListening();
 });
+
+// Watch for microphone changes and restart listening
+watch(activeMicrophoneId, restartListening);
 </script>
 
 <style lang="scss" scoped>

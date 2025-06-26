@@ -24,6 +24,7 @@ export const WEBRTC_SIGNAL = "webrtc/signal";
 export const WEBRTC_STREAM_REQUEST = "webrtc/stream-request";
 export const WEBRTC_EMOJI = "webrtc/emoji";
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = "webrtc/media-settings-changed";
+export const WEBRTC_LEAVING_CALL = "webrtc/leaving-call";
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -119,9 +120,9 @@ export const useWebrtcStore = defineStore(
       signallingService.value?.sendSignal({ source: JSON.stringify(data), predicate, target });
     }
 
-    function signalPeers(type: string, data: any): void {
+    function signalPeers(type: string, data?: any): void {
       // Signals all connected peers via their WebRTC data channels
-      const signal = JSON.stringify({ type, data });
+      const signal = JSON.stringify({ type, data: data || {} });
       peerConnections.value.forEach((connection, did) => {
         try {
           if (connection.peer._channel?.readyState === "open") connection.peer.send(signal);
@@ -147,7 +148,7 @@ export const useWebrtcStore = defineStore(
       if (callHealth.value !== newCallHealth) callHealth.value = newCallHealth;
     }
 
-    function startLoadingCheck(mediaType: "audio" | "video" | "screenShare", peer: PeerConnection): void {
+    function startLoadingCheck(mediaType: "audio" | "video" | "screenshare", peer: PeerConnection): void {
       // Polls for expected tracks after peer media changes because track replacement doesn't trigger an event we can listen for
       const interval = 500; // Check every 500ms
       const maxAttempts = 20; // Give up after 20 attempts (10 seconds with 500ms intervals)
@@ -171,10 +172,10 @@ export const useWebrtcStore = defineStore(
             hasMedia = stream.getAudioTracks().length > 0;
             break;
           case "video":
-            hasMedia = stream.getVideoTracks().some((track) => !mediaDevicesStore.isScreenShareTrack(track));
+            hasMedia = stream.getVideoTracks().some((track) => track.enabled);
             break;
-          case "screenShare":
-            hasMedia = stream.getVideoTracks().some((track) => mediaDevicesStore.isScreenShareTrack(track));
+          case "screenshare":
+            hasMedia = stream.getVideoTracks().some((track) => track.enabled);
             break;
         }
 
@@ -186,7 +187,7 @@ export const useWebrtcStore = defineStore(
           // Update the media state
           if (mediaType === "audio") peer.audioState = hasMedia ? "on" : "off";
           else if (mediaType === "video") peer.videoState = hasMedia ? "on" : "off";
-          else if (mediaType === "screenShare") peer.screenShareState = hasMedia ? "on" : "off";
+          else if (mediaType === "screenshare") peer.screenShareState = hasMedia ? "on" : "off";
 
           clearInterval(checkInterval);
           peer.loadingChecks.delete(mediaType);
@@ -239,7 +240,7 @@ export const useWebrtcStore = defineStore(
         // }, 1000);
       });
 
-      peer.on("data", (signal) => {
+      peer.on("data", async (signal) => {
         let parsedSignal;
         try {
           parsedSignal = JSON.parse(signal);
@@ -262,9 +263,7 @@ export const useWebrtcStore = defineStore(
             peer.audioState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("audio", peer);
           } else if (data.type === "video") {
-            const existingVideoTrack = peer.streams[0]
-              .getVideoTracks()
-              .some((track) => !mediaDevicesStore.isScreenShareTrack(track));
+            const existingVideoTrack = peer.streams[0].getVideoTracks().some((track) => track.enabled);
             // If toggling back on an existing video track or switching on video while screen sharing is enabled, skip the video loading state
             if (data.enabled && (existingVideoTrack || peer.screenShareState === "on")) {
               peer.videoState = "on";
@@ -275,17 +274,29 @@ export const useWebrtcStore = defineStore(
             }
           } else if (data.type === "screenShare") {
             peer.screenShareState = data.enabled ? "loading" : "off";
-            if (data.enabled) startLoadingCheck("screenShare", peer);
+            if (data.enabled) startLoadingCheck("screenshare", peer);
           }
+        }
 
-          console.log(`Peer ${did} updated media settings:`, data);
+        if (type === WEBRTC_LEAVING_CALL) {
+          console.log(`Peer ${did} is leaving the call`);
+
+          // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
+          disconnectedAgents.value.push(did);
+          setTimeout(
+            () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
+            HEARTBEAT_INTERVAL + 1000
+          );
+
+          // Clean up the peer connection
+          cleanupPeerConnection(did);
+          const peerProfile = await getCachedAgentProfile(did);
+          appStore.showDangerToast({ message: `👤 ${peerProfile.username || did} has left the call` });
         }
       });
 
       peer.on("track", (track, stream) => {
-        let trackType = track.kind;
-        if (mediaDevicesStore.isScreenShareTrack(track)) trackType = "screenShare";
-        console.log(`🎞️ New ${trackType} track from ${did}`, track);
+        console.log(`🎞️ New ${track.kind} track from ${did}`, track);
 
         // Find the peer connection
         const peerConnection = peerConnections.value.get(did);
@@ -383,13 +394,6 @@ export const useWebrtcStore = defineStore(
       console.log(`🗑️ Cleaning up peer connection for ${did}`);
 
       try {
-        // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
-        disconnectedAgents.value.push(did);
-        setTimeout(
-          () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
-          HEARTBEAT_INTERVAL + 1000
-        );
-
         // Clear any loading check intervals
         peerConnection.loadingChecks.forEach((interval) => clearInterval(interval));
         peerConnection.loadingChecks.clear();
@@ -478,7 +482,6 @@ export const useWebrtcStore = defineStore(
       if (!inCall.value) return;
 
       console.log("📹 Replacing video track for all peers", newTrack);
-      console.log("is screenshare track: ", mediaDevicesStore.isScreenShareTrack(newTrack));
 
       const updatePromises = Array.from(peerConnections.value.entries()).map(async ([did, peerConnection]) => {
         try {
@@ -625,6 +628,9 @@ export const useWebrtcStore = defineStore(
 
     async function leaveRoom() {
       try {
+        // Signal all peers that we're leaving the call
+        signalPeers(WEBRTC_LEAVING_CALL);
+
         // Close all peer connections
         peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
 
@@ -755,6 +761,7 @@ export const useWebrtcStore = defineStore(
       peerConnections,
       joiningCall,
       iceServers,
+      disconnectedAgents,
       addTrack,
       removeTrack,
       replaceAudioTrack,
