@@ -119,8 +119,7 @@ export default function Post({
       {hasUrl && (
         <j-box pt="400">
           <div className={styles.postUrl}>
-            {/* @ts-ignore */}
-            <j-icon size="md" name="link" />
+            <j-icon name="link" />
             <a onClick={(e) => e.stopPropagation()} href={post.url} target="_blank">
               {new URL(post.url).origin}
             </a>
