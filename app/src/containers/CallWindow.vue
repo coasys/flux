@@ -609,12 +609,16 @@ watch(callWindowOpen, (open) => {
   if (open) closeFocusedVideoLayout();
 });
 
-watch(disconnectedAgents, (disconnected) => {
-  // Toggle off the focused video layout if the disconnected agent was focused
-  console.log("*** Disconnected agents updated in call window:", disconnected);
-  console.log("*** focusedVideoId.value:", focusedVideoId.value);
-  if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) closeFocusedVideoLayout();
-});
+watch(
+  disconnectedAgents,
+  (disconnected) => {
+    // Toggle off the focused video layout if the disconnected agent was focused
+    console.log("*** Disconnected agents updated in call window:", disconnected);
+    console.log("*** focusedVideoId.value:", focusedVideoId.value);
+    if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) closeFocusedVideoLayout();
+  },
+  { deep: true }
+);
 
 onMounted(getMyProfile);
 </script>
