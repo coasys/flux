@@ -155,6 +155,7 @@ export default function TimelineColumn({
     // Get the timestamp of the last item in the last subgroup
     const lastSubgroupId = subgroupIds[subgroupIds.length - 1];
     let timestamp = await getLastSubgroupItemsTimestamp(lastSubgroupId);
+
     // Error case: if subgroup found but no items added yet, use the timestamp of the subgroup
     if (!timestamp) timestamp = await getLastSubgroupsTimestamp(lastSubgroupId);
 
@@ -191,7 +192,7 @@ export default function TimelineColumn({
 
   async function checkIfWeShouldStartProcessing(items: SynergyItem[]) {
     // Skip if processing already in progress, signals are unhealthy, our AI is disabled, or we're in another channel
-    if (processing.current || !signalsHealthy || !aiStore.aiEnabled) return;
+    if (processing.current || !signalsHealthy || !aiStore.defaultLLM) return;
 
     // Skip if not enough unprocessed items
     const enoughItems = items.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;

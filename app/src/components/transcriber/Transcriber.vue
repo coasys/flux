@@ -1,103 +1,208 @@
 <template>
   <div class="transcriber">
-    <j-box v-if="transcripts.length || previewText" mb="300">
-      <j-flex direction="column" gap="400">
-        <span
-          v-if="!transcripts.length && previewText"
-          :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
-        >
-          {{ previewText }}
-        </span>
-        <div
-          v-for="transcript in transcripts"
-          :key="transcript.id"
-          :id="`transcript-${transcript.id}`"
-          class="transcript"
-        >
-          <j-flex direction="column" gap="300">
-            <j-text nomargin>
-              <j-timestamp :value="transcript.timestamp" dateStyle="short" timeStyle="short" size="sm" />
-            </j-text>
-            <j-text nomargin size="500" color="ui-white">
-              {{ transcript.text }}
-              <span
-                v-if="previewText && transcript.id === transcriptId"
-                :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
-              >
-                {{ previewText }}
-              </span>
-            </j-text>
-            <j-flex v-if="transcript.state === 'transcribing'" gap="400" a="center">
-              <j-spinner size="xxs" />
-              <j-text nomargin size="500" color="primary-600"> Transcribing... </j-text>
+    <template v-if="modelsReady">
+      <j-box v-if="transcripts.length || previewText" mb="300">
+        <j-flex direction="column" gap="400">
+          <span
+            v-if="!transcripts.length && previewText"
+            :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
+          >
+            {{ previewText }}
+          </span>
+          <div
+            v-for="transcript in transcripts"
+            :key="transcript.id"
+            :id="`transcript-${transcript.id}`"
+            class="transcript"
+          >
+            <j-flex direction="column" gap="300">
+              <j-text nomargin>
+                <j-timestamp :value="transcript.timestamp" dateStyle="short" timeStyle="short" size="sm" />
+              </j-text>
+              <j-text nomargin size="500" color="ui-white">
+                {{ transcript.text }}
+                <span
+                  v-if="previewText && transcript.id === transcriptId"
+                  :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }"
+                >
+                  {{ previewText }}
+                </span>
+              </j-text>
+              <j-flex v-if="transcript.state === 'transcribing'" gap="400" a="center">
+                <j-spinner size="xxs" />
+                <j-text nomargin size="500" color="primary-600"> Transcribing... </j-text>
+              </j-flex>
+              <j-flex v-if="transcript.state === 'saved'" gap="400" a="center">
+                <j-icon name="check-circle" color="success-600" size="xs" />
+                <j-text nomargin size="500" color="success-600"> Saved </j-text>
+              </j-flex>
+              <j-flex v-if="transcript.state === 'aborted'" gap="400" a="center">
+                <j-icon name="x-circle" color="danger-600" size="xs" />
+                <j-text nomargin size="500" color="danger-600"> Aborted </j-text>
+              </j-flex>
             </j-flex>
-            <j-flex v-if="transcript.state === 'saved'" gap="400" a="center">
-              <j-icon name="check-circle" color="success-600" size="xs" />
-              <j-text nomargin size="500" color="success-600"> Saved </j-text>
-            </j-flex>
-            <j-flex v-if="transcript.state === 'aborted'" gap="400" a="center">
-              <j-icon name="x-circle" color="danger-600" size="xs" />
-              <j-text nomargin size="500" color="danger-600"> Aborted </j-text>
-            </j-flex>
+          </div>
+        </j-flex>
+      </j-box>
+
+      <j-box mb="300">
+        <j-flex gap="400" j="between" a="center">
+          <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
+          <j-flex a="center">
+            <j-tooltip
+              placement="top"
+              :title="`${browser === 'chrome' ? 'Use' : 'Using'} local AI for transcription`"
+              style="margin-right: 12px; height: 22px"
+              :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
+            >
+              <Ad4mLogo
+                width="22"
+                height="22"
+                :color="`var(--j-color-primary-${useRemoteService ? 300 : 500})`"
+                @click="browser === 'chrome' && toggleRemoteService()"
+              />
+            </j-tooltip>
+            <j-toggle
+              :checked="browser === 'chrome' && useRemoteService"
+              :disabled="browser !== 'chrome'"
+              @change="toggleRemoteService"
+              size="sm"
+            />
+            <j-tooltip
+              placement="top"
+              :title="
+                browser === 'chrome'
+                  ? 'Use Google AI for transcription'
+                  : 'Open Flux in Chrome to enable Google AI transcription'
+              "
+              style="margin-left: -5px; height: 22px"
+              :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
+            >
+              <j-icon
+                name="google"
+                size="sm"
+                :color="useRemoteService ? 'primary-500' : 'primary-300'"
+                @click="browser === 'chrome' && toggleRemoteService()"
+              />
+            </j-tooltip>
           </j-flex>
+        </j-flex>
+      </j-box>
+
+      <j-flex v-if="mediaSettings.audioEnabled" gap="300" a="center">
+        <RecordingIcon :size="30" :style="{ flexShrink: 0, marginLeft: '-5px' }" />
+        <j-text nomargin :style="{ flexShrink: 0, marginRight: '10px' }">Listening...</j-text>
+        <div class="volumeThreshold">
+          <div id="volume" class="volume"></div>
         </div>
       </j-flex>
-    </j-box>
-    <j-box mb="300">
-      <j-flex gap="400" j="between" a="center">
-        <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
-        <j-flex a="center">
-          <j-tooltip
-            :placement="'top'"
-            :title="`${browser === 'chrome' ? 'Use' : 'Using'} local AI for transcription`"
-            style="margin-right: 12px; height: 22px"
-            :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
-          >
-            <Ad4mLogo
-              width="22"
-              height="22"
-              :color="`var(--j-color-primary-${useRemoteService ? 300 : 500})`"
-              @click="browser === 'chrome' && toggleRemoteService()"
-            />
-          </j-tooltip>
-          <j-toggle
-            :checked="browser === 'chrome' && useRemoteService"
-            :disabled="browser !== 'chrome'"
-            @change="toggleRemoteService"
-            size="sm"
-          />
-          <j-tooltip
-            :placement="'top'"
-            :title="
-              browser === 'chrome'
-                ? 'Use Google AI for transcription'
-                : 'Open Flux in Chrome to enable Google AI transcription'
-            "
-            style="margin-left: -5px; height: 22px"
-            :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
-          >
-            <j-icon
-              name="google"
-              size="sm"
-              :color="useRemoteService ? 'primary-500' : 'primary-300'"
-              @click="browser === 'chrome' && toggleRemoteService()"
-            />
-          </j-tooltip>
+      <j-flex v-else gap="400" a="center">
+        <j-icon name="mic-mute" />
+        <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }">Audio muted</j-text>
+      </j-flex>
+    </template>
+    <template v-else>
+      <j-flex direction="column" gap="300">
+        <j-flex j="between" a="center">
+          <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
+          <j-flex a="center" gap="400">
+            <j-tooltip placement="top" title="Transcriber info" style="cursor: pointer">
+              <j-icon name="info-circle" size="sm" color="ui-500" @click="infoModalOpen = true" />
+            </j-tooltip>
+            <j-tooltip
+              placement="top"
+              title="Refresh AI models"
+              :style="{ cursor: loadingAIData ? 'auto' : 'pointer' }"
+            >
+              <j-icon name="arrow-repeat" :color="loadingAIData ? 'ui-300' : 'ui-500'" @click="aiStore.loadAIData" />
+            </j-tooltip>
+          </j-flex>
+        </j-flex>
+
+        <j-flex gap="300">
+          <j-text nomargin weight="800" size="400">Whisper:</j-text>
+          <j-text v-if="!whisperLoadingStatus" nomargin size="400">Model not found</j-text>
+          <j-text v-else-if="whisperLoadingStatus.progress !== 100" size="400" nomargin>
+            {{ whisperLoadingStatus.progress }}% loaded...
+          </j-text>
+          <j-text v-else nomargin size="400">Ready</j-text>
+        </j-flex>
+
+        <j-flex gap="300">
+          <j-text nomargin weight="800" size="400">Whisper tiny:</j-text>
+          <j-text v-if="!whisperTinyLoadingStatus" nomargin size="400">Model not found</j-text>
+          <j-text v-else-if="whisperTinyLoadingStatus.progress !== 100" nomargin size="400">
+            {{ whisperTinyLoadingStatus.progress }}% loaded...
+          </j-text>
+          <j-text v-else nomargin size="400">Ready</j-text>
         </j-flex>
       </j-flex>
-    </j-box>
-    <j-flex v-if="mediaSettings.audioEnabled" gap="300" a="center">
-      <RecordingIcon :size="30" :style="{ flexShrink: 0, marginLeft: '-5px' }" />
-      <j-text nomargin :style="{ flexShrink: 0, marginRight: '10px' }">Listening...</j-text>
-      <div class="volumeThreshold">
-        <div id="volume" class="volume"></div>
-      </div>
-    </j-flex>
-    <j-flex v-else gap="400" a="center">
-      <j-icon name="mic-mute" />
-      <j-text nomargin :style="{ flexShrink: 0, marginRight: '20px' }">Audio muted</j-text>
-    </j-flex>
+    </template>
   </div>
+
+  <j-modal :open="infoModalOpen" @toggle="(e: any) => (infoModalOpen = e.target.open)" style="pointer-events: all">
+    <j-box p="600">
+      <j-flex a="center" direction="column" gap="400">
+        <j-icon name="robot" size="xl" color="ui-500" />
+        <j-flex a="center" gap="400">
+          <j-text uppercase nomargin color="primary-500">Transcriber models</j-text>
+          <j-icon name="arrow-repeat" color="ui-500" @click="aiStore.loadAIData" style="cursor: pointer" />
+        </j-flex>
+
+        <j-box my="400">
+          <j-text>Open the Ad4m launcher and navigate to the AI tab to view and/or edit your selected models</j-text>
+        </j-box>
+
+        <j-box my="400">
+          <j-flex a="center" direction="column">
+            <j-text uppercase color="primary-500">Whisper</j-text>
+            <j-text>The main Whisper model used for full quality transcriptions</j-text>
+            <template v-if="whisperLoadingStatus">
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Downloaded:</j-text>
+                <j-text nomargin>{{ whisperLoadingStatus.downloaded }}</j-text>
+              </j-flex>
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Progress:</j-text>
+                <j-text nomargin>{{ whisperLoadingStatus.progress }}%</j-text>
+              </j-flex>
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Status:</j-text>
+                <j-text nomargin>{{ whisperLoadingStatus.status }}</j-text>
+              </j-flex>
+            </template>
+            <template v-else>
+              <j-text nomargin>No whisper model found</j-text>
+            </template>
+          </j-flex>
+        </j-box>
+
+        <j-box my="400">
+          <j-flex a="center" direction="column">
+            <j-text uppercase color="primary-500">Whisper Tiny</j-text>
+            <j-text>The smaller quantized Whisper model used for transcription previews</j-text>
+            <template v-if="whisperTinyLoadingStatus">
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Downloaded:</j-text>
+                <j-text nomargin>{{ whisperTinyLoadingStatus.downloaded }}</j-text>
+              </j-flex>
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Progress:</j-text>
+                <j-text nomargin>{{ whisperTinyLoadingStatus.progress }}%</j-text>
+              </j-flex>
+              <j-flex a="center" gap="300">
+                <j-text nomargin weight="800">Status:</j-text>
+                <j-text nomargin>{{ whisperTinyLoadingStatus.status }}</j-text>
+              </j-flex>
+            </template>
+            <template v-else>
+              <j-text nomargin>No whisper model found</j-text>
+            </template>
+          </j-flex>
+        </j-box>
+      </j-flex>
+    </j-box>
+  </j-modal>
 </template>
 
 <script setup lang="ts">
@@ -110,21 +215,22 @@ import { Message } from "@coasys/flux-api";
 import { detectBrowser } from "@coasys/flux-utils";
 import { storeToRefs } from "pinia";
 import { v4 as uuidv4 } from "uuid";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 const mediaDevicesStore = useMediaDevicesStore();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 
 const { mediaSettings, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
-const { transcriptionMessageTimeout } = storeToRefs(aiStore);
+const { loadingAIData, whisperLoadingStatus, whisperTinyLoadingStatus, transcriptionMessageTimeout } =
+  storeToRefs(aiStore);
 const { callRoute } = storeToRefs(webrtcStore);
 
 const browser = detectBrowser();
+
 const transcripts = ref<any[]>([]);
 const useRemoteService = ref(false);
 const previewText = ref("");
-
 const usingRemoteService = ref(false);
 const audioContext = ref<AudioContext | null>(null);
 const analyser = ref<AnalyserNode | null>(null);
@@ -137,6 +243,11 @@ const streamId = ref<string | null>(null);
 const fastStreamId = ref<string | null>(null);
 const transcriptId = ref<string>("");
 const volumeCheckInterval = ref<ReturnType<typeof setInterval> | null>(null);
+const infoModalOpen = ref(false);
+
+const modelsReady = computed(
+  () => whisperLoadingStatus.value?.progress === 100 && whisperTinyLoadingStatus.value?.progress === 100
+);
 
 function renderVolume() {
   if (listening.value && analyser.value && dataArray.value) {
