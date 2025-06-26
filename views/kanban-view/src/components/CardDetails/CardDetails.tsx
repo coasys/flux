@@ -21,7 +21,6 @@ export default function CardDetails({
   selectedClass,
   onDeleted = () => {},
   perspective,
-  channelId,
   agentProfiles,
 }: Props) {
   const [showAssign, setShowAssign] = useState(false);
@@ -54,7 +53,7 @@ export default function CardDetails({
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
         <j-box pb="800">
-          <Entry task={task} perspective={perspective} selectedClass={selectedClass} channelId={channelId} />
+          <Entry task={task} perspective={perspective} selectedClass={selectedClass} />
         </j-box>
 
         <j-box pb="500">

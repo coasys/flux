@@ -1,7 +1,7 @@
 import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "home/james/Desktop/Coding/flux/packages/types/src";
+import { Profile } from "@coasys/flux-types";
 import { useEffect, useMemo } from "preact/hooks";
 import { useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
