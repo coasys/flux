@@ -160,16 +160,15 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }
 
   function addTaskToColumn(columns, task, propertyName) {
-    return Object.keys(columns).reduce((acc, key) => {
+    const result = {};
+    Object.keys(columns).forEach((key) => {
       const column = columns[key];
-      return {
-        ...acc,
-        [key]: {
-          ...column,
-          taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
-        },
+      result[key] = {
+        ...column,
+        taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
       };
-    }, {});
+    });
+    return result;
   }
 
   function getClasses(perspective: PerspectiveProxy, source) {
