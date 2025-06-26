@@ -298,21 +298,6 @@ export const useMediaDevicesStore = defineStore(
 
             console.log("✅ Added new video track");
           } catch (error) {
-            if (error.name === "OverconstrainedError") {
-              console.error("❌ Overconstrained:", {
-                constraint: error.constraint, // Which constraint failed
-                message: error.message,
-                requestedConstraints: videoConstraints,
-              });
-
-              // Log available devices for debugging
-              const devices = await navigator.mediaDevices.enumerateDevices();
-              console.log(
-                "Available video devices:",
-                devices.filter((d) => d.kind === "videoinput")
-              );
-            }
-
             console.error("❌ Failed to add video track:", error);
             // Revert the state if it failed
             videoEnabled.value = false;

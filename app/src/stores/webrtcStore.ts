@@ -240,7 +240,7 @@ export const useWebrtcStore = defineStore(
         // }, 1000);
       });
 
-      peer.on("data", (signal) => {
+      peer.on("data", async (signal) => {
         let parsedSignal;
         try {
           parsedSignal = JSON.parse(signal);
@@ -276,8 +276,6 @@ export const useWebrtcStore = defineStore(
             peer.screenShareState = data.enabled ? "loading" : "off";
             if (data.enabled) startLoadingCheck("screenshare", peer);
           }
-
-          console.log(`Peer ${did} updated media settings:`, data);
         }
 
         if (type === WEBRTC_LEAVING_CALL) {
@@ -285,7 +283,6 @@ export const useWebrtcStore = defineStore(
 
           // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
           disconnectedAgents.value.push(did);
-          console.log("*** New disconnected agents in webrtc store:", disconnectedAgents.value);
           setTimeout(
             () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
             HEARTBEAT_INTERVAL + 1000
@@ -293,7 +290,8 @@ export const useWebrtcStore = defineStore(
 
           // Clean up the peer connection
           cleanupPeerConnection(did);
-          appStore.showDangerToast({ message: `${did} has left the call` });
+          const peerProfile = await getCachedAgentProfile(did);
+          appStore.showDangerToast({ message: `👤 ${peerProfile.username || did} has left the call` });
         }
       });
 
