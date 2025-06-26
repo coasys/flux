@@ -13,7 +13,6 @@ type Props = {
   source: string;
   agent: AgentClient;
   appStore: any;
-  uiStore: any;
   aiStore: any;
   signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
@@ -24,7 +23,6 @@ export default function SynergyDemoView({
   agent,
   source,
   appStore,
-  uiStore,
   aiStore,
   signallingService,
   getProfile,
@@ -41,9 +39,12 @@ export default function SynergyDemoView({
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
   const [signalsHealthy, setSignalsHealthy] = useState(true);
+  const [showLLMInfoModal, setShowLLMInfoModal] = useState(false);
+  const [aiDataLoading, setAiDataLoading] = useState(false);
+  const [modalRenderKey, setModalRenderKey] = useState(0);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
-    // searches for items in the neighbourhood that match the search filters & have similar embedding scores
+    // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
     const semanticRelationship = new SemanticRelationship(perspective);
     const sourceEmbedding = await semanticRelationship.itemEmbedding(itemId);
     let allEmbeddings = [];
@@ -57,11 +58,11 @@ export default function SynergyDemoView({
     const matches = await Promise.all(
       allEmbeddings.map(async (e: any) => {
         const { baseExpression, type, embedding, channelId, channelName } = e;
-        // filter out results that don't match the search filters
+        // Filter out results that don't match the search filters
         const isSourceItem = baseExpression === itemId;
         const wrongChannel = !filterSettings.includeChannel && channelId === source;
         if (isSourceItem || wrongChannel) return null;
-        // generate a similarity score for the embedding
+        // Generate a similarity score for the embedding
         const score = await cos_sim(sourceEmbedding, embedding);
         return { baseExpression, channelId, channelName, type, score };
       })
@@ -75,11 +76,11 @@ export default function SynergyDemoView({
     // If the grouping is "Items", we need to change it to "Conversations" as topics no longer have topic tags
     let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
     if (grouping === "Items") setFilterSettings((prev) => ({ ...prev, grouping: "Conversations" }));
-    // find matches
+    // Find matches
     const topic = new Topic(perspective, topicId);
     const matches =
       currentGrouping === "Conversations" ? await topic.linkedConversations() : await topic.linkedSubgroups();
-    // filter out results that don't match the search filters
+    // Filter out results that don't match the search filters
     const filteredMatches = matches.map((relationship) => {
       const { baseExpression, type, channelId, channelName, relevance } = relationship;
       const isSourceItem = baseExpression === itemId;
@@ -136,14 +137,165 @@ export default function SynergyDemoView({
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
 
-  // TODO: fix now that width must be number
-  // useEffect(() => uiStore?.setCallWindowWidth(showMatchColumn ? `${100 / 3}%` : "50%"), [showMatchColumn]);
-
   return (
     <div className={styles.wrapper}>
-      <j-text uppercase size="500" weight="800" color="primary-500">
-        Synergy Demo
-      </j-text>
+      <j-flex gap="500" a="center" wrap>
+        <j-text nomargin uppercase size="600" weight="800" color="primary-500">
+          Synergy
+        </j-text>
+
+        {aiStore && (
+          <j-flex a="center" gap="300">
+            <j-icon name="robot" color="ui-500" />
+            <j-text nomargin>LLM processing:</j-text>
+            <j-text nomargin weight="800">
+              {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "Localy" : "Remotely") : "Disabled"}
+            </j-text>
+            <j-icon
+              name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "house-fill" : "broadcast-pin") : "x-lg"}
+              color="ui-500"
+            />
+            <j-icon
+              name="info-circle"
+              color="ui-500"
+              onClick={() => setShowLLMInfoModal(true)}
+              style={{ marginLeft: 20, cursor: "pointer" }}
+            />
+          </j-flex>
+        )}
+
+        {/* @ts-ignore */}
+        <j-modal open={showLLMInfoModal} onToggle={(e) => setShowLLMInfoModal(e.target.open)}>
+          {aiStore && (
+            <j-box p="600" key={modalRenderKey}>
+              <j-flex a="center" direction="column" gap="400">
+                <j-icon name="robot" size="xl" color="ui-500" />
+                <j-flex a="center" gap="400">
+                  <j-text uppercase nomargin color="primary-500" size="600">
+                    LLM Settings
+                  </j-text>
+                  <j-icon
+                    name="arrow-repeat"
+                    color={aiDataLoading ? "ui-300" : "ui-500"}
+                    onClick={() => {
+                      if (aiDataLoading) return;
+                      setAiDataLoading(true);
+                      aiStore.loadAIData();
+                      setTimeout(() => {
+                        // Force re-render to update LLM info
+                        setModalRenderKey((prev) => prev + 1);
+                        setAiDataLoading(false);
+                      }, 1000);
+                    }}
+                    style={{ cursor: aiDataLoading ? "auto" : "pointer" }}
+                  />
+                </j-flex>
+
+                <j-box my="400">
+                  <j-text>
+                    Open the Ad4m launcher and navigate to the AI tab to view and/or edit your selected models
+                  </j-text>
+                </j-box>
+
+                <j-box my="400">
+                  <j-flex a="center" gap="300">
+                    <j-text nomargin>LLM processing:</j-text>
+                    <j-text nomargin weight="800">
+                      {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "Localy" : "Remotely") : "Disabled"}
+                    </j-text>
+                    <j-icon
+                      name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "house-fill" : "broadcast-pin") : "x-lg"}
+                      color="ui-500"
+                    />
+                  </j-flex>
+                </j-box>
+
+                {aiStore.defaultLLM && (
+                  <j-box>
+                    {aiStore.defaultLLM.local ? (
+                      <j-flex a="center" direction="column" gap="400">
+                        {aiStore.llmLoadingStatus ? (
+                          <>
+                            <j-flex a="center" gap="300">
+                              <j-text weight="800" nomargin>
+                                Downloaded:
+                              </j-text>
+                              <j-text nomargin>{aiStore.llmLoadingStatus.downloaded}</j-text>
+                            </j-flex>
+
+                            <j-flex a="center" gap="300">
+                              <j-text weight="800" nomargin>
+                                Progress:
+                              </j-text>
+                              <j-text nomargin>{aiStore.llmLoadingStatus.progress}%</j-text>
+                            </j-flex>
+
+                            <j-flex a="center" gap="300">
+                              <j-text weight="800" nomargin>
+                                Status:
+                              </j-text>
+                              <j-text nomargin>{aiStore.llmLoadingStatus.status}</j-text>
+                            </j-flex>
+                          </>
+                        ) : (
+                          <j-text nomargin>No loading status available for local LLM</j-text>
+                        )}
+
+                        <j-flex a="center" gap="300">
+                          <j-text weight="800" nomargin>
+                            Model Name:
+                          </j-text>
+                          <j-text nomargin>{aiStore.defaultLLM.name}</j-text>
+                        </j-flex>
+
+                        <j-flex a="center" gap="300">
+                          <j-text weight="800" nomargin>
+                            File Name:
+                          </j-text>
+                          <j-text nomargin>{aiStore.defaultLLM.local.fileName}</j-text>
+                        </j-flex>
+                      </j-flex>
+                    ) : (
+                      <j-flex a="center" direction="column" gap="400">
+                        <j-flex a="center" gap="300">
+                          <j-text weight="800" nomargin>
+                            API Type:
+                          </j-text>
+                          <j-text nomargin>{aiStore.defaultLLM.api.apiType}</j-text>
+                        </j-flex>
+
+                        <j-flex gap="300">
+                          <j-text weight="800" nomargin>
+                            API Key:
+                          </j-text>
+                          <j-text nomargin style={{ overflow: "hidden", maxWidth: 600, wordBreak: "break-all" }}>
+                            {aiStore.defaultLLM.api.apiKey}
+                          </j-text>
+                        </j-flex>
+
+                        <j-flex gap="300">
+                          <j-text weight="800" nomargin>
+                            Base URL:
+                          </j-text>
+                          <j-text nomargin>{aiStore.defaultLLM.api.baseUrl}</j-text>
+                        </j-flex>
+
+                        <j-flex gap="300">
+                          <j-text weight="800" nomargin>
+                            Model:
+                          </j-text>
+                          <j-text nomargin>{aiStore.defaultLLM.api.model}</j-text>
+                        </j-flex>
+                      </j-flex>
+                    )}
+                  </j-box>
+                )}
+              </j-flex>
+            </j-box>
+          )}
+        </j-modal>
+      </j-flex>
+
       {!signalsHealthy && (
         <j-badge variant="danger">
           <j-icon name="exclamation-triangle" style={{ marginRight: 10 }} />

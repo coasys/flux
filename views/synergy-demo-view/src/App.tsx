@@ -10,7 +10,6 @@ type Props = {
   perspective: PerspectiveProxy;
   source: string;
   appStore: any;
-  uiStore: any;
   aiStore: any;
   signallingService: SignallingService;
   getProfile: (did: string) => Promise<Profile>;
