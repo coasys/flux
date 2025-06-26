@@ -40,6 +40,8 @@ export default function SynergyDemoView({
   const [showMatchColumn, setShowMatchColumn] = useState(false);
   const [signalsHealthy, setSignalsHealthy] = useState(true);
   const [showLLMInfoModal, setShowLLMInfoModal] = useState(false);
+  const [aiDataLoading, setAiDataLoading] = useState(false);
+  const [modalRenderKey, setModalRenderKey] = useState(0);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -165,7 +167,7 @@ export default function SynergyDemoView({
         {/* @ts-ignore */}
         <j-modal open={showLLMInfoModal} onToggle={(e) => setShowLLMInfoModal(e.target.open)}>
           {aiStore && (
-            <j-box p="600">
+            <j-box p="600" key={modalRenderKey}>
               <j-flex a="center" direction="column" gap="400">
                 <j-icon name="robot" size="xl" color="ui-500" />
                 <j-flex a="center" gap="400">
@@ -174,9 +176,18 @@ export default function SynergyDemoView({
                   </j-text>
                   <j-icon
                     name="arrow-repeat"
-                    color="ui-500"
-                    onClick={() => aiStore.loadAIData()}
-                    style={{ cursor: "pointer" }}
+                    color={aiDataLoading ? "ui-300" : "ui-500"}
+                    onClick={() => {
+                      if (aiDataLoading) return;
+                      setAiDataLoading(true);
+                      aiStore.loadAIData();
+                      setTimeout(() => {
+                        // Force re-render to update LLM info
+                        setModalRenderKey((prev) => prev + 1);
+                        setAiDataLoading(false);
+                      }, 1000);
+                    }}
+                    style={{ cursor: aiDataLoading ? "auto" : "pointer" }}
                   />
                 </j-flex>
 

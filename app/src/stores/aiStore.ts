@@ -33,6 +33,7 @@ export const useAiStore = defineStore(
     const { ad4mClient } = storeToRefs(appStore);
     const { currentRoute } = storeToRefs(routeMemoryStore);
 
+    const loadingAIData = ref(false);
     const allModels = ref<Model[]>([]);
     const allTasks = ref<AITask[]>([]);
     const defaultLLM = ref<Model | null>(null);
@@ -65,19 +66,30 @@ export const useAiStore = defineStore(
     }
 
     async function loadAIData() {
-      allModels.value = await ad4mClient.value.ai.getModels();
-      allTasks.value = await ad4mClient.value.ai.tasks();
-      defaultLLM.value = await ad4mClient.value.ai.getDefaultModel("LLM");
+      if (loadingAIData.value) return;
 
-      // Get model statuses
-      const llm = allModels.value.find((model) => model.modelType === "LLM");
-      if (llm) llmLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(llm.id);
+      loadingAIData.value = true;
 
-      const whisper = allModels.value.find((model) => model.name === "Whisper");
-      if (whisper) whisperLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisper.id);
+      try {
+        allModels.value = await ad4mClient.value.ai.getModels();
+        allTasks.value = await ad4mClient.value.ai.tasks();
+        defaultLLM.value = await ad4mClient.value.ai.getDefaultModel("LLM");
 
-      const whisperTiny = allModels.value.find((model) => model.name === "Whisper tiny quantized");
-      if (whisperTiny) whisperTinyLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisperTiny.id);
+        // Get model statuses
+        const llm = allModels.value.find((model) => model.modelType === "LLM");
+        if (llm) llmLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(llm.id);
+
+        const whisper = allModels.value.find((model) => model.name === "Whisper");
+        if (whisper) whisperLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisper.id);
+
+        const whisperTiny = allModels.value.find((model) => model.name === "Whisper tiny quantized");
+        if (whisperTiny) whisperTinyLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisperTiny.id);
+
+        loadingAIData.value = false;
+      } catch (error) {
+        console.error("Failed to load AI data:", error);
+        loadingAIData.value = false;
+      }
     }
 
     // Load AI data when the ad4mClient is initialized
@@ -101,6 +113,7 @@ export const useAiStore = defineStore(
     );
 
     return {
+      loadingAIData,
       allModels,
       allTasks,
       defaultLLM,

@@ -109,8 +109,12 @@
             <j-tooltip placement="top" title="Transcriber info" style="cursor: pointer">
               <j-icon name="info-circle" size="sm" color="ui-500" @click="infoModalOpen = true" />
             </j-tooltip>
-            <j-tooltip placement="top" title="Refresh AI models" style="cursor: pointer">
-              <j-icon name="arrow-repeat" color="ui-500" @click="aiStore.loadAIData" />
+            <j-tooltip
+              placement="top"
+              title="Refresh AI models"
+              :style="{ cursor: loadingAIData ? 'auto' : 'pointer' }"
+            >
+              <j-icon name="arrow-repeat" :color="loadingAIData ? 'ui-300' : 'ui-500'" @click="aiStore.loadAIData" />
             </j-tooltip>
           </j-flex>
         </j-flex>
@@ -218,7 +222,8 @@ const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 
 const { mediaSettings } = storeToRefs(mediaDevicesStore);
-const { whisperLoadingStatus, whisperTinyLoadingStatus, transcriptionMessageTimeout } = storeToRefs(aiStore);
+const { loadingAIData, whisperLoadingStatus, whisperTinyLoadingStatus, transcriptionMessageTimeout } =
+  storeToRefs(aiStore);
 const { callRoute } = storeToRefs(webrtcStore);
 
 const browser = detectBrowser();
