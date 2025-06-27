@@ -2,7 +2,7 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Channel, Conversation } from "@coasys/flux-api";
 import { AgentState, ProcessingState, Profile, SignallingService } from "@coasys/flux-types";
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { closeMenu } from "../../utils";
 import Avatar from "../Avatar";
 import TimelineBlock from "../TimelineBlock";
@@ -55,10 +55,20 @@ export default function TimelineColumn({
   const [selectedItemId, setSelectedItemId] = useState("");
   const [zoom, setZoom] = useState<GroupingOption>(groupingOptions[0]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [creatingNewConversation, setCreatingNewConversation] = useState(false);
   const processing = useRef(false);
   const gettingData = useRef(false);
   const linkAddedTimeout = useRef<any>(null);
   const linkUpdatesQueued = useRef<any>(null);
+
+  const showStartNewConversationButton = useMemo(() => {
+    if (creatingNewConversation || processingState) return false;
+
+    const lastConversation = conversations[conversations.length - 1];
+    const processingNames = ["Generating conversation...", "New conversation initialized..."];
+
+    return lastConversation && !processingNames.includes(lastConversation.name);
+  }, [creatingNewConversation, processingState, conversations]);
 
   async function getConversations() {
     const channel = new Channel(perspective, channelId);
@@ -70,108 +80,23 @@ export default function TimelineColumn({
     return await channel.unprocessedItems();
   }
 
-  async function getConversationIds(): Promise<string[]> {
-    const result = await perspective.infer(`
-      findall(ConversationId, (
-        % 1. Find all conversations in the channel
-        subject_class("Conversation", ConversationClass),
-        instance(ConversationClass, ConversationId),
-        triple("${channelId}", "ad4m://has_child", ConversationId)
-      ), ConversationIds).
-    `);
-
-    return result[0]?.ConversationIds || [];
-  }
-
-  async function getSubgroupIds(conversationId: string): Promise<string[]> {
-    const result = await perspective.infer(`
-      findall(SubgroupId, (
-        % 1. Find all subgroups in the conversation
-        subject_class("ConversationSubgroup", SubgroupClass),
-        instance(SubgroupClass, SubgroupId),
-        triple("${conversationId}", "ad4m://has_child", SubgroupId)
-      ), SubgroupIds).
-    `);
-
-    return result[0]?.SubgroupIds || [];
-  }
-
-  async function getLastSubgroupItemsTimestamp(subgroupId: string): Promise<number | null> {
-    const result = await perspective.infer(`
-      findall(LastTimestamp, (
-        % 1. Get all valid items and their timestamps
-        findall(Timestamp, (
-          triple("${subgroupId}", "ad4m://has_child", Item),
-          
-          % 2. Check item is valid type
-          (
-            subject_class("Message", MC),
-            instance(MC, Item)
-            ;
-            subject_class("Post", PC),
-            instance(PC, Item)
-            ;
-            subject_class("Task", TC),
-            instance(TC, Item)
-          ),
-          
-          % 3. Get timestamp
-          link(_, "ad4m://has_child", Item, Timestamp, _)
-        ), Timestamps),
-        
-        % 4. Sort timestamps and get last one
-        sort(Timestamps, SortedTimestamps),
-        reverse(SortedTimestamps, [LastTimestamp|_])
-      ), [FinalTimestamp]).
-    `);
-
-    return result[0]?.FinalTimestamp || null;
-  }
-
-  async function getLastSubgroupsTimestamp(subgroupId: string): Promise<number | null> {
-    const result = await perspective.infer(`
-      findall(Timestamp, (
-        % 1. Get subgroup timestamp directly from link
-        link(_, "ad4m://has_child", "${subgroupId}", Timestamp, _)
-      ), [SubgroupTimestamp]).
-    `);
-
-    return result[0]?.SubgroupTimestamp || null;
-  }
-
-  async function findExistingConversation(): Promise<Conversation | null> {
-    // Get existing conversation ids from the channel
-    const conversationIds = await getConversationIds();
-    if (!conversationIds.length) return null;
-
-    // Get the last conversations subgroup ids
-    const lastConversationId = conversationIds[conversationIds.length - 1];
-    const lastConversation = new Conversation(perspective, lastConversationId);
-    const subgroupIds = await getSubgroupIds(lastConversationId);
-
-    // Error case: if conversation found but no subgroups added yet, reuse the conversation
-    if (!subgroupIds.length) return lastConversation;
-
-    // Get the timestamp of the last item in the last subgroup
-    const lastSubgroupId = subgroupIds[subgroupIds.length - 1];
-    let timestamp = await getLastSubgroupItemsTimestamp(lastSubgroupId);
-
-    // Error case: if subgroup found but no items added yet, use the timestamp of the subgroup
-    if (!timestamp) timestamp = await getLastSubgroupsTimestamp(lastSubgroupId);
-
-    // If recent activity found, reuse conversation
-    const minsSinceCreated = (new Date().getTime() - new Date(timestamp).getTime()) / (1000 * 60);
-    if (timestamp && minsSinceCreated < 30) return lastConversation;
-
-    return null;
-  }
-
   async function createNewConversation() {
+    // Creates a new conversation during the LLM processing phase
     const conversation = new Conversation(perspective, undefined, channelId);
     conversation.conversationName = "Generating conversation...";
     conversation.summary = "Content will appear when processing is complete";
     await conversation.save();
     return conversation;
+  }
+
+  async function startNewConversation() {
+    // Starts a new conversation when the user manually clicks the "Create new conversation" button
+    setCreatingNewConversation(true);
+
+    const conversation = new Conversation(perspective, undefined, channelId);
+    conversation.conversationName = "New conversation initialized...";
+    conversation.summary = "Content will appear when the first items have been processed";
+    await conversation.save();
   }
 
   function checkItemsForResponsibility(items: SynergyItem[], increment = 0): boolean {
@@ -207,21 +132,46 @@ export default function TimelineColumn({
     if (responsibleForProcessing) processItems(items);
   }
 
+  async function processBatch(items: SynergyItem[], conversationId: string) {
+    const itemIds = items.map((item) => item.baseExpression);
+    signallingService.setProcessingState({ step: 1, channelId, author: appStore.me.did, itemIds });
+    const conversation = new Conversation(perspective, conversationId);
+    await conversation.processNewExpressions(items, signallingService.setProcessingState);
+  }
+
   async function processItems(items: SynergyItem[]) {
     processing.current = true;
 
-    // Get the items to process
-    const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, items.length - PROCESSING_ITEMS_DELAY);
-    const itemsToProcess = items.slice(0, numberOfItemsToProcess);
-    const itemIds = itemsToProcess.map((item) => item.baseExpression);
-
-    signallingService.setProcessingState({ step: 1, channelId, author: appStore.me.did, itemIds });
+    console.log("🤖 LLM processing started");
 
     try {
-      const conversation = (await findExistingConversation()) || (await createNewConversation());
-      await conversation.processNewExpressions(itemsToProcess, signallingService.setProcessingState);
+      const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, items.length - PROCESSING_ITEMS_DELAY);
+      const itemsToProcess = items.slice(0, numberOfItemsToProcess);
+      const currentConversations = await getConversations();
+      const currentConversation = currentConversations[currentConversations.length - 1];
+      const lastConversation = currentConversations[currentConversations.length - 2];
+
+      if (!currentConversation) {
+        // If no conversation found, create a new one and process all items into the new conversation
+        const conversation = await createNewConversation();
+        await processBatch(itemsToProcess, conversation.baseExpression);
+      } else {
+        // If current conversation exists but no last conversation, put all items in the current conversation
+        if (!lastConversation) await processBatch(itemsToProcess, currentConversation.baseExpression);
+        else {
+          // If multiple conversations found, split items before and after current conversation based on their timestamps
+          const [previousBatch, newBatch] = itemsToProcess.reduce(
+            ([prev, next], item) =>
+              item.timestamp < currentConversation.timestamp ? [[...prev, item], next] : [prev, [...next, item]],
+            [[], []] as [SynergyItem[], SynergyItem[]]
+          );
+
+          if (previousBatch.length) await processBatch(previousBatch, lastConversation.baseExpression);
+          if (newBatch.length) await processBatch(newBatch, currentConversation.baseExpression);
+        }
+      }
     } catch (e) {
-      console.log("Error processing items into conversation:" + e);
+      console.log("Error processing items into conversation:", e);
     } finally {
       processing.current = false;
       signallingService.setProcessingState(null);
@@ -235,6 +185,7 @@ export default function TimelineColumn({
     const [newConversations, newUnproccessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
     setConversations(newConversations);
     setUnprocessedItems(newUnproccessedItems);
+    if (newConversations.length) setCreatingNewConversation(false);
     gettingData.current = false;
     setRefreshTrigger((prev) => prev + 1);
 
@@ -268,7 +219,7 @@ export default function TimelineColumn({
     }, LINK_ADDED_TIMEOUT);
   }
 
-  const handleNewAgentsState = (event: CustomEvent) => {
+  function handleNewAgentsState(event: CustomEvent) {
     // Search for any processing agents in the channel
     const newAgentsState = event.detail as Record<string, AgentState>;
     const processingAgents = Object.values(newAgentsState).filter(
@@ -277,7 +228,7 @@ export default function TimelineColumn({
 
     // Update the progress bar with the latest processing state
     setProcessingState(processingAgents[0]?.processing || null);
-  };
+  }
 
   useEffect(() => {
     // Wait until appstore & signallingService are available before initializing
@@ -347,9 +298,19 @@ export default function TimelineColumn({
           ))}
           {unprocessedItems.length > 0 && (
             <div style={{ marginLeft: 70 }}>
-              <j-text uppercase size="400" weight="800" color="primary-500">
-                {unprocessedItems.length} Unprocessed Items
-              </j-text>
+              <j-box mb="400">
+                <j-flex a="center" j="between">
+                  <j-text uppercase nomargin size="400" weight="800" color="primary-500">
+                    {unprocessedItems.length} Unprocessed Items
+                  </j-text>
+
+                  {showStartNewConversationButton && (
+                    <j-button variant="primary" size="sm" onClick={startNewConversation}>
+                      Start new conversation
+                    </j-button>
+                  )}
+                </j-flex>
+              </j-box>
 
               {processingState && (
                 <j-box mb="500">

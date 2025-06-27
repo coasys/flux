@@ -1,14 +1,14 @@
 import { AIClient } from "@coasys/ad4m";
 //@ts-ignore
 import JSON5 from "json5";
-import { synergyTasks, FluxLLMTask } from "./synergy-prompts";
+import { FluxLLMTask, synergyTasks } from "./synergy-prompts";
+
+const showLogs = false; // Set to true to enable debug logs
 
 async function ensureLLMTask(task: FluxLLMTask, ai: AIClient): Promise<FluxLLMTask> {
   const registeredTasks = await ai.tasks();
   let existingTask = registeredTasks.find((r) => r.name === task.name);
-  if (!existingTask) {
-    existingTask = await ai.addTask(task.name, "default", task.prompt, task.examples);
-  }
+  if (!existingTask) existingTask = await ai.addTask(task.name, "default", task.prompt, task.examples);
   task.id = existingTask!.taskId;
 
   return task;
@@ -34,49 +34,41 @@ export async function LLMTaskWithExpectedOutputs(
   let data;
   let attempts = 0;
 
-  if((prompt as any).avoidError)
-    delete (prompt as any).avoidError
+  if ((prompt as any).avoidError) delete (prompt as any).avoidError;
 
   // attempt LLM task up to 5 times before giving up
   while (!data && attempts < 5) {
     attempts += 1;
-    console.log(`LLM Prompt for ${task.name}`, prompt);
+    if (showLogs) console.log(`LLM Prompt for ${task.name}`, prompt);
     const response = await ai.prompt(task.id!, JSON.stringify(prompt));
-    console.log(`LLM Response for ${task.name}`, response);
+    if (showLogs) console.log(`LLM Response for ${task.name}`, response);
 
     try {
-
       // Clean up common LLM mistakes before parsing
       let cleanResponse = response;
       // Remove any <think> blocks that the LLM might add
-      cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/g, '');
+      cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/g, "");
       // Remove any # comments that the LLM might add
-      cleanResponse = cleanResponse.replace(/#.*$/gm, '');
+      cleanResponse = cleanResponse.replace(/#.*$/gm, "");
       // Remove any ```json or ``` markers
-      cleanResponse = cleanResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      cleanResponse = cleanResponse.replace(/```json\n?/g, "").replace(/```\n?/g, "");
       // Remove any trailing commas before closing brackets/braces
-      cleanResponse = cleanResponse.replace(/,(\s*[}\]])/g, '$1');
+      cleanResponse = cleanResponse.replace(/,(\s*[}\]])/g, "$1");
       // Remove any content after a valid JSON structure
       let arrayMatch, objectMatch;
       if (task.expectArray) {
         // Try to find a valid JSON array first if we expect an array
         arrayMatch = cleanResponse.match(/(\[[\s\S]*\])/);
-        if(arrayMatch?.length)
-          cleanResponse = arrayMatch[1];
-        else {
-          throw "expected output to be an array"
-        }
+        if (arrayMatch?.length) cleanResponse = arrayMatch[1];
+        else throw new Error("expected output to be an array");
       } else {
         // Try to find a valid JSON object first if we don't expect an array
         objectMatch = cleanResponse.match(/(\{[\s\S]*\})/);
-        if(objectMatch?.length)
-          cleanResponse = objectMatch[1];
-        else {
-          "expected output to be an object"
-        }
+        if (objectMatch?.length) cleanResponse = objectMatch[1];
+        else throw new Error("expected output to be an object");
       }
 
-      console.log(`Sanitzied extracted JSON to parse: ${cleanResponse}`)
+      if (showLogs) console.log(`Sanitzied extracted JSON to parse: ${cleanResponse}`);
       const parsedData = JSON5.parse(cleanResponse);
       // ensure all expected properties are present
       const missingProperties = [];
@@ -101,22 +93,17 @@ export async function LLMTaskWithExpectedOutputs(
         if (!Array.isArray(parsedData)) missingProperties.push("expected output to be an array");
       }
 
-      if (missingProperties.length)
-        throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
+      if (missingProperties.length) throw new Error(`Missing expected properties: ${missingProperties.join(", ")}`);
       // the parsed data looks good
       data = parsedData;
     } catch (error) {
-      console.error("LLM response parse error:", error);
-      if(error.message)
-        (prompt as any).avoidError = error.message;
-      else
-        (prompt as any).avoidError = error;
+      if (showLogs) console.error("LLM response parse error:", error);
+      if (error.message) (prompt as any).avoidError = error.message;
+      else (prompt as any).avoidError = error;
     }
   }
 
-  if (!data) {
-    throw "Failed to parse LLM response after 5 attempts. Returning empty data.";
-  }
+  if (!data) throw new Error("Failed to parse LLM response after 5 attempts. Returning empty data.");
 
   return data;
 }
