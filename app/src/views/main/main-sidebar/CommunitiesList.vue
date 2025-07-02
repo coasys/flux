@@ -17,12 +17,12 @@
 
         <j-menu slot="content">
           <j-menu-item @click="() => handleSetShowLeaveCommunity(true, uuid as string)">
-            <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
+            <j-icon slot="start" size="xs" name="box-arrow-left" />
             Leave community
           </j-menu-item>
 
-          <j-menu-item @click="() => muteCommunity(uuid as string)"
-            ><j-icon size="xs" slot="start" name="bell" />
+          <j-menu-item @click="() => muteCommunity(uuid as string)">
+            <j-icon size="xs" slot="start" name="bell" />
             Mute Community
           </j-menu-item>
 
@@ -36,7 +36,7 @@
 
     <j-tooltip title="Create or join community">
       <j-button @click="() => (modalStore.showCreateCommunity = true)" square circle variant="subtle">
-        <j-icon size="md" name="plus"></j-icon>
+        <j-icon size="md" name="plus" />
       </j-button>
     </j-tooltip>
   </div>
@@ -125,6 +125,8 @@ function handleCommunityClick(communityId: string) {
 
 .avatar-wrapper {
   border-radius: 50%;
+  width: var(--j-size-md);
+  height: var(--j-size-md);
 
   &.present {
     box-shadow: 0 0 0 2px var(--j-color-primary-500);
