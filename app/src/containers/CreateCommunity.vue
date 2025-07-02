@@ -136,9 +136,9 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text variant="body" v-if="Object.keys(nonFluxCommunities).length === 0"
-            >No perspective found that is not a flux community</j-text
-          >
+          <j-text variant="body" v-if="Object.keys(nonFluxCommunities).length === 0">
+            No perspective found that is not a flux community
+          </j-text>
           <j-menu-item
             v-for="perspective in nonFluxCommunities"
             :key="perspective.uuid"
@@ -154,7 +154,7 @@
           <j-text variant="heading-sm"> Please wait while your community is being created </j-text>
           <j-text variant="body"> Right now this proccess might take a couple of minutes, so please be patient </j-text>
           <j-flex j="center">
-            <j-spinner size="lg"></j-spinner>
+            <j-spinner size="lg" />
           </j-flex>
         </div>
       </div>
@@ -163,7 +163,7 @@
           <j-text variant="heading-sm"> Please wait while you join the testing community </j-text>
           <j-text variant="body"> Right now this proccess might take a couple of minutes, so please be patient </j-text>
           <j-flex j="center">
-            <j-spinner size="lg"></j-spinner>
+            <j-spinner size="lg" />
           </j-flex>
         </div>
       </div>
@@ -289,6 +289,10 @@ function createCommunityMethod() {
       newCommunityDesc.value = "";
       newProfileImage.value = undefined;
 
+      // Refresh my communities in the app store
+      appStore.getMyCommunities();
+
+      // Navigate to the new community
       router.push({ name: "community", params: { communityId: community.uuid } });
     })
     .finally(() => {

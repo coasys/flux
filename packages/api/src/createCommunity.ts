@@ -1,14 +1,8 @@
-import { v4 as uuidv4 } from "uuid";
+import { Perspective } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect";
 import { Community as FluxCommunity } from "@coasys/flux-types";
-import { Ad4mClient, Perspective } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-  createNeighbourhoodMeta,
-} from "@coasys/flux-utils";
-import { SubjectRepository } from "./factory";
+import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
+import { v4 as uuidv4 } from "uuid";
 import { Community } from "./community";
 
 export interface Payload {
@@ -27,67 +21,26 @@ export default async function createCommunity({
   perspectiveUuid,
 }: Payload): Promise<FluxCommunity> {
   try {
-    const client: Ad4mClient = await getAd4mClient();
+    const client = await getAd4mClient();
     const agent = await client.agent.me();
-
     const author = agent.did;
 
+    // Get or create the perspective
     const perspective = perspectiveUuid
       ? await client.perspective.byUUID(perspectiveUuid)
       : await client.perspective.add(name);
 
-    //Create metadata
+    // Add the Community model to the perspectives SDNA
+    await perspective.ensureSDNASubjectClass(Community);
+
+    // Create a neighbourhood from the perspective
+    const uid = uuidv4().toString();
+    const langs = await client.runtime.knownLinkLanguageTemplates();
+    const templateData = JSON.stringify({ uid, name: `${name}-link-language` });
+    const linkLanguage = await client.languages.applyTemplateAndPublish(linkLangAddress || langs[0], templateData);
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
-    const CommunityModel = new SubjectRepository(Community, {
-      perspective: perspective,
-    });
-
-    let thumbnail: string | undefined = undefined;
-    let compressedImage: string | undefined = undefined;
-
-    if (image) {
-      compressedImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(image as string), 0.6)
-      );
-      thumbnail = await blobToDataURL(
-        await resizeImage(dataURItoBlob(image as string), 0.3)
-      );
-    }
-
-    const metaData = {
-      name,
-      description,
-      image: compressedImage
-        ? {
-            data_base64: compressedImage,
-            name: "community-image",
-            file_type: "image/png",
-          }
-        : undefined,
-      thumbnail: thumbnail
-        ? {
-            data_base64: thumbnail,
-            name: "community-image",
-            file_type: "image/png",
-          }
-        : undefined,
-    };
-
-    const uid = uuidv4().toString();
-
-    const langs = await client.runtime.knownLinkLanguageTemplates();
-
-    //Create unique social-context
-    const linkLanguage = await client.languages.applyTemplateAndPublish(
-      linkLangAddress || langs[0],
-      JSON.stringify({
-        uid: uid,
-        name: `${name}-link-language`,
-      })
-    );
-
-    let sharedUrl = perspective!.sharedUrl;
+    let sharedUrl = perspective.sharedUrl;
 
     if (!sharedUrl) {
       sharedUrl = await client.neighbourhood.publishFromPerspective(
@@ -97,31 +50,45 @@ export default async function createCommunity({
       );
     }
 
-    const community = await CommunityModel.create(metaData, "ad4m://self");
+    // Create the community model
+    const newCommunity = new Community(perspective, "ad4m://self");
+    newCommunity.name = name;
+    newCommunity.description = description;
 
+    if (image) {
+      // Resize and add image
+      const thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
+      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
+      if (thumbnail)
+        newCommunity.thumbnail = { data_base64: thumbnail, name: "community-image", file_type: "image/png" };
+      if (compressedImage)
+        newCommunity.image = { data_base64: compressedImage, name: "community-image", file_type: "image/png" };
+    }
+
+    await newCommunity.save();
+
+    // Update notifications to include the new community
     const notifications = await client.runtime.notifications();
+    const notification = notifications.find((notification) => notification.appName === "Flux");
 
-    const notification = notifications.find(notification => notification.appName === "Flux")
-
-    const notificationId = notification.id
-    delete notification.granted
-    delete notification.id
+    const notificationId = notification.id;
+    delete notification.granted;
+    delete notification.id;
 
     await client.runtime.updateNotification(notificationId, {
       ...notification,
-      perspectiveIds: [...notification.perspectiveIds, perspective.uuid]
-    })
+      perspectiveIds: [...notification.perspectiveIds, perspective.uuid],
+    });
 
-    // @ts-ignore
     return {
       uuid: perspective.uuid,
       author: author,
-      id: community.id,
-      timestamp: community.timestamp,
-      name: community.name,
-      description: community.description || "",
-      image: community.image,
-      thumbnail: community.thumbnail,
+      id: newCommunity.baseExpression,
+      timestamp: newCommunity.timestamp,
+      name: newCommunity.name,
+      description: newCommunity.description || "",
+      image: newCommunity.image,
+      thumbnail: newCommunity.thumbnail,
       neighbourhoodUrl: sharedUrl,
       members: [author],
     };
