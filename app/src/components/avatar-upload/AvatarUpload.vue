@@ -28,9 +28,11 @@
         aspectRatio: 12 / 12,
       }"
     />
-    <j-box pt="300">
-      <j-button @click="clearImage">Cancel</j-button>
-      <j-button variant="primary" @click="selectImage">Crop</j-button>
+    <j-box pt="500">
+      <j-flex gap="400" j="center">
+        <j-button @click="clearImage">Cancel</j-button>
+        <j-button variant="primary" @click="selectImage">Crop</j-button>
+      </j-flex>
     </j-box>
   </div>
 </template>

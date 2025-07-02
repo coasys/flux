@@ -4,33 +4,31 @@
       <j-text variant="heading-sm">Edit profile</j-text>
       <ImgUpload
         :value="profileBackground"
-        @change="(url) => (profileBackground = url || '')"
-        @hide="(val) => (hideContainer = val)"
+        @change="(url: string | null) => (profileBackground = url || '')"
+        @hide="(val: boolean) => (hideContainer = val)"
       />
-      <AvatarUpload :hash="me?.did" :value="profilePicture" @change="(url) => (profilePicture = url || '')" />
+      <AvatarUpload
+        :hash="me?.did"
+        :value="profilePicture"
+        @change="(url: string | null) => (profilePicture = url || '')"
+      />
       <j-input
         size="lg"
         label="Username"
-        @keydown.enter="updateProfileMethod"
+        @keydown.enter="saveProfile"
         :value="username"
         @input="(e: Event) => (username = (e.target as HTMLInputElement).value)"
       />
       <j-input
         size="lg"
         label="Bio"
-        @keydown.enter="updateProfileMethod"
+        @keydown.enter="saveProfile"
         :value="bio"
         @input="(e: Event) => (bio = (e.target as HTMLInputElement).value)"
       />
-      <j-flex gap="200">
+      <j-flex gap="300">
         <j-button size="lg" @click="emit('cancel')"> Cancel </j-button>
-        <j-button
-          :disabled="isUpdatingProfile"
-          size="lg"
-          :loading="isUpdatingProfile"
-          variant="primary"
-          @click="updateProfileMethod"
-        >
+        <j-button :disabled="saving" size="lg" :loading="saving" variant="primary" @click="saveProfile">
           Save
         </j-button>
       </j-flex>
@@ -41,34 +39,33 @@
 <script setup lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { useMe } from "@coasys/ad4m-vue-hooks";
-import { getProfile, updateProfile } from "@coasys/flux-api";
-import { profileFormatter } from "@coasys/flux-utils";
-import { onMounted, ref, watch } from "vue";
+import { useAppStore } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { updateProfile } from "@coasys/flux-api";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
 
 const emit = defineEmits<{ cancel: []; submit: [] }>();
 
-const isUpdatingProfile = ref(false);
-const username = ref("");
-const bio = ref("");
+const appStore = useAppStore();
+const { me } = storeToRefs(appStore);
+
 const profileBackground = ref("");
 const profilePicture = ref("");
+const username = ref("");
+const bio = ref("");
+
 const hideContainer = ref(false);
+const saving = ref(false);
 
-// Setup AD4M client and profile
-const client = await getAd4mClient();
-const { profile, me } = useMe(client.agent, profileFormatter);
-
-// Methods
-async function updateProfileMethod() {
-  isUpdatingProfile.value = true;
+async function saveProfile() {
+  saving.value = true;
 
   try {
     await updateProfile({
       username: username.value,
-      profilePicture: profilePicture.value,
       bio: bio.value,
+      profilePicture: profilePicture.value,
       profileBackground: profileBackground.value,
     });
 
@@ -76,31 +73,20 @@ async function updateProfileMethod() {
   } catch (e) {
     console.error("Error updating profile:", e);
   } finally {
-    isUpdatingProfile.value = false;
+    saving.value = false;
   }
 }
 
-// Load profile data when component mounts and when profile/me changes
 async function loadProfileData() {
-  if (me.value?.did) {
-    try {
-      const profileData = await getProfile(me.value.did);
-      profilePicture.value = profileData.profilePicture || "";
-      profileBackground.value = profileData.profileBackground || "";
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    }
+  const profile = await getCachedAgentProfile(me.value.did);
 
-    username.value = profile.value?.username || "";
-    bio.value = profile.value?.bio || "";
-  }
+  profileBackground.value = profile.profileBackground;
+  profilePicture.value = profile.profilePicture;
+  username.value = profile.username;
+  bio.value = profile.bio;
 }
 
-// Watch for changes in profile and me data
-watch([profile, me], loadProfileData, { immediate: true });
-
-// Also load data on mount as fallback
-onMounted(() => loadProfileData());
+onMounted(loadProfileData);
 </script>
 
 <style scoped>

@@ -55,7 +55,7 @@
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
           <AvatarUpload
             :value="newProfileImage"
-            @change="(val) => (newProfileImage = val || undefined)"
+            @change="(val: string | null) => (newProfileImage = val || undefined)"
             icon="camera"
           />
           <j-input
@@ -294,6 +294,10 @@ function createCommunityMethod() {
 
       // Navigate to the new community
       router.push({ name: "community", params: { communityId: community.uuid } });
+    })
+    .catch((error) => {
+      console.error("Error creating community:", error);
+      appStore.setToast({ variant: "error", message: "Failed to create community. Please try again.", open: true });
     })
     .finally(() => {
       isCreatingCommunity.value = false;

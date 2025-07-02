@@ -15,9 +15,9 @@ const defaultProfile: Profile = {
 
 const profileCache: Record<string, Profile> = {};
 
-export async function getCachedAgentProfile(did: string): Promise<Profile> {
-  // Return the cached profile if it already exists
-  if (profileCache[did]) return profileCache[did];
+export async function getCachedAgentProfile(did: string, refresh?: boolean): Promise<Profile> {
+  // Return the cached profile if it already exists (skip when refreshing)
+  if (!refresh && profileCache[did]) return profileCache[did];
 
   try {
     // Otherwise fetch the profile and store it in the cache

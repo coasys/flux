@@ -1,26 +1,13 @@
-import { Profile } from "@coasys/flux-types";
 import { languages, profile } from "@coasys/flux-constants";
-import {
-  resizeImage,
-  dataURItoBlob,
-  blobToDataURL,
-  createLinks,
-  createLiteralLinks,
-} from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
+import { blobToDataURL, createLinks, createLiteralLinks, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 
-import getProfile from "./getProfile";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { LinkExpression } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect";
+import getProfile from "./getProfile";
 
 const { FILE_STORAGE_LANGUAGE } = languages;
-const {
-  FLUX_PROFILE,
-  HAS_BG_IMAGE,
-  HAS_BIO,
-  HAS_PROFILE_IMAGE,
-  HAS_THUMBNAIL_IMAGE,
-  HAS_USERNAME,
-} = profile;
+const { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } = profile;
 
 export interface Payload {
   username?: string;
@@ -29,21 +16,12 @@ export interface Payload {
   profileBackground?: string;
 }
 
-export default async function updateProfile(
-  payload: Payload
-): Promise<Profile> {
+export default async function updateProfile(payload: Payload): Promise<Profile> {
   try {
     const client = await getAd4mClient();
-
     const me = await client.agent.me();
-
     const oldProfile = await getProfile(me.did);
-
-    const newProfile = {
-      ...oldProfile,
-      ...payload,
-    } as Profile;
-
+    const newProfile = { ...oldProfile, ...payload } as Profile;
     const { perspective } = await client.agent.me();
 
     if (!perspective) {
@@ -57,18 +35,11 @@ export default async function updateProfile(
 
     if (payload.profileBackground) {
       const compressedImage = await blobToDataURL(
-        await resizeImage(
-          dataURItoBlob(payload.profileBackground as string),
-          0.6
-        )
+        await resizeImage(dataURItoBlob(payload.profileBackground as string), 0.6)
       );
 
       profileBackgroundUrl = await client.expression.create(
-        {
-          data_base64: compressedImage,
-          name: "profile-background",
-          file_type: "image/png",
-        },
+        { data_base64: compressedImage, name: "profile-background", file_type: "image/png" },
         FILE_STORAGE_LANGUAGE
       );
     }
@@ -79,11 +50,7 @@ export default async function updateProfile(
       );
 
       profilePictureUrl = await client.expression.create(
-        {
-          data_base64: compressedImage,
-          name: "profile-picture",
-          file_type: "image/png",
-        },
+        { data_base64: compressedImage, name: "profile-picture", file_type: "image/png" },
         FILE_STORAGE_LANGUAGE
       );
     }
@@ -94,18 +61,12 @@ export default async function updateProfile(
       );
 
       profileThumbnailUrl = await client.expression.create(
-        {
-          data_base64: compressedImage,
-          name: "profile-thumbnail",
-          file_type: "image/png",
-        },
+        { data_base64: compressedImage, name: "profile-thumbnail", file_type: "image/png" },
         FILE_STORAGE_LANGUAGE
       );
     }
 
-    const removals = perspective.links.filter(
-      (l: LinkExpression) => l.data.source === FLUX_PROFILE
-    );
+    const removals = perspective.links.filter((l: LinkExpression) => l.data.source === FLUX_PROFILE);
 
     const links = await createLiteralLinks(FLUX_PROFILE, {
       ...(payload.bio !== undefined && { [HAS_BIO]: payload.bio }),

@@ -64,10 +64,10 @@ const emit = defineEmits(["click"]);
 
     &.small {
       padding: 5px;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       font-size: 12px;
-      margin-left: -5px;
+      margin-left: -3px;
     }
   }
 }

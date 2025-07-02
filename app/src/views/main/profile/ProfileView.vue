@@ -1,22 +1,30 @@
 <template>
   <div v-if="profile" class="profile__container">
-    <div :style="{ backgroundImage: `url(${profileBackground})` }" class="profile__bg" />
+    <div :style="{ backgroundImage: `url('${profile?.profileBackground}')` }" class="profile__bg" />
 
     <div class="profile">
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
+            <div class="avatar-wrapper" @click="() => (modalsStore.showEditProfile = true)">
+              <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
+              <div class="avatar-hover">
+                <j-icon name="pen" />
+              </div>
+            </div>
+
             <j-button v-if="sameAgent" variant="ghost" @click="() => (modalsStore.showEditProfile = true)">
-              <j-icon size="sm" name="pen"></j-icon>
+              <j-icon size="sm" name="pen" />
             </j-button>
           </div>
+
           <j-box pt="400" pb="300">
             <j-text nomargin v-if="profile.familyName || profile.givenName" variant="heading-sm">
               {{ `${profile.givenName} ${profile.familyName}` }}
             </j-text>
             <j-text nomargin size="500" weight="500" color="ui-500"> @{{ profile.username }} </j-text>
           </j-box>
+
           <j-box pt="400">
             <j-text nomargin size="500" color="ui-800" v-if="profile.bio">
               {{ profile.bio || "No bio yet" }}
@@ -100,9 +108,10 @@
     </div>
 
     <div class="sidebar" @click="() => uiStore.setAppSidebarOpen(!uiStore.showAppSidebar)">
-      <j-icon name="layout-sidebar" size="md"></j-icon>
+      <j-icon name="layout-sidebar" size="md" />
     </div>
   </div>
+
   <j-modal
     v-if="showAddlinkModal"
     size="sm"
@@ -122,19 +131,21 @@
       @submit="() => setShowJoinCommunityModal(false)"
       @cancel="() => setShowJoinCommunityModal(false)"
       :joiningLink="joiningLink"
-    ></ProfileJoinLink>
+    />
   </j-modal>
+
   <j-modal
     v-if="modalsStore.showEditProfile"
     :open="modalsStore.showEditProfile"
     @toggle="(e: any) => (modalsStore.showEditProfile = e.target.open)"
   >
-    <edit-profile
+    <EditProfile
       @submit="() => (modalsStore.showEditProfile = false)"
       @cancel="() => (modalsStore.showEditProfile = false)"
     />
   </j-modal>
-  <router-view></router-view>
+
+  <RouterView />
 </template>
 
 <script setup lang="ts">
@@ -144,7 +155,6 @@ import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
-import { getImage } from "@coasys/flux-utils";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Attestations from "./Attestations.vue";
@@ -175,27 +185,16 @@ const showAddProofModal = ref(false);
 const showEditlinkModal = ref(false);
 const showJoinCommunityModal = ref(false);
 const weblinks = ref<any[]>([]);
-const profileBackground = ref("");
 const joiningLink = ref("");
 const editArea = ref(null);
 const verifiedProofs = ref<Record<string, boolean>>({});
 const selectedAddress = ref("");
 const proofs = ref<EntanglementProof[]>([]);
 
-// Computed properties
-const did = computed((): string => {
-  return (route.params.did as string) || me.value?.did || "";
-});
+const did = computed((): string => (route.params.did as string) || me.value?.did || "");
+const sameAgent = computed(() => did.value === me.value?.did);
+const hasHistory = computed(() => router?.options?.history?.state?.back);
 
-const sameAgent = computed(() => {
-  return did.value === me.value?.did;
-});
-
-const hasHistory = computed(() => {
-  return router?.options?.history?.state?.back;
-});
-
-// Methods
 function getIcon(address: string) {
   if (address) {
     const seed = parseInt(address.slice(2, 10), 16);
@@ -306,10 +305,14 @@ watch(showEditlinkModal, (val) => {
   if (!val) getAgentAreas();
 });
 
+// Refresh profile cache and agent areas when edit modal closed
 watch(
   () => modalsStore.showEditProfile,
-  (val) => {
-    if (!val) getAgentAreas();
+  async (val) => {
+    if (!val) {
+      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, true);
+      getAgentAreas();
+    }
   }
 );
 
@@ -318,14 +321,6 @@ watch(
   () => {
     getAgentAreas();
     getEntanglementProofs();
-  },
-  { immediate: true }
-);
-
-watch(
-  profile,
-  async (val) => {
-    if (val) profileBackground.value = await getImage(val.profileBackground);
   },
   { immediate: true }
 );
@@ -341,7 +336,7 @@ watch(
 );
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .profile {
   --avatar-size: clamp(var(--j-size-xxl), 10vw, 160px);
   width: 100%;
@@ -351,21 +346,49 @@ watch(
   padding-right: var(--j-space-500);
 }
 
-.avatar {
-  --j-avatar-size: var(--avatar-size);
-  --j-skeleton-height: var(--avatar-size);
-  --j-skeleton-width: var(--avatar-size);
-}
+.avatar-wrapper {
+  cursor: pointer;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  position: relative;
 
-.avatar::part(base) {
-  border-radius: 20px;
-  display: inline-block;
-  border-radius: 30px;
-  border: 7px solid var(--j-color-white);
-}
+  .avatar {
+    --j-avatar-size: var(--avatar-size);
+    --j-skeleton-height: var(--avatar-size);
+    --j-skeleton-width: var(--avatar-size);
 
-.avatar::part(img) {
-  border-radius: 20px;
+    &::part(base) {
+      border-radius: 20px;
+      display: inline-block;
+      border-radius: 30px;
+      border: 7px solid var(--j-color-white);
+    }
+
+    &::part(img) {
+      border-radius: 20px;
+    }
+  }
+
+  .avatar-hover {
+    display: flex;
+    opacity: 0;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    border-radius: 20px;
+    width: calc(var(--avatar-size) - 14px);
+    height: calc(var(--avatar-size) - 14px);
+    background-color: rgba(0, 0, 0, 0.4);
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover {
+    .avatar-hover {
+      opacity: 1;
+    }
+  }
 }
 
 .profile__layout {
