@@ -3,7 +3,7 @@ import { Profile } from "@coasys/flux-types";
 import { blobToDataURL, createLinks, createLiteralLinks, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 
 import { LinkExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import getProfile from "./getProfile";
 
 const { FILE_STORAGE_LANGUAGE } = languages;

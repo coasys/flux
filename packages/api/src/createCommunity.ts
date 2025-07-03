@@ -1,5 +1,5 @@
 import { Perspective } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community as FluxCommunity } from "@coasys/flux-types";
 import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import { v4 as uuidv4 } from "uuid";
