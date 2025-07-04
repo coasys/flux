@@ -313,8 +313,8 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     return agents.value[did];
   }
 
-  function setProcessingState(newState: ProcessingState): void {
-    const processing = newState ? { ...myState.value.processing, ...newState } : null;
+  function setProcessingState(newState: Partial<ProcessingState> | null): void {
+    const processing = newState ? ({ ...myState.value.processing, ...newState } as ProcessingState) : null;
     myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
@@ -333,14 +333,6 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
   watch(defaultLLM, (newDefaultLLM) => updateMyState("aiEnabled", !!newDefaultLLM));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
-
-  // Dispatch custom event when agents map changes for webcomponent plugins to listen to
-  watch(
-    agents,
-    (newAgentsState) =>
-      window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
-    { deep: true, immediate: true }
-  );
 
   return {
     signalling,

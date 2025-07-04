@@ -7,8 +7,10 @@
       </j-flex>
     </j-box>
 
+    <SynergyView v-if="viewId === 'conversation'" />
+
     <component
-      v-if="wcName"
+      v-else-if="wcName"
       :is="wcName"
       style="height: 100%"
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
@@ -31,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import SynergyView from "@/components/synergy/SynergyView.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
