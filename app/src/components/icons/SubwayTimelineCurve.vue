@@ -4,12 +4,12 @@
       <path
         fill="none"
         stroke="currentColor"
-        strokeDasharray="none"
-        strokeLinecap="butt"
-        strokeLinejoin="miter"
-        strokeMiterlimit="4"
-        strokeOpacity="1"
-        strokeWidth="1.587"
+        stroke-dasharray="none"
+        stroke-linecap="butt"
+        stroke-linejoin="miter"
+        stroke-miterlimit="4"
+        stroke-opacity="1"
+        stroke-width="1.587"
         d="M4.185 5.533c0 10.349 8.466 4.714 8.466 15.876"
       />
     </g>

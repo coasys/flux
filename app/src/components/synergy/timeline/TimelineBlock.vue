@@ -1,5 +1,5 @@
 <template>
-  <div :id="`timeline-block-${baseExpression}`" :class="['timeline-block', blockType]">
+  <div :id="`timeline-block-${baseExpression}`" :class="['block', blockType]">
     <button v-if="!match" class="group-button" @click="onGroupClick" />
 
     <!-- Timestamps -->
@@ -7,7 +7,7 @@
     <span v-else-if="blockType === 'subgroup'" class="timestamp">
       {{ ((new Date(end).getTime() - new Date(start).getTime()) / 1000 / 60).toFixed(1) }} mins
     </span>
-    <j-timestamp v-else-if="blockType === 'item'" :value="timestamp" time-style="short" class="timestamp" />
+    <j-timestamp v-else-if="blockType === 'item'" :value="timestamp" timeStyle="short" class="timestamp" />
 
     <!-- Position indicator -->
     <div class="position">
@@ -143,7 +143,7 @@
           </j-flex>
         </j-flex>
 
-        <j-text nomargin :dangerously-set-inner-html="{ __html: data.text }" class="item-text" color="color-white" />
+        <div class="item-text" v-html="data.text" />
 
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 10px">
           <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', baseExpression)">
@@ -373,11 +373,11 @@ watch(
 
 // Get data when expanding children or refresh triggered & children expanded
 watch([() => showChildren.value, () => props.refreshTrigger], () => {
-  // false on first load. updated when zoom useEffect below fires and later when children are expanded by user
+  // False on first load. Updated when zoom useEffect below fires and later when children are expanded by user
   if (showChildren.value) {
     if (props.blockType === "conversation") getSubgroups();
     if (props.blockType === "subgroup") getItems();
-    // deselects block when clicked on if not a match and not the currently selected item
+    // Deselects block when clicked on if not a match and not the currently selected item
     if (!props.match && props.selectedItemId !== baseExpression) {
       props.setSelectedItemId?.(null);
     }
@@ -388,7 +388,7 @@ watch([() => showChildren.value, () => props.refreshTrigger], () => {
 watch(
   () => props.zoom,
   () => {
-    // if a match and loading has finished at the level above, stop further expansion
+    // If a match and loading has finished at the level above, stop further expansion
     if (!props.match || props.loading) {
       if (props.zoom === "Conversations") {
         showChildren.value = false;
@@ -437,116 +437,321 @@ watch(
 </script>
 
 <style scoped lang="scss">
-$line-offset: 92px;
-
-.wrapper {
+.block {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  height: calc(100vh - 320px);
+  align-items: stretch;
 
-  .header {
-    flex-shrink: 0;
-    z-index: 15;
-  }
+  &.conversation {
+    h1 {
+      font-size: 26px;
+      font-weight: 500;
+      margin: 0;
+    }
 
-  .timeline {
-    display: flex;
-    flex-direction: column;
-    flex-basis: 100%;
-    height: 100%;
-    position: relative;
+    .timestamp {
+      left: -64px;
+    }
 
-    .fades {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-
-      .fadeTop {
-        position: absolute;
-        top: 0;
-        height: 100px;
-        width: 100%;
-        background: linear-gradient(to bottom, var(--app-channel-bg-color), transparent);
-        z-index: 10;
-      }
-
-      .fadeBottom {
-        position: absolute;
-        bottom: 0;
-        height: 100px;
-        width: 100%;
-        background: linear-gradient(to top, var(--app-channel-bg-color), transparent);
-        z-index: 10;
-      }
-
-      .line {
-        height: 100%;
-        width: 6px;
-        margin-left: $line-offset;
+    .position {
+      .line,
+      .node {
+        z-index: 3;
         background-color: var(--j-color-primary-200);
       }
     }
 
-    .items {
+    .content {
+      margin-bottom: 60px;
+      .children {
+        .curve-top,
+        .curve-bottom {
+          z-index: 2;
+          color: var(--j-color-primary-400);
+        }
+
+        .expand-button-wrapper {
+          .expand-button {
+            border-left: 6px dotted var(--j-color-primary-400);
+          }
+        }
+
+        .expand-button-padding {
+          border-left: 6px solid var(--j-color-primary-400);
+        }
+      }
+    }
+  }
+
+  &.subgroup {
+    h1 {
+      font-size: 18px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .timestamp {
+      left: -96px;
+    }
+
+    .position {
+      .line,
+      .node {
+        z-index: 2;
+        background-color: var(--j-color-primary-400);
+      }
+    }
+
+    .content {
+      margin-bottom: 40px;
+      .children {
+        .curve-top,
+        .curve-bottom {
+          z-index: 1;
+          color: var(--j-color-primary-600);
+        }
+
+        .expand-button-wrapper {
+          .expand-button {
+            border-left: 6px dotted var(--j-color-primary-600);
+          }
+        }
+
+        .expand-button-padding {
+          border-left: 6px solid var(--j-color-primary-600);
+        }
+      }
+    }
+  }
+
+  &.item {
+    .timestamp {
+      left: -130px;
+      top: 30px;
+    }
+
+    .position {
+      .line,
+      .node {
+        background-color: var(--j-color-primary-600);
+        z-index: 3;
+      }
+
+      .node {
+        top: 30px;
+
+        &.selected {
+          top: 25px;
+        }
+      }
+    }
+  }
+
+  .group-button {
+    all: unset;
+    cursor: pointer;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .timestamp {
+    width: 80px;
+    flex-shrink: 0;
+    color: var(--j-color-ui-500);
+    font-size: 14px;
+    position: absolute;
+    top: 5px;
+    text-align: end;
+  }
+
+  .position {
+    position: relative;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+    flex-shrink: 0;
+    pointer-events: none;
+
+    .line {
       height: 100%;
-      overflow-y: scroll;
-      z-index: 5;
-      padding: 130px 20px 130px 60px;
+      width: 6px;
+      position: absolute;
+    }
 
-      &::-webkit-scrollbar {
-        display: none;
+    .node {
+      all: unset;
+      cursor: pointer;
+      position: absolute;
+      top: 5px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      transition: all 0.3s;
+
+      &.selected {
+        top: 15px;
+        width: 34px;
+        height: 34px;
       }
+    }
+  }
 
-      .line {
-        height: 130px;
-        width: 6px;
-        margin-left: $line-offset;
-        background-color: var(--j-color-primary-200);
+  .tag {
+    all: unset;
+    cursor: pointer;
+    border-radius: 8px;
+    height: 32px;
+    padding: 0 8px;
+    background-color: var(--j-color-ui-50);
+    border: 1px solid var(--j-color-primary-500);
+    color: var(--j-color-primary-500);
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 14px;
+    z-index: 5;
+    transition: all 0.3s;
+
+    &:hover {
+      border: 1px solid var(--j-color-primary-700);
+      color: var(--j-color-primary-700);
+    }
+
+    &.focus {
+      border: 1px solid white;
+      color: white;
+    }
+
+    &.vector {
+      border: 1px solid var(--j-color-success-500);
+      color: var(--j-color-success-500);
+
+      &:hover {
+        border: 1px solid var(--j-color-success-700);
+        color: var(--j-color-success-700);
       }
+    }
+  }
 
-      .itemCard {
+  .itemText {
+    p {
+      margin: 0;
+    }
+  }
+
+  .content {
+    .card {
+      word-break: break-word;
+      width: 100%;
+
+      .show-children-button {
+        all: unset;
+        cursor: pointer;
+        z-index: 2;
         display: flex;
-        margin-bottom: 20px;
-        width: 100%;
+        align-items: center;
+        flex-shrink: 0;
+        color: var(--j-color-ui-300);
+        font-weight: 600;
+
+        > svg {
+          width: 18px;
+          height: 18px;
+          margin-right: 8px;
+        }
+      }
+
+      .summary {
+        color: var(--j-color-ui-600);
+        font-style: italic;
+        margin: 0 0 5px 0;
+      }
+
+      &.selected {
         border: 1px solid var(--j-color-ui-300);
         border-radius: var(--j-border-radius);
         padding: var(--j-space-400);
         background-color: var(--j-color-ui-100);
-
-        .timestamp {
-          font-size: 14px;
-          color: var(--j-color-ui-400);
-        }
       }
+    }
 
-      .itemText {
-        p {
-          margin: 0;
-        }
-      }
+    .children {
+      position: relative;
+      padding: 20px 0;
+      margin-left: -38px;
 
-      .progress {
+      .expand-button-wrapper {
+        padding: 6px 0;
+        margin-left: 6px;
+        background-color: var(--app-channel-bg-color);
+        z-index: 5;
+        display: flex;
         position: relative;
-        width: 100%;
-        height: 24px;
-        margin-top: var(--j-space-400);
-        border-radius: 12px;
-        background-color: var(--j-color-ui-100);
-        box-shadow: 0 0 0 1px var(--j-color-ui-300);
 
-        .progressBar {
-          height: 24px;
-          border-radius: 12px;
-          background-color: var(--j-color-primary-300);
-          transition: width 0.3s ease-in-out;
-        }
+        .expand-button {
+          margin-left: 26px;
+          padding-left: 32px;
+          height: 50px;
+          display: flex;
+          align-items: center;
+          background-color: var(--app-channel-bg-color);
 
-        .progressText {
-          position: absolute;
-          top: 2.5px;
-          left: 10px;
+          > j-button {
+            > span {
+              color: var(--j-color-ui-300);
+              display: flex;
+              align-items: center;
+
+              > svg {
+                width: 18px;
+                height: 18px;
+                margin-right: 8px;
+              }
+            }
+          }
         }
+      }
+
+      .expand-button-padding {
+        height: 14px;
+        margin-left: 32px;
+      }
+
+      .curve-top,
+      .curve-bottom {
+        position: absolute;
+      }
+
+      .curve-top {
+        top: -34px;
+      }
+
+      .curve-bottom {
+        bottom: -44px;
+        transform: scale(-1, 1);
+      }
+    }
+  }
+
+  .item-card {
+    display: flex;
+    margin-bottom: 20px;
+    width: 100%;
+
+    &.selected {
+      border: 1px solid var(--j-color-ui-300);
+      border-radius: var(--j-border-radius);
+      padding: var(--j-space-400);
+      background-color: var(--j-color-ui-100);
+    }
+
+    .item-text {
+      :deep(p) {
+        margin: 0;
       }
     }
   }
