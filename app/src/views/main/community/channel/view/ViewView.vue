@@ -119,20 +119,23 @@ function toggleProfile(open: boolean, did?: any): void {
 }
 
 onMounted(async () => {
-  const generatedName = await generateWCName(viewId as string);
+  // Skip web component generation if mounting the conversation view
+  if (viewId !== "conversation") {
+    const generatedName = await generateWCName(viewId as string);
 
-  if (!customElements.get(generatedName)) {
-    const module = await fetchFluxApp(viewId as string);
-    if (module?.default) {
-      try {
-        await customElements.define(generatedName, module.default);
-      } catch (e) {
-        console.error(`Failed to define custom element ${generatedName}:`, e);
+    if (!customElements.get(generatedName)) {
+      const module = await fetchFluxApp(viewId as string);
+      if (module?.default) {
+        try {
+          await customElements.define(generatedName, module.default);
+        } catch (e) {
+          console.error(`Failed to define custom element ${generatedName}:`, e);
+        }
       }
     }
-  }
 
-  wcName.value = generatedName;
+    wcName.value = generatedName;
+  }
   loading.value = false;
 });
 </script>
