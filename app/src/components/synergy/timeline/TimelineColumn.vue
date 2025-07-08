@@ -87,12 +87,7 @@
                 </j-badge>
               </j-flex>
 
-              <j-text
-                nomargin
-                :dangerously-set-inner-html="{ __html: item.text }"
-                class="item-text"
-                color="color-white"
-              />
+              <j-text nomargin v-html="item.text" class="item-text" color="color-white" />
             </j-flex>
           </j-flex>
         </div>
@@ -361,16 +356,15 @@ onUnmounted(() => {
 });
 
 watch(
-  signallingService.agents,
+  signallingService.agents.value,
   (newAgents) => {
-    console.log("newAgents", newAgents);
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(
-      (agent) => agent.value.processing && agent.value.processing.channelId === (route.params.channelId as string)
+      (agent) => agent.processing && agent.processing.channelId === (route.params.channelId as string)
     );
 
     // Update the progress bar with the latest processing state
-    processingState.value = processingAgents[0]?.value.processing || null;
+    processingState.value = processingAgents[0]?.processing || null;
   },
   { immediate: true }
 );
