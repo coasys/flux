@@ -11,7 +11,7 @@
               :selected="zoom === option"
               @click="
                 () => {
-                  setZoom(option);
+                  zoom = option;
                   closeMenu('zoom-menu');
                 }
               "
@@ -318,10 +318,6 @@ function handleLinkAdded() {
   }, LINK_ADDED_TIMEOUT);
 
   return null;
-}
-
-function setZoom(option: GroupingOption) {
-  zoom.value = option;
 }
 
 function setSelectedItemId(id: string | null) {

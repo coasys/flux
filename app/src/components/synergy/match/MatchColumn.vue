@@ -3,11 +3,11 @@
     <j-flex direction="column" gap="400" class="header">
       <j-flex a="center" gap="400" wrap>
         <j-menu style="height: 42px; z-index: 20">
-          <j-menu-group collapsible :title="grouping" id="grouping-menu">
+          <j-menu-group collapsible :title="filterSettings.grouping" id="grouping-menu">
             <j-menu-item
               v-for="option in filteredGroupingOptions"
               :key="option"
-              :selected="grouping === option"
+              :selected="filterSettings.grouping === option"
               @click="
                 () => {
                   setFilterSettings({ ...filterSettings, grouping: option });
@@ -20,12 +20,12 @@
           </j-menu-group>
         </j-menu>
 
-        <j-menu v-if="grouping === 'Items'" style="height: 42px; z-index: 20">
-          <j-menu-group collapsible :title="itemType" id="item-type-menu">
+        <j-menu v-if="filterSettings.grouping === 'Items'" style="height: 42px; z-index: 20">
+          <j-menu-group collapsible :title="filterSettings.itemType" id="item-type-menu">
             <j-menu-item
               v-for="option in itemTypeOptions"
               :key="option"
-              :selected="itemType === option"
+              :selected="filterSettings.itemType === option"
               @click="
                 () => {
                   setFilterSettings({ ...filterSettings, itemType: option });
@@ -39,8 +39,8 @@
         </j-menu>
 
         <j-checkbox
-          :checked="includeChannel"
-          @change="() => setFilterSettings({ ...filterSettings, includeChannel: !includeChannel })"
+          :checked="filterSettings.includeChannel"
+          @change="() => setFilterSettings({ ...filterSettings, includeChannel: !filterSettings.includeChannel })"
         >
           Include Channel
         </j-checkbox>
@@ -59,7 +59,7 @@
         :key="index"
         :match="match"
         :index="index"
-        :grouping="grouping"
+        :grouping="filterSettings.grouping"
         :selected-topic-id="selectedTopicId"
       />
 
@@ -100,7 +100,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { grouping, itemType, includeChannel } = props.filterSettings;
 
 const numberOfMatchesDisplayed = ref(5);
 

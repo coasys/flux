@@ -54,6 +54,14 @@ onMounted(async () => themeStore.changeCurrentTheme("global"));
 :root {
   --app-main-sidebar-width: 100px;
   --app-header-height: 60px;
+
+  j-menu-group::part(summary) {
+    margin: 5px 0;
+  }
+
+  j-menu-group::part(summary)::after {
+    top: 5px;
+  }
 }
 
 @media (max-width: 800px) {

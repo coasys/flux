@@ -120,7 +120,7 @@ async function getData() {
   // Find the conversation that contains the match
   newConversations.forEach((conversation, conversationIndex) => {
     if (conversation.baseExpression === props.match.baseExpression) {
-      // Store the conversations index & mark loading true to prevent further loading of children
+      // Store the conversations index & mark loading false to prevent further loading of children
       matchIndexes.value = {
         ...matchIndexes.value,
         conversation: conversationIndex,

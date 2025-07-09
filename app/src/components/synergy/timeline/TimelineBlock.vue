@@ -29,7 +29,7 @@
             <h1>{{ name }}</h1>
           </j-flex>
 
-          <button v-if="totalChildren > 0" class="show-children-button" @click="setShowChildren(!showChildren)">
+          <button v-if="totalChildren > 0" class="show-children-button" @click="showChildren = !showChildren">
             <ChevronDown v-if="showChildren" />
             <ChevronRight v-else />
             {{ totalChildren }}
@@ -72,7 +72,7 @@
         <template v-if="onMatchTree && collapseBefore && matchIndex! > 0">
           <div class="expand-button-wrapper" style="margin-top: 6px">
             <div class="expand-button">
-              <j-button @click="setCollapseBefore(false)">
+              <j-button @click="collapseBefore = false">
                 See more
                 <span> <ChevronUp /> {{ matchIndex }} </span>
               </j-button>
@@ -117,7 +117,7 @@
           :style="{ marginTop: blockType === 'subgroup' ? '-8px' : '-20px' }"
         >
           <div class="expand-button">
-            <j-button @click="setCollapseAfter(false)">
+            <j-button @click="collapseAfter = false">
               See more
               <span> <ChevronDown /> {{ children.length - matchIndex! - 1 }} </span>
             </j-button>
@@ -346,18 +346,6 @@ function onGroupClick() {
   }
 }
 
-function setShowChildren(value: boolean) {
-  showChildren.value = value;
-}
-
-function setCollapseBefore(value: boolean) {
-  collapseBefore.value = value;
-}
-
-function setCollapseAfter(value: boolean) {
-  collapseAfter.value = value;
-}
-
 // Get stats on first load and whenever refresh triggered if last child
 watch(
   () => props.refreshTrigger,
@@ -372,17 +360,21 @@ watch(
 );
 
 // Get data when expanding children or refresh triggered & children expanded
-watch([() => showChildren.value, () => props.refreshTrigger], () => {
-  // False on first load. Updated when zoom useEffect below fires and later when children are expanded by user
-  if (showChildren.value) {
-    if (props.blockType === "conversation") getSubgroups();
-    if (props.blockType === "subgroup") getItems();
-    // Deselects block when clicked on if not a match and not the currently selected item
-    if (!props.match && props.selectedItemId !== baseExpression) {
-      props.setSelectedItemId?.(null);
+watch(
+  [() => showChildren.value, () => props.refreshTrigger],
+  () => {
+    // False on first load. Updated when zoom useEffect below fires and later when children are expanded by user
+    if (showChildren.value) {
+      if (props.blockType === "conversation") getSubgroups();
+      if (props.blockType === "subgroup") getItems();
+      // Deselects block when clicked on if not a match and not the currently selected item
+      if (!props.match && props.selectedItemId !== baseExpression) {
+        props.setSelectedItemId?.(null);
+      }
     }
-  }
-});
+  },
+  { immediate: true }
+);
 
 // Expand or collapse children based on zoom level
 watch(
@@ -398,7 +390,8 @@ watch(
         showChildren.value = true;
       }
     }
-  }
+  },
+  { immediate: true }
 );
 
 // Mark as selected & get topics if match
@@ -432,7 +425,8 @@ watch(
         });
       }
     }
-  }
+  },
+  { immediate: true }
 );
 </script>
 
