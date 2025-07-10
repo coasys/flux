@@ -16,9 +16,28 @@
           required
           type="text"
           :value="channelName"
-          @keydown.enter="createChannel"
           @input="(e: any) => (channelName = e.target.value)"
-        ></j-input>
+        />
+
+        <j-input
+          autofocus
+          size="lg"
+          label="Description"
+          :minlength="10"
+          :maxlength="300"
+          autovalidate
+          type="text"
+          :value="channelDescription"
+          @input="(e: any) => (channelDescription = e.target.value)"
+        />
+
+        <j-flex gap="400" a="center">
+          <j-text nomargin>Make the channel a conversation</j-text>
+          <j-toggle :checked="isConversation" :disabled="isCreatingChannel" @change="isConversation = !isConversation">
+            {{ isConversation ? "True" : "False" }}
+          </j-toggle>
+          <j-icon name="info-circle" size="sm" color="ui-500" />
+        </j-flex>
 
         <j-box pb="500" pt="300">
           <j-box pb="300">
@@ -110,6 +129,8 @@ const packages = ref<FluxApp[]>([]);
 const selectedViews = ref<string[]>([]);
 const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
 const channelName = ref("");
+const channelDescription = ref("");
+const isConversation = ref(false);
 const isCreatingChannel = ref(false);
 
 const client = await getAd4mClient();
@@ -121,7 +142,11 @@ const validSelectedViews = computed(() => selectedViews.value.length >= 1);
 const canSubmit = computed(() => hasName.value && validSelectedViews.value);
 const selectedPlugins = computed(() => packages.value.filter((p) => selectedViews.value.includes(p.pkg)));
 const officialApps = computed(() =>
-  packages.value.filter((p) => p.pkg.startsWith("@coasys/") && p.pkg !== "@coasys/flux-webrtc-view")
+  packages.value.filter(
+    // TODO: WebRTC & Synergy filterd out for now, remove plugins from codebase when fully replaced in main app?
+    (p) =>
+      p.pkg.startsWith("@coasys/") && !["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(p.pkg)
+  )
 );
 const communityApps = computed(() => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
 const filteredPackages = computed(() => (tab.value === "official" ? officialApps.value : communityApps.value));
@@ -136,14 +161,10 @@ function toggleView(pkg: FluxApp) {
   selectedViews.value = isSelected
     ? selectedViews.value.filter((n) => n !== pkg.pkg)
     : [...selectedViews.value, pkg.pkg];
-
-  // Preload view when selected to remove loading on submit
-  if (!isSelected) fetchFluxApp(pkg.pkg);
 }
 
 async function createChannel() {
   const communityId = route.params.communityId as string;
-  const name = channelName.value;
   isCreatingChannel.value = true;
 
   try {
@@ -152,7 +173,9 @@ async function createChannel() {
     }
 
     const channel = new Channel(perspective.value);
-    channel.name = name;
+    channel.name = channelName.value;
+    channel.description = channelDescription.value;
+    channel.isConversation = isConversation.value;
     await channel.save();
 
     await perspective.value.ensureSDNASubjectClass(App);
@@ -193,9 +216,7 @@ watch(
       } else {
         loadedPlugins[app.pkg] = "loading";
         const module = await fetchFluxApp(app.pkg);
-        if (module) {
-          customElements.define(wcName, module.default);
-        }
+        if (module) customElements.define(wcName, module.default);
         loadedPlugins[app.pkg] = "loaded";
       }
     });
@@ -236,6 +257,8 @@ onMounted(async () => {
   gap: var(--j-space-400);
   display: grid;
   grid-template-columns: 1fr;
+  max-height: 600px;
+  overflow-y: auto;
 }
 .app-card {
   padding: var(--j-space-500);

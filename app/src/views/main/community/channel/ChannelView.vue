@@ -1,11 +1,11 @@
 <template>
-  <div id="channel-view" class="channel-view">
-    <div class="channel-view__header">
-      <j-button class="channel-view__sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
+  <div id="channel-view" class="channel-view" v-if="channel">
+    <div class="header">
+      <j-button class="sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
-      <div v-if="isMobile" class="channel-view__header-actions">
+      <div v-if="isMobile" class="header-actions">
         <j-box pr="500" @click="onIsChannelChange">
           <j-flex a="center" gap="200">
             <j-icon name="hash" size="md" color="ui-300" />
@@ -27,21 +27,38 @@
         </j-tooltip>
       </div>
 
-      <div class="channel-view__header-actions" v-if="!isMobile">
-        <div class="channel-view__header-left">
+      <div class="header-actions" v-if="!isMobile">
+        <div class="header-left">
           <j-box pr="500">
             <j-flex a="center" gap="200">
               <j-icon name="hash" size="md" color="ui-300" />
               <j-text color="black" weight="700" size="500" nomargin>
-                {{ channel?.name }}
+                {{ channel.name }}
               </j-text>
             </j-flex>
           </j-box>
 
-          <div class="channel-view__tabs">
+          <div class="tabs">
+            <div class="tab-divider" />
+
+            <label
+              v-if="channel.isConversation"
+              :class="{ tab: true, checked: viewId === 'conversation' }"
+              @click="() => changeCurrentView('conversation')"
+            >
+              <j-icon name="flower2" size="xs" />
+              <span>Conversation</span>
+            </label>
+
+            <j-button v-else @click="makeChannelAConversation" size="sm" variant="primary">Make conversation</j-button>
+
+            <div class="tab-divider" />
+          </div>
+
+          <div class="tabs">
             <label
               v-for="view in views"
-              :class="{ 'channel-view-tab': true, checked: view.pkg === viewId }"
+              :class="{ tab: true, checked: view.pkg === viewId }"
               @click="() => changeCurrentView(view.pkg)"
             >
               <j-icon :name="view.icon" size="xs" />
@@ -101,9 +118,7 @@
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" a="center">
         <Hourglass width="30px" />
-
         <j-text variant="heading">Joining community</j-text>
-
         <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
@@ -115,7 +130,7 @@
         </j-box>
 
         <label
-          :class="{ 'channel-view-tab-2': true, checked: view.pkg === currentView }"
+          :class="{ 'tab-modal': true, checked: view.pkg === currentView }"
           v-for="view in views"
           @click="() => changeCurrentView(view.pkg)"
         >
@@ -125,9 +140,7 @@
             :checked.prop="view.pkg === currentView"
             :value.prop="view.pkg"
           />
-
           <j-icon :name="view.icon" size="xs" />
-
           <span>{{ view.name }}</span>
         </label>
       </j-box>
@@ -143,7 +156,7 @@ import ProfileContainer from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
-import { App } from "@coasys/flux-api";
+import { App, Channel } from "@coasys/flux-api";
 import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, ref, watch } from "vue";
@@ -174,7 +187,6 @@ const currentView = ref("");
 const activeProfile = ref<string>("");
 const showProfile = ref(false);
 const isJoiningCommunity = ref(false);
-const isExpanded = ref(false);
 const isChangeChannel = ref(false);
 
 type AgentData = Profile & AgentState;
@@ -182,7 +194,7 @@ type AgentData = Profile & AgentState;
 const channel = computed(() => channels.value.find((c) => c.baseExpression === channelId));
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
-const agentsInCall = ref<AgentData[]>([]); // computed(() => signallingService.getAgentsInCall(route.params.channelId as string));
+const agentsInCall = ref<AgentData[]>([]);
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
 
@@ -223,6 +235,14 @@ async function handleProfileClick(did: string) {
   else router.push({ name: "profile", params: { did, communityId } });
 }
 
+async function makeChannelAConversation() {
+  if (!channel.value) return;
+
+  const channelModel = new Channel(perspective, channel.value.baseExpression);
+  channelModel.isConversation = true;
+  await channelModel.update();
+}
+
 // Navigate to the first loaded view if no viewId set in the URL params
 watch(views, (newVal, oldVal) => {
   const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
@@ -244,48 +264,136 @@ watch(
 );
 </script>
 
-<style>
+<style scoped lang="scss">
 .channel-view {
   position: relative;
   background: var(--app-channel-bg-color, transparent);
   width: 100%;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: var(--j-space-400);
+    padding: 0 var(--j-space-200);
+    position: sticky;
+    background: var(--app-channel-header-bg-color, transparent);
+    border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
+    height: var(--app-header-height);
+
+    @media (min-width: 800px) {
+      padding: 0 var(--j-space-500);
+      justify-content: space-between;
+      gap: 0;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      height: 100%;
+    }
+
+    &-left {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: var(--j-space-300);
+    }
+
+    &-right {
+      align-self: center;
+    }
+  }
+
+  .sidebar-toggle {
+    @media (min-width: 800px) {
+      display: none;
+    }
+  }
+
+  .tabs {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: var(--j-space-500);
+
+    .tab-divider {
+      width: 1px;
+      height: 100%;
+      background: var(--j-color-ui-200);
+      margin: 0 var(--j-space-400);
+    }
+  }
+
+  .perspective-view {
+    position: relative;
+    height: calc(100% - var(--app-header-height));
+    overflow-y: auto;
+    display: block;
+  }
 }
 
-.channel-view__header {
-  display: flex;
-  align-items: center;
-  gap: var(--j-space-400);
-  padding: 0 var(--j-space-200);
-  position: sticky;
-  background: var(--app-channel-header-bg-color, transparent);
-  border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
-  height: var(--app-header-height);
-}
-
-.channel-view__header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
+.tab {
   height: 100%;
-}
-
-.channel-view__header-left {
+  font-weight: 500;
   display: flex;
   align-items: center;
-  height: 100%;
   gap: var(--j-space-300);
-}
-
-.channel-view__header-right {
-  align-self: center;
-}
-
-.perspective-view {
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
+  cursor: pointer;
   position: relative;
-  height: calc(100% - var(--app-header-height));
-  overflow-y: auto;
-  display: block;
+  padding: var(--j-space-200) 0;
+  border-bottom: 1px solid transparent;
+
+  &:hover {
+    color: var(--j-color-black);
+  }
+
+  &.checked {
+    position: relative;
+    border-bottom: 1px solid var(--j-color-primary-500);
+    color: var(--j-color-black);
+  }
+
+  input {
+    position: absolute;
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px, 1px, 1px, 1px);
+    vertical-align: middle;
+  }
+}
+
+.tab-modal {
+  height: 100%;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
+  cursor: pointer;
+  position: relative;
+  padding: var(--j-space-300);
+  border-radius: 6px;
+
+  &:hover {
+    color: var(--j-color-black);
+  }
+
+  &.checked {
+    position: relative;
+    background: var(--j-color-primary-100);
+    color: var(--j-color-black);
+  }
+
+  input {
+    position: absolute;
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px, 1px, 1px, 1px);
+    vertical-align: middle;
+  }
 }
 
 .split {
@@ -298,90 +406,5 @@ watch(
   right: 0;
   padding: var(--j-space-600);
   width: 50%;
-}
-
-.channel-view__tabs {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  gap: var(--j-space-500);
-}
-
-.channel-view-tab {
-  height: 100%;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: var(--j-space-300);
-  color: var(--j-color-ui-500);
-  font-size: var(--j-font-size-500);
-  cursor: pointer;
-  position: relative;
-  padding: var(--j-space-200) 0;
-  border-bottom: 1px solid transparent;
-}
-
-.channel-view-tab-2 {
-  height: 100%;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: var(--j-space-300);
-  color: var(--j-color-ui-500);
-  font-size: var(--j-font-size-500);
-  cursor: pointer;
-  position: relative;
-  padding: var(--j-space-300);
-  border-radius: 6px;
-}
-
-.channel-view-tab:hover {
-  color: var(--j-color-black);
-}
-
-.channel-view-tab-2:hover {
-  color: var(--j-color-black);
-}
-
-.channel-view-tab.checked {
-  position: relative;
-  border-bottom: 1px solid var(--j-color-primary-500);
-  color: var(--j-color-black);
-}
-
-.channel-view-tab-2.checked {
-  position: relative;
-  background: var(--j-color-primary-100);
-  color: var(--j-color-black);
-}
-
-.channel-view-tab input {
-  position: absolute;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  vertical-align: middle;
-}
-
-.channel-view-tab-2 input {
-  position: absolute;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  vertical-align: middle;
-}
-
-@media (min-width: 800px) {
-  .channel-view__sidebar-toggle {
-    display: none;
-  }
-  .channel-view__header {
-    padding: 0 var(--j-space-500);
-    justify-content: space-between;
-    gap: 0;
-  }
-}
-
-.perspective-view {
-  display: block;
-  height: calc(100% - var(--app-header-height));
 }
 </style>
