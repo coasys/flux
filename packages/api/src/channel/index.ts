@@ -1,10 +1,10 @@
+import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Property } from "@coasys/ad4m";
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { Property, Collection, ModelOptions, Flag, Ad4mModel, Literal } from "@coasys/ad4m";
-import { SynergyItem, SynergyGroup, icons } from "@coasys/flux-utils";
+import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
 import App from "../app";
 
-const { FLUX_APP, NAME, ENTRY_TYPE } = community;
+const { CHANNEL_IS_CONVERSATION, CHANNEL_NAME, CHANNEL_DESCRIPTION, ENTRY_TYPE } = community;
 
 @ModelOptions({ name: "Channel" })
 export class Channel extends Ad4mModel {
@@ -15,11 +15,25 @@ export class Channel extends Ad4mModel {
   type: string;
 
   @Property({
-    through: NAME,
+    through: CHANNEL_NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
+
+  @Property({
+    through: CHANNEL_DESCRIPTION,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  description: string;
+
+  @Property({
+    through: CHANNEL_IS_CONVERSATION,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  isConversation: boolean;
 
   @Collection({
     through: "ad4m://has_child",

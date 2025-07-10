@@ -39,16 +39,15 @@ export class Community extends Ad4mModel {
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
-  image: string | FileData | undefined;
+  image: string | FileData;
 
-  // @ts-ignore
   @Optional({
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
-  thumbnail: string | FileData | undefined;
+  thumbnail: string | FileData;
 
   @Collection({
     through: "ad4m://has_child",

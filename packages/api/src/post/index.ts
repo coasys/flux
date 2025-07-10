@@ -1,6 +1,6 @@
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from "@coasys/ad4m";
 import { community, languages } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { ModelOptions, Property, Collection, Flag, Ad4mModel, Optional } from "@coasys/ad4m";
 import Message from "../message";
 
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
@@ -34,7 +34,6 @@ export class Post extends Ad4mModel {
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    // @ts-ignore
     transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
   image: string;
