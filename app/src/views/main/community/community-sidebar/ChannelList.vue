@@ -2,7 +2,7 @@
   <j-box pt="500" pb="800">
     <j-menu-group open title="Channels">
       <j-button @click.prevent="() => (modalStore.showCreateChannel = true)" size="sm" slot="end" variant="ghost">
-        <j-icon size="sm" square name="plus"></j-icon>
+        <j-icon size="sm" square name="plus" />
       </j-button>
 
       <j-box mt="400" ml="600" v-if="channelsLoading">

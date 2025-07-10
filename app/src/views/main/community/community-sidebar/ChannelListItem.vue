@@ -9,7 +9,7 @@
     >
       <j-flex slot="start" gap="400" a="center">
         <j-flex gap="300">
-          <j-icon size="xs" :name="getIcon(channel.views[0])" />
+          <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" />
           {{ channel.name }}
         </j-flex>
 
@@ -52,10 +52,9 @@
 <script setup lang="ts">
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { viewOptions as channelViewOptions } from "@/constants";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { AgentState, ChannelView, Profile } from "@coasys/flux-types";
+import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, defineOptions, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -118,10 +117,6 @@ async function findAgentsInChannel() {
   agentsInChannel.value = await Promise.all(
     agentsInChannelMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
   );
-}
-
-function getIcon(view: ChannelView | string) {
-  return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
 }
 
 function navigateToChannel() {
