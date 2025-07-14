@@ -1,13 +1,13 @@
 <template>
-  <div :id="`timeline-block-${baseExpression}`" :class="['block', blockType]">
+  <div :id="`timeline-block-${data.baseExpression}`" :class="['block', blockType]">
     <button v-if="!match" class="group-button" @click="onGroupClick" />
 
     <!-- Timestamps -->
-    <j-timestamp v-if="blockType === 'conversation'" :value="timestamp" relative class="timestamp" />
+    <j-timestamp v-if="blockType === 'conversation'" :value="data.timestamp" relative class="timestamp" />
     <span v-else-if="blockType === 'subgroup'" class="timestamp">
-      {{ ((new Date(end).getTime() - new Date(start).getTime()) / 1000 / 60).toFixed(1) }} mins
+      {{ ((new Date(data.end).getTime() - new Date(data.start).getTime()) / 1000 / 60).toFixed(1) }} mins
     </span>
-    <j-timestamp v-else-if="blockType === 'item'" :value="timestamp" timeStyle="short" class="timestamp" />
+    <j-timestamp v-else-if="blockType === 'item'" :value="data.timestamp" timeStyle="short" class="timestamp" />
 
     <!-- Position indicator -->
     <div class="position">
@@ -21,12 +21,12 @@
         <j-flex a="center" gap="400">
           <j-flex a="center" gap="400">
             <PercentageRing
-              v-if="match && match.baseExpression === baseExpression"
+              v-if="match && match.baseExpression === data.baseExpression"
               :ring-size="70"
               :font-size="10"
               :score="(match.score || 0) * 100"
             />
-            <h1>{{ name }}</h1>
+            <h1>{{ data.name }}</h1>
           </j-flex>
 
           <button v-if="totalChildren > 0" class="show-children-button" @click="showChildren = !showChildren">
@@ -36,7 +36,7 @@
           </button>
         </j-flex>
 
-        <p class="summary">{{ summary }}</p>
+        <p class="summary">{{ data.summary }}</p>
 
         <j-flex class="participants">
           <Avatar
@@ -52,14 +52,14 @@
             v-for="topic in topics"
             :key="topic.baseExpression"
             :class="['tag', { focus: selectedTopicId === topic.baseExpression }]"
-            @click="search!('topic', baseExpression, topic)"
+            @click="search!('topic', data.baseExpression, topic)"
             :disabled="!!match"
             :style="{ cursor: !!match ? 'default' : 'pointer' }"
           >
             #{{ topic.name }}
           </button>
 
-          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', baseExpression)">
+          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
             <j-icon name="flower2" color="color-success-500" size="sm" style="margin-right: 5px" />
             Synergize
           </button>
@@ -129,7 +129,7 @@
     <!-- Content for items -->
     <j-flex v-else-if="blockType === 'item'" gap="400" a="center" :class="['item-card', { selected }]">
       <PercentageRing
-        v-if="match && match.baseExpression === baseExpression"
+        v-if="match && match.baseExpression === data.baseExpression"
         :ring-size="70"
         :font-size="10"
         :score="(match.score || 0) * 100"
@@ -139,14 +139,14 @@
         <j-flex gap="400" a="center">
           <j-icon :name="data.icon" color="ui-400" size="lg" />
           <j-flex gap="400" a="center" wrap>
-            <Avatar :did="author" show-name />
+            <Avatar :did="data.author" show-name />
           </j-flex>
         </j-flex>
 
         <div class="item-text" v-html="data.text" />
 
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 10px">
-          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', baseExpression)">
+          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
             <j-icon name="flower2" color="color-success-500" size="sm" style="margin-right: 5px" />
             Synergize
           </button>
@@ -194,7 +194,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = props.data;
+// const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = props.data;
 
 const { perspective } = useCommunityService();
 
@@ -218,16 +218,16 @@ const matchIndex = computed(() =>
 
 const onMatchTree = computed(() =>
   props.match
-    ? (props.blockType === "conversation" && index === props.matchIndexes?.conversation) ||
+    ? (props.blockType === "conversation" && props.data.index === props.matchIndexes?.conversation) ||
       (props.blockType === "subgroup" &&
-        parentIndex === props.matchIndexes?.conversation &&
-        index === props.matchIndexes?.subgroup)
+        props.data.parentIndex === props.matchIndexes?.conversation &&
+        props.data.index === props.matchIndexes?.subgroup)
     : false
 );
 
 const visibleChildren = computed(() =>
   children.value.filter((child: any, i) => {
-    child.parentIndex = index;
+    child.parentIndex = props.data.index;
     child.index = i;
     if (onMatchTree.value) {
       // skip if below match
@@ -243,31 +243,31 @@ const visibleChildren = computed(() =>
 );
 
 async function getConversationStats() {
-  const conversation = new Conversation(perspective, baseExpression);
+  const conversation = new Conversation(perspective, props.data.baseExpression);
   const stats = await conversation.stats();
   totalChildren.value = stats.totalSubgroups;
   participants.value = stats.participants;
 }
 
 async function getSubgroupStats() {
-  const subgroup = new ConversationSubgroup(perspective, baseExpression);
+  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
   const stats = await subgroup.stats();
   totalChildren.value = stats.totalItems;
   participants.value = stats.participants;
 }
 
 async function getConversationTopics() {
-  const conversation = new Conversation(perspective, baseExpression);
+  const conversation = new Conversation(perspective, props.data.baseExpression);
   topics.value = await conversation.topics();
 }
 
 async function getSubgroupTopics() {
-  const subgroup = new ConversationSubgroup(perspective, baseExpression);
+  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
   topics.value = await subgroup.topics();
 }
 
 async function getSubgroups() {
-  const conversation = new Conversation(perspective, baseExpression);
+  const conversation = new Conversation(perspective, props.data.baseExpression);
   const subgroups = await conversation.subgroupsData();
 
   if (props.match) {
@@ -276,7 +276,7 @@ async function getSubgroups() {
       if (subgroup.baseExpression === props.match!.baseExpression) {
         // If found, store the subgroups index & mark loading true to prevent further loading
         props.setMatchIndexes?.({
-          conversation: index,
+          conversation: props.data.index,
           subgroup: subgroupIndex,
           item: undefined,
         });
@@ -294,7 +294,7 @@ async function removeDuplicateItems(itemIds: string[]) {
     itemIds.map(async (itemId) => {
       // Grab all links connecting the item to the subgroup
       const links = await perspective.get(
-        new LinkQuery({ source: baseExpression, predicate: "ad4m://has_child", target: itemId })
+        new LinkQuery({ source: props.data.baseExpression, predicate: "ad4m://has_child", target: itemId })
       );
       // Remove all except the first link
       return links.slice(1);
@@ -304,7 +304,7 @@ async function removeDuplicateItems(itemIds: string[]) {
 }
 
 async function getItems() {
-  const subgroup = new ConversationSubgroup(perspective, baseExpression);
+  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
   const items = await subgroup.itemsData();
   const uniqueItems = new Map();
   const duplicates = new Set<string>();
@@ -318,8 +318,8 @@ async function getItems() {
       // Set match indexes and stop loading if match found
       if (props.match && item.baseExpression === props.match.baseExpression) {
         props.setMatchIndexes?.({
-          conversation: parentIndex,
-          subgroup: index,
+          conversation: props.data.parentIndex,
+          subgroup: props.data.index,
           item: itemIndex,
         });
         props.setLoading?.(false);
@@ -338,7 +338,7 @@ async function getItems() {
 
 function onGroupClick() {
   if (!props.match) {
-    props.setSelectedItemId?.(selected.value ? null : baseExpression);
+    props.setSelectedItemId?.(selected.value ? null : props.data.baseExpression);
   }
   if (!selected.value) {
     if (props.blockType === "conversation") getConversationTopics();
@@ -368,7 +368,7 @@ watch(
       if (props.blockType === "conversation") getSubgroups();
       if (props.blockType === "subgroup") getItems();
       // Deselects block when clicked on if not a match and not the currently selected item
-      if (!props.match && props.selectedItemId !== baseExpression) {
+      if (!props.match && props.selectedItemId !== props.data.baseExpression) {
         props.setSelectedItemId?.(null);
       }
     }
@@ -398,8 +398,8 @@ watch(
 watch(
   () => props.selectedItemId,
   () => {
-    const isSelected = props.selectedItemId === baseExpression;
-    const isMatch = props.match?.baseExpression === baseExpression;
+    const isSelected = props.selectedItemId === props.data.baseExpression;
+    const isMatch = props.match?.baseExpression === props.data.baseExpression;
     selected.value = isSelected || isMatch;
 
     if (isMatch) {
