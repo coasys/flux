@@ -91,7 +91,7 @@ export const useAppStore = defineStore(
 
     async function refreshMyProfile() {
       me.value = await ad4mClient.value.agent.me();
-      myProfile.value = await getCachedAgentProfile(me.value.did);
+      myProfile.value = await getCachedAgentProfile(me.value.did, true);
     }
 
     return {

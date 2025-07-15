@@ -165,7 +165,7 @@ const modalsStore = useModalStore();
 const themeStore = useThemeStore();
 const uiStore = useUiStore();
 
-const { me } = storeToRefs(appStore);
+const { me, myProfile } = storeToRefs(appStore);
 const { ad4mClient } = appStore;
 
 const profile = ref<Profile | null>(null);
@@ -320,6 +320,15 @@ watch(
     getEntanglementProofs();
   },
   { immediate: true }
+);
+
+// Watch for changes to myProfile and update profile state if viewing my profile
+watch(
+  myProfile,
+  (newProfile) => {
+    if (!route.params.did || route.params.did === me.value?.did) profile.value = newProfile;
+  },
+  { immediate: true, deep: true }
 );
 
 watch(
