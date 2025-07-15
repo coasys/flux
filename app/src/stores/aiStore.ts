@@ -43,7 +43,7 @@ export const useAiStore = defineStore(
     const transcriptionEnabled = ref(true);
     const transcriptionModel = ref("Base");
     const transcriptionPreviewTimeout = ref(0.4);
-    const transcriptionMessageTimeout = ref(5);
+    const transcriptionMessageTimeout = ref(3);
 
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
