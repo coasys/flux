@@ -8,9 +8,9 @@
       }"
     >
       <j-flex slot="start" gap="400" a="center">
-        <j-flex gap="300" @click="navigateToChannel" style="cursor: pointer">
-          <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" />
-          {{ channel.name }}
+        <j-flex gap="200" @click="navigateToChannel" style="cursor: pointer">
+          <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
+          <j-text nomargin>{{ channel.name }}</j-text>
         </j-flex>
 
         <button v-if="channel.children?.length" class="show-children-button" @click="expanded = !expanded">
