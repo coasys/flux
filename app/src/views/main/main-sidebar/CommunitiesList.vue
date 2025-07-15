@@ -125,6 +125,8 @@ function handleCommunityClick(communityId: string) {
 
 .avatar-wrapper {
   border-radius: 50%;
+  width: var(--j-size-md);
+  height: var(--j-size-md);
 
   &.present {
     box-shadow: 0 0 0 2px var(--j-color-primary-500);
