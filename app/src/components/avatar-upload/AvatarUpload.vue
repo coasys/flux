@@ -19,7 +19,7 @@
     @change="selectFile"
   />
   <div class="cropper" v-if="tempProfileImage !== null">
-    <cropper
+    <Cropper
       ref="cropper"
       class="cropper__element"
       backgroundClass="cropper__background"

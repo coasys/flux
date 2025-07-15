@@ -41,6 +41,7 @@
 <script setup lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
+import { useAppStore } from "@/stores";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getProfile, updateProfile } from "@coasys/flux-api";
@@ -48,6 +49,8 @@ import { profileFormatter } from "@coasys/flux-utils";
 import { onMounted, ref, watch } from "vue";
 
 const emit = defineEmits<{ cancel: []; submit: [] }>();
+
+const appStore = useAppStore();
 
 const isUpdatingProfile = ref(false);
 const username = ref("");
@@ -73,6 +76,8 @@ async function updateProfileMethod() {
     });
 
     emit("submit");
+
+    appStore.refreshMyProfile();
   } catch (e) {
     console.error("Error updating profile:", e);
   } finally {

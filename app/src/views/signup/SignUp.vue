@@ -19,7 +19,8 @@
 
         <j-text variant="heading"> Create a user </j-text>
 
-        <avatar-upload icon="camera" :value="profilePicture" @change="(url) => (profilePicture = url)"> </avatar-upload>
+        <AvatarUpload icon="camera" :value="profilePicture" @change="(url) => (profilePicture = url)" />
+
         <j-input
           label="Username"
           size="xl"
@@ -28,10 +29,12 @@
           :error="usernameError"
           :errortext="usernameErrorMessage"
           @blur="(e: any) => validateUsername()"
-        ></j-input>
-        <j-toggle style="width: 100%" full size="lg" variant="primary" @change="allowNotifications"
-          >Allow Notifications</j-toggle
-        >
+        />
+
+        <j-toggle style="width: 100%" full size="lg" variant="primary" @change="allowNotifications">
+          Allow Notifications
+        </j-toggle>
+
         <j-button
           style="width: 100%"
           full
@@ -56,9 +59,7 @@ import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/stores";
 import { useValidation } from "@/utils/validation";
 import { getAd4mClient } from "@coasys/ad4m-connect";
-import { useMe } from "@coasys/ad4m-vue-hooks";
 import { createProfile, getAd4mProfile } from "@coasys/flux-api";
-import { profileFormatter } from "@coasys/flux-utils";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { registerNotification } from "../../utils/registerMobileNotifications";
@@ -73,15 +74,6 @@ const isCreatingUser = ref(false);
 const name = ref("");
 const familyName = ref("");
 const email = ref("");
-
-// Initialize Ad4m client
-let clientInstance: any;
-const hasUser = ref<Boolean>(false);
-(async () => {
-  clientInstance = await getAd4mClient();
-  const { status } = useMe(clientInstance.agent, profileFormatter);
-  hasUser.value = status.value.isInitialized;
-})();
 
 // Form validation
 const {
@@ -104,10 +96,8 @@ const {
   ],
 });
 
-// Computed properties
 const canSignUp = computed(() => usernameIsValid.value);
 
-// Methods
 async function checkIfHasFluxProfile() {
   const client = await getAd4mClient();
   const { perspective } = await client.agent.me();
@@ -145,8 +135,9 @@ async function createUser() {
     username: username.value,
     profilePicture: profilePicture.value,
   })
-    .then(() => {
-      router.push("/");
+    .then(async () => {
+      appStore.refreshMyProfile();
+      router.push({ name: "home" });
       registerNotification();
     })
     .finally(() => {
@@ -160,12 +151,14 @@ async function allowNotifications(value: any) {
 }
 
 onMounted(() => {
-  const authStateChangeHandler = async () => {
-    if (ad4mConnect.authState === "authenticated") {
-      autoFillUser();
-    }
-  };
+  async function authStateChangeHandler() {
+    if (ad4mConnect.authState === "authenticated") autoFillUser();
+  }
 
+  // Fire the authStateChangeHandler immediately incase the user is already authenticated
+  authStateChangeHandler();
+
+  // Listen for authentication state changes
   ad4mConnect.addEventListener("authstatechange", authStateChangeHandler);
   onBeforeUnmount(() => ad4mConnect.removeEventListener("authstatechange", authStateChangeHandler));
 });

@@ -395,10 +395,9 @@ import {
   useWebrtcStore,
   WEBRTC_EMOJI,
 } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { AgentStatus, Profile } from "@coasys/flux-types";
+import { AgentStatus } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -411,7 +410,7 @@ const mediaDeviceStore = useMediaDevicesStore();
 const modalStore = useModalStore();
 const aiStore = useAiStore();
 
-const { me } = storeToRefs(appStore);
+const { me, myProfile } = storeToRefs(appStore);
 const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
 const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
@@ -438,7 +437,6 @@ const videoLayoutOptions: LayoutOption[] = [
   { label: "Focused", class: "focused", icon: "person-video2" },
 ];
 
-const myProfile = ref<Profile | null>(null);
 const callWindow = ref<HTMLElement | null>(null);
 const rightSection = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
@@ -567,11 +565,6 @@ function stopResize() {
   document.addEventListener("mouseup", stopResize, false);
 }
 
-// TODO: store my profile in the app store?
-async function getMyProfile() {
-  myProfile.value = await getCachedAgentProfile(me.value.did);
-}
-
 function profileClick() {
   router.push({ name: "home", params: { did: me.value.did } });
 }
@@ -616,8 +609,6 @@ watch(
   },
   { deep: true }
 );
-
-onMounted(getMyProfile);
 </script>
 
 <style lang="scss" scoped>

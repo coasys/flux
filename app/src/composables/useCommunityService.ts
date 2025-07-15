@@ -5,7 +5,7 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Community, Topic } from "@coasys/flux-api";
 import { Profile, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref } from "vue";
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useSignallingService } from "./useSignallingService";
 
@@ -76,6 +76,20 @@ export async function createCommunityService(): Promise<CommunityService> {
   });
 
   getMembers();
+
+  watch(
+    isSynced,
+    (synced) => {
+      // Fire a custom event that the SynergyView web component can listen to
+      const event = new CustomEvent(`${perspective.uuid}-community-synced`, {
+        detail: { synced },
+        bubbles: true,
+        composed: true,
+      });
+      window.dispatchEvent(event);
+    },
+    { immediate: true }
+  );
 
   return {
     perspective,

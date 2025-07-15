@@ -21,7 +21,7 @@
     <j-modal :open="tempProfileImage !== null">
       <j-box>
         <div class="cropper">
-          <cropper
+          <Cropper
             ref="cropper"
             class="cropper__element"
             backgroundClass="cropper__background"

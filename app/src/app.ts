@@ -42,7 +42,7 @@ const appStore = useAppStore(pinia);
   try {
     const ad4mClient = await getAd4mClient();
     appStore.setAdamClient(ad4mClient);
-    appStore.setMe(await ad4mClient.agent.me());
+    appStore.refreshMyProfile();
   } catch (error) {
     console.error("Failed to initialize Ad4m client:", error);
   }

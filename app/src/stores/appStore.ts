@@ -1,8 +1,10 @@
 import iconPath from "@/assets/images/icon.png";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { ToastState, UpdateState } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Ad4mClient, Agent } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { defineStore } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
@@ -10,6 +12,7 @@ export const useAppStore = defineStore(
   "appStore",
   () => {
     const me = ref<Agent>({ did: "" });
+    const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>("not-available");
     const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
@@ -27,10 +30,6 @@ export const useAppStore = defineStore(
     // Mutations
     function setAdamClient(client: Ad4mClient): void {
       ad4mClientRef.value = client;
-    }
-
-    function setMe(newMe: Agent): void {
-      me.value = newMe;
     }
 
     // Todo: move toasts & notifications to ui store?
@@ -90,10 +89,16 @@ export const useAppStore = defineStore(
       );
     }
 
+    async function refreshMyProfile() {
+      me.value = await ad4mClient.value.agent.me();
+      myProfile.value = await getCachedAgentProfile(me.value.did, true);
+    }
+
     return {
       // State
       ad4mClient,
       me,
+      myProfile,
       updateState,
       toast,
       notification,
@@ -101,7 +106,6 @@ export const useAppStore = defineStore(
 
       // Mutations
       setAdamClient,
-      setMe,
       setToast,
       showSuccessToast,
       showDangerToast,
@@ -112,6 +116,7 @@ export const useAppStore = defineStore(
       changeNotificationState,
       joinTestingCommunity,
       getMyCommunities,
+      refreshMyProfile,
     };
   },
   { persist: { omit: ["myCommunities"] } }
