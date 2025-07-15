@@ -9,7 +9,7 @@
       <template v-if="recentConversations.length">
         <div
           v-for="conversation in recentConversations"
-          @click="navigateToConversation(conversation)"
+          @click="navigateToConversation(conversation.channelId)"
           style="cursor: pointer"
         >
           <j-flex a="center" gap="200">
@@ -41,10 +41,10 @@ const route = useRoute();
 const router = useRouter();
 const { recentConversations, recentConversationsLoading } = useCommunityService();
 
-function navigateToConversation(conversation: any) {
+function navigateToConversation(channelId: string) {
   router.push({
     name: "view",
-    params: { communityId: route.params.communityId, channelId: conversation.channelId, viewId: "conversation" },
+    params: { communityId: route.params.communityId, channelId, viewId: "conversation" },
   });
 }
 </script>

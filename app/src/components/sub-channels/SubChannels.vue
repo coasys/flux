@@ -1,10 +1,17 @@
 <template>
   <div class="wrapper">
-    <j-text>Explore and manage sub channels here!</j-text>
+    <j-flex a="center" gap="500">
+      <j-text nomargin>Explore and manage sub channels here!</j-text>
+
+      <j-button variant="primary" @click="openNewSubChannelModal">
+        <j-icon name="plus-lg" />
+        Create a new sub channel
+      </j-button>
+    </j-flex>
 
     <j-box mt="500">
       <j-flex gap="500" wrap>
-        <button class="item" v-for="channel in subChannels">
+        <button class="item" v-for="channel in subChannels" @click="() => navigateToChannel(channel.baseExpression)">
           <j-flex direction="column" a="center" gap="400">
             <j-flex a="center" gap="400">
               <j-icon :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-700" />
@@ -12,11 +19,6 @@
             </j-flex>
             <j-text v-if="channel.description && !Array.isArray(channel.description)">{{ channel.description }}</j-text>
           </j-flex>
-        </button>
-
-        <button class="item" @click="openNewSubChannelModal">
-          <j-icon name="plus" size="xl" />
-          <j-text> Create a new sub channel </j-text>
         </button>
       </j-flex>
     </j-box>
@@ -30,6 +32,7 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 interface Props {
   parentChannel: Channel;
@@ -37,6 +40,8 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const route = useRoute();
+const router = useRouter();
 const modalStore = useModalStore();
 
 const { showCreateChannel, createChannelParent } = storeToRefs(modalStore);
@@ -53,6 +58,13 @@ function openNewSubChannelModal() {
   showCreateChannel.value = true;
 }
 
+function navigateToChannel(channelId: string) {
+  router.push({
+    name: "view",
+    params: { communityId: route.params.communityId, channelId, viewId: "sub-channels" },
+  });
+}
+
 onMounted(() => {
   console.log("SubChannels component mounted", props.parentChannel);
 });
@@ -64,6 +76,7 @@ watch(subChannels, (newSubChannels) => {
 
 <style lang="scss" scoped>
 .wrapper {
+  width: 100%;
   padding: var(--j-space-600);
 
   .item {
