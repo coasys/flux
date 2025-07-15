@@ -187,7 +187,7 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel } from "@coasys/flux-api";
 import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelView" });
@@ -267,13 +267,13 @@ async function handleProfileClick(did: string) {
   else router.push({ name: "profile", params: { did, communityId } });
 }
 
-async function makeChannelAConversation() {
-  if (!channel.value) return;
+// async function makeChannelAConversation() {
+//   if (!channel.value) return;
 
-  const channelModel = new Channel(perspective, channel.value.baseExpression);
-  channelModel.isConversation = true;
-  await channelModel.update();
-}
+//   const channelModel = new Channel(perspective, channel.value.baseExpression);
+//   channelModel.isConversation = true;
+//   await channelModel.update();
+// }
 
 async function togglePinned() {
   if (!channel.value) return;
@@ -283,10 +283,18 @@ async function togglePinned() {
   await channelModel.update();
 }
 
-// Navigate to the first loaded view if no viewId set in the URL params
-watch(views, (newVal, oldVal) => {
-  const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
-  if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
+// // Navigate to the first loaded view if no viewId set in the URL params
+// watch(views, (newVal, oldVal) => {
+//   const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
+//   if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
+// });
+
+onMounted(() => {
+  // Navigate to the conversation or subchannels view if no viewId present when entering channel
+  if (!viewId) {
+    if (channel.value?.isConversation) router.push({ name: "view", params: { viewId: "conversation" } });
+    else router.push({ name: "view", params: { viewId: "sub-channels" } });
+  }
 });
 
 // Watch for agent changes in the signalling service
