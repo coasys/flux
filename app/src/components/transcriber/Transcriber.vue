@@ -222,8 +222,13 @@ const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 
 const { mediaSettings, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
-const { loadingAIData, whisperLoadingStatus, whisperTinyLoadingStatus, transcriptionMessageTimeout } =
-  storeToRefs(aiStore);
+const {
+  loadingAIData,
+  whisperLoadingStatus,
+  whisperTinyLoadingStatus,
+  transcriptionMessageTimeout,
+  transcriptionMaxChars,
+} = storeToRefs(aiStore);
 const { callRoute } = storeToRefs(webrtcStore);
 
 const browser = detectBrowser();
@@ -322,6 +327,13 @@ function addCurrentTranscript(text?: string) {
   if (existingIndex >= 0) {
     // If match found, update text
     transcripts.value[existingIndex].text += text;
+
+    // Check if message exceeds max length
+    if (transcripts.value[existingIndex].text.length > transcriptionMaxChars.value) {
+      // Save immediately and start new message
+      saveMessage();
+      return;
+    }
   } else {
     // Otherwise initialise new transcript
     transcriptId.value = uuidv4();
@@ -341,13 +353,22 @@ async function handleTranscriptionText(text: string) {
   // Clear preview text when we get final text
   previewText.value = "";
   addCurrentTranscript(text);
-  resetSaveTimeout();
+
+  // Check current transcript length and save if it exceeds max length
+  const currentTranscript = transcripts.value.find((t) => t.id === transcriptId.value);
+  if (currentTranscript && currentTranscript.text.length > transcriptionMaxChars.value) await saveMessage();
+  else resetSaveTimeout();
 }
 
 async function handleTranscriptionPreview(text: string) {
   addCurrentTranscript();
   previewText.value += text;
-  resetSaveTimeout();
+
+  // Check total length including preview & save immediately if it exceeds max length
+  const currentTranscript = transcripts.value.find((t) => t.id === transcriptId.value);
+  const totalLength = (currentTranscript?.text.length || 0) + previewText.value.length;
+  if (totalLength > transcriptionMaxChars.value) await saveMessage();
+  else resetSaveTimeout();
 }
 
 function startRemoteTranscription() {
