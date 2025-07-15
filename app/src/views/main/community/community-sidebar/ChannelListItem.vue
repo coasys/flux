@@ -1,14 +1,14 @@
 <template>
-  <div slot="trigger">
-    <j-menu-item
-      tag="j-menu-item"
+  <j-flex direction="column" gap="200">
+    <div
       class="channel"
-      :class="{ 'channel--muted': channel.notifications?.mute }"
-      :selected="channel.baseExpression === route.params.channelId && !expanded"
-      @click="navigateToChannel"
+      :class="{
+        selected: channel.baseExpression === route.params.channelId,
+        muted: channel.notifications?.mute,
+      }"
     >
       <j-flex slot="start" gap="400" a="center">
-        <j-flex gap="300">
+        <j-flex gap="300" @click="navigateToChannel" style="cursor: pointer">
           <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" />
           {{ channel.name }}
         </j-flex>
@@ -19,7 +19,7 @@
           {{ channel.children.length }}
         </button>
 
-        <div class="channel__notification" v-if="channel.hasNewMessages" />
+        <div class="notification" v-if="channel.hasNewMessages" />
 
         <j-flex>
           <template v-for="agent in activeAgents" :key="agent.did">
@@ -39,12 +39,12 @@
 
         <RecordingIcon />
       </j-flex>
-    </j-menu-item>
+    </div>
 
     <div v-if="expanded && channel.children?.length" style="margin-left: var(--j-space-500)">
       <ChannelListItem v-for="subChannel in channel.children" :key="subChannel.baseExpression" :channel="subChannel" />
     </div>
-  </div>
+  </j-flex>
 
   <!-- <j-menu slot="content" v-if="isChannelCreator">
     <j-menu-item @click="() => (modalStore.showEditChannel = true)">
@@ -179,7 +179,18 @@ watch(() => agents.value, findAgentsInChannel, { deep: true });
 <style lang="scss" scoped>
 .channel {
   position: relative;
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+
+  &.selected {
+    background-color: var(--j-color-primary-100);
+  }
+
+  &.muted {
+    opacity: 0.6;
+  }
 
   .show-children-button {
     all: unset;
@@ -198,43 +209,35 @@ watch(() => agents.value, findAgentsInChannel, { deep: true });
       margin-right: 6px;
     }
   }
-}
 
-.channel--muted {
-  opacity: 0.6;
-}
-
-.channel-views {
-  margin-left: var(--j-space-400);
-}
-
-.channel__notification {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--j-color-primary-500);
-  flex-shrink: 0;
-}
-
-.agent {
-  height: 20px;
-  z-index: 1;
-  border-radius: 50%;
-
-  &:not(:first-child) {
-    margin-left: -10px;
+  .notification {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--j-color-primary-500);
+    flex-shrink: 0;
   }
 
-  &.active {
-    box-shadow: 0 0 0 1px var(--j-color-success-300);
-  }
+  .agent {
+    height: 20px;
+    z-index: 1;
+    border-radius: 50%;
 
-  &.asleep {
-    box-shadow: 0 0 0 1px var(--j-color-warning-500);
-  }
+    &:not(:first-child) {
+      margin-left: -10px;
+    }
 
-  &.in-call {
-    box-shadow: 0 0 0 1px var(--j-color-danger-400);
+    &.active {
+      box-shadow: 0 0 0 1px var(--j-color-success-300);
+    }
+
+    &.asleep {
+      box-shadow: 0 0 0 1px var(--j-color-warning-500);
+    }
+
+    &.in-call {
+      box-shadow: 0 0 0 1px var(--j-color-danger-400);
+    }
   }
 }
 </style>
