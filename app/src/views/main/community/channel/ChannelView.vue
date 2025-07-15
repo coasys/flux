@@ -45,12 +45,17 @@
 
               <button
                 v-if="channel.isConversation"
-                class="pin-conversation-button"
-                :class="channel.isPinned ? 'pinned' : ''"
+                class="header-button"
+                :class="channel.isPinned ? 'highlighted' : ''"
                 @click="togglePinned"
               >
                 <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
                 {{ channel.isPinned ? "Pinned" : "Pin conversation" }}
+              </button>
+
+              <button v-else class="header-button highlighted" @click="goToEditChannel">
+                <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
+                Edit channel
               </button>
 
               <AvatarGroup
@@ -357,7 +362,7 @@ watch(
       height: 100%;
       gap: var(--j-space-300);
 
-      .pin-conversation-button {
+      .header-button {
         all: unset;
         cursor: pointer;
         display: flex;
@@ -372,7 +377,7 @@ watch(
           color: var(--j-color-ui-400);
         }
 
-        &.pinned {
+        &.highlighted {
           outline: 1px solid var(--j-color-primary-500);
           color: var(--j-color-primary-600);
 
@@ -388,7 +393,7 @@ watch(
             color: var(--j-color-ui-500);
           }
 
-          &.pinned {
+          &.highlighted {
             outline: 1px solid var(--j-color-primary-600);
             color: var(--j-color-primary-700);
 
