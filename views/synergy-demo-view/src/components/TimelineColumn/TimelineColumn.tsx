@@ -56,6 +56,7 @@ export default function TimelineColumn({
   const [zoom, setZoom] = useState<GroupingOption>(groupingOptions[0]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
+  const synced = useRef(true);
   const processing = useRef(false);
   const gettingData = useRef(false);
   const linkAddedTimeout = useRef<any>(null);
@@ -116,8 +117,8 @@ export default function TimelineColumn({
   }
 
   async function checkIfWeShouldStartProcessing(items: SynergyItem[]) {
-    // Skip if processing already in progress, signals are unhealthy, our AI is disabled, or we're in another channel
-    if (processing.current || !signalsHealthy || !aiStore.defaultLLM) return;
+    // Skip if processing already in progress, not synched, signals are unhealthy, our AI is disabled, or we're in another channel
+    if (processing.current || !synced.current || !signalsHealthy || !aiStore.defaultLLM) return;
 
     // Skip if not enough unprocessed items
     const enoughItems = items.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;
@@ -230,20 +231,29 @@ export default function TimelineColumn({
     setProcessingState(processingAgents[0]?.processing || null);
   }
 
+  function handleSyncStateChanged(event: CustomEvent) {
+    synced.current = event.detail.synced;
+  }
+
   useEffect(() => {
     // Wait until appstore & signallingService are available before initializing
     if (appStore && signallingService) {
       getData(true);
 
       // Listen for new agents state from the signalling service
-      const eventName = `${perspective.uuid}-new-agents-state`;
-      window.addEventListener(eventName, handleNewAgentsState);
+      const agentStateEvent = `${perspective.uuid}-new-agents-state`;
+      window.addEventListener(agentStateEvent, handleNewAgentsState);
+
+      // Listen for sync state changes from the community service
+      const syncStateEvent = `${perspective.uuid}-community-synced`;
+      window.addEventListener(syncStateEvent, handleSyncStateChanged);
 
       // Listen for link-added events from the perspective
       perspective.addListener("link-added", handleLinkAdded);
 
       return () => {
-        window.removeEventListener(eventName, handleNewAgentsState);
+        window.removeEventListener(agentStateEvent, handleNewAgentsState);
+        window.removeEventListener(syncStateEvent, handleSyncStateChanged);
         perspective.removeListener("link-added", handleLinkAdded);
       };
     }
