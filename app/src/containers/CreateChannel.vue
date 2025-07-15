@@ -146,8 +146,7 @@ const { data } = usePerspective(client, () => route.params.communityId);
 const perspective = computed(() => data.value.perspective);
 
 const hasName = computed(() => channelName.value?.length >= 3);
-const validSelectedViews = computed(() => selectedViews.value.length >= 1);
-const canSubmit = computed(() => hasName.value && validSelectedViews.value);
+const canSubmit = computed(() => hasName.value);
 const selectedPlugins = computed(() => packages.value.filter((p) => selectedViews.value.includes(p.pkg)));
 const officialApps = computed(() =>
   packages.value.filter(
@@ -159,7 +158,6 @@ const officialApps = computed(() =>
 const communityApps = computed(() => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
 const filteredPackages = computed(() => (tab.value === "official" ? officialApps.value : communityApps.value));
 
-// Methods
 function isSelected(pkg: FluxApp) {
   return selectedViews.value.some((view) => view === pkg.pkg);
 }
