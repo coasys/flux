@@ -29,12 +29,36 @@
 
       <div class="header-actions" v-if="!isMobile">
         <div class="header-left">
-          <j-box pr="500">
-            <j-flex a="center" gap="200">
-              <j-icon name="hash" size="md" color="ui-300" />
-              <j-text color="black" weight="700" size="500" nomargin>
-                {{ channel.name }}
-              </j-text>
+          <j-box pr="300">
+            <j-flex a="center" gap="600">
+              <j-flex a="center" @click="() => changeCurrentView('conversation')" style="cursor: pointer">
+                <j-icon
+                  :name="channel.isConversation ? 'flower2' : 'hash'"
+                  size="md"
+                  color="ui-300"
+                  :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
+                />
+                <j-text color="black" weight="700" size="500" nomargin>
+                  {{ conversation ? conversation.conversationName : channel.name }}
+                </j-text>
+              </j-flex>
+
+              <button
+                v-if="channel.isConversation"
+                class="pin-conversation-button"
+                :class="channel.isPinned ? 'pinned' : ''"
+                @click="togglePinned"
+              >
+                <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
+                {{ channel.isPinned ? "Pinned" : "Pin conversation" }}
+              </button>
+
+              <AvatarGroup
+                v-if="agentsInChannel.length"
+                :users="agentsInChannel"
+                :tooltip-title="`${agentsInChannel.length} agent${agentsInChannel.length > 1 ? 's' : ''} in the channel`"
+                size="xs"
+              />
             </j-flex>
           </j-box>
 
@@ -42,20 +66,23 @@
             <div class="tab-divider" />
 
             <label
-              v-if="channel.isConversation"
-              :class="{ tab: true, checked: viewId === 'conversation' }"
-              @click="() => changeCurrentView('conversation')"
+              v-if="!channel.isConversation"
+              :class="{ tab: true, checked: viewId === 'sub-channels' }"
+              @click="() => changeCurrentView('sub-channels')"
             >
-              <j-icon name="flower2" size="xs" />
-              <span>Conversation</span>
+              <j-icon name="diagram-3" size="xs" />
+              <span>Sub channels</span>
             </label>
 
-            <j-button v-else @click="makeChannelAConversation" size="sm" variant="primary">Make conversation</j-button>
+            <label
+              v-if="!channel.isConversation"
+              :class="{ tab: true, checked: viewId === 'conversations' }"
+              @click="() => changeCurrentView('conversations')"
+            >
+              <j-icon name="flower2" size="xs" />
+              <span>Conversations</span>
+            </label>
 
-            <div class="tab-divider" />
-          </div>
-
-          <div class="tabs">
             <label
               v-for="view in views"
               :class="{ tab: true, checked: view.pkg === viewId }"
@@ -101,6 +128,7 @@
           v-if="route.params.communityId === communityId && route.params.channelId === channelId"
           :key="`${channelId}-${route.params.viewId}`"
           :is="Component"
+          :channel="channel"
           class="perspective-view"
         />
       </KeepAlive>
@@ -177,7 +205,7 @@ const modalStore = useModalStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { perspective, channels, signallingService } = useCommunityService();
+const { perspective, allChannels, signallingService, recentConversations } = useCommunityService();
 
 const { me } = storeToRefs(appStore);
 const { callWindowOpen } = storeToRefs(uiStore);
@@ -191,9 +219,13 @@ const isChangeChannel = ref(false);
 
 type AgentData = Profile & AgentState;
 
-const channel = computed(() => channels.value.find((c) => c.baseExpression === channelId));
+const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId));
+const conversation = computed(() =>
+  channel.value?.isConversation ? recentConversations.value.find((c) => c.channelId === channelId) : null
+);
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
+const agentsInChannel = ref<AgentData[]>([]);
 const agentsInCall = ref<AgentData[]>([]);
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
@@ -202,8 +234,8 @@ function goToEditChannel() {
   modalStore.showEditChannel = true;
 }
 
-function changeCurrentView(value: string) {
-  router.push({ name: "view", params: { communityId, channelId, viewId: value } });
+function changeCurrentView(viewId: string) {
+  router.push({ name: "view", params: { communityId, channelId, viewId } });
 }
 
 function onIsChannelChange() {
@@ -243,16 +275,33 @@ async function makeChannelAConversation() {
   await channelModel.update();
 }
 
+async function togglePinned() {
+  if (!channel.value) return;
+
+  const channelModel = new Channel(perspective, channel.value.baseExpression);
+  channelModel.isPinned = !channel.value.isPinned;
+  await channelModel.update();
+}
+
 // Navigate to the first loaded view if no viewId set in the URL params
 watch(views, (newVal, oldVal) => {
   const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
   if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
 });
 
-// Watch for agent changes in the signalling service and update agentsInCall
+// Watch for agent changes in the signalling service
 watch(
   signallingService.agents.value,
   async (newAgents) => {
+    // Update agentsInChannel
+    const agentsInChannelMap = Object.entries(newAgents).filter(
+      ([_, agent]) => agent.currentRoute?.channelId === channelId && !["offline", "invisible"].includes(agent.status)
+    );
+    agentsInChannel.value = await Promise.all(
+      agentsInChannelMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
+    );
+
+    // Update agentsInCall
     const agentsInCallMap = Object.entries(newAgents).filter(
       ([_, agent]) => agent.inCall && agent.callRoute.channelId === channelId
     );
@@ -299,6 +348,48 @@ watch(
       align-items: center;
       height: 100%;
       gap: var(--j-space-300);
+
+      .pin-conversation-button {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: var(--j-color-ui-500);
+        font-size: var(--j-font-size-400);
+        padding: var(--j-space-200) var(--j-space-300);
+        border-radius: 8px;
+        background: var(--j-color-ui-100);
+
+        > j-icon {
+          color: var(--j-color-ui-400);
+        }
+
+        &.pinned {
+          outline: 1px solid var(--j-color-primary-500);
+          color: var(--j-color-primary-600);
+
+          > j-icon {
+            color: var(--j-color-primary-600);
+          }
+        }
+
+        &:hover {
+          color: var(--j-color-ui-600);
+
+          > j-icon {
+            color: var(--j-color-ui-500);
+          }
+
+          &.pinned {
+            outline: 1px solid var(--j-color-primary-600);
+            color: var(--j-color-primary-700);
+
+            > j-icon {
+              color: var(--j-color-primary-700);
+            }
+          }
+        }
+      }
     }
 
     &-right {
@@ -316,13 +407,13 @@ watch(
     display: flex;
     height: 100%;
     align-items: center;
-    gap: var(--j-space-500);
+    gap: var(--j-space-600);
 
     .tab-divider {
       width: 1px;
       height: 100%;
       background: var(--j-color-ui-200);
-      margin: 0 var(--j-space-400);
+      margin: 0 var(--j-space-300);
     }
   }
 

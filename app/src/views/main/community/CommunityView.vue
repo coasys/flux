@@ -44,7 +44,7 @@
       </j-box>
     </div>
 
-    <div class="center" v-if="isSynced && !route.params.channelId && community && channels.length">
+    <div class="center" v-if="isSynced && !route.params.channelId && community && nestedChannels.length">
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community.thumbnail || null" />
@@ -58,7 +58,7 @@
             <button
               class="channel-card"
               @click="() => navigateToChannel(channel.baseExpression)"
-              v-for="channel in channels"
+              v-for="channel in nestedChannels"
             >
               # {{ channel.name }}
             </button>
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <div class="center" v-if="isSynced && !route.params.channelId && channels.length === 0">
+    <div class="center" v-if="isSynced && !route.params.channelId && nestedChannels.length === 0">
       <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
@@ -110,7 +110,7 @@ const communityServiceStore = useCommunityServiceStore();
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
 communityServiceStore.addCommunityService(communityId, communityService);
-const { community, isSynced, channels, signallingService } = communityService;
+const { community, isSynced, nestedChannels, signallingService } = communityService;
 
 function navigateToChannel(channelId: string) {
   router.push({ name: "channel", params: { communityId, channelId } });

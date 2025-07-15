@@ -4,7 +4,7 @@ import { EntryType } from "@coasys/flux-types";
 import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
 import App from "../app";
 
-const { CHANNEL_IS_CONVERSATION, CHANNEL_NAME, CHANNEL_DESCRIPTION, ENTRY_TYPE } = community;
+const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
 
 @ModelOptions({ name: "Channel" })
 export class Channel extends Ad4mModel {
@@ -34,6 +34,13 @@ export class Channel extends Ad4mModel {
     resolveLanguage: "literal",
   })
   isConversation: boolean;
+
+  @Property({
+    through: CHANNEL_IS_PINNED,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  isPinned: boolean;
 
   @Collection({
     through: "ad4m://has_child",

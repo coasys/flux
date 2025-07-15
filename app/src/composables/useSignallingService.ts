@@ -326,6 +326,25 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     broadcastState();
   }
 
+  // function getAgentsInChannel(channelId: string) {
+  //   return computed(() => {
+  //     if (!agents.value) return [];
+
+  //     const agentsInChannelMap = Object.entries(agents.value).filter(([_, agent]) => {
+  //       const inChannel = agent.currentRoute?.channelId === channelId;
+  //       const inCall = agent.inCall && agent.callRoute.channelId === channelId;
+  //       return inChannel || inCall;
+  //     });
+
+  //     console.log("Agents in channel:", channelId, agentsInChannelMap);
+
+  //     return agentsInChannelMap.map(([agentDid, agent]) => ({
+  //       did: agentDid,
+  //       ...agent,
+  //     }));
+  //   });
+  // }
+
   // Watch for state changes in the stores & broadcast updates to peers
   watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
@@ -337,12 +356,13 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   return {
     signalling,
     agents,
-    setProcessingState,
-    getAgentState,
     startSignalling,
     stopSignalling,
     addSignalHandler,
     removeSignalHandler,
     sendSignal,
+    setProcessingState,
+    getAgentState,
+    // getAgentsInChannel,
   };
 }

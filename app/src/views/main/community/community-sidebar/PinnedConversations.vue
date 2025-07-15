@@ -6,7 +6,7 @@
         <j-text color="ui-400" uppercase nomargin>Pinned Conversations</j-text>
       </j-flex>
 
-      <j-spinner size="sm" v-if="!pinnedConversations.length && pinnedConversationsLoading" />
+      <j-spinner size="xs" v-if="!pinnedConversations.length && pinnedConversationsLoading" />
 
       <div
         v-for="conversation in pinnedConversations"
@@ -14,7 +14,7 @@
         style="cursor: pointer"
       >
         <j-flex a="center" gap="200">
-          <j-text nomargin>{{ conversation.name }}</j-text>
+          <j-text nomargin>{{ conversation.conversationName }}</j-text>
         </j-flex>
       </div>
     </j-flex>

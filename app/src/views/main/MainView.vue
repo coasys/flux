@@ -33,8 +33,8 @@
     <j-modal :open="modalStore.showCreateChannel" @toggle="(e: any) => (modalStore.showCreateChannel = e.target.open)">
       <CreateChannel
         v-if="modalStore.showCreateChannel"
-        @submit="() => (modalStore.showCreateChannel = false)"
-        @cancel="() => (modalStore.showCreateChannel = false)"
+        @submit="modalStore.hideCreateChannelModal"
+        @cancel="modalStore.hideCreateChannelModal"
       />
     </j-modal>
 
@@ -48,7 +48,7 @@
       @toggle="(e: any) => (modalStore.showEditCommunity = e.target.open)"
     >
       <EditCommunity
-        :communityId="route.params.communityId"
+        :communityId="`${route.params.communityId}`"
         v-if="modalStore.showEditCommunity"
         @submit="() => (modalStore.showEditCommunity = false)"
         @cancel="() => (modalStore.showEditCommunity = false)"
@@ -83,7 +83,7 @@
         v-if="modalStore.showEditChannel"
         @cancel="() => (modalStore.showEditChannel = false)"
         @submit="() => (modalStore.showEditChannel = false)"
-        :channelId="route.params.channelId"
+        :channelId="`${route.params.channelId}`"
       />
     </j-modal>
 

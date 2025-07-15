@@ -4,7 +4,7 @@
       tag="j-menu-item"
       class="channel"
       :class="{ 'channel--muted': channel.notifications?.mute }"
-      :selected="channel.baseExpression === route.params.channelId && !channel.expanded"
+      :selected="channel.baseExpression === route.params.channelId && !expanded"
       @click="navigateToChannel"
     >
       <j-flex slot="start" gap="400" a="center">
@@ -12,6 +12,12 @@
           <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" />
           {{ channel.name }}
         </j-flex>
+
+        <button v-if="channel.children?.length" class="show-children-button" @click="expanded = !expanded">
+          <ChevronDown v-if="expanded" />
+          <ChevronRight v-else />
+          {{ channel.children.length }}
+        </button>
 
         <div class="channel__notification" v-if="channel.hasNewMessages" />
 
@@ -34,9 +40,13 @@
         <RecordingIcon />
       </j-flex>
     </j-menu-item>
+
+    <div v-if="expanded && channel.children?.length" style="margin-left: var(--j-space-500)">
+      <ChannelListItem v-for="subChannel in channel.children" :key="subChannel.baseExpression" :channel="subChannel" />
+    </div>
   </div>
 
-  <j-menu slot="content" v-if="isChannelCreator">
+  <!-- <j-menu slot="content" v-if="isChannelCreator">
     <j-menu-item @click="() => (modalStore.showEditChannel = true)">
       <j-icon size="xs" slot="start" name="pencil" />
       Edit Channel
@@ -46,12 +56,14 @@
       <j-icon size="xs" slot="start" name="trash" />
       Delete Channel
     </j-menu-item>
-  </j-menu>
+  </j-menu> -->
 </template>
 
 <script setup lang="ts">
+import ChevronDown from "@/components/icons/ChevronDown.vue";
+import ChevronRight from "@/components/icons/ChevronRight.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
+import { ChannelWithChildren, useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentState, Profile } from "@coasys/flux-types";
@@ -59,10 +71,13 @@ import { storeToRefs } from "pinia";
 import { computed, defineOptions, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+type Props = {
+  channel: ChannelWithChildren;
+};
 type AgentData = Profile & AgentState;
 
 defineOptions({ name: "ChannelListItem" });
-const { channel } = defineProps({ channel: { type: Object, required: true } });
+const { channel } = defineProps<Props>();
 
 const route = useRoute();
 const router = useRouter();
@@ -75,6 +90,7 @@ const { signallingService } = useCommunityService();
 const { agents } = signallingService;
 
 const agentsInChannel = ref<AgentData[]>([]);
+const expanded = ref(false);
 
 const isChannelCreator = computed(() => channel.author === me.value.did);
 const activeAgents = computed(() =>
@@ -139,7 +155,23 @@ async function deleteChannel() {
   }
 }
 
-onMounted(findAgentsInChannel);
+function searchDescendentsForChannel(channel: ChannelWithChildren): boolean {
+  if (!channel.children?.length) return false;
+
+  // Check direct children first
+  if (channel.children.some((c) => c.baseExpression === route.params.channelId)) return true;
+
+  // Recursively search children
+  return channel.children.some((child) => searchDescendentsForChannel(child));
+}
+
+onMounted(() => {
+  // If the current channel is contained within this channels descendents, expand it
+  searchDescendentsForChannel(channel as ChannelWithChildren);
+  if (searchDescendentsForChannel(channel as ChannelWithChildren)) expanded.value = true;
+
+  findAgentsInChannel();
+});
 
 watch(() => agents.value, findAgentsInChannel, { deep: true });
 </script>
@@ -148,6 +180,24 @@ watch(() => agents.value, findAgentsInChannel, { deep: true });
 .channel {
   position: relative;
   display: block;
+
+  .show-children-button {
+    all: unset;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--j-color-ui-300);
+    font-weight: 600;
+    font-size: var(--j-font-size-400);
+
+    > svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+    }
+  }
 }
 
 .channel--muted {

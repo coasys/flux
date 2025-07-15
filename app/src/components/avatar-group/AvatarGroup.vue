@@ -33,6 +33,7 @@ const emit = defineEmits(["click"]);
   background: none;
   cursor: pointer;
   display: flex;
+  padding: 0;
 
   .avatars {
     gap: var(--j-space-200);

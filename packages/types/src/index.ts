@@ -245,4 +245,5 @@ export interface SignallingService {
   addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   sendSignal: (link: Link) => void;
+  // getAgentsInChannel: (channelId: string) => ComputedRef<(AgentState & { did: string })[]>;
 }

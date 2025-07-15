@@ -53,9 +53,9 @@
                 {{ unprocessedItems.length }} Unprocessed Items
               </j-text>
 
-              <j-button v-if="showStartNewConversationButton" variant="primary" size="sm" @click="startNewConversation">
+              <!-- <j-button v-if="showStartNewConversationButton" variant="primary" size="sm" @click="startNewConversation">
                 Start new conversation
-              </j-button>
+              </j-button> -->
             </j-flex>
           </j-box>
 
@@ -137,7 +137,8 @@ const appStore = useAppStore();
 const webrtcStore = useWebrtcStore();
 const aiStore = useAiStore();
 
-const { signallingService, perspective, isSynced } = useCommunityService();
+const { signallingService, perspective, isSynced, getPinnedConversations, getRecentConversations } =
+  useCommunityService();
 const { me } = storeToRefs(appStore);
 const { callHealth } = storeToRefs(webrtcStore);
 const { defaultLLM } = storeToRefs(aiStore);
@@ -281,7 +282,13 @@ async function getData(firstRun?: boolean): Promise<void> {
   if (gettingData.value) return;
 
   gettingData.value = true;
-  const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
+  const [newConversations, newUnprocessedItems] = await Promise.all([
+    getConversations(),
+    getUnprocessedItems(),
+    // TODO: find better approach (maybe just update all conversations in community service, and have that trigger updates to recent and pinned?)
+    getPinnedConversations(),
+    getRecentConversations(),
+  ]);
   conversations.value = newConversations;
   unprocessedItems.value = newUnprocessedItems;
   if (newConversations.length) creatingNewConversation.value = false;

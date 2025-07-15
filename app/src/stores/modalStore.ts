@@ -1,3 +1,4 @@
+import { Channel } from "@coasys/flux-api";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -17,6 +18,16 @@ export const useModalStore = defineStore(
     const showCommunityTweaks = ref(false);
     const showLeaveCommunity = ref(false);
     const showWebrtcSettings = ref(false);
+
+    // Used to track the parent channel when creating a subchannels in the CreateChannel modal
+    const createChannelParent = ref<Channel | null>(null);
+
+    function hideCreateChannelModal() {
+      showCreateChannel.value = false;
+
+      // Reset the parent channel when closing the modal
+      createChannelParent.value = null;
+    }
 
     function closeAllModals(): void {
       showDisclaimer.value = false;
@@ -48,9 +59,11 @@ export const useModalStore = defineStore(
       showCommunityTweaks,
       showLeaveCommunity,
       showWebrtcSettings,
+      createChannelParent,
 
+      hideCreateChannelModal,
       closeAllModals,
     };
   },
-  { persist: true }
+  { persist: { omit: ["createChannelParent"] } }
 );

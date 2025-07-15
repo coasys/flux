@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import { App, Channel, getAllFluxApps } from "@coasys/flux-api";
+import { App, Channel, Conversation, getAllFluxApps } from "@coasys/flux-api";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ChannelList from "./ChannelList.vue";
@@ -38,13 +38,17 @@ async function startConversation() {
 
   // Create the channel
   const channel = new Channel(perspective);
-  channel.name = "New conversation initialized...";
-  channel.description = "Content will appear when the first items have been processed";
+  channel.name = "";
+  channel.description = "";
   channel.isConversation = true;
   channel.isPinned = false;
   await channel.save();
 
-  console.log("channel created", channel);
+  // Create the first placeholder conversation
+  const conversation = new Conversation(perspective, undefined, channel.baseExpression);
+  conversation.conversationName = "New conversation";
+  conversation.summary = "Content will appear when the first items have been processed...";
+  await conversation.save();
 
   // Attach the chat app
   const fluxApps = await getAllFluxApps();
@@ -68,7 +72,7 @@ async function startConversation() {
 
   // Navigate to the new channel
   const communityId = route.params.communityId as string;
-  router.push({ name: "channel", params: { communityId, channelId: channel.baseExpression } });
+  router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: "conversation" } });
 
   newConversationLoading.value = false;
 }

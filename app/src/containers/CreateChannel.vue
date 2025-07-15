@@ -2,7 +2,10 @@
   <j-box p="800">
     <j-flex direction="column" gap="700">
       <div>
-        <j-text variant="heading-sm">Create Channel</j-text>
+        <j-text v-if="createChannelParent" variant="heading-sm">
+          Create a sub-channel in #{{ createChannelParent.name }}
+        </j-text>
+        <j-text v-else variant="heading-sm">Create Channel</j-text>
         <j-text variant="body"> Channels are ways to organize your conversations by topics. </j-text>
       </div>
       <j-flex direction="column" gap="400">
@@ -31,13 +34,13 @@
           @input="(e: any) => (channelDescription = e.target.value)"
         />
 
-        <j-flex gap="400" a="center">
-          <j-text nomargin>Make the channel a conversation</j-text>
+        <!-- <j-flex gap="400" a="center">
+          <j-text nomargin>Make the {{ createChannelParent ? "sub-" : "" }}channel a conversation</j-text>
           <j-toggle :checked="isConversation" :disabled="isCreatingChannel" @change="isConversation = !isConversation">
             {{ isConversation ? "True" : "False" }}
           </j-toggle>
           <j-icon name="info-circle" size="sm" color="ui-500" />
-        </j-flex>
+        </j-flex> -->
 
         <j-box pb="500" pt="300">
           <j-box pb="300">
@@ -110,18 +113,23 @@
 </template>
 
 <script setup lang="ts">
+import { useModalStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { usePerspective } from "@coasys/ad4m-vue-hooks";
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from "@coasys/flux-api";
+import { storeToRefs } from "pinia";
 import semver from "semver";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const emit = defineEmits<{ cancel: []; submit: [] }>();
 
 const route = useRoute();
 const router = useRouter();
+const modalStore = useModalStore();
+
+const { createChannelParent } = storeToRefs(modalStore);
 
 const tab = ref<"official" | "community">("official");
 const isLoading = ref(false);
@@ -130,7 +138,7 @@ const selectedViews = ref<string[]>([]);
 const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
 const channelName = ref("");
 const channelDescription = ref("");
-const isConversation = ref(false);
+// const isConversation = ref(false);
 const isCreatingChannel = ref(false);
 
 const client = await getAd4mClient();
@@ -172,13 +180,16 @@ async function createChannel() {
       throw new Error("Cannot create a channel because perspective is undefined.");
     }
 
-    const channel = new Channel(perspective.value);
+    console.log("creating channel: ", createChannelParent.value?.baseExpression);
+
+    const channel = new Channel(perspective.value, undefined, createChannelParent.value?.baseExpression || undefined);
     channel.name = channelName.value;
     channel.description = channelDescription.value;
-    channel.isConversation = isConversation.value;
+    channel.isConversation = false; // isConversation.value;
+    channel.isPinned = false;
     await channel.save();
 
-    await perspective.value.ensureSDNASubjectClass(App);
+    // await perspective.value.ensureSDNASubjectClass(App);
 
     await Promise.all(
       selectedPlugins.value.map(async (app) => {
@@ -201,6 +212,7 @@ async function createChannel() {
       },
     });
   } finally {
+    createChannelParent.value = null;
     isCreatingChannel.value = false;
   }
 }
@@ -210,6 +222,7 @@ watch(
   selectedPlugins,
   async (apps: FluxApp[]) => {
     apps?.forEach(async (app) => {
+      console.log("app:", app);
       const wcName = await generateWCName(app.pkg);
       if (customElements.get(wcName)) {
         loadedPlugins[app.pkg] = "loaded";
@@ -249,6 +262,8 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+onUnmounted(modalStore.hideCreateChannelModal);
 </script>
 
 <style scoped>

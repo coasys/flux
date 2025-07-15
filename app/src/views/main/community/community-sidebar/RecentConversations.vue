@@ -6,21 +6,26 @@
         <j-text color="ui-400" uppercase nomargin>Recent Conversations</j-text>
       </j-flex>
 
-      <j-spinner size="sm" v-if="!recentConversations.length && recentConversationsLoading" />
+      <template v-if="recentConversations.length">
+        <div
+          v-for="conversation in recentConversations"
+          @click="navigateToConversation(conversation)"
+          style="cursor: pointer"
+        >
+          <j-flex a="center" gap="200">
+            <j-text nomargin>{{ conversation.conversationName }}</j-text>
+            <j-text nomargin size="300">•</j-text>
+            <j-text nomargin size="300">
+              <j-timestamp :value="conversation.lastActivity" relative class="timestamp" />
+            </j-text>
+          </j-flex>
+        </div>
+      </template>
 
-      <div
-        v-for="conversation in recentConversations"
-        @click="navigateToConversation(conversation)"
-        style="cursor: pointer"
-      >
-        <j-flex a="center" gap="200">
-          <j-text nomargin>{{ conversation.name }}</j-text>
-          <j-text nomargin size="300">•</j-text>
-          <j-text nomargin size="300">
-            <j-timestamp :value="conversation.lastActivity" relative class="timestamp" />
-          </j-text>
-        </j-flex>
-      </div>
+      <template v-else>
+        <j-spinner size="xs" v-if="recentConversationsLoading" />
+        <j-text v-else>No conversations created yet...</j-text>
+      </template>
     </j-flex>
   </j-box>
 </template>

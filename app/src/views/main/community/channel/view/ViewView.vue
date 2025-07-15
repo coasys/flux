@@ -9,6 +9,8 @@
 
     <SynergyView v-if="viewId === 'conversation'" />
 
+    <SubChannels v-if="viewId === 'sub-channels'" :parentChannel="channel" />
+
     <component
       v-else-if="wcName"
       :is="wcName"
@@ -33,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import SubChannels from "@/components/sub-channels/SubChannels.vue";
 import SynergyView from "@/components/synergy/SynergyView.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
@@ -43,12 +46,16 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ViewView" });
-const { communityId, channelId, viewId } = defineProps({
-  communityId: { type: String },
-  channelId: { type: String },
-  viewId: { type: String },
-  defaultViewId: { type: String },
-});
+interface Props {
+  communityId: string;
+  channelId: string;
+  viewId: string;
+  defaultViewId?: string;
+  channel: Channel;
+}
+
+const props = defineProps<Props>();
+const { communityId, channelId, viewId, channel } = props;
 
 const router = useRouter();
 const route = useRoute();
@@ -120,7 +127,7 @@ function toggleProfile(open: boolean, did?: any): void {
 
 onMounted(async () => {
   // Skip web component generation if mounting the conversation view
-  if (viewId !== "conversation") {
+  if (!["conversation", "sub-channels"].includes(viewId as string)) {
     const generatedName = await generateWCName(viewId as string);
 
     if (!customElements.get(generatedName)) {

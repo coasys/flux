@@ -3,6 +3,7 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community as FluxCommunity } from "@coasys/flux-types";
 import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import { v4 as uuidv4 } from "uuid";
+import App from "./app";
 import { Community } from "./community";
 import Conversation from "./conversation";
 import ConversationSubgroup from "./conversation-subgroup";
@@ -35,8 +36,9 @@ export default async function createCommunity({
       ? await client.perspective.byUUID(perspectiveUuid)
       : await client.perspective.add(name);
 
-    // Add the Community model to the perspectives SDNA
+    // Add models to the perspectives SDNA
     await perspective.ensureSDNASubjectClass(Community);
+    await perspective.ensureSDNASubjectClass(App);
 
     // Add conversation models to the perspective's SDNA (TODO: only add these when converting a channel into a conversation)
     await perspective.ensureSDNASubjectClass(Conversation);
