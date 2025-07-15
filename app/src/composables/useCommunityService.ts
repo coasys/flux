@@ -88,25 +88,32 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   async function recursivelyGetSubChannels(channel: ChannelWithChildren): Promise<ChannelWithChildren> {
+    // Get the sub-channels for the current channel
     const subChannels = await Channel.findAll(perspective, {
       source: channel.baseExpression,
       where: { isConversation: false },
     });
     channel.children = subChannels;
+
+    // Rerun the function recursively for each sub-channel
     await Promise.all(subChannels.map(recursivelyGetSubChannels));
+
     return channel;
   }
 
   async function getNestedChannels() {
     channelsLoading.value = true;
 
+    // Find all root channels that are not conversations
     const newRootChannels = await Channel.findAll(perspective, {
       source: "ad4m://self",
       where: { isConversation: false },
     });
-    await Promise.all(newRootChannels.map(async (channel: ChannelWithChildren) => recursivelyGetSubChannels(channel)));
-    nestedChannels.value = newRootChannels;
 
+    // Recursively get sub-channels for each root channel
+    await Promise.all(newRootChannels.map(async (channel: ChannelWithChildren) => recursivelyGetSubChannels(channel)));
+
+    nestedChannels.value = newRootChannels;
     channelsLoading.value = false;
   }
 
@@ -118,9 +125,10 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     // Get the conversation data for each pinned channel
     pinnedConversations.value = await Promise.all(
-      pinnedChannels.map(
-        async (channel: Channel) => (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0]
-      )
+      pinnedChannels.map(async (channel: Channel) => {
+        const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+        return { ...conversation, channelId: channel.baseExpression };
+      })
     );
 
     pinnedConversationsLoading.value = false;
