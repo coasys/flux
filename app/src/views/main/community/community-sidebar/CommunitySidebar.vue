@@ -1,14 +1,14 @@
 <template>
   <Header />
   <Members />
-  <j-box mt="800" pl="500">
+  <j-box mt="800" mb="500" pl="500">
     <j-button @click="startConversation" variant="primary" :loading="newConversationLoading">
       <j-icon name="door-open" />
       Start conversation
     </j-button>
   </j-box>
   <PinnedConversations v-if="pinnedConversations.length" />
-  <RecentConversations />
+  <RecentConversations v-if="recentConversations.length" />
   <ChannelList />
 </template>
 
@@ -27,7 +27,7 @@ defineOptions({ name: "CommunitySidebar" });
 
 const route = useRoute();
 const router = useRouter();
-const { perspective, pinnedConversations } = useCommunityService();
+const { perspective, pinnedConversations, recentConversations } = useCommunityService();
 
 const newConversationLoading = ref(false);
 

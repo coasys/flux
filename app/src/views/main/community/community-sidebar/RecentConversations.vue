@@ -1,31 +1,27 @@
 <template>
   <j-box mt="800" mb="400" px="500">
     <j-flex direction="column" gap="400">
-      <j-flex a="center" gap="300">
+      <div class="header">
         <j-icon name="clock" size="sm" color="ui-400" />
         <j-text color="ui-400" uppercase nomargin>Recent Conversations</j-text>
-      </j-flex>
+        <j-box ml="200" mt="100" v-if="recentConversationsLoading">
+          <j-spinner size="xxs" />
+        </j-box>
+      </div>
 
-      <template v-if="recentConversations.length">
-        <div
-          v-for="conversation in recentConversations"
-          @click="navigateToConversation(conversation.channelId)"
-          style="cursor: pointer"
-        >
-          <j-flex a="center" gap="200">
-            <j-text nomargin>{{ conversation.conversationName }}</j-text>
-            <j-text nomargin size="300">•</j-text>
-            <j-text nomargin size="300">
-              <j-timestamp :value="conversation.lastActivity" relative class="timestamp" />
-            </j-text>
-          </j-flex>
-        </div>
-      </template>
-
-      <template v-else>
-        <j-spinner size="xs" v-if="recentConversationsLoading" />
-        <j-text v-else>No conversations created yet...</j-text>
-      </template>
+      <div
+        v-for="conversation in recentConversations"
+        @click="navigateToConversation(conversation.channelId)"
+        style="cursor: pointer"
+      >
+        <j-flex a="center" gap="200">
+          <j-text nomargin>{{ conversation.conversationName }}</j-text>
+          <j-text nomargin size="300">•</j-text>
+          <j-text nomargin size="300">
+            <j-timestamp :value="conversation.lastActivity" relative class="timestamp" />
+          </j-text>
+        </j-flex>
+      </div>
     </j-flex>
   </j-box>
 </template>
@@ -49,4 +45,11 @@ function navigateToConversation(channelId: string) {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  height: 25px;
+}
+</style>

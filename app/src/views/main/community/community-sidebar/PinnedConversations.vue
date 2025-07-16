@@ -1,12 +1,13 @@
 <template>
   <j-box mt="800" mb="400" px="500">
     <j-flex direction="column" gap="400">
-      <j-flex a="center" gap="300">
+      <div class="header">
         <j-icon name="pin" size="sm" color="ui-400" />
         <j-text color="ui-400" uppercase nomargin>Pinned Conversations</j-text>
-      </j-flex>
-
-      <j-spinner size="xs" v-if="!pinnedConversations.length && pinnedConversationsLoading" />
+        <j-box ml="200" mt="100" v-if="pinnedConversationsLoading">
+          <j-spinner size="xxs" />
+        </j-box>
+      </div>
 
       <div
         v-for="conversation in pinnedConversations"
@@ -40,4 +41,11 @@ function navigateToConversation(channelId: string) {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  height: 25px;
+}
+</style>

@@ -1,38 +1,27 @@
 <template>
-  <j-box pt="500" pb="800" px="400">
+  <j-box pt="500" pb="800" px="500">
     <j-flex direction="column" gap="300">
-      <j-box px="400">
-        <j-flex a="center" gap="300">
-          <j-icon name="diagram-3" size="sm" color="ui-400" />
-          <j-text color="ui-400" uppercase nomargin>Channels</j-text>
-        </j-flex>
-      </j-box>
+      <div class="header">
+        <j-icon name="diagram-3" size="sm" color="ui-400" />
+        <j-text color="ui-400" uppercase nomargin>Channels</j-text>
+        <j-box ml="200" mt="100" v-if="channelsLoading">
+          <j-spinner size="xxs" />
+        </j-box>
+      </div>
 
-      <j-button @click.prevent="() => (modalStore.showCreateChannel = true)" size="sm" slot="end" variant="ghost">
-        <j-icon size="sm" square name="plus" />
-      </j-button>
-
-      <j-box mt="400" ml="600" v-if="channelsLoading">
-        <j-spinner size="sm" />
-      </j-box>
-
-      <j-flex direction="column" v-else>
+      <j-flex direction="column">
         <ChannelListItem v-for="channel in nestedChannels" :channel="channel" />
       </j-flex>
 
-      <!-- <j-popover
-        event="contextmenu"
-        placement="bottom-start"
-        v-for="channel in nestedChannels"
-        :key="channel.baseExpression"
+      <j-flex
+        a="center"
+        gap="200"
+        style="cursor: pointer; margin-left: -2px"
+        @click="() => (modalStore.showCreateChannel = true)"
       >
-        <ChannelListItem v-for="channel in nestedChannels" :channel="channel" />
-      </j-popover>
-
-      <j-menu-item @click="() => (modalStore.showCreateChannel = true)" v-if="!channelsLoading">
-        <j-icon size="xs" slot="start" name="plus" />
-        Add channel
-      </j-menu-item> -->
+        <j-icon size="sm" square name="plus" color="ui-400" />
+        <j-text nomargin color="ui-400">Add channel</j-text>
+      </j-flex>
     </j-flex>
   </j-box>
 </template>
@@ -49,4 +38,11 @@ const modalStore = useModalStore();
 const { nestedChannels, channelsLoading } = useCommunityService();
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  height: 25px;
+}
+</style>

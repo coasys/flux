@@ -1,5 +1,5 @@
 <template>
-  <j-flex direction="column" gap="200">
+  <j-flex direction="column">
     <div
       class="channel"
       :class="{
@@ -181,7 +181,8 @@ watch(() => agents.value, findAgentsInChannel, { deep: true });
   position: relative;
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
+  margin: 0 -12px;
+  padding: 10px;
   border-radius: 6px;
 
   &.selected {
