@@ -1,20 +1,18 @@
 <template>
   <div class="wrapper">
-    <j-flex a="center" gap="500">
-      <j-text nomargin>Explore and manage sub channels here!</j-text>
+    <j-text nomargin>Explore and manage sub channels here!</j-text>
 
-      <j-button variant="primary" @click="openNewSubChannelModal">
-        <j-icon name="plus-lg" />
-        Create a new sub channel
-      </j-button>
-    </j-flex>
+    <j-button variant="primary" @click="openNewSubChannelModal">
+      <j-icon name="plus-lg" />
+      Create a new sub channel
+    </j-button>
 
     <j-box mt="500">
       <j-flex gap="500" wrap>
         <button class="item" v-for="channel in subChannels" @click="() => navigateToChannel(channel.baseExpression)">
           <j-flex direction="column" a="center" gap="400">
-            <j-flex a="center" gap="400">
-              <j-icon :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-700" />
+            <j-flex a="center" gap="100">
+              <j-icon :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
               <j-text nomargin uppercase size="600" weight="600" color="ui-700">{{ channel.name }}</j-text>
             </j-flex>
             <j-text v-if="channel.description && !Array.isArray(channel.description)">{{ channel.description }}</j-text>
@@ -50,7 +48,7 @@ const { perspective } = useCommunityService();
 const { entries: subChannels } = useModel({
   perspective,
   model: Channel,
-  query: { source: props.parentChannel.baseExpression },
+  query: { source: props.parentChannel.baseExpression, where: { isConversation: false } },
 });
 
 function openNewSubChannelModal() {
@@ -76,8 +74,11 @@ watch(subChannels, (newSubChannels) => {
 
 <style lang="scss" scoped>
 .wrapper {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   padding: var(--j-space-600);
+  gap: var(--j-space-500);
 
   .item {
     all: unset;

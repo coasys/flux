@@ -31,7 +31,11 @@
         <div class="header-left">
           <j-box pr="300">
             <j-flex a="center" gap="600">
-              <j-flex a="center" @click="() => changeCurrentView('conversation')" style="cursor: pointer">
+              <j-flex
+                a="center"
+                @click="() => changeCurrentView(channel?.isConversation ? 'conversation' : 'sub-channels')"
+                style="cursor: pointer"
+              >
                 <j-icon
                   :name="channel.isConversation ? 'flower2' : 'hash'"
                   size="md"
@@ -70,14 +74,14 @@
           <div class="tabs">
             <div class="tab-divider" />
 
-            <label
+            <!-- <label
               v-if="!channel.isConversation"
               :class="{ tab: true, checked: viewId === 'sub-channels' }"
               @click="() => changeCurrentView('sub-channels')"
             >
               <j-icon name="diagram-3" size="xs" />
               <span>Sub channels</span>
-            </label>
+            </label> -->
 
             <label
               v-if="!channel.isConversation"
@@ -210,7 +214,8 @@ const modalStore = useModalStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { perspective, allChannels, signallingService, recentConversations } = useCommunityService();
+const { perspective, allChannels, signallingService, recentConversations, getPinnedConversations } =
+  useCommunityService();
 
 const { me } = storeToRefs(appStore);
 const { callWindowOpen } = storeToRefs(uiStore);
@@ -286,6 +291,8 @@ async function togglePinned() {
   const channelModel = new Channel(perspective, channel.value.baseExpression);
   channelModel.isPinned = !channel.value.isPinned;
   await channelModel.update();
+
+  getPinnedConversations();
 }
 
 // // Navigate to the first loaded view if no viewId set in the URL params

@@ -4,7 +4,7 @@
       <div class="header">
         <j-icon name="diagram-3" size="sm" color="ui-400" />
         <j-text color="ui-400" uppercase nomargin>Channels</j-text>
-        <j-box ml="200" mt="100" v-if="channelsLoading">
+        <j-box ml="200" mt="100" v-if="nestedChannelsLoading">
           <j-spinner size="xxs" />
         </j-box>
       </div>
@@ -35,7 +35,7 @@ import { defineOptions } from "vue";
 defineOptions({ name: "ChannelList" });
 
 const modalStore = useModalStore();
-const { nestedChannels, channelsLoading } = useCommunityService();
+const { nestedChannels, nestedChannelsLoading } = useCommunityService();
 </script>
 
 <style lang="scss" scoped>

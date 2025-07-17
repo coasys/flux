@@ -10,7 +10,7 @@
       <j-flex slot="start" gap="400" a="center">
         <j-flex gap="200" @click="navigateToChannel" style="cursor: pointer">
           <j-icon size="xs" :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
-          <j-text nomargin>{{ channel.name }}</j-text>
+          <j-text nomargin>{{ channel.conversation ? channel.conversation.conversationName : channel.name }}</j-text>
         </j-flex>
 
         <button v-if="channel.children?.length" class="show-children-button" @click="expanded = !expanded">
@@ -22,7 +22,7 @@
         <div class="notification" v-if="channel.hasNewMessages" />
 
         <j-flex>
-          <template v-for="agent in activeAgents" :key="agent.did">
+          <template v-for="agent in agentsInChannel" :key="agent.did">
             <div :class="['agent', agent.status]">
               <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
             </div>
@@ -42,7 +42,11 @@
     </div>
 
     <div v-if="expanded && channel.children?.length" style="margin-left: var(--j-space-500)">
-      <ChannelListItem v-for="subChannel in channel.children" :key="subChannel.baseExpression" :channel="subChannel" />
+      <ChannelListItem
+        v-for="conversationChannel in channel.children"
+        :key="conversationChannel.baseExpression"
+        :channel="conversationChannel"
+      />
     </div>
   </j-flex>
 
@@ -63,7 +67,7 @@
 import ChevronDown from "@/components/icons/ChevronDown.vue";
 import ChevronRight from "@/components/icons/ChevronRight.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
-import { ChannelWithChildren, useCommunityService } from "@/composables/useCommunityService";
+import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { AgentState, Profile } from "@coasys/flux-types";
@@ -72,7 +76,7 @@ import { computed, defineOptions, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type Props = {
-  channel: ChannelWithChildren;
+  channel: ChannelData;
 };
 type AgentData = Profile & AgentState;
 
@@ -89,48 +93,49 @@ const { me } = storeToRefs(appStore);
 const { signallingService } = useCommunityService();
 const { agents } = signallingService;
 
-const agentsInChannel = ref<AgentData[]>([]);
+const activeAgents = ref<AgentData[]>([]);
 const expanded = ref(false);
 
 const isChannelCreator = computed(() => channel.author === me.value.did);
-const activeAgents = computed(() =>
-  agentsInChannel.value.filter(
-    (agent) =>
-      !["offline", "invisible"].includes(agent.status) &&
-      (!agent.inCall || agent.callRoute.channelId !== channel.baseExpression)
-  )
-);
 const agentsInCall = computed(() =>
-  agentsInChannel.value.filter((agent) => agent.inCall && agent.callRoute.channelId === channel.baseExpression)
+  activeAgents.value.filter((agent) => {
+    const inCall = agent.callRoute.channelId === channel.baseExpression;
+    const inNestedCall = channel.children?.some((child) => child.baseExpression === agent.callRoute.channelId);
+
+    return agent.inCall && expanded.value ? inCall : inCall || inNestedCall;
+  })
+);
+const agentsInChannel = computed(() =>
+  activeAgents.value.filter((agent) => {
+    const inChannel = agent.currentRoute.channelId === channel.baseExpression;
+    const inNestedChannel = channel.children?.some((child) => child.baseExpression === agent.currentRoute.channelId);
+    // const inChannelCall = agent.callRoute.channelId === channel.baseExpression;
+
+    return expanded.value ? inChannel : inChannel || inNestedChannel; // && !inChannelCall
+  })
 );
 
-// // Commented out code for testing active agents UI
-// const did1 = "did:key:z6MkqC5MxR8PothBSq5AVmkqzm7MuMn6CoWVq1Yqgciubw54";
-// const did2 = "did:key:z6MkqC5MxR8PothBSq5AVmkqzm7MuMn6CaWVq1Yqgciubw55";
-// const did3 = "did:key:z6MkqC5MxR8PothBSq5AVmkqzm7MuMn6CoWVq1Yqgciubw56";
-// const did4 = "did:key:z6MkhSJjcAEd1jURga1K4NVPMqCV6R6NCh98WT2irUMnHqv1";
-// const channelId = channel.baseExpression as string;
-
-// const sampleAgents = {
-//   [me.value.did]: { did: me.value.did, status: "in-call", channelId },
-//   [did4]: { did: did4, status: "in-call", channelId },
-//   [did2]: { did: did2, status: "in-call", channelId },
-//   [did3]: { did: did3, status: "active", channelId },
-//   [did1]: { did: did1, status: "asleep", channelId },
-// } as Record<string, { did: string; status: AgentStatus; channelId: string }>;
-
-async function findAgentsInChannel() {
+async function findActiveAgents() {
   if (!agents.value) return [];
 
-  // Include all agents with the channel ID in their currenRoute or their callRoute
+  // Include all agents with the channel ID (or nested conversation channel ID) in their currenRoute or their callRoute
   const agentsInChannelMap = Object.entries(agents.value).filter(([_, agent]) => {
+    if (["offline", "invisible"].includes(agent.status)) return false;
+
     const inChannel = agent.currentRoute?.channelId === channel.baseExpression;
     const inCall = agent.inCall && agent.callRoute.channelId === channel.baseExpression;
-    return inChannel || inCall;
+
+    // If the channel is expanded or has no children, just check the the channel
+    if (expanded.value || !channel.children?.length) return inChannel || inCall;
+
+    // Otherwise, check the nested conversation channels too
+    const inChildChannel = channel.children.some((child) => child.baseExpression === agent.currentRoute?.channelId);
+    const inChildCall = channel.children.some((child) => child.baseExpression === agent.callRoute?.channelId);
+    return inChannel || inCall || inChildChannel || inChildCall;
   });
 
   // Get each agents profile
-  agentsInChannel.value = await Promise.all(
+  activeAgents.value = await Promise.all(
     agentsInChannelMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
   );
 }
@@ -140,7 +145,7 @@ function navigateToChannel() {
 
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = channel.baseExpression;
+  const channelId = channel.baseExpression || "";
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
   if (lastViewId) router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId } });
   else router.push({ name: "channel", params: { communityId, channelId } });
@@ -148,32 +153,28 @@ function navigateToChannel() {
 
 async function deleteChannel() {
   try {
-    await channel.delete();
+    // await channel.delete();
+    // TODO get channel model first
     router.push({ name: "community", params: { communityId: route.params.communityId } });
   } catch (error) {
     console.error("Failed to delete channel:", error);
   }
 }
 
-function searchDescendentsForChannel(channel: ChannelWithChildren): boolean {
-  if (!channel.children?.length) return false;
-
-  // Check direct children first
-  if (channel.children.some((c) => c.baseExpression === route.params.channelId)) return true;
-
-  // Recursively search children
-  return channel.children.some((child) => searchDescendentsForChannel(child));
+function expandIfInNestedConversation() {
+  const currentChannelId = route.params.channelId as string;
+  const inNestedConversation = channel.children?.some((c) => c.baseExpression === currentChannelId);
+  if (inNestedConversation) expanded.value = true;
 }
 
 onMounted(() => {
-  // If the current channel is contained within this channels descendents, expand it
-  searchDescendentsForChannel(channel as ChannelWithChildren);
-  if (searchDescendentsForChannel(channel as ChannelWithChildren)) expanded.value = true;
-
-  findAgentsInChannel();
+  expandIfInNestedConversation();
+  findActiveAgents();
 });
 
-watch(() => agents.value, findAgentsInChannel, { deep: true });
+watch(agents, findActiveAgents, { deep: true });
+watch(expanded, findActiveAgents, { deep: true });
+watch(() => route.params.channelId, expandIfInNestedConversation, { immediate: true });
 </script>
 
 <style lang="scss" scoped>
