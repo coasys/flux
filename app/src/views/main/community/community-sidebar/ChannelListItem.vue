@@ -147,8 +147,8 @@ function navigateToChannel() {
   const communityId = route.params.communityId as string;
   const channelId = channel.baseExpression || "";
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
-  if (lastViewId) router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId } });
-  else router.push({ name: "channel", params: { communityId, channelId } });
+  const defaultViewId = channel.isConversation ? "conversation" : "conversations";
+  router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
 }
 
 async function deleteChannel() {
