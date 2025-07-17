@@ -74,24 +74,6 @@
           <div class="tabs">
             <div class="tab-divider" />
 
-            <!-- <label
-              v-if="!channel.isConversation"
-              :class="{ tab: true, checked: viewId === 'sub-channels' }"
-              @click="() => changeCurrentView('sub-channels')"
-            >
-              <j-icon name="diagram-3" size="xs" />
-              <span>Sub channels</span>
-            </label> -->
-
-            <label
-              v-if="!channel.isConversation"
-              :class="{ tab: true, checked: viewId === 'conversations' }"
-              @click="() => changeCurrentView('conversations')"
-            >
-              <j-icon name="flower2" size="xs" />
-              <span>Conversations</span>
-            </label>
-
             <label
               v-for="view in views"
               :class="{ tab: true, checked: view.pkg === viewId }"
