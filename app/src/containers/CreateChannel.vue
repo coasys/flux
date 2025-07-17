@@ -202,13 +202,19 @@ async function createChannel() {
 
     emit("submit");
     channelName.value = "";
-    router.push({
-      name: "channel",
-      params: {
-        communityId: communityId.toString(),
-        channelId: channel.baseExpression,
-      },
-    });
+
+    console.log("createChannelParent.value", createChannelParent.value);
+
+    if (!createChannelParent.value) {
+      console.log("navigating to channel");
+      router.push({
+        name: "channel",
+        params: {
+          communityId: communityId.toString(),
+          channelId: channel.baseExpression,
+        },
+      });
+    }
   } finally {
     createChannelParent.value = null;
     isCreatingChannel.value = false;

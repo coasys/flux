@@ -66,7 +66,7 @@
       <j-button
         v-if="matches.length > numberOfMatchesDisplayed"
         class="show-more-button"
-        @click="() => setNumberOfMatchesDisplayed((prev) => prev + 5)"
+        @click="() => (numberOfMatchesDisplayed += 5)"
       >
         See more
         <span> <ChevronDown /> {{ matches.length - numberOfMatchesDisplayed }} </span>
@@ -108,10 +108,6 @@ const filteredGroupingOptions = computed((): GroupingOption[] =>
 );
 
 const visibleMatches = computed(() => props.matches.slice(0, numberOfMatchesDisplayed.value));
-
-function setNumberOfMatchesDisplayed(updater: (prev: number) => number) {
-  numberOfMatchesDisplayed.value = updater(numberOfMatchesDisplayed.value);
-}
 
 watch(
   () => props.matches,

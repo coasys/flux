@@ -3,7 +3,15 @@
     <button v-if="!match" class="group-button" @click="onGroupClick" />
 
     <!-- Timestamps -->
-    <j-timestamp v-if="blockType === 'conversation'" :value="data.timestamp" relative class="timestamp" />
+    <j-timestamp
+      v-if="blockType === 'conversation'"
+      :value="data.timestamp"
+      relative
+      class="timestamp"
+      :class="{
+        reposition: location === 'channel-conversations',
+      }"
+    />
     <span v-else-if="blockType === 'subgroup'" class="timestamp">
       {{ ((new Date(data.end).getTime() - new Date(data.start).getTime()) / 1000 / 60).toFixed(1) }} mins
     </span>
@@ -21,7 +29,7 @@
         <j-flex a="center" gap="400">
           <j-flex a="center" gap="400">
             <PercentageRing
-              v-if="match && match.baseExpression === data.baseExpression"
+              v-if="match && match.score !== undefined && match.baseExpression === data.baseExpression"
               :ring-size="70"
               :font-size="10"
               :score="(match.score || 0) * 100"
@@ -191,11 +199,10 @@ interface Props {
   search?: (type: SearchType, itemId: string, topic?: SynergyTopic) => void;
   setLoading?: (loading: boolean) => void;
   loading?: boolean;
+  location?: string; // Optional location prop for context
 }
 
 const props = defineProps<Props>();
-// const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = props.data;
-
 const { perspective } = useCommunityService();
 
 const totalChildren = ref(0);
@@ -445,6 +452,11 @@ watch(
 
     .timestamp {
       left: -64px;
+
+      &.reposition {
+        left: -6px;
+        top: 45px;
+      }
     }
 
     .position {

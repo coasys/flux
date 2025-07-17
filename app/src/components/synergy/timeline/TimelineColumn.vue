@@ -286,7 +286,7 @@ async function getData(firstRun?: boolean): Promise<void> {
     getConversations(),
     getUnprocessedItems(),
     // TODO: find better approach (maybe just update all conversations in community service, and have that trigger updates to recent and pinned?)
-    getPinnedConversations(),
+    // getPinnedConversations(),
     getRecentConversations(),
   ]);
   conversations.value = newConversations;
