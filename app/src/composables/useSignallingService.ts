@@ -1,8 +1,9 @@
 import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
+import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
@@ -170,11 +171,12 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // } as AgentState,
   };
 
-  const agents = ref<Record<string, AgentState>>(sampleAgents);
-  const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
-
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
+
+  const agents = ref<Record<string, AgentState>>(sampleAgents);
+  const agentsWithProfiles = ref<AgentData[]>([]);
+  const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
 
   function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
     signalHandlers.value.push(handler);
@@ -326,24 +328,36 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     broadcastState();
   }
 
-  // function getAgentsInChannel(channelId: string) {
-  //   return computed(() => {
-  //     if (!agents.value) return [];
+  function getAgentsInChannel(channelId?: string) {
+    return computed<AgentData[]>(() => {
+      return agentsWithProfiles.value.filter(
+        (agent) => !["offline", "invisible"].includes(agent.status) && agent.currentRoute?.channelId === channelId
+      );
+    });
+  }
 
-  //     const agentsInChannelMap = Object.entries(agents.value).filter(([_, agent]) => {
-  //       const inChannel = agent.currentRoute?.channelId === channelId;
-  //       const inCall = agent.inCall && agent.callRoute.channelId === channelId;
-  //       return inChannel || inCall;
-  //     });
+  function getAgentsInCall(channelId?: string) {
+    return computed<AgentData[]>(() =>
+      agentsWithProfiles.value.filter(
+        (agent) => !["offline", "invisible"].includes(agent.status) && agent.callRoute?.channelId === channelId
+      )
+    );
+  }
 
-  //     console.log("Agents in channel:", channelId, agentsInChannelMap);
-
-  //     return agentsInChannelMap.map(([agentDid, agent]) => ({
-  //       did: agentDid,
-  //       ...agent,
-  //     }));
-  //   });
-  // }
+  // Watch for changes in the agents map and update agentsWithProfiles
+  watch(
+    agents,
+    async (newAgents) => {
+      const agentEntries = Object.entries(newAgents);
+      agentsWithProfiles.value = await Promise.all(
+        agentEntries.map(async ([did, agent]) => ({
+          ...agent,
+          ...(await getCachedAgentProfile(did)),
+        }))
+      );
+    },
+    { deep: true, immediate: true }
+  );
 
   // Watch for state changes in the stores & broadcast updates to peers
   watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
@@ -363,6 +377,7 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     sendSignal,
     setProcessingState,
     getAgentState,
-    // getAgentsInChannel,
+    getAgentsInChannel,
+    getAgentsInCall,
   };
 }

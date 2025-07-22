@@ -235,6 +235,7 @@ export interface AgentState {
 }
 
 export type CallHealth = "healthy" | "warnings" | "connections-lost";
+export type AgentData = Profile & AgentState;
 export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
@@ -245,5 +246,6 @@ export interface SignallingService {
   addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   sendSignal: (link: Link) => void;
-  // getAgentsInChannel: (channelId: string) => ComputedRef<(AgentState & { did: string })[]>;
+  getAgentsInChannel: (channelId?: string, children?: PerspectiveExpression[]) => ComputedRef<AgentData[]>;
+  getAgentsInCall: (channelId?: string, children?: PerspectiveExpression[]) => ComputedRef<AgentData[]>;
 }
