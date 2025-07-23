@@ -19,12 +19,13 @@
 </template>
 
 <script setup lang="ts">
+import { ChannelData } from "@/composables/useCommunityService";
 import SidebarItem from "@/views/main/community/community-sidebar/SidebarItem.vue";
 import { defineOptions } from "vue";
 
 defineOptions({ name: "SidebarList" });
 
-type Props = { title: string; icon: string; loading: boolean; items: any[] };
+type Props = { title: string; icon: string; loading: boolean; items: ChannelData[] };
 const { title, icon, loading, items } = defineProps<Props>();
 </script>
 

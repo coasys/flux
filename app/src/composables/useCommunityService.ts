@@ -13,8 +13,9 @@ export interface ChannelData {
   channel: Partial<Channel>;
   conversation?: Partial<Conversation>;
   children?: ChannelData[];
-  notifications?: any;
-  hasNewMessages?: boolean;
+  // notifications?: any;
+  // hasNewMessages?: boolean;
+  lastActivity?: string;
 }
 
 export interface ChannelDataWithAgents extends ChannelData {

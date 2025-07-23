@@ -4,7 +4,7 @@
       class="channel"
       :class="{
         selected,
-        muted: item.channel.notifications?.mute,
+        // muted: item.channel.notifications?.mute,
         'drag-over': isDragOver,
         'is-dragging': isDragging,
         moving: moveConversationLoading,
@@ -36,7 +36,7 @@
           {{ item.children.length }}
         </button>
 
-        <div class="notification" v-if="item.channel.hasNewMessages" />
+        <!-- <div class="notification" v-if="item.channel.hasNewMessages" /> -->
 
         <template v-if="agentsInChannel.length">
           <j-flex v-for="agent in agentsInChannel" :key="agent.did">
@@ -68,14 +68,14 @@
 import ChevronDown from "@/components/icons/ChevronDown.vue";
 import ChevronRight from "@/components/icons/ChevronRight.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
+import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
 import { useRouteMemoryStore } from "@/stores";
 import { computed, defineOptions, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "SidebarItem" });
 
-type Props = { item: any };
+type Props = { item: ChannelData };
 const { item } = defineProps<Props>();
 
 const route = useRoute();
@@ -122,7 +122,7 @@ function handleDragStart(event: DragEvent) {
 
   isDragging.value = true;
   event.dataTransfer!.effectAllowed = "move";
-  event.dataTransfer!.setData("application/json", item.channel.baseExpression);
+  event.dataTransfer!.setData("application/json", item.channel.baseExpression!);
 
   // Prevent navigation when dragging starts
   event.stopPropagation();
@@ -157,7 +157,7 @@ async function handleDrop(event: DragEvent) {
 
   try {
     const conversationChannelId = event.dataTransfer!.getData("application/json");
-    await moveConversation(conversationChannelId, item.channel.baseExpression);
+    await moveConversation(conversationChannelId, item.channel.baseExpression!);
   } catch (error) {
     console.error("Error handling drop:", error);
     // Could show a toast notification here
