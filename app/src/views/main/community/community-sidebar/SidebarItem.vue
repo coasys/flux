@@ -1,6 +1,22 @@
 <template>
   <j-flex direction="column">
-    <div class="channel" :class="{ selected: selected, muted: item.channel.notifications?.mute }">
+    <div
+      class="channel"
+      :class="{
+        selected,
+        muted: item.channel.notifications?.mute,
+        'drag-over': isDragOver,
+        'is-dragging': isDragging,
+        moving: moveConversationLoading,
+      }"
+      :draggable="item.channel.isConversation"
+      @dragstart="handleDragStart"
+      @dragend="handleDragEnd"
+      @dragover="handleDragOver"
+      @dragleave="handleDragLeave"
+      @drop="handleDrop"
+      @click="navigateToChannel"
+    >
       <j-flex slot="start" gap="400" a="center">
         <j-flex gap="200" a="center" @click="navigateToChannel" style="cursor: pointer">
           <j-icon size="xs" :name="item.channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
@@ -14,7 +30,7 @@
           </template>
         </j-flex>
 
-        <button v-if="item.children?.length" class="show-children-button" @click="expanded = !expanded">
+        <button v-if="item.children?.length" class="show-children-button" @click.stop="expanded = !expanded">
           <ChevronDown v-if="expanded" />
           <ChevronRight v-else />
           {{ item.children.length }}
@@ -52,6 +68,7 @@
 import ChevronDown from "@/components/icons/ChevronDown.vue";
 import ChevronRight from "@/components/icons/ChevronRight.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
+import { useCommunityService } from "@/composables/useCommunityService";
 import { useRouteMemoryStore } from "@/stores";
 import { computed, defineOptions, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -64,8 +81,12 @@ const { item } = defineProps<Props>();
 const route = useRoute();
 const router = useRouter();
 const routeMemoryStore = useRouteMemoryStore();
+const { moveConversation, moveConversationLoading } = useCommunityService();
 
 const expanded = ref(false);
+const isDragOver = ref(false);
+const isDragging = ref(false);
+
 const selected = computed(() => item.channel.baseExpression === route.params.channelId);
 const agentsInChannel = computed(() => aggregateAgents(expanded.value, item, "agentsInChannel"));
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, "agentsInCall"));
@@ -96,6 +117,53 @@ function expandIfInNestedChannel() {
   if (inNestedChannel) expanded.value = true;
 }
 
+function handleDragStart(event: DragEvent) {
+  if (!item.channel.isConversation) return;
+
+  isDragging.value = true;
+  event.dataTransfer!.effectAllowed = "move";
+  event.dataTransfer!.setData("application/json", item.channel.baseExpression);
+
+  // Prevent navigation when dragging starts
+  event.stopPropagation();
+}
+
+function handleDragEnd() {
+  isDragging.value = false;
+}
+
+function handleDragOver(event: DragEvent) {
+  if (item.channel.isConversation) return;
+
+  event.preventDefault();
+  event.dataTransfer!.dropEffect = "move";
+  isDragOver.value = true;
+}
+
+function handleDragLeave(event: DragEvent) {
+  // Only remove drag-over if we're actually leaving the element
+  const currentTarget = event.currentTarget as HTMLElement;
+  const relatedTarget = event.relatedTarget as HTMLElement;
+
+  if (!currentTarget.contains(relatedTarget)) isDragOver.value = false;
+}
+
+async function handleDrop(event: DragEvent) {
+  if (item.channel.isConversation) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  isDragOver.value = false;
+
+  try {
+    const conversationChannelId = event.dataTransfer!.getData("application/json");
+    await moveConversation(conversationChannelId, item.channel.baseExpression);
+  } catch (error) {
+    console.error("Error handling drop:", error);
+    // Could show a toast notification here
+  }
+}
+
 watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true });
 </script>
 
@@ -107,6 +175,7 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
   margin: 0 -12px;
   padding: 10px;
   border-radius: 6px;
+  transition: all 0.2s ease;
 
   &.selected {
     background-color: var(--j-color-primary-100);
@@ -114,6 +183,38 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
 
   &.muted {
     opacity: 0.6;
+  }
+
+  &:hover:not(.is-dragging, .selected) {
+    background-color: var(--j-color-ui-100);
+  }
+
+  &[draggable="true"] {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.is-dragging {
+      opacity: 0.6;
+      transform: rotate(1deg);
+    }
+  }
+
+  &.drag-over {
+    background-color: var(--j-color-primary-200);
+    box-shadow: inset 0 0 0 1px var(--j-color-primary-500);
+  }
+
+  &.moving {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  // Prevent drag on non-draggable items
+  &:not([draggable="true"]) {
+    user-select: none;
   }
 
   .show-children-button {
