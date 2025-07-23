@@ -23,7 +23,9 @@
                     </j-text>
                   </j-flex>
                   <j-text nomargin size="400">
-                    <b>{{ callCommunityName }}</b> / {{ callChannelName }}
+                    <b>{{ callRouteData.communityName }}</b>
+                    <template v-if="callRouteData.channelName"> / #{{ callRouteData.channelName }}</template>
+                    <template v-if="callRouteData.conversationName"> / {{ callRouteData.conversationName }}</template>
                   </j-text>
                 </j-flex>
               </j-tooltip>
@@ -151,7 +153,9 @@
         <div class="call-window-header">
           <j-flex direction="column" gap="300">
             <j-text nomargin size="400">
-              <b>{{ callCommunityName }}</b> / {{ callChannelName }}
+              <b>{{ callRouteData.communityName }}</b>
+              <template v-if="callRouteData.channelName"> / #{{ callRouteData.channelName }}</template>
+              <template v-if="callRouteData.conversationName"> / {{ callRouteData.conversationName }}</template>
             </j-text>
 
             <j-flex v-if="agentsInCall.length" a="center" gap="100" style="margin-left: -6px">
@@ -385,10 +389,12 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import MediaPlayer, { MediaPlayerWarning } from "@/components/media-player/MediaPlayer.vue";
 import Transcriber from "@/components/transcriber/Transcriber.vue";
 import TranscriptionIcon from "@/components/transcription-icon/TranscriptionIcon.vue";
+import { ChannelData } from "@/composables/useCommunityService";
 import {
   MediaState,
   useAiStore,
   useAppStore,
+  useCommunityServiceStore,
   useMediaDevicesStore,
   useModalStore,
   useUiStore,
@@ -396,6 +402,7 @@ import {
   WEBRTC_EMOJI,
 } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { Channel, Community } from "@coasys/flux-api";
 import { AgentStatus, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
@@ -410,6 +417,7 @@ const webrtcStore = useWebrtcStore();
 const mediaDeviceStore = useMediaDevicesStore();
 const modalStore = useModalStore();
 const aiStore = useAiStore();
+const communityServiceStore = useCommunityServiceStore();
 
 const { me } = storeToRefs(appStore);
 const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
@@ -422,8 +430,6 @@ const {
   callHealth,
   callEmojis,
   agentsInCall,
-  callCommunityName,
-  callChannelName,
   myAgentStatus,
   peerConnections,
   disconnectedAgents,
@@ -454,6 +460,34 @@ const callHealthColour = computed(findHealthColour);
 const connectionWarning = computed(findConnectionWarning);
 const connectionText = computed(findConnectionText);
 const peers = computed(() => Array.from(peerConnections.value.values()));
+const callRouteData = computed(() => {
+  const communityId = callRoute.value.communityId || (route.params.communityId as string);
+  const channelId = callRoute.value.channelId || (route.params.channelId as string);
+  const communityService = communityServiceStore.getCommunityService(communityId);
+
+  const communityName = (communityService?.community as Community | undefined)?.name || "";
+  const allChannels = (communityService?.allChannels || []) as Channel[];
+  const channel = allChannels.find((c) => c.baseExpression === channelId);
+
+  if (!channel) return { communityName, channelName: "", conversationName: "" };
+
+  if (channel.isConversation) {
+    const channelsWithConversations = (communityService?.channelsWithConversations || []) as ChannelData[];
+    const recentConversations = (communityService?.recentConversations || []) as ChannelData[];
+
+    const parentChannel = channelsWithConversations.find((c) =>
+      c.children?.some((child) => child.channel.baseExpression === channelId)
+    );
+    const conversationData = recentConversations?.find((c) => c.channel.baseExpression === channelId);
+
+    const channelName = parentChannel?.channel.name || "";
+    const conversationName = conversationData?.conversation?.conversationName || "";
+
+    return { communityName, channelName, conversationName };
+  }
+
+  return { communityName, channelName: channel.name || "", conversationName: "" };
+});
 const allParticipants = computed(() => {
   const { microphone, camera } = mediaPermissions.value;
   const { audioEnabled, videoEnabled, screenShareEnabled } = mediaSettings.value;
@@ -567,7 +601,7 @@ function stopResize() {
   document.addEventListener("mouseup", stopResize, false);
 }
 
-// TODO: store my profile in the app store?
+// TODO: store my profile in the app store (already done in other branch, merge in dev to fix this)
 async function getMyProfile() {
   myProfile.value = await getCachedAgentProfile(me.value.did);
 }

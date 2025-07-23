@@ -213,7 +213,9 @@ type AgentData = Profile & AgentState;
 
 const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId));
 const conversation = computed(() =>
-  channel.value?.isConversation ? recentConversations.value.find((c) => c.channelId === channelId) : null
+  channel.value?.isConversation
+    ? recentConversations.value.find((c) => c.channel.baseExpression === channelId)?.conversation
+    : null
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
