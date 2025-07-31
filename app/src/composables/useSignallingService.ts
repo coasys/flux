@@ -11,7 +11,7 @@ const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
 const MAX_AGE = 60000; // 60 seconds before "offline"
 const NEW_STATE = "agent/new-state";
 
-export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
+export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();

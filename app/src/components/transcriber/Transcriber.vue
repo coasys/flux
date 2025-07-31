@@ -612,10 +612,8 @@ watch(activeMicrophoneId, restartListening);
 .transcriber {
   pointer-events: auto;
   border-radius: var(--j-border-radius);
-  margin: 20px 20px 0 20px;
   background-color: var(--j-color-ui-100);
   padding: var(--j-space-400);
-  width: calc(100% - 40px);
 
   .volumeThreshold {
     position: relative;

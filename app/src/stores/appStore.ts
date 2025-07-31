@@ -80,14 +80,21 @@ export const useAppStore = defineStore(
 
     async function getMyCommunities() {
       const allMyPerspectives = await ad4mClient.value.perspective.all();
-      await Promise.all(
+
+      // Filter perspectives that have a neighbourhood and map to community entries
+      const communityEntries = await Promise.all(
         allMyPerspectives
           .filter((p) => p.neighbourhood)
           .map(async (p) => {
             const community = (await Community.findAll(p))[0];
-            if (community) myCommunities.value[p.uuid] = community;
+            return community ? ([p.uuid, community] as const) : null;
           })
       );
+
+      // Filter out null results and create object from entries
+      const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
+
+      myCommunities.value = { ...myCommunities.value, ...newCommunities };
     }
 
     return {

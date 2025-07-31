@@ -1,145 +1,173 @@
 <template>
   <div class="wrapper">
     <div class="left-section" :style="{ width: `calc(${communitySidebarWidth}px + 100px)` }">
-      <Transcriber v-if="inCall && transcriptionEnabled" />
-      <div class="controls">
-        <j-flex v-if="inCall" direction="column">
-          <j-flex j="between" wrap>
-            <j-box mb="300" mr="500">
-              <j-tooltip :placement="'top'" title="Go to call channel">
-                <j-flex
-                  direction="column"
-                  gap="100"
-                  @click="router.push({ name: 'view', params: callRoute })"
-                  style="cursor: pointer"
-                >
-                  <j-flex a="center" gap="200">
-                    <div class="connection-icon">
-                      <j-icon name="wifi" :color="callHealthColour" style="rotate: 45deg" />
-                    </div>
-                    <j-text :color="callHealthColour" nomargin> {{ connectionText }} </j-text>
-                    <j-text v-if="connectionWarning" :color="callHealthColour" nomargin>
-                      {{ connectionWarning }}
-                    </j-text>
-                  </j-flex>
-                  <j-text nomargin size="400">
-                    <b>{{ callRouteData.communityName }}</b>
-                    <template v-if="callRouteData.channelName"> / #{{ callRouteData.channelName }}</template>
-                    <template v-if="callRouteData.conversationName"> / {{ callRouteData.conversationName }}</template>
-                  </j-text>
-                </j-flex>
-              </j-tooltip>
-            </j-box>
+      <j-flex direction="column" gap="500">
+        <j-flex direction="column" gap="300" class="widget" v-if="processingState">
+          <j-flex a="center" gap="300">
+            <j-icon name="robot" size="lg" color="ui-700" />
+            <j-text nomargin>
+              {{ processingState.itemIds?.length || 0 }} items being processed
+              {{ defaultLLM!.local ? "localy" : "remotely" }}
+              {{
+                processingQueue.length > 1
+                  ? `(${processingQueue.length - 1} task${processingQueue.length === 2 ? "" : "s"} queued)`
+                  : ""
+              }}
+            </j-text>
 
-            <j-box mt="300">
-              <j-flex a="center" gap="500">
-                <j-tooltip :placement="'top'" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
-                  <TranscriptionIcon
-                    :enabled="transcriptionEnabled"
-                    color="ui-500"
-                    @click="aiStore.toggleTranscriptionEnabled"
-                    style="cursor: pointer"
-                  />
-                </j-tooltip>
-
-                <j-tooltip
-                  :placement="'top'"
-                  :title="`${mediaSettings.audioEnabled ? 'Disable' : 'Enable'} microphone`"
-                >
-                  <j-icon
-                    :name="`mic${mediaSettings.audioEnabled ? '' : '-mute'}`"
-                    color="ui-500"
-                    @click="mediaDeviceStore.toggleAudio"
-                  />
-                </j-tooltip>
-
-                <j-tooltip :placement="'top'" :title="`${mediaSettings.videoEnabled ? 'Disable' : 'Enable'} camera`">
-                  <j-icon
-                    :name="`camera-video${mediaSettings.videoEnabled ? '' : '-off'}`"
-                    color="ui-500"
-                    @click="mediaDeviceStore.toggleVideo"
-                  />
-                </j-tooltip>
-
-                <j-tooltip v-if="mediaSettings.screenShareEnabled" :placement="'top'" title="Disable screen share">
-                  <j-icon name="display" color="ui-500" @click="mediaDeviceStore.toggleScreenShare" />
-                </j-tooltip>
-
-                <j-tooltip :placement="'top'" title="Leave call">
-                  <j-icon name="telephone-x" color="danger-500" @click="webrtcStore.leaveRoom" />
-                </j-tooltip>
-              </j-flex>
-            </j-box>
+            <j-spinner size="xs" />
           </j-flex>
+
+          <j-text size="400">
+            <b>{{ processingState.communityName }}</b>
+            <template v-if="processingState.channelName"> / #{{ processingState.channelName }}</template>
+            <template v-if="processingState.conversationName"> / {{ processingState.conversationName }}</template>
+          </j-text>
+
+          <ProgressBar :steps="llmProcessingSteps" :current-step="processingState?.step || 0" />
         </j-flex>
 
-        <j-flex j="between" a="center">
-          <j-flex a="center" gap="300">
-            <j-tooltip :placement="'top'" title="Go to profile">
-              <j-avatar
-                :hash="appStore.me.did"
-                :src="myProfile?.profileThumbnailPicture"
-                @click="profileClick"
-                style="cursor: pointer"
-              />
-            </j-tooltip>
+        <Transcriber v-if="inCall && transcriptionEnabled" />
 
-            <j-flex direction="column">
-              <j-tooltip :placement="'top'" title="Go to profile">
-                <j-text nomargin weight="600" @click="profileClick" style="cursor: pointer">
-                  {{ myProfile?.username }}
-                </j-text>
-              </j-tooltip>
-
-              <j-tooltip :placement="'top'" title="Set agent status">
-                <j-popover
-                  :open="showAgentStatusMenu"
-                  @toggle="(e: any) => (showAgentStatusMenu = e.target.open)"
-                  event="click"
-                  placement="top-end"
-                  style="cursor: pointer; margin-top: 2px"
-                >
-                  <j-flex slot="trigger" a="center" gap="100">
-                    <div class="agent-status" :class="myAgentStatus" />
-                    <j-text nomargin size="300">{{ myAgentStatus }}</j-text>
+        <div class="widget">
+          <j-flex v-if="inCall" direction="column">
+            <j-flex j="between" wrap>
+              <j-box mb="300" mr="500">
+                <j-tooltip :placement="'top'" title="Go to call channel">
+                  <j-flex
+                    direction="column"
+                    gap="100"
+                    @click="router.push({ name: 'view', params: callRoute })"
+                    style="cursor: pointer"
+                  >
+                    <j-flex a="center" gap="200">
+                      <div class="connection-icon">
+                        <j-icon name="wifi" :color="callHealthColour" style="rotate: 45deg" />
+                      </div>
+                      <j-text :color="callHealthColour" nomargin> {{ connectionText }} </j-text>
+                      <j-text v-if="connectionWarning" :color="callHealthColour" nomargin>
+                        {{ connectionWarning }}
+                      </j-text>
+                    </j-flex>
+                    <j-text nomargin size="400">
+                      <b>{{ callRouteData.communityName }}</b>
+                      <template v-if="callRouteData.channelName"> / #{{ callRouteData.channelName }}</template>
+                      <template v-if="callRouteData.conversationName"> / {{ callRouteData.conversationName }}</template>
+                    </j-text>
                   </j-flex>
+                </j-tooltip>
+              </j-box>
 
-                  <j-menu slot="content">
-                    <j-menu-item
-                      v-for="status in statusStates"
-                      @click="
-                        myAgentStatus = status;
-                        showAgentStatusMenu = false;
-                      "
-                    >
-                      <div slot="start" class="agent-status" :class="status" />
-                      {{ status }}
-                    </j-menu-item>
-                  </j-menu>
-                </j-popover>
-              </j-tooltip>
+              <j-box mt="300">
+                <j-flex a="center" gap="500">
+                  <j-tooltip :placement="'top'" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
+                    <TranscriptionIcon
+                      :enabled="transcriptionEnabled"
+                      color="ui-500"
+                      @click="aiStore.toggleTranscriptionEnabled"
+                      style="cursor: pointer"
+                    />
+                  </j-tooltip>
+
+                  <j-tooltip
+                    :placement="'top'"
+                    :title="`${mediaSettings.audioEnabled ? 'Disable' : 'Enable'} microphone`"
+                  >
+                    <j-icon
+                      :name="`mic${mediaSettings.audioEnabled ? '' : '-mute'}`"
+                      color="ui-500"
+                      @click="mediaDeviceStore.toggleAudio"
+                    />
+                  </j-tooltip>
+
+                  <j-tooltip :placement="'top'" :title="`${mediaSettings.videoEnabled ? 'Disable' : 'Enable'} camera`">
+                    <j-icon
+                      :name="`camera-video${mediaSettings.videoEnabled ? '' : '-off'}`"
+                      color="ui-500"
+                      @click="mediaDeviceStore.toggleVideo"
+                    />
+                  </j-tooltip>
+
+                  <j-tooltip v-if="mediaSettings.screenShareEnabled" :placement="'top'" title="Disable screen share">
+                    <j-icon name="display" color="ui-500" @click="mediaDeviceStore.toggleScreenShare" />
+                  </j-tooltip>
+
+                  <j-tooltip :placement="'top'" title="Leave call">
+                    <j-icon name="telephone-x" color="danger-500" @click="webrtcStore.leaveRoom" />
+                  </j-tooltip>
+                </j-flex>
+              </j-box>
             </j-flex>
           </j-flex>
 
-          <j-flex a="center" gap="500">
-            <j-tooltip :placement="'top'" title="Open app settings">
-              <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
-            </j-tooltip>
+          <j-flex j="between" a="center">
+            <j-flex a="center" gap="300">
+              <j-tooltip :placement="'top'" title="Go to profile">
+                <j-avatar
+                  :hash="appStore.me.did"
+                  :src="myProfile?.profileThumbnailPicture"
+                  @click="profileClick"
+                  style="cursor: pointer"
+                />
+              </j-tooltip>
 
-            <j-tooltip
-              v-if="inCall || route.params.channelId"
-              :placement="'top'"
-              :title="`${callWindowOpen ? 'Hide' : 'Show'} call window`"
-            >
-              <j-icon
-                :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
-                color="ui-500"
-                @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
-              />
-            </j-tooltip>
+              <j-flex direction="column">
+                <j-tooltip :placement="'top'" title="Go to profile">
+                  <j-text nomargin weight="600" @click="profileClick" style="cursor: pointer">
+                    {{ myProfile?.username }}
+                  </j-text>
+                </j-tooltip>
+
+                <j-tooltip :placement="'top'" title="Set agent status">
+                  <j-popover
+                    :open="showAgentStatusMenu"
+                    @toggle="(e: any) => (showAgentStatusMenu = e.target.open)"
+                    event="click"
+                    placement="top-end"
+                    style="cursor: pointer; margin-top: 2px"
+                  >
+                    <j-flex slot="trigger" a="center" gap="100">
+                      <div class="agent-status" :class="myAgentStatus" />
+                      <j-text nomargin size="300">{{ myAgentStatus }}</j-text>
+                    </j-flex>
+
+                    <j-menu slot="content">
+                      <j-menu-item
+                        v-for="status in statusStates"
+                        @click="
+                          myAgentStatus = status;
+                          showAgentStatusMenu = false;
+                        "
+                      >
+                        <div slot="start" class="agent-status" :class="status" />
+                        {{ status }}
+                      </j-menu-item>
+                    </j-menu>
+                  </j-popover>
+                </j-tooltip>
+              </j-flex>
+            </j-flex>
+
+            <j-flex a="center" gap="500">
+              <j-tooltip :placement="'top'" title="Open app settings">
+                <j-icon name="gear" color="ui-500" @click="router.push({ name: 'settings' })" />
+              </j-tooltip>
+
+              <j-tooltip
+                v-if="inCall || route.params.channelId"
+                :placement="'top'"
+                :title="`${callWindowOpen ? 'Hide' : 'Show'} call window`"
+              >
+                <j-icon
+                  :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
+                  color="ui-500"
+                  @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
+                />
+              </j-tooltip>
+            </j-flex>
           </j-flex>
-        </j-flex>
-      </div>
+        </div>
+      </j-flex>
     </div>
 
     <div ref="rightSection" class="right-section">
@@ -387,10 +415,12 @@
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import MediaPlayer, { MediaPlayerWarning } from "@/components/media-player/MediaPlayer.vue";
+import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
 import Transcriber from "@/components/transcriber/Transcriber.vue";
 import TranscriptionIcon from "@/components/transcription-icon/TranscriptionIcon.vue";
 import { ChannelData } from "@/composables/useCommunityService";
 import {
+  llmProcessingSteps,
   MediaState,
   useAiStore,
   useAppStore,
@@ -422,7 +452,7 @@ const communityServiceStore = useCommunityServiceStore();
 const { me } = storeToRefs(appStore);
 const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
 const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
-const { transcriptionEnabled } = storeToRefs(aiStore);
+const { transcriptionEnabled, processingState, defaultLLM, processingQueue } = storeToRefs(aiStore);
 const {
   joiningCall,
   inCall,
@@ -677,21 +707,20 @@ onMounted(getMyProfile);
 
   .left-section {
     position: relative;
-    height: 100%;
-    max-width: calc(33vw + 100px);
-    min-width: 300px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     flex-shrink: 0;
+    height: 100%;
+    max-width: calc(33vw + 100px);
+    min-width: 300px;
+    padding: var(--j-space-500);
 
-    .controls {
+    .widget {
       pointer-events: auto;
       gap: var(--j-space-400);
       display: flex;
       flex-direction: column;
-      margin: 20px;
-      width: calc(100% - 40px);
       border-radius: 10px;
       padding: var(--j-space-400);
       background-color: var(--j-color-ui-100);

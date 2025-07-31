@@ -1,4 +1,4 @@
-import { useAppStore } from "@/stores";
+import { useAiStore, useAppStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
@@ -50,13 +50,17 @@ export interface CommunityService {
   getRecentConversations: () => Promise<void>;
   startNewConversation: (parentChannelId?: string) => Promise<void>;
   moveConversation: (conversationChannelId: string, targetChannelId: string) => Promise<void>;
+  getParentChannel: (channelId: string) => Partial<Channel> | undefined;
+  getConversation: (channelId: string) => Partial<Conversation> | undefined;
 }
 
 export async function createCommunityService(): Promise<CommunityService> {
   const route = useRoute();
   const router = useRouter();
   const appStore = useAppStore();
+  const aiStore = useAiStore();
   const { me } = storeToRefs(appStore);
+  const { defaultLLM } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
   const perspective = (await appStore.ad4mClient.perspective.byUUID(
@@ -68,7 +72,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   perspective.ensureSDNASubjectClass(Topic);
 
   // Initialise the signalling service for the community
-  const signallingService = useSignallingService(perspective.uuid, neighbourhood);
+  const signallingService = useSignallingService(neighbourhood);
 
   // Model subscriptions (Todo: singularise communities when singular useModel hook available)
   const { entries: communities } = useModel({ perspective, model: Community });
@@ -77,6 +81,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const pinnedChannels = shallowRef<Channel[]>([]);
   const conversationChannels = shallowRef<Channel[]>([]);
   const spaceChannels = shallowRef<Channel[]>([]);
+  const processingStateChecked = ref(false);
   const isSynced = ref(true);
   const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
@@ -275,7 +280,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     moveConversationLoading.value = true;
 
     try {
-      console.log(`Moving conversation ${conversationChannelId} to channel ${targetChannelId}`);
+      console.log(`➡️ Moving conversation ${conversationChannelId} to channel ${targetChannelId}`);
 
       // Get the link from the conversation channel to its current parent
       const link = (
@@ -294,14 +299,24 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       // Refresh the channels list
       getChannelsWithConversations();
-
-      console.log("Conversation moved successfully");
     } catch (error) {
       console.error("Failed to move conversation:", error);
       throw error;
     } finally {
       moveConversationLoading.value = false;
     }
+  }
+
+  function getParentChannel(channelId: string): Partial<Channel> | undefined {
+    const parentChannelData = channelsWithConversations.value.find((c) =>
+      c.children?.some((child) => child.channel.baseExpression === channelId)
+    );
+    return parentChannelData ? parentChannelData.channel : undefined;
+  }
+
+  function getConversation(channelId: string) {
+    const conversationData = recentConversations.value.find((c) => c.channel.baseExpression === channelId);
+    return conversationData ? conversationData.conversation : undefined;
   }
 
   // Initialize sync state listener
@@ -313,6 +328,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   getMembers();
 
+  // Watch for changes in channels and update the pinned, conversation, and space channels
   watch(allChannels, (newChannels) => {
     pinnedChannels.value = newChannels.filter((channel) => channel.isPinned);
     conversationChannels.value = newChannels.filter((channel) => channel.isConversation);
@@ -321,6 +337,15 @@ export async function createCommunityService(): Promise<CommunityService> {
   watch(pinnedChannels, getPinnedConversations);
   watch(conversationChannels, getRecentConversations);
   watch(spaceChannels, getChannelsWithConversations);
+
+  // Find processing tasks in the community when the conversations first load
+  watch(recentConversations, () => {
+    if (defaultLLM.value && !processingStateChecked.value) {
+      processingStateChecked.value = true;
+      // Delay the check to allow time for signals to arrive
+      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), 5000);
+    }
+  });
 
   return {
     perspective,
@@ -349,6 +374,8 @@ export async function createCommunityService(): Promise<CommunityService> {
     getRecentConversations,
     startNewConversation,
     moveConversation,
+    getParentChannel,
+    getConversation,
   };
 }
 

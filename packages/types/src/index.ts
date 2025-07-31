@@ -220,6 +220,9 @@ export interface ProcessingState {
   channelId: string;
   itemIds: string[];
   author: string;
+  communityName?: string;
+  channelName?: string;
+  conversationName?: string;
 }
 
 export type MediaSettings = { audioEnabled: boolean; videoEnabled: boolean; screenShareEnabled: boolean };
