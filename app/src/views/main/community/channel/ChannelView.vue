@@ -173,12 +173,10 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import ProfileContainer from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel } from "@coasys/flux-api";
-import { AgentState, Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelView" });
@@ -209,8 +207,6 @@ const showProfile = ref(false);
 const isJoiningCommunity = ref(false);
 const isChangeChannel = ref(false);
 
-type AgentData = Profile & AgentState;
-
 const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId));
 const conversation = computed(() =>
   channel.value?.isConversation
@@ -219,8 +215,8 @@ const conversation = computed(() =>
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const isMobile = computed(() => window.innerWidth <= 768);
-const agentsInChannel = ref<AgentData[]>([]);
-const agentsInCall = ref<AgentData[]>([]);
+const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
+const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId)?.value || []);
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
 
@@ -261,29 +257,19 @@ async function handleProfileClick(did: string) {
   else router.push({ name: "profile", params: { did, communityId } });
 }
 
-// async function makeChannelAConversation() {
-//   if (!channel.value) return;
-
-//   const channelModel = new Channel(perspective, channel.value.baseExpression);
-//   channelModel.isConversation = true;
-//   await channelModel.update();
-// }
-
 async function togglePinned() {
   if (!channel.value) return;
 
-  const channelModel = new Channel(perspective, channel.value.baseExpression);
-  channelModel.isPinned = !channel.value.isPinned;
-  await channelModel.update();
-
-  getPinnedConversations();
+  try {
+    const channelModel = new Channel(perspective, channel.value.baseExpression);
+    channelModel.isPinned = !channel.value.isPinned;
+    await channelModel.update();
+    getPinnedConversations();
+  } catch (error) {
+    console.error("Error toggling pinned state:", error);
+    appStore.showDangerToast({ message: "Failed to update pinned state" });
+  }
 }
-
-// // Navigate to the first loaded view if no viewId set in the URL params
-// watch(views, (newVal, oldVal) => {
-//   const firstResults = (!oldVal || oldVal.length === 0) && newVal.length > 0;
-//   if (firstResults && !viewId) router.push({ name: "view", params: { viewId: newVal[0].pkg } });
-// });
 
 onMounted(() => {
   // Navigate to the conversation or subchannels view if no viewId present when entering channel
@@ -292,29 +278,6 @@ onMounted(() => {
     else router.push({ name: "view", params: { viewId: "sub-channels" } });
   }
 });
-
-// Watch for agent changes in the signalling service
-watch(
-  signallingService.agents.value,
-  async (newAgents) => {
-    // Update agentsInChannel
-    const agentsInChannelMap = Object.entries(newAgents).filter(
-      ([_, agent]) => agent.currentRoute?.channelId === channelId && !["offline", "invisible"].includes(agent.status)
-    );
-    agentsInChannel.value = await Promise.all(
-      agentsInChannelMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
-    );
-
-    // Update agentsInCall
-    const agentsInCallMap = Object.entries(newAgents).filter(
-      ([_, agent]) => agent.inCall && agent.callRoute.channelId === channelId
-    );
-    agentsInCall.value = await Promise.all(
-      agentsInCallMap.map(async ([agentDid, agent]) => ({ ...agent, ...(await getCachedAgentProfile(agentDid)) }))
-    );
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped lang="scss">
