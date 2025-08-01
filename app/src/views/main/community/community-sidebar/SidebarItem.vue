@@ -18,7 +18,7 @@
       @click="navigateToChannel"
     >
       <j-flex slot="start" gap="400" a="center">
-        <j-flex gap="200" a="center" @click="navigateToChannel" style="cursor: pointer">
+        <j-flex gap="200" a="center" style="cursor: pointer">
           <j-icon size="xs" :name="item.channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
           <j-text nomargin>{{ item.conversation ? item.conversation.conversationName : item.channel.name }}</j-text>
 
