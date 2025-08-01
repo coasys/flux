@@ -71,14 +71,15 @@ router.beforeEach(async (to, from, next) => {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
     if (isAuthenticated) {
       const appStore = useAppStore();
-      await appStore.refreshMyProfile();
       const { me } = storeToRefs(appStore);
 
       // Handle authenticated routes
       const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
-      if (fluxAccountCreated && isOnSignupOrMain) next("/home");
-      if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
+      if (fluxAccountCreated && isOnSignupOrMain) {
+        await appStore.refreshMyProfile();
+        next("/home");
+      } else if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
 
       next();
     } else {
