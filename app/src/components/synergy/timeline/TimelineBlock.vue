@@ -13,7 +13,15 @@
       }"
     />
     <span v-else-if="blockType === 'subgroup'" class="timestamp">
-      {{ ((new Date(data.end).getTime() - new Date(data.start).getTime()) / 1000 / 60).toFixed(1) }} mins
+      {{
+        (
+          (new Date((data as SynergyGroup).end as string).getTime() -
+            new Date((data as SynergyGroup).start as string).getTime()) /
+          1000 /
+          60
+        ).toFixed(1)
+      }}
+      mins
     </span>
     <j-timestamp v-else-if="blockType === 'item'" :value="data.timestamp" timeStyle="short" class="timestamp" />
 
@@ -34,7 +42,7 @@
               :font-size="10"
               :score="(match.score || 0) * 100"
             />
-            <h1>{{ data.name }}</h1>
+            <h1>{{ (data as SynergyGroup).name }}</h1>
           </j-flex>
 
           <button v-if="totalChildren > 0" class="show-children-button" @click="showChildren = !showChildren">
@@ -44,7 +52,7 @@
           </button>
         </j-flex>
 
-        <p class="summary">{{ data.summary }}</p>
+        <p class="summary">{{ (data as SynergyGroup).summary }}</p>
 
         <j-flex class="participants">
           <Avatar
@@ -145,13 +153,13 @@
 
       <j-flex gap="300" direction="column">
         <j-flex gap="400" a="center">
-          <j-icon :name="data.icon" color="ui-400" size="lg" />
+          <j-icon :name="(data as SynergyItem).icon" color="ui-400" size="lg" />
           <j-flex gap="400" a="center" wrap>
-            <Avatar :did="data.author" show-name />
+            <Avatar :did="(data as SynergyItem).author" show-name />
           </j-flex>
         </j-flex>
 
-        <div class="item-text" v-html="data.text" />
+        <div class="item-text" v-html="(data as SynergyItem).text" />
 
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 10px">
           <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
@@ -186,7 +194,7 @@ import { computed, ref, watch } from "vue";
 interface Props {
   blockType: BlockType;
   lastChild?: boolean;
-  data: any;
+  data: SynergyGroup | SynergyItem;
   timelineIndex: number;
   selectedTopicId: string;
   match?: SynergyMatch;
@@ -227,7 +235,7 @@ const onMatchTree = computed(() =>
   props.match
     ? (props.blockType === "conversation" && props.data.index === props.matchIndexes?.conversation) ||
       (props.blockType === "subgroup" &&
-        props.data.parentIndex === props.matchIndexes?.conversation &&
+        (props.data as SynergyGroup).parentIndex === props.matchIndexes?.conversation &&
         props.data.index === props.matchIndexes?.subgroup)
     : false
 );
@@ -325,7 +333,7 @@ async function getItems() {
       // Set match indexes and stop loading if match found
       if (props.match && item.baseExpression === props.match.baseExpression) {
         props.setMatchIndexes?.({
-          conversation: props.data.parentIndex,
+          conversation: (props.data as SynergyGroup).parentIndex,
           subgroup: props.data.index,
           item: itemIndex,
         });

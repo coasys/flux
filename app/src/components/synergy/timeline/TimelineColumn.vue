@@ -126,7 +126,7 @@ const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
 const selectedItemId = ref("");
 const zoom = ref<GroupingOption>(groupingOptions[0]);
-const refreshTrigger = ref(0);
+const refreshTrigger = ref(0); // TODO: can this be removed now we've moved from React to Vue?
 const creatingNewConversation = ref(false);
 const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
@@ -146,25 +146,31 @@ async function getData(firstRun?: boolean): Promise<void> {
   if (gettingData.value) return;
 
   gettingData.value = true;
-  const [newConversations, newUnprocessedItems] = await Promise.all([
-    getConversations(),
-    getUnprocessedItems(),
-    // TODO: find better approach (maybe just update all conversations in community service, and have that trigger updates to recent and pinned?)
-    getRecentConversations(),
-    getPinnedConversations(),
-    getChannelsWithConversations(),
-  ]);
-  conversations.value = newConversations;
-  unprocessedItems.value = newUnprocessedItems;
-  if (newConversations.length) creatingNewConversation.value = false;
-  gettingData.value = false;
-  refreshTrigger.value = refreshTrigger.value + 1;
 
-  const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
+  try {
+    const [newConversations, newUnprocessedItems] = await Promise.all([
+      getConversations(),
+      getUnprocessedItems(),
+      // TODO: find better approach (maybe check new conversations for changes and only fire the following functions if updated?)
+      getRecentConversations(),
+      getPinnedConversations(),
+      getChannelsWithConversations(),
+    ]);
+    conversations.value = newConversations;
+    unprocessedItems.value = newUnprocessedItems;
+    if (newConversations.length) creatingNewConversation.value = false;
+    gettingData.value = false;
+    refreshTrigger.value = refreshTrigger.value + 1;
 
-  if (!firstRun && shouldProcess) {
-    const channel = new Channel(perspective, route.params.channelId as string);
-    aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
+
+    if (!firstRun && shouldProcess) {
+      const channel = new Channel(perspective, route.params.channelId as string);
+      aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
+    }
+  } catch (error) {
+    console.error("Error fetching conversations or unprocessed items:", error);
+    gettingData.value = false;
   }
 }
 

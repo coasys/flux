@@ -155,7 +155,7 @@ import { SemanticRelationship, Topic } from "@coasys/flux-api";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import { cos_sim } from "@xenova/transformers";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -165,6 +165,8 @@ const webrtcStore = useWebrtcStore();
 const { perspective } = useCommunityService();
 const { defaultLLM, llmLoadingStatus, loadingAIData } = storeToRefs(aiStore);
 const { callHealth } = storeToRefs(webrtcStore);
+
+const MINIMUM_MATCH_SCORE = 0.2;
 
 const matches = ref<SynergyMatch[]>([]);
 const selectedTopic = ref<SynergyTopic | null>(null);
@@ -206,7 +208,7 @@ async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
       return { baseExpression, channelId, channelName, type, score };
     })
   );
-  return matches.filter((item) => item && item.score > 0.2) as SynergyMatch[];
+  return matches.filter((item) => item && item.score > MINIMUM_MATCH_SCORE) as SynergyMatch[];
 }
 
 async function findTopicMatches(itemId: string, topicId: string): Promise<SynergyMatch[]> {
@@ -243,15 +245,21 @@ async function search(type: SearchType, itemId: string, topic?: SynergyTopic) {
   searchItemId.value = itemId;
   selectedTopic.value = type === "topic" && topic ? topic : null;
 
-  const newMatches =
-    type === "topic" ? await findTopicMatches(itemId, topic!.baseExpression) : await findEmbeddingMatches(itemId);
+  try {
+    const newMatches =
+      type === "topic" ? await findTopicMatches(itemId, topic!.baseExpression) : await findEmbeddingMatches(itemId);
 
-  const sortedMatches = newMatches
-    .filter((match): match is SynergyMatch & { score: number } => typeof match.score === "number")
-    .sort((a, b) => b.score - a.score);
+    const sortedMatches = newMatches
+      .filter((match): match is SynergyMatch & { score: number } => typeof match.score === "number")
+      .sort((a, b) => b.score - a.score);
 
-  matches.value = sortedMatches;
-  searching.value = false;
+    matches.value = sortedMatches;
+  } catch (error) {
+    console.error("Search failed:", error);
+    matches.value = [];
+  } finally {
+    searching.value = false;
+  }
 }
 
 const matchText = computed((): string => {
@@ -266,32 +274,6 @@ const matchText = computed((): string => {
 function setFilterSettings(newSettings: FilterSettings) {
   filterSettings.value = newSettings;
 }
-
-// // Event listener for call health updates
-// let handleCallHealthUpdate: (event: CustomEvent) => void;
-
-onMounted(() => {
-  // Ensure SDNA classes
-  // props.perspective.ensureSDNASubjectClass(Conversation);
-  // props.perspective.ensureSDNASubjectClass(ConversationSubgroup);
-  // props.perspective.ensureSDNASubjectClass(Topic);
-  // props.perspective.ensureSDNASubjectClass(Embedding);
-  // props.perspective.ensureSDNASubjectClass(SemanticRelationship);
-  // TODO: listen directly to the signalling service now
-  // // Listen for call health updates from the signalling service
-  // const eventName = `${props.perspective.uuid}-call-health-update`;
-  // handleCallHealthUpdate = (event: CustomEvent) => {
-  //   signalsHealthy.value = event.detail === "healthy";
-  // };
-  // window.addEventListener(eventName, handleCallHealthUpdate);
-});
-
-// onUnmounted(() => {
-//   if (handleCallHealthUpdate) {
-//     const eventName = `${props.perspective.uuid}-call-health-update`;
-//     window.removeEventListener(eventName, handleCallHealthUpdate);
-//   }
-// });
 
 // Update search results when filters change
 watch(

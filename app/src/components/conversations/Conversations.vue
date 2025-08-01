@@ -113,20 +113,24 @@ function navigateToConversation(channelId: string) {
 }
 
 watch(conversationChannels, async (newConversationChannels) => {
-  const newConversations = await Promise.all(
-    newConversationChannels.map(async (channel) => {
-      const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-      return {
-        baseExpression: conversation.baseExpression,
-        name: conversation.conversationName,
-        summary: conversation.summary,
-        timestamp: conversation.timestamp,
-        channelId: channel.baseExpression,
-      };
-    })
-  );
+  try {
+    const newConversations = await Promise.all(
+      newConversationChannels.map(async (channel) => {
+        const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+        return {
+          baseExpression: conversation.baseExpression,
+          name: conversation.conversationName,
+          summary: conversation.summary,
+          timestamp: conversation.timestamp,
+          channelId: channel.baseExpression,
+        };
+      })
+    );
 
-  conversations.value = newConversations;
+    conversations.value = newConversations;
+  } catch (error) {
+    console.error("Failed to load conversations:", error);
+  }
 });
 </script>
 

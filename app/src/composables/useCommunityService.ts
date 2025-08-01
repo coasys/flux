@@ -16,6 +16,8 @@ export interface ChannelData {
   // notifications?: any;
   // hasNewMessages?: boolean;
   lastActivity?: string;
+  agentsInChannel?: AgentData[];
+  agentsInCall?: AgentData[];
 }
 
 export interface ChannelDataWithAgents extends ChannelData {
@@ -53,6 +55,8 @@ export interface CommunityService {
   getParentChannel: (channelId: string) => Partial<Channel> | undefined;
   getConversation: (channelId: string) => Partial<Conversation> | undefined;
 }
+
+const DEFAULT_CHAT_APP_PKG = "@coasys/flux-chat-view";
 
 export async function createCommunityService(): Promise<CommunityService> {
   const route = useRoute();
@@ -143,15 +147,20 @@ export async function createCommunityService(): Promise<CommunityService> {
   async function getPinnedConversations() {
     pinnedConversationsLoading.value = true;
 
-    // Loop through all the pinned channels and get the conversation data for each
-    pinnedConversations.value = await Promise.all(
-      pinnedChannels.value.map(async (channel: Channel) => {
-        const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-        return { conversation, channel };
-      })
-    );
-
-    pinnedConversationsLoading.value = false;
+    try {
+      // Loop through all the pinned channels and get the conversation data for each
+      pinnedConversations.value = await Promise.all(
+        pinnedChannels.value.map(async (channel: Channel) => {
+          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+          return { conversation, channel };
+        })
+      );
+    } catch (error) {
+      console.error("Error loading pinned conversations:", error);
+      pinnedConversations.value = [];
+    } finally {
+      pinnedConversationsLoading.value = false;
+    }
   }
 
   // TODO: make use of shared get children (or stats) function here, for expanding out conversations?
@@ -242,38 +251,45 @@ export async function createCommunityService(): Promise<CommunityService> {
   async function startNewConversation(parentChannelId?: string) {
     newConversationLoading.value = true;
 
-    // Create the channel
-    const channel = new Channel(perspective, undefined, parentChannelId);
-    channel.name = "";
-    channel.description = "";
-    channel.isConversation = true;
-    channel.isPinned = false;
-    await channel.save();
+    try {
+      // Create the channel
+      const channel = new Channel(perspective, undefined, parentChannelId);
+      channel.name = "";
+      channel.description = "";
+      channel.isConversation = true;
+      channel.isPinned = false;
+      await channel.save();
 
-    // Create the first placeholder conversation
-    const conversation = new Conversation(perspective, undefined, channel.baseExpression);
-    conversation.conversationName = "New conversation";
-    conversation.summary = "Content will appear when the first items have been processed...";
-    await conversation.save();
+      // Create the first placeholder conversation
+      const conversation = new Conversation(perspective, undefined, channel.baseExpression);
+      conversation.conversationName = "New conversation";
+      conversation.summary = "Content will appear when the first items have been processed...";
+      await conversation.save();
 
-    // Attach the chat app
-    const fluxApps = await getAllFluxApps();
-    const chatAppData = fluxApps.find((app) => app.pkg === "@coasys/flux-chat-view");
+      // Attach the chat app
+      const fluxApps = await getAllFluxApps();
+      const chatAppData = fluxApps.find((app) => app.pkg === DEFAULT_CHAT_APP_PKG);
+      if (!chatAppData) throw new Error(`Chat app ${DEFAULT_CHAT_APP_PKG} not found`);
 
-    const { name, description, icon, pkg } = chatAppData!;
+      const { name, description, icon, pkg } = chatAppData;
 
-    const chatApp = new App(perspective, undefined, channel.baseExpression);
-    chatApp.name = name;
-    chatApp.description = description;
-    chatApp.icon = icon;
-    chatApp.pkg = pkg;
-    await chatApp.save();
+      const chatApp = new App(perspective, undefined, channel.baseExpression);
+      chatApp.name = name;
+      chatApp.description = description;
+      chatApp.icon = icon;
+      chatApp.pkg = pkg;
+      await chatApp.save();
 
-    // Navigate to the new channel
-    const communityId = route.params.communityId as string;
-    router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: "conversation" } });
-
-    newConversationLoading.value = false;
+      // Navigate to the new channel
+      const communityId = route.params.communityId as string;
+      router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: "conversation" } });
+    } catch (error) {
+      console.error("Failed to create new conversation:", error);
+      appStore.showDangerToast({ message: "Failed to create conversation" });
+      throw error;
+    } finally {
+      newConversationLoading.value = false;
+    }
   }
 
   async function moveConversation(conversationChannelId: string, targetChannelId: string) {

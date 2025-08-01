@@ -88,14 +88,14 @@ const isDragOver = ref(false);
 const isDragging = ref(false);
 
 const selected = computed(() => item.channel.baseExpression === route.params.channelId);
-const agentsInChannel = computed(() => aggregateAgents(expanded.value, item, "agentsInChannel"));
-const agentsInCall = computed(() => aggregateAgents(expanded.value, item, "agentsInCall"));
+const agentsInChannel = computed(() => aggregateAgents(expanded.value, item, "agentsInChannel") || []);
+const agentsInCall = computed(() => aggregateAgents(expanded.value, item, "agentsInCall") || []);
 
-function aggregateAgents(expanded: boolean, item: any, agentKey: string) {
+function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: "agentsInChannel" | "agentsInCall") {
   // If collapsed and children exist, aggregate agents from child channels
   if (!expanded && item.children?.length) {
-    const childAgents = item.children.flatMap((child: any) => child[agentKey] || []);
-    return [...item[agentKey], ...childAgents];
+    const childAgents = item.children.flatMap((child) => child[agentKey] || []);
+    return [...(item[agentKey] || []), ...childAgents];
   }
   // Otherwise, just return agents from the current channel
   return item[agentKey];

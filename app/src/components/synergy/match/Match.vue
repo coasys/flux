@@ -8,7 +8,7 @@
 
     <h2 class="channel-name">{{ channelName }}</h2>
 
-    <div v-if="loading" style="margin-left: 130px; margin-bottom: -14px">
+    <div v-if="loading" class="loading-container">
       <j-flex gap="500" a="center">
         <j-text nomargin>Loading match...</j-text>
         <j-spinner size="xs" />
@@ -83,7 +83,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { channelId, channelName } = props.match;
 
 const { perspective } = useCommunityService();
 
@@ -97,6 +96,8 @@ const matchIndexes = ref<MatchIndexes>({
 const collapseBefore = ref(true);
 const collapseAfter = ref(true);
 
+const channelId = computed(() => props.match.channelId);
+const channelName = computed(() => props.match.channelName);
 const visibleConversations = computed(() =>
   conversations.value.filter((conversation, i) => {
     conversation.index = i;
@@ -114,7 +115,7 @@ const visibleConversations = computed(() =>
 );
 
 async function getData() {
-  const channel = new Channel(perspective, channelId);
+  const channel = new Channel(perspective, channelId.value);
   const newConversations = await channel.conversations();
 
   // Find the conversation that contains the match
@@ -202,6 +203,11 @@ $line-offset: 92px;
     margin: 0px;
     position: absolute;
     z-index: 10;
+  }
+
+  .loading-container {
+    margin-left: 130px;
+    margin-bottom: -14px;
   }
 
   .items {

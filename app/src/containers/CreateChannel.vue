@@ -8,6 +8,7 @@
         <j-text v-else variant="heading-sm">Create Channel</j-text>
         <j-text variant="body"> Channels are ways to organize your conversations by topics. </j-text>
       </div>
+
       <j-flex direction="column" gap="400">
         <j-input
           autofocus
@@ -23,7 +24,6 @@
         />
 
         <j-input
-          autofocus
           size="lg"
           label="Description"
           :minlength="10"
@@ -33,14 +33,6 @@
           :value="channelDescription"
           @input="(e: any) => (channelDescription = e.target.value)"
         />
-
-        <!-- <j-flex gap="400" a="center">
-          <j-text nomargin>Make the {{ createChannelParent ? "sub-" : "" }}channel a conversation</j-text>
-          <j-toggle :checked="isConversation" :disabled="isCreatingChannel" @change="isConversation = !isConversation">
-            {{ isConversation ? "True" : "False" }}
-          </j-toggle>
-          <j-icon name="info-circle" size="sm" color="ui-500" />
-        </j-flex> -->
 
         <j-box pb="500" pt="300">
           <j-box pb="300">
@@ -138,7 +130,6 @@ const selectedViews = ref<string[]>([]);
 const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
 const channelName = ref("");
 const channelDescription = ref("");
-// const isConversation = ref(false);
 const isCreatingChannel = ref(false);
 
 const client = await getAd4mClient();
@@ -150,7 +141,7 @@ const canSubmit = computed(() => hasName.value);
 const selectedPlugins = computed(() => packages.value.filter((p) => selectedViews.value.includes(p.pkg)));
 const officialApps = computed(() =>
   packages.value.filter(
-    // TODO: WebRTC & Synergy filterd out for now, remove plugins from codebase when fully replaced in main app?
+    // TODO: WebRTC & Synergy filtered out for now, remove plugins from codebase when fully replaced in main app?
     (p) =>
       p.pkg.startsWith("@coasys/") && !["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(p.pkg)
   )
@@ -183,11 +174,9 @@ async function createChannel() {
     const channel = new Channel(perspective.value, undefined, createChannelParent.value?.baseExpression || undefined);
     channel.name = channelName.value;
     channel.description = channelDescription.value;
-    channel.isConversation = false; // isConversation.value;
+    channel.isConversation = false;
     channel.isPinned = false;
     await channel.save();
-
-    // await perspective.value.ensureSDNASubjectClass(App);
 
     await Promise.all(
       selectedPlugins.value.map(async (app) => {
@@ -203,10 +192,7 @@ async function createChannel() {
     emit("submit");
     channelName.value = "";
 
-    console.log("createChannelParent.value", createChannelParent.value);
-
     if (!createChannelParent.value) {
-      console.log("navigating to channel");
       router.push({
         name: "channel",
         params: {
@@ -226,11 +212,9 @@ watch(
   selectedPlugins,
   async (apps: FluxApp[]) => {
     apps?.forEach(async (app) => {
-      console.log("app:", app);
       const wcName = await generateWCName(app.pkg);
-      if (customElements.get(wcName)) {
-        loadedPlugins[app.pkg] = "loaded";
-      } else {
+      if (customElements.get(wcName)) loadedPlugins[app.pkg] = "loaded";
+      else {
         loadedPlugins[app.pkg] = "loading";
         const module = await fetchFluxApp(app.pkg);
         if (module) customElements.define(wcName, module.default);

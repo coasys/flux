@@ -19,6 +19,9 @@ export class SynergyGroup {
   summary: string;
   timestamp: string;
   index?: number;
+  parentIndex?: number;
+  end?: string;
+  start?: string;
 }
 
 export class SynergyItem {

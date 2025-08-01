@@ -249,6 +249,6 @@ export interface SignallingService {
   addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   sendSignal: (link: Link) => void;
-  getAgentsInChannel: (channelId?: string, children?: PerspectiveExpression[]) => ComputedRef<AgentData[]>;
-  getAgentsInCall: (channelId?: string, children?: PerspectiveExpression[]) => ComputedRef<AgentData[]>;
+  getAgentsInChannel: (channelId?: string) => ComputedRef<AgentData[]>;
+  getAgentsInCall: (channelId?: string) => ComputedRef<AgentData[]>;
 }

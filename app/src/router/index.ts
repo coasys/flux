@@ -80,8 +80,7 @@ router.beforeEach(async (to, from, next) => {
         await appStore.refreshMyProfile();
         next("/home");
       } else if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
-
-      next();
+      else next();
     } else {
       // If not logged in, redirect to signup
       if (to.name !== "signup") next("/signup");

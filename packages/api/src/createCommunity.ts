@@ -1,4 +1,5 @@
 import { Perspective } from "@coasys/ad4m";
+// @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community as FluxCommunity } from "@coasys/flux-types";
 import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
@@ -86,8 +87,8 @@ export default async function createCommunity({
     const notification = notifications.find((notification) => notification.appName === "Flux");
 
     const notificationId = notification.id;
-    delete notification.granted;
-    delete notification.id;
+    notification.granted = undefined;
+    notification.id = undefined;
 
     await client.runtime.updateNotification(notificationId, {
       ...notification,
