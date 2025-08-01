@@ -367,7 +367,6 @@ async function handleTranscriptionPreview(text: string) {
   // Check total length including preview & save immediately if it exceeds max length
   const currentTranscript = transcripts.value.find((t) => t.id === transcriptId.value);
   const totalLength = (currentTranscript?.text.length || 0) + previewText.value.length;
-
   if (totalLength > transcriptionMaxChars.value) await saveMessage();
   else resetSaveTimeout();
 }

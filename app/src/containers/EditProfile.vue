@@ -50,10 +50,10 @@ const emit = defineEmits<{ cancel: []; submit: [] }>();
 const appStore = useAppStore();
 const { me } = storeToRefs(appStore);
 
-const profileBackground = ref("");
-const profilePicture = ref("");
 const username = ref("");
 const bio = ref("");
+const profileBackground = ref("");
+const profilePicture = ref("");
 
 const hideContainer = ref(false);
 const saving = ref(false);
@@ -70,6 +70,8 @@ async function saveProfile() {
     });
 
     emit("submit");
+
+    appStore.refreshMyProfile();
   } catch (e) {
     console.error("Error updating profile:", e);
   } finally {

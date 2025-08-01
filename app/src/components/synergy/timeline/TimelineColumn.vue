@@ -205,26 +205,17 @@ onMounted(() => {
   if (signallingService) {
     getData(true);
 
-    // // Listen for new agents state from the signalling service
-    // const eventName = `${perspective.uuid}-new-agents-state`;
-    // window.addEventListener(eventName, handleNewAgentsState);
-
     // Listen for link-added events from the perspective
     perspective.addListener("link-added", handleLinkAdded);
   }
 });
 
 onUnmounted(() => {
-  if (signallingService) {
-    // const eventName = `${perspective.uuid}-new-agents-state`;
-    // window.removeEventListener(eventName, handleNewAgentsState);
-    perspective.removeListener("link-added", handleLinkAdded);
-  }
+  // Remove the link-added listener when the component is unmounted
+  if (signallingService) perspective.removeListener("link-added", handleLinkAdded);
 
   // Clear timeouts
-  if (linkAddedTimeout.value) {
-    clearTimeout(linkAddedTimeout.value);
-  }
+  if (linkAddedTimeout.value) clearTimeout(linkAddedTimeout.value);
 });
 
 watch(
