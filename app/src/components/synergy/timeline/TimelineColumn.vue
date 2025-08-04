@@ -148,14 +148,7 @@ async function getData(firstRun?: boolean): Promise<void> {
   gettingData.value = true;
 
   try {
-    const [newConversations, newUnprocessedItems] = await Promise.all([
-      getConversations(),
-      getUnprocessedItems(),
-      // TODO: find better approach (maybe check new conversations for changes and only fire the following functions if updated?)
-      getRecentConversations(),
-      getPinnedConversations(),
-      getChannelsWithConversations(),
-    ]);
+    const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
     conversations.value = newConversations;
     unprocessedItems.value = newUnprocessedItems;
     if (newConversations.length) creatingNewConversation.value = false;
