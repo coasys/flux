@@ -106,5 +106,5 @@ export const useUiStore = defineStore(
       setCallWindowFullscreen,
     };
   },
-  { persist: { omit: ["callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
+  { persist: { omit: ["showAppSidebar", "callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
 );

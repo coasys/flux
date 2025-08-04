@@ -29,11 +29,10 @@ const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, c
 const touchstartX = ref(0);
 const touchendX = ref(0);
 
-const mainWidth = computed(() =>
-  callWindowOpen.value
-    ? `calc(100% - ${callWindowWidth.value}px - var(--app-main-sidebar-width))`
-    : "calc(100% - var(--app-main-sidebar-width))"
-);
+const mainWidth = computed(() => {
+  const sidebarWidth = showAppSidebar ? "var(--app-main-sidebar-width)" : "0px";
+  callWindowOpen.value ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})` : `calc(100% - ${sidebarWidth})`;
+});
 
 function handleTouchStart(e: any) {
   touchstartX.value = e.changedTouches[0].screenX;
