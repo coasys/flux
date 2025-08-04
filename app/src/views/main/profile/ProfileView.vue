@@ -107,7 +107,7 @@
       </div>
     </div>
 
-    <div class="sidebar" @click="() => uiStore.setAppSidebarOpen(!uiStore.showAppSidebar)">
+    <div class="sidebar" @click="uiStore.toggleAppSidebar">
       <j-icon name="layout-sidebar" size="md" />
     </div>
   </div>

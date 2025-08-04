@@ -25,7 +25,15 @@ export const useUiStore = defineStore(
     }
 
     function toggleAppSidebar(): void {
+      // Prevent width transition when toggling the app sidebar
+      const mainAppLayout = document.getElementById("app-layout-main");
+      if (mainAppLayout) mainAppLayout.style.transition = "none";
+
+      // Toggle the app sidebar visibility
       showAppSidebar.value = !showAppSidebar.value;
+
+      // Reset the transition after toggling
+      if (mainAppLayout) setTimeout(() => (mainAppLayout.style.transition = "width 0.5s ease-in-out"), 200);
     }
 
     function setAppSidebarOpen(open: boolean): void {
