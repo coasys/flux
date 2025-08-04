@@ -1,9 +1,6 @@
 <template>
   <div>
-    <j-box pb="800">
-      <j-box pb="500">
-        <j-text variant="heading-sm">Appeareance</j-text>
-      </j-box>
+    <j-box pb="800" pt="500">
       <j-box pb="800">
         <j-box pb="300">
           <j-text variant="label">Primary color</j-text>

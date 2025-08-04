@@ -31,7 +31,9 @@ const touchendX = ref(0);
 
 const mainWidth = computed(() => {
   const sidebarWidth = showAppSidebar ? "var(--app-main-sidebar-width)" : "0px";
-  callWindowOpen.value ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})` : `calc(100% - ${sidebarWidth})`;
+  return callWindowOpen.value
+    ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})`
+    : `calc(100% - ${sidebarWidth})`;
 });
 
 function handleTouchStart(e: any) {
