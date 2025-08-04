@@ -7,11 +7,7 @@
   >
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
     <div class="app-layout__webrtc"><slot name="webrtc"></slot></div>
-    <main
-      class="app-layout__main"
-      id="app-layout-main"
-      :style="{ width: mainWidth, minWidth: `${communitySidebarWidth}px` }"
-    >
+    <main class="app-layout__main" id="app-layout-main" :style="{ width: mainWidth }">
       <slot></slot>
     </main>
   </div>
@@ -119,5 +115,13 @@ function checkDirection() {
   overflow-x: hidden;
   transition: width 0.5s ease-in-out;
   margin-left: 0;
+
+  @media (min-width: 801px) {
+    min-width: v-bind('communitySidebarWidth + "px"');
+  }
+
+  @media (max-width: 800px) {
+    min-width: unset;
+  }
 }
 </style>
