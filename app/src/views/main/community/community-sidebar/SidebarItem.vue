@@ -69,7 +69,7 @@ import ChevronDown from "@/components/icons/ChevronDown.vue";
 import ChevronRight from "@/components/icons/ChevronRight.vue";
 import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
 import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
-import { useRouteMemoryStore } from "@/stores";
+import { useRouteMemoryStore, useUiStore } from "@/stores";
 import { computed, defineOptions, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -80,6 +80,7 @@ const { item } = defineProps<Props>();
 
 const route = useRoute();
 const router = useRouter();
+const uiStore = useUiStore();
 const routeMemoryStore = useRouteMemoryStore();
 const { moveConversation, moveConversationLoading } = useCommunityService();
 
@@ -108,6 +109,9 @@ function navigateToChannel() {
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
   const defaultViewId = item.channel.isConversation ? "conversation" : "conversations";
   router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
+
+  // Toggle the community sidebar shut if open (only has effect on mobile)
+  uiStore.toggleCommunitySidebar();
 }
 
 function expandIfInNestedChannel() {
