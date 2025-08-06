@@ -19,7 +19,15 @@
     >
       <j-flex slot="start" gap="400" a="center">
         <j-flex gap="200" a="center" style="cursor: pointer">
-          <j-icon size="xs" :name="item.channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
+          <j-icon
+            v-if="item.channel.isConversation && isChild"
+            size="xs"
+            name="chat-square-text"
+            color="ui-500"
+            style="margin: 2px 4px 0 0"
+          />
+          <j-icon v-if="!item.channel.isConversation" size="xs" name="hash" color="ui-500" />
+
           <j-text nomargin>{{ item.conversation ? item.conversation.conversationName : item.channel.name }}</j-text>
 
           <template v-if="item.lastActivity">
@@ -59,7 +67,7 @@
     </div>
 
     <div v-if="expanded && item.children?.length" style="margin-left: var(--j-space-500)">
-      <SidebarItem v-for="child in item.children" :key="child.channel.baseExpression" :item="child" />
+      <SidebarItem v-for="child in item.children" :key="child.channel.baseExpression" :item="child" is-child />
     </div>
   </j-flex>
 </template>
@@ -75,7 +83,7 @@ import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "SidebarItem" });
 
-type Props = { item: ChannelData };
+type Props = { item: ChannelData; isChild?: boolean };
 const { item } = defineProps<Props>();
 
 const route = useRoute();
@@ -176,7 +184,7 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
   position: relative;
   display: flex;
   justify-content: space-between;
-  margin: 0 -12px;
+  margin: 0 -10px;
   padding: 10px;
   border-radius: 6px;
   transition: all 0.2s ease;
