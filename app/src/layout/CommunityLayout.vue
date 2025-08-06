@@ -76,6 +76,9 @@ function stopResize() {
   background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 @media (max-width: 800px) {
