@@ -159,7 +159,7 @@
                 :title="`${callWindowOpen ? 'Hide' : 'Show'} call window`"
               >
                 <j-icon
-                  :name="`arrows-angle-${callWindowOpen ? 'contract' : 'expand'}`"
+                  :name="callWindowOpen ? 'arrows-angle-contract' : 'telephone'"
                   color="ui-500"
                   @click="() => uiStore.setCallWindowOpen(!callWindowOpen)"
                 />
