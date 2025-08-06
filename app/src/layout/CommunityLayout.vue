@@ -134,7 +134,6 @@ function stopResize() {
 .community-layout__main {
   width: 100%;
   max-height: 100vh;
-  overflow-y: auto;
   flex: 1;
   background: var(--app-main-content-bg-color, var(--j-color-white));
 }

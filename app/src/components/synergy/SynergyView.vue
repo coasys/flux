@@ -1,8 +1,6 @@
 <template>
   <div class="synergy-wrapper">
     <j-flex gap="500" a="center" wrap>
-      <j-text nomargin uppercase size="600" weight="800" color="primary-500"> Synergy </j-text>
-
       <j-flex v-if="aiStore" a="center" gap="300">
         <j-icon name="robot" color="ui-500" />
         <j-text nomargin>LLM processing:</j-text>
