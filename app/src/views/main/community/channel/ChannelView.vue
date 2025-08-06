@@ -47,10 +47,10 @@
           <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
           {{ channel.isPinned ? "Pinned" : "Pin" }}
         </button>
-        <button v-else class="header-button highlighted" @click="goToEditChannel">
+        <!-- <button v-else class="header-button highlighted" @click="goToEditChannel">
           <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
           Edit channel
-        </button>
+        </button> -->
       </div>
 
       <div class="header-views">

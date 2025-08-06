@@ -169,8 +169,6 @@ async function createChannel() {
       throw new Error("Cannot create a channel because perspective is undefined.");
     }
 
-    console.log("creating channel: ", createChannelParent.value?.baseExpression);
-
     const channel = new Channel(perspective.value, undefined, createChannelParent.value?.baseExpression || undefined);
     channel.name = channelName.value;
     channel.description = channelDescription.value;
