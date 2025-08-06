@@ -17,53 +17,50 @@
       @drop="handleDrop"
       @click="navigateToChannel"
     >
-      <j-flex slot="start" gap="400" a="center">
-        <j-flex gap="200" a="center" style="cursor: pointer">
-          <j-icon
-            v-if="item.channel.isConversation && isChild"
-            size="xs"
-            name="chat-square-text"
-            color="ui-500"
-            style="margin: 2px 4px 0 0"
-          />
-          <j-icon v-if="!item.channel.isConversation" size="xs" name="hash" color="ui-500" />
+      <div class="title">
+        <j-icon
+          v-if="item.channel.isConversation && isChild"
+          size="xs"
+          name="chat-square-text"
+          color="ui-500"
+          style="margin: 2px 4px 0 0"
+        />
+        <j-icon v-if="!item.channel.isConversation" size="xs" name="hash" color="ui-500" />
 
-          <j-text nomargin>{{ item.conversation ? item.conversation.conversationName : item.channel.name }}</j-text>
+        <j-text nomargin>{{ item.conversation ? item.conversation.conversationName : item.channel.name }}</j-text>
+      </div>
 
-          <template v-if="item.lastActivity">
-            <j-text nomargin size="300">•</j-text>
-            <j-text nomargin size="300">
-              <j-timestamp :value="item.lastActivity" relative class="timestamp" />
-            </j-text>
-          </template>
-        </j-flex>
+      <div v-if="item.lastActivity" class="last-activity">
+        <j-text nomargin size="300">•</j-text>
+        <j-text nomargin size="300">
+          <j-timestamp :value="item.lastActivity" relative class="timestamp" />
+        </j-text>
+      </div>
 
-        <button v-if="item.children?.length" class="show-children-button" @click.stop="expanded = !expanded">
-          <ChevronDown v-if="expanded" />
-          <ChevronRight v-else />
-          {{ item.children.length }}
-        </button>
+      <button v-if="item.children?.length" class="show-children-button" @click.stop="expanded = !expanded">
+        <ChevronDown v-if="expanded" />
+        <ChevronRight v-else />
+        {{ item.children.length }}
+      </button>
 
-        <!-- <div class="notification" v-if="item.channel.hasNewMessages" /> -->
-
-        <template v-if="agentsInChannel.length">
+      <div class="agents" v-if="agentsInChannel.length || agentsInCall.length">
+        <div class="agents-in-channel" v-if="agentsInChannel.length">
           <j-flex v-for="agent in agentsInChannel" :key="agent.did">
             <div :class="['agent', agent.status]">
               <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
             </div>
           </j-flex>
-        </template>
-      </j-flex>
+        </div>
 
-      <j-flex v-if="agentsInCall.length" class="active-agents in-call" slot="end">
-        <template v-for="agent in agentsInCall" :key="agent.did">
-          <div class="agent in-call">
-            <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
-          </div>
-        </template>
-
-        <RecordingIcon />
-      </j-flex>
+        <div class="agents-in-call" v-if="agentsInCall.length">
+          <j-flex v-for="agent in agentsInCall" :key="agent.did">
+            <div class="agent in-call">
+              <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
+            </div>
+          </j-flex>
+          <RecordingIcon />
+        </div>
+      </div>
     </div>
 
     <div v-if="expanded && item.children?.length" style="margin-left: var(--j-space-500)">
@@ -183,7 +180,9 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
 .channel {
   position: relative;
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--j-space-300);
   margin: 0 -10px;
   padding: 10px;
   border-radius: 6px;
@@ -229,6 +228,20 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
     user-select: none;
   }
 
+  .title {
+    display: flex;
+    align-items: center;
+    gap: var(--j-space-200);
+    margin-right: var(--j-space-100);
+  }
+
+  .last-activity {
+    display: flex;
+    gap: var(--j-space-200);
+    flex-shrink: 0;
+    margin-right: var(--j-space-200);
+  }
+
   .show-children-button {
     all: unset;
     cursor: pointer;
@@ -239,6 +252,7 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
     color: var(--j-color-ui-300);
     font-weight: 600;
     font-size: var(--j-font-size-400);
+    margin-right: var(--j-space-200);
 
     > svg {
       width: 16px;
@@ -253,6 +267,21 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
     border-radius: 50%;
     background: var(--j-color-primary-500);
     flex-shrink: 0;
+  }
+
+  .agents {
+    display: flex;
+    flex: 1;
+    gap: var(--j-space-200);
+
+    .agents-in-channel {
+      display: flex;
+    }
+
+    .agents-in-call {
+      display: flex;
+      margin-left: auto;
+    }
   }
 
   .agent {
