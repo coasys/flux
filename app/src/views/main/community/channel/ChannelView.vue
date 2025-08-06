@@ -309,7 +309,7 @@ onUnmounted(() => {
       padding: 0 var(--j-space-300);
       border-radius: 8px;
       background: var(--j-color-ui-100);
-      height: 36px;
+      height: var(--j-size-sm);
 
       > j-icon {
         color: var(--j-color-ui-400);

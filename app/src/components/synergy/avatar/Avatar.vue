@@ -40,8 +40,8 @@ onMounted(async () => {
   background-color: var(--j-color-ui-100);
   box-shadow: 0 0 0 1px var(--j-color-ui-200);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: var(--j-size-sm);
+  height: var(--j-size-sm);
   z-index: 1;
 }
 </style>
