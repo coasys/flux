@@ -126,8 +126,7 @@ const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
 const selectedItemId = ref("");
 const zoom = ref<GroupingOption>(groupingOptions[0]);
-const refreshTrigger = ref(0); // TODO: can this be removed now we've moved from React to Vue?
-const creatingNewConversation = ref(false);
+const refreshTrigger = ref(0);
 const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
@@ -149,15 +148,26 @@ async function getData(firstRun?: boolean): Promise<void> {
 
   try {
     const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
+
+    // Update sidebar items if the conversations name has changed
+    if (conversations.value[0] && conversations.value[0].name !== newConversations[0].name) {
+      getPinnedConversations();
+      getRecentConversations();
+      getChannelsWithConversations();
+    }
+
+    // Update state
     conversations.value = newConversations;
     unprocessedItems.value = newUnprocessedItems;
-    if (newConversations.length) creatingNewConversation.value = false;
     gettingData.value = false;
+
+    // Trigger a refresh in child components
     refreshTrigger.value = refreshTrigger.value + 1;
 
+    // If this is not the first run, check if we should process tasks
+    if (firstRun) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
-
-    if (!firstRun && shouldProcess) {
+    if (shouldProcess) {
       const channel = new Channel(perspective, route.params.channelId as string);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
     }
