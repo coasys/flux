@@ -135,7 +135,7 @@ import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ChannelView" });
@@ -153,11 +153,9 @@ const modalStore = useModalStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { perspective, allChannels, signallingService, recentConversations, getPinnedConversations } =
-  useCommunityService();
-
+const { perspective, allChannels, signallingService, recentConversations } = useCommunityService();
 const { me } = storeToRefs(appStore);
-const { callWindowOpen } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
@@ -173,8 +171,6 @@ const conversation = computed(() =>
     : null
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
-const windowWidth = ref(window.innerWidth);
-const isMobile = computed(() => windowWidth.value < 800);
 const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId)?.value || []);
 
@@ -230,24 +226,12 @@ async function togglePinned() {
   }
 }
 
-function updateWindowWidth() {
-  windowWidth.value = window.innerWidth;
-}
-
 onMounted(() => {
-  // Add resize event listener to update window width
-  window.addEventListener("resize", updateWindowWidth);
-
   // Navigate to the conversation or subchannels view if no viewId present when entering channel
   if (!viewId) {
     if (channel.value?.isConversation) router.push({ name: "view", params: { viewId: "conversation" } });
     else router.push({ name: "view", params: { viewId: "sub-channels" } });
   }
-});
-
-onUnmounted(() => {
-  // Remove resize event listener
-  window.removeEventListener("resize", updateWindowWidth);
 });
 </script>
 

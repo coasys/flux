@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
 import { WindowState } from "./types";
 
@@ -18,6 +18,9 @@ export const useUiStore = defineStore(
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
     const windowState = ref<WindowState>("visible");
+    const windowWidth = ref(window.innerWidth);
+
+    const isMobile = computed(() => windowWidth.value < 800);
 
     // Mutations
     function toggleCommunitySidebar(): void {
@@ -87,8 +90,13 @@ export const useUiStore = defineStore(
       globalError.value = error;
     }
 
+    function updateWindowWidth(): void {
+      windowWidth.value = window.innerWidth;
+    }
+
     return {
       // State
+      isMobile,
       showAppSidebar,
       showCommunitySidebar,
       communitySidebarWidth,
@@ -112,6 +120,7 @@ export const useUiStore = defineStore(
       setGlobalLoading,
       setGlobalError,
       setCallWindowFullscreen,
+      updateWindowWidth,
     };
   },
   { persist: { omit: ["showAppSidebar", "callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
