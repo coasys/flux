@@ -135,9 +135,9 @@ function stopResize() {
 }
 
 .community-layout__main {
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
   max-height: 100vh;
-  flex: 1;
   background: var(--app-main-content-bg-color, var(--j-color-white));
 }
 
