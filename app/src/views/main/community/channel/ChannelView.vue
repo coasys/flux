@@ -253,6 +253,8 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .channel-view {
+  display: flex;
+  flex-direction: column;
   position: relative;
   background: var(--app-channel-bg-color, transparent);
   width: 100%;
@@ -263,7 +265,6 @@ onUnmounted(() => {
     flex-wrap: wrap;
     align-items: center;
     padding: 0 var(--j-space-400);
-    position: sticky;
     background: var(--app-channel-header-bg-color, transparent);
     border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
     min-height: var(--app-header-height);
@@ -365,9 +366,11 @@ onUnmounted(() => {
 
   .perspective-view {
     position: relative;
-    height: calc(100% - var(--app-header-height));
+    height: 100%;
     overflow-y: auto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 }
 
