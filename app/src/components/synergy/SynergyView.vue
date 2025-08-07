@@ -109,7 +109,7 @@
       Holochain signals disrupted. Processing paused until connection restored.
     </j-badge>
 
-    <j-flex class="synergy-content">
+    <div class="synergy-content">
       <div
         :style="{
           width: showMatchColumn ? '50%' : '100%',
@@ -127,7 +127,7 @@
           pointerEvents: showMatchColumn ? 'all' : 'none',
           transition: 'all 0.5s ease-in-out',
           maxWidth: '1200px',
-          marginLeft: '40px',
+          marginLeft: showMatchColumn ? '40px' : 0,
         }"
       >
         <MatchColumn
@@ -140,7 +140,7 @@
           :close="() => (showMatchColumn = false)"
         />
       </div>
-    </j-flex>
+    </div>
   </div>
 </template>
 
@@ -283,17 +283,9 @@ watch(
   },
   { deep: true }
 );
-
-// // Reset matches when channel changes
-// watch(
-//   () => props.source,
-//   () => {
-//     matches.value = [];
-//   }
-// );
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .synergy-wrapper {
   margin: 0 auto;
   padding: var(--j-space-800);
@@ -302,10 +294,15 @@ watch(
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
 
-.synergy-content {
-  width: 100%;
-  margin-top: 20px;
+  @media screen and (max-width: 800px) {
+    padding: var(--j-space-400);
+  }
+
+  .synergy-content {
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+  }
 }
 </style>

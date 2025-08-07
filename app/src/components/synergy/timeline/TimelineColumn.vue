@@ -46,7 +46,7 @@
           :search="search"
         />
 
-        <div v-if="unprocessedItems.length > 0" style="margin-left: 70px">
+        <div v-if="unprocessedItems.length > 0" class="unprocessed-items">
           <j-box mb="400">
             <j-flex a="center" j="between">
               <j-text uppercase nomargin size="400" weight="800" color="primary-500">
@@ -243,8 +243,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-$line-offset: 92px;
-
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -289,8 +287,12 @@ $line-offset: 92px;
       .line {
         height: 100%;
         width: 6px;
-        margin-left: $line-offset;
+        margin-left: 92px;
         background-color: var(--j-color-primary-200);
+
+        @media screen and (max-width: 800px) {
+          margin-left: 12px;
+        }
       }
     }
 
@@ -298,36 +300,42 @@ $line-offset: 92px;
       height: 100%;
       overflow-y: scroll;
       z-index: 5;
-      padding: 130px 20px 130px 60px;
+      padding: 90px 20px 90px 60px;
+
+      @media screen and (max-width: 800px) {
+        padding: 70px 0;
+        margin-left: -20px;
+      }
 
       &::-webkit-scrollbar {
         display: none;
       }
 
-      .line {
-        height: 130px;
-        width: 6px;
-        margin-left: $line-offset;
-        background-color: var(--j-color-primary-200);
-      }
+      .unprocessed-items {
+        margin-left: 70px;
 
-      .item-card {
-        display: flex;
-        margin-bottom: 20px;
-        width: 100%;
-        border: 1px solid var(--j-color-ui-300);
-        border-radius: var(--j-border-radius);
-        padding: var(--j-space-400);
-        background-color: var(--j-color-ui-100);
-
-        .timestamp {
-          font-size: 14px;
-          color: var(--j-color-ui-400);
+        @media screen and (max-width: 800px) {
+          margin-left: 56px;
         }
-      }
 
-      .item-text :deep(p) {
-        margin: 0;
+        .item-card {
+          display: flex;
+          margin-bottom: 20px;
+          width: 100%;
+          border: 1px solid var(--j-color-ui-300);
+          border-radius: var(--j-border-radius);
+          padding: var(--j-space-400);
+          background-color: var(--j-color-ui-100);
+
+          .timestamp {
+            font-size: 14px;
+            color: var(--j-color-ui-400);
+          }
+        }
+
+        .item-text :deep(p) {
+          margin: 0;
+        }
       }
     }
   }

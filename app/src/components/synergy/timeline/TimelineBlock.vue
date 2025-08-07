@@ -465,6 +465,10 @@ watch(
         left: -6px;
         top: 45px;
       }
+
+      @media screen and (max-width: 800px) {
+        display: none;
+      }
     }
 
     .position {
