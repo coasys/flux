@@ -414,10 +414,10 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
+import TranscriptionIcon from "@/components/icons/TranscriptionIcon.vue";
 import MediaPlayer, { MediaPlayerWarning } from "@/components/media-player/MediaPlayer.vue";
 import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
 import Transcriber from "@/components/transcriber/Transcriber.vue";
-import TranscriptionIcon from "@/components/transcription-icon/TranscriptionIcon.vue";
 import { ChannelData } from "@/composables/useCommunityService";
 import {
   llmProcessingSteps,
@@ -449,7 +449,7 @@ const aiStore = useAiStore();
 const communityServiceStore = useCommunityServiceStore();
 
 const { me, myProfile } = storeToRefs(appStore);
-const { communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
+const { isMobile, communitySidebarWidth, callWindowOpen, callWindowWidth, callWindowFullscreen } = storeToRefs(uiStore);
 const { stream, mediaSettings, mediaPermissions, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled, processingState, defaultLLM, processingQueue } = storeToRefs(aiStore);
 const {

@@ -60,7 +60,7 @@
           @click="() => (numberOfConversationsDisplayed = numberOfConversationsDisplayed + 5)"
         >
           See more
-          <span> <ChevronDown /> {{ conversations.length - numberOfConversationsDisplayed }} </span>
+          <span> <ChevronDownIcon /> {{ conversations.length - numberOfConversationsDisplayed }} </span>
         </j-button>
       </j-flex>
     </j-box>
@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import { ChevronDownIcon } from "@/components/icons";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore } from "@/stores";
 import { useModel } from "@coasys/ad4m-vue-hooks";
@@ -76,7 +77,6 @@ import { SynergyGroup } from "@coasys/flux-utils";
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import ChevronDown from "../icons/ChevronDown.vue";
 import TimelineBlock from "../synergy/timeline/TimelineBlock.vue";
 
 interface Props {

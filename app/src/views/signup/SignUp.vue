@@ -14,7 +14,7 @@
         </j-box>
 
         <j-box pb="800">
-          <Logo width="150px" />
+          <FluxLogoIcon width="150px" />
         </j-box>
 
         <j-text variant="heading"> Create a user </j-text>
@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import Logo from "@/components/logo/Logo.vue";
+import { FluxLogoIcon } from "@/components/icons";
 import { useAppStore } from "@/stores";
 import { useValidation } from "@/utils/validation";
 import { getAd4mClient } from "@coasys/ad4m-connect";

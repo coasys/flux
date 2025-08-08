@@ -10,7 +10,7 @@
     <div class="slider" @scroll="handleScroll">
       <div id="first" class="slider__slide">
         <div class="slider__content">
-          <Logo height="9vh" />
+          <FluxLogoIcon height="9vh" />
         </div>
       </div>
       <div id="second" class="slider__slide">
@@ -41,7 +41,7 @@
     <j-box pb="500" style="text-align: center" v-if="deferredPrompt">
       <j-button size="xl" variant="primary" @click="downloadPWA">
         Install for Chrome
-        <ChromeSVG />
+        <ChromeIcon />
       </j-button>
     </j-box>
     <j-box>
@@ -61,8 +61,7 @@
 
 <script setup lang="ts">
 import { ad4mConnect } from "@/ad4mConnect";
-import ChromeSVG from "@/components/chrome-svg/ChromeSVG.vue";
-import Logo from "@/components/logo/Logo.vue";
+import { ChromeIcon, FluxLogoIcon } from "@/components/icons";
 import { onMounted, ref } from "vue";
 import Orb from "./Orb.vue";
 

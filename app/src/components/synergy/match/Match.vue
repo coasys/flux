@@ -25,7 +25,7 @@
         <div class="expand-button">
           <j-button @click="setCollapseBefore(false)">
             See more
-            <span> <ChevronUp /> {{ matchIndexes.conversation }} </span>
+            <span> <ChevronUpIcon /> {{ matchIndexes.conversation }} </span>
           </j-button>
         </div>
       </div>
@@ -59,7 +59,7 @@
         <div class="expand-button">
           <j-button @click="setCollapseAfter(false)">
             See more
-            <span> <ChevronDown /> {{ conversations.length - matchIndexes.conversation - 1 }} </span>
+            <span> <ChevronDownIcon /> {{ conversations.length - matchIndexes.conversation - 1 }} </span>
           </j-button>
         </div>
       </div>
@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDown, ChevronUp } from "@/components/icons/index";
+import { ChevronDownIcon, ChevronUpIcon } from "@/components/icons";
 import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { Channel } from "@coasys/flux-api";

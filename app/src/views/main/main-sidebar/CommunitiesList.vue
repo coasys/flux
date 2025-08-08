@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
+import RecordingIcon from "@/components/icons/RecordingIcon.vue";
 import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";

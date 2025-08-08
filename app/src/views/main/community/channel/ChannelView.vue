@@ -3,7 +3,7 @@
     <div class="header">
       <div class="header-info">
         <button v-if="isMobile" class="open-sidebar-button" @click="() => uiStore.setCommunitySidebarOpen(true)">
-          <ChevronLeft />
+          <ChevronLeftIcon />
         </button>
         <j-flex
           a="center"
@@ -94,7 +94,7 @@
 
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" a="center">
-        <Hourglass width="30px" />
+        <HourglassIcon width="30px" />
         <j-text variant="heading">Joining community</j-text>
         <j-text>Please wait...</j-text>
       </j-box>
@@ -127,8 +127,7 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import Hourglass from "@/components/hourglass/Hourglass.vue";
-import ChevronLeft from "@/components/icons/ChevronLeft.vue";
+import { ChevronLeftIcon, HourglassIcon } from "@/components/icons";
 import { useCommunityService } from "@/composables/useCommunityService";
 import ProfileContainer from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";

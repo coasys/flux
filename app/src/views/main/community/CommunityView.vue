@@ -31,7 +31,7 @@
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
-            <Hourglass />
+            <HourglassIcon />
           </j-box>
 
           <j-flex direction="column" a="center">
@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import Hourglass from "@/components/hourglass/Hourglass.vue";
+import { HourglassIcon } from "@/components/icons";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";

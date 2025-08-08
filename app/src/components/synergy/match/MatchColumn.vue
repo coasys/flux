@@ -69,14 +69,14 @@
         @click="() => (numberOfMatchesDisplayed += 5)"
       >
         See more
-        <span> <ChevronDown /> {{ matches.length - numberOfMatchesDisplayed }} </span>
+        <span> <ChevronDownIcon /> {{ matches.length - numberOfMatchesDisplayed }} </span>
       </j-button>
     </j-flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ChevronDown } from "@/components/icons";
+import { ChevronDownIcon } from "@/components/icons";
 import Match from "@/components/synergy/match/Match.vue";
 import { closeMenu } from "@/components/synergy/utils/index";
 import {

@@ -38,8 +38,8 @@
       </div>
 
       <button v-if="item.children?.length" class="show-children-button" @click.stop="expanded = !expanded">
-        <ChevronDown v-if="expanded" />
-        <ChevronRight v-else />
+        <ChevronDownIcon v-if="expanded" />
+        <ChevronRightIcon v-else />
         {{ item.children.length }}
       </button>
 
@@ -70,9 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import ChevronDown from "@/components/icons/ChevronDown.vue";
-import ChevronRight from "@/components/icons/ChevronRight.vue";
-import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
+import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from "@/components/icons";
 import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
 import { useRouteMemoryStore, useUiStore } from "@/stores";
 import { computed, defineOptions, ref, watch } from "vue";
