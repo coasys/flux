@@ -173,9 +173,9 @@
 </template>
 
 <script setup lang="ts">
+import Avatar from "@/components/conversation/avatar/Avatar.vue";
+import PercentageRing from "@/components/conversation/percentage-ring/PercentageRing.vue";
 import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, SubwayTimelineCurveIcon } from "@/components/icons";
-import Avatar from "@/components/synergy/avatar/Avatar.vue";
-import PercentageRing from "@/components/synergy/percentage-ring/PercentageRing.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { LinkQuery } from "@coasys/ad4m";
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";

@@ -145,8 +145,8 @@
 </template>
 
 <script setup lang="ts">
-import MatchColumn from "@/components/synergy/match/MatchColumn.vue";
-import TimelineColumn from "@/components/synergy/timeline/TimelineColumn.vue";
+import MatchColumn from "@/components/conversation/match/MatchColumn.vue";
+import TimelineColumn from "@/components/conversation/timeline/TimelineColumn.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useAiStore, useWebrtcStore } from "@/stores";
 import { SemanticRelationship, Topic } from "@coasys/flux-api";

@@ -76,8 +76,8 @@
 </template>
 
 <script setup lang="ts">
+import Match from "@/components/conversation/match/Match.vue";
 import { ChevronDownIcon } from "@/components/icons";
-import Match from "@/components/synergy/match/Match.vue";
 import { closeMenu } from "@/utils/helperFunctions";
 import {
   FilterSettings,

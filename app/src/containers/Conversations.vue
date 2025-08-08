@@ -68,8 +68,8 @@
 </template>
 
 <script setup lang="ts">
+import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
 import { ChevronDownIcon } from "@/components/icons";
-import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore } from "@/stores";
 import { useModel } from "@coasys/ad4m-vue-hooks";

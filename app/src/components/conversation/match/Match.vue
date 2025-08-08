@@ -68,8 +68,8 @@
 </template>
 
 <script setup lang="ts">
+import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
 import { ChevronDownIcon, ChevronUpIcon } from "@/components/icons";
-import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { Channel } from "@coasys/flux-api";
 import { GroupingOption, MatchIndexes, SynergyGroup, SynergyMatch } from "@coasys/flux-utils";

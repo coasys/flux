@@ -94,9 +94,9 @@
 </template>
 
 <script setup lang="ts">
+import Avatar from "@/components/conversation/avatar/Avatar.vue";
+import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
 import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
-import Avatar from "@/components/synergy/avatar/Avatar.vue";
-import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { llmProcessingSteps, useAiStore } from "@/stores";
 import { closeMenu } from "@/utils/helperFunctions";
