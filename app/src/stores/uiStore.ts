@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
-import { WindowState } from "./types";
+import { VideoLayoutOption, WindowState } from "./types";
 
 export const useUiStore = defineStore(
   "uiStore",
@@ -11,10 +11,16 @@ export const useUiStore = defineStore(
 
     const showAppSidebar = ref(true);
     const showCommunitySidebar = ref(true);
-    const communitySidebarWidth = ref(330);
+    const communitySidebarWidth = ref(400);
     const callWindowOpen = ref(false);
     const callWindowFullscreen = ref(false);
     const callWindowWidth = ref(0);
+    const selectedVideoLayout = ref<VideoLayoutOption>({
+      label: "16/9 aspect ratio",
+      class: "16-by-9",
+      icon: "aspect-ratio",
+    });
+    const focusedVideoId = ref("");
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
     const windowState = ref<WindowState>("visible");
@@ -78,6 +84,14 @@ export const useUiStore = defineStore(
       callWindowWidth.value = width;
     }
 
+    function setVideoLayout(layout: VideoLayoutOption): void {
+      selectedVideoLayout.value = layout;
+    }
+
+    function setFocusedVideoId(id: string) {
+      focusedVideoId.value = id;
+    }
+
     function setWindowState(state: WindowState): void {
       windowState.value = state;
     }
@@ -103,6 +117,8 @@ export const useUiStore = defineStore(
       callWindowOpen,
       callWindowFullscreen,
       callWindowWidth,
+      selectedVideoLayout,
+      focusedVideoId,
       showGlobalLoading,
       globalError,
       windowState,
@@ -116,6 +132,8 @@ export const useUiStore = defineStore(
       setCallWindowOpen,
       toggleCallWindowFullscreen,
       setCallWindowWidth,
+      setVideoLayout,
+      setFocusedVideoId,
       setWindowState,
       setGlobalLoading,
       setGlobalError,
@@ -123,5 +141,16 @@ export const useUiStore = defineStore(
       updateWindowWidth,
     };
   },
-  { persist: { omit: ["showAppSidebar", "callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
+  {
+    persist: {
+      omit: [
+        "showAppSidebar",
+        "callWindowOpen",
+        "callWindowWidth",
+        "callWindowFullscreen",
+        "selectedVideoLayout",
+        "focusedVideoId",
+      ],
+    },
+  }
 );

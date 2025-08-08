@@ -7,7 +7,7 @@
 
     <!-- WebRTC call window -->
     <template v-slot:webrtc>
-      <CallWindow />
+      <CallContainer />
     </template>
 
     <!-- Main content -->
@@ -168,7 +168,7 @@
 import { ad4mConnect } from "@/ad4mConnect";
 import WebrtcSettingsModal from "@/components/webrtc-settings-modal/WebrtcSettingsModal.vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import CallWindow from "@/containers/CallWindow.vue";
+import CallContainer from "@/containers/CallContainer.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";
