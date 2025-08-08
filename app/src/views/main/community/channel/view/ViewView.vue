@@ -7,11 +7,11 @@
       </j-flex>
     </j-box>
 
-    <SynergyView v-if="viewId === 'conversation'" />
-
-    <!-- <SubChannels v-if="viewId === 'sub-channels'" :parentChannel="channel" /> -->
+    <Conversation v-if="viewId === 'conversation'" />
 
     <Conversations v-if="viewId === 'conversations'" :parentChannel="channel" />
+
+    <!-- <SubChannels v-if="viewId === 'sub-channels'" :parentChannel="channel" /> -->
 
     <component
       v-else-if="wcName"
@@ -37,9 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import Conversations from "@/components/conversations/Conversations.vue";
-import SynergyView from "@/components/synergy/SynergyView.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
+import Conversation from "@/containers/Conversation.vue";
+import Conversations from "@/containers/Conversations.vue";
 import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";

@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { ChevronDownIcon } from "@/components/icons";
 import Match from "@/components/synergy/match/Match.vue";
-import { closeMenu } from "@/components/synergy/utils/index";
+import { closeMenu } from "@/utils/helperFunctions";
 import {
   FilterSettings,
   GroupingOption,

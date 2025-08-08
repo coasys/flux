@@ -97,9 +97,9 @@
 import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
 import Avatar from "@/components/synergy/avatar/Avatar.vue";
 import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
-import { closeMenu } from "@/components/synergy/utils";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { llmProcessingSteps, useAiStore } from "@/stores";
+import { closeMenu } from "@/utils/helperFunctions";
 import { Channel } from "@coasys/flux-api";
 import { ProcessingState } from "@coasys/flux-types";
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
