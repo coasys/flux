@@ -333,6 +333,9 @@ export async function createCommunityService(): Promise<CommunityService> {
       chatApp.pkg = pkg;
       await chatApp.save();
 
+      // Update the recent conversations
+      getRecentConversations();
+
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
       router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: "conversation" } });
