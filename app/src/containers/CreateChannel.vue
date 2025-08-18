@@ -134,10 +134,9 @@ const isCreatingChannel = ref(false);
 
 const client = await getAd4mClient();
 const { data } = usePerspective(client, () => route.params.communityId);
-const perspective = computed(() => data.value.perspective);
 
-const hasName = computed(() => channelName.value?.length >= 3);
-const canSubmit = computed(() => hasName.value);
+const perspective = computed(() => data.value.perspective);
+const canSubmit = computed(() => channelName.value?.length);
 const selectedPlugins = computed(() => packages.value.filter((p) => selectedViews.value.includes(p.pkg)));
 const officialApps = computed(() =>
   packages.value.filter(
