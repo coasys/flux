@@ -226,11 +226,9 @@ async function togglePinned() {
 }
 
 onMounted(() => {
-  // Navigate to the conversation or subchannels view if no viewId present when entering channel
-  if (!viewId) {
-    if (channel.value?.isConversation) router.push({ name: "view", params: { viewId: "conversation" } });
-    else router.push({ name: "view", params: { viewId: "sub-channels" } });
-  }
+  // Navigate to the conversation or conversations view if no viewId present when entering channel
+  if (!viewId)
+    router.push({ name: "view", params: { viewId: `conversation${channel.value?.isConversation ? "" : "s"}` } });
 });
 </script>
 
