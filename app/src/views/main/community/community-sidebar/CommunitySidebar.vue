@@ -26,7 +26,6 @@
   />
 
   <SidebarList
-    v-if="channelsWithConversationsAndAgents.length"
     title="Channels"
     icon="diagram-3"
     :loading="channelsWithConversationsLoading"

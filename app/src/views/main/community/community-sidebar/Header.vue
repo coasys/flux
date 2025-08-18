@@ -71,14 +71,12 @@
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore, useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 defineOptions({ name: "Header" });
 
 const uiStore = useUiStore();
 const modalsStore = useModalStore();
-const { showAppSidebar } = storeToRefs(uiStore);
 
 const { isSynced, isAuthor, community } = useCommunityService();
 
