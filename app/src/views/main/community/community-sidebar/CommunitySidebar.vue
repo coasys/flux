@@ -3,7 +3,7 @@
   <Members />
 
   <j-box mt="800" mb="500" pl="500">
-    <j-button @click="() => startNewConversation()" :loading="newConversationLoading">
+    <j-button variant="primary" @click="() => startNewConversation()" :loading="newConversationLoading">
       <j-icon name="door-open" />
       Start conversation
     </j-button>

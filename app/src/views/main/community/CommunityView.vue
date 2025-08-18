@@ -36,8 +36,8 @@
 
           <j-flex direction="column" a="center">
             <j-text color="black" size="700" weight="800"> Syncing community </j-text>
-            <j-text size="400" weight="400"
-              >Note: Flux is P2P, you will not receive any data until another user is online
+            <j-text size="400" weight="400">
+              Note: Flux is P2P, you will not receive any data until another user is online
             </j-text>
           </j-flex>
         </j-flex>
@@ -49,10 +49,18 @@
         <j-flex gap="600" direction="column" a="center" j="center">
           <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community.thumbnail || null" />
 
-          <j-box pb="300">
+          <j-flex direction="column" a="center">
+            <j-text variant="heading"> Welcome to {{ community.name }}! </j-text>
+          </j-flex>
+
+          <j-button @click="() => startNewConversation()" :loading="newConversationLoading" variant="primary" size="xl">
+            <j-icon name="door-open" />
+            Start a conversation
+          </j-button>
+
+          <j-box pt="500">
             <j-flex direction="column" a="center">
-              <j-text variant="heading"> Welcome to {{ community.name }} </j-text>
-              <j-text variant="ingress">Pick a channel</j-text>
+              <j-text variant="ingress" nomargin>Or pick a channel:</j-text>
             </j-flex>
           </j-box>
 
@@ -71,16 +79,35 @@
 
     <div class="center" v-if="isSynced && !route.params.channelId && channelsWithConversations.length === 0">
       <div class="center-inner">
-        <j-flex gap="400" direction="column" a="center" j="center">
-          <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
+        <j-flex gap="500" direction="column" a="center" j="center">
+          <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community?.thumbnail || null" />
 
           <j-flex direction="column" a="center">
-            <j-text nomargin color="black" size="700" weight="800"> No channels yet </j-text>
-            <j-text size="400" weight="400">Be the first to make one!</j-text>
-            <j-button variant="primary" @click="() => (modalStore.showCreateChannel = true)">
-              Create a new channel
-            </j-button>
+            <j-text variant="heading"> Welcome to {{ community?.name }}! </j-text>
           </j-flex>
+
+          <j-box pt="500">
+            <j-flex gap="500" direction="column" a="center" j="center">
+              <j-button
+                @click="() => startNewConversation()"
+                :loading="newConversationLoading"
+                variant="primary"
+                size="xl"
+              >
+                <j-icon name="door-open" />
+                Start a conversation
+              </j-button>
+
+              <j-text nomargin>Or</j-text>
+
+              <j-flex direction="column" a="center">
+                <j-button size="xl" @click="() => (modalStore.showCreateChannel = true)">
+                  <j-icon name="balloon" />
+                  Create a new channel
+                </j-button>
+              </j-flex>
+            </j-flex>
+          </j-box>
         </j-flex>
       </div>
     </div>
@@ -112,7 +139,14 @@ const communityServiceStore = useCommunityServiceStore();
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
 communityServiceStore.addCommunityService(communityId, communityService);
-const { community, isSynced, channelsWithConversations, signallingService } = communityService;
+const {
+  community,
+  isSynced,
+  channelsWithConversations,
+  signallingService,
+  newConversationLoading,
+  startNewConversation,
+} = communityService;
 
 function navigateToChannel(channelId?: string) {
   router.push({ name: "channel", params: { communityId, channelId } });
