@@ -1,7 +1,7 @@
 <template>
   <div
     class="widgets"
-    :class="{ mobile: isMobile }"
+    :class="{ mobile: isMobile, open: callWindowOpen }"
     :style="{ width: isMobile ? '100%' : `calc(${communitySidebarWidth}px + 100px)` }"
   >
     <j-flex direction="column" gap="500">
@@ -25,7 +25,7 @@ const aiStore = useAiStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { communitySidebarWidth, isMobile } = storeToRefs(uiStore);
+const { communitySidebarWidth, isMobile, callWindowOpen } = storeToRefs(uiStore);
 const { transcriptionEnabled, processingState } = storeToRefs(aiStore);
 const { inCall } = storeToRefs(webrtcStore);
 </script>
@@ -40,9 +40,14 @@ const { inCall } = storeToRefs(webrtcStore);
   max-width: calc(33vw + 100px);
   min-width: 300px;
   padding: var(--j-space-500);
+  z-index: 50;
 
   &.mobile {
     max-width: none;
+  }
+
+  &.open {
+    background-color: #1c1a1f;
   }
 }
 </style>

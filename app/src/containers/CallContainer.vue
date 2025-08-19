@@ -1,7 +1,9 @@
 <template>
-  <div class="wrapper" :class="{ mobile: isMobile }">
+  <div class="call-container-wrapper" :class="{ mobile: isMobile }">
     <CallWidgets :callRouteData="callRouteData" />
-    <CallWindow :callRouteData="callRouteData" />
+    <div class="call-window-wrapper" :class="{ open: callWindowOpen }">
+      <CallWindow :callRouteData="callRouteData" />
+    </div>
   </div>
 </template>
 
@@ -21,7 +23,7 @@ const uiStore = useUiStore();
 const communityServiceStore = useCommunityServiceStore();
 
 const { callRoute } = storeToRefs(webrtcStore);
-const { isMobile } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen } = storeToRefs(uiStore);
 
 const callRouteData = computed(() => {
   const communityId = callRoute.value.communityId || (route.params.communityId as string);
@@ -64,18 +66,33 @@ const callRouteData = computed(() => {
   }
 }
 
-.wrapper {
+.call-container-wrapper {
   display: flex;
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 20;
+
+  .call-window-wrapper {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
 
   &.mobile {
     flex-direction: column-reverse;
+
+    .call-window-wrapper {
+      transform: translateY(100%); // Start off-screen
+      transition: transform 0.3s ease-in-out;
+
+      &.open {
+        pointer-events: auto;
+        transform: translateY(0); // Slide in when open
+      }
+    }
   }
 }
 </style>

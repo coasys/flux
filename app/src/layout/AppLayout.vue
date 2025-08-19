@@ -8,19 +8,10 @@
     <!-- Main sidebar -->
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
 
-    <!-- Desktop call window -->
-    <div v-if="!isMobile" class="app-layout__desktop-call">
-      <slot name="call-window"></slot>
+    <!-- Call container -->
+    <div class="app-layout__call-container">
+      <slot name="call-container"></slot>
     </div>
-
-    <!-- Mobile call window -->
-    <aside
-      v-if="isMobile"
-      class="app-layout__mobile-call"
-      :class="{ 'app-layout__mobile-call--visible': callWindowOpen }"
-    >
-      <slot name="call-window"></slot>
-    </aside>
 
     <!-- Main content -->
     <main class="app-layout__main" id="app-layout-main" :style="{ width: mainWidth }">
@@ -114,46 +105,14 @@ function checkDirection() {
   }
 }
 
-.app-layout__desktop-call {
+.app-layout__call-container {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  pointer-events: none;
-  width: 100%;
-  height: 100%;
-  z-index: 20;
-
-  /* Hide desktop call window on mobile */
-  @media (max-width: 800px) {
-    display: none;
-  }
-}
-
-/* Mobile Call Aside */
-.app-layout__mobile-call {
-  position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: #1c1a1f;
-  z-index: 1000;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  transform: translateY(100%);
-  transition: transform 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-
-  /* Show when visible class is applied */
-  &--visible {
-    transform: translateY(0);
-  }
-
-  /* Only show on mobile */
-  @media (min-width: 801px) {
-    display: none;
-  }
+  pointer-events: none;
+  z-index: 1001;
 }
 
 .app-layout__main {

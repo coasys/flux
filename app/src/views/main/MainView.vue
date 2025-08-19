@@ -5,7 +5,8 @@
       <MainSidebar />
     </template>
 
-    <template v-slot:call-window>
+    <!-- Call container -->
+    <template v-slot:call-container>
       <CallContainer />
     </template>
 
@@ -36,10 +37,6 @@
         @cancel="modalStore.hideCreateChannelModal"
       />
     </j-modal>
-
-    <!-- <j-modal size="sm" :open="modalStore.showCommunityMembers" @toggle="(e: any) => setShowCommunityMembers(e.target.open)">
-      <CommunityMembers @close="() => setShowCommunityMembers(false)" v-if="modalStore.showCommunityMembers" />
-    </j-modal> -->
 
     <j-modal
       size="sm"

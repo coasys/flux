@@ -1,5 +1,5 @@
 <template>
-  <div ref="rightSection" class="call-window-panel" :style="{ height: isMobile ? '100%' : 'auto' }">
+  <div ref="rightSection" class="call-window-panel">
     <div
       ref="callWindow"
       class="call-window"
@@ -98,6 +98,7 @@ function closeCallWindow() {
 <style scoped lang="scss">
 .call-window-panel {
   width: 100%;
+  height: 100%;
   position: relative;
   display: flex;
   justify-content: flex-end;
