@@ -44,10 +44,10 @@ const { inCall } = storeToRefs(webrtcStore);
 
   &.mobile {
     max-width: none;
-  }
 
-  &.open {
-    background-color: #1c1a1f;
+    &.open {
+      background-color: #1c1a1f;
+    }
   }
 }
 </style>
