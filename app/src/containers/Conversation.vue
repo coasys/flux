@@ -115,6 +115,7 @@
           width: showMatchColumn ? '50%' : '100%',
           maxWidth: '1200px',
           transition: 'width 0.5s ease-in-out',
+          height: isMobile ? 'calc(100% - 70px)' : '100%',
         }"
       >
         <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
@@ -148,7 +149,7 @@
 import MatchColumn from "@/components/conversation/match/MatchColumn.vue";
 import TimelineColumn from "@/components/conversation/timeline/TimelineColumn.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAiStore, useWebrtcStore } from "@/stores";
+import { useAiStore, useUiStore, useWebrtcStore } from "@/stores";
 import { SemanticRelationship, Topic } from "@coasys/flux-api";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import { cos_sim } from "@xenova/transformers";
@@ -159,10 +160,12 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
+const uiStore = useUiStore();
 
 const { perspective } = useCommunityService();
 const { defaultLLM, llmLoadingStatus, loadingAIData } = storeToRefs(aiStore);
 const { callHealth } = storeToRefs(webrtcStore);
+const { isMobile } = storeToRefs(uiStore);
 
 const MINIMUM_MATCH_SCORE = 0.2;
 
@@ -302,6 +305,7 @@ watch(
   .synergy-content {
     display: flex;
     width: 100%;
+    height: 100%;
     margin-top: 20px;
   }
 }

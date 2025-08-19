@@ -79,6 +79,7 @@
           :is="Component"
           :channel="channel"
           class="perspective-view"
+          :style="{ paddingBottom: isMobile ? `calc(${callWidgetsHeight + 20}px)` : '0' }"
         />
       </KeepAlive>
     </RouterView>
@@ -154,7 +155,7 @@ const webrtcStore = useWebrtcStore();
 
 const { perspective, allChannels, signallingService, recentConversations } = useCommunityService();
 const { me } = storeToRefs(appStore);
-const { isMobile, callWindowOpen } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen, callWidgetsHeight } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
@@ -170,7 +171,7 @@ const conversation = computed(() =>
     : null
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
-const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
+// const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId)?.value || []);
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
@@ -183,22 +184,22 @@ function changeCurrentView(viewId: string) {
   router.push({ name: "view", params: { communityId, channelId, viewId } });
 }
 
-function onIsChannelChange() {
-  isChangeChannel.value = !isChangeChannel.value;
-}
+// function onIsChannelChange() {
+//   isChangeChannel.value = !isChangeChannel.value;
+// }
 
-function onHideNotificationIndicator({ detail }: any) {
-  const { channelId } = route.params;
+// function onHideNotificationIndicator({ detail }: any) {
+//   const { channelId } = route.params;
 
-  if (channelId) {
-    // TODO: Set channel has new messages
-    // dataStore.setHasNewMessages({
-    //   communityId: route.params.communityId as string,
-    //   channelId: channelId as string,
-    //   value: false,
-    // });
-  }
-}
+//   if (channelId) {
+//     // TODO: Set channel has new messages
+//     // dataStore.setHasNewMessages({
+//     //   communityId: route.params.communityId as string,
+//     //   channelId: channelId as string,
+//     //   value: false,
+//     // });
+//   }
+// }
 
 function toggleProfile(open: boolean, did?: any): void {
   if (!open) activeProfile.value = "";

@@ -15,6 +15,7 @@ export const useUiStore = defineStore(
     const callWindowOpen = ref(false);
     const callWindowFullscreen = ref(false);
     const callWindowWidth = ref(0);
+    const callWidgetsHeight = ref(0);
     const selectedVideoLayout = ref<VideoLayoutOption>({
       label: "16/9 aspect ratio",
       class: "16-by-9",
@@ -110,6 +111,10 @@ export const useUiStore = defineStore(
       windowWidth.value = window.innerWidth;
     }
 
+    function setCallWidgetsHeight(height: number): void {
+      callWidgetsHeight.value = height;
+    }
+
     return {
       // State
       isMobile,
@@ -124,6 +129,7 @@ export const useUiStore = defineStore(
       showGlobalLoading,
       globalError,
       windowState,
+      callWidgetsHeight,
 
       // Actions
       toggleCommunitySidebar,
@@ -141,6 +147,7 @@ export const useUiStore = defineStore(
       setGlobalError,
       setCallWindowFullscreen,
       updateWindowWidth,
+      setCallWidgetsHeight,
     };
   },
   {
@@ -152,6 +159,7 @@ export const useUiStore = defineStore(
         "callWindowFullscreen",
         "selectedVideoLayout",
         "focusedVideoId",
+        "callWidgetsHeight",
       ],
     },
   }

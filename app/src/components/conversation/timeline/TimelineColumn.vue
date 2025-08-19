@@ -246,7 +246,7 @@ watch(
 .wrapper {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 320px);
+  height: 100%;
 
   .header {
     flex-shrink: 0;
