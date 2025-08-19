@@ -5,8 +5,24 @@
     class="app-layout"
     :class="{ 'app-layout--show-sidebar': showAppSidebar }"
   >
+    <!-- Main sidebar -->
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
-    <div class="app-layout__webrtc"><slot name="webrtc"></slot></div>
+
+    <!-- Desktop call window -->
+    <div v-if="!isMobile" class="app-layout__desktop-call">
+      <slot name="call-window"></slot>
+    </div>
+
+    <!-- Mobile call window -->
+    <aside
+      v-if="isMobile"
+      class="app-layout__mobile-call"
+      :class="{ 'app-layout__mobile-call--visible': callWindowOpen }"
+    >
+      <slot name="call-window"></slot>
+    </aside>
+
+    <!-- Main content -->
     <main class="app-layout__main" id="app-layout-main" :style="{ width: mainWidth }">
       <slot></slot>
     </main>
@@ -19,7 +35,7 @@ import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 
 const uiStore = useUiStore();
-const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth } =
+const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth, isMobile } =
   storeToRefs(uiStore);
 
 const touchstartX = ref(0);
@@ -98,7 +114,7 @@ function checkDirection() {
   }
 }
 
-.app-layout__webrtc {
+.app-layout__desktop-call {
   position: absolute;
   left: 0;
   bottom: 0;
@@ -106,6 +122,38 @@ function checkDirection() {
   width: 100%;
   height: 100%;
   z-index: 20;
+
+  /* Hide desktop call window on mobile */
+  @media (max-width: 800px) {
+    display: none;
+  }
+}
+
+/* Mobile Call Aside */
+.app-layout__mobile-call {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #1c1a1f;
+  z-index: 1000;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+
+  /* Show when visible class is applied */
+  &--visible {
+    transform: translateY(0);
+  }
+
+  /* Only show on mobile */
+  @media (min-width: 801px) {
+    display: none;
+  }
 }
 
 .app-layout__main {

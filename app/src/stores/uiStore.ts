@@ -60,9 +60,11 @@ export const useUiStore = defineStore(
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
 
-      // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
-      setCallWindowWidth(open ? fullWidth / 2 : 0);
+      // Desktop-specific width logic
+      if (!isMobile.value) {
+        const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
+        setCallWindowWidth(open ? fullWidth / 2 : 0);
+      }
 
       // Initialise a stream if the call window is opened without one
       if (open && !stream.value) mediaDevicesStore.createStream();

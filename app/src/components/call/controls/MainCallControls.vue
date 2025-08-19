@@ -62,7 +62,7 @@
       </div>
     </j-popover>
 
-    <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
+    <j-tooltip v-if="!isMobile" placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
       <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
         <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
       </j-button>
@@ -126,7 +126,7 @@ const modalStore = useModalStore();
 const aiStore = useAiStore();
 
 const { me } = storeToRefs(appStore);
-const { callWindowFullscreen } = storeToRefs(uiStore);
+const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 const { mediaSettings, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
 const { inCall } = storeToRefs(webrtcStore);

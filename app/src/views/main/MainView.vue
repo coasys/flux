@@ -5,8 +5,7 @@
       <MainSidebar />
     </template>
 
-    <!-- WebRTC call window -->
-    <template v-slot:webrtc>
+    <template v-slot:call-window>
       <CallContainer />
     </template>
 

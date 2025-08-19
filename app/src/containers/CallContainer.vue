@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" :class="{ mobile: isMobile }">
     <CallWidgets :callRouteData="callRouteData" />
     <CallWindow :callRouteData="callRouteData" />
   </div>
@@ -9,7 +9,7 @@
 import CallWidgets from "@/components/call/widgets/CallWidgets.vue";
 import CallWindow from "@/components/call/window/CallWindow.vue";
 import { ChannelData } from "@/composables/useCommunityService";
-import { useCommunityServiceStore, useWebrtcStore } from "@/stores";
+import { useCommunityServiceStore, useUiStore, useWebrtcStore } from "@/stores";
 import { Channel, Community } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
@@ -17,9 +17,11 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const webrtcStore = useWebrtcStore();
+const uiStore = useUiStore();
 const communityServiceStore = useCommunityServiceStore();
 
 const { callRoute } = storeToRefs(webrtcStore);
+const { isMobile } = storeToRefs(uiStore);
 
 const callRouteData = computed(() => {
   const communityId = callRoute.value.communityId || (route.params.communityId as string);
@@ -71,5 +73,9 @@ const callRouteData = computed(() => {
   bottom: 0;
   pointer-events: none;
   z-index: 20;
+
+  &.mobile {
+    flex-direction: column-reverse;
+  }
 }
 </style>

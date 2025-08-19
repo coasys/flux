@@ -1,11 +1,11 @@
 <template>
-  <div ref="rightSection" class="call-window-panel">
+  <div ref="rightSection" class="call-window-panel" :style="{ height: isMobile ? '100%' : 'auto' }">
     <div
       ref="callWindow"
       class="call-window"
-      :style="{ width: `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
+      :style="{ width: isMobile ? '100%' : `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
     >
-      <CallResizeHandle @start-resize="startResize" />
+      <CallResizeHandle v-if="!isMobile" @start-resize="startResize" />
 
       <!-- Header -->
       <div class="call-window-header">
@@ -82,7 +82,7 @@ defineProps<{
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { callWindowWidth, callWindowOpen } = storeToRefs(uiStore);
+const { callWindowWidth, callWindowOpen, isMobile } = storeToRefs(uiStore);
 const { agentsInCall, inCall } = storeToRefs(webrtcStore);
 
 const rightSection = ref<HTMLElement | null>(null);
