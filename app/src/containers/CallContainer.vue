@@ -1,7 +1,11 @@
 <template>
   <div class="call-container-wrapper" :class="{ mobile: isMobile }">
     <CallWidgets :callRouteData="callRouteData" />
-    <div class="call-window-wrapper" :class="{ open: callWindowOpen }">
+    <div
+      class="call-window-wrapper"
+      :class="{ open: callWindowOpen }"
+      :style="{ height: isMobile ? `calc(100vh - ${callWidgetsHeight}px - 45px)` : '100%' }"
+    >
       <CallWindow :callRouteData="callRouteData" />
     </div>
   </div>
@@ -23,7 +27,7 @@ const uiStore = useUiStore();
 const communityServiceStore = useCommunityServiceStore();
 
 const { callRoute } = storeToRefs(webrtcStore);
-const { isMobile, callWindowOpen } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen, callWidgetsHeight } = storeToRefs(uiStore);
 
 const callRouteData = computed(() => {
   const communityId = callRoute.value.communityId || (route.params.communityId as string);
@@ -77,7 +81,6 @@ const callRouteData = computed(() => {
 
   .call-window-wrapper {
     width: 100%;
-    height: 100%;
     pointer-events: none;
   }
 

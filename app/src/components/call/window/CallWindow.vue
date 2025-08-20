@@ -45,8 +45,8 @@
       </div>
 
       <!-- Footer -->
-      <div class="call-window-footer">
-        <div class="disclaimer" v-if="!inCall">
+      <div class="call-window-footer" v-if="!inCall">
+        <div class="disclaimer">
           <j-flex a="center" gap="300">
             <j-icon name="exclamation-circle" size="xs" color="warning-500" />
             <j-text size="400" nomargin color="warning-500"> This is a beta feature </j-text>
@@ -139,7 +139,7 @@ function closeCallWindow() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: calc(100% - 80px);
+      height: calc(100% - 150px);
       gap: var(--j-space-500);
     }
 
