@@ -62,6 +62,7 @@
         :warning="participant.warning"
         :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
         @click="focusOnVideo(participant.did)"
+        :class="{ 'single-participant': unfocusedParticipants.length < 2 }"
       />
     </template>
   </div>
@@ -77,8 +78,6 @@ import { useVideoLayout } from "../composables/useVideoLayout";
 const webrtcStore = useWebrtcStore();
 const { callEmojis } = storeToRefs(webrtcStore);
 
-const videoGrid = ref<HTMLElement | null>(null);
-
 const {
   selectedVideoLayout,
   numberOfColumns,
@@ -87,6 +86,8 @@ const {
   unfocusedParticipants,
   focusOnVideo,
 } = useVideoLayout();
+
+const videoGrid = ref<HTMLElement | null>(null);
 </script>
 
 <style scoped lang="scss">
@@ -105,6 +106,15 @@ const {
     height: auto;
     max-height: 100%;
     border-radius: 10px;
+
+    &.single-participant {
+      max-height: calc(100vh - 500px);
+      width: min(calc((100vh - 500px) * 16 / 9), 100%);
+    }
+  }
+
+  &:has(.single-participant) {
+    justify-items: center;
   }
 
   &.flexible {
@@ -116,6 +126,7 @@ const {
       height: 100%;
       aspect-ratio: unset;
       min-height: 260px;
+      max-height: none;
     }
   }
 
