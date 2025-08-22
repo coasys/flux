@@ -109,12 +109,12 @@
       Holochain signals disrupted. Processing paused until connection restored.
     </j-badge>
 
-    <div :class="{ content: true, mobile: isMobile, 'show-match-column': showMatchColumn }">
+    <div ref="contentRef" :class="{ content: true, collapsed: collapsed, 'show-match-column': showMatchColumn }">
       <div class="timeline-column-wrapper">
         <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
       </div>
 
-      <div class="match-column-wrapper">
+      <div class="match-column-wrapper" :style="{ maxWidth: `${contentWidth}px` }">
         <MatchColumn
           :matches="matches"
           :selected-topic-id="selectedTopic?.baseExpression || ''"
@@ -138,7 +138,7 @@ import { SemanticRelationship, Topic } from "@coasys/flux-api";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import { cos_sim } from "@xenova/transformers";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -166,6 +166,23 @@ const filterSettings = ref<FilterSettings>({
 const showMatchColumn = ref(false);
 const showLLMInfoModal = ref(false);
 const modalRenderKey = ref(0);
+const contentRef = ref<HTMLElement | null>(null);
+const contentWidth = ref(0);
+const collapsed = computed(() => isMobile.value || contentWidth.value < 1000);
+
+onMounted(() => {
+  if (contentRef.value && window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) contentWidth.value = entry.contentRect.width;
+    });
+
+    resizeObserver.observe(contentRef.value);
+
+    onUnmounted(() => {
+      resizeObserver.disconnect();
+    });
+  }
+});
 
 async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
   // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -322,7 +339,7 @@ watch(
       }
     }
 
-    &.mobile {
+    &.collapsed {
       .timeline-column-wrapper {
         height: calc(100% - 70px);
         width: 100%;
