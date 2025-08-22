@@ -1,5 +1,5 @@
 <template>
-  <div class="match-column-wrapper">
+  <div class="match-column">
     <j-flex direction="column" gap="400" class="header">
       <j-flex a="center" gap="400" wrap>
         <j-menu style="height: 42px; z-index: 20">
@@ -118,12 +118,12 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.match-column-wrapper {
+.match-column {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  height: calc(100vh - 320px);
+  height: calc(100% - 10px);
 
   .close-button {
     all: unset;
@@ -144,6 +144,7 @@ watch(
   .results {
     height: 100%;
     overflow-y: scroll;
+    padding-bottom: 350px;
 
     &::-webkit-scrollbar {
       display: none;

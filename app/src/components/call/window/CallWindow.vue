@@ -113,6 +113,7 @@ function closeCallWindow() {
     height: 100%;
     background-color: #1c1a1f;
     transition: all 0.5s ease-in-out;
+    transition-property: opacity, width, transform;
     opacity: 0;
     padding: 0;
 

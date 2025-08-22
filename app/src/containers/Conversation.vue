@@ -1,5 +1,5 @@
 <template>
-  <div class="synergy-wrapper">
+  <div class="conversation-wrapper">
     <j-flex gap="500" a="center" wrap>
       <j-flex v-if="aiStore" a="center" gap="300">
         <j-icon name="robot" color="ui-500" />
@@ -109,28 +109,12 @@
       Holochain signals disrupted. Processing paused until connection restored.
     </j-badge>
 
-    <div class="synergy-content">
-      <div
-        :style="{
-          width: showMatchColumn ? '50%' : '100%',
-          maxWidth: '1200px',
-          transition: 'width 0.5s ease-in-out',
-          height: isMobile ? 'calc(100% - 70px)' : '100%',
-        }"
-      >
+    <div :class="{ content: true, mobile: isMobile, 'show-match-column': showMatchColumn }">
+      <div class="timeline-column-wrapper">
         <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
       </div>
 
-      <div
-        :style="{
-          width: showMatchColumn ? '50%' : '0%',
-          opacity: showMatchColumn ? '1' : '0',
-          pointerEvents: showMatchColumn ? 'all' : 'none',
-          transition: 'all 0.5s ease-in-out',
-          maxWidth: '1200px',
-          marginLeft: showMatchColumn ? '40px' : 0,
-        }"
-      >
+      <div class="match-column-wrapper">
         <MatchColumn
           :matches="matches"
           :selected-topic-id="selectedTopic?.baseExpression || ''"
@@ -289,7 +273,7 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.synergy-wrapper {
+.conversation-wrapper {
   margin: 0 auto;
   padding: var(--j-space-800);
   width: 100%;
@@ -302,11 +286,56 @@ watch(
     padding: var(--j-space-400);
   }
 
-  .synergy-content {
+  .content {
     display: flex;
     width: 100%;
     height: 100%;
     margin-top: 20px;
+
+    .timeline-column-wrapper {
+      height: 100%;
+      width: 100%;
+      max-width: 1200px;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .match-column-wrapper {
+      opacity: 0;
+      pointer-events: none;
+      height: 100%;
+      width: 0%;
+      max-width: 1200px;
+      transition: all 0.5s ease-in-out;
+    }
+
+    &.show-match-column {
+      .timeline-column-wrapper {
+        width: 50%;
+      }
+
+      .match-column-wrapper {
+        width: 50%;
+        opacity: 1;
+        pointer-events: all;
+        padding-left: var(--j-space-600);
+        padding-bottom: var(--j-space-800);
+      }
+    }
+
+    &.mobile {
+      .timeline-column-wrapper {
+        height: calc(100% - 70px);
+        width: 100%;
+      }
+
+      .match-column-wrapper {
+        width: calc(100% - 30px);
+        padding-left: 0;
+        position: fixed;
+        background-color: var(--app-channel-bg-color);
+        z-index: 100;
+      }
+    }
   }
 }
 </style>

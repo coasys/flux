@@ -6,7 +6,7 @@
       <div class="line" />
     </div>
 
-    <h2 class="channel-name">{{ channelName }}</h2>
+    <h2 class="channel-name"># {{ channelName }}</h2>
 
     <div v-if="loading" class="loading-container">
       <j-flex gap="500" a="center">
@@ -153,8 +153,6 @@ onMounted(getData);
 </script>
 
 <style lang="scss" scoped>
-$line-offset: 92px;
-
 .match-wrapper {
   display: flex;
   flex-direction: column;
@@ -194,15 +192,25 @@ $line-offset: 92px;
     .line {
       height: 100%;
       width: 6px;
-      margin-left: $line-offset;
+      margin-left: 92px;
       background-color: var(--j-color-primary-200);
+
+      @media screen and (max-width: 800px) {
+        margin-left: 12px;
+      }
     }
   }
 
   .channel-name {
-    margin: 0px;
+    margin: 0 0 0 130px;
     position: absolute;
     z-index: 10;
+    color: var(--j-color-ui-500);
+    font-size: 24px;
+
+    @media screen and (max-width: 800px) {
+      margin: 0 0 0 50px;
+    }
   }
 
   .loading-container {
@@ -215,6 +223,11 @@ $line-offset: 92px;
     z-index: 5;
     padding: 40px 0 10px 60px;
 
+    @media screen and (max-width: 800px) {
+      padding: 60px 0;
+      margin-left: -20px;
+    }
+
     &.hidden {
       opacity: 0;
       height: 0;
@@ -224,7 +237,7 @@ $line-offset: 92px;
     .line {
       height: 50px;
       width: 6px;
-      margin-left: $line-offset;
+      margin-left: 92px;
       background-color: var(--j-color-primary-200);
     }
 

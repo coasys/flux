@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="timeline-column">
     <j-flex a="center" j="between" class="header">
       <j-flex a="center" gap="400">
         <j-text nomargin>Zoom</j-text>
@@ -243,7 +243,7 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.wrapper {
+.timeline-column {
   display: flex;
   flex-direction: column;
   height: 100%;
