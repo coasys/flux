@@ -2,8 +2,8 @@
   <div ref="rightSection" class="call-window-panel">
     <div
       ref="callWindow"
-      class="call-window"
-      :style="{ width: isMobile ? '100%' : `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
+      :class="['call-window', { open: callWindowOpen }]"
+      :style="{ width: isMobile ? '100%' : `${callWindowWidth}px` }"
     >
       <CallResizeHandle v-if="!isMobile" @start-resize="startResize" />
 
@@ -111,9 +111,15 @@ function closeCallWindow() {
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
-    padding: var(--j-space-500);
     background-color: #1c1a1f;
     transition: all 0.5s ease-in-out;
+    opacity: 0;
+    padding: 0;
+
+    &.open {
+      opacity: 1;
+      padding: var(--j-space-500);
+    }
 
     .call-window-header {
       display: flex;
