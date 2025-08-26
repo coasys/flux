@@ -57,6 +57,7 @@ export default function TimelineColumn({
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
   const synced = useRef(true);
+  const processingCheck = useRef(false);
   const processing = useRef(false);
   const gettingData = useRef(false);
   const linkAddedTimeout = useRef<any>(null);
@@ -116,21 +117,31 @@ export default function TimelineColumn({
     return checkItemsForResponsibility(items, increment + 1);
   }
 
-  async function checkIfWeShouldStartProcessing(items: SynergyItem[]) {
-    // Skip if processing already in progress, not synched, signals are unhealthy, our AI is disabled, or we're in another channel
-    if (processing.current || !synced.current || !signalsHealthy || !aiStore.defaultLLM) return;
+  function checkAndProcessIfNeeded(items: SynergyItem[]) {
+    if (processingCheck.current) return;
 
-    // Skip if not enough unprocessed items
-    const enoughItems = items.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;
-    if (!enoughItems) return;
+    processingCheck.current = true;
 
-    // Skip if we didn't author any of the unprocessed items
-    const weAuthoredAtLeastOne = items.some((item) => item.author === appStore.me.did);
-    if (!weAuthoredAtLeastOne) return;
+    try {
+      // Skip if processing already in progress, not synced, signals are unhealthy, or our AI is disabled
+      if (processing.current || !synced.current || !signalsHealthy || !aiStore.defaultLLM) return;
 
-    // Finally, walk through each item to see if we're responsible for processing
-    const responsibleForProcessing = checkItemsForResponsibility(items);
-    if (responsibleForProcessing) processItems(items);
+      // Skip if not enough unprocessed items
+      const enoughItems = items.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;
+      if (!enoughItems) return;
+
+      // Skip if we didn't author any of the unprocessed items
+      const weAuthoredAtLeastOne = items.some((item) => item.author === appStore.me.did);
+      if (!weAuthoredAtLeastOne) return;
+
+      // Check if we're responsible and process if so
+      const responsibleForProcessing = checkItemsForResponsibility(items);
+      if (responsibleForProcessing) processItems(items);
+    } catch (error) {
+      console.error("Error checking/processing items:", error);
+    } finally {
+      processingCheck.current = false;
+    }
   }
 
   async function processBatch(items: SynergyItem[], conversationId: string) {
@@ -191,7 +202,7 @@ export default function TimelineColumn({
     setRefreshTrigger((prev) => prev + 1);
 
     // Delay check on first run to allow time for signals to arrive
-    setTimeout(() => checkIfWeShouldStartProcessing(newUnproccessedItems), firstRun ? 5000 : 0);
+    setTimeout(() => checkAndProcessIfNeeded(newUnproccessedItems), firstRun ? 5000 : 0);
   }
 
   // TODO: Remove this if we can achieve the same with subscriptions. Currently indiscriminate about link types.
@@ -231,8 +242,13 @@ export default function TimelineColumn({
     setProcessingState(processingAgents[0]?.processing || null);
   }
 
-  function handleSyncStateChanged(event: CustomEvent) {
+  async function handleSyncStateChanged(event: CustomEvent) {
     synced.current = event.detail.synced;
+
+    if (synced.current && !gettingData.current) {
+      const newUnproccessedItems = await getUnprocessedItems();
+      checkAndProcessIfNeeded(newUnproccessedItems);
+    }
   }
 
   useEffect(() => {
