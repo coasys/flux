@@ -44,4 +44,4 @@ export const viewOptions = [
 ];
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =
-  "neighbourhood://QmzSYwddYdovhLD43F4rnpk3ArVHUR5JRFx4zXVv1ezgzqgHHXX";
+  "neighbourhood://QmzSYwdpSKtMZqKavurZuknFqUeQdZ4KrWReAXCkukPaXHwo5Eu";
