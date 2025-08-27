@@ -143,8 +143,8 @@
     <div ref="rightSection" class="right-section">
       <div
         ref="callWindow"
-        class="call-window"
-        :style="{ width: `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
+        :class="{ 'call-window': true, open: callWindowOpen }"
+        :style="{ width: `${callWindowWidth}px` }"
       >
         <div class="resize-handle" @mousedown="startResize" />
 
@@ -712,9 +712,15 @@ watch(
       flex-direction: column;
       justify-content: space-between;
       height: 100%;
-      padding: var(--j-space-500);
       background-color: #1c1a1f; // var(--app-drawer-bg-color); // var(--j-color-ui-50);
       transition: all 0.5s ease-in-out;
+      opacity: 0;
+      padding: 0;
+
+      &.open {
+        opacity: 1;
+        padding: var(--j-space-500);
+      }
 
       .resize-handle {
         position: absolute;
