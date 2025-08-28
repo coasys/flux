@@ -145,6 +145,7 @@
         ref="callWindow"
         :class="{ 'call-window': true, open: callWindowOpen }"
         :style="{ width: `${callWindowWidth}px` }"
+        :aria-hidden="!callWindowOpen"
       >
         <div class="resize-handle" @mousedown="startResize" />
 
@@ -716,10 +717,12 @@ watch(
       transition: all 0.5s ease-in-out;
       opacity: 0;
       padding: 0;
+      pointer-events: none;
 
       &.open {
         opacity: 1;
         padding: var(--j-space-500);
+        pointer-events: auto;
       }
 
       .resize-handle {
