@@ -563,7 +563,7 @@ function stopResize() {
 
   // Remove event listeners for mousemove and mouseup
   document.removeEventListener("mousemove", doResize);
-  document.addEventListener("mouseup", stopResize, false);
+  document.removeEventListener("mouseup", stopResize, false);
 }
 
 function profileClick() {
