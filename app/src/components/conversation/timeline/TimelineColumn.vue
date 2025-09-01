@@ -150,7 +150,7 @@ async function getData(firstRun?: boolean): Promise<void> {
     const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
 
     // Update sidebar items if the conversations name has changed
-    if (conversations.value[0] && conversations.value[0].name !== newConversations[0].name) {
+    if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
       getPinnedConversations();
       getRecentConversations();
       getChannelsWithConversations();
