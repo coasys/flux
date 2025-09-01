@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-comment-section",
-  "version": "0.10.1-rc3",
+  "version": "0.10.1-rc4",
   "type": "module",
   "files": [
     "dist"
@@ -26,13 +26,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/flux-editor": "0.10.1-rc3",
-    "@coasys/flux-types": "0.10.1-rc3",
-    "@coasys/flux-ui": "0.10.1-rc3",
+    "@coasys/flux-editor": "0.10.1-rc4",
+    "@coasys/flux-types": "0.10.1-rc4",
+    "@coasys/flux-ui": "0.10.1-rc4",
     "preact": "^10.11.3"
   },
   "devDependencies": {
-    "@coasys/flux-container": "0.10.1-rc3",
+    "@coasys/flux-container": "0.10.1-rc4",
     "@preact/preset-vite": "^2.5.0",
     "npm-run-all": "^4.1.5",
     "vite": "^4.3.5",
