@@ -197,7 +197,7 @@ const isJoining = ref(false);
 const hasCopied = ref(false);
 
 const hasJoinedTestingCommunity = computed(() => {
-  return !!Object.values(perspectives).find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
+  return !!Object.values(perspectives.value).find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
 });
 
 async function leaveCommunity() {
