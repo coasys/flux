@@ -61,3 +61,9 @@ export interface UIStore {
   globalError: { show: boolean; message: string };
   windowState: WindowState;
 }
+
+export type VideoLayoutOption = {
+  label: string;
+  class: string;
+  icon: string;
+};

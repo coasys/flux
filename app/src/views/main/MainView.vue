@@ -5,9 +5,9 @@
       <MainSidebar />
     </template>
 
-    <!-- WebRTC call window -->
-    <template v-slot:webrtc>
-      <CallWindow />
+    <!-- Call container -->
+    <template v-slot:call-container>
+      <CallContainer />
     </template>
 
     <!-- Main content -->
@@ -37,10 +37,6 @@
         @cancel="modalStore.hideCreateChannelModal"
       />
     </j-modal>
-
-    <!-- <j-modal size="sm" :open="modalStore.showCommunityMembers" @toggle="(e: any) => setShowCommunityMembers(e.target.open)">
-      <CommunityMembers @close="() => setShowCommunityMembers(false)" v-if="modalStore.showCommunityMembers" />
-    </j-modal> -->
 
     <j-modal
       size="sm"
@@ -168,7 +164,7 @@
 import { ad4mConnect } from "@/ad4mConnect";
 import WebrtcSettingsModal from "@/components/webrtc-settings-modal/WebrtcSettingsModal.vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import CallWindow from "@/containers/CallWindow.vue";
+import CallContainer from "@/containers/CallContainer.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";

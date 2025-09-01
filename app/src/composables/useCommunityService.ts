@@ -5,9 +5,9 @@ import { useModel } from "@coasys/ad4m-vue-hooks";
 import { App, Channel, Community, Conversation, getAllFluxApps, Topic } from "@coasys/flux-api";
 import { AgentData, Profile, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, shallowRef, toRaw, watch } from "vue";
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useSignallingService } from "./useSignallingService";
+import { HEARTBEAT_INTERVAL, useSignallingService } from "./useSignallingService";
 
 export interface ChannelData {
   channel: Partial<Channel>;
@@ -82,24 +82,24 @@ export async function createCommunityService(): Promise<CommunityService> {
   const { entries: communities } = useModel({ perspective, model: Community });
   const { entries: allChannels } = useModel({ perspective, model: Channel });
 
-  const pinnedChannels = shallowRef<Channel[]>([]);
-  const conversationChannels = shallowRef<Channel[]>([]);
-  const spaceChannels = shallowRef<Channel[]>([]);
   const processingStateChecked = ref(false);
   const isSynced = ref(true);
   const members = ref<Partial<Profile>[]>([]);
   const membersLoading = ref(true);
   const pinnedConversations = ref<ChannelData[]>([]);
-  const pinnedConversationsLoading = ref(true);
+  const pinnedConversationsLoading = ref(false);
   const recentConversations = ref<ChannelData[]>([]);
-  const recentConversationsLoading = ref(true);
+  const recentConversationsLoading = ref(false);
   const channelsWithConversations = ref<ChannelData[]>([]);
-  const channelsWithConversationsLoading = ref(true);
+  const channelsWithConversationsLoading = ref(false);
   const newConversationLoading = ref(false);
   const moveConversationLoading = ref(false);
 
   const isAuthor = computed(() => communities.value[0]?.author === me.value.did);
   const community = computed<Community>(() => communities.value[0]);
+  const pinnedChannels = computed(() => allChannels.value.filter((channel) => channel.isPinned));
+  const conversationChannels = computed(() => allChannels.value.filter((channel) => channel.isConversation));
+  const spaceChannels = computed(() => allChannels.value.filter((channel) => !channel.isConversation));
   const pinnedConversationsWithAgents = computed((): ChannelDataWithAgents[] => {
     return pinnedConversations.value.map((data) => ({
       ...data,
@@ -128,6 +128,50 @@ export async function createCommunityService(): Promise<CommunityService> {
     }));
   });
 
+  // Signatures used to detect changes in the allChannels subscription that should trigger channel array updates
+  const pinnedChannelsSignature = computed(() =>
+    allChannels.value
+      .filter((channel) => channel.isPinned)
+      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .sort()
+      .join(",")
+  );
+
+  const conversationChannelsSignature = computed(() =>
+    allChannels.value
+      .filter((channel) => channel.isConversation)
+      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .sort()
+      .join(",")
+  );
+
+  // TODO: should update when any channel name changes and when nested channels are added or removed
+  const nestedChannelsSignature = computed(
+    () => {}
+    // allChannels.value
+    //   .filter(channel => !channel.isConversation)
+    //   .map(spaceChannel => {
+    //     const parentChannelData = channelsWithConversations.value.find((c) =>
+    //       c.children?.some((child) => child.channel.baseExpression === channelId)
+    //     );
+
+    //     // Get nested conversation channels for this space channel
+    //     const nestedConversations = allChannels.value
+    //       .filter(channel =>
+    //         channel.isConversation &&
+
+    //       )
+    //       .map(nested => `${nested.baseExpression}:${nested.name}`)
+    //       .sort()
+    //       .join('|');
+
+    //     // Combine space channel info with its nested channels
+    //     return `${spaceChannel.baseExpression}:${spaceChannel.name}[${nestedConversations}]`;
+    //   })
+    //   .sort()
+    //   .join(',')
+  );
+
   async function getMembers() {
     try {
       membersLoading.value = true;
@@ -145,7 +189,10 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   async function getPinnedConversations() {
+    if (pinnedConversationsLoading.value) return;
     pinnedConversationsLoading.value = true;
+
+    console.log("*** Loading pinned conversations ***");
 
     try {
       // Loop through all the pinned channels and get the conversation data for each
@@ -165,7 +212,10 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   // TODO: make use of shared get children (or stats) function here, for expanding out conversations?
   async function getRecentConversations() {
+    if (recentConversationsLoading.value) return;
     recentConversationsLoading.value = true;
+
+    console.log("*** Loading recent conversations ***");
 
     // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
     const conversations = await Promise.all(
@@ -219,7 +269,10 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   async function getChannelsWithConversations() {
+    if (channelsWithConversationsLoading.value) return;
     channelsWithConversationsLoading.value = true;
+
+    console.log("*** Loading channels with conversations ***");
 
     // Loop through all the space channels and get the conversations in each
     channelsWithConversations.value = await Promise.all(
@@ -279,6 +332,9 @@ export async function createCommunityService(): Promise<CommunityService> {
       chatApp.icon = icon;
       chatApp.pkg = pkg;
       await chatApp.save();
+
+      // Update the recent conversations
+      getRecentConversations();
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
@@ -344,22 +400,17 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   getMembers();
 
-  // Watch for changes in channels and update the pinned, conversation, and space channels
-  watch(allChannels, (newChannels) => {
-    pinnedChannels.value = newChannels.filter((channel) => channel.isPinned);
-    conversationChannels.value = newChannels.filter((channel) => channel.isConversation);
-    spaceChannels.value = newChannels.filter((channel) => !channel.isConversation);
-  });
-  watch(pinnedChannels, getPinnedConversations);
-  watch(conversationChannels, getRecentConversations);
+  watch(pinnedChannelsSignature, getPinnedConversations);
+  watch(conversationChannelsSignature, getRecentConversations);
+  // TODO: should update when any channel name changes or when nested channels are added or removed from a space channel
   watch(spaceChannels, getChannelsWithConversations);
 
   // Find processing tasks in the community when the conversations first load
   watch(recentConversations, () => {
     if (defaultLLM.value && !processingStateChecked.value) {
       processingStateChecked.value = true;
-      // Delay the check to allow time for signals to arrive
-      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), 5000);
+      // Delay by heart beat interval to allow time for signals to arrive
+      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), HEARTBEAT_INTERVAL);
     }
   });
 

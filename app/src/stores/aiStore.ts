@@ -1,4 +1,3 @@
-import { ChannelData } from "@/composables/useCommunityService";
 import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from "@/stores";
 import { AIModelLoadingStatus, AITask } from "@coasys/ad4m";
 import { Model } from "@coasys/ad4m/lib/src/ai/AIResolver";
@@ -6,7 +5,7 @@ import { Channel } from "@coasys/flux-api";
 import { ProcessingState, SignallingService } from "@coasys/flux-types";
 import { SynergyItem } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
-import { ref, toRaw, watch } from "vue";
+import { ref, toRaw, unref, watch } from "vue";
 
 export const transcriptionModels = [
   "Tiny", // The tiny model.
@@ -158,7 +157,7 @@ export const useAiStore = defineStore(
 
       // Search conversations for processing tasks we are responsible for
       const tasks = await Promise.all(
-        (communityService.recentConversations as any as ChannelData[]).map(async (conversationData) => {
+        unref(communityService.recentConversations).map(async (conversationData) => {
           const unprocessedItems = await toRaw(conversationData.channel).unprocessedItems!();
           const shouldProcess = await checkIfWeShouldProcessTask(unprocessedItems, communityService.signallingService);
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;

@@ -107,7 +107,7 @@
       </div>
     </div>
 
-    <div class="sidebar" @click="() => uiStore.setAppSidebarOpen(!uiStore.showAppSidebar)">
+    <div class="sidebar" @click="uiStore.toggleAppSidebar">
       <j-icon name="layout-sidebar" size="md" />
     </div>
   </div>
@@ -412,6 +412,7 @@ watch(
   overflow-y: auto;
   position: relative;
   padding-top: env(safe-area-inset-top);
+  background-color: var(--app-drawer-bg-color);
 }
 
 .profile__content {
@@ -468,8 +469,8 @@ watch(
 
 .sidebar {
   position: absolute;
-  top: calc(20px + env(safe-area-inset-top));
-  left: 20px;
+  top: var(--j-space-500);
+  left: var(--j-space-500);
   cursor: pointer;
 }
 

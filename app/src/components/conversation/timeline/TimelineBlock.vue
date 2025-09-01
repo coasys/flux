@@ -46,8 +46,8 @@
           </j-flex>
 
           <button v-if="totalChildren > 0" class="show-children-button" @click="showChildren = !showChildren">
-            <ChevronDown v-if="showChildren" />
-            <ChevronRight v-else />
+            <ChevronDownIcon v-if="showChildren" />
+            <ChevronRightIcon v-else />
             {{ totalChildren }}
           </button>
         </j-flex>
@@ -90,7 +90,7 @@
             <div class="expand-button">
               <j-button @click="collapseBefore = false">
                 See more
-                <span> <ChevronUp /> {{ matchIndex }} </span>
+                <span> <ChevronUpIcon /> {{ matchIndex }} </span>
               </j-button>
             </div>
           </div>
@@ -98,7 +98,7 @@
         </template>
 
         <div class="curve-top">
-          <SubwayTimelineCurve />
+          <SubwayTimelineCurveIcon />
         </div>
 
         <!-- Recursive timeline blocks -->
@@ -123,7 +123,7 @@
         />
 
         <div class="curve-bottom">
-          <SubwayTimelineCurve />
+          <SubwayTimelineCurveIcon />
         </div>
 
         <!-- Expand button after -->
@@ -135,7 +135,7 @@
           <div class="expand-button">
             <j-button @click="collapseAfter = false">
               See more
-              <span> <ChevronDown /> {{ children.length - matchIndex! - 1 }} </span>
+              <span> <ChevronDownIcon /> {{ children.length - matchIndex! - 1 }} </span>
             </j-button>
           </div>
         </div>
@@ -173,9 +173,9 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDown, ChevronRight, ChevronUp, SubwayTimelineCurve } from "@/components/icons/index";
-import Avatar from "@/components/synergy/avatar/Avatar.vue";
-import PercentageRing from "@/components/synergy/percentage-ring/PercentageRing.vue";
+import Avatar from "@/components/conversation/avatar/Avatar.vue";
+import PercentageRing from "@/components/conversation/percentage-ring/PercentageRing.vue";
+import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, SubwayTimelineCurveIcon } from "@/components/icons";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { LinkQuery } from "@coasys/ad4m";
 import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
@@ -464,6 +464,10 @@ watch(
       &.reposition {
         left: -6px;
         top: 45px;
+      }
+
+      @media screen and (max-width: 800px) {
+        display: none;
       }
     }
 

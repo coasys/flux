@@ -55,7 +55,7 @@
               style="margin-right: 12px; height: 22px"
               :style="{ cursor: browser === 'chrome' ? 'pointer' : 'default' }"
             >
-              <Ad4mLogo
+              <Ad4mLogoIcon
                 width="22"
                 height="22"
                 :color="`var(--j-color-primary-${useRemoteService ? 300 : 500})`"
@@ -206,8 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
-import RecordingIcon from "@/components/recording-icon/RecordingIcon.vue";
+import { Ad4mLogoIcon, RecordingIcon } from "@/components/icons";
 import { useAiStore, useMediaDevicesStore, useWebrtcStore } from "@/stores";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect";

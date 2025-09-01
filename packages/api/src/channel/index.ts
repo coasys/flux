@@ -1,4 +1,4 @@
-import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Property } from "@coasys/ad4m";
+import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from "@coasys/ad4m";
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
 import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
@@ -21,21 +21,21 @@ export class Channel extends Ad4mModel {
   })
   name: string;
 
-  @Property({
+  @Optional({
     through: CHANNEL_DESCRIPTION,
     writable: true,
     resolveLanguage: "literal",
   })
   description: string;
 
-  @Property({
+  @Optional({
     through: CHANNEL_IS_CONVERSATION,
     writable: true,
     resolveLanguage: "literal",
   })
   isConversation: boolean;
 
-  @Property({
+  @Optional({
     through: CHANNEL_IS_PINNED,
     writable: true,
     resolveLanguage: "literal",
@@ -44,9 +44,7 @@ export class Channel extends Ad4mModel {
 
   @Collection({
     through: "ad4m://has_child",
-    where: {
-      isInstance: App,
-    },
+    where: { isInstance: App },
   })
   views: string[] = [];
 

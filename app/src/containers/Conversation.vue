@@ -1,8 +1,6 @@
 <template>
-  <div class="synergy-wrapper">
+  <div class="conversation-wrapper">
     <j-flex gap="500" a="center" wrap>
-      <j-text nomargin uppercase size="600" weight="800" color="primary-500"> Synergy </j-text>
-
       <j-flex v-if="aiStore" a="center" gap="300">
         <j-icon name="robot" color="ui-500" />
         <j-text nomargin>LLM processing:</j-text>
@@ -111,27 +109,12 @@
       Holochain signals disrupted. Processing paused until connection restored.
     </j-badge>
 
-    <j-flex class="synergy-content">
-      <div
-        :style="{
-          width: showMatchColumn ? '50%' : '100%',
-          maxWidth: '1200px',
-          transition: 'width 0.5s ease-in-out',
-        }"
-      >
+    <div ref="contentRef" :class="{ content: true, collapsed: collapsed, 'show-match-column': showMatchColumn }">
+      <div class="timeline-column-wrapper">
         <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
       </div>
 
-      <div
-        :style="{
-          width: showMatchColumn ? '50%' : '0%',
-          opacity: showMatchColumn ? '1' : '0',
-          pointerEvents: showMatchColumn ? 'all' : 'none',
-          transition: 'all 0.5s ease-in-out',
-          maxWidth: '1200px',
-          marginLeft: '40px',
-        }"
-      >
+      <div class="match-column-wrapper" :style="{ maxWidth: `${contentWidth}px` }">
         <MatchColumn
           :matches="matches"
           :selected-topic-id="selectedTopic?.baseExpression || ''"
@@ -142,29 +125,31 @@
           :close="() => (showMatchColumn = false)"
         />
       </div>
-    </j-flex>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import MatchColumn from "@/components/synergy/match/MatchColumn.vue";
-import TimelineColumn from "@/components/synergy/timeline/TimelineColumn.vue";
+import MatchColumn from "@/components/conversation/match/MatchColumn.vue";
+import TimelineColumn from "@/components/conversation/timeline/TimelineColumn.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAiStore, useWebrtcStore } from "@/stores";
+import { useAiStore, useUiStore, useWebrtcStore } from "@/stores";
 import { SemanticRelationship, Topic } from "@coasys/flux-api";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import { cos_sim } from "@xenova/transformers";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
+const uiStore = useUiStore();
 
 const { perspective } = useCommunityService();
 const { defaultLLM, llmLoadingStatus, loadingAIData } = storeToRefs(aiStore);
 const { callHealth } = storeToRefs(webrtcStore);
+const { isMobile } = storeToRefs(uiStore);
 
 const MINIMUM_MATCH_SCORE = 0.2;
 
@@ -181,6 +166,23 @@ const filterSettings = ref<FilterSettings>({
 const showMatchColumn = ref(false);
 const showLLMInfoModal = ref(false);
 const modalRenderKey = ref(0);
+const contentRef = ref<HTMLElement | null>(null);
+const contentWidth = ref(0);
+const collapsed = computed(() => isMobile.value || contentWidth.value < 1000);
+
+onMounted(() => {
+  if (contentRef.value && window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) contentWidth.value = entry.contentRect.width;
+    });
+
+    resizeObserver.observe(contentRef.value);
+
+    onUnmounted(() => {
+      resizeObserver.disconnect();
+    });
+  }
+});
 
 async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
   // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -285,18 +287,10 @@ watch(
   },
   { deep: true }
 );
-
-// // Reset matches when channel changes
-// watch(
-//   () => props.source,
-//   () => {
-//     matches.value = [];
-//   }
-// );
 </script>
 
-<style scoped>
-.synergy-wrapper {
+<style scoped lang="scss">
+.conversation-wrapper {
   margin: 0 auto;
   padding: var(--j-space-800);
   width: 100%;
@@ -304,10 +298,61 @@ watch(
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
 
-.synergy-content {
-  width: 100%;
-  margin-top: 20px;
+  @media screen and (max-width: 800px) {
+    padding: var(--j-space-400);
+  }
+
+  .content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+
+    .timeline-column-wrapper {
+      height: 100%;
+      width: 100%;
+      max-width: 1200px;
+      transition: width 0.5s ease-in-out;
+    }
+
+    .match-column-wrapper {
+      opacity: 0;
+      pointer-events: none;
+      height: 100%;
+      width: 0%;
+      max-width: 1200px;
+      transition: all 0.5s ease-in-out;
+    }
+
+    &.show-match-column {
+      .timeline-column-wrapper {
+        width: 50%;
+      }
+
+      .match-column-wrapper {
+        width: 50%;
+        opacity: 1;
+        pointer-events: all;
+        padding-left: var(--j-space-600);
+        padding-bottom: var(--j-space-800);
+      }
+    }
+
+    &.collapsed {
+      .timeline-column-wrapper {
+        height: calc(100% - 70px);
+        width: 100%;
+      }
+
+      .match-column-wrapper {
+        width: calc(100% - 30px);
+        padding-left: 0;
+        position: fixed;
+        background-color: var(--app-channel-bg-color);
+        z-index: 100;
+      }
+    }
+  }
 }
 </style>

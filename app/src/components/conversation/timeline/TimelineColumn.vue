@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="timeline-column">
     <j-flex a="center" j="between" class="header">
       <j-flex a="center" gap="400">
         <j-text nomargin>Zoom</j-text>
@@ -46,7 +46,7 @@
           :search="search"
         />
 
-        <div v-if="unprocessedItems.length > 0" style="margin-left: 70px">
+        <div v-if="unprocessedItems.length > 0" class="unprocessed-items">
           <j-box mb="400">
             <j-flex a="center" j="between">
               <j-text uppercase nomargin size="400" weight="800" color="primary-500">
@@ -94,12 +94,12 @@
 </template>
 
 <script setup lang="ts">
+import Avatar from "@/components/conversation/avatar/Avatar.vue";
+import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
 import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
-import Avatar from "@/components/synergy/avatar/Avatar.vue";
-import TimelineBlock from "@/components/synergy/timeline/TimelineBlock.vue";
-import { closeMenu } from "@/components/synergy/utils";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { llmProcessingSteps, useAiStore } from "@/stores";
+import { closeMenu } from "@/utils/helperFunctions";
 import { Channel } from "@coasys/flux-api";
 import { ProcessingState } from "@coasys/flux-types";
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
@@ -126,8 +126,7 @@ const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
 const selectedItemId = ref("");
 const zoom = ref<GroupingOption>(groupingOptions[0]);
-const refreshTrigger = ref(0); // TODO: can this be removed now we've moved from React to Vue?
-const creatingNewConversation = ref(false);
+const refreshTrigger = ref(0);
 const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
@@ -148,23 +147,27 @@ async function getData(firstRun?: boolean): Promise<void> {
   gettingData.value = true;
 
   try {
-    const [newConversations, newUnprocessedItems] = await Promise.all([
-      getConversations(),
-      getUnprocessedItems(),
-      // TODO: find better approach (maybe check new conversations for changes and only fire the following functions if updated?)
-      getRecentConversations(),
-      getPinnedConversations(),
-      getChannelsWithConversations(),
-    ]);
+    const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
+
+    // Update sidebar items if the conversations name has changed
+    if (conversations.value[0] && conversations.value[0].name !== newConversations[0].name) {
+      getPinnedConversations();
+      getRecentConversations();
+      getChannelsWithConversations();
+    }
+
+    // Update state
     conversations.value = newConversations;
     unprocessedItems.value = newUnprocessedItems;
-    if (newConversations.length) creatingNewConversation.value = false;
     gettingData.value = false;
+
+    // Trigger a refresh in child components
     refreshTrigger.value = refreshTrigger.value + 1;
 
+    // If this is not the first run, check if we should process tasks
+    if (firstRun) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
-
-    if (!firstRun && shouldProcess) {
+    if (shouldProcess) {
       const channel = new Channel(perspective, route.params.channelId as string);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
     }
@@ -240,12 +243,10 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-$line-offset: 92px;
-
-.wrapper {
+.timeline-column {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 320px);
+  height: 100%;
 
   .header {
     flex-shrink: 0;
@@ -286,8 +287,12 @@ $line-offset: 92px;
       .line {
         height: 100%;
         width: 6px;
-        margin-left: $line-offset;
+        margin-left: 92px;
         background-color: var(--j-color-primary-200);
+
+        @media screen and (max-width: 800px) {
+          margin-left: 12px;
+        }
       }
     }
 
@@ -295,36 +300,42 @@ $line-offset: 92px;
       height: 100%;
       overflow-y: scroll;
       z-index: 5;
-      padding: 130px 20px 130px 60px;
+      padding: 90px 20px 90px 60px;
+
+      @media screen and (max-width: 800px) {
+        padding: 70px 0;
+        margin-left: -20px;
+      }
 
       &::-webkit-scrollbar {
         display: none;
       }
 
-      .line {
-        height: 130px;
-        width: 6px;
-        margin-left: $line-offset;
-        background-color: var(--j-color-primary-200);
-      }
+      .unprocessed-items {
+        margin-left: 70px;
 
-      .item-card {
-        display: flex;
-        margin-bottom: 20px;
-        width: 100%;
-        border: 1px solid var(--j-color-ui-300);
-        border-radius: var(--j-border-radius);
-        padding: var(--j-space-400);
-        background-color: var(--j-color-ui-100);
-
-        .timestamp {
-          font-size: 14px;
-          color: var(--j-color-ui-400);
+        @media screen and (max-width: 800px) {
+          margin-left: 56px;
         }
-      }
 
-      .item-text :deep(p) {
-        margin: 0;
+        .item-card {
+          display: flex;
+          margin-bottom: 20px;
+          width: 100%;
+          border: 1px solid var(--j-color-ui-300);
+          border-radius: var(--j-border-radius);
+          padding: var(--j-space-400);
+          background-color: var(--j-color-ui-100);
+
+          .timestamp {
+            font-size: 14px;
+            color: var(--j-color-ui-400);
+          }
+        }
+
+        .item-text :deep(p) {
+          margin: 0;
+        }
       }
     }
   }

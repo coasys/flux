@@ -2,7 +2,7 @@
   <div class="sidebar-header">
     <div class="sidebar-header__top">
       <j-button variant="ghost" size="sm" @click="uiStore.toggleAppSidebar">
-        <j-icon size="sm" :name="showAppSidebar ? 'layout-sidebar' : 'layout-sidebar'" />
+        <j-icon size="sm" name="layout-sidebar" />
       </j-button>
 
       <j-popover
@@ -13,7 +13,7 @@
         placement="bottom-end"
       >
         <j-button square slot="trigger" variant="ghost">
-          <j-icon size="sm" name="sliders2"></j-icon>
+          <j-icon size="sm" name="sliders2" />
         </j-button>
         <j-menu slot="content">
           <j-menu-item v-if="isAuthor" @click="() => (modalsStore.showEditCommunity = true)">
@@ -50,13 +50,13 @@
           {{ communityDescription() }}
         </j-text>
         <j-box pt="400" v-if="!isSynced">
-          <LoadingBar></LoadingBar>
+          <LoadingBar />
         </j-box>
       </div>
     </div>
     <div class="warning-box">
       <j-flex a="center" gap="300">
-        <j-icon name="exclamation-circle" size="xs" color="warning-500"></j-icon>
+        <j-icon name="exclamation-circle" size="xs" color="warning-500" />
         <j-text nomargin weight="700" size="400" color="warning-500">Warning</j-text>
       </j-flex>
       <j-text nomargin size="300" color="warning-500">
@@ -71,14 +71,12 @@
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore, useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 defineOptions({ name: "Header" });
 
 const uiStore = useUiStore();
 const modalsStore = useModalStore();
-const { showAppSidebar } = storeToRefs(uiStore);
 
 const { isSynced, isAuthor, community } = useCommunityService();
 

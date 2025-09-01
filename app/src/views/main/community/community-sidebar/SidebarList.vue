@@ -9,6 +9,15 @@
         <j-box ml="200" mt="100" v-if="loading">
           <j-spinner size="xxs" />
         </j-box>
+
+        <j-button
+          v-if="title === 'Channels'"
+          @click="() => (modalsStore.showCreateChannel = true)"
+          size="sm"
+          variant="ghost"
+        >
+          <j-icon size="sm" square name="plus" />
+        </j-button>
       </div>
 
       <j-flex direction="column">
@@ -20,6 +29,7 @@
 
 <script setup lang="ts">
 import { ChannelData } from "@/composables/useCommunityService";
+import { useModalStore } from "@/stores";
 import SidebarItem from "@/views/main/community/community-sidebar/SidebarItem.vue";
 import { defineOptions } from "vue";
 
@@ -27,6 +37,8 @@ defineOptions({ name: "SidebarList" });
 
 type Props = { title: string; icon: string; loading: boolean; items: ChannelData[] };
 const { title, icon, loading, items } = defineProps<Props>();
+
+const modalsStore = useModalStore();
 </script>
 
 <style lang="scss" scoped>

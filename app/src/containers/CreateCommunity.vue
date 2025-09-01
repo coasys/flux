@@ -108,7 +108,7 @@
           <j-text variant="body"> Please be patient, this might take a while right now. </j-text>
           <j-box pt="500">
             <j-flex j="center">
-              <HourGlass width="50" />
+              <HourglassIcon width="50" />
             </j-flex>
           </j-box>
         </div>
@@ -173,7 +173,7 @@
 
 <script setup lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import HourGlass from "@/components/hourglass/Hourglass.vue";
+import { HourglassIcon } from "@/components/icons";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { useAppStore, useModalStore } from "@/stores";
 import { isValid } from "@/utils/validation";

@@ -1,7 +1,7 @@
 <template>
   <j-box p="800">
     <j-flex direction="column" gap="500">
-      <j-text variant="heading-sm">Edit Channel</j-text>
+      <j-text variant="heading-sm">Edit {{ isConversation ? "Conversation" : "Channel" }}</j-text>
 
       <j-input
         size="lg"
@@ -9,7 +9,7 @@
         :value="name"
         @keydown.enter="updateChannel"
         @input="(e: any) => (name = e.target.value)"
-      ></j-input>
+      />
 
       <j-box pb="500" pt="300">
         <j-box pb="300">
@@ -21,7 +21,7 @@
         </j-box>
 
         <j-box v-if="isLoading" a="center" p="500">
-          <j-spinner></j-spinner>
+          <j-spinner />
         </j-box>
 
         <j-box v-else pb="500">
@@ -81,12 +81,21 @@
 </template>
 
 <script setup lang="ts">
+import { useCommunityServiceStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getAd4mClient } from "@coasys/ad4m-connect";
 import { useModel, usePerspective } from "@coasys/ad4m-vue-hooks";
-import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from "@coasys/flux-api";
+import {
+  App,
+  Channel,
+  Conversation,
+  FluxApp,
+  generateWCName,
+  getAllFluxApps,
+  getOfflineFluxApps,
+} from "@coasys/flux-api";
 import semver from "semver";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, toRaw, unref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 interface Props {
@@ -94,10 +103,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
 const emit = defineEmits<{ cancel: []; submit: [] }>();
-
 const route = useRoute();
+const communityServiceStore = useCommunityServiceStore();
 
 const tab = ref<"official" | "community">("official");
 const isLoading = ref(false);
@@ -121,16 +129,22 @@ const { entries: apps } = useModel({
 });
 
 const channel = computed(() => channels.value?.[0] || null);
+const isConversation = computed(() => channel.value?.isConversation);
 const perspective = computed(() => data.value.perspective);
 const canSave = computed(() => selectedPlugins.value.length >= 1);
-const officialApps = computed((): FluxApp[] => packages.value.filter((p) => p.pkg.startsWith("@coasys/")));
+const officialApps = computed(() =>
+  packages.value.filter(
+    // TODO: WebRTC & Synergy filtered out for now, remove plugins from codebase when fully replaced in main app?
+    (p) =>
+      p.pkg.startsWith("@coasys/") && !["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(p.pkg)
+  )
+);
 const communityApps = computed((): FluxApp[] => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
 const filteredPackages = computed((): FluxApp[] =>
   tab.value === "official" ? officialApps.value : communityApps.value
 );
 
 function toggleView(app: FluxApp) {
-  console.log("toggleView");
   const isSelectedApp = selectedPlugins.value.some((a) => a.pkg === app.pkg);
 
   selectedPlugins.value = isSelectedApp
@@ -171,9 +185,27 @@ async function updateChannel() {
 
     await Promise.all(addedApps);
 
-    const channelModel = new Channel(perspective.value!, route.params.channelId as string);
-    channelModel.name = name.value;
-    await channelModel.update();
+    if (isConversation) {
+      // Update the assosiated conversation name
+      const communityService = communityServiceStore.getCommunityService(route.params.communityId as string);
+      if (!communityService) return;
+      const conversations = unref(communityService.recentConversations);
+      const conversationData = conversations.find((c) => c.channel.baseExpression === channel.value.baseExpression);
+      const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
+      if (!conversationId) return;
+      const conversationModel = new Conversation(perspective.value!, conversationId);
+      conversationModel.conversationName = name.value;
+      await conversationModel.update();
+      // Refresh sidebar channels
+      communityService.getPinnedConversations();
+      communityService.getRecentConversations();
+      communityService.getChannelsWithConversations();
+    } else {
+      // Update the channel name directly
+      const channelModel = new Channel(perspective.value!, route.params.channelId as string);
+      channelModel.name = name.value;
+      await channelModel.update();
+    }
 
     emit("submit");
   } finally {
@@ -192,9 +224,22 @@ watch(
 watch(
   channel,
   (newChannel) => {
-    if (newChannel) name.value = newChannel.name;
+    if (newChannel) {
+      if (newChannel.isConversation) {
+        // Get the conversation name for the channel
+        const communityService = communityServiceStore.getCommunityService(route.params.communityId as string);
+        if (!communityService) return;
+        const conversationData = unref(communityService.recentConversations).find(
+          (c) => c.channel.baseExpression === newChannel.baseExpression
+        );
+        name.value = conversationData?.conversation?.conversationName || "";
+      } else {
+        // Otherwise just use the channel name
+        name.value = newChannel.name;
+      }
+    }
   },
-  { deep: true, immediate: true }
+  { deep: true }
 );
 
 watch(

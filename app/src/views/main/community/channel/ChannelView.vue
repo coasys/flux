@@ -1,115 +1,73 @@
 <template>
   <div id="channel-view" class="channel-view" v-if="channel">
     <div class="header">
-      <j-button class="sidebar-toggle" variant="ghost" @click="() => uiStore.toggleCommunitySidebar()">
-        <j-icon color="ui-800" size="md" name="arrow-left-short" />
-      </j-button>
+      <div class="header-info">
+        <button v-if="isMobile" class="open-sidebar-button" @click="() => uiStore.setCommunitySidebarOpen(true)">
+          <ChevronLeftIcon />
+        </button>
+        <j-flex
+          a="center"
+          @click="() => changeCurrentView(`conversation${channel?.isConversation ? '' : 's'}`)"
+          style="cursor: pointer"
+        >
+          <j-icon
+            :name="channel.isConversation ? 'flower2' : 'hash'"
+            size="md"
+            color="ui-300"
+            :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
+          />
+          <j-text color="black" weight="700" size="500" nomargin>
+            {{ channel.isConversation ? conversation?.conversationName || "" : channel.name }}
+          </j-text>
+        </j-flex>
+      </div>
 
-      <div v-if="isMobile" class="header-actions">
-        <j-box pr="500" @click="onIsChannelChange">
-          <j-flex a="center" gap="200">
-            <j-icon name="hash" size="md" color="ui-300" />
+      <div class="header-buttons">
+        <template v-if="!callWindowOpen && (!inCall || callRoute.channelId === channelId)">
+          <j-button size="sm" variant="primary" :onClick="() => uiStore.setCallWindowOpen(true)">
+            <j-icon size="sm" name="telephone" style="margin-right: -5px" />
+            {{ `${inCall ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
+          </j-button>
 
-            <j-text color="black" weight="700" size="500" nomargin>
-              {{ channel?.name }}
-            </j-text>
-          </j-flex>
+          <AvatarGroup
+            v-if="agentsInCall.length"
+            @click="() => uiStore.setCallWindowOpen(true)"
+            :users="agentsInCall"
+            :tooltip-title="`${agentsInCall.length} agent${agentsInCall.length > 1 ? 's' : ''} in the call`"
+            size="xs"
+          />
+        </template>
 
-          <j-box pl="600">
-            <j-text variant="label" size="200">Change View</j-text>
-          </j-box>
-        </j-box>
+        <button
+          v-if="channel.isConversation"
+          class="header-button"
+          :class="channel.isPinned ? 'highlighted' : ''"
+          @click="togglePinned"
+        >
+          <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
+          {{ channel.isPinned ? "Pinned" : "Pin" }}
+        </button>
+        <!-- <button v-else class="header-button highlighted" @click="goToEditChannel">
+          <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
+          Edit channel
+        </button> -->
+      </div>
+
+      <div class="header-views">
+        <label
+          v-for="view in views"
+          :class="{ tab: true, checked: view.pkg === viewId }"
+          @click="() => changeCurrentView(view.pkg)"
+        >
+          <j-icon :name="view.icon" size="xs" />
+          <span>{{ view.name }}</span>
+        </label>
 
         <j-tooltip placement="auto" title="Manage views">
           <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
             <j-icon size="md" name="plus" />
           </j-button>
         </j-tooltip>
-      </div>
-
-      <div class="header-actions" v-if="!isMobile">
-        <div class="header-left">
-          <j-box pr="300">
-            <j-flex a="center" gap="600">
-              <j-flex
-                a="center"
-                @click="() => changeCurrentView(channel?.isConversation ? 'conversation' : 'sub-channels')"
-                style="cursor: pointer"
-              >
-                <j-icon
-                  :name="channel.isConversation ? 'flower2' : 'hash'"
-                  size="md"
-                  color="ui-300"
-                  :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
-                />
-                <j-text color="black" weight="700" size="500" nomargin>
-                  {{ channel.isConversation ? conversation?.conversationName || "" : channel.name }}
-                </j-text>
-              </j-flex>
-
-              <button
-                v-if="channel.isConversation"
-                class="header-button"
-                :class="channel.isPinned ? 'highlighted' : ''"
-                @click="togglePinned"
-              >
-                <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
-                {{ channel.isPinned ? "Pinned" : "Pin conversation" }}
-              </button>
-
-              <button v-else class="header-button highlighted" @click="goToEditChannel">
-                <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
-                Edit channel
-              </button>
-
-              <AvatarGroup
-                v-if="agentsInChannel.length"
-                :users="agentsInChannel"
-                :tooltip-title="`${agentsInChannel.length} agent${agentsInChannel.length > 1 ? 's' : ''} in the channel`"
-                size="xs"
-              />
-            </j-flex>
-          </j-box>
-
-          <div class="tabs">
-            <div class="tab-divider" />
-
-            <label
-              v-for="view in views"
-              :class="{ tab: true, checked: view.pkg === viewId }"
-              @click="() => changeCurrentView(view.pkg)"
-            >
-              <j-icon :name="view.icon" size="xs" />
-              <span>{{ view.name }}</span>
-            </label>
-
-            <j-tooltip placement="auto" title="Manage views">
-              <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
-                <j-icon size="md" name="plus" />
-              </j-button>
-            </j-tooltip>
-          </div>
-
-          <template v-if="!callWindowOpen && (!inCall || callRoute.channelId === channelId)">
-            <j-button
-              size="sm"
-              variant="primary"
-              style="margin-left: 25px"
-              :onClick="() => uiStore.setCallWindowOpen(true)"
-            >
-              <j-icon size="sm" name="telephone" style="margin-right: -5px" />
-              {{ `${inCall ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
-            </j-button>
-
-            <AvatarGroup
-              v-if="agentsInCall.length"
-              @click="() => uiStore.setCallWindowOpen(true)"
-              :users="agentsInCall"
-              :tooltip-title="`${agentsInCall.length} agent${agentsInCall.length > 1 ? 's' : ''} in the call`"
-              size="xs"
-            />
-          </template>
-        </div>
       </div>
     </div>
 
@@ -121,6 +79,7 @@
           :is="Component"
           :channel="channel"
           class="perspective-view"
+          :style="{ paddingBottom: isMobile ? `calc(${callWidgetsHeight + 20}px)` : '0' }"
         />
       </KeepAlive>
     </RouterView>
@@ -136,7 +95,7 @@
 
     <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" a="center">
-        <Hourglass width="30px" />
+        <HourglassIcon width="30px" />
         <j-text variant="heading">Joining community</j-text>
         <j-text>Please wait...</j-text>
       </j-box>
@@ -169,7 +128,7 @@
 
 <script setup lang="ts">
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import Hourglass from "@/components/hourglass/Hourglass.vue";
+import { ChevronLeftIcon, HourglassIcon } from "@/components/icons";
 import { useCommunityService } from "@/composables/useCommunityService";
 import ProfileContainer from "@/containers/Profile.vue";
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";
@@ -194,11 +153,9 @@ const modalStore = useModalStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { perspective, allChannels, signallingService, recentConversations, getPinnedConversations } =
-  useCommunityService();
-
+const { perspective, allChannels, signallingService, recentConversations } = useCommunityService();
 const { me } = storeToRefs(appStore);
-const { callWindowOpen } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen, callWidgetsHeight } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 const currentView = ref("");
@@ -214,8 +171,7 @@ const conversation = computed(() =>
     : null
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
-const isMobile = computed(() => window.innerWidth <= 768);
-const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
+// const agentsInChannel = computed(() => signallingService?.getAgentsInChannel(channelId)?.value || []);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId)?.value || []);
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId } });
@@ -228,22 +184,22 @@ function changeCurrentView(viewId: string) {
   router.push({ name: "view", params: { communityId, channelId, viewId } });
 }
 
-function onIsChannelChange() {
-  isChangeChannel.value = !isChangeChannel.value;
-}
+// function onIsChannelChange() {
+//   isChangeChannel.value = !isChangeChannel.value;
+// }
 
-function onHideNotificationIndicator({ detail }: any) {
-  const { channelId } = route.params;
+// function onHideNotificationIndicator({ detail }: any) {
+//   const { channelId } = route.params;
 
-  if (channelId) {
-    // TODO: Set channel has new messages
-    // dataStore.setHasNewMessages({
-    //   communityId: route.params.communityId as string,
-    //   channelId: channelId as string,
-    //   value: false,
-    // });
-  }
-}
+//   if (channelId) {
+//     // TODO: Set channel has new messages
+//     // dataStore.setHasNewMessages({
+//     //   communityId: route.params.communityId as string,
+//     //   channelId: channelId as string,
+//     //   value: false,
+//     // });
+//   }
+// }
 
 function toggleProfile(open: boolean, did?: any): void {
   if (!open) activeProfile.value = "";
@@ -264,7 +220,6 @@ async function togglePinned() {
     const channelModel = new Channel(perspective, channel.value.baseExpression);
     channelModel.isPinned = !channel.value.isPinned;
     await channelModel.update();
-    getPinnedConversations();
   } catch (error) {
     console.error("Error toggling pinned state:", error);
     appStore.showDangerToast({ message: "Failed to update pinned state" });
@@ -272,95 +227,102 @@ async function togglePinned() {
 }
 
 onMounted(() => {
-  // Navigate to the conversation or subchannels view if no viewId present when entering channel
-  if (!viewId) {
-    if (channel.value?.isConversation) router.push({ name: "view", params: { viewId: "conversation" } });
-    else router.push({ name: "view", params: { viewId: "sub-channels" } });
-  }
+  // Navigate to the conversation or conversations view if no viewId present when entering channel
+  if (!viewId)
+    router.push({ name: "view", params: { viewId: `conversation${channel.value?.isConversation ? "" : "s"}` } });
 });
 </script>
 
 <style scoped lang="scss">
 .channel-view {
+  display: flex;
+  flex-direction: column;
   position: relative;
   background: var(--app-channel-bg-color, transparent);
   width: 100%;
+  height: 100vh;
 
   .header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--j-space-400);
-    padding: 0 var(--j-space-200);
-    position: sticky;
+    padding: 0 var(--j-space-400);
     background: var(--app-channel-header-bg-color, transparent);
     border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
-    height: var(--app-header-height);
+    min-height: var(--app-header-height);
 
-    @media (min-width: 800px) {
-      padding: 0 var(--j-space-500);
-      justify-content: space-between;
-      gap: 0;
-    }
-
-    &-actions {
+    .open-sidebar-button {
+      all: unset;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      flex: 1;
-      height: 100%;
-    }
+      flex-shrink: 0;
+      color: var(--j-color-ui-300);
+      font-weight: 600;
+      font-size: var(--j-font-size-400);
 
-    &-left {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      gap: var(--j-space-300);
-
-      .header-button {
-        all: unset;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        color: var(--j-color-ui-500);
-        font-size: var(--j-font-size-400);
-        padding: var(--j-space-200) var(--j-space-300);
-        border-radius: 8px;
-        background: var(--j-color-ui-100);
-
-        > j-icon {
-          color: var(--j-color-ui-400);
-        }
-
-        &.highlighted {
-          outline: 1px solid var(--j-color-primary-500);
-          color: var(--j-color-primary-600);
-
-          > j-icon {
-            color: var(--j-color-primary-600);
-          }
-        }
-
-        &:hover {
-          color: var(--j-color-ui-600);
-
-          > j-icon {
-            color: var(--j-color-ui-500);
-          }
-
-          &.highlighted {
-            outline: 1px solid var(--j-color-primary-600);
-            color: var(--j-color-primary-700);
-
-            > j-icon {
-              color: var(--j-color-primary-700);
-            }
-          }
-        }
+      > svg {
+        width: 20px;
+        height: 20px;
       }
     }
 
-    &-right {
-      align-self: center;
+    .header-info,
+    .header-buttons,
+    .header-views {
+      display: flex;
+      align-items: center;
+      height: var(--app-header-height);
+      gap: var(--j-space-400);
+      margin-right: var(--j-space-600);
+    }
+
+    .header-views {
+      gap: var(--j-space-600);
+      overflow-x: auto;
+    }
+
+    .header-button {
+      all: unset;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: var(--j-color-ui-500);
+      font-size: var(--j-font-size-400);
+      padding: 0 var(--j-space-300);
+      border-radius: 8px;
+      background: var(--j-color-ui-100);
+      height: var(--j-size-sm);
+
+      > j-icon {
+        color: var(--j-color-ui-400);
+      }
+
+      &.highlighted {
+        outline: 1px solid var(--j-color-primary-500);
+        color: var(--j-color-primary-600);
+
+        > j-icon {
+          color: var(--j-color-primary-600);
+        }
+      }
+
+      &:hover {
+        color: var(--j-color-ui-600);
+
+        > j-icon {
+          color: var(--j-color-ui-500);
+        }
+
+        &.highlighted {
+          outline: 1px solid var(--j-color-primary-600);
+          color: var(--j-color-primary-700);
+
+          > j-icon {
+            color: var(--j-color-primary-700);
+          }
+        }
+      }
     }
   }
 
@@ -386,9 +348,11 @@ onMounted(() => {
 
   .perspective-view {
     position: relative;
-    height: calc(100% - var(--app-header-height));
+    height: 100%;
     overflow-y: auto;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
 }
 

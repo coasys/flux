@@ -5,13 +5,16 @@
     class="app-layout"
     :class="{ 'app-layout--show-sidebar': showAppSidebar }"
   >
+    <!-- Main sidebar -->
     <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
-    <div class="app-layout__webrtc"><slot name="webrtc"></slot></div>
-    <main
-      class="app-layout__main"
-      id="app-layout-main"
-      :style="{ width: mainWidth, minWidth: `${communitySidebarWidth}px` }"
-    >
+
+    <!-- Call container -->
+    <div class="app-layout__call-container">
+      <slot name="call-container"></slot>
+    </div>
+
+    <!-- Main content -->
+    <main class="app-layout__main" id="app-layout-main" :style="{ width: mainWidth }">
       <slot></slot>
     </main>
   </div>
@@ -23,17 +26,18 @@ import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 
 const uiStore = useUiStore();
-const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth } =
+const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth, isMobile } =
   storeToRefs(uiStore);
 
 const touchstartX = ref(0);
 const touchendX = ref(0);
 
-const mainWidth = computed(() =>
-  callWindowOpen.value
-    ? `calc(100% - ${callWindowWidth.value}px - var(--app-main-sidebar-width))`
-    : "calc(100% - var(--app-main-sidebar-width))"
-);
+const mainWidth = computed(() => {
+  const sidebarWidth = showAppSidebar.value ? "var(--app-main-sidebar-width)" : "0px";
+  return callWindowOpen.value
+    ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})`
+    : `calc(100% - ${sidebarWidth})`;
+});
 
 function handleTouchStart(e: any) {
   touchstartX.value = e.changedTouches[0].screenX;
@@ -101,14 +105,14 @@ function checkDirection() {
   }
 }
 
-.app-layout__webrtc {
+.app-layout__call-container {
   position: absolute;
+  top: 0;
   left: 0;
-  bottom: 0;
-  pointer-events: none;
   width: 100%;
   height: 100%;
-  z-index: 20;
+  pointer-events: none;
+  z-index: 1001;
 }
 
 .app-layout__main {
@@ -118,5 +122,13 @@ function checkDirection() {
   overflow-x: hidden;
   transition: width 0.5s ease-in-out;
   margin-left: 0;
+
+  @media (min-width: 801px) {
+    min-width: v-bind('communitySidebarWidth + "px"');
+  }
+
+  @media (max-width: 800px) {
+    min-width: unset;
+  }
 }
 </style>

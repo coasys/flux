@@ -1,5 +1,5 @@
 <template>
-  <div class="match-column-wrapper">
+  <div class="match-column">
     <j-flex direction="column" gap="400" class="header">
       <j-flex a="center" gap="400" wrap>
         <j-menu style="height: 42px; z-index: 20">
@@ -69,16 +69,16 @@
         @click="() => (numberOfMatchesDisplayed += 5)"
       >
         See more
-        <span> <ChevronDown /> {{ matches.length - numberOfMatchesDisplayed }} </span>
+        <span> <ChevronDownIcon /> {{ matches.length - numberOfMatchesDisplayed }} </span>
       </j-button>
     </j-flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ChevronDown } from "@/components/icons";
-import Match from "@/components/synergy/match/Match.vue";
-import { closeMenu } from "@/components/synergy/utils/index";
+import Match from "@/components/conversation/match/Match.vue";
+import { ChevronDownIcon } from "@/components/icons";
+import { closeMenu } from "@/utils/helperFunctions";
 import {
   FilterSettings,
   GroupingOption,
@@ -118,12 +118,12 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.match-column-wrapper {
+.match-column {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  height: calc(100vh - 320px);
+  height: calc(100% - 10px);
 
   .close-button {
     all: unset;
@@ -144,6 +144,7 @@ watch(
   .results {
     height: 100%;
     overflow-y: scroll;
+    padding-bottom: 350px;
 
     &::-webkit-scrollbar {
       display: none;
