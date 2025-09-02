@@ -30,10 +30,7 @@
 <script setup lang="ts">
 import { ChannelData } from "@/composables/useCommunityService";
 import { useModalStore } from "@/stores";
-import SidebarItem from "@/views/main/community/community-sidebar/SidebarItem.vue";
-import { defineOptions } from "vue";
-
-defineOptions({ name: "SidebarList" });
+import SidebarItem from "@/views/main/community/sidebar/SidebarItem.vue";
 
 type Props = { title: string; icon: string; loading: boolean; items: ChannelData[] };
 const { title, icon, loading, items } = defineProps<Props>();

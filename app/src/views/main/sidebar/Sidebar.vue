@@ -1,13 +1,13 @@
 <template>
   <div class="sidebar-container">
-    <CommunitiesList />
-    <!-- <BottomSection /> -->
+    <SidebarCommunities />
+    <!-- <SidebarFooter /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-// import BottomSection from "./BottomSection.vue";
-import CommunitiesList from "./CommunitiesList.vue";
+import SidebarCommunities from "./SidebarCommunities.vue";
+// import SidebarFooter from "./SidebarFooter.vue";
 </script>
 
 <style scoped>

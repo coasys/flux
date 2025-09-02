@@ -22,8 +22,6 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore } from "@/stores";
 import { computed } from "vue";
 
-defineOptions({ name: "Members" });
-
 const modalStore = useModalStore();
 const { membersLoading, members } = useCommunityService();
 

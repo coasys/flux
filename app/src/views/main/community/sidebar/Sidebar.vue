@@ -1,6 +1,7 @@
 <template>
-  <Header />
-  <Members />
+  <SidebarHeader />
+
+  <SidebarMembers />
 
   <j-box mt="800" mb="500" pl="500">
     <j-button variant="primary" @click="() => startNewConversation()" :loading="newConversationLoading">
@@ -35,11 +36,9 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
-import SidebarList from "@/views/main/community/community-sidebar/SidebarList.vue";
-import Header from "./Header.vue";
-import Members from "./Members.vue";
-
-defineOptions({ name: "CommunitySidebar" });
+import SidebarList from "@/views/main/community/sidebar/SidebarList.vue";
+import SidebarMembers from "@/views/main/community/sidebar/SidebarMembers.vue";
+import SidebarHeader from "./SidebarHeader.vue";
 
 const {
   pinnedConversationsWithAgents,

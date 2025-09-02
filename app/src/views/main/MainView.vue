@@ -2,7 +2,7 @@
   <AppLayout>
     <!-- Outer left sidebar -->
     <template v-slot:sidebar>
-      <MainSidebar />
+      <Sidebar />
     </template>
 
     <!-- Call container -->
@@ -182,7 +182,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { dependencies } from "../../../package.json";
 import { registerNotification } from "../../utils/registerMobileNotifications";
-import MainSidebar from "./main-sidebar/MainSidebar.vue";
+import Sidebar from "./sidebar/Sidebar.vue";
 
 const route = useRoute();
 const router = useRouter();

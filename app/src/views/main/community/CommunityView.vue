@@ -1,7 +1,7 @@
 <template>
   <CommunityLayout>
     <template v-slot:sidebar>
-      <CommunitySidebar />
+      <Sidebar />
     </template>
 
     <RouterView v-slot="{ Component }">
@@ -120,7 +120,7 @@ import { CommunityServiceKey, createCommunityService } from "@/composables/useCo
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
 import { useCommunityServiceStore, useModalStore } from "@/stores";
-import CommunitySidebar from "@/views/main/community/community-sidebar/CommunitySidebar.vue";
+import Sidebar from "@/views/main/community/sidebar/Sidebar.vue";
 import { onMounted, onUnmounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
 

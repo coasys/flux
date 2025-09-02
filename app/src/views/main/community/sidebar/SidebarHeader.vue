@@ -73,8 +73,6 @@ import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore, useUiStore } from "@/stores";
 import { ref } from "vue";
 
-defineOptions({ name: "Header" });
-
 const uiStore = useUiStore();
 const modalsStore = useModalStore();
 
