@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import App from "./app";
 import { Community } from "./community";
 import Conversation from "./conversation";
+import Channel from "./channel";
 import ConversationSubgroup from "./conversation-subgroup";
 import Embedding from "./embedding";
 import SemanticRelationship from "./semantic-relationship";
@@ -40,8 +41,7 @@ export default async function createCommunity({
     // Add models to the perspectives SDNA
     await perspective.ensureSDNASubjectClass(Community);
     await perspective.ensureSDNASubjectClass(App);
-
-    // Add conversation models to the perspective's SDNA (TODO: only add these when converting a channel into a conversation)
+    await perspective.ensureSDNASubjectClass(Channel);
     await perspective.ensureSDNASubjectClass(Conversation);
     await perspective.ensureSDNASubjectClass(ConversationSubgroup);
     await perspective.ensureSDNASubjectClass(Topic);
