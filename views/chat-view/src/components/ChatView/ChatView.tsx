@@ -4,7 +4,6 @@ import { Message } from "@coasys/flux-api";
 import { community } from "@coasys/flux-constants";
 import { EntryType, Profile } from "@coasys/flux-types";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { getPosition } from "../../utils/getPosition";
 import MessageList from "../MessageList/MessageList";
 import styles from "./ChatView.module.css";
 
@@ -140,6 +139,15 @@ export default function ChatView({ agent, perspective, source, threaded, element
     setReplyProfile(profile);
   }
 
+  function getEmojiPickerPosition(x: number, y: number, el: HTMLElement, offset = 20) {
+    if (!el || !x || !y) return { left: 0, top: 0 };
+
+    // Position above and to the left of the click point
+    const left = `${Math.max(0, x - el.offsetWidth - offset)}px`;
+    const top = `${Math.max(0, y - el.offsetHeight - offset)}px`;
+    return { left, top };
+  }
+
   useEffect(() => {
     // Reset reply and thread
     setThreadSource(null);
@@ -162,10 +170,10 @@ export default function ChatView({ agent, perspective, source, threaded, element
         onChange={onEmojiClick}
         ref={emojiPicker}
         style={{
-          display: pickerInfo?.id ? "block" : "none",
-          position: "absolute",
-          zIndex: 999,
-          ...getPosition(pickerInfo?.x, pickerInfo?.y, emojiPicker?.current),
+          visibility: pickerInfo?.id ? "visible" : "hidden",
+          position: "fixed",
+          zIndex: 9999,
+          ...getEmojiPickerPosition(pickerInfo?.x, pickerInfo?.y, emojiPicker?.current),
         }}
       />
 
