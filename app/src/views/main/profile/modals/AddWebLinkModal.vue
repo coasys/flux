@@ -1,68 +1,75 @@
 <template>
-  <j-box p="800">
-    <j-flex direction="column" gap="600" class="steps">
-      <j-text variant="heading-sm">Add a link to your profile</j-text>
-      <j-input
-        label="Web link"
-        size="xl"
-        :value="link"
-        autovalidate
-        @invalid="() => (isValidLink = false)"
-        @input="handleInput"
-        type="url"
-        required
-      >
-        <j-box pr="300" v-if="loadingMeta" slot="end">
-          <j-spinner size="xxs" />
-        </j-box>
-      </j-input>
-
-      <j-input
-        ref="titleEl"
-        v-if="isValidLink"
-        :disabled="loadingMeta"
-        size="xl"
-        label="Title"
-        :value="title"
-        @input="(e: any) => (title = e.target.value)"
-      />
-
-      <j-input
-        v-if="isValidLink"
-        :disabled="loadingMeta"
-        size="xl"
-        type="textarea"
-        label="Description"
-        :value="description"
-        @input="(e: any) => (description = e.target.value)"
-      />
-
-      <j-flex gap="400">
-        <j-button full style="width: 100%" size="lg" @click="emit('cancel')"> Cancel </j-button>
-        <j-button
-          style="width: 100%"
-          full
-          :disabled="isAddingLink || !isValidLink"
-          :loading="isAddingLink"
-          size="lg"
-          variant="primary"
-          @click="createLink"
+  <j-modal
+    size="sm"
+    :open="modalStore.showAddWebLink"
+    @toggle="(e: any) => (modalStore.showAddWebLink = e.target.open)"
+  >
+    <j-box p="800">
+      <j-flex direction="column" gap="600" class="steps">
+        <j-text variant="heading-sm">Add a link to your profile</j-text>
+        <j-input
+          label="Web link"
+          size="xl"
+          :value="link"
+          autovalidate
+          @invalid="() => (isValidLink = false)"
+          @input="handleInput"
+          type="url"
+          required
         >
-          <j-icon slot="end" name="add" />
-          Add link
-        </j-button>
+          <j-box pr="300" v-if="loadingMeta" slot="end">
+            <j-spinner size="xxs" />
+          </j-box>
+        </j-input>
+
+        <j-input
+          ref="titleEl"
+          v-if="isValidLink"
+          :disabled="loadingMeta"
+          size="xl"
+          label="Title"
+          :value="title"
+          @input="(e: any) => (title = e.target.value)"
+        />
+
+        <j-input
+          v-if="isValidLink"
+          :disabled="loadingMeta"
+          size="xl"
+          type="textarea"
+          label="Description"
+          :value="description"
+          @input="(e: any) => (description = e.target.value)"
+        />
+
+        <j-flex gap="400">
+          <j-button full style="width: 100%" size="lg" @click="modalStore.showAddWebLink = false"> Cancel </j-button>
+          <j-button
+            style="width: 100%"
+            full
+            :disabled="isAddingLink || !isValidLink"
+            :loading="isAddingLink"
+            size="lg"
+            variant="primary"
+            @click="createLink"
+          >
+            <j-icon slot="end" name="add" />
+            Add link
+          </j-button>
+        </j-flex>
       </j-flex>
-    </j-flex>
-  </j-box>
+    </j-box>
+  </j-modal>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores";
+import { useAppStore, useModalStore } from "@/stores";
 import { createAgentWebLink } from "@coasys/flux-api";
 import { ref } from "vue";
 
 defineProps({ step: { type: Number } });
-const emit = defineEmits(["cancel", "submit"]);
+
+const modalStore = useModalStore();
 
 const title = ref("");
 const description = ref("");
@@ -119,7 +126,7 @@ async function createLink() {
     description.value = "";
     imageUrl.value = "";
 
-    emit("submit");
+    modalStore.showAddWebLink = false;
   } finally {
     isAddingLink.value = false;
   }

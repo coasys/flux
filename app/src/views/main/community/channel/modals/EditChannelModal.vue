@@ -1,90 +1,92 @@
 <template>
-  <j-box p="800">
-    <j-flex direction="column" gap="500">
-      <j-text variant="heading-sm">Edit {{ isConversation ? "Conversation" : "Channel" }}</j-text>
+  <j-modal :open="modalStore.showEditChannel" @toggle="(e: any) => (modalStore.showEditChannel = e.target.open)">
+    <j-box p="800">
+      <j-flex direction="column" gap="500">
+        <j-text variant="heading-sm">Edit {{ isConversation ? "Conversation" : "Channel" }}</j-text>
 
-      <j-input
-        size="lg"
-        label="Name"
-        :value="name"
-        @keydown.enter="updateChannel"
-        @input="(e: any) => (name = e.target.value)"
-      />
+        <j-input
+          size="lg"
+          label="Name"
+          :value="name"
+          @keydown.enter="updateChannel"
+          @input="(e: any) => (name = e.target.value)"
+        />
 
-      <j-box pb="500" pt="300">
-        <j-box pb="300">
-          <j-text variant="label">Select at least one plugin</j-text>
-          <j-text size="300" variant="label">
-            Can't find a suitable plugin?
-            <a target="_blank" style="color: var(--j-color-black)" href="https://docs.fluxsocial.io">Create one</a>
-          </j-text>
-        </j-box>
+        <j-box pb="500" pt="300">
+          <j-box pb="300">
+            <j-text variant="label">Select at least one plugin</j-text>
+            <j-text size="300" variant="label">
+              Can't find a suitable plugin?
+              <a target="_blank" style="color: var(--j-color-black)" href="https://docs.fluxsocial.io">Create one</a>
+            </j-text>
+          </j-box>
 
-        <j-box v-if="isLoading" a="center" p="500">
-          <j-spinner />
-        </j-box>
+          <j-box v-if="isLoading" a="center" p="500">
+            <j-spinner />
+          </j-box>
 
-        <j-box v-else pb="500">
-          <j-tabs class="tabs" :value="tab" @change="(e: any) => (tab = e.target.value)">
-            <j-tab-item value="official">Official</j-tab-item>
-            <j-tab-item value="community">Community</j-tab-item>
-          </j-tabs>
-        </j-box>
+          <j-box v-else pb="500">
+            <j-tabs class="tabs" :value="tab" @change="(e: any) => (tab = e.target.value)">
+              <j-tab-item value="official">Official</j-tab-item>
+              <j-tab-item value="community">Community</j-tab-item>
+            </j-tabs>
+          </j-box>
 
-        <j-flex v-if="!isLoading" direction="column" gap="500">
-          <div class="app-card" v-for="app in filteredPackages" :key="app.name">
-            <j-flex a="center" direction="row" j="between" gap="500">
-              <j-flex gap="500" a="center" j="center">
-                <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
-                <div>
-                  <j-flex gap="300">
-                    <j-text variant="heading-sm">
-                      {{ app.name }}
+          <j-flex v-if="!isLoading" direction="column" gap="500">
+            <div class="app-card" v-for="app in filteredPackages" :key="app.name">
+              <j-flex a="center" direction="row" j="between" gap="500">
+                <j-flex gap="500" a="center" j="center">
+                  <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
+                  <div>
+                    <j-flex gap="300">
+                      <j-text variant="heading-sm">
+                        {{ app.name }}
+                      </j-text>
+                      <j-badge size="sm" v-if="app.pkg.startsWith('@coasys')" variant="success"> Official App </j-badge>
+                    </j-flex>
+                    <j-text nomargin>
+                      {{ app.description }}
                     </j-text>
-                    <j-badge size="sm" v-if="app.pkg.startsWith('@coasys')" variant="success"> Official App </j-badge>
-                  </j-flex>
-                  <j-text nomargin>
-                    {{ app.description }}
-                  </j-text>
+                  </div>
+                </j-flex>
+                <div>
+                  <j-button
+                    :variant="isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded' ? '' : 'primary'"
+                    :loading="loadedPlugins[app.pkg] === 'loading'"
+                    @click="() => toggleView(app)"
+                  >
+                    {{ isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded" ? "Remove" : "Add" }}
+                  </j-button>
                 </div>
               </j-flex>
-              <div>
-                <j-button
-                  :variant="isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded' ? '' : 'primary'"
-                  :loading="loadedPlugins[app.pkg] === 'loading'"
-                  @click="() => toggleView(app)"
-                >
-                  {{ isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded" ? "Remove" : "Add" }}
-                </j-button>
-              </div>
-            </j-flex>
-          </div>
-        </j-flex>
-      </j-box>
+            </div>
+          </j-flex>
+        </j-box>
 
-      <j-box mt="500">
-        <j-flex direction="row" j="end" gap="300">
-          <j-button size="lg" variant="link" @click="emit('cancel')"> Cancel </j-button>
-          <j-button
-            :loading="isSaving"
-            :disabled="!canSave || isSaving"
-            @click="updateChannel"
-            size="lg"
-            variant="primary"
-          >
-            Save
-          </j-button>
-        </j-flex>
-      </j-box>
-    </j-flex>
-  </j-box>
+        <j-box mt="500">
+          <j-flex direction="row" j="end" gap="300">
+            <j-button size="lg" variant="link" @click="modalStore.showEditChannel = false"> Cancel </j-button>
+            <j-button
+              :loading="isSaving"
+              :disabled="!canSave || isSaving"
+              @click="updateChannel"
+              size="lg"
+              variant="primary"
+            >
+              Save
+            </j-button>
+          </j-flex>
+        </j-box>
+      </j-flex>
+    </j-box>
+  </j-modal>
 </template>
 
 <script setup lang="ts">
-import { useCommunityServiceStore } from "@/stores";
+import { useCommunityService } from "@/composables/useCommunityService";
+import { useModalStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { useModel, usePerspective } from "@coasys/ad4m-vue-hooks";
+import { useModel } from "@coasys/ad4m-vue-hooks";
 import {
   App,
   Channel,
@@ -95,17 +97,19 @@ import {
   getOfflineFluxApps,
 } from "@coasys/flux-api";
 import semver from "semver";
-import { computed, onMounted, reactive, ref, toRaw, unref, watch } from "vue";
+import { computed, onMounted, reactive, ref, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 
-interface Props {
-  channelId: string;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<{ cancel: []; submit: [] }>();
 const route = useRoute();
-const communityServiceStore = useCommunityServiceStore();
+const modalStore = useModalStore();
+
+const {
+  perspective,
+  recentConversations,
+  getPinnedConversations,
+  getRecentConversations,
+  getChannelsWithConversations,
+} = useCommunityService();
 
 const tab = ref<"official" | "community">("official");
 const isLoading = ref(false);
@@ -115,22 +119,9 @@ const name = ref("");
 const selectedPlugins = ref<App[]>([]);
 const isSaving = ref(false);
 
-const client = await getAd4mClient();
-const { data } = usePerspective(client, () => route.params.communityId);
-const { entries: channels } = useModel({
-  perspective: computed(() => data.value.perspective),
-  model: Channel,
-  query: { where: { base: props.channelId } },
-});
-const { entries: apps } = useModel({
-  perspective: computed(() => data.value.perspective),
-  model: App,
-  query: { source: props.channelId },
-});
-
+const channelId = computed(() => route.params.channelId as string);
 const channel = computed(() => channels.value?.[0] || null);
 const isConversation = computed(() => channel.value?.isConversation);
-const perspective = computed(() => data.value.perspective);
 const canSave = computed(() => selectedPlugins.value.length >= 1);
 const officialApps = computed(() =>
   packages.value.filter(
@@ -143,6 +134,9 @@ const communityApps = computed((): FluxApp[] => packages.value.filter((p) => !p.
 const filteredPackages = computed((): FluxApp[] =>
   tab.value === "official" ? officialApps.value : communityApps.value
 );
+
+const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelId.value } } });
+const { entries: apps } = useModel({ perspective, model: App, query: { source: channelId.value } });
 
 function toggleView(app: FluxApp) {
   const isSelectedApp = selectedPlugins.value.some((a) => a.pkg === app.pkg);
@@ -166,7 +160,7 @@ async function updateChannel() {
     const removeApps = apps.value
       .filter((app) => !selectedPlugins.value.some((a) => a.pkg === app.pkg))
       .map((app) => {
-        const appModel = new App(perspective.value!, app.baseExpression);
+        const appModel = new App(perspective, app.baseExpression);
         return appModel.delete();
       });
 
@@ -175,7 +169,7 @@ async function updateChannel() {
     const addedApps = selectedPlugins.value
       .filter((app) => !apps.value.some((a) => a.pkg === app.pkg))
       .map((app) => {
-        const appModel = new App(perspective.value!, undefined, route.params.channelId as string);
+        const appModel = new App(perspective, undefined, channelId.value);
         appModel.name = app.name;
         appModel.description = app.description;
         appModel.icon = app.icon;
@@ -187,27 +181,25 @@ async function updateChannel() {
 
     if (isConversation) {
       // Update the assosiated conversation name
-      const communityService = communityServiceStore.getCommunityService(route.params.communityId as string);
-      if (!communityService) return;
-      const conversations = unref(communityService.recentConversations);
-      const conversationData = conversations.find((c) => c.channel.baseExpression === channel.value.baseExpression);
+      // Todo: use unref(recentConversations) here if needed
+      const conversationData = recentConversations.value.find(
+        (c) => c.channel.baseExpression === channel.value.baseExpression
+      );
       const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
       if (!conversationId) return;
-      const conversationModel = new Conversation(perspective.value!, conversationId);
+      const conversationModel = new Conversation(perspective, conversationId);
       conversationModel.conversationName = name.value;
       await conversationModel.update();
       // Refresh sidebar channels
-      communityService.getPinnedConversations();
-      communityService.getRecentConversations();
-      communityService.getChannelsWithConversations();
+      getPinnedConversations();
+      getRecentConversations();
+      getChannelsWithConversations();
     } else {
       // Update the channel name directly
-      const channelModel = new Channel(perspective.value!, route.params.channelId as string);
+      const channelModel = new Channel(perspective, channelId.value);
       channelModel.name = name.value;
       await channelModel.update();
     }
-
-    emit("submit");
   } finally {
     isSaving.value = false;
   }
@@ -227,9 +219,7 @@ watch(
     if (newChannel) {
       if (newChannel.isConversation) {
         // Get the conversation name for the channel
-        const communityService = communityServiceStore.getCommunityService(route.params.communityId as string);
-        if (!communityService) return;
-        const conversationData = unref(communityService.recentConversations).find(
+        const conversationData = recentConversations.value.find(
           (c) => c.channel.baseExpression === newChannel.baseExpression
         );
         name.value = conversationData?.conversation?.conversationName || "";

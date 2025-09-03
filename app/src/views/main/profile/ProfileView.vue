@@ -6,14 +6,14 @@
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <div class="avatar-wrapper" @click="() => (modalsStore.showEditProfile = true)">
+            <div class="avatar-wrapper" @click="() => (modalStore.showEditProfile = true)">
               <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
               <div class="avatar-hover">
                 <j-icon name="pen" />
               </div>
             </div>
 
-            <j-button v-if="sameAgent" variant="ghost" @click="() => (modalsStore.showEditProfile = true)">
+            <j-button v-if="sameAgent" variant="ghost" @click="() => (modalStore.showEditProfile = true)">
               <j-icon size="sm" name="pen" />
             </j-button>
           </div>
@@ -41,7 +41,7 @@
 
             <div v-show="currentTab === 'web2'">
               <j-box py="500" a="right">
-                <j-button v-if="sameAgent" variant="primary" @click="() => (showAddlinkModal = true)">
+                <j-button v-if="sameAgent" variant="primary" @click="() => (modalStore.showAddWebLink = true)">
                   Add Link
                 </j-button>
               </j-box>
@@ -72,13 +72,8 @@
                   >
                     <div class="wallet__avatar" v-html="getIcon(proof.deviceKey)"></div>
                     <j-badge size="sm" variant="primary">
-                      <j-icon
-                        size="xs"
-                        v-if="verifiedProofs[proof.deviceKey]"
-                        color="success-500"
-                        name="check"
-                      ></j-icon>
-                      <j-icon size="xs" color="danger-500" name="cross" v-else> </j-icon>
+                      <j-icon size="xs" v-if="verifiedProofs[proof.deviceKey]" color="success-500" name="check" />
+                      <j-icon size="xs" color="danger-500" name="cross" v-else />
                       {{ verifiedProofs[proof.deviceKey] ? "Verified" : "Not verified" }}
                     </j-badge>
                     <j-box pt="200">
@@ -92,7 +87,7 @@
                   </div>
                   <a v-if="sameAgent" class="wallet" href="https://dapp.ad4m.dev/" target="_blank">
                     <j-text size="600" nomargin>
-                      <j-icon name="plus"></j-icon>
+                      <j-icon name="plus" />
                       Add
                     </j-text>
                   </a>
@@ -112,54 +107,21 @@
     </div>
   </div>
 
-  <j-modal
-    v-if="showAddlinkModal"
-    size="sm"
-    :open="showAddlinkModal"
-    @toggle="(e: any) => setAddLinkModal(e.target.open)"
-  >
-    <WebLinkAdd @cancel="() => setAddLinkModal(false)" @submit="() => setAddLinkModal(false)" />
-  </j-modal>
-
-  <j-modal
-    v-if="showJoinCommunityModal"
-    size="lg"
-    :open="showJoinCommunityModal"
-    @toggle="(e: any) => setShowJoinCommunityModal(e.target.open)"
-  >
-    <ProfileJoinLink
-      @submit="() => setShowJoinCommunityModal(false)"
-      @cancel="() => setShowJoinCommunityModal(false)"
-      :joiningLink="joiningLink"
-    />
-  </j-modal>
-
-  <j-modal
-    v-if="modalsStore.showEditProfile"
-    :open="modalsStore.showEditProfile"
-    @toggle="(e: any) => (modalsStore.showEditProfile = e.target.open)"
-  >
-    <EditProfile
-      @submit="() => (modalsStore.showEditProfile = false)"
-      @cancel="() => (modalsStore.showEditProfile = false)"
-    />
-  </j-modal>
+  <Modals />
 
   <RouterView />
 </template>
 
 <script setup lang="ts">
-import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import Modals from "@/views/main/profile/modals/Modals.vue";
 import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Attestations from "./Attestations.vue";
-import ProfileJoinLink from "./ProfileJoinLink.vue";
-import WebLinkAdd from "./WebLinkAdd.vue";
 import WebLinkCard from "./WebLinkCard.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
@@ -171,7 +133,7 @@ const route = useRoute();
 const router = useRouter();
 
 const appStore = useAppStore();
-const modalsStore = useModalStore();
+const modalStore = useModalStore();
 const themeStore = useThemeStore();
 const uiStore = useUiStore();
 
@@ -180,12 +142,9 @@ const { ad4mClient } = appStore;
 
 const profile = ref<Profile | null>(null);
 const currentTab = ref("web3");
-const showAddlinkModal = ref(false);
-const showAddProofModal = ref(false);
-const showEditlinkModal = ref(false);
-const showJoinCommunityModal = ref(false);
+const showAddProofModal = ref(false); // TODO: Currently not used
+const showEditLinkModal = ref(false); // TODO: Currently not used
 const weblinks = ref<any[]>([]);
-const joiningLink = ref("");
 const editArea = ref(null);
 const verifiedProofs = ref<Record<string, boolean>>({});
 const selectedAddress = ref("");
@@ -268,17 +227,9 @@ async function removeProof(proof: EntanglementProof) {
   getEntanglementProofs();
 }
 
-function setAddLinkModal(value: boolean): void {
-  showAddlinkModal.value = value;
-}
-
 function setEditLinkModal(value: boolean, area: any): void {
-  showEditlinkModal.value = value;
+  showEditLinkModal.value = value;
   editArea.value = area;
-}
-
-function setShowJoinCommunityModal(value: boolean): void {
-  showJoinCommunityModal.value = value;
 }
 
 async function deleteWebLink(link: LinkExpression) {
@@ -293,21 +244,24 @@ async function getAgentAreas() {
 onBeforeMount(() => themeStore.changeCurrentTheme("global"));
 
 // Watchers
-watch(showAddlinkModal, (val) => {
-  if (!val) getAgentAreas();
-});
+watch(
+  () => modalStore.showAddWebLink,
+  (val) => {
+    if (!val) getAgentAreas();
+  }
+);
 
 watch(showAddProofModal, (val) => {
   if (!val) getEntanglementProofs();
 });
 
-watch(showEditlinkModal, (val) => {
+watch(showEditLinkModal, (val) => {
   if (!val) getAgentAreas();
 });
 
 // Refresh profile cache and agent areas when edit modal closed
 watch(
-  () => modalsStore.showEditProfile,
+  () => modalStore.showEditProfile,
   async (val) => {
     if (!val) {
       profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, true);

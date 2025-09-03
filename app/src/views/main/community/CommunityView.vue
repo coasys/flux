@@ -15,17 +15,9 @@
       </KeepAlive>
     </RouterView>
 
-    <j-modal
-      size="sm"
-      :style="{ height: 500 }"
-      :open="modalStore.showCommunityMembers"
-      @toggle="(e: any) => (modalStore.showCommunityMembers = e.target.open)"
-    >
-      <CommunityMembers
-        @close="() => (modalStore.showCommunityMembers = false)"
-        v-if="modalStore.showCommunityMembers"
-      />
-    </j-modal>
+    <Modals />
+
+    <!-- TODO: Move the logic below into seperate componenets -->
 
     <div v-if="!isSynced && !route.params.channelId" class="center">
       <j-box py="800">
@@ -117,9 +109,9 @@
 <script setup lang="ts">
 import { HourglassIcon } from "@/components/icons";
 import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
-import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunityLayout from "@/layout/CommunityLayout.vue";
 import { useCommunityServiceStore, useModalStore } from "@/stores";
+import Modals from "@/views/main/community/modals/Modals.vue";
 import Sidebar from "@/views/main/community/sidebar/Sidebar.vue";
 import { onMounted, onUnmounted, provide } from "vue";
 import { useRoute, useRouter } from "vue-router";
