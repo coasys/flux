@@ -45,19 +45,15 @@
 
       <div class="agents" v-if="agentsInChannel.length || agentsInCall.length">
         <div class="agents-in-channel" v-if="agentsInChannel.length">
-          <j-flex v-for="agent in agentsInChannel" :key="agent.did">
-            <div :class="['agent', agent.status]">
-              <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
-            </div>
-          </j-flex>
+          <div v-for="agent in agentsInChannel" :key="agent.did" :class="['agent', agent.status]">
+            <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
+          </div>
         </div>
 
         <div class="agents-in-call" v-if="agentsInCall.length">
-          <j-flex v-for="agent in agentsInCall" :key="agent.did">
-            <div class="agent in-call">
-              <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
-            </div>
-          </j-flex>
+          <div v-for="agent in agentsInCall" :key="agent.did" class="agent in-call">
+            <j-avatar size="xxs" :hash="agent.did" :src="agent.profileThumbnailPicture || null" />
+          </div>
           <RecordingIcon />
         </div>
       </div>
@@ -286,27 +282,27 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
       display: flex;
       margin-left: auto;
     }
-  }
 
-  .agent {
-    height: 20px;
-    z-index: 1;
-    border-radius: 50%;
+    .agent {
+      height: 20px;
+      z-index: 1;
+      border-radius: 50%;
 
-    &:not(:first-child) {
-      margin-left: -10px;
-    }
+      &:not(:first-child) {
+        margin-left: -10px;
+      }
 
-    &.active {
-      box-shadow: 0 0 0 1px var(--j-color-success-300);
-    }
+      &.active {
+        box-shadow: 0 0 0 1px var(--j-color-success-300);
+      }
 
-    &.asleep {
-      box-shadow: 0 0 0 1px var(--j-color-warning-500);
-    }
+      &.asleep {
+        box-shadow: 0 0 0 1px var(--j-color-warning-500);
+      }
 
-    &.in-call {
-      box-shadow: 0 0 0 1px var(--j-color-danger-400);
+      &.in-call {
+        box-shadow: 0 0 0 1px var(--j-color-danger-400);
+      }
     }
   }
 }
