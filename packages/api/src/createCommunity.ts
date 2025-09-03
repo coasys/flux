@@ -5,11 +5,12 @@ import { Community as FluxCommunity } from "@coasys/flux-types";
 import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import { v4 as uuidv4 } from "uuid";
 import App from "./app";
+import Channel from "./channel";
 import { Community } from "./community";
 import Conversation from "./conversation";
-import Channel from "./channel";
 import ConversationSubgroup from "./conversation-subgroup";
 import Embedding from "./embedding";
+import Message from "./message";
 import SemanticRelationship from "./semantic-relationship";
 import Topic from "./topic";
 
@@ -40,13 +41,14 @@ export default async function createCommunity({
 
     // Add models to the perspectives SDNA
     await perspective.ensureSDNASubjectClass(Community);
-    await perspective.ensureSDNASubjectClass(App);
     await perspective.ensureSDNASubjectClass(Channel);
+    await perspective.ensureSDNASubjectClass(App);
     await perspective.ensureSDNASubjectClass(Conversation);
     await perspective.ensureSDNASubjectClass(ConversationSubgroup);
     await perspective.ensureSDNASubjectClass(Topic);
     await perspective.ensureSDNASubjectClass(Embedding);
     await perspective.ensureSDNASubjectClass(SemanticRelationship);
+    await perspective.ensureSDNASubjectClass(Message);
 
     // Create a neighbourhood from the perspective
     const uid = uuidv4().toString();
