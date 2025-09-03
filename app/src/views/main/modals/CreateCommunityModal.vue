@@ -1,9 +1,5 @@
 <template>
-  <j-modal
-    size="sm"
-    :open="modalStore.showCreateCommunity"
-    @toggle="(e: any) => (modalStore.showCreateCommunity = e.target.open)"
-  >
+  <j-modal size="sm" :open="modalStore.showCreateCommunity" @toggle="(e: any) => toggleModal(e.target.open)">
     <j-box pt="600" pb="800" px="400" v-if="!tabView">
       <j-box pb="500">
         <j-text variant="heading-sm">Add a Community</j-text>
@@ -34,7 +30,7 @@
           <j-icon slot="end" name="chevron-right" />
         </button>
         <button
-          v-if="!hasAlreadyJoinedTestingCommunity"
+          v-if="!hasJoinedTestingCommunity"
           class="option"
           size="xl"
           variant="secondary"
@@ -184,22 +180,19 @@
 <script setup lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { HourglassIcon } from "@/components/icons";
-import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { useAppStore, useModalStore } from "@/stores";
 import { isValid } from "@/utils/validation";
-import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { createCommunity, joinCommunity } from "@coasys/flux-api";
-import { useCommunities } from "@coasys/flux-vue";
-import { computed, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, ref, toRaw } from "vue";
 import { useRouter } from "vue-router";
-
-const emit = defineEmits<{ cancel: []; submit: [] }>();
 
 const router = useRouter();
 const appStore = useAppStore();
 const modalStore = useModalStore();
+
+const { ad4mClient, hasJoinedTestingCommunity, myPerspectives, myCommunities } = storeToRefs(appStore);
 
 const tabView = ref("");
 const joiningLink = ref("");
@@ -210,19 +203,13 @@ const isJoiningCommunity = ref(false);
 const isCreatingCommunity = ref(false);
 const selectedLang = ref<any>(null);
 const langMeta = ref<any>(null);
-const communities = ref<any>({});
-const perspectives = ref<Record<string, PerspectiveProxy>>({});
 
 const nonFluxCommunities = computed((): Record<string, PerspectiveProxy> => {
-  return Object.entries(perspectives.value).reduce((acc, [uuid, perspective]) => {
-    const perspectiveIsCommunity = Object.keys(communities.value).some((id) => uuid === id);
-    if (!perspectiveIsCommunity) return { ...acc, [uuid]: perspective };
+  return myPerspectives.value.reduce((acc, perspective) => {
+    const perspectiveIsCommunity = Object.keys(myCommunities.value).some((id) => perspective.uuid === id);
+    if (!perspectiveIsCommunity) return { ...acc, [perspective.uuid]: perspective };
     return acc;
   }, {});
-});
-
-const hasAlreadyJoinedTestingCommunity = computed(() => {
-  return !!Object.values(perspectives.value).find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
 });
 
 const canJoin = computed((): boolean => {
@@ -247,6 +234,26 @@ const canSubmit = computed((): boolean => {
   );
 });
 
+function closeModal() {
+  modalStore.showCreateCommunity = false;
+
+  // Reset state after modal close animation
+  setTimeout(() => {
+    tabView.value = "";
+    joiningLink.value = "";
+    newCommunityName.value = "";
+    newCommunityDesc.value = "";
+    newProfileImage.value = undefined;
+    isJoiningCommunity.value = false;
+    isCreatingCommunity.value = false;
+  }, 300);
+}
+
+function toggleModal(open: boolean) {
+  modalStore.showCreateCommunity = open;
+  if (!open) closeModal();
+}
+
 function cleanInviteLink(text: string) {
   const regex = /neighbourhood:\/\/[^\s]*/;
   const neighbourhoodUrlMatch = text.match(regex) || [""];
@@ -261,26 +268,19 @@ async function joinCommunityMethod() {
   isJoiningCommunity.value = true;
 
   const neighbourhoodUrl = joiningLink.value;
-
-  const existingPerspective = Object.values(perspectives.value).find(
-    (p: PerspectiveProxy) => p.sharedUrl === neighbourhoodUrl
-  );
+  const existingPerspective = toRaw(myPerspectives.value).find((p) => p.sharedUrl === neighbourhoodUrl);
 
   if (existingPerspective) {
     appStore.setToast({ variant: "error", message: "You are already a member of this community", open: true });
     isJoiningCommunity.value = false;
-    modalStore.showCreateCommunity = false;
+    closeModal();
     return;
   }
 
-  joinCommunity({ joiningLink: neighbourhoodUrl })
-    .then((community) => {
-      emit("submit");
-      router.push({ name: "community", params: { communityId: community.uuid } });
-    })
-    .finally(async () => {
-      isJoiningCommunity.value = false;
-    });
+  joinCommunity({ joiningLink: neighbourhoodUrl }).then((community) => {
+    router.push({ name: "community", params: { communityId: community.uuid } });
+    closeModal();
+  });
 }
 
 function createCommunityMethod() {
@@ -293,10 +293,7 @@ function createCommunityMethod() {
     image: newProfileImage.value,
   })
     .then((community) => {
-      emit("submit");
-      newCommunityName.value = "";
-      newCommunityDesc.value = "";
-      newProfileImage.value = undefined;
+      closeModal();
 
       // Refresh my communities in the app store
       appStore.getMyCommunities();
@@ -307,9 +304,6 @@ function createCommunityMethod() {
     .catch((error) => {
       console.error("Error creating community:", error);
       appStore.setToast({ variant: "error", message: "Failed to create community. Please try again.", open: true });
-    })
-    .finally(() => {
-      isCreatingCommunity.value = false;
     });
 }
 
@@ -320,14 +314,10 @@ function createCommunityFromPerspective(perspective: any) {
     description: newCommunityDesc.value,
     image: newProfileImage.value,
     perspectiveUuid: perspective.uuid,
-  })
-    .then(() => {
-      emit("submit");
-      router.push({ name: "community", params: { communityId: perspective.uuid } });
-    })
-    .finally(() => {
-      isCreatingCommunity.value = false;
-    });
+  }).then(() => {
+    router.push({ name: "community", params: { communityId: perspective.uuid } });
+    closeModal();
+  });
 }
 
 async function joinTestingCommunity() {
@@ -335,28 +325,20 @@ async function joinTestingCommunity() {
     tabView.value = "Test";
     await appStore.joinTestingCommunity();
   } catch (e) {
-    console.log(e);
+    console.log("Error joining testing community:", e);
   } finally {
-    emit("cancel");
+    closeModal();
   }
 }
 
-// TODO: refactor this with updated stores (use ad4mClient and myCommunties from app store)
 onMounted(async () => {
-  const client: Ad4mClient = await getAd4mClient();
-
-  const linkLangs = await client.runtime.knownLinkLanguageTemplates();
-  const langExpression = await client.expression.getMany(linkLangs.map((l) => `lang://${l}`));
-
+  // Get link languages
+  const linkLangs = await ad4mClient.value.runtime.knownLinkLanguageTemplates();
+  const langExpression = await ad4mClient.value.expression.getMany(linkLangs.map((l) => `lang://${l}`));
   const langMetaData = langExpression.map((l) => JSON.parse(l.data));
-
-  const { perspectives: perspectivesData, neighbourhoods } = usePerspectives(client);
-  const { communities: communitiesData } = useCommunities(neighbourhoods);
 
   selectedLang.value = langMetaData[0].address;
   langMeta.value = langMetaData;
-  communities.value = communitiesData;
-  perspectives.value = perspectivesData.value;
 });
 </script>
 
