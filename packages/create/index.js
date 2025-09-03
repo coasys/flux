@@ -17,7 +17,8 @@ async function run() {
       name: "template",
       message: "Pick a template",
       choices: [
-        { title: "preact", value: "preact", selected: true }
+        { title: "react", value: "react", selected: true },
+        { title: "preact", value: "preact", selected: true },
         { title: "vue", value: "vue" }
       ],
       hint: "- Space to select. Return to submit",
