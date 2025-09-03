@@ -1,15 +1,7 @@
-import "preact/debug";
-
 import "@coasys/flux-ui/dist/main.d.ts";
-import { toCustomElement } from "@coasys/ad4m-react-hooks";
 import Plugin from "./Plugin";
+import r2wc from "@r2wc/react-to-web-component";
 
-const CustomElement = toCustomElement(
-  Plugin,
-  ["perspective", "agent", "source"],
-  {
-    shadow: false,
-  }
-);
+const CustomElement = r2wc(Plugin);
 
 export default CustomElement;

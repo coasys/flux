@@ -1,4 +1,4 @@
-import { useState } from "react/hooks";
+import React, { useState } from "react";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-react-hooks";
 
@@ -14,7 +14,11 @@ type Props = {
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
-  const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
+  const { entries: todos } = useModel({
+    perspective,
+    model: Todo,
+    query: { source },
+  });
 
   async function createTodo(event: React.KeyboardEvent<Element>) {
     if (event.key !== "Enter") return;
@@ -24,7 +28,7 @@ export default function TodoView({ perspective, source }: Props) {
     setTitle("");
   }
 
-  function toggleTodo({ id, done }) {
+  function toggleTodo({ id, done }: { id: string; done: boolean }) {
     const todo = new Todo(perspective, id, source);
     todo.done = done;
     todo.update();
@@ -38,13 +42,7 @@ export default function TodoView({ perspective, source }: Props) {
   return (
     <div>
       <j-box pt="900" pb="400">
-        <j-text
-          uppercase
-          size="300"
-          weight="800"
-          color="primary-500"
-          variant="success"
-        >
+        <j-text uppercase size="300" weight="800" color="primary-500">
           Make a new todo
         </j-text>
       </j-box>
@@ -61,12 +59,15 @@ export default function TodoView({ perspective, source }: Props) {
       <j-box pt="500">
         <j-flex gap="300" direction="column">
           {todos.map((todo) => (
-            <j-box bg="ui-50" p="400" radius="md">
+            <j-box p="400" radius="md">
               <j-flex j="between">
                 <div className={todo.done ? styles.doneTodo : ""}>
                   <j-checkbox
                     onChange={(e) =>
-                      toggleTodo({ id: todo.baseExpression, done: e.target.checked })
+                      toggleTodo({
+                        id: todo.baseExpression,
+                        done: e.target.checked,
+                      })
                     }
                     checked={todo.done}
                     style="--j-border-radius: 50%;"
@@ -81,7 +82,9 @@ export default function TodoView({ perspective, source }: Props) {
                     </j-text>
                   </j-checkbox>
                 </div>
-                <j-button onClick={() => deleteTodo(todo.baseExpression)}>Delete</j-button>
+                <j-button onClick={() => deleteTodo(todo.baseExpression)}>
+                  Delete
+                </j-button>
               </j-flex>
             </j-box>
           ))}

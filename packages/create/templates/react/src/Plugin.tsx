@@ -1,3 +1,4 @@
+import React from "react";
 import styles from "./Plugin.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import TodoView from "./components/TodoView";

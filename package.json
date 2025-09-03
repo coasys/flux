@@ -3,12 +3,13 @@
   "version": "0.8.1",
   "workspaces": {
     "packages": [
-      "packages/**/*",
+      "packages/*",
       "views/**/*",
       "app",
       "docs"
     ],
     "nohoist": [
+      "packages/create/templates/*",
       "**/electron",
       "**/electron/**",
       "**/electron-squirrel-startup",

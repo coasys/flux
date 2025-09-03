@@ -1,17 +1,11 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
-import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react-swc'
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
 export default defineConfig({
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: tag => tag.startsWith('j-')
-        }
-      }
-    }),
+    react(),
     cssInjectedByJsPlugin(),
   ],
   optimizeDeps: {
