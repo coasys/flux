@@ -129,7 +129,13 @@ function handleDragStart(event: DragEvent) {
 
   isDragging.value = true;
   event.dataTransfer!.effectAllowed = "move";
-  event.dataTransfer!.setData("application/json", item.channel.baseExpression!);
+  event.dataTransfer!.setData(
+    "application/json",
+    JSON.stringify({
+      conversationChannelId: item.channel.baseExpression!,
+      name: item.conversation?.conversationName || "",
+    })
+  );
 
   // Prevent navigation when dragging starts
   event.stopPropagation();
@@ -163,11 +169,11 @@ async function handleDrop(event: DragEvent) {
   isDragOver.value = false;
 
   try {
-    const conversationChannelId = event.dataTransfer!.getData("application/json");
-    await moveConversation(conversationChannelId, item.channel.baseExpression!);
+    const dropData = event.dataTransfer!.getData("application/json");
+    const { conversationChannelId, name } = JSON.parse(dropData);
+    await moveConversation(conversationChannelId, item.channel.baseExpression!, name);
   } catch (error) {
     console.error("Error handling drop:", error);
-    // Could show a toast notification here
   }
 }
 

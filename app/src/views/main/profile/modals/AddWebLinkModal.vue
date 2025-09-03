@@ -70,6 +70,7 @@ import { ref } from "vue";
 defineProps({ step: { type: Number } });
 
 const modalStore = useModalStore();
+const appStore = useAppStore();
 
 const title = ref("");
 const description = ref("");
@@ -107,8 +108,6 @@ async function handleInput(e: any) {
 
 async function createLink() {
   isAddingLink.value = true;
-
-  const appStore = useAppStore();
 
   try {
     await createAgentWebLink({

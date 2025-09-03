@@ -51,7 +51,11 @@ export interface CommunityService {
   getPinnedConversations: () => Promise<void>;
   getRecentConversations: () => Promise<void>;
   startNewConversation: (parentChannelId?: string) => Promise<void>;
-  moveConversation: (conversationChannelId: string, targetChannelId: string) => Promise<void>;
+  moveConversation: (
+    conversationChannelId: string,
+    newSpaceChannelId: string,
+    conversationName?: string
+  ) => Promise<void>;
   getParentChannel: (channelId: string) => Partial<Channel> | undefined;
   getConversation: (channelId: string) => Partial<Conversation> | undefined;
 }
@@ -192,7 +196,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (pinnedConversationsLoading.value) return;
     pinnedConversationsLoading.value = true;
 
-    console.log("*** Loading pinned conversations ***");
+    // console.log("*** Loading pinned conversations ***");
 
     try {
       // Loop through all the pinned channels and get the conversation data for each
@@ -215,7 +219,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (recentConversationsLoading.value) return;
     recentConversationsLoading.value = true;
 
-    console.log("*** Loading recent conversations ***");
+    // console.log("*** Loading recent conversations ***");
 
     // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
     const conversations = await Promise.all(
@@ -272,7 +276,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (channelsWithConversationsLoading.value) return;
     channelsWithConversationsLoading.value = true;
 
-    console.log("*** Loading channels with conversations ***");
+    // console.log("*** Loading channels with conversations ***");
 
     // Loop through all the space channels and get the conversations in each
     channelsWithConversations.value = await Promise.all(
@@ -348,11 +352,13 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   }
 
-  async function moveConversation(conversationChannelId: string, targetChannelId: string) {
+  async function moveConversation(conversationChannelId: string, newSpaceChannelId: string, conversationName?: string) {
     moveConversationLoading.value = true;
 
     try {
-      console.log(`➡️ Moving conversation ${conversationChannelId} to channel ${targetChannelId}`);
+      console.log(
+        `➡️ Moving conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`
+      );
 
       // Get the link from the conversation channel to its current parent
       const link = (
@@ -360,19 +366,34 @@ export async function createCommunityService(): Promise<CommunityService> {
       )[0];
 
       // Skip if the conversation is already linked to the target channel
-      if (link.source === targetChannelId) return;
+      if (link.source === newSpaceChannelId) return;
 
       // Update the link to point to the new parent channel
       await perspective.update(link, {
-        source: targetChannelId,
+        source: newSpaceChannelId,
         predicate: "ad4m://has_child",
         target: conversationChannelId,
+      });
+
+      // Display success message
+      appStore.showSuccessToast({
+        message:
+          newSpaceChannelId === "ad4m://self"
+            ? `Succesfully removed conversation "${conversationName || conversationChannelId}" from channel`
+            : `Succesfully moved conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
       });
 
       // Refresh the channels list
       getChannelsWithConversations();
     } catch (error) {
       console.error("Failed to move conversation:", error);
+      // Display error message
+      appStore.showDangerToast({
+        message:
+          newSpaceChannelId === "ad4m://self"
+            ? `Failed to remove conversation "${conversationName || conversationChannelId}" from channel`
+            : `Failed to move conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
+      });
       throw error;
     } finally {
       moveConversationLoading.value = false;

@@ -12,11 +12,6 @@
         <j-icon name="door-open" />
         Start conversation in channel
       </j-button>
-
-      <!-- <j-button @click="openNewSubChannelModal">
-        <j-icon name="plus-lg" />
-        Add conversation to channel
-      </j-button> -->
     </j-flex>
 
     <j-box mt="400">
@@ -38,7 +33,11 @@
               Open
             </j-button>
 
-            <j-button size="sm" variant="subtle">
+            <j-button
+              size="sm"
+              variant="subtle"
+              @click="() => moveConversation(conversation.channelId, 'ad4m://self', conversation.name)"
+            >
               <j-icon name="x-lg" size="sm" />
               Remove
             </j-button>
@@ -71,11 +70,9 @@
 import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
 import { ChevronDownIcon } from "@/components/icons";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/stores";
 import { useModel } from "@coasys/ad4m-vue-hooks";
 import { Channel, Conversation } from "@coasys/flux-api";
 import { SynergyGroup } from "@coasys/flux-utils";
-import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -86,10 +83,8 @@ interface Props {
 const props = defineProps<Props>();
 const route = useRoute();
 const router = useRouter();
-const modalStore = useModalStore();
 
-const { showCreateChannel, createChannelParent } = storeToRefs(modalStore);
-const { perspective, newConversationLoading, startNewConversation } = useCommunityService();
+const { perspective, newConversationLoading, startNewConversation, moveConversation } = useCommunityService();
 
 const { entries: conversationChannels } = useModel({
   perspective,
@@ -99,11 +94,6 @@ const { entries: conversationChannels } = useModel({
 
 const conversations = ref<(SynergyGroup & { channelId: string })[]>([]);
 const numberOfConversationsDisplayed = ref(5);
-
-function openNewSubChannelModal() {
-  createChannelParent.value = props.parentChannel;
-  showCreateChannel.value = true;
-}
 
 function navigateToConversation(channelId: string) {
   router.push({
