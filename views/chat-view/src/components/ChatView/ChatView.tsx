@@ -19,7 +19,6 @@ type Props = {
 };
 
 export default function ChatView({ agent, perspective, source, threaded, element, getProfile }: Props) {
-  const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
   const [pickerInfo, setPickerInfo] = useState<{
     x: number;
@@ -139,12 +138,15 @@ export default function ChatView({ agent, perspective, source, threaded, element
     setReplyProfile(profile);
   }
 
-  function getEmojiPickerPosition(x: number, y: number, el: HTMLElement, offset = 20) {
-    if (!el || !x || !y) return { left: 0, top: 0 };
+  function getEmojiPickerPosition(x: number, y: number, offset = 20) {
+    if (!x || !y) return { left: 0, top: 0 };
+
+    const pickerWidth = 352;
+    const pickerHeight = 435;
 
     // Position above and to the left of the click point
-    const left = `${Math.max(0, x - el.offsetWidth - offset)}px`;
-    const top = `${Math.max(0, y - el.offsetHeight - offset)}px`;
+    const left = `${Math.max(0, x - pickerWidth - offset)}px`;
+    const top = `${Math.max(0, y - pickerHeight - offset)}px`;
     return { left, top };
   }
 
@@ -164,18 +166,18 @@ export default function ChatView({ agent, perspective, source, threaded, element
 
   return (
     <div className={styles.wrapper} data-threaded={threaded} data-show-thread={!!threadSource}>
-      <j-emoji-picker
-        // @ts-ignore
-        onclickoutside={() => setPickerInfo(null)}
-        onChange={onEmojiClick}
-        ref={emojiPicker}
-        style={{
-          visibility: pickerInfo?.id ? "visible" : "hidden",
-          position: "fixed",
-          zIndex: 9999,
-          ...getEmojiPickerPosition(pickerInfo?.x, pickerInfo?.y, emojiPicker?.current),
-        }}
-      />
+      {pickerInfo?.id && (
+        <j-emoji-picker
+          // @ts-ignore
+          onclickoutside={() => setPickerInfo(null)}
+          onChange={onEmojiClick}
+          style={{
+            position: "fixed",
+            zIndex: 9999,
+            ...getEmojiPickerPosition(pickerInfo.x, pickerInfo.y),
+          }}
+        />
+      )}
 
       <div className={styles.inner}>
         <MessageList
