@@ -9,7 +9,7 @@
     <template v-if="selectedVideoLayout.label === 'Focused'">
       <!-- Main focused video -->
       <MediaPlayer
-        :key="focusedParticipant.did"
+        :key="`participant-${focusedParticipant.did}`"
         :did="focusedParticipant.did"
         :isMe="focusedParticipant.isMe"
         :inCall="focusedParticipant.inCall"
@@ -29,7 +29,7 @@
         <div class="bottom-row">
           <MediaPlayer
             v-for="participant in unfocusedParticipants"
-            :key="participant.did"
+            :key="`participant-${participant.did}`"
             :did="participant.did"
             :isMe="participant.isMe"
             :inCall="participant.inCall"
@@ -50,7 +50,7 @@
     <template v-else>
       <MediaPlayer
         v-for="participant in allParticipants"
-        :key="participant.did"
+        :key="`participant-${participant.did}`"
         :did="participant.did"
         :isMe="participant.isMe"
         :inCall="participant.inCall"
@@ -99,6 +99,9 @@ const videoGrid = ref<HTMLElement | null>(null);
   max-height: 100%;
   overflow-y: auto;
   grid-auto-rows: min-content;
+  // Optimize rendering during layout changes
+  will-change: grid-template-columns;
+  transition: grid-template-columns 0.2s ease;
 
   > div {
     aspect-ratio: 16/9;
@@ -106,6 +109,11 @@ const videoGrid = ref<HTMLElement | null>(null);
     height: auto;
     max-height: 100%;
     border-radius: 10px;
+    // Prevent layout shifts from affecting media
+    contain: layout style paint;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
 
     &.single-participant {
       max-height: calc(100vh - 500px);
