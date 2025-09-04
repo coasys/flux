@@ -1,7 +1,11 @@
 import "@coasys/flux-ui/dist/main.d.ts";
+import * as React from "react";
+import * as ReactDOM from "react-dom/client";
 import Plugin from "./Plugin";
-import r2wc from "@r2wc/react-to-web-component";
+import { reactToWebComponent } from "@coasys/ad4m-react-hooks";
 
-const CustomElement = r2wc(Plugin);
+const CustomElement = reactToWebComponent(Plugin, React, ReactDOM, {
+  observedProps: ["perspective", "agent", "source"],
+});
 
 export default CustomElement;
