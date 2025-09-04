@@ -49,7 +49,7 @@ export class Channel extends Ad4mModel {
   views: string[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
-    // get all unprocessed items in the channel
+    // Get all unprocessed items in the channel
     try {
       const result = await this.perspective.infer(`
         findall([ItemId, Author, Timestamp, Type, Text], (
@@ -110,7 +110,7 @@ export class Channel extends Ad4mModel {
   }
 
   async totalItemCount(): Promise<number> {
-    // find the total number of items in the channel
+    // Find the total number of items in the channel
     try {
       const result = await this.perspective.infer(`
         findall(Count, (
@@ -142,8 +142,41 @@ export class Channel extends Ad4mModel {
     }
   }
 
+  async allAuthors(): Promise<string[]> {
+    // Find the did of everyone who has created an item in the channel
+    try {
+      const result = await this.perspective.infer(`
+        findall(Author, (
+          % 1. Get channel item
+          triple("${this.baseExpression}", "ad4m://has_child", ItemId),
+        
+          % 2. Get author from link
+          link(_, "ad4m://has_child", ItemId, _, Author),
+        
+          % 3. Check item is of valid type
+          (
+            subject_class("Message", MessageClass),
+            instance(MessageClass, ItemId)
+            ;
+            subject_class("Post", PostClass),
+            instance(PostClass, ItemId)
+            ;
+            subject_class("Task", TaskClass),
+            instance(TaskClass, ItemId)
+          )
+        ), AuthorsWithDuplicates),
+        % 4. Remove duplicates
+        sort(AuthorsWithDuplicates, UniqueAuthors).
+      `);
+      return result[0]?.UniqueAuthors || [];
+    } catch (error) {
+      console.error("Error getting channel authors:", error);
+      return [];
+    }
+  }
+
   async conversations(): Promise<SynergyGroup[]> {
-    // find the necissary data to render conversations in timeline components
+    // Find the necissary data to render conversations in timeline components
     try {
       const result = await this.perspective.infer(`
       findall(ConversationInfo, (
