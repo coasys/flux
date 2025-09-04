@@ -109,7 +109,10 @@
       Holochain signals disrupted. Processing paused until connection restored.
     </j-badge>
 
-    <div ref="contentRef" :class="{ content: true, collapsed: collapsed, 'show-match-column': showMatchColumn }">
+    <div
+      ref="contentRef"
+      :class="{ content: true, collapsed: collapsed, mobile: isMobile, 'show-match-column': showMatchColumn }"
+    >
       <div class="timeline-column-wrapper">
         <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
       </div>
@@ -168,7 +171,7 @@ const showLLMInfoModal = ref(false);
 const modalRenderKey = ref(0);
 const contentRef = ref<HTMLElement | null>(null);
 const contentWidth = ref(0);
-const collapsed = computed(() => isMobile.value || contentWidth.value < 1000);
+const collapsed = computed(() => contentWidth.value < 1000);
 
 onMounted(() => {
   if (contentRef.value && window.ResizeObserver) {
@@ -339,6 +342,7 @@ watch(
       }
     }
 
+    // Applied when the main content divs width is < 1000px even on large screens (i.e. when the call window is open)
     &.collapsed {
       .timeline-column-wrapper {
         height: calc(100% - 70px);
@@ -346,11 +350,18 @@ watch(
       }
 
       .match-column-wrapper {
-        width: calc(100% - 30px);
         padding-left: 0;
         position: fixed;
         background-color: var(--app-channel-bg-color);
         z-index: 100;
+        transition: opacity 0.5s ease-in-out;
+      }
+    }
+
+    // Applied when viewport width is < 800px
+    &.mobile {
+      .match-column-wrapper {
+        width: calc(100% - 30px);
       }
     }
   }
