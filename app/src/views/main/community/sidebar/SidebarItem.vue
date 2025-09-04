@@ -197,7 +197,7 @@ watch(
         .map(async (did) => ({ ...(await getCachedAgentProfile(did)), did, status: "inactive" }))
     );
 
-    agentsInChannel.value = [...active.map((a) => ({ ...a, status: a.status || "active" })), ...inactive];
+    agentsInChannel.value = [...inactive, ...active.map((a) => ({ ...a, status: a.status || "active" }))];
   },
   { immediate: true }
 );
@@ -323,17 +323,18 @@ watch(
         box-shadow: 0 0 0 1px var(--j-color-success-300);
       }
 
-      &.inactive {
-        opacity: 0.4; /* Greyed out for previously active members */
-        box-shadow: 0 0 0 1px var(--j-color-ui-300);
-      }
-
       &.asleep {
         box-shadow: 0 0 0 1px var(--j-color-warning-500);
       }
 
       &.in-call {
         box-shadow: 0 0 0 1px var(--j-color-danger-400);
+      }
+
+      &.inactive {
+        /* Previously active members greyed out */
+        filter: contrast(0.6) brightness(0.5);
+        box-shadow: 0 0 0 1px var(--j-color-ui-300);
       }
     }
   }
