@@ -18,6 +18,7 @@ export interface ChannelData {
   lastActivity?: string;
   agentsInChannel?: AgentData[];
   agentsInCall?: AgentData[];
+  allAuthors?: string[];
 }
 
 export interface ChannelDataWithAgents extends ChannelData {
@@ -203,7 +204,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       pinnedConversations.value = await Promise.all(
         pinnedChannels.value.map(async (channel: Channel) => {
           const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-          return { conversation, channel };
+          const allAuthors = await toRaw(channel).allAuthors();
+          return { conversation, channel, allAuthors };
         })
       );
     } catch (error) {
@@ -214,7 +216,6 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   }
 
-  // TODO: make use of shared get children (or stats) function here, for expanding out conversations?
   async function getRecentConversations() {
     if (recentConversationsLoading.value) return;
     recentConversationsLoading.value = true;
@@ -225,13 +226,14 @@ export async function createCommunityService(): Promise<CommunityService> {
     const conversations = await Promise.all(
       conversationChannels.value.map(async (channel: Channel) => {
         const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-        let lastActivity: string | null = null;
 
         if (!conversation) return null;
 
         // If there are unprocessed items, use the latest unprocessed items timestamp
+        let lastActivity: string | null = null;
         const channelRaw = toRaw(channel);
         const unprocessedItems = await channelRaw.unprocessedItems();
+        const allAuthors = await channelRaw.allAuthors();
         if (unprocessedItems.length) {
           const lastUnprocessedItem = unprocessedItems.sort(
             (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -259,7 +261,7 @@ export async function createCommunityService(): Promise<CommunityService> {
           }
         }
 
-        return { conversation, channel, lastActivity };
+        return { conversation, channel, lastActivity, allAuthors };
       })
     );
 
@@ -291,14 +293,18 @@ export async function createCommunityService(): Promise<CommunityService> {
         const conversations = await Promise.all(
           nestedConversationChannels.map(async (childChannel: Channel) => {
             const conversation = (await Conversation.findAll(perspective, { source: childChannel.baseExpression }))[0];
-            // TODO: also get stats here?
+            const allAuthors = await toRaw(childChannel).allAuthors();
             // TODO: investigate and remove explicit baseExpression from channel if possible
-            // return { channel: childChannel, conversation };
-            return { channel: { ...childChannel, baseExpression: childChannel.baseExpression }, conversation };
+            // return { channel: childChannel, conversation, allAuthors };
+            return {
+              channel: { ...childChannel, baseExpression: childChannel.baseExpression },
+              conversation,
+              allAuthors,
+            };
           })
         );
 
-        return { channel, children: conversations };
+        return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
       })
     );
 

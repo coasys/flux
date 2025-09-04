@@ -69,6 +69,8 @@
 import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from "@/components/icons";
 import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
 import { useRouteMemoryStore, useUiStore } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import { AgentData, Profile } from "@coasys/flux-types";
 import { computed, defineOptions, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -86,9 +88,9 @@ const { moveConversation, moveConversationLoading } = useCommunityService();
 const expanded = ref(false);
 const isDragOver = ref(false);
 const isDragging = ref(false);
+const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
 const selected = computed(() => item.channel.baseExpression === route.params.channelId);
-const agentsInChannel = computed(() => aggregateAgents(expanded.value, item, "agentsInChannel") || []);
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, "agentsInCall") || []);
 
 function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: "agentsInChannel" | "agentsInCall") {
@@ -99,6 +101,14 @@ function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: "agents
   }
   // Otherwise, just return agents from the current channel
   return item[agentKey];
+}
+
+function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
+  if (!expanded && item.children?.length) {
+    const childAuthors = item.children.flatMap((child) => child.allAuthors || []);
+    return [...new Set([...(item.allAuthors || []), ...childAuthors])];
+  }
+  return item.allAuthors || [];
 }
 
 function navigateToChannel() {
@@ -174,6 +184,23 @@ async function handleDrop(event: DragEvent) {
 }
 
 watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true });
+
+// Update agentsInChannel whenever expanded state or item changes
+watch(
+  [() => expanded.value, () => item],
+  async () => {
+    const active = aggregateAgents(expanded.value, item, "agentsInChannel") || [];
+    const activeDids = new Set(active.map((a) => a.did));
+    const inactive = await Promise.all(
+      aggregateAllAuthors(expanded.value, item)
+        .filter((did) => !activeDids.has(did))
+        .map(async (did) => ({ ...(await getCachedAgentProfile(did)), did, status: "inactive" }))
+    );
+
+    agentsInChannel.value = [...active.map((a) => ({ ...a, status: a.status || "active" })), ...inactive];
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -294,6 +321,11 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
 
       &.active {
         box-shadow: 0 0 0 1px var(--j-color-success-300);
+      }
+
+      &.inactive {
+        opacity: 0.4; /* Greyed out for previously active members */
+        box-shadow: 0 0 0 1px var(--j-color-ui-300);
       }
 
       &.asleep {
