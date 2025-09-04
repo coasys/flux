@@ -24,6 +24,7 @@
     icon="clock"
     :loading="recentConversationsLoading"
     :items="recentConversationsWithAgents"
+    :limitTo="5"
   />
 
   <SidebarList
