@@ -6,7 +6,7 @@
       <div class="line" />
     </div>
 
-    <h2 class="channel-name"># {{ channelName }}</h2>
+    <h2 class="channel-name"># {{ channelName || perspective.name }}</h2>
 
     <div v-if="loading" class="loading-container">
       <j-flex gap="500" a="center">
