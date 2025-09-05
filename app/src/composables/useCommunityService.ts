@@ -2,7 +2,18 @@ import { useAiStore, useAppStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
 import { useModel } from "@coasys/ad4m-vue-hooks";
-import { App, Channel, Community, Conversation, getAllFluxApps, Topic } from "@coasys/flux-api";
+import {
+  App,
+  Channel,
+  Community,
+  Conversation,
+  ConversationSubgroup,
+  Embedding,
+  getAllFluxApps,
+  Message,
+  SemanticRelationship,
+  Topic,
+} from "@coasys/flux-api";
 import { AgentData, Profile, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
 import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from "vue";
@@ -77,8 +88,18 @@ export async function createCommunityService(): Promise<CommunityService> {
   )) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
-  // Ensure required SDNA is installed (Todo: include other models here...)
-  perspective.ensureSDNASubjectClass(Topic);
+  // Ensure all required SDNA is installed
+  await Promise.all([
+    perspective.ensureSDNASubjectClass(Community),
+    perspective.ensureSDNASubjectClass(Channel),
+    perspective.ensureSDNASubjectClass(App),
+    perspective.ensureSDNASubjectClass(Conversation),
+    perspective.ensureSDNASubjectClass(ConversationSubgroup),
+    perspective.ensureSDNASubjectClass(Topic),
+    perspective.ensureSDNASubjectClass(Embedding),
+    perspective.ensureSDNASubjectClass(SemanticRelationship),
+    perspective.ensureSDNASubjectClass(Message),
+  ]);
 
   // Initialise the signalling service for the community
   const signallingService = useSignallingService(neighbourhood);
