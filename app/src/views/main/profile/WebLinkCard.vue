@@ -6,7 +6,7 @@
     </div>
 
     <div class="link-card__content">
-      <a :href="url" target="_blank" class="link-card__info">
+      <a :href="safeUrl" target="_blank" rel="noopener noreferrer" class="link-card__info">
         <h2 class="link-card__title">{{ title || url }}</h2>
 
         <div class="link-card__description" v-if="description">{{ description }}</div>
@@ -39,10 +39,19 @@ const emit = defineEmits(["delete", "edit"]);
 
 const { ad4mClient } = useAppStore();
 
+function normalizeUrl(input: string): string {
+  const value = (input || "").trim();
+  if (!value) return "";
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value);
+  return hasScheme ? value : `https://${value}`;
+}
+
+const safeUrl = computed(() => normalizeUrl(props.url));
+
 const hostname = computed(() => {
-  if (props.url) {
+  if (safeUrl.value) {
     try {
-      return new URL(props.url).hostname;
+      return new URL(safeUrl.value).hostname;
     } catch (e) {
       return "";
     }

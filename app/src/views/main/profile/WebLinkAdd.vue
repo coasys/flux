@@ -9,7 +9,7 @@
         autovalidate
         @invalid="() => (isValidLink = false)"
         @input="handleInput"
-        type="url"
+        type="text"
         required
       >
         <j-box pr="300" v-if="loadingMeta" slot="end">
@@ -72,27 +72,64 @@ const loadingMeta = ref(false);
 const isAddingLink = ref(false);
 const isValidLink = ref(false);
 const titleEl = ref<HTMLElement | null>(null);
+let metaDebounce: ReturnType<typeof setTimeout> | null = null;
 
-async function getMeta() {
+function normalizeUrl(input: string): string {
+  const value = (input || "").trim();
+  if (!value) return value;
+  // If already has a scheme, keep as is
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value);
+  return hasScheme ? value : `https://${value}`;
+}
+
+function looksLikeHost(urlStr: string): boolean {
+  try {
+    const u = new URL(urlStr);
+    const host = u.hostname;
+    // Require a dot or be localhost to reduce early validations like "https://exa"
+    return host === "localhost" || host.includes(".");
+  } catch {
+    return false;
+  }
+}
+
+async function getMeta(urlForMeta: string) {
   try {
     loadingMeta.value = true;
-    const data = await fetch("https://jsonlink.io/api/extract?url=" + link.value).then((res) => res.json());
+    const data = await fetch("https://jsonlink.io/api/extract?url=" + encodeURIComponent(urlForMeta)).then((res) =>
+      res.json()
+    );
 
     title.value = data.title || "";
     description.value = data.description || "";
     imageUrl.value = data.images[0] || "";
   } finally {
     loadingMeta.value = false;
-    titleEl.value?.focus();
   }
 }
 
 async function handleInput(e: any) {
   try {
     link.value = e.target.value;
-    await new URL(e.target.value);
-    getMeta();
+    const normalized = normalizeUrl(link.value);
+
+    // If it doesn't look like a host yet, consider invalid and skip meta fetch
+    if (!looksLikeHost(normalized)) {
+      isValidLink.value = false;
+      if (metaDebounce) clearTimeout(metaDebounce);
+      return;
+    }
+
+    // Validate
+    // new URL will throw if not valid
+    // We intentionally do not mutate the visible input to avoid caret jumps
+    // Use a debounced meta fetch to avoid interrupting typing
+    new URL(normalized);
     isValidLink.value = true;
+    if (metaDebounce) clearTimeout(metaDebounce);
+    metaDebounce = setTimeout(() => {
+      getMeta(normalized);
+    }, 500);
   } catch (e) {
     isValidLink.value = false;
   }
@@ -108,7 +145,7 @@ async function createLink() {
       title: title.value,
       description: description.value,
       imageUrl: imageUrl.value,
-      url: link.value,
+      url: normalizeUrl(link.value),
     });
 
     appStore.showSuccessToast({ message: "Link added to agent perspective" });
