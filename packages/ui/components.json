@@ -599,10 +599,10 @@
       ],
       "events": [
         {
-          "name": "change"
+          "name": "clickoutside"
         },
         {
-          "name": "clickoutside"
+          "name": "change"
         }
       ]
     },

@@ -143,8 +143,9 @@
     <div ref="rightSection" class="right-section">
       <div
         ref="callWindow"
-        class="call-window"
-        :style="{ width: `${callWindowWidth}px`, opacity: callWindowOpen ? 1 : 0 }"
+        :class="{ 'call-window': true, open: callWindowOpen }"
+        :style="{ width: `${callWindowWidth}px` }"
+        :aria-hidden="!callWindowOpen"
       >
         <div class="resize-handle" @mousedown="startResize" />
 
@@ -562,7 +563,7 @@ function stopResize() {
 
   // Remove event listeners for mousemove and mouseup
   document.removeEventListener("mousemove", doResize);
-  document.addEventListener("mouseup", stopResize, false);
+  document.removeEventListener("mouseup", stopResize, false);
 }
 
 function profileClick() {
@@ -712,9 +713,17 @@ watch(
       flex-direction: column;
       justify-content: space-between;
       height: 100%;
-      padding: var(--j-space-500);
       background-color: #1c1a1f; // var(--app-drawer-bg-color); // var(--j-color-ui-50);
       transition: all 0.5s ease-in-out;
+      opacity: 0;
+      padding: 0;
+      pointer-events: none;
+
+      &.open {
+        opacity: 1;
+        padding: var(--j-space-500);
+        pointer-events: auto;
+      }
 
       .resize-handle {
         position: absolute;
