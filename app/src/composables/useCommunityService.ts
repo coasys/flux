@@ -171,33 +171,6 @@ export async function createCommunityService(): Promise<CommunityService> {
       .join(",")
   );
 
-  // TODO: should update when any channel name changes and when nested channels are added or removed
-  const nestedChannelsSignature = computed(
-    () => {}
-    // allChannels.value
-    //   .filter(channel => !channel.isConversation)
-    //   .map(spaceChannel => {
-    //     const parentChannelData = channelsWithConversations.value.find((c) =>
-    //       c.children?.some((child) => child.channel.baseExpression === channelId)
-    //     );
-
-    //     // Get nested conversation channels for this space channel
-    //     const nestedConversations = allChannels.value
-    //       .filter(channel =>
-    //         channel.isConversation &&
-
-    //       )
-    //       .map(nested => `${nested.baseExpression}:${nested.name}`)
-    //       .sort()
-    //       .join('|');
-
-    //     // Combine space channel info with its nested channels
-    //     return `${spaceChannel.baseExpression}:${spaceChannel.name}[${nestedConversations}]`;
-    //   })
-    //   .sort()
-    //   .join(',')
-  );
-
   async function getMembers() {
     try {
       membersLoading.value = true;
@@ -243,56 +216,62 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     // console.log("*** Loading recent conversations ***");
 
-    // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
-    const conversations = await Promise.all(
-      conversationChannels.value.map(async (channel: Channel) => {
-        const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+    try {
+      // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
+      const conversations = await Promise.all(
+        conversationChannels.value.map(async (channel: Channel) => {
+          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
 
-        if (!conversation) return null;
+          if (!conversation) return null;
 
-        // If there are unprocessed items, use the latest unprocessed items timestamp
-        let lastActivity: string | null = null;
-        const channelRaw = toRaw(channel);
-        const unprocessedItems = await channelRaw.unprocessedItems();
-        const allAuthors = await channelRaw.allAuthors();
-        if (unprocessedItems.length) {
-          const lastUnprocessedItem = unprocessedItems.sort(
-            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          )[0];
-          lastActivity = lastUnprocessedItem.timestamp;
-        } else if (conversation.summary === "Content will appear when the first items have been processed...") {
-          // If the conversation is an empty placeholder use the conversations timestamp
-          lastActivity = conversation.timestamp;
-        } else {
-          // If no subgroups exist, use the conversation timestamp
-          const subgroups = await conversation.subgroups();
-          if (!subgroups.length) lastActivity = conversation.timestamp;
-          else {
-            // If no items exist in the last subgroup, use the subgroup timestamp
-            const lastSubgroup = subgroups[subgroups.length - 1];
-            const items = await lastSubgroup.itemsData();
-            if (!items.length) lastActivity = lastSubgroup.timestamp;
+          // If there are unprocessed items, use the latest unprocessed items timestamp
+          let lastActivity: string | null = null;
+          const channelRaw = toRaw(channel);
+          const unprocessedItems = await channelRaw.unprocessedItems();
+          const allAuthors = await channelRaw.allAuthors();
+          if (unprocessedItems.length) {
+            const lastUnprocessedItem = unprocessedItems.sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )[0];
+            lastActivity = lastUnprocessedItem.timestamp;
+          } else if (conversation.summary === "Content will appear when the first items have been processed...") {
+            // If the conversation is an empty placeholder use the conversations timestamp
+            lastActivity = conversation.timestamp;
+          } else {
+            // If no subgroups exist, use the conversation timestamp
+            const subgroups = await conversation.subgroups();
+            if (!subgroups.length) lastActivity = conversation.timestamp;
             else {
-              // Finally, use the timestamp of the last item in the last subgroup
-              const lastItem = items.sort(
-                (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-              )[0];
-              lastActivity = lastItem.timestamp;
+              // If no items exist in the last subgroup, use the subgroup timestamp
+              const lastSubgroup = subgroups[subgroups.length - 1];
+              const items = await lastSubgroup.itemsData();
+              if (!items.length) lastActivity = lastSubgroup.timestamp;
+              else {
+                // Finally, use the timestamp of the last item in the last subgroup
+                const lastItem = items.sort(
+                  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                )[0];
+                lastActivity = lastItem.timestamp;
+              }
             }
           }
-        }
 
-        return { conversation, channel, lastActivity, allAuthors };
-      })
-    );
+          return { conversation, channel, lastActivity, allAuthors };
+        })
+      );
 
-    // Sort conversations by last activity timestamp
-    const conversationsSortedByLastActivity = conversations
-      .filter((c) => c !== null)
-      .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+      // Sort conversations by last activity timestamp
+      const conversationsSortedByLastActivity = conversations
+        .filter((c) => c !== null)
+        .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
 
-    recentConversations.value = conversationsSortedByLastActivity;
-    recentConversationsLoading.value = false;
+      recentConversations.value = conversationsSortedByLastActivity;
+    } catch (error) {
+      console.error("Error loading recent conversations:", error);
+      recentConversations.value = [];
+    } finally {
+      recentConversationsLoading.value = false;
+    }
   }
 
   async function getChannelsWithConversations() {
@@ -301,35 +280,42 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     // console.log("*** Loading channels with conversations ***");
 
-    // Loop through all the space channels and get the conversations in each
-    channelsWithConversations.value = await Promise.all(
-      spaceChannels.value.map(async (channel: Channel) => {
-        // Get all nested conversation channels
-        const nestedConversationChannels = await Channel.findAll(perspective, {
-          source: channel.baseExpression,
-          where: { isConversation: true },
-        });
+    try {
+      // Loop through all the space channels and get the conversations in each
+      channelsWithConversations.value = await Promise.all(
+        spaceChannels.value.map(async (channel: Channel) => {
+          // Get all nested conversation channels
+          const nestedConversationChannels = await Channel.findAll(perspective, {
+            source: channel.baseExpression,
+            where: { isConversation: true },
+          });
 
-        // Get the conversation data for each of the nested conversation channels
-        const conversations = await Promise.all(
-          nestedConversationChannels.map(async (childChannel: Channel) => {
-            const conversation = (await Conversation.findAll(perspective, { source: childChannel.baseExpression }))[0];
-            const allAuthors = await toRaw(childChannel).allAuthors();
-            // TODO: investigate and remove explicit baseExpression from channel if possible
-            // return { channel: childChannel, conversation, allAuthors };
-            return {
-              channel: { ...childChannel, baseExpression: childChannel.baseExpression },
-              conversation,
-              allAuthors,
-            };
-          })
-        );
+          // Get the conversation data for each of the nested conversation channels
+          const conversations = await Promise.all(
+            nestedConversationChannels.map(async (childChannel: Channel) => {
+              const conversation = (
+                await Conversation.findAll(perspective, { source: childChannel.baseExpression })
+              )[0];
+              const allAuthors = await toRaw(childChannel).allAuthors();
+              // TODO: investigate and remove explicit baseExpression from channel if possible
+              // return { channel: childChannel, conversation, allAuthors };
+              return {
+                channel: { ...childChannel, baseExpression: childChannel.baseExpression },
+                conversation,
+                allAuthors,
+              };
+            })
+          );
 
-        return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
-      })
-    );
-
-    channelsWithConversationsLoading.value = false;
+          return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
+        })
+      );
+    } catch (error) {
+      console.error("Error loading channels with conversations:", error);
+      channelsWithConversations.value = [];
+    } finally {
+      channelsWithConversationsLoading.value = false;
+    }
   }
 
   async function startNewConversation(parentChannelId?: string) {
@@ -388,9 +374,17 @@ export async function createCommunityService(): Promise<CommunityService> {
       );
 
       // Get the link from the conversation channel to its current parent
-      const link = (
-        await perspective.get(new LinkQuery({ predicate: "ad4m://has_child", target: conversationChannelId }))
-      )[0];
+      const existingLinks = await perspective.get(
+        new LinkQuery({ predicate: "ad4m://has_child", target: conversationChannelId })
+      );
+      const link = existingLinks[0];
+      if (!link) {
+        console.warn(`No parent link found for conversation ${conversationChannelId}`);
+        appStore.showDangerToast({
+          message: `Failed to move conversation "${conversationName || conversationChannelId}": no parent link found`,
+        });
+        return;
+      }
 
       // Skip if the conversation is already linked to the target channel
       if (link.source === newSpaceChannelId) return;
@@ -406,8 +400,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       appStore.showSuccessToast({
         message:
           newSpaceChannelId === "ad4m://self"
-            ? `Succesfully removed conversation "${conversationName || conversationChannelId}" from channel`
-            : `Succesfully moved conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
+            ? `Successfully removed conversation "${conversationName || conversationChannelId}" from channel`
+            : `Successfully moved conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
       });
 
       // Refresh the channels list
@@ -449,8 +443,10 @@ export async function createCommunityService(): Promise<CommunityService> {
   getMembers();
 
   watch(pinnedChannelsSignature, getPinnedConversations);
-  watch(conversationChannelsSignature, getRecentConversations);
-  // TODO: should update when any channel name changes or when nested channels are added or removed from a space channel
+  watch(conversationChannelsSignature, () => {
+    getRecentConversations();
+    getChannelsWithConversations();
+  });
   watch(spaceChannels, getChannelsWithConversations);
 
   // Find processing tasks in the community when the conversations first load

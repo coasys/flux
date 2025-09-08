@@ -83,11 +83,14 @@
                   <j-text weight="800" nomargin>API Type:</j-text>
                   <j-text nomargin>{{ defaultLLM.api.apiType }}</j-text>
                 </j-flex>
-                <j-flex gap="300">
+                <j-flex a="center" gap="300">
                   <j-text weight="800" nomargin>API Key:</j-text>
                   <j-text nomargin style="overflow: hidden; max-width: 600px; word-break: break-all">
-                    {{ defaultLLM.api.apiKey }}
+                    {{ showApiKey ? defaultLLM.api.apiKey : maskedApiKey }}
                   </j-text>
+                  <j-button size="xs" @click="showApiKey = !showApiKey">
+                    {{ showApiKey ? "Hide" : "Show" }}
+                  </j-button>
                 </j-flex>
                 <j-flex gap="300">
                   <j-text weight="800" nomargin>Base URL:</j-text>
@@ -171,6 +174,12 @@ const showLLMInfoModal = ref(false);
 const modalRenderKey = ref(0);
 const contentRef = ref<HTMLElement | null>(null);
 const contentWidth = ref(0);
+const showApiKey = ref(false);
+const maskedApiKey = computed(() => {
+  const key = defaultLLM.value?.api?.apiKey || "";
+  return key ? key.replace(/.(?=.{4})/g, "•") : "";
+});
+
 const collapsed = computed(() => contentWidth.value < 1000);
 
 onMounted(() => {

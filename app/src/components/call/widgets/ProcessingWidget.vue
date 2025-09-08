@@ -4,7 +4,7 @@
       <j-icon name="robot" size="lg" color="ui-700" />
       <j-text nomargin>
         {{ processingState.itemIds?.length || 0 }} items being processed
-        {{ defaultLLM!.local ? "localy" : "remotely" }}
+        {{ defaultLLM?.local ? "locally" : "remotely" }}
         {{
           processingQueue.length > 1
             ? `(${processingQueue.length - 1} task${processingQueue.length === 2 ? "" : "s"} queued)`

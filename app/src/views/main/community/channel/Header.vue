@@ -1,6 +1,6 @@
 <template>
-  <div class="header" v-if="channel">
-    <div class="header-info">
+  <div class="header" v-if="channel" :style="{ minHeight: `${headerHeight}px` }">
+    <div class="header-info" :style="{ height: `${headerHeight}px` }">
       <button v-if="isMobile" class="open-sidebar-button" @click="() => uiStore.setCommunitySidebarOpen(true)">
         <ChevronLeftIcon />
       </button>
@@ -21,7 +21,7 @@
       </j-flex>
     </div>
 
-    <div class="header-buttons">
+    <div class="header-buttons" :style="{ height: `${headerHeight}px` }">
       <template v-if="!callWindowOpen && (!inCall || callRoute.channelId === channelId)">
         <j-button size="sm" variant="primary" :onClick="() => uiStore.setCallWindowOpen(true)">
           <j-icon size="sm" name="telephone" style="margin-right: -5px" />
@@ -52,7 +52,7 @@
       </button> -->
     </div>
 
-    <div class="header-views">
+    <div class="header-views" :style="{ height: `${headerHeight}px` }">
       <label
         v-for="view in views"
         :class="{ tab: true, checked: view.pkg === viewId }"
@@ -92,7 +92,7 @@ const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
 const { me } = storeToRefs(appStore);
-const { isMobile, callWindowOpen } = storeToRefs(uiStore);
+const { isMobile, callWindowOpen, headerHeight } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
 const { perspective, signallingService, allChannels, recentConversations } = useCommunityService();
@@ -139,7 +139,6 @@ async function togglePinned() {
   padding: 0 var(--j-space-400);
   background: var(--app-channel-header-bg-color, transparent);
   border-bottom: 1px solid var(--app-channel-header-border-color, var(--j-border-color));
-  min-height: var(--app-header-height);
 
   .open-sidebar-button {
     all: unset;
@@ -162,7 +161,6 @@ async function togglePinned() {
   .header-views {
     display: flex;
     align-items: center;
-    height: var(--app-header-height);
     gap: var(--j-space-400);
     margin-right: var(--j-space-600);
   }

@@ -40,27 +40,16 @@ const appStore = useAppStore();
 
 const { me } = storeToRefs(appStore);
 
-const activeProfile = ref<string>("");
+const activeProfile = ref("");
 const showProfile = ref(false);
 const profile = ref<Profile>();
 
-// Watch for DID changes and load profile
-watch(
-  () => activeProfile.value,
-  async (newDid, oldDid) => {
-    if (newDid !== oldDid && newDid) {
-      profile.value = await getCachedAgentProfile(newDid);
-    }
-  },
-  { immediate: true }
-);
-
-function toggleProfile(open: boolean, did?: any): void {
+function toggleProfile(open: boolean, did?: string): void {
   if (!open) {
     activeProfile.value = "";
     profile.value = undefined;
   } else {
-    activeProfile.value = did;
+    activeProfile.value = did || "";
   }
   showProfile.value = open;
 }
@@ -70,6 +59,15 @@ async function handleProfileClick(did: string) {
   if (did === me.value.did) router.push({ name: "home", params: { did } });
   else router.push({ name: "profile", params: { did, communityId: route.params.communityId } });
 }
+
+// Watch for DID changes and load profile
+watch(
+  () => activeProfile.value,
+  async (newDid, oldDid) => {
+    if (newDid !== oldDid && newDid) profile.value = await getCachedAgentProfile(newDid);
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>

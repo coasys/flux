@@ -194,7 +194,10 @@ watch(
     const inactive = await Promise.all(
       aggregateAllAuthors(expanded.value, item)
         .filter((did) => !activeDids.has(did))
-        .map(async (did) => ({ ...(await getCachedAgentProfile(did)), did, status: "inactive" }))
+        .map(async (did) => {
+          const profile = (await getCachedAgentProfile(did)) || {};
+          return { ...profile, did, status: "inactive" };
+        })
     );
 
     agentsInChannel.value = [...inactive, ...active.map((a) => ({ ...a, status: a.status || "active" }))];

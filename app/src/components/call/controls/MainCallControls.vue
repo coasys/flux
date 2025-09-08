@@ -136,9 +136,15 @@ const { videoLayoutOptions, selectedVideoLayout, selectVideoLayout } = useVideoL
 const emojiPopover = ref<HTMLElement | null>(null);
 const videoLayoutPopover = ref<HTMLElement | null>(null);
 
-function onEmojiClick(event: any) {
-  webrtcStore.signalAgentsInCall(WEBRTC_EMOJI, event.detail.native);
-  webrtcStore.displayEmoji(event.detail.native, me.value.did);
+function onEmojiClick(e: CustomEvent<{ native?: string }>) {
+  const emoji = e?.detail?.native;
+  const did = me.value?.did;
+  if (!emoji || !did) {
+    emojiPopover.value?.removeAttribute("open");
+    return;
+  }
+  webrtcStore.signalAgentsInCall(WEBRTC_EMOJI, emoji);
+  webrtcStore.displayEmoji(emoji, did);
   emojiPopover.value?.removeAttribute("open");
 }
 </script>

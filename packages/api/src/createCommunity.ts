@@ -53,10 +53,12 @@ export default async function createCommunity({
     ]);
 
     // Create a neighbourhood from the perspective
-    const uid = uuidv4().toString();
+    const uid = uuidv4();
     const langs = await client.runtime.knownLinkLanguageTemplates();
     const templateData = JSON.stringify({ uid, name: `${name}-link-language` });
-    const linkLanguage = await client.languages.applyTemplateAndPublish(linkLangAddress || langs[0], templateData);
+    const templateAddress = linkLangAddress || langs?.[0];
+    if (!templateAddress) throw new Error("No link language templates available to publish neighbourhood.");
+    const linkLanguage = await client.languages.applyTemplateAndPublish(templateAddress, templateData);
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
     let sharedUrl = perspective.sharedUrl;
@@ -88,16 +90,16 @@ export default async function createCommunity({
 
     // Update notifications to include the new community
     const notifications = await client.runtime.notifications();
-    const notification = notifications.find((notification) => notification.appName === "Flux");
-
-    const notificationId = notification.id;
-    notification.granted = undefined;
-    notification.id = undefined;
-
-    await client.runtime.updateNotification(notificationId, {
-      ...notification,
-      perspectiveIds: [...notification.perspectiveIds, perspective.uuid],
-    });
+    const notification = notifications.find((n) => n.appName === "Flux");
+    if (notification) {
+      const notificationId = notification.id;
+      notification.granted = undefined;
+      notification.id = undefined;
+      await client.runtime.updateNotification(notificationId, {
+        ...notification,
+        perspectiveIds: [...(notification.perspectiveIds || []), perspective.uuid],
+      });
+    }
 
     return {
       uuid: perspective.uuid,

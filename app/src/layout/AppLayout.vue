@@ -6,7 +6,12 @@
     :class="{ 'app-layout--show-sidebar': showAppSidebar }"
   >
     <!-- Main sidebar -->
-    <div class="app-layout__sidebar"><slot name="sidebar"></slot></div>
+    <div
+      class="app-layout__sidebar"
+      :style="{ width: `${appSidebarWidth}px`, transform: `translateX(${showAppSidebar ? '0' : '-100%'})` }"
+    >
+      <slot name="sidebar"></slot>
+    </div>
 
     <!-- Call container -->
     <div class="app-layout__call-container">
@@ -14,7 +19,11 @@
     </div>
 
     <!-- Main content -->
-    <main class="app-layout__main" id="app-layout-main" :style="{ width: mainWidth }">
+    <main
+      class="app-layout__main"
+      id="app-layout-main"
+      :style="{ width: mainWidth, marginLeft: showAppSidebar ? `${appSidebarWidth}px` : '0px' }"
+    >
       <slot></slot>
     </main>
   </div>
@@ -26,14 +35,20 @@ import { storeToRefs } from "pinia";
 import { computed, ref } from "vue";
 
 const uiStore = useUiStore();
-const { showCommunitySidebar, showAppSidebar, callWindowOpen, callWindowWidth, communitySidebarWidth, isMobile } =
-  storeToRefs(uiStore);
+const {
+  appSidebarWidth,
+  showCommunitySidebar,
+  showAppSidebar,
+  callWindowOpen,
+  callWindowWidth,
+  communitySidebarWidth,
+} = storeToRefs(uiStore);
 
 const touchstartX = ref(0);
 const touchendX = ref(0);
 
 const mainWidth = computed(() => {
-  const sidebarWidth = showAppSidebar.value ? "var(--app-main-sidebar-width)" : "0px";
+  const sidebarWidth = showAppSidebar.value ? `${appSidebarWidth.value}px` : "0px";
   return callWindowOpen.value
     ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})`
     : `calc(100% - ${sidebarWidth})`;
@@ -78,16 +93,11 @@ function checkDirection() {
   transform: translateX(0px);
 }
 
-.app-layout--show-sidebar .app-layout__main {
-  margin-left: var(--app-main-sidebar-width);
-}
-
 .app-layout__sidebar {
   position: absolute;
   left: 0;
   top: 0;
   padding-top: env(safe-area-inset-top);
-  width: var(--app-main-sidebar-width);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -96,7 +106,6 @@ function checkDirection() {
   z-index: 10;
   border-right: 1px solid var(--app-main-sidebar-border-color, var(--j-border-color));
   transition: all 0.3s ease;
-  transform: translateX(calc(var(--app-main-sidebar-width) * -1));
 }
 
 @media (max-width: 800px) {

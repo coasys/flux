@@ -12,16 +12,8 @@
         reposition: location === 'channel-conversations',
       }"
     />
-    <span v-else-if="blockType === 'subgroup'" class="timestamp">
-      {{
-        (
-          (new Date((data as SynergyGroup).end as string).getTime() -
-            new Date((data as SynergyGroup).start as string).getTime()) /
-          1000 /
-          60
-        ).toFixed(1)
-      }}
-      mins
+    <span v-else-if="blockType === 'subgroup' && subgroupDurationMins" class="timestamp">
+      {{ subgroupDurationMins }} mins
     </span>
     <j-timestamp v-else-if="blockType === 'item'" :value="data.timestamp" timeStyle="short" class="timestamp" />
 
@@ -42,7 +34,7 @@
               :font-size="10"
               :score="(match.score || 0) * 100"
             />
-            <h1>{{ (data as SynergyGroup).name }}</h1>
+            <h1>{{ group?.name }}</h1>
           </j-flex>
 
           <button v-if="totalChildren > 0" class="show-children-button" @click="showChildren = !showChildren">
@@ -52,7 +44,7 @@
           </button>
         </j-flex>
 
-        <p class="summary">{{ (data as SynergyGroup).summary }}</p>
+        <p class="summary">{{ group?.summary }}</p>
 
         <j-flex class="participants">
           <Avatar
@@ -85,7 +77,7 @@
       <!-- Children -->
       <div v-if="totalChildren > 0 && showChildren" class="children">
         <!-- Expand button before -->
-        <template v-if="onMatchTree && collapseBefore && matchIndex! > 0">
+        <template v-if="onMatchTree && collapseBefore && typeof matchIndex === 'number' && matchIndex > 0">
           <div class="expand-button-wrapper" style="margin-top: 6px">
             <div class="expand-button">
               <j-button @click="collapseBefore = false">
@@ -128,7 +120,7 @@
 
         <!-- Expand button after -->
         <div
-          v-if="onMatchTree && collapseAfter && matchIndex! < children.length - 1"
+          v-if="onMatchTree && collapseAfter && typeof matchIndex === 'number' && matchIndex < children.length - 1"
           class="expand-button-wrapper"
           :style="{ marginTop: blockType === 'subgroup' ? '-8px' : '-20px' }"
         >
@@ -257,97 +249,142 @@ const visibleChildren = computed(() =>
   })
 );
 
+const group = computed<SynergyGroup | null>(() => (props.blockType !== "item" ? (props.data as SynergyGroup) : null));
+
+const subgroupDurationMins = computed(() => {
+  const g = group.value;
+  if (!g?.start || !g?.end) return null;
+  const mins = (new Date(g.end).getTime() - new Date(g.start).getTime()) / 60000;
+  return mins.toFixed(1);
+});
+
 async function getConversationStats() {
-  const conversation = new Conversation(perspective, props.data.baseExpression);
-  const stats = await conversation.stats();
-  totalChildren.value = stats.totalSubgroups;
-  participants.value = stats.participants;
+  try {
+    const conversation = new Conversation(perspective, props.data.baseExpression);
+    const stats = await conversation.stats();
+    totalChildren.value = stats.totalSubgroups;
+    participants.value = stats.participants;
+  } catch (error) {
+    console.error("Error fetching conversation stats:", error);
+    totalChildren.value = 0;
+    participants.value = [];
+  }
 }
 
 async function getSubgroupStats() {
-  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
-  const stats = await subgroup.stats();
-  totalChildren.value = stats.totalItems;
-  participants.value = stats.participants;
+  try {
+    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    const stats = await subgroup.stats();
+    totalChildren.value = stats.totalItems;
+    participants.value = stats.participants;
+  } catch (error) {
+    console.error("Error fetching subgroup stats:", error);
+    totalChildren.value = 0;
+    participants.value = [];
+  }
 }
 
 async function getConversationTopics() {
-  const conversation = new Conversation(perspective, props.data.baseExpression);
-  topics.value = await conversation.topics();
+  try {
+    const conversation = new Conversation(perspective, props.data.baseExpression);
+    topics.value = await conversation.topics();
+  } catch (error) {
+    console.error("Error fetching conversation topics:", error);
+    topics.value = [];
+  }
 }
 
 async function getSubgroupTopics() {
-  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
-  topics.value = await subgroup.topics();
+  try {
+    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    topics.value = await subgroup.topics();
+  } catch (error) {
+    console.error("Error fetching subgroup topics:", error);
+    topics.value = [];
+  }
 }
 
 async function getSubgroups() {
-  const conversation = new Conversation(perspective, props.data.baseExpression);
-  const subgroups = await conversation.subgroupsData();
+  try {
+    const conversation = new Conversation(perspective, props.data.baseExpression);
+    const subgroups = await conversation.subgroupsData();
 
-  if (props.match) {
-    // Look for match in subgroups
-    subgroups.forEach((subgroup, subgroupIndex) => {
-      if (subgroup.baseExpression === props.match!.baseExpression) {
-        // If found, store the subgroups index & mark loading true to prevent further loading
-        props.setMatchIndexes?.({
-          conversation: props.data.index,
-          subgroup: subgroupIndex,
-          item: undefined,
-        });
-        props.setLoading?.(false);
-      }
-    });
+    if (props.match) {
+      // Look for match in subgroups
+      subgroups.forEach((subgroup, subgroupIndex) => {
+        if (subgroup.baseExpression === props.match!.baseExpression) {
+          // If found, store the subgroups index & mark loading true to prevent further loading
+          props.setMatchIndexes?.({
+            conversation: props.data.index,
+            subgroup: subgroupIndex,
+            item: undefined,
+          });
+          props.setLoading?.(false);
+        }
+      });
+    }
+    children.value = subgroups;
+  } catch (error) {
+    console.error("Error fetching subgroups:", error);
+    children.value = [];
   }
-  children.value = subgroups;
 }
 
 async function removeDuplicateItems(itemIds: string[]) {
-  // Used to remove duplicate items from the subgroup if added multiple times due to network errors
-  console.log("Removing duplicate items from subgroup", itemIds);
-  const duplicateLinks = await Promise.all(
-    itemIds.map(async (itemId) => {
-      // Grab all links connecting the item to the subgroup
-      const links = await perspective.get(
-        new LinkQuery({ source: props.data.baseExpression, predicate: "ad4m://has_child", target: itemId })
-      );
-      // Remove all except the first link
-      return links.slice(1);
-    })
-  );
-  await perspective.removeLinks(duplicateLinks.flat());
+  try {
+    // Used to remove duplicate items from the subgroup if added multiple times due to network errors
+    console.log("Removing duplicate items from subgroup", itemIds);
+    const duplicateLinks = await Promise.all(
+      itemIds.map(async (itemId) => {
+        // Grab all links connecting the item to the subgroup
+        const links = await perspective.get(
+          new LinkQuery({ source: props.data.baseExpression, predicate: "ad4m://has_child", target: itemId })
+        );
+        // Remove all except the first link
+        return links.slice(1);
+      })
+    );
+    await perspective.removeLinks(duplicateLinks.flat());
+  } catch (error) {
+    console.error("Error removing duplicate items:", error);
+  }
 }
 
 async function getItems() {
-  const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
-  const items = await subgroup.itemsData();
-  const uniqueItems = new Map();
-  const duplicates = new Set<string>();
+  try {
+    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    const items = await subgroup.itemsData();
+    const uniqueItems = new Map();
+    const duplicates = new Set<string>();
 
-  items.forEach((item, itemIndex) => {
-    // Store duplicates for link cleanup
-    if (uniqueItems.has(item.baseExpression)) {
-      duplicates.add(item.baseExpression);
-    } else {
-      uniqueItems.set(item.baseExpression, item);
-      // Set match indexes and stop loading if match found
-      if (props.match && item.baseExpression === props.match.baseExpression) {
-        props.setMatchIndexes?.({
-          conversation: (props.data as SynergyGroup).parentIndex,
-          subgroup: props.data.index,
-          item: itemIndex,
-        });
-        props.setLoading?.(false);
+    items.forEach((item, itemIndex) => {
+      // Store duplicates for link cleanup
+      if (uniqueItems.has(item.baseExpression)) {
+        duplicates.add(item.baseExpression);
+      } else {
+        uniqueItems.set(item.baseExpression, item);
+        // Set match indexes and stop loading if match found
+        if (props.match && item.baseExpression === props.match.baseExpression) {
+          props.setMatchIndexes?.({
+            conversation: (props.data as SynergyGroup).parentIndex,
+            subgroup: props.data.index,
+            item: itemIndex,
+          });
+          props.setLoading?.(false);
+        }
       }
+    });
+
+    children.value = Array.from(uniqueItems.values());
+
+    // Remove duplicates if found
+    const duplicateItems = Array.from(duplicates);
+    if (duplicateItems.length) {
+      await removeDuplicateItems(duplicateItems);
     }
-  });
-
-  children.value = Array.from(uniqueItems.values());
-
-  // Remove duplicates if found
-  const duplicateItems = Array.from(duplicates);
-  if (duplicateItems.length) {
-    await removeDuplicateItems(duplicateItems);
+  } catch (error) {
+    console.error("Error fetching items:", error);
+    children.value = [];
   }
 }
 

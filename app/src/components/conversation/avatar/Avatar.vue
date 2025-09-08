@@ -3,14 +3,14 @@
     <div class="avatar-image">
       <j-avatar :size="size" :src="profile.profileThumbnailPicture || null" :hash="did" />
     </div>
-    <j-text v-if="showName" nomargin>{{ profile.username }}</j-text>
+    <j-text v-if="showName" nomargin>{{ profile.username || "Unknown User" }}</j-text>
   </j-flex>
 </template>
 
 <script setup lang="ts">
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 
 interface Props {
   did: string;
@@ -26,13 +26,21 @@ const props = withDefaults(defineProps<Props>(), {
 
 const profile = ref<Partial<Profile>>({});
 
-onMounted(async () => {
+async function fetchProfile(did: string) {
   try {
-    profile.value = await getCachedAgentProfile(props.did);
+    const result = await getCachedAgentProfile(did);
+    profile.value = result || {};
   } catch (error) {
     console.error("Error loading profile:", error);
+    profile.value = {};
   }
-});
+}
+
+watch(
+  () => props.did,
+  (newDid) => fetchProfile(newDid),
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

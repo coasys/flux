@@ -1,5 +1,8 @@
 <template>
-  <j-modal :open="modalStore.showCreateChannel" @toggle="(e: any) => (modalStore.showCreateChannel = e.target.open)">
+  <j-modal
+    :open="modalStore.showCreateChannel"
+    @toggle="(e: any) => (e.target.open ? (modalStore.showCreateChannel = true) : modalStore.hideCreateChannelModal())"
+  >
     <j-box p="800">
       <j-flex direction="column" gap="700">
         <div>
@@ -90,7 +93,7 @@
 
           <j-box mt="500">
             <j-flex direction="row" j="end" gap="300">
-              <j-button size="lg" variant="link" @click="modalStore.showCreateChannel = false"> Cancel </j-button>
+              <j-button size="lg" variant="link" @click="modalStore.hideCreateChannelModal"> Cancel </j-button>
               <j-button
                 size="lg"
                 :loading="isCreatingChannel"

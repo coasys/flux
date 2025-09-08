@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar-header">
-    <div class="sidebar-header__top">
+    <div class="sidebar-header__top" :style="{ height: `${headerHeight}px` }">
       <j-button variant="ghost" size="sm" @click="uiStore.toggleAppSidebar">
         <j-icon size="sm" name="layout-sidebar" />
       </j-button>
@@ -71,11 +71,13 @@
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
 import { useModalStore, useUiStore } from "@/stores";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 const uiStore = useUiStore();
 const modalsStore = useModalStore();
 
+const { headerHeight } = storeToRefs(uiStore);
 const { isSynced, isAuthor, community } = useCommunityService();
 
 const showCommunityMenu = ref(false);
@@ -109,7 +111,6 @@ function goToSettings() {
 }
 
 .sidebar-header__top {
-  height: var(--app-header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;

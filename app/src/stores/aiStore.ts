@@ -1,3 +1,4 @@
+import { CommunityService } from "@/composables/useCommunityService";
 import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from "@/stores";
 import { AIModelLoadingStatus, AITask } from "@coasys/ad4m";
 import { Model } from "@coasys/ad4m/lib/src/ai/AIResolver";
@@ -35,7 +36,7 @@ export const llmProcessingSteps = [
   "LLM Conversation Updates",
   "Generating New Groupings",
   "Generating Vector Embeddings",
-  "Processing complete. Commiting batch!",
+  "Processing complete. Committing batch!",
 ];
 
 export const MIN_ITEMS_TO_PROCESS = 5;
@@ -191,72 +192,85 @@ export const useAiStore = defineStore(
 
       console.log("🤖 LLM processing started");
 
-      // Prioritise tasks from the current channel, then the current community, and finally by their original order
-      processingQueue.value = processingQueue.value
-        .map((item, index) => ({ ...item, originalIndex: index }))
-        .sort((a, b) => {
-          const { channelId, communityId } = currentRoute.value;
-          // Current channel gets highest priority
-          if (a.channel.baseExpression === channelId && b.channel.baseExpression !== channelId) return -1;
-          if (b.channel.baseExpression === channelId && a.channel.baseExpression !== channelId) return 1;
+      let communityService: CommunityService | undefined = undefined;
 
-          // Current community gets second priority
-          if (a.communityId === communityId && b.communityId !== communityId) return -1;
-          if (b.communityId === communityId && a.communityId !== communityId) return 1;
+      try {
+        // Prioritise tasks from the current channel, then the current community, and finally by their original order
+        processingQueue.value = processingQueue.value
+          .map((item, index) => ({ ...item, originalIndex: index }))
+          .sort((a, b) => {
+            const { channelId, communityId } = currentRoute.value;
+            // Current channel gets highest priority
+            if (a.channel.baseExpression === channelId && b.channel.baseExpression !== channelId) return -1;
+            if (b.channel.baseExpression === channelId && a.channel.baseExpression !== channelId) return 1;
 
-          // If same priority level, maintain original insertion order
-          return a.originalIndex - b.originalIndex;
+            // Current community gets second priority
+            if (a.communityId === communityId && b.communityId !== communityId) return -1;
+            if (b.communityId === communityId && a.communityId !== communityId) return 1;
+
+            // If same priority level, maintain original insertion order
+            return a.originalIndex - b.originalIndex;
+          });
+
+        // Get the first task from the queue & its associated communityService
+        const { communityId, channel } = processingQueue.value[0];
+        const rawChannel = toRaw(channel) as Channel;
+        communityService = communityServiceStore.getCommunityService(communityId);
+        const conversation = communityService?.getConversation(rawChannel.baseExpression!);
+        const parentChannel = communityService?.getParentChannel(rawChannel.baseExpression!);
+
+        if (!communityService || !conversation) {
+          console.error("Missing community service or conversation");
+          processingQueue.value.shift();
+          return;
+        }
+
+        // Get the items to process from the channel
+        const unprocessedItems = await rawChannel.unprocessedItems!();
+        const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY);
+        const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
+
+        // Create setProcessingState function to update processing state at each step
+        function setProcessingState(newState: Partial<ProcessingState> | null) {
+          // Update our app level processing state
+          processingState.value = newState ? { ...processingState.value, ...newState } : null;
+
+          // Update our processing state in the assosiated signalling service
+          communityService!.signallingService.setProcessingState(newState);
+        }
+
+        // Set our initial processing state
+        const itemIds = itemsToProcess.map((item) => item.baseExpression);
+        setProcessingState({
+          step: 1,
+          channelId: rawChannel.baseExpression,
+          author: me.value.did,
+          itemIds,
+          communityName: communityService.perspective.name,
+          channelName: parentChannel?.name,
+          conversationName: conversation.conversationName,
         });
 
-      // Get the first task from the queue & its associated communityService
-      const { communityId, channel } = processingQueue.value[0];
-      const rawChannel = toRaw(channel) as Channel;
-      const communityService = communityServiceStore.getCommunityService(communityId);
-      const conversation = communityService?.getConversation(rawChannel.baseExpression!);
-      const parentChannel = communityService?.getParentChannel(rawChannel.baseExpression!);
+        // Run the LLM processing
+        await toRaw(conversation).processNewExpressions!(itemsToProcess, setProcessingState);
 
-      if (!communityService || !conversation) return;
+        // Remove the processed task from the queue
+        processingQueue.value.shift();
 
-      // Get the items to process from the channel
-      const unprocessedItems = await rawChannel.unprocessedItems!();
-      const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY);
-      const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
+        console.log("🤖 LLM processing completed", processingQueue.value);
+      } catch (error) {
+        console.error("🤖 LLM processing failed:", error);
+        // Remove the failed task from the queue to prevent getting stuck
+        processingQueue.value.shift();
+      } finally {
+        // Reset our processing state
+        processingState.value = null;
+        if (communityService) communityService.signallingService.setProcessingState(null);
+        processing.value = false;
 
-      // Create setProcessingState function to update processing state at each step
-      function setProcessingState(newState: Partial<ProcessingState> | null) {
-        // Update our app level processing state
-        processingState.value = newState ? { ...processingState.value, ...newState } : null;
-
-        // Update our processing state in the assosiated signalling service
-        communityService!.signallingService.setProcessingState(newState);
+        // If there are more tasks in the queue, process the next one
+        setTimeout(() => processesNextTask(), 0);
       }
-
-      // Set our initial processing state
-      const itemIds = itemsToProcess.map((item) => item.baseExpression);
-      setProcessingState({
-        step: 1,
-        channelId: rawChannel.baseExpression,
-        author: me.value.did,
-        itemIds,
-        communityName: communityService.perspective.name,
-        channelName: parentChannel?.name,
-        conversationName: conversation.conversationName,
-      });
-
-      // Run the LLM processing
-      await toRaw(conversation).processNewExpressions!(itemsToProcess, setProcessingState);
-
-      // Remove the processed task from the queue
-      processingQueue.value.shift();
-
-      console.log("🤖 LLM processing completed", processingQueue.value);
-
-      // Reset our processing state
-      setProcessingState(null);
-      processing.value = false;
-
-      // If there are more tasks in the queue, process the next one
-      processesNextTask();
     }
 
     // Load AI data when the ad4mClient is initialized
@@ -272,7 +286,10 @@ export const useAiStore = defineStore(
     watch(
       currentRoute,
       (newRoute, oldRoute) => {
-        const isNewRoute = JSON.stringify(newRoute) !== JSON.stringify(oldRoute);
+        const isNewRoute =
+          newRoute.communityId !== oldRoute?.communityId ||
+          newRoute.channelId !== oldRoute?.channelId ||
+          newRoute.viewId !== oldRoute?.viewId;
         if (isNewRoute && newRoute.viewId === "conversation") loadAIData();
       },
       { immediate: true }

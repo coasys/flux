@@ -2,7 +2,7 @@
   <div class="join-call-controls">
     <j-toggle
       :checked="mediaSettings.videoEnabled"
-      :disabled="!mediaPermissions.microphone.granted"
+      :disabled="!mediaPermissions.camera?.granted"
       @change="mediaDeviceStore.toggleVideo"
     >
       Join with camera!

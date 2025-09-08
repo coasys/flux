@@ -18,7 +18,7 @@
         </j-text>
 
         <ul>
-          <li>You might loose your communities and chat messages</li>
+          <li>You might lose your communities and chat messages</li>
           <li>Messages might not always be delivered reliably</li>
         </ul>
       </div>

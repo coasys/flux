@@ -1,31 +1,14 @@
-import Ad4mLogoIcon from "./Ad4mLogoIcon.vue";
-import ChevronDownIcon from "./ChevronDownIcon.vue";
-import ChevronLeftIcon from "./ChevronLeftIcon.vue";
-import ChevronRightIcon from "./ChevronRightIcon.vue";
-import ChevronUpIcon from "./ChevronUpIcon.vue";
-import ChromeIcon from "./ChromeIcon.vue";
-import FluxLogoIcon from "./FluxLogoIcon.vue";
-import HourglassIcon from "./HourglassIcon.vue";
-import Orb2Icon from "./Orb2Icon.vue";
-import Orb3Icon from "./Orb3Icon.vue";
-import OrbIcon from "./OrbIcon.vue";
-import RecordingIcon from "./RecordingIcon.vue";
-import SubwayTimelineCurveIcon from "./SubwayTimelineCurveIcon.vue";
-import TranscriptionIcon from "./TranscriptionIcon.vue";
-
-export {
-  Ad4mLogoIcon,
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-  ChromeIcon,
-  FluxLogoIcon,
-  HourglassIcon,
-  Orb2Icon,
-  Orb3Icon,
-  OrbIcon,
-  RecordingIcon,
-  SubwayTimelineCurveIcon,
-  TranscriptionIcon,
-};
+export { default as Ad4mLogoIcon } from "./Ad4mLogoIcon.vue";
+export { default as ChevronDownIcon } from "./ChevronDownIcon.vue";
+export { default as ChevronLeftIcon } from "./ChevronLeftIcon.vue";
+export { default as ChevronRightIcon } from "./ChevronRightIcon.vue";
+export { default as ChevronUpIcon } from "./ChevronUpIcon.vue";
+export { default as ChromeIcon } from "./ChromeIcon.vue";
+export { default as FluxLogoIcon } from "./FluxLogoIcon.vue";
+export { default as HourglassIcon } from "./HourglassIcon.vue";
+export { default as Orb2Icon } from "./Orb2Icon.vue";
+export { default as Orb3Icon } from "./Orb3Icon.vue";
+export { default as OrbIcon } from "./OrbIcon.vue";
+export { default as RecordingIcon } from "./RecordingIcon.vue";
+export { default as SubwayTimelineCurveIcon } from "./SubwayTimelineCurveIcon.vue";
+export { default as TranscriptionIcon } from "./TranscriptionIcon.vue";

@@ -6,9 +6,13 @@
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <div class="avatar-wrapper" @click="() => (modalStore.showEditProfile = true)">
+            <div
+              class="avatar-wrapper"
+              :class="{ 'is-editable': sameAgent }"
+              @click="sameAgent && (modalStore.showEditProfile = true)"
+            >
               <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
-              <div class="avatar-hover">
+              <div class="avatar-hover" v-if="sameAgent">
                 <j-icon name="pen" />
               </div>
             </div>
@@ -310,10 +314,13 @@ watch(
 }
 
 .avatar-wrapper {
-  cursor: pointer;
   width: var(--avatar-size);
   height: var(--avatar-size);
   position: relative;
+
+  &.is-editable {
+    cursor: pointer;
+  }
 
   .avatar {
     --j-avatar-size: var(--avatar-size);

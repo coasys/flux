@@ -25,7 +25,7 @@
           <j-icon slot="start" name="file-arrow-up" size="xl" />
           <div class="option-body">
             <j-text variant="heading-sm">Load a Community</j-text>
-            <j-text variant="body" nomargin>Load a existing perspective as community</j-text>
+            <j-text variant="body" nomargin>Load an existing perspective as a community</j-text>
           </div>
           <j-icon slot="end" name="chevron-right" />
         </button>
@@ -154,7 +154,7 @@
           <div v-if="isCreatingCommunity" style="text-align: center">
             <j-text variant="heading-sm"> Please wait while your community is being created </j-text>
             <j-text variant="body">
-              Right now this proccess might take a couple of minutes, so please be patient
+              Right now this process might take a couple of minutes, so please be patient
             </j-text>
             <j-flex j="center">
               <j-spinner size="lg" />
@@ -165,7 +165,7 @@
           <div style="text-align: center">
             <j-text variant="heading-sm"> Please wait while you join the testing community </j-text>
             <j-text variant="body">
-              Right now this proccess might take a couple of minutes, so please be patient
+              Right now this process might take a couple of minutes, so please be patient
             </j-text>
             <j-flex j="center">
               <j-spinner size="lg" />
@@ -260,64 +260,75 @@ function cleanInviteLink(text: string) {
   const match = neighbourhoodUrlMatch[0];
   joiningLink.value = match;
   if (text && !match) {
-    appStore.setToast({ variant: "error", message: "We were not able to parse this invite link", open: true });
+    appStore.showDangerToast({ message: "We were not able to parse this invite link" });
   }
 }
 
 async function joinCommunityMethod() {
+  if (isJoiningCommunity.value) return;
   isJoiningCommunity.value = true;
 
-  const neighbourhoodUrl = joiningLink.value;
-  const existingPerspective = toRaw(myPerspectives.value).find((p) => p.sharedUrl === neighbourhoodUrl);
+  try {
+    const neighbourhoodUrl = joiningLink.value;
+    const existingPerspective = toRaw(myPerspectives.value).find((p) => p.sharedUrl === neighbourhoodUrl);
 
-  if (existingPerspective) {
-    appStore.setToast({ variant: "error", message: "You are already a member of this community", open: true });
-    isJoiningCommunity.value = false;
-    closeModal();
-    return;
-  }
+    if (existingPerspective) {
+      appStore.showDangerToast({ message: "You are already a member of this community" });
+      closeModal();
+      return;
+    }
 
-  joinCommunity({ joiningLink: neighbourhoodUrl }).then((community) => {
+    const community = await joinCommunity({ joiningLink: neighbourhoodUrl });
     router.push({ name: "community", params: { communityId: community.uuid } });
     closeModal();
-  });
+  } catch (error) {
+    console.error("Error joining community:", error);
+    appStore.showDangerToast({ message: "Failed to join community. Please try again." });
+  } finally {
+    isJoiningCommunity.value = false;
+  }
 }
 
-function createCommunityMethod() {
+async function createCommunityMethod() {
+  if (isCreatingCommunity.value) return;
   isCreatingCommunity.value = true;
-
-  createCommunity({
-    linkLangAddress: selectedLang.value,
-    name: newCommunityName.value,
-    description: newCommunityDesc.value,
-    image: newProfileImage.value,
-  })
-    .then((community) => {
-      closeModal();
-
-      // Refresh my communities in the app store
-      appStore.getMyCommunities();
-
-      // Navigate to the new community
-      router.push({ name: "community", params: { communityId: community.uuid } });
-    })
-    .catch((error) => {
-      console.error("Error creating community:", error);
-      appStore.setToast({ variant: "error", message: "Failed to create community. Please try again.", open: true });
+  try {
+    const community = await createCommunity({
+      linkLangAddress: selectedLang.value,
+      name: newCommunityName.value,
+      description: newCommunityDesc.value,
+      image: newProfileImage.value,
     });
+    // Refresh communities and navigate to the new one
+    await appStore.getMyCommunities();
+    router.push({ name: "community", params: { communityId: community.uuid } });
+    closeModal();
+  } catch (error) {
+    console.error("Error creating community:", error);
+    appStore.showDangerToast({ message: "Failed to create community." });
+  } finally {
+    isCreatingCommunity.value = false;
+  }
 }
 
-function createCommunityFromPerspective(perspective: any) {
+async function createCommunityFromPerspective(perspective: any) {
+  if (isCreatingCommunity.value) return;
   isCreatingCommunity.value = true;
-  createCommunity({
-    name: perspective.name,
-    description: newCommunityDesc.value,
-    image: newProfileImage.value,
-    perspectiveUuid: perspective.uuid,
-  }).then(() => {
-    router.push({ name: "community", params: { communityId: perspective.uuid } });
+  try {
+    const community = await createCommunity({
+      name: perspective.name,
+      description: newCommunityDesc.value,
+      image: newProfileImage.value,
+      perspectiveUuid: perspective.uuid,
+    });
+    router.push({ name: "community", params: { communityId: community.uuid } });
     closeModal();
-  });
+  } catch (error) {
+    console.error("Error creating community from perspective:", error);
+    appStore.showDangerToast({ message: "Failed to create community from perspective." });
+  } finally {
+    isCreatingCommunity.value = false;
+  }
 }
 
 async function joinTestingCommunity() {
@@ -326,6 +337,7 @@ async function joinTestingCommunity() {
     await appStore.joinTestingCommunity();
   } catch (e) {
     console.log("Error joining testing community:", e);
+    appStore.showDangerToast({ message: "Failed to join testing community." });
   } finally {
     closeModal();
   }
@@ -333,12 +345,24 @@ async function joinTestingCommunity() {
 
 onMounted(async () => {
   // Get link languages
-  const linkLangs = await ad4mClient.value.runtime.knownLinkLanguageTemplates();
-  const langExpression = await ad4mClient.value.expression.getMany(linkLangs.map((l) => `lang://${l}`));
-  const langMetaData = langExpression.map((l) => JSON.parse(l.data));
-
-  selectedLang.value = langMetaData[0].address;
-  langMeta.value = langMetaData;
+  try {
+    const linkLangs = await ad4mClient.value.runtime.knownLinkLanguageTemplates();
+    if (!linkLangs?.length) {
+      langMeta.value = [];
+      selectedLang.value = null;
+      appStore.setToast({ variant: "error", message: "No link languages available.", open: true });
+      return;
+    }
+    const langExpression = await ad4mClient.value.expression.getMany(linkLangs.map((l: string) => `lang://${l}`));
+    const langMetaData = langExpression.map((l: any) => JSON.parse(l.data));
+    langMeta.value = langMetaData;
+    selectedLang.value = langMetaData[0]?.address ?? null;
+  } catch (error) {
+    console.error("Error loading link languages:", error);
+    langMeta.value = [];
+    selectedLang.value = null;
+    appStore.showDangerToast({ message: "Failed to load link languages." });
+  }
 });
 </script>
 

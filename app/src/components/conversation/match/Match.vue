@@ -115,22 +115,26 @@ const visibleConversations = computed(() =>
 );
 
 async function getData() {
-  const channel = new Channel(perspective, channelId.value);
-  const newConversations = await channel.conversations();
+  try {
+    const channel = new Channel(perspective, channelId.value);
+    const newConversations = await channel.conversations();
 
-  // Find the conversation that contains the match
-  newConversations.forEach((conversation, conversationIndex) => {
-    if (conversation.baseExpression === props.match.baseExpression) {
-      // Store the conversations index & mark loading false to prevent further loading of children
-      matchIndexes.value = {
-        ...matchIndexes.value,
-        conversation: conversationIndex,
-      };
-      loading.value = false;
-    }
-  });
+    // Find the conversation that contains the match
+    newConversations.forEach((conversation, conversationIndex) => {
+      if (conversation.baseExpression === props.match.baseExpression) {
+        // Store the conversations index & mark loading false to prevent further loading of children
+        matchIndexes.value = {
+          ...matchIndexes.value,
+          conversation: conversationIndex,
+        };
+        loading.value = false;
+      }
+    });
 
-  conversations.value = newConversations;
+    conversations.value = newConversations;
+  } catch (e) {
+    console.error("Failed to load conversations", e);
+  }
 }
 
 function setMatchIndexes(indexes: MatchIndexes) {

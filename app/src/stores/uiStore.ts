@@ -9,9 +9,11 @@ export const useUiStore = defineStore(
     const mediaDevicesStore = useMediaDevicesStore();
     const { stream } = storeToRefs(mediaDevicesStore);
 
+    const appSidebarWidth = ref(100);
+    const communitySidebarWidth = ref(400);
+    const headerHeight = ref(60);
     const showAppSidebar = ref(true);
     const showCommunitySidebar = ref(true);
-    const communitySidebarWidth = ref(400);
     const callWindowOpen = ref(false);
     const callWindowFullscreen = ref(false);
     const callWindowWidth = ref(0);
@@ -25,7 +27,7 @@ export const useUiStore = defineStore(
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
     const windowState = ref<WindowState>("visible");
-    const windowWidth = ref(window.innerWidth);
+    const windowWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1024);
 
     const isMobile = computed(() => windowWidth.value < 800);
 
@@ -63,7 +65,7 @@ export const useUiStore = defineStore(
 
       // Desktop-specific width logic
       if (!isMobile.value) {
-        const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
+        const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
         setCallWindowWidth(open ? fullWidth / 2 : 0);
       }
 
@@ -79,7 +81,7 @@ export const useUiStore = defineStore(
       callWindowFullscreen.value = !callWindowFullscreen.value;
 
       // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
+      const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
       callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
     }
 
@@ -108,7 +110,9 @@ export const useUiStore = defineStore(
     }
 
     function updateWindowWidth(): void {
-      windowWidth.value = window.innerWidth;
+      if (typeof window !== "undefined") {
+        windowWidth.value = window.innerWidth;
+      }
     }
 
     function setCallWidgetsHeight(height: number): void {
@@ -117,10 +121,12 @@ export const useUiStore = defineStore(
 
     return {
       // State
+      appSidebarWidth,
+      headerHeight,
+      communitySidebarWidth,
       isMobile,
       showAppSidebar,
       showCommunitySidebar,
-      communitySidebarWidth,
       callWindowOpen,
       callWindowFullscreen,
       callWindowWidth,

@@ -38,6 +38,10 @@ export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection:
   }
 
   function stopResize() {
+    // Remove event listeners
+    document.removeEventListener("mousemove", doResize);
+    document.removeEventListener("mouseup", stopResize);
+
     if (!callWindow.value) return;
 
     isDragging.value = false;
@@ -52,10 +56,6 @@ export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection:
     if (mainAppLayout) mainAppLayout.style.transition = "width 0.5s ease-in-out";
     callWindow.value.style.transition = "all 0.5s ease-in-out";
     document.body.classList.remove("text-selection-disabled");
-
-    // Remove event listeners
-    document.removeEventListener("mousemove", doResize);
-    document.removeEventListener("mouseup", stopResize);
   }
 
   return {

@@ -102,26 +102,33 @@ function navigateToConversation(channelId: string) {
   });
 }
 
-watch(conversationChannels, async (newConversationChannels) => {
-  try {
-    const newConversations = await Promise.all(
-      newConversationChannels.map(async (channel) => {
-        const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-        return {
-          baseExpression: conversation.baseExpression,
-          name: conversation.conversationName,
-          summary: conversation.summary,
-          timestamp: conversation.timestamp,
-          channelId: channel.baseExpression,
-        };
-      })
-    );
+watch(
+  conversationChannels,
+  async (newConversationChannels) => {
+    try {
+      const newConversations = (
+        await Promise.all(
+          newConversationChannels.map(async (channel) => {
+            const [conversation] = await Conversation.findAll(perspective, { source: channel.baseExpression });
+            if (!conversation) return null;
+            return {
+              baseExpression: conversation.baseExpression,
+              name: conversation.conversationName,
+              summary: conversation.summary,
+              timestamp: conversation.timestamp,
+              channelId: channel.baseExpression,
+            };
+          })
+        )
+      ).filter(Boolean) as (SynergyGroup & { channelId: string })[];
 
-    conversations.value = newConversations;
-  } catch (error) {
-    console.error("Failed to load conversations:", error);
-  }
-});
+      conversations.value = newConversations;
+    } catch (error) {
+      console.error("Failed to load conversations:", error);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

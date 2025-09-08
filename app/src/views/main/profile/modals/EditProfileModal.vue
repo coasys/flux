@@ -45,7 +45,7 @@ import { useAppStore, useModalStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { updateProfile } from "@coasys/flux-api";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 
 const appStore = useAppStore();
 const modalStore = useModalStore();
@@ -81,15 +81,21 @@ async function saveProfile() {
 }
 
 async function loadProfileData() {
+  if (!me.value?.did) return;
   const profile = await getCachedAgentProfile(me.value.did);
-
-  profileBackground.value = profile.profileBackground;
-  profilePicture.value = profile.profilePicture;
-  username.value = profile.username;
-  bio.value = profile.bio;
+  profileBackground.value = profile.profileBackground ?? "";
+  profilePicture.value = profile.profilePicture ?? "";
+  username.value = profile.username ?? "";
+  bio.value = profile.bio ?? "";
 }
 
-onMounted(loadProfileData);
+// Load profile data when opening the modal
+watch(
+  () => modalStore.showEditProfile,
+  (open) => {
+    if (open) loadProfileData();
+  }
+);
 </script>
 
 <style scoped>

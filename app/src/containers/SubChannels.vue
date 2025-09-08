@@ -9,7 +9,13 @@
 
     <j-box mt="500">
       <j-flex gap="500" wrap>
-        <button class="item" v-for="channel in subChannels" @click="() => navigateToChannel(channel.baseExpression)">
+        <button
+          class="item"
+          v-for="channel in subChannels"
+          :key="channel.baseExpression"
+          type="button"
+          @click="() => navigateToChannel(channel.baseExpression)"
+        >
           <j-flex direction="column" a="center" gap="400">
             <j-flex a="center" gap="100">
               <j-icon :name="channel.isConversation ? 'flower2' : 'hash'" color="ui-500" />
@@ -96,6 +102,11 @@ watch(subChannels, (newSubChannels) => {
 
     &:hover {
       background-color: var(--j-color-ui-200);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--j-color-primary-400);
+      outline-offset: 2px;
     }
   }
 }

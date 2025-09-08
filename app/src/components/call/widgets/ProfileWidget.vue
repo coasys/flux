@@ -35,7 +35,7 @@
       <j-flex a="center" gap="300">
         <j-tooltip placement="top" title="Go to profile">
           <j-avatar
-            :hash="me.did"
+            :hash="me?.did || ''"
             :src="myProfile?.profileThumbnailPicture"
             @click="goToProfile"
             style="cursor: pointer"
@@ -98,13 +98,15 @@ const connectionWarning = computed(() => {
 });
 
 const connectionText = computed(() => {
-  if (mediaSettings.value.videoEnabled) return "Video connected";
-  else if (mediaSettings.value.audioEnabled) return "Voice connected";
+  if (mediaSettings.value?.videoEnabled) return "Video connected";
+  else if (mediaSettings.value?.audioEnabled) return "Voice connected";
   return "Connected";
 });
 
 function goToProfile() {
-  router.push({ name: "home", params: { did: me.value.did } });
+  const did = me.value?.did;
+  if (!did) return;
+  router.push({ name: "home", params: { did } });
 }
 
 function goToCallChannel() {

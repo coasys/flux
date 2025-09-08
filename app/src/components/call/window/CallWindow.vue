@@ -3,7 +3,11 @@
     <div
       ref="callWindow"
       :class="['call-window', { open: callWindowOpen }]"
-      :style="{ width: isMobile ? '100%' : `${callWindowWidth}px` }"
+      :style="{
+        width: isMobile ? '100%' : `${callWindowOpen ? callWindowWidth : 0}px`,
+        pointerEvents: callWindowOpen ? 'auto' : 'none',
+      }"
+      :aria-hidden="!callWindowOpen"
     >
       <CallResizeHandle v-if="!isMobile" @start-resize="startResize" />
 
@@ -24,7 +28,7 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow">
+        <button class="close-button" @click="closeCallWindow" aria-label="Close call window">
           <j-icon name="x" color="color-white" />
         </button>
       </div>

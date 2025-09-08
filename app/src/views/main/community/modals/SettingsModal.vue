@@ -12,7 +12,7 @@
           <j-tabs full :value="currentView" @change="(e: any) => (currentView = e.target.value)">
             <j-tab-item variant="button" value="theme-editor">
               <j-icon size="sm" name="eye" slot="start" />
-              Apperance
+              Appearance
             </j-tab-item>
           </j-tabs>
         </aside>

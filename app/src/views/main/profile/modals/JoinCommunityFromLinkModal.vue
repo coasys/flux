@@ -22,22 +22,28 @@
 </template>
 
 <script setup lang="ts">
-import { useModalStore } from "@/stores";
+import { useAppStore, useModalStore } from "@/stores";
 import { joinCommunity } from "@coasys/flux-api";
 import { ref } from "vue";
 
 const props = defineProps({ joiningLink: String });
 
+const appStore = useAppStore();
 const modalStore = useModalStore();
 
 const isJoiningCommunity = ref(false);
 
-function handleJoinCommunity() {
+async function handleJoinCommunity() {
   isJoiningCommunity.value = true;
-
-  joinCommunity({ joiningLink: props.joiningLink || "" })
-    .then(() => (modalStore.showJoinCommunity = false))
-    .finally(() => (isJoiningCommunity.value = false));
+  try {
+    await joinCommunity({ joiningLink: (props.joiningLink || "").trim() });
+    modalStore.showJoinCommunity = false;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    appStore.showDangerToast({ message });
+  } finally {
+    isJoiningCommunity.value = false;
+  }
 }
 </script>
 

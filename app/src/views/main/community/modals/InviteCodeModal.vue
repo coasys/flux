@@ -27,17 +27,20 @@ const { perspective } = useCommunityService();
 
 const hasCopied = ref(false);
 
-function getInviteCode() {
-  // Get the invite code to join community and copy to clipboard
-  const el = document.createElement("textarea");
-  el.value = `Hey! Here is an invite code to join my private community on Flux: ${perspective.sharedUrl}`;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand("copy");
-  document.body.removeChild(el);
-  hasCopied.value = true;
+async function getInviteCode() {
+  const url = perspective.sharedUrl;
+  if (!url) return appStore.showDangerToast({ message: "No invite code available yet." });
 
-  appStore.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
+  const text = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    hasCopied.value = true;
+    appStore.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
+  } catch (error) {
+    console.error("Failed to copy to clipboard:", error);
+    appStore.showDangerToast({ message: "Failed to copy invite code. Please try again." });
+  }
 }
 
 function toggleModal(open: boolean): void {

@@ -179,9 +179,8 @@ async function updateChannel() {
 
     await Promise.all(addedApps);
 
-    if (isConversation) {
+    if (isConversation.value) {
       // Update the assosiated conversation name
-      // Todo: use unref(recentConversations) here if needed
       const conversationData = recentConversations.value.find(
         (c) => c.channel.baseExpression === channel.value.baseExpression
       );
@@ -202,6 +201,7 @@ async function updateChannel() {
     }
   } finally {
     isSaving.value = false;
+    modalStore.showEditChannel = false;
   }
 }
 

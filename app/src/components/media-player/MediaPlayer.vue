@@ -102,7 +102,7 @@ const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 const profile = ref<Profile>();
 const videoElement = ref<HTMLVideoElement>();
 
-const showVideo = computed(() => stream && (props.videoState === "on" || props.screenShareState === "on"));
+const showVideo = computed(() => !!stream.value && (props.videoState === "on" || props.screenShareState === "on"));
 const flipVideo = computed(() => props.isMe && props.screenShareState !== "on");
 const loadingMessage = computed(() => {
   if (!props.streamReady) return "Loading...";
