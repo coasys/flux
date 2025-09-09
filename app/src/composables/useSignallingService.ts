@@ -1,8 +1,9 @@
 import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from "@/stores";
+import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
+import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
@@ -10,7 +11,7 @@ const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
 const MAX_AGE = 60000; // 60 seconds before "offline"
 const NEW_STATE = "agent/new-state";
 
-export function useSignallingService(communityId: string, neighbourhood: NeighbourhoodProxy): SignallingService {
+export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();
@@ -170,11 +171,12 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     // } as AgentState,
   };
 
-  const agents = ref<Record<string, AgentState>>(sampleAgents);
-  const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
-
   let heartbeatTimeout: NodeJS.Timeout | null = null;
   let cleanupInterval: NodeJS.Timeout | null = null;
+
+  const agents = ref<Record<string, AgentState>>(sampleAgents);
+  const agentsWithProfiles = ref<AgentData[]>([]);
+  const signalHandlers = ref<Array<(signal: PerspectiveExpression) => void>>([]);
 
   function addSignalHandler(handler: (signal: PerspectiveExpression) => void): void {
     signalHandlers.value.push(handler);
@@ -313,8 +315,8 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     return agents.value[did];
   }
 
-  function setProcessingState(newState: ProcessingState): void {
-    const processing = newState ? { ...myState.value.processing, ...newState } : null;
+  function setProcessingState(newState: Partial<ProcessingState> | null): void {
+    const processing = newState ? ({ ...myState.value.processing, ...newState } as ProcessingState) : null;
     myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
     agents.value[me.value.did] = myState.value;
     broadcastState();
@@ -326,6 +328,37 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
     broadcastState();
   }
 
+  function getAgentsInChannel(channelId?: string) {
+    return computed<AgentData[]>(() => {
+      return agentsWithProfiles.value.filter(
+        (agent) => !["offline", "invisible"].includes(agent.status) && agent.currentRoute?.channelId === channelId
+      );
+    });
+  }
+
+  function getAgentsInCall(channelId?: string) {
+    return computed<AgentData[]>(() =>
+      agentsWithProfiles.value.filter(
+        (agent) => !["offline", "invisible"].includes(agent.status) && agent.callRoute?.channelId === channelId
+      )
+    );
+  }
+
+  // Watch for changes in the agents map and update agentsWithProfiles
+  watch(
+    agents,
+    async (newAgents) => {
+      const agentEntries = Object.entries(newAgents);
+      agentsWithProfiles.value = await Promise.all(
+        agentEntries.map(async ([did, agent]) => ({
+          ...agent,
+          ...(await getCachedAgentProfile(did)),
+        }))
+      );
+    },
+    { deep: true, immediate: true }
+  );
+
   // Watch for state changes in the stores & broadcast updates to peers
   watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
@@ -334,23 +367,17 @@ export function useSignallingService(communityId: string, neighbourhood: Neighbo
   watch(defaultLLM, (newDefaultLLM) => updateMyState("aiEnabled", !!newDefaultLLM));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
 
-  // Dispatch custom event when agents map changes for webcomponent plugins to listen to
-  watch(
-    agents,
-    (newAgentsState) =>
-      window.dispatchEvent(new CustomEvent(`${communityId}-new-agents-state`, { detail: newAgentsState })),
-    { deep: true, immediate: true }
-  );
-
   return {
     signalling,
     agents,
-    setProcessingState,
-    getAgentState,
     startSignalling,
     stopSignalling,
     addSignalHandler,
     removeSignalHandler,
     sendSignal,
+    setProcessingState,
+    getAgentState,
+    getAgentsInChannel,
+    getAgentsInCall,
   };
 }

@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { useAppStore, useThemeStore, useUiStore } from "@/stores";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 
 const appStore = useAppStore();
 const uiStore = useUiStore();
@@ -47,18 +47,30 @@ const themeStore = useThemeStore();
 const { toast } = storeToRefs(appStore);
 const { globalError, showGlobalLoading } = storeToRefs(uiStore);
 
-onMounted(async () => themeStore.changeCurrentTheme("global"));
+// Initialise the global theme
+onMounted(() => themeStore.changeCurrentTheme("global"));
+
+// Set up resize listeners to keep track of window width for responsive design
+onMounted(() => {
+  uiStore.updateWindowWidth();
+  window.addEventListener("resize", uiStore.updateWindowWidth);
+});
+onUnmounted(() => window.removeEventListener("resize", uiStore.updateWindowWidth));
 </script>
 
 <style>
 :root {
-  --app-main-sidebar-width: 100px;
-  --app-header-height: 60px;
+  j-menu-group::part(summary) {
+    margin: 5px 0;
+  }
+
+  j-menu-group::part(summary)::after {
+    top: 5px;
+  }
 }
 
 @media (max-width: 800px) {
   :root {
-    --app-main-sidebar-width: 75px;
     --j-font-base-size: 15px !important;
   }
 }

@@ -1,22 +1,34 @@
 <template>
   <div v-if="profile" class="profile__container">
-    <div :style="{ backgroundImage: `url(${profileBackground})` }" class="profile__bg" />
+    <div :style="{ backgroundImage: `url('${profile?.profileBackground}')` }" class="profile__bg" />
 
     <div class="profile">
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
-            <j-button v-if="sameAgent" variant="ghost" @click="() => (modalsStore.showEditProfile = true)">
-              <j-icon size="sm" name="pen"></j-icon>
+            <div
+              class="avatar-wrapper"
+              :class="{ 'is-editable': sameAgent }"
+              @click="sameAgent && (modalStore.showEditProfile = true)"
+            >
+              <j-avatar class="avatar" :hash="did" :src="profile?.profilePicture" />
+              <div class="avatar-hover" v-if="sameAgent">
+                <j-icon name="pen" />
+              </div>
+            </div>
+
+            <j-button v-if="sameAgent" variant="ghost" @click="() => (modalStore.showEditProfile = true)">
+              <j-icon size="sm" name="pen" />
             </j-button>
           </div>
+
           <j-box pt="400" pb="300">
             <j-text nomargin v-if="profile.familyName || profile.givenName" variant="heading-sm">
               {{ `${profile.givenName} ${profile.familyName}` }}
             </j-text>
             <j-text nomargin size="500" weight="500" color="ui-500"> @{{ profile.username }} </j-text>
           </j-box>
+
           <j-box pt="400">
             <j-text nomargin size="500" color="ui-800" v-if="profile.bio">
               {{ profile.bio || "No bio yet" }}
@@ -33,7 +45,7 @@
 
             <div v-show="currentTab === 'web2'">
               <j-box py="500" a="right">
-                <j-button v-if="sameAgent" variant="primary" @click="() => (showAddlinkModal = true)">
+                <j-button v-if="sameAgent" variant="primary" @click="() => (modalStore.showAddWebLink = true)">
                   Add Link
                 </j-button>
               </j-box>
@@ -64,13 +76,8 @@
                   >
                     <div class="wallet__avatar" v-html="getIcon(proof.deviceKey)"></div>
                     <j-badge size="sm" variant="primary">
-                      <j-icon
-                        size="xs"
-                        v-if="verifiedProofs[proof.deviceKey]"
-                        color="success-500"
-                        name="check"
-                      ></j-icon>
-                      <j-icon size="xs" color="danger-500" name="cross" v-else> </j-icon>
+                      <j-icon size="xs" v-if="verifiedProofs[proof.deviceKey]" color="success-500" name="check" />
+                      <j-icon size="xs" color="danger-500" name="cross" v-else />
                       {{ verifiedProofs[proof.deviceKey] ? "Verified" : "Not verified" }}
                     </j-badge>
                     <j-box pt="200">
@@ -84,7 +91,7 @@
                   </div>
                   <a v-if="sameAgent" class="wallet" href="https://dapp.ad4m.dev/" target="_blank">
                     <j-text size="600" nomargin>
-                      <j-icon name="plus"></j-icon>
+                      <j-icon name="plus" />
                       Add
                     </j-text>
                   </a>
@@ -99,57 +106,26 @@
       </div>
     </div>
 
-    <div class="sidebar" @click="() => uiStore.setAppSidebarOpen(!uiStore.showAppSidebar)">
-      <j-icon name="layout-sidebar" size="md"></j-icon>
+    <div class="sidebar" @click="uiStore.toggleAppSidebar">
+      <j-icon name="layout-sidebar" size="md" />
     </div>
   </div>
-  <j-modal
-    v-if="showAddlinkModal"
-    size="sm"
-    :open="showAddlinkModal"
-    @toggle="(e: any) => setAddLinkModal(e.target.open)"
-  >
-    <WebLinkAdd @cancel="() => setAddLinkModal(false)" @submit="() => setAddLinkModal(false)" />
-  </j-modal>
 
-  <j-modal
-    v-if="showJoinCommunityModal"
-    size="lg"
-    :open="showJoinCommunityModal"
-    @toggle="(e: any) => setShowJoinCommunityModal(e.target.open)"
-  >
-    <ProfileJoinLink
-      @submit="() => setShowJoinCommunityModal(false)"
-      @cancel="() => setShowJoinCommunityModal(false)"
-      :joiningLink="joiningLink"
-    ></ProfileJoinLink>
-  </j-modal>
-  <j-modal
-    v-if="modalsStore.showEditProfile"
-    :open="modalsStore.showEditProfile"
-    @toggle="(e: any) => (modalsStore.showEditProfile = e.target.open)"
-  >
-    <edit-profile
-      @submit="() => (modalsStore.showEditProfile = false)"
-      @cancel="() => (modalsStore.showEditProfile = false)"
-    />
-  </j-modal>
-  <router-view></router-view>
+  <Modals />
+
+  <RouterView />
 </template>
 
 <script setup lang="ts">
-import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
+import Modals from "@/views/main/profile/modals/Modals.vue";
 import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
 import { getAgentWebLinks } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
-import { getImage } from "@coasys/flux-utils";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Attestations from "./Attestations.vue";
-import ProfileJoinLink from "./ProfileJoinLink.vue";
-import WebLinkAdd from "./WebLinkAdd.vue";
 import WebLinkCard from "./WebLinkCard.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
@@ -161,7 +137,7 @@ const route = useRoute();
 const router = useRouter();
 
 const appStore = useAppStore();
-const modalsStore = useModalStore();
+const modalStore = useModalStore();
 const themeStore = useThemeStore();
 const uiStore = useUiStore();
 
@@ -170,32 +146,18 @@ const { ad4mClient } = appStore;
 
 const profile = ref<Profile | null>(null);
 const currentTab = ref("web3");
-const showAddlinkModal = ref(false);
-const showAddProofModal = ref(false);
-const showEditlinkModal = ref(false);
-const showJoinCommunityModal = ref(false);
+const showAddProofModal = ref(false); // TODO: Currently not used
+const showEditLinkModal = ref(false); // TODO: Currently not used
 const weblinks = ref<any[]>([]);
-const profileBackground = ref("");
-const joiningLink = ref("");
 const editArea = ref(null);
 const verifiedProofs = ref<Record<string, boolean>>({});
 const selectedAddress = ref("");
 const proofs = ref<EntanglementProof[]>([]);
 
-// Computed properties
-const did = computed((): string => {
-  return (route.params.did as string) || me.value?.did || "";
-});
+const did = computed((): string => (route.params.did as string) || me.value?.did || "");
+const sameAgent = computed(() => did.value === me.value?.did);
+const hasHistory = computed(() => router?.options?.history?.state?.back);
 
-const sameAgent = computed(() => {
-  return did.value === me.value?.did;
-});
-
-const hasHistory = computed(() => {
-  return router?.options?.history?.state?.back;
-});
-
-// Methods
 function getIcon(address: string) {
   if (address) {
     const seed = parseInt(address.slice(2, 10), 16);
@@ -269,17 +231,9 @@ async function removeProof(proof: EntanglementProof) {
   getEntanglementProofs();
 }
 
-function setAddLinkModal(value: boolean): void {
-  showAddlinkModal.value = value;
-}
-
 function setEditLinkModal(value: boolean, area: any): void {
-  showEditlinkModal.value = value;
+  showEditLinkModal.value = value;
   editArea.value = area;
-}
-
-function setShowJoinCommunityModal(value: boolean): void {
-  showJoinCommunityModal.value = value;
 }
 
 async function deleteWebLink(link: LinkExpression) {
@@ -294,22 +248,29 @@ async function getAgentAreas() {
 onBeforeMount(() => themeStore.changeCurrentTheme("global"));
 
 // Watchers
-watch(showAddlinkModal, (val) => {
-  if (!val) getAgentAreas();
-});
+watch(
+  () => modalStore.showAddWebLink,
+  (val) => {
+    if (!val) getAgentAreas();
+  }
+);
 
 watch(showAddProofModal, (val) => {
   if (!val) getEntanglementProofs();
 });
 
-watch(showEditlinkModal, (val) => {
+watch(showEditLinkModal, (val) => {
   if (!val) getAgentAreas();
 });
 
+// Refresh profile cache and agent areas when edit modal closed
 watch(
-  () => modalsStore.showEditProfile,
-  (val) => {
-    if (!val) getAgentAreas();
+  () => modalStore.showEditProfile,
+  async (val) => {
+    if (!val) {
+      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, true);
+      getAgentAreas();
+    }
   }
 );
 
@@ -331,14 +292,6 @@ watch(
   { immediate: true, deep: true }
 );
 
-watch(
-  profile,
-  async (val) => {
-    if (val) profileBackground.value = await getImage(val.profileBackground);
-  },
-  { immediate: true }
-);
-
 // Load profile when route changes
 watch(
   () => route.params.did,
@@ -350,7 +303,7 @@ watch(
 );
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .profile {
   --avatar-size: clamp(var(--j-size-xxl), 10vw, 160px);
   width: 100%;
@@ -360,21 +313,52 @@ watch(
   padding-right: var(--j-space-500);
 }
 
-.avatar {
-  --j-avatar-size: var(--avatar-size);
-  --j-skeleton-height: var(--avatar-size);
-  --j-skeleton-width: var(--avatar-size);
-}
+.avatar-wrapper {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  position: relative;
 
-.avatar::part(base) {
-  border-radius: 20px;
-  display: inline-block;
-  border-radius: 30px;
-  border: 7px solid var(--j-color-white);
-}
+  &.is-editable {
+    cursor: pointer;
+  }
 
-.avatar::part(img) {
-  border-radius: 20px;
+  .avatar {
+    --j-avatar-size: var(--avatar-size);
+    --j-skeleton-height: var(--avatar-size);
+    --j-skeleton-width: var(--avatar-size);
+
+    &::part(base) {
+      border-radius: 20px;
+      display: inline-block;
+      border-radius: 30px;
+      border: 7px solid var(--j-color-white);
+    }
+
+    &::part(img) {
+      border-radius: 20px;
+    }
+  }
+
+  .avatar-hover {
+    display: flex;
+    opacity: 0;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    border-radius: 20px;
+    width: calc(var(--avatar-size) - 14px);
+    height: calc(var(--avatar-size) - 14px);
+    background-color: rgba(0, 0, 0, 0.4);
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &:hover {
+    .avatar-hover {
+      opacity: 1;
+    }
+  }
 }
 
 .profile__layout {
@@ -389,6 +373,7 @@ watch(
   overflow-y: auto;
   position: relative;
   padding-top: env(safe-area-inset-top);
+  background-color: var(--app-drawer-bg-color);
 }
 
 .profile__content {
@@ -445,8 +430,8 @@ watch(
 
 .sidebar {
   position: absolute;
-  top: calc(20px + env(safe-area-inset-top));
-  left: 20px;
+  top: var(--j-space-500);
+  left: var(--j-space-500);
   cursor: pointer;
 }
 

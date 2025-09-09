@@ -4,7 +4,7 @@
       <div class="img-upload__avatar">
         <img :src="value" v-if="value" />
         <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-        <j-button class="remove" v-if="value" @click="removeImage" size="sm"> Remove image </j-button>
+        <j-button class="remove" variant="primary" v-if="value" @click="removeImage" size="sm">Remove image</j-button>
       </div>
     </j-flex>
   </div>
@@ -28,9 +28,11 @@
             :src="tempProfileImage"
             :stencil-props="{ aspectRatio: 12 / 4 }"
           />
-          <j-box pt="300">
-            <j-button @click="clearImage">Cancel</j-button>
-            <j-button variant="primary" @click="selectImage">Ok</j-button>
+          <j-box pt="500">
+            <j-flex gap="400" j="center">
+              <j-button @click="clearImage">Cancel</j-button>
+              <j-button variant="primary" @click="selectImage">Ok</j-button>
+            </j-flex>
           </j-box>
         </div>
       </j-box>
@@ -107,7 +109,7 @@ watch(tempProfileImage, (newValue) => emit("hide", newValue !== null));
   background-color: var(--junto-border-color);
   background-size: cover;
   width: 100%;
-  height: 200px;
+  min-height: 236px;
 }
 .img-upload j-avatar {
   --j-avatar-size: 7rem;
@@ -120,7 +122,7 @@ watch(tempProfileImage, (newValue) => emit("hide", newValue !== null));
   text-align: center;
   cursor: pointer;
   width: 100%;
-  height: 200px;
+  min-height: 236px;
   position: relative;
 }
 

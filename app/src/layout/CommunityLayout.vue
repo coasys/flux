@@ -3,7 +3,11 @@
     class="community-layout"
     :class="{ 'community-layout--closed': !showCommunitySidebar, 'community-layout--is-dragging': isDragging }"
   >
-    <aside ref="sidebar" class="community-layout__drawer" :style="{ width: `${communitySidebarWidth}px` }">
+    <aside
+      ref="sidebar"
+      class="community-layout__drawer"
+      :style="{ width: `${communitySidebarWidth}px`, paddingBottom: `calc(${callWidgetsHeight + 20}px)` }"
+    >
       <span role="presentation" class="community-layout__resize-handle" @mousedown="startResize" />
       <slot name="sidebar"></slot>
     </aside>
@@ -20,7 +24,7 @@ import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
 const uiStore = useUiStore();
-const { showCommunitySidebar, communitySidebarWidth } = storeToRefs(uiStore);
+const { showCommunitySidebar, communitySidebarWidth, callWidgetsHeight } = storeToRefs(uiStore);
 
 const sidebar = ref<HTMLElement | null>(null);
 const isDragging = ref(false);
@@ -76,6 +80,9 @@ function stopResize() {
   background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 @media (max-width: 800px) {
@@ -132,10 +139,9 @@ function stopResize() {
 }
 
 .community-layout__main {
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 0;
   max-height: 100vh;
-  overflow-y: auto;
-  flex: 1;
   background: var(--app-main-content-bg-color, var(--j-color-white));
 }
 

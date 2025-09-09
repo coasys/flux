@@ -10,6 +10,12 @@ export interface NeighbourhoodMeta {
   languages: { [x: string]: string };
 }
 
+export interface FileData {
+  name: string;
+  file_type: string;
+  data_base64: string;
+}
+
 export interface Community {
   id: string;
   uuid: string;
@@ -17,8 +23,8 @@ export interface Community {
   timestamp: string;
   name: string;
   description: string;
-  image: string;
-  thumbnail: string;
+  image: string | FileData | undefined;
+  thumbnail: string | FileData | undefined;
   neighbourhoodUrl: string;
   members: string[];
 }
@@ -211,9 +217,12 @@ export interface RouteParams {
 
 export interface ProcessingState {
   step: number;
-  channelId?: string;
-  itemIds?: string[];
-  author?: string;
+  channelId: string;
+  itemIds: string[];
+  author: string;
+  communityName?: string;
+  channelName?: string;
+  conversationName?: string;
 }
 
 export type MediaSettings = { audioEnabled: boolean; videoEnabled: boolean; screenShareEnabled: boolean };
@@ -229,14 +238,17 @@ export interface AgentState {
 }
 
 export type CallHealth = "healthy" | "warnings" | "connections-lost";
+export type AgentData = Profile & AgentState;
 export interface SignallingService {
   signalling: Ref<boolean>;
   agents: Ref<Record<string, AgentState>>;
-  setProcessingState: (processing: ProcessingState) => void;
+  setProcessingState: (newState: Partial<ProcessingState> | null) => void;
   getAgentState(did: string): AgentState | undefined;
   startSignalling: () => void;
   stopSignalling: () => void;
   addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
   sendSignal: (link: Link) => void;
+  getAgentsInChannel: (channelId?: string) => ComputedRef<AgentData[]>;
+  getAgentsInCall: (channelId?: string) => ComputedRef<AgentData[]>;
 }

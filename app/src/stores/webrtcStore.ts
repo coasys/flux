@@ -5,7 +5,6 @@ import popWav from "@/assets/audio/pop.wav";
 import { HEARTBEAT_INTERVAL } from "@/composables/useSignallingService";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { PerspectiveExpression } from "@coasys/ad4m";
-import { Channel, Community } from "@coasys/flux-api";
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from "@coasys/flux-types";
 import { Howl } from "howler";
 import { defineStore, storeToRefs } from "pinia";
@@ -81,7 +80,7 @@ export const useWebrtcStore = defineStore(
 
     const joiningCall = ref(false);
     const inCall = ref(false);
-    const callRoute = ref<RouteParams>(route.params);
+    const callRoute = ref<RouteParams>({});
     const agentsInCall = ref<AgentWithProfile[]>([]);
     const callHealth = ref<CallHealth>("healthy");
     const callEmojis = ref<CallEmoji[]>([]);
@@ -95,16 +94,6 @@ export const useWebrtcStore = defineStore(
     const communityService = computed(() => getCommunityService(callRoute.value.communityId || ""));
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
-    // TODO: Get these when call window is opened instead to avoid complex computed properties?
-    const callCommunityName = computed(
-      () => (communityService.value?.community as unknown as Community)?.name || "No community name"
-    );
-    const callChannelName = computed(() => {
-      const callChannel = (communityService.value?.channels as any)?.find(
-        (c: Channel) => c.baseExpression === callRoute.value.channelId
-      );
-      return callChannel?.name || "No channel name";
-    });
 
     let healthCheckInterval: NodeJS.Timeout | null = null;
 
@@ -651,17 +640,11 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    // Update the call route or close call window on route param changes if not already in a call
+    // Close the call window on route param changes if not in a call or a channel
     watch(
       () => route.params,
       async (newParams) => {
-        // Skip if we're already in a call
-        if (inCall.value) return;
-
-        // If channel id present in the params update the call route
-        if (newParams.channelId) callRoute.value = newParams;
-        // Otherwise, close the call window
-        else uiStore.setCallWindowOpen(false);
+        if (!inCall.value && !newParams.channelId) uiStore.setCallWindowOpen(false);
       }
     );
 
@@ -756,8 +739,6 @@ export const useWebrtcStore = defineStore(
       callHealth,
       callEmojis,
       communityService,
-      callCommunityName,
-      callChannelName,
       peerConnections,
       joiningCall,
       iceServers,

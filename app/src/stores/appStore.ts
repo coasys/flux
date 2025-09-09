@@ -2,11 +2,11 @@ import iconPath from "@/assets/images/icon.png";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { ToastState, UpdateState } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Ad4mClient, Agent } from "@coasys/ad4m";
+import { Ad4mClient, Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { Community, joinCommunity } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
 import { defineStore } from "pinia";
-import { computed, ref, shallowRef } from "vue";
+import { computed, ref, shallowRef, toRaw } from "vue";
 
 export const useAppStore = defineStore(
   "appStore",
@@ -15,8 +15,9 @@ export const useAppStore = defineStore(
     const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>("not-available");
     const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
-    const notification = ref<{ globalNotification: boolean }>({ globalNotification: false });
-    const myCommunities = ref<Record<string, Community>>({});
+    const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
+    const myPerspectives = ref<PerspectiveProxy[]>([]);
+    const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
 
     // Store a shallow ref of the Ad4mClient so we retain access to its methods
     const ad4mClientRef = shallowRef<Ad4mClient | null>(null);
@@ -25,6 +26,10 @@ export const useAppStore = defineStore(
     const ad4mClient = computed(() => {
       if (!ad4mClientRef.value) console.error("Trying to access Ad4mClient before initialization");
       return ad4mClientRef.value as Ad4mClient;
+    });
+
+    const hasJoinedTestingCommunity = computed(() => {
+      return !!myPerspectives.value.find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
     });
 
     // Mutations
@@ -78,15 +83,23 @@ export const useAppStore = defineStore(
     }
 
     async function getMyCommunities() {
-      const allMyPerspectives = await ad4mClient.value.perspective.all();
-      await Promise.all(
-        allMyPerspectives
-          .filter((p) => p.neighbourhood)
-          .map(async (p) => {
-            const community = (await Community.findAll(p))[0];
-            if (community) myCommunities.value[p.uuid] = community;
+      // Get all my perspectives
+      myPerspectives.value = await ad4mClient.value.perspective.all();
+
+      // Filter perspectives that have a neighbourhood and map to community entries
+      const communityEntries = await Promise.all(
+        toRaw(myPerspectives.value)
+          .filter((perspective) => perspective.neighbourhood)
+          .map(async (perspective) => {
+            const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
+            return community ? ([perspective.uuid, community] as const) : null;
           })
       );
+
+      // Filter out null results and create object from entries
+      const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
+
+      myCommunities.value = { ...myCommunities.value, ...newCommunities };
     }
 
     async function refreshMyProfile() {
@@ -102,7 +115,9 @@ export const useAppStore = defineStore(
       updateState,
       toast,
       notification,
+      myPerspectives,
       myCommunities,
+      hasJoinedTestingCommunity,
 
       // Mutations
       setAdamClient,
@@ -119,5 +134,5 @@ export const useAppStore = defineStore(
       refreshMyProfile,
     };
   },
-  { persist: { omit: ["myCommunities"] } }
+  { persist: { omit: ["myPerspectives", "myCommunities"] } }
 );

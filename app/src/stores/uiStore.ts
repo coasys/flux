@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useMediaDevicesStore } from "./mediaDevicesStore";
-import { WindowState } from "./types";
+import { VideoLayoutOption, WindowState } from "./types";
 
 export const useUiStore = defineStore(
   "uiStore",
@@ -9,15 +9,27 @@ export const useUiStore = defineStore(
     const mediaDevicesStore = useMediaDevicesStore();
     const { stream } = storeToRefs(mediaDevicesStore);
 
+    const appSidebarWidth = ref(100);
+    const communitySidebarWidth = ref(400);
+    const headerHeight = ref(60);
     const showAppSidebar = ref(true);
     const showCommunitySidebar = ref(true);
-    const communitySidebarWidth = ref(330);
     const callWindowOpen = ref(false);
     const callWindowFullscreen = ref(false);
     const callWindowWidth = ref(0);
+    const callWidgetsHeight = ref(0);
+    const selectedVideoLayout = ref<VideoLayoutOption>({
+      label: "16/9 aspect ratio",
+      class: "16-by-9",
+      icon: "aspect-ratio",
+    });
+    const focusedVideoId = ref("");
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: "" });
     const windowState = ref<WindowState>("visible");
+    const windowWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1024);
+
+    const isMobile = computed(() => windowWidth.value < 800);
 
     // Mutations
     function toggleCommunitySidebar(): void {
@@ -25,7 +37,15 @@ export const useUiStore = defineStore(
     }
 
     function toggleAppSidebar(): void {
+      // Prevent width transition when toggling the app sidebar
+      const mainAppLayout = document.getElementById("app-layout-main");
+      if (mainAppLayout) mainAppLayout.style.transition = "none";
+
+      // Toggle the app sidebar visibility
       showAppSidebar.value = !showAppSidebar.value;
+
+      // Reset the transition after toggling
+      if (mainAppLayout) setTimeout(() => (mainAppLayout.style.transition = "width 0.5s ease-in-out"), 200);
     }
 
     function setAppSidebarOpen(open: boolean): void {
@@ -43,9 +63,11 @@ export const useUiStore = defineStore(
     function setCallWindowOpen(open: boolean): void {
       callWindowOpen.value = open;
 
-      // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
-      setCallWindowWidth(open ? fullWidth / 2 : 0);
+      // Desktop-specific width logic
+      if (!isMobile.value) {
+        const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
+        setCallWindowWidth(open ? fullWidth / 2 : 0);
+      }
 
       // Initialise a stream if the call window is opened without one
       if (open && !stream.value) mediaDevicesStore.createStream();
@@ -59,12 +81,20 @@ export const useUiStore = defineStore(
       callWindowFullscreen.value = !callWindowFullscreen.value;
 
       // Update the call window width
-      const fullWidth = window.innerWidth - communitySidebarWidth.value - 100;
+      const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
       callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
     }
 
     function setCallWindowWidth(width: number): void {
       callWindowWidth.value = width;
+    }
+
+    function setVideoLayout(layout: VideoLayoutOption): void {
+      selectedVideoLayout.value = layout;
+    }
+
+    function setFocusedVideoId(id: string) {
+      focusedVideoId.value = id;
     }
 
     function setWindowState(state: WindowState): void {
@@ -79,17 +109,33 @@ export const useUiStore = defineStore(
       globalError.value = error;
     }
 
+    function updateWindowWidth(): void {
+      if (typeof window !== "undefined") {
+        windowWidth.value = window.innerWidth;
+      }
+    }
+
+    function setCallWidgetsHeight(height: number): void {
+      callWidgetsHeight.value = height;
+    }
+
     return {
       // State
+      appSidebarWidth,
+      headerHeight,
+      communitySidebarWidth,
+      isMobile,
       showAppSidebar,
       showCommunitySidebar,
-      communitySidebarWidth,
       callWindowOpen,
       callWindowFullscreen,
       callWindowWidth,
+      selectedVideoLayout,
+      focusedVideoId,
       showGlobalLoading,
       globalError,
       windowState,
+      callWidgetsHeight,
 
       // Actions
       toggleCommunitySidebar,
@@ -100,11 +146,27 @@ export const useUiStore = defineStore(
       setCallWindowOpen,
       toggleCallWindowFullscreen,
       setCallWindowWidth,
+      setVideoLayout,
+      setFocusedVideoId,
       setWindowState,
       setGlobalLoading,
       setGlobalError,
       setCallWindowFullscreen,
+      updateWindowWidth,
+      setCallWidgetsHeight,
     };
   },
-  { persist: { omit: ["callWindowOpen", "callWindowWidth", "callWindowFullscreen"] } }
+  {
+    persist: {
+      omit: [
+        "showAppSidebar",
+        "callWindowOpen",
+        "callWindowWidth",
+        "callWindowFullscreen",
+        "selectedVideoLayout",
+        "focusedVideoId",
+        "callWidgetsHeight",
+      ],
+    },
+  }
 );

@@ -20,6 +20,12 @@ export const CHANNEL = "flux://has_channel";
 
 export const CHANNEL_NAME = "flux://has_channel_name";
 
+export const CHANNEL_DESCRIPTION = "flux://has_channel_description";
+
+export const CHANNEL_IS_CONVERSATION = "flux://channel_is_conversation";
+
+export const CHANNEL_IS_PINNED = "flux://channel_is_pinned";
+
 export const FLUX_APP = "flux://has_app";
 
 export const AD4M_CLASS = "ad4m://has_class";

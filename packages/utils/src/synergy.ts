@@ -1,13 +1,13 @@
 export const icons = { Message: "chat", Post: "postcard", Task: "kanban" };
-export const groupingOptions = ["Conversations", "Subgroups", "Items"];
-export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"];
+export const groupingOptions = ["Conversations", "Subgroups", "Items"] as const;
+export const itemTypeOptions = ["All Types", "Messages", "Posts", "Tasks"] as const;
 
 export type GroupingOption = (typeof groupingOptions)[number];
 export type ItemTypeOption = (typeof itemTypeOptions)[number];
 export type ItemType = "Message" | "Post" | "Task";
 export type SearchType = "" | "vector" | "topic";
 export type BlockType = "conversation" | "subgroup" | "item";
-export type FilterSettings = { grouping: GroupingOption; itemType: "All Types" | ItemType; includeChannel: boolean };
+export type FilterSettings = { grouping: GroupingOption; itemType: ItemTypeOption; includeChannel: boolean };
 export type MatchIndexes = { conversation: number | undefined; subgroup: number | undefined; item: number | undefined };
 export type Link = { source: string; predicate: string; target: string };
 export type LinkExpression = { author: string; data: Link };
@@ -19,6 +19,9 @@ export class SynergyGroup {
   summary: string;
   timestamp: string;
   index?: number;
+  parentIndex?: number;
+  end?: string;
+  start?: string;
 }
 
 export class SynergyItem {

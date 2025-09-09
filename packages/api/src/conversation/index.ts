@@ -283,7 +283,7 @@ export default class Conversation extends Ad4mModel {
 
   async processNewExpressions(
     unprocessedItems: SynergyItem[],
-    updateProcessingState: (state?: ProcessingState) => void
+    updateProcessingState: (newState: Partial<ProcessingState> | null) => void
   ) {
     const showLogs = false; // Set to true to enable detailed logging
     const duration = (start, end) => `${((end - start) / 1000).toFixed(1)} secs`;

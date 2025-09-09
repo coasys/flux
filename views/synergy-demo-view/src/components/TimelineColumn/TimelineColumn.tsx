@@ -242,14 +242,14 @@ export default function TimelineColumn({
     setProcessingState(processingAgents[0]?.processing || null);
   }
 
-  async function handleSyncStateChanged(event: CustomEvent) {
-    synced.current = event.detail.synced;
+  // async function handleSyncStateChanged(event: CustomEvent) {
+  //   synced.current = event.detail.synced;
 
-    if (synced.current && !gettingData.current) {
-      const newUnproccessedItems = await getUnprocessedItems();
-      checkAndProcessIfNeeded(newUnproccessedItems);
-    }
-  }
+  //   if (synced.current && !gettingData.current) {
+  //     const newUnproccessedItems = await getUnprocessedItems();
+  //     checkAndProcessIfNeeded(newUnproccessedItems);
+  //   }
+  // }
 
   useEffect(() => {
     // Wait until appstore & signallingService are available before initializing
@@ -257,19 +257,14 @@ export default function TimelineColumn({
       getData(true);
 
       // Listen for new agents state from the signalling service
-      const agentStateEvent = `${perspective.uuid}-new-agents-state`;
-      window.addEventListener(agentStateEvent, handleNewAgentsState);
-
-      // Listen for sync state changes from the community service
-      const syncStateEvent = `${perspective.uuid}-community-synced`;
-      window.addEventListener(syncStateEvent, handleSyncStateChanged);
+      const eventName = `${perspective.uuid}-new-agents-state`;
+      window.addEventListener(eventName, handleNewAgentsState);
 
       // Listen for link-added events from the perspective
       perspective.addListener("link-added", handleLinkAdded);
 
       return () => {
-        window.removeEventListener(agentStateEvent, handleNewAgentsState);
-        window.removeEventListener(syncStateEvent, handleSyncStateChanged);
+        window.removeEventListener(eventName, handleNewAgentsState);
         perspective.removeListener("link-added", handleLinkAdded);
       };
     }

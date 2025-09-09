@@ -1,8 +1,8 @@
 <template>
   <div class="media-player" @click="onClick">
     <video
+      ref="videoElement"
       class="video"
-      :srcObject.prop="stream"
       :muted="isMe"
       :style="{ opacity: showVideo ? 1 : 0, transform: flipVideo ? 'scaleX(-1)' : 'none' }"
       autoplay
@@ -54,7 +54,7 @@
               <j-icon name="gear" />
             </j-button>
           </j-tooltip>
-          <j-tooltip placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
+          <j-tooltip v-if="!isMobile" placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
             <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
               <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
             </j-button>
@@ -75,7 +75,7 @@ import { CallEmoji, MediaState, useModalStore, useUiStore } from "@/stores";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
 import { Profile } from "@coasys/flux-types";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, PropType, ref, toRefs } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRefs, watch } from "vue";
 
 export type MediaPlayerWarning = "" | "mic-disabled" | "camera-disabled";
 
@@ -97,17 +97,53 @@ const { did, stream } = toRefs(props);
 const uiStore = useUiStore();
 const modalStore = useModalStore();
 
-const { callWindowFullscreen } = storeToRefs(uiStore);
+const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 
 const profile = ref<Profile>();
+const videoElement = ref<HTMLVideoElement>();
 
-const showVideo = computed(() => stream && (props.videoState === "on" || props.screenShareState === "on"));
+const showVideo = computed(() => !!stream.value && (props.videoState === "on" || props.screenShareState === "on"));
 const flipVideo = computed(() => props.isMe && props.screenShareState !== "on");
 const loadingMessage = computed(() => {
   if (!props.streamReady) return "Loading...";
   if (props.videoState === "loading") return "Video loading...";
   else if (props.screenShareState === "loading") return "Screenshare loading...";
   return "";
+});
+
+// Watch for stream changes and properly attach them to the video element
+watch(
+  stream,
+  async (newStream, oldStream) => {
+    if (!videoElement.value) return;
+
+    // Avoid unnecessary updates
+    if (newStream === oldStream) return;
+
+    try {
+      // Clear old stream
+      if (oldStream && videoElement.value.srcObject === oldStream) videoElement.value.srcObject = null;
+
+      // Set new stream
+      if (newStream) {
+        videoElement.value.srcObject = newStream;
+
+        // Wait for next tick then try to play
+        await nextTick();
+        if (videoElement.value && !videoElement.value.paused) return;
+
+        await videoElement.value.play();
+      }
+    } catch (error) {
+      console.warn("Error setting video stream:", error);
+    }
+  },
+  { immediate: true }
+);
+
+// Ensure proper cleanup
+onBeforeUnmount(() => {
+  if (videoElement.value) videoElement.value.srcObject = null;
 });
 
 // Get profile on mount

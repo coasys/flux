@@ -1,10 +1,10 @@
+import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from "@coasys/ad4m";
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { Property, Collection, ModelOptions, Flag, Ad4mModel, Literal } from "@coasys/ad4m";
-import { SynergyItem, SynergyGroup, icons } from "@coasys/flux-utils";
+import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
 import App from "../app";
 
-const { FLUX_APP, NAME, ENTRY_TYPE } = community;
+const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
 
 @ModelOptions({ name: "Channel" })
 export class Channel extends Ad4mModel {
@@ -15,22 +15,41 @@ export class Channel extends Ad4mModel {
   type: string;
 
   @Property({
-    through: NAME,
+    through: CHANNEL_NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
+  @Optional({
+    through: CHANNEL_DESCRIPTION,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  description: string;
+
+  @Optional({
+    through: CHANNEL_IS_CONVERSATION,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  isConversation: boolean;
+
+  @Optional({
+    through: CHANNEL_IS_PINNED,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  isPinned: boolean;
+
   @Collection({
     through: "ad4m://has_child",
-    where: {
-      isInstance: App,
-    },
+    where: { isInstance: App },
   })
   views: string[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
-    // get all unprocessed items in the channel
+    // Get all unprocessed items in the channel
     try {
       const result = await this.perspective.infer(`
         findall([ItemId, Author, Timestamp, Type, Text], (
@@ -91,7 +110,7 @@ export class Channel extends Ad4mModel {
   }
 
   async totalItemCount(): Promise<number> {
-    // find the total number of items in the channel
+    // Find the total number of items in the channel
     try {
       const result = await this.perspective.infer(`
         findall(Count, (
@@ -123,8 +142,41 @@ export class Channel extends Ad4mModel {
     }
   }
 
+  async allAuthors(): Promise<string[]> {
+    // Find the did of everyone who has created an item in the channel
+    try {
+      const result = await this.perspective.infer(`
+        findall(Author, (
+          % 1. Get channel item
+          triple("${this.baseExpression}", "ad4m://has_child", ItemId),
+        
+          % 2. Get author from link
+          link(_, "ad4m://has_child", ItemId, _, Author),
+        
+          % 3. Check item is of valid type
+          (
+            subject_class("Message", MessageClass),
+            instance(MessageClass, ItemId)
+            ;
+            subject_class("Post", PostClass),
+            instance(PostClass, ItemId)
+            ;
+            subject_class("Task", TaskClass),
+            instance(TaskClass, ItemId)
+          )
+        ), AuthorsWithDuplicates),
+        % 4. Remove duplicates
+        sort(AuthorsWithDuplicates, UniqueAuthors).
+      `);
+      return result[0]?.UniqueAuthors || [];
+    } catch (error) {
+      console.error("Error getting channel authors:", error);
+      return [];
+    }
+  }
+
   async conversations(): Promise<SynergyGroup[]> {
-    // find the necissary data to render conversations in timeline components
+    // Find the necissary data to render conversations in timeline components
     try {
       const result = await this.perspective.infer(`
       findall(ConversationInfo, (

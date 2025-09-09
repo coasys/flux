@@ -7,8 +7,14 @@
       </j-flex>
     </j-box>
 
+    <Conversation v-if="viewId === 'conversation'" />
+
+    <Conversations v-if="viewId === 'conversations'" :parentChannel="channel" />
+
+    <!-- <SubChannels v-if="viewId === 'sub-channels'" :parentChannel="channel" /> -->
+
     <component
-      v-if="wcName"
+      v-else-if="wcName"
       :is="wcName"
       style="height: 100%"
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
@@ -32,6 +38,8 @@
 
 <script setup lang="ts">
 import { useCommunityService } from "@/composables/useCommunityService";
+import Conversation from "@/containers/Conversation.vue";
+import Conversations from "@/containers/Conversations.vue";
 import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import { getCachedAgentProfile } from "@/utils/userProfileCache";
@@ -40,12 +48,16 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 defineOptions({ name: "ViewView" });
-const { communityId, channelId, viewId } = defineProps({
-  communityId: { type: String },
-  channelId: { type: String },
-  viewId: { type: String },
-  defaultViewId: { type: String },
-});
+interface Props {
+  communityId: string;
+  channelId: string;
+  viewId: string;
+  defaultViewId?: string;
+  channel: Channel;
+}
+
+const props = defineProps<Props>();
+const { communityId, channelId, viewId, channel } = props;
 
 const router = useRouter();
 const route = useRoute();
@@ -116,20 +128,23 @@ function toggleProfile(open: boolean, did?: any): void {
 }
 
 onMounted(async () => {
-  const generatedName = await generateWCName(viewId as string);
+  // Skip web component generation if mounting the conversation view
+  if (!["conversation", "sub-channels", "conversations"].includes(viewId as string)) {
+    const generatedName = await generateWCName(viewId as string);
 
-  if (!customElements.get(generatedName)) {
-    const module = await fetchFluxApp(viewId as string);
-    if (module?.default) {
-      try {
-        await customElements.define(generatedName, module.default);
-      } catch (e) {
-        console.error(`Failed to define custom element ${generatedName}:`, e);
+    if (!customElements.get(generatedName)) {
+      const module = await fetchFluxApp(viewId as string);
+      if (module?.default) {
+        try {
+          await customElements.define(generatedName, module.default);
+        } catch (e) {
+          console.error(`Failed to define custom element ${generatedName}:`, e);
+        }
       }
     }
-  }
 
-  wcName.value = generatedName;
+    wcName.value = generatedName;
+  }
   loading.value = false;
 });
 </script>

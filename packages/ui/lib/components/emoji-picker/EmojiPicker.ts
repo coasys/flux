@@ -26,6 +26,8 @@ export default class Box extends LitElement {
     if (!event.composedPath().includes(this)) {
       const clickOutsideEvent = new CustomEvent("clickoutside", {
         bubbles: true,
+        composed: true,
+        detail: { originalEvent: event },
       });
       this.dispatchEvent(clickOutsideEvent);
     }

@@ -33,6 +33,7 @@ const emit = defineEmits(["click"]);
   background: none;
   cursor: pointer;
   display: flex;
+  padding: 0;
 
   .avatars {
     gap: var(--j-space-200);
@@ -64,10 +65,10 @@ const emit = defineEmits(["click"]);
 
     &.small {
       padding: 5px;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       font-size: 12px;
-      margin-left: -5px;
+      margin-left: -3px;
     }
   }
 }
