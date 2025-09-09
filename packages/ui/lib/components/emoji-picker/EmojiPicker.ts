@@ -18,7 +18,9 @@ const styles = css`
 export default class Box extends LitElement {
   static styles = [sharedStyles, styles];
 
-  private picker: any;
+  private picker: any = null;
+  private listenerSetupTimeout?: number;
+  private documentListenerAttached = false;
   private handleDocumentClick = (event: Event) => {
     // Check if click is outside this component
     if (!event.composedPath().includes(this)) {
@@ -46,14 +48,25 @@ export default class Box extends LitElement {
     this.shadowRoot.appendChild(this.picker);
 
     // Add our own click outside handler
-    setTimeout(() => {
+    this.listenerSetupTimeout = window.setTimeout(() => {
+      if (!this.isConnected || this.documentListenerAttached) return;
       document.addEventListener("click", this.handleDocumentClick, true);
+      this.documentListenerAttached = true;
     }, 0);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener("click", this.handleDocumentClick, true);
+    if (this.listenerSetupTimeout) {
+      clearTimeout(this.listenerSetupTimeout);
+      this.listenerSetupTimeout = undefined;
+    }
+    if (this.documentListenerAttached) {
+      document.removeEventListener("click", this.handleDocumentClick, true);
+      this.documentListenerAttached = false;
+    }
+    this.picker?.remove?.();
+    this.picker = null;
   }
 
   render() {
