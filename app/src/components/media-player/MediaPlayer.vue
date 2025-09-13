@@ -143,22 +143,25 @@ watch(
 
 // Ensure proper cleanup
 onBeforeUnmount(() => {
-  if (videoElement.value) videoElement.value.srcObject = null;
+  if (videoElement.value) {
+    videoElement.value.pause();
+    videoElement.value.srcObject = null;
+  }
 });
 
 onMounted(async () => {
-  // Get user profile
-  profile.value = await getCachedAgentProfile(did.value);
   // Attach stream to video element if not already set
   if (stream.value && videoElement.value && !videoElement.value.srcObject) {
     try {
       videoElement.value.srcObject = stream.value;
       await nextTick();
-      if (videoElement.value.paused) await videoElement.value.play().catch(() => {});
+      if (videoElement.value.paused) await videoElement.value.play();
     } catch (e) {
       console.warn('Mount attach stream failed', e);
     }
   }
+  // Get user profile
+  profile.value = await getCachedAgentProfile(did.value);
 });
 </script>
 
