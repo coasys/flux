@@ -146,8 +146,20 @@ onBeforeUnmount(() => {
   if (videoElement.value) videoElement.value.srcObject = null;
 });
 
-// Get profile on mount
-onMounted(async () => (profile.value = await getCachedAgentProfile(did.value)));
+onMounted(async () => {
+  // Get user profile
+  profile.value = await getCachedAgentProfile(did.value);
+  // Attach stream to video element if not already set
+  if (stream.value && videoElement.value && !videoElement.value.srcObject) {
+    try {
+      videoElement.value.srcObject = stream.value;
+      await nextTick();
+      if (videoElement.value.paused) await videoElement.value.play().catch(() => {});
+    } catch (e) {
+      console.warn('Mount attach stream failed', e);
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>
