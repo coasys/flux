@@ -1,59 +1,55 @@
-import { EntryType } from "@coasys/flux-types";
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from "@coasys/ad4m";
 import { community, languages } from "@coasys/flux-constants";
+import { EntryType } from "@coasys/flux-types";
+import Channel from "../channel";
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
 
-import {
-  SDNAClass,
-  SubjectProperty,
-  SubjectCollection,
-  SubjectFlag,
-} from "@coasys/ad4m";
-import Channel from "../channel";
+interface FileData {
+  name: string;
+  file_type: string;
+  data_base64: string;
+}
 
-@SDNAClass({
+@ModelOptions({
   name: "Community",
 })
-export class Community {
-  @SubjectFlag({ through: ENTRY_TYPE, value: EntryType.Community })
+export class Community extends Ad4mModel {
+  @Flag({ through: ENTRY_TYPE, value: EntryType.Community })
   type: string;
 
-  @SubjectProperty({
+  @Property({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @SubjectProperty({
+  @Property({
     through: DESCRIPTION,
     writable: true,
     resolveLanguage: "literal",
   })
   description: string;
 
-  // @ts-ignore
-  @SubjectProperty({
+  @Optional({
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) =>
-      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
+    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
-  image: string;
+  image: string | FileData;
 
-  // @ts-ignore
-  @SubjectProperty({
+  @Optional({
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) =>
-      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
+    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
-  thumbnail: string;
+  thumbnail: string | FileData;
 
-  @SubjectCollection({
+  @Collection({
     through: "ad4m://has_child",
     where: {
       isInstance: Channel,

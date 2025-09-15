@@ -1,51 +1,45 @@
-import { useContext } from "preact/hooks";
-import { useMe } from "@coasys/ad4m-react-hooks";
-import Avatar from "../Avatar";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Profile } from "@coasys/flux-types";
+import { useContext, useState } from "preact/hooks";
+import { useEffect } from "react";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { profileFormatter } from "@coasys/flux-utils";
-
 import styles from "./index.module.css";
 
-export default function Header({ agent }: { agent: AgentClient }) {
-  const { profile, me } = useMe(agent, profileFormatter);
+type Props = { agent: AgentClient; getProfile: (did: string) => Promise<Profile> };
+
+export default function Header({ agent, getProfile }: Props) {
   const { methods } = useContext(UIContext);
+  const [myProfile, setMyProfile] = useState<Profile | null>(null);
 
   function handlePostClick(type) {
     methods.toggleOverlay(true, type);
   }
 
+  async function getMyProfile() {
+    const me = await agent.me();
+    setMyProfile(await getProfile(me.did));
+  }
+
+  useEffect(() => {
+    if (getProfile) getMyProfile();
+  }, [getProfile]);
+
   return (
     <header className={styles.header}>
       <j-flex a="center" gap="500">
-        <a href={me?.did}>
-          <Avatar
-            size="lg"
-            did={me?.did}
-            url={profile?.profileThumbnailPicture}
-          ></Avatar>
+        <a href={myProfile?.did}>
+          <j-avatar hash={myProfile?.did} src={myProfile?.profileThumbnailPicture || null} size="lg" />
         </a>
-        <j-flex a="center" gap="200" style="width: 100%">
-          <j-input
-            onFocus={() => handlePostClick(PostOption.Text)}
-            full
-            size="lg"
-            placeholder="Create a post"
-          ></j-input>
+        <j-flex a="center" gap="200" style={{ width: "100%" }}>
+          <j-input onFocus={() => handlePostClick(PostOption.Text)} full size="lg" placeholder="Create a post" />
           <j-flex a="center" gap="200">
             {postOptions
               .filter((o) => o.value !== PostOption.Text)
               .map((option) => {
                 return (
-                  <j-button
-                    size="lg"
-                    square
-                    onClick={() => handlePostClick(option.value)}
-                    value={PostOption.Text}
-                    variant="ghost"
-                  >
-                    <j-icon slot="start" size="md" name={option.icon}></j-icon>
+                  <j-button size="lg" square onClick={() => handlePostClick(option.value)} variant="ghost">
+                    <j-icon slot="start" name={option.icon} />
                   </j-button>
                 );
               })}
@@ -53,16 +47,15 @@ export default function Header({ agent }: { agent: AgentClient }) {
         </j-flex>
       </j-flex>
 
-      <j-button
+      {/* <j-button
         onClick={() => handlePostClick(PostOption.Text)}
         className={styles.addButton}
         size="lg"
-        icon="plus"
         variant="primary"
       >
         New Post
-        <j-icon slot="end" size="sm" name="chat"></j-icon>
-      </j-button>
+        <j-icon slot="end" size="sm" name="chat" />
+      </j-button> */}
     </header>
   );
 }

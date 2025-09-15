@@ -1,1 +1,4 @@
+/icon.png https://i.ibb.co/GnqjPJP/icon.png 200
+/nilchain-proxy/* https://rpc.testnet.nilchain-rpc-proxy.nilogy.xyz/:splat 200
+/cdn-proxy/* https://cdn.jsdelivr.net/:splat 200
 /*  /index.html 200

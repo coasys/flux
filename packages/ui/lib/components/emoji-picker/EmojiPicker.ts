@@ -1,7 +1,8 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
 import { Picker } from "emoji-mart";
+import { css, html, LitElement } from "lit";
+import { customElement } from "lit/decorators.js";
+import sharedStyles from "../../shared/styles";
+import data from "./data.json";
 
 // TODO: Do we need this type  of generic component?
 
@@ -17,15 +18,25 @@ const styles = css`
 export default class Box extends LitElement {
   static styles = [sharedStyles, styles];
 
+  private picker: any = null;
+  private listenerSetupTimeout?: number;
+  private documentListenerAttached = false;
+  private handleDocumentClick = (event: Event) => {
+    // Check if click is outside this component
+    if (!event.composedPath().includes(this)) {
+      const clickOutsideEvent = new CustomEvent("clickoutside", {
+        bubbles: true,
+        composed: true,
+        detail: { originalEvent: event },
+      });
+      this.dispatchEvent(clickOutsideEvent);
+    }
+  };
+
   connectedCallback() {
     super.connectedCallback();
-    const picker = new Picker({
-      data: async () => {
-        // Sjekk emojimart docs
-        const response = await import("./data.json");
-
-        return response;
-      },
+    this.picker = new Picker({
+      data,
       onEmojiSelect: (emoji) => {
         const event = new CustomEvent("change", {
           detail: emoji,
@@ -33,14 +44,29 @@ export default class Box extends LitElement {
         });
         this.dispatchEvent(event);
       },
-      onClickOutside: () => {
-        const event = new CustomEvent("clickoutside", {
-          bubbles: true,
-        });
-        this.dispatchEvent(event);
-      },
     });
-    this.shadowRoot.appendChild(picker);
+    this.shadowRoot.appendChild(this.picker);
+
+    // Add our own click outside handler
+    this.listenerSetupTimeout = window.setTimeout(() => {
+      if (!this.isConnected || this.documentListenerAttached) return;
+      document.addEventListener("click", this.handleDocumentClick, true);
+      this.documentListenerAttached = true;
+    }, 0);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.listenerSetupTimeout) {
+      clearTimeout(this.listenerSetupTimeout);
+      this.listenerSetupTimeout = undefined;
+    }
+    if (this.documentListenerAttached) {
+      document.removeEventListener("click", this.handleDocumentClick, true);
+      this.documentListenerAttached = false;
+    }
+    this.picker?.remove?.();
+    this.picker = null;
   }
 
   render() {

@@ -1,14 +1,14 @@
 import {
-  PerspectiveProxy,
   Agent,
   Literal,
   NeighbourhoodProxy,
   PerspectiveExpression,
+  PerspectiveProxy,
 } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
-import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 import { getDefaultIceServers } from "@coasys/flux-utils";
+import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 
 function getExpressionData(data: any) {
   let parsedData;
@@ -58,12 +58,21 @@ export type EventLogItem = {
 export type Connection = {
   peer: AD4MPeerInstance;
   eventLog: EventLogItem[];
+  ad4mPeer: AD4MPeer;
+};
+
+type Transcriber = {
+  on: boolean;
+  selectedModel: string;
+  previewTimeout: number;
+  messageTimeout: number;
 };
 
 export type Settings = {
   video: boolean | MediaTrackConstraints;
   audio: boolean | MediaTrackConstraints;
   screen: boolean;
+  transcriber: Transcriber;
 };
 
 export type IceServer = {
@@ -132,7 +141,7 @@ export class WebRTCManager {
     this.closeConnection = this.closeConnection.bind(this);
     this.addConnection = this.addConnection.bind(this);
     this.broadcastArrival = this.broadcastArrival.bind(this);
-    this.broadcastArrivalResponse = this.broadcastArrivalResponse.bind(this);
+    this.respondToArrival = this.respondToArrival.bind(this);
 
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
@@ -151,7 +160,7 @@ export class WebRTCManager {
     const that = this;
 
     this.connections.set = function (key: string, value: Connection) {
-      console.log(`✅ Added key: ${key} value: ${value} to the map`);
+      // console.log(`✅ Added key: ${key} value: ${value} to the map`);
 
       that.callbacks[Event.PEER_ADDED].forEach((cb) => {
         cb(key, value);
@@ -162,7 +171,7 @@ export class WebRTCManager {
 
     // Listen for deletions from the map
     this.connections.delete = function (key: string) {
-      console.log(`🚫 Deleted key: ${key} from the map`);
+      // console.log(`🚫 Deleted key: ${key} from the map`);
 
       that.callbacks[Event.PEER_REMOVED].forEach((cb) => {
         cb(key);
@@ -183,15 +192,15 @@ export class WebRTCManager {
     if (!this.isListening) return;
 
     if (expression.author === this.agent.did) {
-      console.log("Received signal from self, ignoring!");
+      // console.log("Received signal from self, ignoring!");
       return null;
     }
 
     const link = await getLinkFromPerspective(expression);
-    console.log(`🔵 ${link?.data?.predicate}`, {
-      link,
-      author: expression.author,
-    });
+    // console.log(`🔵 ${link?.data?.predicate}`, {
+    //   link,
+    //   author: expression.author,
+    // });
 
     if (!link) {
       this.addToEventLog(
@@ -202,11 +211,7 @@ export class WebRTCManager {
       return;
     }
 
-    // if (link.source !== this.agent.did) {
-    //   console.log("Signal not adressed to current peer, ignoring");
-    //   return null;
-    // }
-
+    // fires when joining webrtc call
     if (
       link.data.predicate === IS_ANYONE_HERE &&
       link.data.source === this.source
@@ -217,7 +222,7 @@ export class WebRTCManager {
         this.addConnection(link.author, false);
       }
 
-      this.broadcastArrivalResponse(link.author);
+      this.respondToArrival(link.author);
     }
 
     if (
@@ -231,7 +236,7 @@ export class WebRTCManager {
         this.addConnection(link.author, true);
       } else {
         this.addConnection(link.author, false);
-        this.broadcastArrivalResponse(link.author);
+        this.respondToArrival(link.author);
       }
     }
 
@@ -244,9 +249,7 @@ export class WebRTCManager {
       // Check if the signal is for us
       if (data.targetPeer === this.agent.did) {
         const remotePeer = this.connections.get(link.author);
-        if (remotePeer) {
-          remotePeer.peer.signal(data.signalData);
-        }
+        if (remotePeer) remotePeer.peer.signal(data.signalData);
       }
     }
 
@@ -261,15 +264,15 @@ export class WebRTCManager {
    * Create connection and add to connections array
    */
   async addConnection(remoteDid: string, initiator: boolean) {
-    if (this.connections.get(remoteDid)) {
-      return this.connections.get(remoteDid);
-    }
+    // if (this.connections.get(remoteDid)) {
+    //   return this.connections.get(remoteDid);
+    // }
 
-    console.log(
-      "🟠 Creating ",
-      initiator ? "active" : "passive",
-      " connection"
-    );
+    // console.log(
+    //   "🟠 Creating ",
+    //   initiator ? "active" : "passive",
+    //   " connection"
+    // );
 
     const ad4mPeer = new AD4MPeer({
       did: remoteDid,
@@ -310,11 +313,12 @@ export class WebRTCManager {
     const newConnection = {
       peer,
       eventLog: [],
+      ad4mPeer,
     };
 
     this.connections.set(remoteDid, newConnection);
 
-    return newConnection;
+    // return newConnection;
   }
 
   /**
@@ -322,33 +326,25 @@ export class WebRTCManager {
    */
   async broadcastArrival() {
     this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: IS_ANYONE_HERE,
-          target: this.agent.did,
-        },
-      ],
-    });
+    try {
+      const link = { source: this.source, predicate: IS_ANYONE_HERE, target: "" }
+      this.neighbourhood.sendBroadcastU({ links: [link] });
+    } catch (e) {
+      console.error(`Error sending IS_ANYONE_HERE signal to peers:`, e);
+    }
   }
 
   /**
-   * Broadcast arrival response
+   * Response to arrival
    */
-  async broadcastArrivalResponse(target: string) {
+  async respondToArrival(author: string) {
     this.addToEventLog(this.agent.did, I_AM_HERE);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: I_AM_HERE,
-          target,
-        },
-      ],
-    });
+    try {
+      const link = { source: this.source, predicate: I_AM_HERE, target: author };
+      this.neighbourhood.sendBroadcastU({ links: [link] });
+    } catch (e) {
+      console.error(`Error sending I_AM_HERE signal to ${author}:`, e);
+    }
   }
 
   /**
@@ -364,9 +360,9 @@ export class WebRTCManager {
       if (!recepients || recepients.includes(key)) {
         try {
           e.peer.send(data);
-          console.log(`📩 Sending message to ${key} -> `, type);
+          // console.log(`📩 Sending message to ${key} -> `, type);
         } catch (e) {
-          console.log(`📩 Couldn't send message to ${key} -> `, type, e);
+          // console.log(`📩 Couldn't send message to ${key} -> `, type, e);
         }
       }
     });
@@ -385,6 +381,7 @@ export class WebRTCManager {
 
     if (connection) {
       connection.peer.destroy();
+      connection.ad4mPeer.destroy();
       this.connections.delete(did);
     }
   }
@@ -411,7 +408,7 @@ export class WebRTCManager {
 
     const connection = this.connections.get(did);
     if (!connection) {
-      console.log("🔴 Failed to add log entry, no connection found!");
+      // console.log("🔴 Failed to add log entry, no connection found!");
       return;
     }
 
@@ -422,14 +419,26 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
-    console.log("trying to join");
-
     let settings = { audio: true, video: false, ...initialSettings };
 
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: settings.audio,
-      video: settings.video,
-    });
+    if (this.localStream) this.localStream.getTracks().forEach(track => track.stop());
+
+    // Get user media
+    try {
+      // To avoid problems rejoining calls, we make sure always get a new stream / device.
+      // For that we use a timestamp in the constraints.
+      const uniqueConstraints = {
+        audio: typeof settings.audio === 'boolean' ? 
+          { deviceId: 'default', timestamp: Date.now() } : 
+          { ...settings.audio, timestamp: Date.now() },
+        video: settings.video,
+      };
+
+      this.localStream = await navigator.mediaDevices.getUserMedia(uniqueConstraints);
+    } catch (error) {
+      console.error("Failed to get user media:", error);
+      throw error;
+    }
 
     if (!this.addedListener) {
       await this.neighbourhood.addSignalHandler(this.onBroadcastReceived);
@@ -476,12 +485,20 @@ export class WebRTCManager {
       this.closeConnection(key);
     });
 
-    // Kill media recording
-    this.localStream.getTracks().forEach((track) => track.stop());
+    // Kill media recording and ensure all tracks are stopped
+    if (this.localStream) {
+      const tracks = this.localStream.getTracks();
+      tracks.forEach((track) => {
+        track.stop();
+        this.localStream.removeTrack(track);
+      });
+      // @ts-ignore
+      this.localStream = null;
+    }
   }
 
   async heartbeat() {
-    console.log("💚 Sending HEARTBEAT");
+    // console.log("💚 Sending HEARTBEAT");
     this.addToEventLog(this.agent.did, HEARTBEAT);
 
     this.neighbourhood.sendBroadcastU({
@@ -496,7 +513,7 @@ export class WebRTCManager {
   }
 
   async sendTestSignal(recipientDid: string) {
-    console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
+    // console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -509,7 +526,7 @@ export class WebRTCManager {
   }
 
   async sendTestBroadcast() {
-    console.log("⚙️ Sending TEST_BROADCAST to room");
+    // console.log("⚙️ Sending TEST_BROADCAST to room");
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -522,7 +539,7 @@ export class WebRTCManager {
   }
 
   setIceServers(iceServers: IceServer[]) {
-    console.log("⚙️ Setting ICE servers: ", iceServers);
+    // console.log("⚙️ Setting ICE servers: ", iceServers);
     this.iceServers = iceServers;
   }
 }

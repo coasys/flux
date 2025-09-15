@@ -1,7 +1,7 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
-import { Message as MessageModel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/ad4m-react-hooks";
+import { Message } from "@coasys/flux-api";
+import { useModel, useMe } from "@coasys/ad4m-react-hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
@@ -22,11 +22,7 @@ export default function CommentSection({
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const { entries: comments, repo } = useSubjects({
-    perspective,
-    source: source || null,
-    subject: MessageModel,
-  });
+  const { entries: comments } = useModel({ perspective, model: Message, query: { source } });
 
   function onKeydown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -39,9 +35,9 @@ export default function CommentSection({
     try {
       const html = editor.current?.editor.getHTML();
       editor.current?.clear();
-      const message = await repo.create({
-        body: html,
-      });
+      const message = new Message(perspective, undefined, source);
+      message.body = html;
+      await message.save();
     } catch (e) {
       console.log(e);
     }

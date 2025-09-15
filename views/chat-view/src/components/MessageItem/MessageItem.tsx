@@ -1,12 +1,10 @@
 import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
-import { useAgent, useSubject } from "@coasys/flux-react-web";
-import styles from "./MessageItem.module.css";
-import Avatar from "../Avatar";
 import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
-import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
+import { useEffect, useState } from "preact/hooks";
+import styles from "./MessageItem.module.css";
 
 export default function MessageItem({
   showAvatar,
@@ -18,6 +16,8 @@ export default function MessageItem({
   onEmojiClick = () => {},
   onReplyClick = () => {},
   onThreadClick = () => {},
+  hideToolbar = false,
+  getProfile,
 }: {
   perspective: PerspectiveProxy;
   showAvatar?: boolean;
@@ -28,20 +28,12 @@ export default function MessageItem({
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
+  hideToolbar?: boolean;
+  getProfile: (did: string) => Promise<any>;
 }) {
-  const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
-
-  const { entry: replyMessage } = useSubject({
-    perspective,
-    id: message.replyingTo,
-    subject: Message,
-  });
-
-  const { profile: replyProfile } = useAgent<Profile>({
-    client: agent,
-    did: replyMessage?.author,
-    formatter: profileFormatter,
-  });
+  const [replyMessage, setReplyMessage] = useState<Message | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [replyProfile, setReplyProfile] = useState<Profile | null>(null);
 
   function onOpenPicker(e) {
     e.stopPropagation();
@@ -61,7 +53,7 @@ export default function MessageItem({
     const me = await agent.me();
     const reactions = await perspective.get(
       new LinkQuery({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       })
@@ -73,25 +65,43 @@ export default function MessageItem({
       perspective.removeLinks(myReactions);
     } else {
       perspective.add({
-        source: message.id,
+        source: message.baseExpression,
         predicate: REACTION,
         target: expression,
       });
     }
   }
 
+  async function getAuthorProfile() {
+    const profileData = await getProfile(message.author);
+    setProfile(profileData);
+  }
+
+  async function getReplyMessage() {
+    try {
+      const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } });
+      if (replies[0]) {
+        setReplyMessage(replies[0]);
+        setReplyProfile(await getProfile(replies[0].author));
+      }
+    } catch (error) {
+      console.error("Failed to fetch reply message:", error);
+    }
+  }
+
+  useEffect(() => {
+    getAuthorProfile();
+    if (message.replyingTo) getReplyMessage();
+  }, []);
+
   return (
-    <div
-      className={`${styles.message} ${isReplying && styles.isReplying} ${
-        message.isPopular && styles.isPopular
-      }`}
-    >
+    <div className={`${styles.message} ${isReplying && styles.isReplying} ${message.isPopular && styles.isPopular}`}>
       {message.replyingTo && (
         <>
           <div></div>
           <div>
             <j-text nomargin size="300" color="ui-400">
-              <j-icon size="xs" name="reply-fill"></j-icon>
+              <j-icon size="xs" name="reply-fill" />
               {profile?.username} replied to {replyProfile?.username}
             </j-text>
             <j-box pb="300">
@@ -100,49 +110,29 @@ export default function MessageItem({
                 className={styles.body}
                 nomargin
                 dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
-              ></j-text>
+              />
             </j-box>
           </div>
         </>
       )}
-      <div>
-        {isFullVersion && (
-          <j-box>
-            <Avatar
-              size="md"
-              profileAddress={profile?.profileThumbnailPicture}
-              hash={message.author}
-            ></Avatar>
-          </j-box>
-        )}
-      </div>
+      <div>{isFullVersion && <j-avatar hash={message.author} src={profile?.profileThumbnailPicture} />}</div>
       <div>
         {isFullVersion && (
           <header className={styles.header}>
             <a href={message.author} className={styles.username}>
               {profile?.username}
             </a>
-            <j-timestamp
-              className={styles.timestamp}
-              relative
-              value={message.timestamp}
-            ></j-timestamp>
+            <j-timestamp className={styles.timestamp} relative value={message.timestamp} />
           </header>
         )}
-        <div
-          className={styles.body}
-          dangerouslySetInnerHTML={{ __html: message.body }}
-        ></div>
+        <div className={styles.body} dangerouslySetInnerHTML={{ __html: message.body }}></div>
         {message.reactions.length > 0 && (
           <div className={styles.reactions}>
             {Object.entries(reactionCounts).map(([emoji, count]) => {
               if (!emoji.startsWith("emoji://")) return null;
               return (
-                <span
-                  className={styles.reaction}
-                  onClick={() => onTogggleEmoji(emoji)}
-                >
-                  {hexToEmoji(emoji.split("emoji://")[1])} {count}
+                <span className={styles.reaction} onClick={() => onTogggleEmoji(emoji)}>
+                  {hexToEmoji(emoji.split("emoji://")[1])}
                 </span>
               );
             })}
@@ -150,44 +140,31 @@ export default function MessageItem({
         )}
         {message.thread?.length > 0 && (
           <j-box py="300">
-            <button
-              className={styles.threadButton}
-              onClick={() => onThreadClick(message)}
-              variant="subtle"
-              size="sm"
-            >
+            <button className={styles.threadButton} onClick={() => onThreadClick(message)}>
               Replies ({message.thread.length})
             </button>
           </j-box>
         )}
       </div>
-      <div className={styles.toolbar}>
-        <j-tooltip placement="top" title="Add reaction">
-          <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
-            <j-icon size="sm" name="emoji-smile"></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="top" title="Reply in thread">
-          <j-button
-            onClick={() => onThreadClick(message)}
-            size="sm"
-            square
-            variant="ghost"
-          >
-            <j-icon size="sm" name="chat-text"></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="top" title="Reply">
-          <j-button
-            onClick={() => onReplyClick(message)}
-            size="sm"
-            square
-            variant="ghost"
-          >
-            <j-icon size="sm" name="reply"></j-icon>
-          </j-button>
-        </j-tooltip>
-      </div>
+      {!hideToolbar && (
+        <div className={styles.toolbar}>
+          <j-tooltip placement="top" title="Add reaction">
+            <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
+              <j-icon size="sm" name="emoji-smile"></j-icon>
+            </j-button>
+          </j-tooltip>
+          <j-tooltip placement="top" title="Reply in thread">
+            <j-button onClick={() => onThreadClick(message)} size="sm" square variant="ghost">
+              <j-icon size="sm" name="chat-text"></j-icon>
+            </j-button>
+          </j-tooltip>
+          <j-tooltip placement="top" title="Reply">
+            <j-button onClick={() => onReplyClick(message)} size="sm" square variant="ghost">
+              <j-icon size="sm" name="reply"></j-icon>
+            </j-button>
+          </j-tooltip>
+        </div>
+      )}
     </div>
   );
 }

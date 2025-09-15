@@ -1,24 +1,27 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile, Profiles } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
-
-import styles from "./JoinScreen.module.css";
-import Disclaimer from "../Disclaimer";
-import Avatar from "../Avatar";
+import { Profile } from "@coasys/flux-types";
+import { useEffect, useRef } from "preact/hooks";
+import styles from "./JoinScreen.module.scss";
 
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
-  onToggleSettings: () => void;
   did?: string;
+  fullscreen?: boolean;
+  webrtcStore: any;
+  onToggleSettings: () => void;
+  toggleFullscreen?: () => void;
+  leaveRoom?: () => void;
 };
 
 export default function JoinScreen({
   webRTC,
   profile,
+  did,
+  fullscreen,
+  webrtcStore,
+  toggleFullscreen,
   onToggleSettings,
-  did
 }: Props) {
   const videoRef = useRef(null);
 
@@ -35,27 +38,18 @@ export default function JoinScreen({
 
       <j-text variant="body">Your microphone will be enabled.</j-text>
 
-      <j-box pt="200">
-        <div
-          className={styles.preview}
-          data-camera-enabled={!!webRTC.localState.settings.video}
-          data-mirrored={true}
-        >
-          <video
-            ref={videoRef}
-            className={styles.video}
-            autoPlay
-            playsInline
-          ></video>
+      <j-box pt="200" style={{ width: "100%" }}>
+        <div className={styles.preview} data-camera-enabled={!!webRTC.localState.settings.video} data-mirrored={true}>
+          <video ref={videoRef} className={styles.video} autoPlay playsInline />
 
           <div className={styles.details}>
             <div className={styles.avatar}>
               <>
                 {profile && (
-                  <Avatar
+                  <j-avatar
                     initials={profile?.username?.charAt(0) || "?"}
                     size="xl"
-                    profileAddress={profile?.profileThumbnailPicture}
+                    src={profile?.profileThumbnailPicture || null}
                     hash={did}
                   />
                 )}
@@ -73,13 +67,18 @@ export default function JoinScreen({
           </div>
 
           <div className={styles.settings}>
-            <div>
+            <j-flex gap="400">
               <j-tooltip placement="top" title="Settings">
                 <j-button onClick={onToggleSettings} square circle size="lg">
-                  <j-icon name="gear"></j-icon>
+                  <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
-            </div>
+              <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+                <j-button onClick={toggleFullscreen} square circle size="lg">
+                  <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+                </j-button>
+              </j-tooltip>
+            </j-flex>
           </div>
         </div>
       </j-box>
@@ -88,13 +87,9 @@ export default function JoinScreen({
         <j-toggle
           checked={webRTC.localState.settings.video ? true : false}
           disabled={
-            webRTC.isLoading ||
-            !webRTC.audioPermissionGranted ||
-            webRTC.devices.every((d) => d.kind !== "videoinput")
+            webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== "videoinput")
           }
-          onChange={() =>
-            webRTC.onToggleCamera(!webRTC.localState.settings.video)
-          }
+          onChange={webrtcStore.toggleVideo}
         >
           Join with camera!
         </j-toggle>
@@ -106,22 +101,16 @@ export default function JoinScreen({
           size="lg"
           loading={webRTC.isLoading}
           disabled={!webRTC.audioPermissionGranted}
-          onClick={webRTC.onJoin}
+          onClick={webrtcStore.joinRoom}
         >
           Join room!
         </j-button>
       </j-box>
 
-      <j-box pt="400">
-        <Disclaimer />
-      </j-box>
-
       <>
         {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
-            <j-text variant="warning">
-              Please allow camera/microphone access to join.
-            </j-text>
+            <j-text color="warning-500">Please allow camera/microphone access to join.</j-text>
           </j-box>
         )}
       </>

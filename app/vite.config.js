@@ -1,8 +1,23 @@
-import { defineConfig, loadEnv } from "vite";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 import vue from "@vitejs/plugin-vue";
-import { VitePWA } from "vite-plugin-pwa";
+import fs from "fs-extra";
 import path from "path";
+import { defineConfig, loadEnv } from "vite";
 import babel from "vite-plugin-babel-compiler";
+import { VitePWA } from "vite-plugin-pwa";
+import worker from "vite-plugin-worker";
+
+function copyNillionFileStore() {
+  return {
+    name: "copy-nillion-file-store",
+    async writeBundle() {
+      const src = "../views/nillion-file-store/dist";
+      const dest = "dist/@coasys/nillion-file-store";
+      await fs.copy(src, dest);
+      console.log(`Copied @coasys/nillion-file-store from ${src} to ${dest}`);
+    },
+  };
+}
 
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
@@ -13,10 +28,8 @@ export default ({ mode }) => {
       babel({
         babel: {
           plugins: [
-            [
-              "@babel/plugin-proposal-decorators",
-              { decoratorsBeforeExport: true },
-            ],
+            ["@babel/plugin-proposal-decorators", { decoratorsBeforeExport: true }],
+            "@babel/plugin-proposal-class-properties",
           ],
         },
       }),
@@ -39,6 +52,11 @@ export default ({ mode }) => {
           },
         },
       }),
+
+      worker({
+        inline: true,
+      }),
+
       VitePWA({
         registerType: "autoUpdate",
         devOptions: {
@@ -49,11 +67,7 @@ export default ({ mode }) => {
           globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
           maximumFileSizeToCacheInBytes: 5000000, // cache files upto 5mb since our index.js is around 3.4mb
         },
-        includeAssets: [
-          "favicon.ico",
-          "apple-touch-icon.png",
-          "masked-icon.svg",
-        ],
+        includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
         manifest: {
           name: "Flux",
           short_name: "Flux",
@@ -68,8 +82,8 @@ export default ({ mode }) => {
               type: "image/png",
             },
             {
-              src: "images/icons/icon-96x96.png",
-              sizes: "96x96",
+              src: "images/icons/icon-92x92.png",
+              sizes: "92x92",
               type: "image/png",
             },
             {
@@ -88,13 +102,13 @@ export default ({ mode }) => {
               type: "image/png",
             },
             {
-              src: "images/icons/icon-192x192.png",
-              sizes: "192x192",
+              src: "images/icons/icon-196x196.png",
+              sizes: "196x196",
               type: "image/png",
             },
             {
-              src: "images/icons/icon-384x384.png",
-              sizes: "384x384",
+              src: "images/icons/icon-256x256.png",
+              sizes: "256x256",
               type: "image/png",
             },
             {
@@ -105,17 +119,49 @@ export default ({ mode }) => {
           ],
         },
       }),
+      copyNillionFileStore(),
+      basicSsl(),
     ],
+    build: {
+      rollupOptions: {
+        external: ["@coasys/nillion-file-store", "@nillion/client-web"],
+      },
+    },
+    optimizeDeps: {
+      exclude: ["@coasys/nillion-file-store", "@nillion/client-web"],
+    },
     define: {
       "process.env": {},
     },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "@coasys/nillion-file-store": path.resolve(
+          __dirname,
+          "../node_modules/@coasys/nillion-file-store/dist/main.js"
+        ),
       },
     },
     server: {
       port: 3030,
+      proxy: {
+        "/nilchain-proxy": {
+          target: "http://65.109.222.111:26657",
+          rewrite: (path) => path.replace(/^\/nilchain-proxy/, ""),
+          changeOrigin: true,
+          secure: false,
+        },
+        "/icon.png": {
+          target: "https://i.ibb.co/GnqjPJP/icon.png",
+          rewrite: (path) => path.replace(/^\/icon.png/, ""),
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+      headers: {
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+      },
     },
   });
 };

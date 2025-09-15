@@ -1,0 +1,70 @@
+diff --git a/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/worker.js b/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/worker.js
+index 545738d..9cb4a07 100644
+--- a/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/worker.js
++++ b/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/worker.js
+@@ -1 +1,39 @@
+-export function startWorker(e,o,t,r,s){const a=new Worker(new URL("./worker.js",import.meta.url),r);return a.postMessage([e,o,t,s.mainJS()]),new Promise(((e,o)=>{a.onmessage=o=>{"started"===o.data&&e()},a.onerror=o}))}"WorkerGlobalScope"in self&&self instanceof WorkerGlobalScope&&(self.onmessage=async e=>{let[o,t,r,s]=e.data;const a="function"==typeof __webpack_require__?import("../../.."):import(s);try{const{default:e,worker_entry_point:s}=await a;await e(o,t),s(r),postMessage("started"),self.onmessage=e=>{console.error("Unexpected message",e)}}catch(e){throw setTimeout((()=>{throw e})),e}});
+\ No newline at end of file
++export function startWorker(e, o, t, r, s) {
++  const workerUrl = new URL("./workerWrapper.js", import.meta.url);
++  const workerOptions = { type: "module" };
++  const a = new Worker(workerUrl, workerOptions);
++
++  a.postMessage([e, o, t, s.mainJS()]);
++
++  return new Promise((resolve, reject) => {
++    a.onmessage = (msgEvent) => {
++      if (msgEvent.data === "started") {
++        resolve();
++      }
++    };
++    a.onerror = (error) => {
++      reject(error);
++    };
++  });
++}
++
++if ("WorkerGlobalScope" in self && self instanceof WorkerGlobalScope) {
++  self.onmessage = async (event) => {
++    const [o, t, r, s] = event.data;
++
++    try {
++      const module = await import(s);
++      const { default: defaultExport, worker_entry_point } = module;
++
++      await defaultExport(o, t);
++      worker_entry_point(r);
++      postMessage("started");
++
++      self.onmessage = (unexpectedEvent) => {
++        console.error("Unexpected message", unexpectedEvent);
++      };
++    } catch (error) {
++      setTimeout(() => { throw error; });
++    }
++  };
++}
+diff --git a/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/workerWrapper.js b/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/workerWrapper.js
+new file mode 100644
+index 0000000..b2f2de0
+--- /dev/null
++++ b/node_modules/@nillion/client-web/dist/snippets/browser-async-executor-b51ed65827bac93b/src/workerWrapper.js
+@@ -0,0 +1,18 @@
++self.onmessage = async (event) => {
++  const [o, t, r, s] = event.data;
++
++  try {
++    const module = await import(s);
++    const { default: defaultExport, worker_entry_point } = module;
++
++    await defaultExport(o, t);
++    worker_entry_point(r);
++    postMessage("started");
++
++    self.onmessage = (unexpectedEvent) => {
++      console.error("Unexpected message", unexpectedEvent);
++    };
++  } catch (error) {
++    setTimeout(() => { throw error; });
++  }
++};

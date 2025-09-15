@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { useModel } from "@coasys/ad4m-react-hooks";
 
 import Todo from "../subjects/Todo";
 
@@ -14,28 +14,25 @@ type Props = {
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
-  const { entries: todos, repo } = useSubjects({
-    perspective,
-    source,
-    subject: Todo,
-  });
+  const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
 
-  function createTodo(event: React.KeyboardEvent<Element>) {
+  async function createTodo(event: React.KeyboardEvent<Element>) {
     if (event.key !== "Enter") return;
-    repo
-      .create({ title: title })
-      .then(() => {
-        setTitle("");
-      })
-      .catch(console.log);
+    const todo = new Todo(perspective, undefined, source);
+    todo.title = title;
+    await todo.save();
+    setTitle("");
   }
 
   function toggleTodo({ id, done }) {
-    repo.update(id, { done }).catch(console.log);
+    const todo = new Todo(perspective, id, source);
+    todo.done = done;
+    todo.update();
   }
 
   function deleteTodo(id: string) {
-    repo.remove(id).catch(console.log);
+    const todo = new Todo(perspective, id, source);
+    todo.delete();
   }
 
   return (
@@ -69,7 +66,7 @@ export default function TodoView({ perspective, source }: Props) {
                 <div className={todo.done ? styles.doneTodo : ""}>
                   <j-checkbox
                     onChange={(e) =>
-                      toggleTodo({ id: todo.id, done: e.target.checked })
+                      toggleTodo({ id: todo.baseExpression, done: e.target.checked })
                     }
                     checked={todo.done}
                     style="--j-border-radius: 50%;"
@@ -84,7 +81,7 @@ export default function TodoView({ perspective, source }: Props) {
                     </j-text>
                   </j-checkbox>
                 </div>
-                <j-button onClick={() => deleteTodo(todo.id)}>Delete</j-button>
+                <j-button onClick={() => deleteTodo(todo.baseExpression)}>Delete</j-button>
               </j-flex>
             </j-box>
           ))}

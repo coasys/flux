@@ -1,30 +1,29 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
-import { useEffect, useState, useRef } from "preact/hooks";
+import { Literal, PerspectiveProxy } from "@coasys/ad4m";
+import { useEffect, useRef, useState } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import { Ad4mClient, Literal } from "@coasys/ad4m";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import styles from "../App.module.css";
-import { PerspectiveProxy } from "@coasys/ad4m";
+import useIntersectionObserver from "../hooks/useIntersectionObserver";
 
-function findNodes(links, source) {
-  return links.reduce((acc, link) => {
-    const hasSource = link.data.source === source;
-    const alreadyIn = acc.some(
-      (l) => l.proof.signature === link.proof.signature
-    );
-
-    if (alreadyIn) return acc;
-
-    if (hasSource && link.data.source === link.data.target) {
-      return [...acc, link];
-    }
-
-    if (hasSource) {
-      const newLinks = findNodes(links, link.data.target);
-      return [...acc, ...newLinks, link];
-    }
-    return acc;
-  }, []);
+function findNodes(source, allLinks, visitedNodes = new Set()) {
+  // find links originating from the source node
+  const linksFromSource = allLinks.filter(
+    (link) => link.data.source === source
+  );
+  // filter out links that have already been visited
+  const newLinks = linksFromSource.filter(
+    (link) => !visitedNodes.has(link.proof.signature)
+  );
+  // mark new links as visited
+  newLinks.forEach((link) => visitedNodes.add(link.proof.signature));
+  // recursively find links from the target nodes
+  const descendantLinks = [];
+  for (const link of newLinks) {
+    const furtherLinks = findNodes(link.data.target, allLinks, visitedNodes);
+    descendantLinks.push(...furtherLinks);
+  }
+  // return the combination of new links and all their descendants
+  return [...newLinks, ...descendantLinks];
 }
 
 function uniqueNodes(array) {
@@ -200,7 +199,7 @@ export default function CommunityOverview({
 async function fetchSnapShot(perspective: PerspectiveProxy, source: string) {
   const snapshot = await perspective.snapshot();
 
-  const subLinks = findNodes(snapshot?.links || [], source);
+  const subLinks = findNodes(source, snapshot?.links || []);
 
   const initialNodes = uniqueNodes(
     subLinks

@@ -1,44 +1,54 @@
+import App from "./app";
+import Channel from "./channel";
+import Community from "./community";
+import Conversation from "./conversation";
+import ConversationSubgroup from "./conversation-subgroup";
+import createAgentWebLink from "./createAgentWebLink";
 import createCommunity from "./createCommunity";
+import createProfile from "./createProfile";
+import Embedding from "./embedding";
+import { SubjectRepository } from "./factory";
+import getAd4mProfile from "./getAd4mProfile";
 import getAgentLinks from "./getAgentLinks";
-import getMe from "./getMe";
+import getAgentWebLinks from "./getAgentWebLinks";
 import type { Me } from "./getMe";
+import getMe from "./getMe";
 import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import joinCommunity from "./joinCommunity";
-import subscribeToLinks from "./subscribeToLinks";
-import Channel from "./channel";
-import Community from "./community";
 import Message from "./message";
 import Post from "./post";
-import App from "./app";
-import updateProfile from "./updateProfile";
-import createProfile from "./createProfile";
-import createAgentWebLink from "./createAgentWebLink";
-import getAgentWebLinks from "./getAgentWebLinks";
-import getAd4mProfile from "./getAd4mProfile";
+import SemanticRelationship from "./semantic-relationship";
+import subscribeToLinks from "./subscribeToLinks";
 import subscribeToSyncState from "./subscribeToSyncState";
-import { SubjectRepository } from "./factory";
+import Topic from "./topic";
+import updateProfile from "./updateProfile";
 export * from "./npmApi";
 
 export {
-  SubjectRepository,
-  Me,
   App,
   Channel,
   Community,
-  Message,
-  Post,
+  Conversation,
+  ConversationSubgroup,
+  createAgentWebLink,
   createCommunity,
+  createProfile,
+  Embedding,
+  getAd4mProfile,
   getAgentLinks,
+  getAgentWebLinks,
   getMe,
   getPerspectiveMeta,
   getProfile,
   joinCommunity,
+  Me,
+  Message,
+  Post,
+  SemanticRelationship,
+  SubjectRepository,
   subscribeToLinks,
-  updateProfile,
-  createProfile,
-  createAgentWebLink,
-  getAgentWebLinks,
-  getAd4mProfile,
   subscribeToSyncState,
+  Topic,
+  updateProfile,
 };

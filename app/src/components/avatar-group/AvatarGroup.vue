@@ -1,17 +1,19 @@
 <template>
-  <button @click="$emit('click')" class="avatar-group">
-    <j-tooltip title="See all members">
-      <div class="avatar-group__avatars">
-        <Avatar
-          v-for="(user, index) in firstUsers"
-          :data-testid="`avatar-group__avatar__${user.did}`"
-          :key="index"
-          :hash="user.did"
-          :size="size"
-          :url="user.profileThumbnailPicture"
-        ></Avatar>
+  <button @click="emit('click')" class="avatar-group">
+    <j-tooltip :title="tooltipTitle">
+      <div class="avatars">
+        <j-spinner size="sm" v-if="loading" />
 
-        <span v-if="users.length >= 5" class="avatar-group__see-all">
+        <j-avatar
+          v-if="!loading"
+          v-for="user in users.slice(0, 4)"
+          :key="user.did"
+          :hash="user.did"
+          :src="user.profileThumbnailPicture"
+          :size="size"
+        />
+
+        <span v-if="!loading && users.length > 4" class="see-all" :class="{ small: size === 'xs' }">
           +{{ users.length - 4 }}
         </span>
       </div>
@@ -19,86 +21,55 @@
   </button>
 </template>
 
-<script lang="ts">
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { defineComponent } from "vue";
-import Avatar from "@/components/avatar/Avatar.vue";
-
-export default defineComponent({
-  emits: ["click"],
-  components: { Avatar },
-  props: ["users", "size"],
-  data() {
-    return {
-      firstUsers: {} as Record<string, Profile>,
-      loading: false,
-    };
-  },
-  watch: {
-    users: {
-      handler: async function (users: string[]) {
-        // reset on change
-        let firstUsers = {} as any;
-        this.loading = true;
-
-        for (let i = 0; i < users.length; i++) {
-          const did = users[i];
-          if (i <= 3) {
-            const profile = await getProfile(did);
-            if (profile) {
-              firstUsers[did] = profile;
-            }
-          }
-        }
-
-        this.firstUsers = firstUsers;
-        this.loading = false;
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
-});
+<script setup lang="ts">
+defineProps<{ users: any[]; loading?: boolean; size?: string; tooltipTitle?: string }>();
+const emit = defineEmits(["click"]);
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .avatar-group {
   outline: 0;
   border: 0;
   background: none;
   cursor: pointer;
   display: flex;
-  min-height: var(--j-size-md);
-}
+  padding: 0;
 
-.avatar-group__avatars {
-  gap: var(--j-space-200);
-  display: flex;
-  height: var(--j-size-md);
-}
+  .avatars {
+    gap: var(--j-space-200);
+    display: flex;
+    align-items: center;
+  }
 
-.avatar-group__avatars > *:not(:first-child) {
-  margin-left: -15px;
-  display: flex;
-}
+  .avatars > *:not(:first-child) {
+    margin-left: -15px;
+    display: flex;
+  }
 
-.avatar-group__see-all {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  outline: 0;
-  cursor: pointer;
-  background: var(--j-color-ui-100);
-  border: 1px solid transparent;
-  border-radius: 50%;
-  height: var(--j-size-md);
-  width: var(--j-size-md);
-  font-size: var(--j-font-size-400);
-  font-weight: 400;
-  color: var(--j-color-ui-600);
-  white-space: nowrap;
-  padding: 14px;
+  .see-all {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: 0;
+    cursor: pointer;
+    background: var(--j-color-ui-100);
+    border: 1px solid transparent;
+    border-radius: 50%;
+    width: var(--j-size-md);
+    font-size: var(--j-font-size-400);
+    font-weight: 400;
+    color: var(--j-color-ui-600);
+    white-space: nowrap;
+    padding: 14px;
+
+    &.small {
+      padding: 5px;
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+      margin-left: -3px;
+    }
+  }
 }
 </style>

@@ -1,42 +1,34 @@
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { getMe, Me } from "@coasys/flux-api";
-import { useWebRTC } from "@coasys/flux-react-web";
-import { useAgent } from "@coasys/ad4m-react-hooks";
-import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-
-import UserGrid from "../UserGrid";
-import Footer from "../Footer";
-import Notifications from "../Notifications";
-import UiContext from "../../context/UiContext";
-import Overlay from "../Overlay/Overlay";
-import JoinScreen from "../JoinScreen";
-
-import { PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-
-// @ts-ignore
-import styles from "./Channel.module.css";
-import Debug from "../Debug";
-import { profileFormatter } from "@coasys/flux-utils";
+import { useWebRTC, WebRTC } from "@coasys/flux-react-web";
 import { Profile } from "@coasys/flux-types";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
+import UiContext from "../../context/UiContext";
+import useIntersectionObserver from "../../hooks/useIntersectionObserver";
+import Debug from "../Debug";
+import Footer from "../Footer";
+import JoinScreen from "../JoinScreen";
+import Notifications from "../Notifications";
+import Overlay from "../Overlay/Overlay";
+import Transcriber from "../Transcriber";
+import UserGrid from "../UserGrid";
+import styles from "./Channel.module.scss";
 
 type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
+  webrtcStore: any;
+  uiStore: any;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function Channel({
-  source,
-  perspective,
-  agent: agentClient,
-}: Props) {
+export default function Channel({ source, perspective, agent: agentClient, webrtcStore, uiStore, getProfile }: Props) {
+  const [, forceUpdate] = useState({});
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
-
-  const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: (profile: any) => {
-    return profileFormatter(profile.perspective.links)
-  } });
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
@@ -62,46 +54,66 @@ export default function Channel({
     },
   });
 
-  // Get agent/me
-  useEffect(() => {
-    async function fetchAgent() {
-      const agent = await agentClient.me();
-      setAgent(agent);
-    }
+  async function fetchAgentData() {
+    const me = await agentClient.me();
+    setAgent(me);
+    const myProfile = await getProfile(me.did);
+    setProfile(myProfile);
+  }
 
-    if (!agent) {
-      fetchAgent();
-    }
-  }, [agent]);
+  function leaveRoom() {
+    webrtcStore.leaveRoom();
+    setTimeout(() => forceUpdate({}), 100);
+  }
+
+  function toggleFullscreen() {
+    setFullscreen(!fullscreen);
+    uiStore.toggleCallFullscreen()
+  }
+
+  useEffect(() => {
+    if (webrtcStore) webrtcStore.addInstance(webRTC);
+  }, [webrtcStore]);
+
+  useEffect(() => {
+    if (!agent && getProfile) fetchAgentData();
+  }, [agent, getProfile]);
 
   return (
-    <section className={styles.outer} ref={wrapperEl}>
-      {!webRTC.hasJoined && (
+    <section className={styles.wrapper} ref={wrapperEl}>
+      {!webRTC.hasJoined && profile && (
         <JoinScreen
           webRTC={webRTC}
           profile={profile}
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
+          webrtcStore={webrtcStore}
+          leaveRoom={leaveRoom}
         />
       )}
 
       {webRTC.hasJoined && (
         <>
-          <UserGrid
-            webRTC={webRTC}
-            agentClient={agentClient}
-            profile={profile}
-          />
+          <UserGrid webRTC={webRTC} profile={profile} getProfile={getProfile} />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
+            fullscreen={fullscreen}
+            toggleFullscreen={toggleFullscreen}
+            webrtcStore={webrtcStore}
+            leaveRoom={leaveRoom}
           />
+          {/* {webRTC.localState.settings.transcriber.on && (
+            <Transcriber webRTC={webRTC} source={source} perspective={perspective} />
+          )} */}
         </>
       )}
 
       <Overlay webRTC={webRTC} profile={profile} />
 
-      <>{showDebug && <Debug webRTC={webRTC} profile={profile} />}</>
+      {showDebug && <Debug webRTC={webRTC} profile={profile} />}
 
       <Notifications />
     </section>

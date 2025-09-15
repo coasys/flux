@@ -1,7 +1,19 @@
+import { Link, PerspectiveExpression } from "@coasys/ad4m";
+
+// Ref types for reactive Vue.js properties
+export type Ref<T> = { value: T };
+export type ComputedRef<T> = { value: T };
+
 export interface NeighbourhoodMeta {
   name: string;
   description: string;
   languages: { [x: string]: string };
+}
+
+export interface FileData {
+  name: string;
+  file_type: string;
+  data_base64: string;
 }
 
 export interface Community {
@@ -11,8 +23,8 @@ export interface Community {
   timestamp: string;
   name: string;
   description: string;
-  image: string;
-  thumbnail: string;
+  image: string | FileData | undefined;
+  thumbnail: string | FileData | undefined;
   neighbourhoodUrl: string;
   members: string[];
 }
@@ -193,4 +205,50 @@ export interface WebLink {
   image: string;
   url: string;
   id: string;
+}
+
+export type AgentStatus = "active" | "asleep" | "offline" | "invisible" | "busy" | "unknown";
+
+export interface RouteParams {
+  communityId?: string;
+  channelId?: string;
+  viewId?: string;
+}
+
+export interface ProcessingState {
+  step: number;
+  channelId: string;
+  itemIds: string[];
+  author: string;
+  communityName?: string;
+  channelName?: string;
+  conversationName?: string;
+}
+
+export type MediaSettings = { audioEnabled: boolean; videoEnabled: boolean; screenShareEnabled: boolean };
+export interface AgentState {
+  status: AgentStatus;
+  currentRoute: RouteParams;
+  callRoute: RouteParams;
+  mediaSettings: MediaSettings;
+  processing: ProcessingState | null;
+  inCall: boolean;
+  aiEnabled: boolean;
+  lastUpdate: number;
+}
+
+export type CallHealth = "healthy" | "warnings" | "connections-lost";
+export type AgentData = Profile & AgentState;
+export interface SignallingService {
+  signalling: Ref<boolean>;
+  agents: Ref<Record<string, AgentState>>;
+  setProcessingState: (newState: Partial<ProcessingState> | null) => void;
+  getAgentState(did: string): AgentState | undefined;
+  startSignalling: () => void;
+  stopSignalling: () => void;
+  addSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  removeSignalHandler: (handler: (signal: PerspectiveExpression) => void) => void;
+  sendSignal: (link: Link) => void;
+  getAgentsInChannel: (channelId?: string) => ComputedRef<AgentData[]>;
+  getAgentsInCall: (channelId?: string) => ComputedRef<AgentData[]>;
 }

@@ -1,0 +1,22 @@
+{
+  "extends": "@tsconfig/recommended",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+    // "esModuleInterop": true,
+    // "allowSyntheticDefaultImports": true
+    // "paths": {
+    //   "@nillion/client-web": [
+    //     "./node_modules/@nillion/client-web/dist/nillion_client_wasm.d.ts"
+    //   ]
+    // }
+  },
+  "include": ["src"]
+}

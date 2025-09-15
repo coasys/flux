@@ -1,88 +1,68 @@
-import UIContext from "../../context/UIContext";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { format, formatDistance } from "date-fns";
-import { getTimeSince } from "../../utils";
-import Avatar from "../Avatar";
-import { Post as PostSubject } from "@coasys/flux-api";
-import { useAgent, useSubject, useMe } from "@coasys/ad4m-react-hooks";
-import styles from "./index.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
+import { useMe, useModel } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { profileFormatter } from "@coasys/flux-utils";
+import { Post as PostSubject } from "@coasys/flux-api";
 import { Profile } from "@coasys/flux-types";
+import { profileFormatter } from "@coasys/flux-utils";
+import { useContext, useEffect, useState } from "preact/hooks";
+import UIContext from "../../context/UIContext";
+import { getTimeSince } from "../../utils";
+import styles from "./index.module.css";
 
 export default function Post({
   agent,
   perspective,
   id,
-  source,
+  getProfile,
 }: {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   id: string;
-  source: string;
+  getProfile: (did: string) => Promise<Profile>;
 }) {
   const { methods: UIMethods } = useContext(UIContext);
+  const [author, setAuthor] = useState<Profile | null>(null);
+  const [ogData, setOgData] = useState<any>({});
 
-  const { entry: post } = useSubject({
-    perspective,
-    id,
-    subject: PostSubject,
-  });
+  const { entries: posts } = useModel({ perspective, model: PostSubject, query: { where: { base: id } } });
+  const post = posts[0];
 
   const { me } = useMe(agent, profileFormatter);
 
-  const { profile, agent: author } = useAgent<Profile>({
-    client: agent,
-    did: post?.author,
-    formatter: profileFormatter,
-  });
-
-  const [ogData, setOgData] = useState<any>({});
-
   async function fetchOgData(url) {
     try {
-      const data = await fetch(
-        "https://jsonlink.io/api/extract?url=" + url
-      ).then((res) => res.json());
+      const data = await fetch("https://jsonlink.io/api/extract?url=" + url).then((res) => res.json());
       setOgData(data);
     } catch (e) {}
   }
 
   useEffect(() => {
-    if (post?.url) {
-      fetchOgData(post.url);
-    }
+    if (post?.author) getProfile(post?.author).then((profile) => setAuthor(profile));
+  }, [post?.author]);
+
+  useEffect(() => {
+    if (post?.url) fetchOgData(post.url);
   }, [post?.url]);
 
   if (!post) return;
 
-  const isAuthor = author?.did === me?.did;
-
-  const hasTitle = post.title;
-  const hasImage = post.image;
-  const hasBody = post.body;
-  const hasUrl = post.url;
+  const isAuthor = post?.author === me?.did;
+  const hasTitle = post?.title;
+  const hasImage = post?.image;
+  const hasBody = post?.body;
+  const hasUrl = post?.url;
 
   return (
     <div className={styles.post}>
       <j-box pb="500">
         <div className={styles.header}>
-          <j-button
-            size="sm"
-            variant="link"
-            onClick={() => UIMethods.goToFeed()}
-          >
+          <j-button size="sm" variant="link" onClick={() => UIMethods.goToFeed()}>
             <j-icon name="arrow-left-short" slot="start"></j-icon>
             Back
           </j-button>
           {isAuthor && (
             <div className={styles.actions}>
-              <j-button
-                size="xs"
-                variant="subtle"
-                onClick={() => UIMethods.toggleOverlay(true)}
-              >
+              <j-button size="xs" variant="subtle" onClick={() => UIMethods.toggleOverlay(true)}>
                 <j-icon name="pencil" size="xs" slot="start"></j-icon>
                 Edit
               </j-button>
@@ -102,21 +82,13 @@ export default function Post({
       <j-box pt="200">
         <j-flex a="center" gap="400">
           <a href={author?.did}>
-            <Avatar
-              size="sm"
-              did={author?.did}
-              url={profile?.profileThumbnailPicture}
-            ></Avatar>
+            <j-avatar hash={author?.did} src={author?.profileThumbnailPicture || null} size="sm" />
           </a>
           <div>
             <a className={styles.authorName} href={author?.did}>
-              {profile?.username || (
-                <j-skeleton width="lg" height="text"></j-skeleton>
-              )}
+              {author ? author.username || "No name" : <j-skeleton width="lg" height="text" />}
             </a>
-            <div className={styles.timestamp}>
-              {getTimeSince(new Date(post.timestamp), new Date())}
-            </div>
+            <div className={styles.timestamp}>{getTimeSince(new Date(post.timestamp), new Date())}</div>
           </div>
         </j-flex>
       </j-box>
@@ -130,6 +102,7 @@ export default function Post({
       )}
 
       {hasImage && (
+        // @ts-ignore
         <j-box bg="white" mt="600">
           <img className={styles.postImage} src={hasImage} />
         </j-box>
@@ -146,12 +119,8 @@ export default function Post({
       {hasUrl && (
         <j-box pt="400">
           <div className={styles.postUrl}>
-            <j-icon size="md" name="link"></j-icon>
-            <a
-              onClick={(e) => e.stopPropagation()}
-              href={post.url}
-              target="_blank"
-            >
+            <j-icon name="link" />
+            <a onClick={(e) => e.stopPropagation()} href={post.url} target="_blank">
               {new URL(post.url).origin}
             </a>
           </div>
@@ -160,10 +129,7 @@ export default function Post({
 
       {hasBody && (
         <j-box pt="500">
-          <div
-            className={styles.postBody}
-            dangerouslySetInnerHTML={{ __html: post.body }}
-          />
+          <div className={styles.postBody} dangerouslySetInnerHTML={{ __html: post.body }} />
         </j-box>
       )}
 
@@ -171,11 +137,8 @@ export default function Post({
         <j-text size="500" color="ui-500" weight="600">
           Comments ({post.comments?.length})
         </j-text>
-        <comment-section
-          agent={agent}
-          perspective={perspective}
-          source={post.id}
-        ></comment-section>
+        {/* @ts-ignore */}
+        <comment-section agent={agent} perspective={perspective} source={post.baseExpression} />
       </j-box>
     </div>
   );

@@ -1,14 +1,20 @@
-import { UiProvider } from "./context/UiContext";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Profile } from "@coasys/flux-types";
 import Channel from "./components/Channel";
+import { UiProvider } from "./context/UiContext";
 
-export default function App({ perspective, source, agent }) {
-  if (!perspective?.uuid || !source) {
-    return null;
-  }
+type Props = {
+  source: string;
+  perspective: PerspectiveProxy;
+  agent: AgentClient;
+  webrtcStore: any;
+  uiStore: any;
+  getProfile: (did: string) => Promise<Profile>;
+};
 
-  return (
-    <UiProvider>
-      <Channel source={source} agent={agent} perspective={perspective} />
-    </UiProvider>
-  );
+export default function App(props: Props) {
+  if (!props.perspective?.uuid || !props.source) return null;
+
+  return <UiProvider>{props.agent && <Channel {...props} />}</UiProvider>;
 }

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "preact/hooks";
 import { Literal } from "@coasys/ad4m";
-import styles from "./DisplayValue.module.css";
-import type { Profile } from "@coasys/flux-types";
 import { getProfile } from "@coasys/flux-api";
+import type { Profile } from "@coasys/flux-types";
+import { useEffect, useRef, useState } from "preact/hooks";
+import styles from "./DisplayValue.module.css";
 
 export function isValidUrl(string) {
   try {
@@ -20,34 +20,36 @@ type Props = {
   onUpdate?: (value: string) => void;
 };
 
-export default function DisplayValue({
-  value,
-  options,
-  onUpdate,
-  onUrlClick = () => {},
-}: Props) {
-  const inputRef = useRef();
+export default function DisplayValue({ value, options, onUpdate, onUrlClick = () => {} }: Props) {
+  const inputRef = useRef<HTMLInputElement>();
   const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (isEditing) inputRef.current?.focus();
   }, [isEditing]);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
 
   function onKeyDown(e) {
     if (e.key === "Enter") {
       e.preventDefault();
       setIsEditing(false);
+      onUpdate(e.target.value);
+      setLocalValue(e.target.value);
     }
     if (e.key === "Escape") {
       e.stopPropagation();
       setIsEditing(false);
+      setLocalValue(value);
     }
   }
 
   function onBlur(e) {
     onUpdate(e.target.value);
+    setLocalValue(e.target.value);
     setIsEditing(false);
   }
 
@@ -56,14 +58,14 @@ export default function DisplayValue({
     setIsEditing(true);
   }
 
-  const isCollection = Array.isArray(value);
+  const isCollection = Array.isArray(localValue);
 
   if (isCollection) {
     return (
       <j-flex gap="200" wrap>
-        {value.map((v, index) => {
-          return <DisplayValue onUrlClick={onUrlClick} value={v} />;
-        })}
+        {localValue.map((v, index) => (
+          <DisplayValue key={index} onUrlClick={onUrlClick} value={v} />
+        ))}
       </j-flex>
     );
   }
@@ -71,16 +73,12 @@ export default function DisplayValue({
   if (options) {
     return (
       <div className={styles.selectWrapper}>
-        <select
-          className={styles.select}
-          value={value}
-          onChange={(e) => onUpdate(e.target.value)}
-        >
+        <select className={styles.select} value={localValue} onChange={(e) => onUpdate(e.target.value)}>
           {options.map((option) => (
             <option value={option.value}>{option.label}</option>
           ))}
         </select>
-        <j-icon name="chevron-down" size="xs"></j-icon>
+        <j-icon name="chevron-down" size="xs" />
       </div>
     );
   }
@@ -89,38 +87,34 @@ export default function DisplayValue({
     return (
       <input
         ref={inputRef}
-        size="sm"
         className={styles.input}
         autoFocus
         onClick={(e) => e.stopPropagation()}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        value={value}
-      ></input>
+        value={localValue}
+      />
     );
   }
 
-  if (typeof value === "string") {
-    if (value.startsWith("did:key")) {
-      return <Profile did={value}></Profile>;
+  if (typeof localValue === "string") {
+    if (localValue.startsWith("did:key")) {
+      return <Profile did={localValue} />;
     }
 
-    if (value.length > 1000)
-      return (
-        <img className={styles.img} src={`data:image/png;base64,${value}`} />
-      );
-    if (isValidUrl(value)) {
-      if (value.startsWith("literal://")) {
+    if (localValue.length > 1000) return <img className={styles.img} src={`data:image/png;base64,${localValue}`} />;
+    if (isValidUrl(localValue)) {
+      if (localValue.startsWith("literal://")) {
         return (
           <a
             className={styles.entryUrl}
-            href={value}
+            href={localValue}
             onClick={(e) => {
               e.stopPropagation();
-              onUrlClick(value);
+              onUrlClick(localValue);
             }}
           >
-            {Literal.fromUrl(value).get()}
+            {Literal.fromUrl(localValue).get()}
           </a>
         );
       }
@@ -128,13 +122,13 @@ export default function DisplayValue({
       return (
         <a
           className={styles.entryUrl}
-          href={value}
+          href={localValue}
           onClick={(e) => {
             e.stopPropagation();
-            onUrlClick(value);
+            onUrlClick(localValue);
           }}
         >
-          {value}
+          {localValue}
         </a>
       );
     }
@@ -142,28 +136,28 @@ export default function DisplayValue({
     return (
       <j-flex gap="500" a="center">
         <div className={styles.value} onClick={onStartEdit}>
-          {value}
+          {localValue}
         </div>
       </j-flex>
     );
   }
 
-  if (value?.constructor?.name === "Object") {
-    return <ShowObjectInfo value={value} />;
+  if (localValue?.constructor?.name === "Object") {
+    return <ShowObjectInfo value={localValue} />;
   }
 
-  if (value === true) return <j-toggle size="sm" checked></j-toggle>;
+  if (localValue === true) return <j-toggle size="sm" checked />;
 
-  if (value === false)
+  if (localValue === false)
     return onUpdate ? (
       <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
-        <j-icon size="xs" name="pencil"></j-icon>
+        <j-icon size="xs" name="pencil" />
       </j-button>
     ) : (
       <span></span>
     );
 
-  return value === null ? <span></span> : value;
+  return localValue === null ? <span></span> : localValue;
 }
 
 function ShowObjectInfo({ value }) {
@@ -184,11 +178,12 @@ function ShowObjectInfo({ value }) {
       {open && (
         <j-modal
           open={open}
-          onClick={(e) => e.stopImmediatePropagation()}
+          onClick={(e: any) => e.stopImmediatePropagation()}
+          // @ts-ignore
           onToggle={(e) => setOpen(e.target.open)}
         >
           <j-box p="500">
-            <j-flex p="500" direction="column" gap="400">
+            <j-flex direction="column" gap="400">
               {properties.map(([key, value]) => (
                 <j-flex gap="100" direction="column">
                   <j-text size="300" uppercase nomargin>
@@ -214,11 +209,7 @@ function Profile({ did }: { did: string }) {
 
   return (
     <j-tooltip strategy="fixed" title={profile?.username}>
-      <j-avatar
-        size="xs"
-        hash={did}
-        src={profile?.profileThumbnailPicture}
-      ></j-avatar>
+      <j-avatar size="xs" hash={did} src={profile?.profileThumbnailPicture} />
     </j-tooltip>
   );
 }

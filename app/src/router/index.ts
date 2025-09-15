@@ -1,5 +1,8 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import { ad4mConnect } from "@/ad4mConnect";
+import { useAppStore, useRouteMemoryStore } from "@/stores";
+import { RouteParams } from "@coasys/flux-types";
+import { storeToRefs } from "pinia";
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -21,19 +24,27 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "home",
-        component: () => import(`@/views/profile/ProfileView.vue`),
+        component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
         path: "communities/:communityId",
         props: true,
         name: "community",
-        component: () => import(`@/views/community/CommunityView.vue`),
+        component: () => import(`@/views/main/community/CommunityView.vue`),
         children: [
           {
             path: ":channelId",
             props: true,
             name: "channel",
-            component: () => import(`@/views/channel/ChannelView.vue`),
+            component: () => import(`@/views/main/community/channel/ChannelView.vue`),
+            children: [
+              {
+                path: ":viewId",
+                props: true,
+                name: "view",
+                component: () => import(`@/views/main/community/channel/view/ViewView.vue`),
+              },
+            ],
           },
         ],
       },
@@ -41,7 +52,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "profile/:did",
         props: true,
         name: "profile",
-        component: () => import(`@/views/profile/ProfileView.vue`),
+        component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
         path: "settings",
@@ -52,48 +63,48 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
-const router = createRouter({
-  history: createWebHashHistory(),
-  routes,
-});
+const router = createRouter({ history: createWebHashHistory(), routes });
 
+// Handle login routing
 router.beforeEach(async (to, from, next) => {
   try {
     const isAuthenticated = await ad4mConnect.isAuthenticated();
-
     if (isAuthenticated) {
-      const client = await ad4mConnect.getAd4mClient();
-      const me = await client.agent.me();
+      const appStore = useAppStore();
+      const { me } = storeToRefs(appStore);
 
-      const fluxLinksFound = me?.perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
-
+      // Handle authenticated routes
+      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
-
-      if (fluxLinksFound && isOnSignupOrMain) {
+      if (fluxAccountCreated && isOnSignupOrMain) {
+        await appStore.refreshMyProfile();
         next("/home");
-      }
-
-      if (!fluxLinksFound && !isOnSignupOrMain) {
-        next("/signup");
-      }
-
-      next();
+      } else if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
+      else next();
     } else {
-      if (to.name !== "signup") {
-        next("/signup");
-      }
-
+      // If not logged in, redirect to signup
+      if (to.name !== "signup") next("/signup");
       next();
     }
   } catch (e) {
-    console.log("error in route", e);
-    if (to.name !== "signup") {
-      next("/signup");
-    } else {
-      next();
-    }
+    console.log("Error in route", e);
+    if (to.name !== "signup") next("/signup");
+    else next();
+  }
+});
+
+// Update the route memory store on each route change
+router.afterEach((to) => {
+  const routeMemoryStore = useRouteMemoryStore();
+  const { communityId, channelId, viewId } = to.params as RouteParams;
+
+  // Set the current route
+  routeMemoryStore.setCurrentRoute({ communityId, channelId, viewId });
+
+  // If navigating to a community, store the last full route for the community & the last view visited in the channel
+  if (communityId) {
+    routeMemoryStore.setLastCommunityRoute(communityId, to.path, to.params);
+    if (channelId && viewId) routeMemoryStore.setLastChannelView(communityId, channelId, viewId);
   }
 });
 

@@ -1,110 +1,76 @@
-import { useState } from "preact/hooks";
-import { useSubject } from "@coasys/ad4m-react-hooks";
-import styles from "./CardDetails.module.css";
-import { PerspectiveProxy } from "@coasys/ad4m";
+import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import Entry from "../Entry";
-import { useEffect } from "preact/hooks";
 import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { useAssociations } from "../../hooks/useAssociations";
+import { useMemo, useState } from "preact/hooks";
+import Entry from "../Entry";
+import styles from "./CardDetails.module.css";
 
 type Props = {
-  id: string;
+  task: Ad4mModel & { assignees: string[]; name: string; title: string };
   perspective: PerspectiveProxy;
+  channelId: string;
   selectedClass: string;
   agent: AgentClient;
+  agentProfiles: Profile[];
   onDeleted: () => void;
 };
 
 export default function CardDetails({
   agent,
-  id,
+  task,
   selectedClass,
   onDeleted = () => {},
   perspective,
+  agentProfiles,
 }: Props) {
-  const { entry, repo } = useSubject({
-    perspective,
-    id,
-    subject: selectedClass,
-  });
-
-  const {
-    associations: assignees,
-    add: addAssignee,
-    remove: removeAssignee,
-  } = useAssociations({
-    perspective,
-    source: id,
-    predicate: "rdf://has_assignee",
-  });
-
   const [showAssign, setShowAssign] = useState(false);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
 
-  async function fetchProfiles() {
-    const n = await perspective.getNeighbourhoodProxy();
-    const dids = await n.otherAgents();
-    const me = await agent.me();
-    const allAgents = [me.did, ...dids];
-    const profiles = await Promise.all(allAgents.map((d) => getProfile(d)));
-    setProfiles(profiles);
-  }
-
-  useEffect(() => {
-    if (perspective.sharedUrl) {
-      fetchProfiles();
-    }
-  }, [perspective.uuid]);
+  const assignedProfiles = useMemo(() => {
+    const assigneeSet = new Set(task.assignees);
+    return agentProfiles.filter((p) => assigneeSet.has(p.did));
+  }, [task.assignees, agentProfiles]);
 
   async function onDelete() {
     try {
-      await repo.remove(entry.id);
+      task.delete();
       onDeleted();
-    } catch (e) {
-      // Todo: error handling
-      console.log(e);
+    } catch (error) {
+      console.log("Error deleting task", error);
     }
   }
 
-  function toggleAssignee(val: boolean, did: string) {
-    if (val) {
-      addAssignee(did);
+  function toggleAssignee(toggleOn: boolean, did: string) {
+    if (toggleOn) {
+      if (!task.assignees.includes(did)) task.assignees.push(did);
+      task.update();
     } else {
-      removeAssignee(did);
+      task.assignees = task.assignees.filter((d) => d !== did);
+      task.update();
     }
   }
-
-  const assignedProfiles = profiles.filter((p) =>
-    assignees.some((l) => l.data.target === p.did)
-  );
 
   return (
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
         <j-box pb="800">
-          <Entry
-            id={id}
-            perspective={perspective}
-            selectedClass={selectedClass}
-          ></Entry>
+          <Entry task={task} perspective={perspective} selectedClass={selectedClass} />
         </j-box>
 
         <j-box pb="500">
           <j-flex a="center" gap="300">
-            <j-icon size="xs" color="ui-500" name="chat-left"></j-icon>
+            <j-icon size="xs" color="ui-500" name="chat-left" />
             <j-text nomargin size="500" weight="700">
               Comments
             </j-text>
           </j-flex>
         </j-box>
+        {/* @ts-ignore */}
         <comment-section
           className={styles.commentSection}
           perspective={perspective}
-          source={id}
+          source={task.baseExpression}
           agent={agent}
-        ></comment-section>
+        />
       </div>
       <aside className={styles.cardSidebar}>
         <j-box pt="800">
@@ -113,44 +79,28 @@ export default function CardDetails({
           </j-text>
         </j-box>
         <j-box pt="300">
-          <button
-            className={styles.actionButton}
-            onClick={() => setShowAssign(!showAssign)}
-          >
-            <j-icon name="people" slot="start" size="xs"></j-icon>
+          <button className={styles.actionButton} onClick={() => setShowAssign(!showAssign)}>
+            <j-icon name="people" slot="start" size="xs" />
             <span>Assign</span>
           </button>
           {showAssign && (
             <j-menu className={styles.menu}>
               <j-box p="200">
                 <j-input size="sm" type="search">
-                  <j-icon
-                    name="search"
-                    slot="start"
-                    color="ui-500"
-                    size="xs"
-                  ></j-icon>
+                  <j-icon name="search" slot="start" color="ui-500" size="xs" />
                 </j-input>
                 <j-box pt="300">
-                  {profiles.map((profile) => (
+                  {agentProfiles.map((profile) => (
                     <j-menu-item key={profile.did}>
                       <j-checkbox
                         full
-                        checked={assignees.some(
-                          (l) => l.data.target === profile.did
-                        )}
-                        onChange={(e) =>
-                          toggleAssignee(e.target.checked, profile.did)
-                        }
+                        checked={task.assignees.some((a) => a === profile.did)}
+                        onChange={(e: any) => toggleAssignee(e.target.checked, profile.did)}
                         size="sm"
                         slot="start"
                       >
                         <div className={styles.suggestion}>
-                          <j-avatar
-                            size="xs"
-                            src={profile.profileThumbnailPicture}
-                            hash={profile.did}
-                          ></j-avatar>
+                          <j-avatar size="xs" src={profile.profileThumbnailPicture} hash={profile.did} />
                           <j-text nomargin size="400" color="ui-800">
                             {profile.username}
                           </j-text>
@@ -167,11 +117,7 @@ export default function CardDetails({
               {assignedProfiles.map((p) => (
                 <j-box pt="300" key={p.did}>
                   <j-flex a="center" gap="300">
-                    <j-avatar
-                      size="xs"
-                      src={p?.profileThumbnailPicture}
-                      hash={p.did}
-                    ></j-avatar>
+                    <j-avatar size="xs" src={p?.profileThumbnailPicture} hash={p.did} />
                     <j-text nomargin size="400" color="ui-700">
                       {p?.username}
                     </j-text>
@@ -183,7 +129,7 @@ export default function CardDetails({
         </j-box>
         <j-box pt="300">
           <button className={styles.dangerActionButton} onClick={onDelete}>
-            <j-icon name="trash" slot="start" size="xs"></j-icon>
+            <j-icon name="trash" slot="start" size="xs" />
             <span>Delete</span>
           </button>
         </j-box>

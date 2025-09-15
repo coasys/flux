@@ -1,43 +1,31 @@
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { useModel } from "@coasys/ad4m-react-hooks";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { Post } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { useState } from "preact/hooks";
+import { DisplayView, displayOptions } from "../../constants/options";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
-import { DisplayView, displayOptions } from "../../constants/options";
-import { useSubjects } from "@coasys/ad4m-react-hooks";
-import { Post } from "@coasys/flux-api";
-import { useMemo } from "react";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
-export default function PostList({
-  agent,
-  perspective,
-  source,
-}: {
+type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
-}) {
+  getProfile: (did: string) => Promise<Profile>;
+};
+
+export default function PostList({ agent, perspective, source, getProfile }: Props) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, isLoading } = useSubjects({
-    perspective: perspective,
-    source: source,
-    subject: Post,
+  const { entries: posts, loading } = useModel({
+    perspective,
+    model: Post,
+    query: { source, order: { timestamp: "DESC" } },
   });
 
-  const sortedPosts = useMemo(() => {
-    return posts.sort(
-      // @ts-ignore
-      (a: any, b: any) => new Date(b.timestamp) - new Date(a.timestamp)
-    );
-  }, [posts, source]);
-
   const displayStyle: DisplayView =
-    view === DisplayView.Compact
-      ? style.compact
-      : view === DisplayView.Grid
-        ? style.grid
-        : style.card;
+    view === DisplayView.Compact ? style.compact : view === DisplayView.Grid ? style.grid : style.card;
 
   const currentOption = displayOptions.find((o) => o.value === view);
 
@@ -53,10 +41,7 @@ export default function PostList({
             <j-menu slot="content">
               {displayOptions.map((option) => {
                 return (
-                  <j-menu-item
-                    selected={option.value === view}
-                    onClick={() => setView(option.value)}
-                  >
+                  <j-menu-item selected={option.value === view} onClick={() => setView(option.value)}>
                     <j-icon size="sm" slot="start" name={option.icon}></j-icon>
                     {option.label}
                   </j-menu-item>
@@ -66,14 +51,14 @@ export default function PostList({
           </j-popover>
         </j-flex>
       </j-box>
-      {isLoading && (
+      {loading && (
         <j-box py="500">
           <j-flex a="center" j="center">
             <j-spinner size="lg"></j-spinner>
           </j-flex>
         </j-box>
       )}
-      {!isLoading && sortedPosts.length === 0 && (
+      {!loading && posts.length === 0 && (
         <j-box py="800">
           <j-flex gap="400" direction="column" a="center" j="center">
             <j-icon color="ui-500" size="xl" name="binoculars"></j-icon>
@@ -89,14 +74,8 @@ export default function PostList({
         </j-box>
       )}
       <div className={[style.posts, displayStyle].join(" ")}>
-        {sortedPosts.map((post) => (
-          <PostItem
-            key={post.id}
-            agent={agent}
-            perspective={perspective}
-            post={post}
-            displayView={view}
-          ></PostItem>
+        {posts.map((post) => (
+          <PostItem key={post.baseExpression} agent={agent} post={post} displayView={view} getProfile={getProfile} />
         ))}
       </div>
     </div>

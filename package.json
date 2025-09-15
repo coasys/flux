@@ -18,16 +18,23 @@
     ]
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "publish-package": "turbo run publish-package",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
     "patch-package": "*",
     "prettier": "latest",
     "turbo": "latest"
+  },
+  "resolutions": {
+    "@coasys/ad4m": "0.10.1",
+    "@coasys/ad4m-connect": "0.10.1",
+    "@coasys/ad4m-vue-hooks": "0.10.1",
+    "@coasys/ad4m-react-hooks": "0.10.1"
   },
   "engines": {
     "node": ">=18.16.0"

@@ -1,5 +1,5 @@
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
 import { createPinia, Pinia, setActivePinia } from "pinia";
-import { useAppStore } from "@/store/app";
 
 describe("App Mutations", () => {
   let store: Pinia;
@@ -13,40 +13,40 @@ describe("App Mutations", () => {
     setActivePinia(store);
   });
 
-  test("toggleSidebar", () => {
-    const appStore = useAppStore();
+  test("toggleCommunitySidebar", () => {
+    const uiStore = useUiStore();
 
-    expect(appStore.showSidebar).toBeTruthy();
+    expect(uiStore.showCommunitySidebar).toBeTruthy();
 
-    appStore.toggleSidebar();
+    uiStore.toggleCommunitySidebar();
 
-    expect(appStore.showSidebar).toBeFalsy();
+    expect(uiStore.showCommunitySidebar).toBeFalsy();
   });
 
-  test("setSidebar", () => {
-    const appStore = useAppStore();
+  test("setCommunitySidebarOpen", () => {
+    const uiStore = useUiStore();
 
-    expect(appStore.showSidebar).toBeTruthy();
+    expect(uiStore.showCommunitySidebar).toBeTruthy();
 
-    appStore.setSidebar(false);
+    uiStore.setCommunitySidebarOpen(false);
 
-    expect(appStore.showSidebar).toBeFalsy();
+    expect(uiStore.showCommunitySidebar).toBeFalsy();
   });
 
   test("setCurrentTheme", () => {
-    const appStore = useAppStore();
+    const themeStore = useThemeStore();
 
-    expect(appStore.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe("global");
 
-    appStore.setCurrentTheme("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
+    themeStore.setCurrentTheme("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
 
-    expect(appStore.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
+    expect(themeStore.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
   });
 
   test("setGlobalTheme", () => {
-    const appStore = useAppStore();
+    const themeStore = useThemeStore();
 
-    expect(appStore.globalTheme).toStrictEqual({
+    expect(themeStore.globalTheme).toStrictEqual({
       fontFamily: "Poppins",
       fontSize: "md",
       hue: 270,
@@ -55,9 +55,9 @@ describe("App Mutations", () => {
     });
 
     // @ts-ignore
-    appStore.setGlobalTheme({ fontFamily: "Arial", hue: 70 });
+    themeStore.setGlobalTheme({ fontFamily: "Arial", hue: 70 });
 
-    expect(appStore.globalTheme).toStrictEqual({
+    expect(themeStore.globalTheme).toStrictEqual({
       fontFamily: "Arial",
       fontSize: "md",
       hue: 70,
@@ -121,13 +121,13 @@ describe("App Mutations", () => {
   });
 
   test("setWindowState", () => {
-    const appStore = useAppStore();
+    const uiStore = useUiStore();
 
-    expect(appStore.windowState).toBe("visible");
+    expect(uiStore.windowState).toBe("visible");
 
-    appStore.setWindowState("foreground");
+    uiStore.setWindowState("foreground");
 
-    expect(appStore.windowState).toBe("foreground");
+    expect(uiStore.windowState).toBe("foreground");
   });
 
   test("setUpdateState", () => {
@@ -141,117 +141,117 @@ describe("App Mutations", () => {
   });
 
   test("setGlobalLoading", () => {
-    const appStore = useAppStore();
+    const uiStore = useUiStore();
 
-    expect(appStore.showGlobalLoading).toBeFalsy();
+    expect(uiStore.showGlobalLoading).toBeFalsy();
 
-    appStore.setGlobalLoading(true);
+    uiStore.setGlobalLoading(true);
 
-    expect(appStore.showGlobalLoading).toBeTruthy();
+    expect(uiStore.showGlobalLoading).toBeTruthy();
   });
 
   test("setGlobalError", () => {
-    const appStore = useAppStore();
+    const uiStore = useUiStore();
 
-    expect(appStore.globalError.show).toBeFalsy();
-    expect(appStore.globalError.message).toBe("");
+    expect(uiStore.globalError.show).toBeFalsy();
+    expect(uiStore.globalError.message).toBe("");
 
-    appStore.setGlobalError({
+    uiStore.setGlobalError({
       show: true,
       message: "error",
     });
 
-    expect(appStore.globalError.show).toBeTruthy();
-    expect(appStore.globalError.message).toBe("error");
+    expect(uiStore.globalError.show).toBeTruthy();
+    expect(uiStore.globalError.message).toBe("error");
   });
 
   test("setShowCreateCommunity", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showCreateCommunity).toBeFalsy();
+    expect(modalStore.showCreateCommunity).toBeFalsy();
 
-    appStore.setShowCreateCommunity(true);
+    modalStore.showCreateCommunity = true;
 
-    expect(appStore.modals.showCreateCommunity).toBeTruthy();
+    expect(modalStore.showCreateCommunity).toBeTruthy();
   });
 
   test("setShowEditCommunity", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showEditCommunity).toBeFalsy();
+    expect(modalStore.showEditCommunity).toBeFalsy();
 
-    appStore.setShowEditCommunity(true);
+    modalStore.showEditCommunity = true;
 
-    expect(appStore.modals.showEditCommunity).toBeTruthy();
+    expect(modalStore.showEditCommunity).toBeTruthy();
   });
 
   test("setShowCommunityMembers", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showCommunityMembers).toBeFalsy();
+    expect(modalStore.showCommunityMembers).toBeFalsy();
 
-    appStore.setShowCommunityMembers(true);
+    modalStore.showCommunityMembers = true;
 
-    expect(appStore.modals.showCommunityMembers).toBeTruthy();
+    expect(modalStore.showCommunityMembers).toBeTruthy();
   });
 
   test("setShowCreateChannel", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showCreateChannel).toBeFalsy();
+    expect(modalStore.showCreateChannel).toBeFalsy();
 
-    appStore.setShowCreateChannel(true);
+    modalStore.showCreateChannel = true;
 
-    expect(appStore.modals.showCreateChannel).toBeTruthy();
+    expect(modalStore.showCreateChannel).toBeTruthy();
   });
 
   test("setShowEditProfile", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showEditProfile).toBeFalsy();
+    expect(modalStore.showEditProfile).toBeFalsy();
 
-    appStore.setShowEditProfile(true);
+    modalStore.showEditProfile = true;
 
-    expect(appStore.modals.showEditProfile).toBeTruthy();
+    expect(modalStore.showEditProfile).toBeTruthy();
   });
 
   test("setShowDisclaimer", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showDisclaimer).toBeTruthy();
+    expect(modalStore.showDisclaimer).toBeTruthy();
 
-    appStore.setShowDisclaimer(false);
+    modalStore.showDisclaimer = false;
 
-    expect(appStore.modals.showDisclaimer).toBeFalsy();
+    expect(modalStore.showDisclaimer).toBeFalsy();
   });
 
   test("setShowSettings", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showSettings).toBeFalsy();
+    expect(modalStore.showSettings).toBeFalsy();
 
-    appStore.setShowSettings(true);
+    modalStore.showSettings = true;
 
-    expect(appStore.modals.showSettings).toBeTruthy();
+    expect(modalStore.showSettings).toBeTruthy();
   });
 
   test("setShowCommunitySettings", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showCommunitySettings).toBeFalsy();
+    expect(modalStore.showCommunitySettings).toBeFalsy();
 
-    appStore.setShowCommunitySettings(true);
+    modalStore.showCommunitySettings = true;
 
-    expect(appStore.modals.showCommunitySettings).toBeTruthy();
+    expect(modalStore.showCommunitySettings).toBeTruthy();
   });
 
   test("setShowInviteCode", () => {
-    const appStore = useAppStore();
+    const modalStore = useModalStore();
 
-    expect(appStore.modals.showInviteCode).toBeFalsy();
+    expect(modalStore.showInviteCode).toBeFalsy();
 
-    appStore.setShowInviteCode(true);
+    modalStore.showInviteCode = true;
 
-    expect(appStore.modals.showInviteCode).toBeTruthy();
+    expect(modalStore.showInviteCode).toBeTruthy();
   });
 });

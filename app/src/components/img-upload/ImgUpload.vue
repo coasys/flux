@@ -4,9 +4,7 @@
       <div class="img-upload__avatar">
         <img :src="value" v-if="value" />
         <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-        <j-button class="remove" v-if="value" @click="removeImage" size="sm">
-          Remove image
-        </j-button>
+        <j-button class="remove" variant="primary" v-if="value" @click="removeImage" size="sm">Remove image</j-button>
       </div>
     </j-flex>
   </div>
@@ -23,18 +21,18 @@
     <j-modal :open="tempProfileImage !== null">
       <j-box>
         <div class="cropper">
-          <cropper
+          <Cropper
             ref="cropper"
             class="cropper__element"
             backgroundClass="cropper__background"
             :src="tempProfileImage"
-            :stencil-props="{
-              aspectRatio: 12 / 4,
-            }"
-          ></cropper>
-          <j-box pt="300">
-            <j-button @click="clearImage">Cancel</j-button>
-            <j-button variant="primary" @click="selectImage">Ok</j-button>
+            :stencil-props="{ aspectRatio: 12 / 4 }"
+          />
+          <j-box pt="500">
+            <j-flex gap="400" j="center">
+              <j-button @click="clearImage">Cancel</j-button>
+              <j-button variant="primary" @click="selectImage">Ok</j-button>
+            </j-flex>
           </j-box>
         </div>
       </j-box>
@@ -42,70 +40,68 @@
   </teleport>
 </template>
 
-<script lang="ts">
-import "vue-advanced-cropper/dist/style.css";
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { ref, watch } from "vue";
 import { Cropper } from "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/style.css";
 
-export default defineComponent({
-  components: { Cropper },
-  emits: ["change", "hide"],
-  props: {
-    value: String,
-    disabled: Boolean,
-    hash: String,
-    icon: {
-      default: "person-fill",
-      type: String,
-    },
-  },
-  data() {
-    return {
-      tempProfileImage: null,
-    };
-  },
-  methods: {
-    onFileClick() {
-      document.getElementById("bannerFileInput")?.click();
-    },
-    selectFile(e: any) {
-      const files = e.target.files || e.dataTransfer.files;
-      if (!files.length) return;
+interface Props {
+  value?: string;
+  disabled?: boolean;
+  hash?: string;
+  icon?: string;
+}
 
-      var reader = new FileReader();
+withDefaults(defineProps<Props>(), { icon: "person-fill" });
 
-      reader.onload = (e) => {
-        const temp: any = e.target?.result;
-        this.tempProfileImage = temp;
-      };
+const emit = defineEmits<{ change: [value: string | null]; hide: [value: boolean] }>();
 
-      reader.readAsDataURL(files[0]);
-    },
-    removeImage(e: any) {
-      e.preventDefault();
-      e.stopPropagation();
-      // @ts-ignore
-      this.$refs.fileInput.value = "";
-      this.$emit("change", null);
-    },
-    clearImage() {
-      // @ts-ignore
-      this.$refs.fileInput.value = "";
-      this.tempProfileImage = null;
-    },
-    selectImage() {
-      const result = (this.$refs.cropper as any).getResult();
-      const data = result.canvas.toDataURL();
-      this.tempProfileImage = null;
-      this.$emit("change", data);
-    },
-  },
-  watch: {
-    tempProfileImage() {
-      this.$emit("hide", this.tempProfileImage !== null);
-    },
-  },
-});
+const fileInput = ref<HTMLInputElement>();
+const cropper = ref<InstanceType<typeof Cropper>>();
+const tempProfileImage = ref<string | null>(null);
+
+function onFileClick() {
+  document.getElementById("bannerFileInput")?.click();
+}
+
+function selectFile(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const files = target.files || (e as any).dataTransfer?.files;
+  if (!files?.length) return;
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const temp = e.target?.result as string;
+    tempProfileImage.value = temp;
+  };
+
+  reader.readAsDataURL(files[0]);
+}
+
+function removeImage(e: Event) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (fileInput.value) fileInput.value.value = "";
+  emit("change", null);
+}
+
+function clearImage() {
+  if (fileInput.value) fileInput.value.value = "";
+  tempProfileImage.value = null;
+}
+
+function selectImage() {
+  if (!cropper.value) return;
+
+  const result = cropper.value.getResult();
+  const data = result.canvas.toDataURL();
+  tempProfileImage.value = null;
+  emit("change", data);
+}
+
+watch(tempProfileImage, (newValue) => emit("hide", newValue !== null));
 </script>
 
 <style lang="scss" scoped>
@@ -113,7 +109,7 @@ export default defineComponent({
   background-color: var(--junto-border-color);
   background-size: cover;
   width: 100%;
-  height: 200px;
+  min-height: 236px;
 }
 .img-upload j-avatar {
   --j-avatar-size: 7rem;
@@ -126,7 +122,7 @@ export default defineComponent({
   text-align: center;
   cursor: pointer;
   width: 100%;
-  height: 200px;
+  min-height: 236px;
   position: relative;
 }
 

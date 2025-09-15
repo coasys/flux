@@ -145,3 +145,11 @@ html.gradient j-menu-item::part(base) {
   margin-right: var(--j-space-300);
   border-radius: 6px;
 }
+
+html.light j-modal::part(close-button),
+html.dark j-modal::part(close-button),
+html.gradient j-modal::part(close-button),
+html.default j-modal::part(close-button),
+html.retro j-modal::part(close-button) {
+  z-index: 999999999;
+}

@@ -36,6 +36,10 @@
   font-size: var(--j-font-size-500);
 }
 
+.body a {
+  word-break: break-all;
+}
+
 body:has(*:last-child:empty) *:first-child {
   margin-top: 0;
 }

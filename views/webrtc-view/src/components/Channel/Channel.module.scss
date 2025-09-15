@@ -1,0 +1,10 @@
+.wrapper {
+  position: relative;
+  display: grid;
+  place-content: center;
+  width: 100%;
+  max-width: 100%;
+  grid-template-columns: 1fr;
+  min-height: 100%;
+  padding: var(--j-space-500);
+}

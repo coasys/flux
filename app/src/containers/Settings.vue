@@ -1,16 +1,12 @@
 <template>
-  <j-box p="800">
-    <j-box pb="800">
+  <div class="wrapper">
+    <j-icon class="sidebar-button" name="layout-sidebar" @click="uiStore.toggleAppSidebar" />
+    <j-box pt="800" pb="400">
       <j-text variant="heading">Settings</j-text>
     </j-box>
     <div class="settings">
-      <aside class="settings__sidebar">
-        <j-tabs
-          variant="button"
-          wrap
-          :value="currentView"
-          @change="(e: any) => (currentView = e.target.value)"
-        >
+      <aside class="sidebar">
+        <j-tabs full :value="currentView" @change="(e: any) => (currentView = e.target.value)">
           <j-tab-item value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Appearance
@@ -20,81 +16,51 @@
             Notifications
           </j-tab-item>
         </j-tabs>
+        <div>
+          <ThemeEditor v-if="currentView === 'theme-editor'" />
+          <Privacy v-if="currentView === 'privacy'" />
+        </div>
       </aside>
-      <div class="settings__content">
-        <theme-editor
-          v-if="currentView === 'theme-editor'"
-          @update="updateGlobalTheme"
-          :theme="theme"
-        />
-        <privacy v-if="currentView === 'privacy'" />
-      </div>
     </div>
-  </j-box>
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { ThemeState } from "@/store/types";
-import ThemeEditor from "./ThemeEditor.vue";
+<script setup lang="ts">
+import { useUiStore } from "@/stores";
+import { ref } from "vue";
 import Privacy from "./Privacy.vue";
-import { useAppStore } from "@/store/app";
+import ThemeEditor from "./ThemeEditor.vue";
 
-export default defineComponent({
-  components: { ThemeEditor, Privacy },
-  setup() {
-    const appStore = useAppStore();
+const uiStore = useUiStore();
 
-    return {
-      appStore,
-    };
-  },
-  data() {
-    return {
-      currentView: "theme-editor",
-    };
-  },
-  methods: {
-    updateGlobalTheme(val: ThemeState) {
-      this.appStore.updateGlobalTheme(val);
-    },
-  },
-  computed: {
-    theme(): ThemeState {
-      return this.appStore.globalTheme;
-    },
-  },
-});
+const currentView = ref("theme-editor");
 </script>
 
-<style scoped>
-.settings {
-  display: flex;
-  gap: var(--j-space-800);
-}
+<style scoped lang="scss">
+.wrapper {
+  position: relative;
+  height: 100%;
+  background-color: var(--app-drawer-bg-color);
+  padding: var(--j-space-800);
 
-.settings__sidebar {
-  width: 300px;
-  position: sticky;
-  top: 0;
-  left: 0;
-}
+  .sidebar-button {
+    cursor: pointer;
+    position: absolute;
+    top: var(--j-space-500);
+    left: var(--j-space-500);
+    z-index: 1000;
+  }
 
-.color-button {
-  --hue: 0;
-  --saturation: 80%;
-  width: var(--j-size-md);
-  height: var(--j-size-md);
-  background-color: hsl(var(--hue), var(--saturation), 60%);
-  border: 2px solid transparent;
-  outline: 0;
-  border-radius: var(--j-border-radius);
-  margin-right: var(--j-space-200);
-}
-.color-button--active {
-  border-color: var(--j-color-primary-600);
-}
-.colors {
-  max-width: 400px;
+  .settings {
+    display: flex;
+    gap: var(--j-space-800);
+
+    .sidebar {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      left: 0;
+    }
+  }
 }
 </style>
