@@ -6,7 +6,7 @@ import { Channel } from "@coasys/flux-api";
 import { ProcessingState, SignallingService } from "@coasys/flux-types";
 import { SynergyItem } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
-import { ref, toRaw, unref, watch } from "vue";
+import { computed, ref, toRaw, unref, watch } from "vue";
 
 export const transcriptionModels = [
   "Tiny", // The tiny model.
@@ -70,6 +70,8 @@ export const useAiStore = defineStore(
     const transcriptionPreviewTimeout = ref(0.4);
     const transcriptionMessageTimeout = ref(3);
     const transcriptionMaxChars = ref(1000);
+
+    const aiEnabled = computed(() => Boolean(defaultLLM.value && llmLoadingStatus.value?.status === "Ready"));
 
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
@@ -310,6 +312,7 @@ export const useAiStore = defineStore(
       transcriptionPreviewTimeout,
       transcriptionMessageTimeout,
       transcriptionMaxChars,
+      aiEnabled,
       setTranscriptionEnabled,
       toggleTranscriptionEnabled,
       setTranscriptionModel,

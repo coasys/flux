@@ -80,7 +80,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const appStore = useAppStore();
   const aiStore = useAiStore();
   const { me } = storeToRefs(appStore);
-  const { defaultLLM } = storeToRefs(aiStore);
+  const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
   const perspective = (await appStore.ad4mClient.perspective.byUUID(
@@ -451,7 +451,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   // Find processing tasks in the community when the conversations first load
   watch(recentConversations, () => {
-    if (defaultLLM.value && !processingStateChecked.value) {
+    if (aiEnabled.value && !processingStateChecked.value) {
       processingStateChecked.value = true;
       // Delay by heart beat interval to allow time for signals to arrive
       setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), HEARTBEAT_INTERVAL);
