@@ -22,7 +22,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   const { inCall, callRoute, myAgentStatus } = storeToRefs(webrtcStore);
   const { mediaSettings } = storeToRefs(mediaDevicesStore);
   const { currentRoute } = storeToRefs(routeMemoryStore);
-  const { defaultLLM } = storeToRefs(aiStore);
+  const { aiEnabled } = storeToRefs(aiStore);
 
   const signalling = ref(false);
   const myState = ref<AgentState>({
@@ -30,7 +30,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     status: myAgentStatus.value,
     callRoute: callRoute.value,
     mediaSettings: mediaSettings.value,
-    aiEnabled: !!defaultLLM.value,
+    aiEnabled: aiEnabled.value,
     inCall: false,
     processing: null,
     lastUpdate: Date.now(),
@@ -364,7 +364,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
   watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
   watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
-  watch(defaultLLM, (newDefaultLLM) => updateMyState("aiEnabled", !!newDefaultLLM));
+  watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
   watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
 
   return {

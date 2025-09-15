@@ -103,6 +103,7 @@ import { closeMenu } from "@/utils/helperFunctions";
 import { Channel } from "@coasys/flux-api";
 import { ProcessingState } from "@coasys/flux-types";
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
+import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -117,6 +118,8 @@ const LINK_ADDED_TIMEOUT = 2000;
 
 const route = useRoute();
 const aiStore = useAiStore();
+
+const { aiEnabled } = storeToRefs(aiStore);
 
 const { signallingService, perspective, getRecentConversations, getPinnedConversations, getChannelsWithConversations } =
   useCommunityService();
@@ -164,8 +167,8 @@ async function getData(firstRun?: boolean): Promise<void> {
     // Trigger a refresh in child components
     refreshTrigger.value = refreshTrigger.value + 1;
 
-    // If this is not the first run, check if we should process tasks
-    if (firstRun) return;
+    // If this is not the first run and AI is enabled, check if we should process tasks
+    if (firstRun || !aiEnabled.value) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
     if (shouldProcess) {
       const channel = new Channel(perspective, route.params.channelId as string);
