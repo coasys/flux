@@ -1250,10 +1250,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.2.tgz#a28a46630af1677f3e9c73f0e6921431d5340152"
   integrity sha512-AmRIX6QvFemItlY7/69ARkIAqitRQqJ2qwgZmD1KqgFb78pH+XFXm1guvS/a8CuOOm/IqZ4ddDbl20yxtBqzGA==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1-release-candidate-1", "@coasys/ad4m-connect@0.10.1-release-candidate-3-test-2", "@coasys/ad4m-connect@0.10.1-release-candidate-4":
-  version "0.10.1-release-candidate-4"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.1-release-candidate-4.tgz#b4229f6c8fa7481c3cd6ca030aa718a08c7f4f1a"
-  integrity sha512-+r7jdiyN7ZurRFFudOcpunn9QIuNfp+JedkF38naz4+0hEWTSELhWCx3rmdpGZDngdZ48h5HP0bd2LYTURVPRA==
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.1.tgz#72326a7b9c1cae8c3e11e087a971fb0802b9ad52"
+  integrity sha512-J74fZCPOMoFb2lIzbTTp2kfqKl0u3KjzG4m+PSZRA0yRf70asHvG8BQTHZVbWZ0rP3dW5/pKTZG1iRHqzwTcVA==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1262,29 +1262,29 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.10.1-release-candidate-2", "@coasys/ad4m-react-hooks@0.10.1-release-candidate-4":
-  version "0.10.1-release-candidate-4"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.1-release-candidate-4.tgz#6de42544d2658f81019eb391e09e9997e56c2dc8"
-  integrity sha512-F0Xx2Qigv5p00x5wtBgcP9/tC/00rKRBsBHnHtEbj8D7e5+7/lCAP2w5H6AXoae+NJwSKNQxQeIvBsi2+GZc8w==
+"@coasys/ad4m-react-hooks@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.1.tgz#92b182994a060b2b54da9fd035ae7917460d7540"
+  integrity sha512-03mww+LOJ4xt+Y8Iouz+qanSeNIxhVH9mV2/25nyxPquHAJ6JTgKaMYbTe8G53UgUafzBQLd0tdtWDTL7pvSPQ==
   dependencies:
-    "@coasys/ad4m" "workspace:0.10.1-release-candidate-4"
+    "@coasys/ad4m" "workspace:0.10.1"
     "@coasys/ad4m-connect" "*"
     "@coasys/hooks-helpers" "*"
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.10.1-release-candidate-2", "@coasys/ad4m-vue-hooks@0.10.1-release-candidate-3-test-2", "@coasys/ad4m-vue-hooks@0.10.1-release-candidate-4":
-  version "0.10.1-release-candidate-4"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.1-release-candidate-4.tgz#3211947872a6124ad13395c3e4ac806043b4fd91"
-  integrity sha512-ZvQSXen1vxs3NjER8ZuWsF2YO/Wm4CtTgpBJ/wCxP8VDQwhkTtqXGMWosPJQiVL0kIbV+fK5KQ9A4i1rgkD9Ow==
+"@coasys/ad4m-vue-hooks@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.1.tgz#c2386ba6539c46c775d4186a2785eadcd1329f25"
+  integrity sha512-31+/XBCFacRO3QkKBRe505xXpzbeaVe/c/266czWeehO8y/T+Nb9+H7/jLEhDL9BcWCMeWzaTwpH5l04ehNNNg==
   dependencies:
-    "@coasys/ad4m" "workspace:0.10.1-release-candidate-4"
+    "@coasys/ad4m" "workspace:0.10.1"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.10.1-release-candidate-1", "@coasys/ad4m@0.10.1-release-candidate-3-test-2", "@coasys/ad4m@0.10.1-release-candidate-4", "@coasys/ad4m@workspace:0.10.1-release-candidate-4":
-  version "0.10.1-release-candidate-4"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.1-release-candidate-4.tgz#8eebd446dd7824d0c40be8f2f151a889cb887339"
-  integrity sha512-PNU9iD75HQ4p1m3lPJi/XjhMuhfC0DTZhfNr91blz0qqoeMFaz1PHrXr/QMjnmCvkpTTZ+OIiQCxgrt+7gTo5Q==
+"@coasys/ad4m@*", "@coasys/ad4m@0.10.1", "@coasys/ad4m@workspace:0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.1.tgz#6a9393abdc8b0233fefeafc3ca88bcb536b52d98"
+  integrity sha512-Ai+PHron8AOZZV11V9Pc1jtI/Os2zrAHTFPT7tsjYDMR3/CFyfy9N74Ky+UXS1/iQOvvo/SoJkrZunmG1a5+hA==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
