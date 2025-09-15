@@ -6,7 +6,7 @@ import { Channel } from "@coasys/flux-api";
 import { ProcessingState, SignallingService } from "@coasys/flux-types";
 import { SynergyItem } from "@coasys/flux-utils";
 import { defineStore, storeToRefs } from "pinia";
-import { computed, ref, toRaw, unref, watch } from "vue";
+import { computed, onUnmounted, ref, toRaw, unref, watch } from "vue";
 
 export const transcriptionModels = [
   "Tiny", // The tiny model.
@@ -274,6 +274,51 @@ export const useAiStore = defineStore(
         setTimeout(() => processesNextTask(), 0);
       }
     }
+
+    // LLM status polling: refresh llmLoadingStatus until it becomes Ready when a defaultLLM is set
+    const llmStatusInterval = ref<ReturnType<typeof setInterval> | null>(null);
+
+    function stopLlmStatusPolling() {
+      if (llmStatusInterval.value) {
+        clearInterval(llmStatusInterval.value);
+        llmStatusInterval.value = null;
+      }
+    }
+
+    async function refreshLlmStatus() {
+      try {
+        const id = defaultLLM.value?.id;
+        if (!id) return;
+        const status = await ad4mClient.value.ai.modelLoadingStatus(id);
+        llmLoadingStatus.value = status;
+        if (status?.status?.toLowerCase() === "ready") stopLlmStatusPolling();
+      } catch (err) {
+        // Keep UI stable; log and continue polling on next tick
+        console.warn("LLM status poll failed:", err);
+      }
+    }
+
+    function startLlmStatusPolling() {
+      stopLlmStatusPolling();
+      if (!defaultLLM.value?.id) return;
+      // Kick off an immediate refresh, then poll
+      refreshLlmStatus();
+      llmStatusInterval.value = setInterval(refreshLlmStatus, 2000);
+    }
+
+    // Start/stop polling when the default model changes
+    watch(defaultLLM, (model) => {
+      if (model?.id) startLlmStatusPolling();
+      else stopLlmStatusPolling();
+    });
+
+    // Stop polling once enabled
+    watch(aiEnabled, (enabled) => {
+      if (enabled) stopLlmStatusPolling();
+    });
+
+    // Cleanup on store teardown
+    onUnmounted(() => stopLlmStatusPolling());
 
     // Load AI data when the ad4mClient is initialized
     watch(
