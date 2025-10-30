@@ -1,5 +1,5 @@
 import { useAppStore } from "@/stores";
-import { getAd4mClient } from "@coasys/ad4m-connect";
+import { getAd4mClientReady } from "@coasys/flux-utils";
 import { createPinia } from "pinia";
 import { createPersistedState } from "pinia-plugin-persistedstate";
 import { createApp, h } from "vue";
@@ -36,20 +36,22 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
-// Initialize Ad4mClient
+// Initialize Ad4mClient and mount after it's ready
 const appStore = useAppStore(pinia);
-(async () => {
+
+async function bootstrap() {
   try {
-    const ad4mClient = await getAd4mClient();
+    const ad4mClient = await getAd4mClientReady();
     appStore.setAdamClient(ad4mClient);
     appStore.refreshMyProfile();
-  } catch (error) {
-    console.error("Failed to initialize Ad4m client:", error);
+  } catch (e) {
+    console.error("Failed to initialize Ad4m client:", e);
+  } finally {
+    vueApp.mount("#app");
   }
-})();
+}
 
-// Mount the app
-vueApp.mount("#app");
+bootstrap();
 
 // Check for service worker updates every 10 minutes and reload
 const intervalMS = 60 * 10 * 1000;
