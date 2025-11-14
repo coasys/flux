@@ -40,7 +40,7 @@ export const useMediaDevicesStore = defineStore(
     const error = ref<Error | null>(null);
     const screenShareEnabled = ref(false);
     const audioEnabled = ref(true);
-    const videoEnabled = ref(false);
+    const videoEnabled = ref(true);
     let savedVideoTrack: MediaStreamTrack | null = null;
 
     // Computed properties
@@ -107,27 +107,48 @@ export const useMediaDevicesStore = defineStore(
       }
     }
 
-    async function checkPermissions() {
+async function checkPermissions() {
+  try {
+    // If we have a stream with tracks, permissions are definitely granted
+    if (stream.value) {
+      const hasVideo = stream.value.getVideoTracks().length > 0;
+      const hasAudio = stream.value.getAudioTracks().length > 0;
+      
+      if (hasVideo) mediaPermissions.value.camera.granted = true;
+      if (hasAudio) mediaPermissions.value.microphone.granted = true;
+    }
+
+    // Try Permissions API as additional check
+    if (navigator.permissions) {
       try {
-        if (navigator.permissions) {
-          // Check camera and microphone permissions using the Permissions API
-          const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
-          const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
+        const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
 
-          mediaPermissions.value.camera.granted = cameraPermission.state === "granted";
-          mediaPermissions.value.microphone.granted = microphonePermission.state === "granted";
-        } else {
-          // Fallback to checking device labels
-          const cameras = availableDevices.value.filter((d) => d.kind === "videoinput");
-          const mics = availableDevices.value.filter((d) => d.kind === "audioinput");
-
-          mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
-          mediaPermissions.value.microphone.granted = mics.some((d) => !!d.label);
-        }
-      } catch (error) {
-        console.error("Error checking media permissions:", error);
+        if (cameraPermission.state === "granted") mediaPermissions.value.camera.granted = true;
+        if (microphonePermission.state === "granted") mediaPermissions.value.microphone.granted = true;
+      } catch (err) {
+        // Permissions API not supported
+        console.log("Permissions API not available for camera/microphone");
       }
     }
+
+    // Fallback to checking device labels
+    if (!mediaPermissions.value.camera.granted || !mediaPermissions.value.microphone.granted) {
+      await findAvailableDevices();
+      const cameras = availableDevices.value.filter((d) => d.kind === "videoinput");
+      const mics = availableDevices.value.filter((d) => d.kind === "audioinput");
+
+      if (!mediaPermissions.value.camera.granted) {
+        mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
+      }
+      if (!mediaPermissions.value.microphone.granted) {
+        mediaPermissions.value.microphone.granted = mics.some((d) => !!d.label);
+      }
+    }
+  } catch (error) {
+    console.error("Error checking media permissions:", error);
+  }
+}
 
     async function switchCamera(deviceId: string) {
       const previousId = activeCameraId.value;
