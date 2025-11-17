@@ -122,7 +122,7 @@ export const useMediaDevicesStore = defineStore(
           } else {
             // No video tracks - sync the enabled state
             mediaPermissions.value.camera.granted = false;
-            if (videoEnabled.value) {
+            if (videoEnabled.value && mediaPermissions.value.camera.requested) {
               console.log("Video tracks removed - syncing videoEnabled to false");
               videoEnabled.value = false;
             }
@@ -133,7 +133,7 @@ export const useMediaDevicesStore = defineStore(
           } else {
             // No audio tracks - sync the enabled state
             mediaPermissions.value.microphone.granted = false;
-            if (audioEnabled.value) {
+            if (audioEnabled.value && mediaPermissions.value.microphone.requested) {
               console.log("Audio tracks removed - syncing audioEnabled to false");
               audioEnabled.value = false;
             }
@@ -150,11 +150,11 @@ export const useMediaDevicesStore = defineStore(
             if (microphonePermission.state === "granted") mediaPermissions.value.microphone.granted = true;
             
             // If permissions are denied, sync enabled states
-            if (cameraPermission.state === "denied" && videoEnabled.value) {
+            if (cameraPermission.state === "denied" && videoEnabled.value && mediaPermissions.value.camera.requested) {
               console.log("Camera permission denied - syncing videoEnabled to false");
               videoEnabled.value = false;
             }
-            if (microphonePermission.state === "denied" && audioEnabled.value) {
+            if (microphonePermission.state === "denied" && audioEnabled.value && mediaPermissions.value.microphone.requested) {
               console.log("Microphone permission denied - syncing audioEnabled to false");
               audioEnabled.value = false;
             }
