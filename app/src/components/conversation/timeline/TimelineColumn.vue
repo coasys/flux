@@ -30,7 +30,15 @@
         <div class="line" />
       </div>
 
-      <div id="timeline-0" class="items">
+      <!-- Loading state -->
+      <div v-if="loading" style="margin-top: 200px;">
+        <j-flex direction="column" gap="500" a="center" j="center" class="loading-state">
+          <j-spinner />
+          <j-text nomargin>Loading timeline...</j-text>
+        </j-flex>
+      </div>
+
+      <div v-else id="timeline-0" class="items">
         <TimelineBlock
           v-for="(conversation, index) in conversations"
           :key="conversation.baseExpression"
@@ -124,6 +132,8 @@ const { aiEnabled } = storeToRefs(aiStore);
 const { signallingService, perspective, getRecentConversations, getPinnedConversations, getChannelsWithConversations } =
   useCommunityService();
 
+const channelId = route.params.channelId as string;
+
 const conversations = ref<SynergyGroup[]>([]);
 const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
@@ -133,14 +143,15 @@ const refreshTrigger = ref(0);
 const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
+const loading = ref(true);
 
 async function getConversations() {
-  const channel = new Channel(perspective, route.params.channelId as string);
+  const channel = new Channel(perspective, channelId);
   return await channel.conversations();
 }
 
 async function getUnprocessedItems() {
-  const channel = new Channel(perspective, route.params.channelId as string);
+  const channel = new Channel(perspective, channelId);
   return await channel.unprocessedItems();
 }
 
@@ -163,6 +174,7 @@ async function getData(firstRun?: boolean): Promise<void> {
     conversations.value = newConversations;
     unprocessedItems.value = newUnprocessedItems;
     gettingData.value = false;
+    if (firstRun) loading.value = false;
 
     // Trigger a refresh in child components
     refreshTrigger.value = refreshTrigger.value + 1;
@@ -171,7 +183,7 @@ async function getData(firstRun?: boolean): Promise<void> {
     if (firstRun || !aiEnabled.value) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
     if (shouldProcess) {
-      const channel = new Channel(perspective, route.params.channelId as string);
+      const channel = new Channel(perspective, channelId);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
     }
   } catch (error) {
@@ -235,7 +247,7 @@ watch(
   (newAgents) => {
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(
-      (agent) => agent.processing && agent.processing.channelId === (route.params.channelId as string)
+      (agent) => agent.processing && agent.processing.channelId === channelId
     );
 
     // Update the progress bar with the latest processing state

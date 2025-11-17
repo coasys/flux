@@ -107,10 +107,15 @@
       </j-modal>
     </j-flex>
 
-    <j-badge v-if="callHealth !== 'healthy'" variant="danger">
-      <j-icon name="exclamation-triangle" style="margin-right: 10px" />
-      Holochain signals disrupted. Processing paused until connection restored.
-    </j-badge>
+    <j-box mt="400" v-if="callHealth !== 'healthy'">
+      <j-badge variant="danger">
+        <j-icon name="exclamation-triangle" style="margin-right: 10px" />
+        Holochain signals disrupted. Processing paused until connection restored.
+        <j-button size="xs" variant="danger" @click="appStore.restartHolochain" style="margin-left: 10px" :loading="holochainRestarting">
+          Restart Holochain
+        </j-button>
+      </j-badge>
+    </j-box>
 
     <div
       ref="contentRef"
@@ -139,7 +144,7 @@
 import MatchColumn from "@/components/conversation/match/MatchColumn.vue";
 import TimelineColumn from "@/components/conversation/timeline/TimelineColumn.vue";
 import { useCommunityService } from "@/composables/useCommunityService";
-import { useAiStore, useUiStore, useWebrtcStore } from "@/stores";
+import { useAiStore, useUiStore, useWebrtcStore, useAppStore } from "@/stores";
 import { SemanticRelationship, Topic } from "@coasys/flux-api";
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
 import { cos_sim } from "@xenova/transformers";
@@ -148,11 +153,13 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const appStore = useAppStore();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
 const uiStore = useUiStore();
 
 const { perspective } = useCommunityService();
+const { holochainRestarting } = storeToRefs(appStore);
 const { defaultLLM, llmLoadingStatus, loadingAIData } = storeToRefs(aiStore);
 const { callHealth } = storeToRefs(webrtcStore);
 const { isMobile } = storeToRefs(uiStore);
