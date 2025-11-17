@@ -115,7 +115,7 @@ export const useAppStore = defineStore(
         showSuccessToast({ message: "Holochain restarted successfully" });
       } catch (e) {
         showDangerToast({ message: e.message });
-        throw new Error(e);
+        throw e;
       } finally {
         holochainRestarting.value = false;
       }
