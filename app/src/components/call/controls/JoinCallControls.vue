@@ -44,11 +44,11 @@ const { mediaSettings, stream, streamLoading } = storeToRefs(mediaDeviceStore);
 const { joiningCall } = storeToRefs(webrtcStore);
 
 const videoDisabled = computed(() => {
-  return !stream.value || stream.value.getVideoTracks().length === 0;
+  return !stream.value || streamLoading.value;
 });
 
 const audioDisabled = computed(() => {
-  return !stream.value || stream.value.getAudioTracks().length === 0;
+  return !stream.value || streamLoading.value || stream.value.getAudioTracks().length === 0;
 });
 </script>
 
