@@ -535,7 +535,7 @@ async function stopListening() {
   listening.value = false;
 
   // Stop and cleanup all media tracks
-  sourceNode.value?.mediaStream.getTracks().forEach((track) => track.stop());
+  sourceNode.value?.mediaStream?.getTracks().forEach((track) => track.stop());
 
   if (sourceNode.value) {
     sourceNode.value.disconnect();

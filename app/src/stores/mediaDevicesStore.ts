@@ -1,6 +1,7 @@
 // import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { useAppStore } from "./appStore";
 
 // TODO: create return type for store?
 
@@ -30,6 +31,8 @@ export type MediaPermissions = {
 export const useMediaDevicesStore = defineStore(
   "mediaDevices",
   () => {
+    const appStore = useAppStore();
+
     // State
     const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
     const activeCameraId = ref<string | null>(null);
@@ -109,20 +112,70 @@ export const useMediaDevicesStore = defineStore(
 
     async function checkPermissions() {
       try {
-        if (navigator.permissions) {
-          // Check camera and microphone permissions using the Permissions API
-          const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
-          const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+        // If we have a stream with tracks, permissions are definitely granted
+        if (stream.value) {
+          const hasVideo = stream.value.getVideoTracks().length > 0;
+          const hasAudio = stream.value.getAudioTracks().length > 0;
+          
+          if (hasVideo) {
+            mediaPermissions.value.camera.granted = true;
+          } else {
+            // No video tracks - sync the enabled state
+            mediaPermissions.value.camera.granted = false;
+            if (videoEnabled.value && mediaPermissions.value.camera.requested) {
+              console.log("Video tracks removed - syncing videoEnabled to false");
+              videoEnabled.value = false;
+            }
+          }
+          
+          if (hasAudio) {
+            mediaPermissions.value.microphone.granted = true;
+          } else {
+            // No audio tracks - sync the enabled state
+            mediaPermissions.value.microphone.granted = false;
+            if (audioEnabled.value && mediaPermissions.value.microphone.requested) {
+              console.log("Audio tracks removed - syncing audioEnabled to false");
+              audioEnabled.value = false;
+            }
+          }
+        }
 
-          mediaPermissions.value.camera.granted = cameraPermission.state === "granted";
-          mediaPermissions.value.microphone.granted = microphonePermission.state === "granted";
-        } else {
-          // Fallback to checking device labels
+        // Try Permissions API as additional check
+        if (navigator.permissions) {
+          try {
+            const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
+            const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+
+            if (cameraPermission.state === "granted") mediaPermissions.value.camera.granted = true;
+            if (microphonePermission.state === "granted") mediaPermissions.value.microphone.granted = true;
+            
+            // If permissions are denied, sync enabled states
+            if (cameraPermission.state === "denied" && videoEnabled.value && mediaPermissions.value.camera.requested) {
+              console.log("Camera permission denied - syncing videoEnabled to false");
+              videoEnabled.value = false;
+            }
+            if (microphonePermission.state === "denied" && audioEnabled.value && mediaPermissions.value.microphone.requested) {
+              console.log("Microphone permission denied - syncing audioEnabled to false");
+              audioEnabled.value = false;
+            }
+          } catch (err) {
+            // Permissions API not supported
+            console.log("Permissions API not available for camera/microphone");
+          }
+        }
+
+        // Fallback to checking device labels
+        if (!mediaPermissions.value.camera.granted || !mediaPermissions.value.microphone.granted) {
+          await findAvailableDevices();
           const cameras = availableDevices.value.filter((d) => d.kind === "videoinput");
           const mics = availableDevices.value.filter((d) => d.kind === "audioinput");
 
-          mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
-          mediaPermissions.value.microphone.granted = mics.some((d) => !!d.label);
+          if (!mediaPermissions.value.camera.granted) {
+            mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
+          }
+          if (!mediaPermissions.value.microphone.granted) {
+            mediaPermissions.value.microphone.granted = mics.some((d) => !!d.label);
+          }
         }
       } catch (error) {
         console.error("Error checking media permissions:", error);
@@ -299,6 +352,8 @@ export const useMediaDevicesStore = defineStore(
             console.log("✅ Added new video track");
           } catch (error) {
             console.error("❌ Failed to add video track:", error);
+
+            appStore.showDangerToast({ message: "Unable to access camera. Please grant camera permissions in your browser." });
             // Revert the state if it failed
             videoEnabled.value = false;
           }
