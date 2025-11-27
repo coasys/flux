@@ -51,58 +51,57 @@ export class Channel extends Ad4mModel {
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
     try {
-      const result = await this.perspective.infer(`
-        findall([ItemId, Author, Timestamp, Type, Text], (
-          % 1. Get channel item
-          triple("${this.baseExpression}", "ad4m://has_child", ItemId),
-        
-          % 2. Ensure item is not yet connected to a subgroup (i.e unprocessed)
-          findall(SubgroupItem, (
-            subject_class("ConversationSubgroup", CS),
-            instance(CS, Subgroup),
-            triple(Subgroup, "ad4m://has_child", SubgroupItem)
-          ), SubgroupItems),
-          findall(X, (member(ItemId, SubgroupItems)), []),
-        
-          % 3. Get timestamp and author
-          findall(
-            [Timestamp, Author], 
-            link(_, "ad4m://has_child", ItemId, Timestamp, Author),
-            AllData
-          ),
-          sort(AllData, SortedData),
-          SortedData = [[Timestamp, Author]|_],
-        
-          % 4. Check item type and get text
-          (
-            Type = "Message",
-            subject_class("Message", MessageClass),
-            instance(MessageClass, ItemId), 
-            property_getter(MessageClass, ItemId, "body", Text)
-            ;
-            Type = "Post",
-            subject_class("Post", PostClass),
-            instance(PostClass, ItemId), 
-            property_getter(PostClass, ItemId, "title", Text)
-            ;
-            Type = "Task",
-            subject_class("Task", TaskClass),
-            instance(TaskClass, ItemId), 
-            property_getter(TaskClass, ItemId, "name", Text)
-          )
-        ), Items),
-        % 5. Remove duplicates
-        sort(Items, UniqueItems).
-      `);
-      return (result[0]?.UniqueItems || [])
-        .map(([itemId, author, timestamp, type, text]) => ({
-          baseExpression: itemId,
+      const surrealQuery = `
+        SELECT
+          out.uri AS baseExpression,
           author,
-          timestamp: new Date(timestamp).toISOString(),
-          text: Literal.fromUrl(text).get().data,
+          timestamp,
+          out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
+        FROM link
+        WHERE in.uri = '${this.baseExpression}'
+          AND predicate = 'ad4m://has_child'
+          AND (
+            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
+            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
+            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
+          )
+          AND out.uri NOT IN (
+            SELECT VALUE out.uri
+            FROM link
+            WHERE in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+              AND predicate = 'ad4m://has_child'
+          )
+        ORDER BY timestamp ASC
+      `;
+
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+
+      return (surrealResult || []).map((item: any) => {
+        let text = '';
+        let type = '';
+
+        if (item.type === 'flux://has_message') {
+          text = item.messageBody || '';
+          type = 'Message';
+        } else if (item.type === 'flux://has_post') {
+          text = item.postTitle || '';
+          type = 'Post';
+        } else if (item.type === 'flux://has_task') {
+          text = item.taskName || '';
+          type = 'Task';
+        }
+
+        return {
+          baseExpression: item.baseExpression,
+          author: item.author,
+          timestamp: new Date(item.timestamp).toISOString(),
+          text,
           icon: icons[type] ? icons[type] : "question",
-        }))
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        };
+      });
     } catch (error) {
       console.error("Error getting channel items:", error);
       return [];
