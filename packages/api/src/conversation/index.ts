@@ -139,12 +139,7 @@ export default class Conversation extends Ad4mModel {
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
           AND (
             in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
-            OR in->link[WHERE predicate = 'flux://has_expression'][0].out.uri IN (
-              SELECT VALUE out.uri
-              FROM link
-              WHERE in.uri = '${this.baseExpression}'
-                AND predicate = 'ad4m://has_child'
-            )
+            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.baseExpression}'][0] IS NOT NONE
           )
       `;
 
