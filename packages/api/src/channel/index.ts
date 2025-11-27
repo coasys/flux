@@ -178,30 +178,101 @@ export class Channel extends Ad4mModel {
   async conversations(): Promise<SynergyGroup[]> {
     // Find the necissary data to render conversations in timeline components
     try {
-      const result = await this.perspective.infer(`
-      findall(ConversationInfo, (
-        % 1. Identify all conversations in the channel
-        subject_class("Conversation", CC),
-        instance(CC, Conversation),
-        
-        % 2. Get timestamp from link
-        link("${this.baseExpression}", "ad4m://has_child", Conversation, Timestamp, _),
-  
-        % 3. Retrieve conversation properties
-        property_getter(CC, Conversation, "conversationName", ConversationName),
-        property_getter(CC, Conversation, "summary", Summary),
-  
-        % 4. Build a single structure for each conversation
-        ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
-      ), Conversations).
-    `);
+      const prologQuery = `
+        findall(ConversationInfo, (
+          % 1. Identify all conversations in the channel
+          subject_class("Conversation", CC),
+          instance(CC, Conversation),
+          
+          % 2. Get timestamp from link
+          link("${this.baseExpression}", "ad4m://has_child", Conversation, Timestamp, _),
+    
+          % 3. Retrieve conversation properties
+          property_getter(CC, Conversation, "conversationName", ConversationName),
+          property_getter(CC, Conversation, "summary", Summary),
+    
+          % 4. Build a single structure for each conversation
+          ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
+        ), Conversations).
+      `;
 
-      return (result[0]?.Conversations || []).map(([baseExpression, conversationName, summary, timestamp]) => ({
+      // const surrealQuery = `
+      //   SELECT
+      //     Conversation.id AS baseExpression,
+      //     Conversation.conversationName AS name,
+      //     Conversation.summary AS summary,
+      //     has_child.timestamp AS timestamp
+      //   FROM ONLY ${this.baseExpression}
+      //   ->ad4m://has_child->Conversation AS Conversation
+      //   FETCH ad4m://has_child
+      // `;
+
+      // const surrealQuery = `
+      //   SELECT
+      //     link.out AS baseExpression
+      //   FROM link
+      //   WHERE
+      //     link.predicate = 'flux://entry_type'
+      //     AND link.target = 'flux://has_conversation'
+      //     AND link.perspective = $perspective
+      // `;
+
+      // const surrealQuery = `
+      //   SELECT *
+      //   FROM link
+      //   WHERE
+      //     predicate = 'flux://entry_type'
+      //     AND target = 'flux://conversation'
+      // `;
+
+      const surrealQuery = `
+        SELECT
+          node.uri AS baseExpression,
+          nameLink.target AS name,
+          summaryLink.target AS summary,
+          edge.timestamp AS timestamp
+        FROM ONLY ${this.baseExpression}
+        ->link[WHERE predicate = 'ad4m://has_child'] AS edge
+        ->node AS node
+        // Traverse to conversationName property
+        ->link[WHERE predicate = 'flux://has_name'] AS nameLink
+        // Traverse to summary property
+        ->link[WHERE predicate = 'flux://has_summary'] AS summaryLink
+        WHERE node IS NOT NONE
+      `;
+
+      // const query = {
+      //   where: [
+      //     { predicate: 'flux://entry_type', target: 'flux://has_conversation' }
+      //   ],
+      //   properties: ['conversationName', 'summary']
+      // };
+      // const surrealQuery = Ad4mModel.queryToSurrealQL(this.perspective, query);
+
+      console.log('this.perspective:', this.perspective);
+
+      const prologResult = await this.perspective.infer(prologQuery);
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+
+      const formattedPrologResult =  (prologResult[0]?.Conversations || []).map(([baseExpression, conversationName, summary, timestamp]) => ({
         baseExpression,
         name: Literal.fromUrl(conversationName).get().data,
         summary: Literal.fromUrl(summary).get().data,
         timestamp: new Date(timestamp).toISOString(),
-      }));
+      }))
+
+      console.log('Prolog Result:', prologResult);
+      console.log('Formatted Prolog Result:', formattedPrologResult);
+      console.log('SurrealDB Result:', surrealResult);
+
+      return [];
+
+      // return (result[0]?.Conversations || []).map(([baseExpression, conversationName, summary, timestamp]) => ({
+      //   baseExpression,
+      //   name: Literal.fromUrl(conversationName).get().data,
+      //   summary: Literal.fromUrl(summary).get().data,
+      //   timestamp: new Date(timestamp).toISOString(),
+      // }));
     } catch (error) {
       console.error("Error getting channel conversations:", error);
       return [];
