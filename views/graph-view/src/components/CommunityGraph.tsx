@@ -1,19 +1,15 @@
-import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
-import { Literal, PerspectiveProxy } from "@coasys/ad4m";
-import { useEffect, useRef, useState } from "preact/hooks";
-import SpriteText from "three-spritetext";
-import styles from "../App.module.css";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
+import ForceGraph3D, { ForceGraph3DInstance } from '3d-force-graph';
+import { Literal, PerspectiveProxy } from '@coasys/ad4m';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import SpriteText from 'three-spritetext';
+import styles from '../App.module.css';
+import useIntersectionObserver from '../hooks/useIntersectionObserver';
 
 function findNodes(source, allLinks, visitedNodes = new Set()) {
   // find links originating from the source node
-  const linksFromSource = allLinks.filter(
-    (link) => link.data.source === source
-  );
+  const linksFromSource = allLinks.filter((link) => link.data.source === source);
   // filter out links that have already been visited
-  const newLinks = linksFromSource.filter(
-    (link) => !visitedNodes.has(link.proof.signature)
-  );
+  const newLinks = linksFromSource.filter((link) => !visitedNodes.has(link.proof.signature));
   // mark new links as visited
   newLinks.forEach((link) => visitedNodes.add(link.proof.signature));
   // recursively find links from the target nodes
@@ -27,38 +23,28 @@ function findNodes(source, allLinks, visitedNodes = new Set()) {
 }
 
 function uniqueNodes(array) {
-  return array.filter(
-    (item, index, self) => index === self.findIndex((t) => t.id === item.id)
-  );
+  return array.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
 }
 
 function extractProtocol(string: string) {
   var match = string.match(/^[^:]+:\/\//);
   if (match) {
     return match[0];
-  } else if (string.startsWith("did:")) {
-    return "did";
+  } else if (string.startsWith('did:')) {
+    return 'did';
   } else {
-    return "unknown";
+    return 'unknown';
   }
 }
 
-export default function CommunityOverview({
-  perspective,
-  source,
-}: {
-  perspective: PerspectiveProxy;
-  source: string;
-}) {
+export default function CommunityOverview({ perspective, source }: { perspective: PerspectiveProxy; source: string }) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
   const [containerSize, setContainerSize] = useState([0, 0]);
   const [graphInitialised, setGraphInitialised] = useState(false);
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
-  const [links, setLinks] = useState<
-    { source: string; target: string; predicate: string }[]
-  >([]);
+  const [links, setLinks] = useState<{ source: string; target: string; predicate: string }[]>([]);
 
   const entry = useIntersectionObserver(graphEl, {});
   const isGraphVisible = !!entry?.isIntersecting;
@@ -78,18 +64,15 @@ export default function CommunityOverview({
   useEffect(() => {
     function handleResize() {
       if (containerRef.current) {
-        setContainerSize([
-          containerRef.current.clientWidth,
-          containerRef.current.clientHeight,
-        ]);
+        setContainerSize([containerRef.current.clientWidth, containerRef.current.clientHeight]);
       }
     }
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
     handleResize();
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -109,7 +92,7 @@ export default function CommunityOverview({
       setLinks(links);
     });
 
-    perspective?.addListener("link-added", (link) => {
+    perspective?.addListener('link-added', (link) => {
       if (link.data.source === source || link.data.target === source) {
         fetchSnapShot(perspective, source).then(({ links, nodes }) => {
           setNodes(nodes);
@@ -126,12 +109,10 @@ export default function CommunityOverview({
       graph.current = ForceGraph3D()(graphEl.current)
         .graphData({ nodes, links })
         .nodeLabel((node: any) => {
-          return node.id.startsWith("literal://")
-            ? Literal.fromUrl(node.id).get().data
-            : node.id;
+          return node.id.startsWith('literal://') ? Literal.fromUrl(node.id).get().data : node.id;
         })
-        .backgroundColor("rgba(0,0,0,0)")
-        .nodeAutoColorBy("group")
+        .backgroundColor('rgba(0,0,0,0)')
+        .nodeAutoColorBy('group')
         .linkDirectionalArrowRelPos(0.9)
         .linkDirectionalArrowLength(3.5)
         .linkThreeObjectExtend(true)
@@ -152,21 +133,21 @@ export default function CommunityOverview({
           graph.current.cameraPosition(
             newPos, // new position
             node, // lookAt ({ x, y, z })
-            3000 // ms transition duration
+            3000, // ms transition duration
           );
         })
         .linkThreeObject((link: any) => {
           // extend link with text sprite
           const sprite = new SpriteText(`${link.predicate}`);
-          sprite.color = "lightgrey";
+          sprite.color = 'lightgrey';
           sprite.textHeight = 1.5;
           return sprite;
         })
         .linkPositionUpdate((sprite: any, { start, end }: any) => {
           const middlePos = Object.assign(
-            ...["x", "y", "z"].map((c) => ({
+            ...['x', 'y', 'z'].map((c) => ({
               [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
-            }))
+            })),
           );
           // Position sprite
           Object.assign(sprite.position, middlePos);
@@ -207,7 +188,7 @@ async function fetchSnapShot(perspective: PerspectiveProxy, source: string) {
         { id: link.data.source, group: extractProtocol(link.data.source) },
         { id: link.data.target, group: extractProtocol(link.data.target) },
       ])
-      .flat()
+      .flat(),
   );
 
   const initialLinks = subLinks.map((l) => ({

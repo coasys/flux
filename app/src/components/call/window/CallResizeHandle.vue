@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 defineEmits<{
-  "start-resize": [event: MouseEvent];
+  'start-resize': [event: MouseEvent];
 }>();
 </script>
 

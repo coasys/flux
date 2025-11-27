@@ -1,4 +1,4 @@
-import { sleep } from "./sleep";
+import { sleep } from './sleep';
 
 type RetryOptions = {
   defaultValue?: any;
@@ -8,7 +8,7 @@ type RetryOptions = {
 
 export default async function retry(
   fn: () => any,
-  { defaultValue = null, count = 50, sleepDuration = 200 }: RetryOptions
+  { defaultValue = null, count = 50, sleepDuration = 200 }: RetryOptions,
 ) {
   return new Promise(async (resolve, reject) => {
     const timeout = sleepDuration * count;

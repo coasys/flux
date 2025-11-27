@@ -1,12 +1,12 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Post } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
-import { useState } from "preact/hooks";
-import { DisplayView, displayOptions } from "../../constants/options";
-import PostItem from "../PostItem";
-import style from "./index.module.css";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Post } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
+import { useState } from 'preact/hooks';
+import { DisplayView, displayOptions } from '../../constants/options';
+import PostItem from '../PostItem';
+import style from './index.module.css';
 
 type Props = {
   agent: AgentClient;
@@ -21,7 +21,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
   const { entries: posts, loading } = useModel({
     perspective,
     model: Post,
-    query: { source, order: { timestamp: "DESC" } },
+    query: { source, order: { timestamp: 'DESC' } },
   });
 
   const displayStyle: DisplayView =
@@ -73,7 +73,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
           </j-flex>
         </j-box>
       )}
-      <div className={[style.posts, displayStyle].join(" ")}>
+      <div className={[style.posts, displayStyle].join(' ')}>
         {posts.map((post) => (
           <PostItem key={post.baseExpression} agent={agent} post={post} displayView={view} getProfile={getProfile} />
         ))}

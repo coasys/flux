@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 defineProps<{ users: any[]; loading?: boolean; size?: string; tooltipTitle?: string }>();
-const emit = defineEmits(["click"]);
+const emit = defineEmits(['click']);
 </script>
 
 <style lang="scss" scoped>

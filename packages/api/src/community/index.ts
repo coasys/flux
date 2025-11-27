@@ -1,7 +1,7 @@
-import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from "@coasys/ad4m";
-import { community, languages } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import Channel from "../channel";
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { community, languages } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import Channel from '../channel';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
@@ -13,7 +13,7 @@ interface FileData {
 }
 
 @ModelOptions({
-  name: "Community",
+  name: 'Community',
 })
 export class Community extends Ad4mModel {
   @Flag({ through: ENTRY_TYPE, value: EntryType.Community })
@@ -22,14 +22,14 @@ export class Community extends Ad4mModel {
   @Property({
     through: NAME,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   name: string;
 
   @Property({
     through: DESCRIPTION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   description: string;
 
@@ -50,7 +50,7 @@ export class Community extends Ad4mModel {
   thumbnail: string | FileData;
 
   @Collection({
-    through: "ad4m://has_child",
+    through: 'ad4m://has_child',
     where: {
       isInstance: Channel,
     },

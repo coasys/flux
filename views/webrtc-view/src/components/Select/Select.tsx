@@ -1,6 +1,6 @@
-import classNames from "classnames";
+import classNames from 'classnames';
 
-import styles from "./Select.module.css";
+import styles from './Select.module.css';
 
 export type SelectOption = {
   text: string;
@@ -30,7 +30,7 @@ type Props = {
 const Select: React.FC<Props> = ({
   name,
   label,
-  placeholder = "",
+  placeholder = '',
   selected,
   options = [],
   onChange,
@@ -46,17 +46,15 @@ const Select: React.FC<Props> = ({
   const showFeedback = error || success;
 
   const selectClass = classNames({
-    [styles["select"]]: true,
-    [styles["-full"]]: full,
-    [styles["-error"]]: error,
-    [styles["-show-message"]]: showFeedback,
-    [styles["-disabled"]]: disabled,
-    [styles["-monochrome"]]: monochrome,
+    [styles['select']]: true,
+    [styles['-full']]: full,
+    [styles['-error']]: error,
+    [styles['-show-message']]: showFeedback,
+    [styles['-disabled']]: disabled,
+    [styles['-monochrome']]: monochrome,
   });
 
-  const selectedOption = options.find(
-    (o) => String(o.value) === String(selected)
-  );
+  const selectedOption = options.find((o) => String(o.value) === String(selected));
 
   return (
     <div className={selectClass}>
@@ -80,7 +78,7 @@ const Select: React.FC<Props> = ({
           autoFocus={autoFocus}
         >
           <option hidden value="">
-            {placeholder || "Velg"}
+            {placeholder || 'Velg'}
           </option>
           {options
             .sort((a, b) => (a.order || 0) - (b.order || 0))
@@ -106,9 +104,7 @@ const Select: React.FC<Props> = ({
       {showFeedback && (
         <div id={`input-${name}-feedback`}>
           <div className={styles.message} aria-live="polite">
-            <p className="sr">
-              {error && `${error && "Error: "}${placeholder}`}
-            </p>
+            <p className="sr">{error && `${error && 'Error: '}${placeholder}`}</p>
             {error || success}
           </div>
         </div>

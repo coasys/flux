@@ -1,3 +1,3 @@
-import UserGrid from "./UserGrid";
+import UserGrid from './UserGrid';
 
 export default UserGrid;

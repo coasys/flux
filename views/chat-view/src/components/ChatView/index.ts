@@ -1,3 +1,3 @@
-import ChatView from "./ChatView";
+import ChatView from './ChatView';
 
 export default ChatView;

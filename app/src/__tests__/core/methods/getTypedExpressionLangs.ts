@@ -1,18 +1,16 @@
-import { ad4mClient } from "@/app";
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import getTypedExpressionLangLanguages from "../../fixtures/getTypedExpressionLangLanguages.json";
-import getTypedExpressionLangLinks from "../../fixtures/getTypedExpressionLangLinks.json";
+import { ad4mClient } from '@/app';
+import { getTypedExpressionLanguages } from '@/core/methods/getTypedExpressionLangs';
+import getTypedExpressionLangLanguages from '../../fixtures/getTypedExpressionLangLanguages.json';
+import getTypedExpressionLangLinks from '../../fixtures/getTypedExpressionLangLinks.json';
 
-describe("Get Typed Expression", () => {
-  test("Get Typed Expression - Success", async () => {
+describe('Get Typed Expression', () => {
+  test('Get Typed Expression - Success', async () => {
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.languages, "byAddress")
+      .spyOn(ad4mClient.languages, 'byAddress')
       // @ts-ignore
       .mockImplementation(async (address) => {
-        return getTypedExpressionLangLanguages.find(
-          (e) => e.address === address
-        );
+        return getTypedExpressionLangLanguages.find((e) => e.address === address);
       });
 
     // @ts-ignore
@@ -20,16 +18,14 @@ describe("Get Typed Expression", () => {
 
     expect(exp.length).toBe(4);
     expect(exp.map((e) => e.languageAddress)).toStrictEqual(
-      getTypedExpressionLangLinks
-        .filter((e) => e.data.predicate === "language")
-        .map((e) => e.data.target)
+      getTypedExpressionLangLinks.filter((e) => e.data.predicate === 'language').map((e) => e.data.target),
     );
   });
 
-  test("Get Typed Expression - Failure", async () => {
+  test('Get Typed Expression - Failure', async () => {
     // @ts-ignore
     jest
-    .spyOn(ad4mClient.languages, "byAddress")
+      .spyOn(ad4mClient.languages, 'byAddress')
       // @ts-ignore
       .mockImplementation(async (address) => {
         return undefined;
@@ -41,8 +37,8 @@ describe("Get Typed Expression", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(
-        "message",
-        "Could not find language with address: QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS"
+        'message',
+        'Could not find language with address: QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS',
       );
     }
   });

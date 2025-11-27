@@ -1,3 +1,3 @@
-import AnswerCard from "./AnswerCard";
+import AnswerCard from './AnswerCard';
 
 export default AnswerCard;

@@ -1,3 +1,3 @@
-import NewPollModal from "./NewPollModal";
+import NewPollModal from './NewPollModal';
 
 export default NewPollModal;

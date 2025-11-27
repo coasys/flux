@@ -36,10 +36,10 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import SidebarList from "@/views/main/community/sidebar/SidebarList.vue";
-import SidebarMembers from "@/views/main/community/sidebar/SidebarMembers.vue";
-import SidebarHeader from "./SidebarHeader.vue";
+import { useCommunityService } from '@/composables/useCommunityService';
+import SidebarList from '@/views/main/community/sidebar/SidebarList.vue';
+import SidebarMembers from '@/views/main/community/sidebar/SidebarMembers.vue';
+import SidebarHeader from './SidebarHeader.vue';
 
 const {
   pinnedConversationsWithAgents,

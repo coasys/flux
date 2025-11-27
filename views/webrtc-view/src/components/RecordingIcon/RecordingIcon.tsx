@@ -1,4 +1,4 @@
-import styles from "./RecordingIcon.module.scss";
+import styles from './RecordingIcon.module.scss';
 
 function RecordingIcon(props: { size?: number; style?: any }): JSX.Element {
   const { size, style } = props;

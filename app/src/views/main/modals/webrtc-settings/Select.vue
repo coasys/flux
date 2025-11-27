@@ -18,7 +18,7 @@
         :autofocus="autoFocus"
       >
         <option hidden value="">
-          {{ placeholder || "Velg" }}
+          {{ placeholder || 'Velg' }}
         </option>
         <option
           v-for="(option, i) in sortedAndFilteredOptions"
@@ -40,7 +40,7 @@
     <div v-if="showFeedback" :id="`input-${name}-feedback`">
       <div class="message" aria-live="polite">
         <p class="sr">
-          {{ error && `${error ? "Error: " : ""}${placeholder}` }}
+          {{ error && `${error ? 'Error: ' : ''}${placeholder}` }}
         </p>
         {{ error || success }}
       </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue';
 
 export interface SelectOption {
   text: string;
@@ -77,7 +77,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  placeholder: "",
+  placeholder: '',
   options: () => [],
   full: false,
   error: undefined,
@@ -94,11 +94,11 @@ const showFeedback = computed(() => props.error || props.success);
 const selectClass = computed(() => {
   return {
     select: true,
-    "-full": props.full,
-    "-error": !!props.error,
-    "-show-message": !!showFeedback.value,
-    "-disabled": props.disabled,
-    "-monochrome": props.monochrome,
+    '-full': props.full,
+    '-error': !!props.error,
+    '-show-message': !!showFeedback.value,
+    '-disabled': props.disabled,
+    '-monochrome': props.monochrome,
   };
 });
 

@@ -10,7 +10,7 @@ html.cyberpunk {
   --j-size-lg: 50px;
 }
 
-html.cyberpunk j-text[variant^="heading"] {
+html.cyberpunk j-text[variant^='heading'] {
   display: block;
   position: relative;
   animation-name: glitched;
@@ -23,13 +23,7 @@ html.cyberpunk j-text[variant^="heading"] {
 
 html.cyberpunk j-button::part(base) {
   cursor: pointer;
-  clip-path: polygon(
-    -15px 0%,
-    calc(100% + 15px) 0%,
-    calc(100% + 15px) 100%,
-    20px 100%,
-    -15px calc(100% - 35px)
-  );
+  clip-path: polygon(-15px 0%, calc(100% + 15px) 0%, calc(100% + 15px) 100%, 20px 100%, -15px calc(100% - 35px));
 }
 
 html.cyberpunk j-button:hover {
@@ -79,23 +73,14 @@ html.cyberpunk j-input::part(input-wrapper):focus-within {
   border-color: var(--j-color-primary-500);
 }
 
-html.cyberpunk j-text[variant^="heading"]::after {
+html.cyberpunk j-text[variant^='heading']::after {
   display: block;
-  content: "";
+  content: '';
   width: 100%;
   bottom: -10px;
   left: 0;
   height: 10px;
-  clip-path: polygon(
-    0px 0px,
-    85px 0px,
-    90px 5px,
-    100% 5px,
-    100% 6px,
-    85px 6px,
-    80px 10px,
-    0px 10px
-  );
+  clip-path: polygon(0px 0px, 85px 0px, 90px 5px, 100% 5px, 100% 6px, 85px 6px, 80px 10px, 0px 10px);
   background: var(--j-color-primary-500);
 }
 

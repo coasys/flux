@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import TranscriptionIcon from "@/components/icons/TranscriptionIcon.vue";
+import TranscriptionIcon from '@/components/icons/TranscriptionIcon.vue';
 import {
   useAiStore,
   useAppStore,
@@ -113,10 +113,10 @@ import {
   useUiStore,
   useWebrtcStore,
   WEBRTC_EMOJI,
-} from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
-import { useVideoLayout } from "../composables/useVideoLayout";
+} from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+import { useVideoLayout } from '../composables/useVideoLayout';
 
 const appStore = useAppStore();
 const uiStore = useUiStore();
@@ -140,12 +140,12 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   const emoji = e?.detail?.native;
   const did = me.value?.did;
   if (!emoji || !did) {
-    emojiPopover.value?.removeAttribute("open");
+    emojiPopover.value?.removeAttribute('open');
     return;
   }
   webrtcStore.signalAgentsInCall(WEBRTC_EMOJI, emoji);
   webrtcStore.displayEmoji(emoji, did);
-  emojiPopover.value?.removeAttribute("open");
+  emojiPopover.value?.removeAttribute('open');
 }
 </script>
 

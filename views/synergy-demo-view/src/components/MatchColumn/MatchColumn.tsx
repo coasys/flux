@@ -1,5 +1,5 @@
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
 import {
   FilterSettings,
   GroupingOption,
@@ -8,11 +8,11 @@ import {
   itemTypeOptions,
   SearchType,
   SynergyMatch,
-} from "@coasys/flux-utils";
-import { useEffect, useState } from "preact/hooks";
-import { ChevronDownSVG, closeMenu } from "../../utils";
-import Match from "../Match";
-import styles from "./MatchColumn.module.scss";
+} from '@coasys/flux-utils';
+import { useEffect, useState } from 'preact/hooks';
+import { ChevronDownSVG, closeMenu } from '../../utils';
+import Match from '../Match';
+import styles from './MatchColumn.module.scss';
 
 type Props = {
   perspective: any;
@@ -41,7 +41,7 @@ export default function MatchColumn({
 }: Props) {
   const { grouping, itemType, includeChannel } = filterSettings;
   const [numberOfMatchesDisplayed, setNumberOfMatchesDisplayed] = useState(5);
-  const filteredGroupingOptions = searchType === "topic" ? ["Conversations", "Subgroups"] : groupingOptions;
+  const filteredGroupingOptions = searchType === 'topic' ? ['Conversations', 'Subgroups'] : groupingOptions;
 
   useEffect(() => setNumberOfMatchesDisplayed(5), [matches]);
 
@@ -56,7 +56,7 @@ export default function MatchColumn({
                   selected={grouping === option}
                   onClick={() => {
                     setFilterSettings({ ...filterSettings, grouping: option });
-                    closeMenu("grouping-menu");
+                    closeMenu('grouping-menu');
                   }}
                 >
                   {option}
@@ -64,7 +64,7 @@ export default function MatchColumn({
               ))}
             </j-menu-group>
           </j-menu>
-          {grouping === "Items" && (
+          {grouping === 'Items' && (
             <j-menu style={{ height: 42, zIndex: 20 }}>
               <j-menu-group collapsible title={itemType} id="item-type-menu">
                 {itemTypeOptions.map((option: ItemType) => (
@@ -72,7 +72,7 @@ export default function MatchColumn({
                     selected={itemType === option}
                     onClick={() => {
                       setFilterSettings({ ...filterSettings, itemType: option });
-                      closeMenu("item-type-menu");
+                      closeMenu('item-type-menu');
                     }}
                   >
                     {option}

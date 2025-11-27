@@ -1,29 +1,29 @@
-import { ModelOptions, Ad4mModel, Flag, Literal, Optional } from "@coasys/ad4m";
-import Topic, { TopicWithRelevance } from "../topic";
-import SemanticRelationship from "../semantic-relationship";
-import { SynergyTopic, SynergyItem, icons } from "@coasys/flux-utils";
+import { ModelOptions, Ad4mModel, Flag, Literal, Optional } from '@coasys/ad4m';
+import Topic, { TopicWithRelevance } from '../topic';
+import SemanticRelationship from '../semantic-relationship';
+import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
 
 @ModelOptions({
-  name: "ConversationSubgroup",
+  name: 'ConversationSubgroup',
 })
 export default class ConversationSubgroup extends Ad4mModel {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://conversation_subgroup",
+    through: 'flux://entry_type',
+    value: 'flux://conversation_subgroup',
   })
   type: string;
 
   @Optional({
-    through: "flux://has_name",
+    through: 'flux://has_name',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   subgroupName: string;
 
   @Optional({
-    through: "flux://has_summary",
+    through: 'flux://has_summary',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   summary: string;
 
@@ -65,7 +65,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       const [totalItems, participants] = result[0]?.Stats ?? [];
       return { totalItems: totalItems ?? 0, participants: participants ?? [] };
     } catch (error) {
-      console.error("Error getting subgroup stats:", error);
+      console.error('Error getting subgroup stats:', error);
       return { totalItems: 0, participants: [] };
     }
   }
@@ -101,11 +101,11 @@ export default class ConversationSubgroup extends Ad4mModel {
           ([baseExpression, name]): SynergyTopic => ({
             baseExpression,
             name: Literal.fromUrl(name).get(),
-          })
+          }),
         ) || []
       );
     } catch (error) {
-      console.error("Error getting subgroup topics:", error);
+      console.error('Error getting subgroup topics:', error);
       return [];
     }
   }
@@ -148,10 +148,10 @@ export default class ConversationSubgroup extends Ad4mModel {
         timestamp: new Date(timestamp).toISOString(),
         author,
         text: Literal.fromUrl(text).get().data,
-        icon: icons[type] || "question",
+        icon: icons[type] || 'question',
       }));
     } catch (error) {
-      console.error("Error getting subgroup items:", error);
+      console.error('Error getting subgroup items:', error);
       return [];
     }
   }
@@ -191,7 +191,13 @@ export default class ConversationSubgroup extends Ad4mModel {
     );
   }
 
-  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean, existingTopic: Topic | null = null, batchId: string) {
+  async updateTopicWithRelevance(
+    topicName: string,
+    relevance: number,
+    isNewGroup?: boolean,
+    existingTopic: Topic | null = null,
+    batchId: string,
+  ) {
     let topic = existingTopic;
     if (!topic) {
       console.log('create new topic for:', topicName);

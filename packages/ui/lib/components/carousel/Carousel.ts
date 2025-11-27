@@ -1,19 +1,19 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { property, customElement, state } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
-import { scrollTo, scrollHandler } from "../../utils/scroll";
-import { generateStylesheet, generateVariable } from "../../utils/stylesheets";
+import { html, css, LitElement, adoptStyles } from 'lit';
+import { property, customElement, state } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
+import { scrollTo, scrollHandler } from '../../utils/scroll';
+import { generateStylesheet, generateVariable } from '../../utils/stylesheets';
 
 const styles = css`
   :host {
     --j-carousel-gap: none;
   }
-  [part="base"] {
+  [part='base'] {
     width: 100%;
     overflow: hidden;
   }
 
-  [part="carousel"] {
+  [part='carousel'] {
     display: flex;
     gap: var(--j-carousel-gap);
     overflow-x: scroll;
@@ -22,7 +22,7 @@ const styles = css`
     align-items: center;
   }
 
-  [part="carousel"]::-webkit-scrollbar {
+  [part='carousel']::-webkit-scrollbar {
     display: none;
   }
 
@@ -33,7 +33,7 @@ const styles = css`
     scroll-snap-align: start;
   }
 
-  [part="navigation"] {
+  [part='navigation'] {
     display: flex;
     padding-top: var(--j-space-200);
     gap: var(--j-space-500);
@@ -41,7 +41,7 @@ const styles = css`
     justify-content: center;
   }
 
-  [part="navigation-button"] {
+  [part='navigation-button'] {
     border: 1px solid transparent;
     cursor: pointer;
     background: var(--j-color-ui-100);
@@ -50,12 +50,12 @@ const styles = css`
     border-radius: 50%;
   }
 
-  [part="navigation-button"][active] {
+  [part='navigation-button'][active] {
     background: var(--j-color-primary-500);
   }
 `;
 
-@customElement("j-carousel")
+@customElement('j-carousel')
 export default class Component extends LitElement {
   static styles = [styles, sharedStyles];
 
@@ -107,8 +107,8 @@ export default class Component extends LitElement {
     const styleSheets = [styles, sharedStyles];
 
     if (this.gap) {
-      const variable = generateVariable("j-space", this.gap);
-      styleSheets.push(generateStylesheet("--j-carousel-gap", variable));
+      const variable = generateVariable('j-space', this.gap);
+      styleSheets.push(generateStylesheet('--j-carousel-gap', variable));
     }
 
     // @ts-ignore
@@ -120,12 +120,12 @@ export default class Component extends LitElement {
     if (index === this._value) return;
     if (this._isScrolling) {
       this._value = index;
-      this.dispatchEvent(new CustomEvent("change"));
+      this.dispatchEvent(new CustomEvent('change'));
       this.requestUpdate();
     } else {
       scrollTo(this.carouselEl, index, () => {
         this._value = index;
-        this.dispatchEvent(new CustomEvent("change"));
+        this.dispatchEvent(new CustomEvent('change'));
         this.requestUpdate();
       });
     }
@@ -156,7 +156,7 @@ export default class Component extends LitElement {
               data-index=${i}
               @click=${() => this.goToSlide(i)}
               part="navigation-button"
-            ></button>`
+            ></button>`,
         )}
       </div>
     </div>`;

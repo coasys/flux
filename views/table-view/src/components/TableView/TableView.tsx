@@ -1,18 +1,18 @@
-import { useEffect, useState, useRef, useMemo } from "preact/hooks";
-import { Agent, Literal, PerspectiveProxy } from "@coasys/ad4m";
-import styles from "./TableView.module.css";
-import { usePrevious, pluralize } from "../../utils";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState, useRef, useMemo } from 'preact/hooks';
+import { Agent, Literal, PerspectiveProxy } from '@coasys/ad4m';
+import styles from './TableView.module.css';
+import { usePrevious, pluralize } from '../../utils';
+import { v4 as uuidv4 } from 'uuid';
 
-import Table from "../Table";
-import Grid from "../Grid";
-import Calendar from "../Calendar";
-import Header from "../Header";
-import History from "../History";
-import Entry from "../Entry";
-import NewClass from "../NewClass";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import Table from '../Table';
+import Grid from '../Grid';
+import Calendar from '../Calendar';
+import Header from '../Header';
+import History from '../History';
+import Entry from '../Entry';
+import NewClass from '../NewClass';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -20,33 +20,29 @@ type Props = {
   agent: AgentClient;
 };
 
-export default function TableView({
-  perspective,
-  agent,
-  source: initialSource,
-}: Props) {
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"grid" | "table" | "calendar">("table");
+export default function TableView({ perspective, agent, source: initialSource }: Props) {
+  const [search, setSearch] = useState('');
+  const [view, setView] = useState<'grid' | 'table' | 'calendar'>('table');
   const [history, setHistory] = useState([initialSource]);
   const prevHistory = usePrevious(history);
   const [classes, setClasses] = useState<string[]>([]);
-  const [selected, setSelected] = useState("");
-  const [currentEntry, setCurrentEntry] = useState("");
+  const [selected, setSelected] = useState('');
+  const [currentEntry, setCurrentEntry] = useState('');
   const [openNewClass, setOpenNewClass] = useState(false);
   const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
   const [me, setMe] = useState<Agent | null>(null);
   const layoutRef = useRef();
 
-  const source = history.length ? history[history.length - 1] : "ad4m://self";
+  const source = history.length ? history[history.length - 1] : 'ad4m://self';
 
   const { entries } = useModel({ perspective, model: selected, query: { source } });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);
     if (wentBack && layoutRef.current) {
-      console.log("wentback");
+      console.log('wentback');
     } else {
-      console.log("wentforward");
+      console.log('wentforward');
     }
   }, history);
 
@@ -55,7 +51,7 @@ export default function TableView({
   }, []);
 
   useEffect(() => {
-    setSelected("");
+    setSelected('');
   }, [perspective?.uuid, initialSource]);
 
   useEffect(() => {
@@ -67,10 +63,10 @@ export default function TableView({
       if (Array.isArray(result)) {
         const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
         setClasses(uniqueClasses);
-        setSelected(uniqueClasses[0] || "");
+        setSelected(uniqueClasses[0] || '');
       } else {
         setClasses([]);
-        setSelected("");
+        setSelected('');
       }
     });
   }, [perspective.uuid]);
@@ -93,12 +89,10 @@ export default function TableView({
   }
 
   const filteredEntries = useMemo(() => {
-    if (search === "") return entries;
+    if (search === '') return entries;
     return entries.filter((entry) => {
       return Object.values(entry).some(
-        (value: any) =>
-          typeof value === "string" &&
-          value.toLowerCase().includes(search.toLowerCase())
+        (value: any) => typeof value === 'string' && value.toLowerCase().includes(search.toLowerCase()),
       );
     });
   }, [search, entries]);
@@ -116,18 +110,12 @@ export default function TableView({
     ),
     grid: () => (
       <j-box px="500" pt="500">
-        <Grid
-          onUrlClick={(url) => onUrlClick(url, false)}
-          entries={filteredEntries}
-        ></Grid>
+        <Grid onUrlClick={(url) => onUrlClick(url, false)} entries={filteredEntries}></Grid>
       </j-box>
     ),
     calendar: () => (
       <j-box px="500" pt="500">
-        <Calendar
-          onEntryClick={(url) => onUrlClick(url, false)}
-          entries={filteredEntries}
-        ></Calendar>
+        <Calendar onEntryClick={(url) => onUrlClick(url, false)} entries={filteredEntries}></Calendar>
       </j-box>
     ),
   };
@@ -138,16 +126,8 @@ export default function TableView({
     <>
       <div ref={layoutRef} className={styles.layout}>
         <div className={styles.entry}>
-          <History
-            perspective={perspective}
-            history={history}
-            onClick={goTo}
-          ></History>
-          <Header
-            perspective={perspective}
-            source={source}
-            onUrlClick={onUrlClick}
-          ></Header>
+          <History perspective={perspective} history={history} onClick={goTo}></History>
+          <Header perspective={perspective} source={source} onUrlClick={onUrlClick}></Header>
         </div>
 
         <div className={styles.children}>
@@ -180,18 +160,8 @@ export default function TableView({
           </j-box>
 
           <div className={styles.options}>
-            <j-input
-              value={search}
-              onInput={(e) => setSearch(e.target.value)}
-              size="sm"
-              placeholder="Search"
-            >
-              <j-icon
-                name="search"
-                color="ui-500"
-                style="--j-icon-size: 0.8rem"
-                slot="end"
-              ></j-icon>
+            <j-input value={search} onInput={(e) => setSearch(e.target.value)} size="sm" placeholder="Search">
+              <j-icon name="search" color="ui-500" style="--j-icon-size: 0.8rem" slot="end"></j-icon>
             </j-input>
             <div>
               <j-tabs
@@ -206,18 +176,13 @@ export default function TableView({
                     size="xs"
                     name="table"
                     slot="start"
-                    color={view === "table" ? "primary-500" : "primary-300"}
+                    color={view === 'table' ? 'primary-500' : 'primary-300'}
                   ></j-icon>
                   Table
                 </j-tab-item>
-                <j-tab-item
-                  size="xs"
-                  style="--j-icon-size: 0.6rem"
-                  className={styles.viewSelectorTab}
-                  value="grid"
-                >
+                <j-tab-item size="xs" style="--j-icon-size: 0.6rem" className={styles.viewSelectorTab} value="grid">
                   <j-icon
-                    color={view === "grid" ? "primary-500" : "primary-300"}
+                    color={view === 'grid' ? 'primary-500' : 'primary-300'}
                     style="--j-icon-size: 0.8rem"
                     name="grid"
                     slot="start"
@@ -229,16 +194,14 @@ export default function TableView({
                     size="xs"
                     name="calendar"
                     slot="start"
-                    color={view === "calendar" ? "primary-500" : "primary-300"}
+                    color={view === 'calendar' ? 'primary-500' : 'primary-300'}
                   ></j-icon>
                   Calendar
                 </j-tab-item>
               </j-tabs>
             </div>
             <j-button
-              onClick={() =>
-                createEntry({ perspective, source, subjectClass: selected })
-              }
+              onClick={() => createEntry({ perspective, source, subjectClass: selected })}
               size="sm"
               variant="primary"
             >
@@ -259,42 +222,23 @@ export default function TableView({
         </div>
       </div>
 
-      <j-modal
-        size="sm"
-        open={openNewClass}
-        onToggle={(e) => setOpenNewClass(e.target.open)}
-      >
+      <j-modal size="sm" open={openNewClass} onToggle={(e) => setOpenNewClass(e.target.open)}>
         <j-box p="500">
-          <NewClass
-            onSaved={() => setOpenNewClass(false)}
-            perspective={perspective}
-          ></NewClass>
+          <NewClass onSaved={() => setOpenNewClass(false)} perspective={perspective}></NewClass>
         </j-box>
       </j-modal>
 
-      <j-modal
-        size="lg"
-        open={openCurrentEntry}
-        onToggle={(e) => setOpenCurrentEntry(e.target.open)}
-      >
+      <j-modal size="lg" open={openCurrentEntry} onToggle={(e) => setOpenCurrentEntry(e.target.open)}>
         <div className={styles.currentEntryGrid}>
           <div className={styles.entryItem}>
-            <Entry
-              perspective={perspective}
-              source={currentEntry}
-              onUrlClick={(url) => onUrlClick(url, true)}
-            ></Entry>
+            <Entry perspective={perspective} source={currentEntry} onUrlClick={(url) => onUrlClick(url, true)}></Entry>
           </div>
           <aside>
             <j-box pt="500">
               <j-text size="500" weight="600" color="ui-500">
                 Comments
               </j-text>
-              <comment-section
-                perspective={perspective}
-                source={currentEntry}
-                agent={agent}
-              ></comment-section>
+              <comment-section perspective={perspective} source={currentEntry} agent={agent}></comment-section>
             </j-box>
           </aside>
         </div>
@@ -316,8 +260,8 @@ async function createEntry({ perspective, subjectClass, source }: CreatePops) {
   await instance.init();
 
   const type = await perspective.add({
-    source: source || "ad4m://self",
-    predicate: "has_child",
+    source: source || 'ad4m://self',
+    predicate: 'has_child',
     target: uuid,
   });
 }

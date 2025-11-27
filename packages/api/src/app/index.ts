@@ -1,11 +1,11 @@
-import { community } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import { Property, ModelOptions, Flag, Ad4mModel } from "@coasys/ad4m";
+import { community } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import { Property, ModelOptions, Flag, Ad4mModel } from '@coasys/ad4m';
 
 const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
 
 @ModelOptions({
-  name: "App",
+  name: 'App',
 })
 export class App extends Ad4mModel {
   @Flag({
@@ -17,28 +17,28 @@ export class App extends Ad4mModel {
   @Property({
     through: NAME,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   name: string;
 
   @Property({
     through: DESCRIPTION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   description: string;
 
   @Property({
-    through: "rdf://icon",
+    through: 'rdf://icon',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   icon: string;
 
   @Property({
-    through: "rdf://pkg",
+    through: 'rdf://pkg',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   pkg: string;
 }

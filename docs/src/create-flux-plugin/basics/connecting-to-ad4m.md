@@ -31,12 +31,12 @@ If you're not using `@coasys/flux-create-plugin` you can just install our `@flux
     </flux-container>
     <script type="module">
       // Flux wrapper for testing
-      import "@coasys/flux-container";
+      import '@coasys/flux-container';
 
       // Your Flux app (web component)
-      import MyFluxApp from "./App.js";
+      import MyFluxApp from './App.js';
 
-      customElements.define("flux-app", MyFluxApp);
+      customElements.define('flux-app', MyFluxApp);
     </script>
   </body>
 </html>

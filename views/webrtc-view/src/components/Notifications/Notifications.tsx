@@ -1,8 +1,8 @@
-import { useContext } from "preact/hooks";
-import UiContext from "../../context/UiContext";
-import Item from "./Item";
+import { useContext } from 'preact/hooks';
+import UiContext from '../../context/UiContext';
+import Item from './Item';
 
-import styles from "./Notifications.module.css";
+import styles from './Notifications.module.css';
 
 export default function Notifications() {
   const {

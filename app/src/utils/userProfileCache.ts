@@ -1,16 +1,16 @@
-import { getProfile } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
+import { getProfile } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
 
 const defaultProfile: Profile = {
-  did: "",
-  username: "",
-  bio: "",
-  email: "",
-  givenName: "",
-  familyName: "",
-  profileBackground: "",
-  profileThumbnailPicture: "",
-  profilePicture: "",
+  did: '',
+  username: '',
+  bio: '',
+  email: '',
+  givenName: '',
+  familyName: '',
+  profileBackground: '',
+  profileThumbnailPicture: '',
+  profilePicture: '',
 };
 
 const profileCache: Record<string, Profile> = {};

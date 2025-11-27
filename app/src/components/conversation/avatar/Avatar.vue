@@ -3,24 +3,24 @@
     <div class="avatar-image">
       <j-avatar :size="size" :src="profile.profileThumbnailPicture || null" :hash="did" />
     </div>
-    <j-text v-if="showName" nomargin>{{ profile.username || "Unknown User" }}</j-text>
+    <j-text v-if="showName" nomargin>{{ profile.username || 'Unknown User' }}</j-text>
   </j-flex>
 </template>
 
 <script setup lang="ts">
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Profile } from "@coasys/flux-types";
-import { ref, watch } from "vue";
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Profile } from '@coasys/flux-types';
+import { ref, watch } from 'vue';
 
 interface Props {
   did: string;
-  size?: "sm" | "xs" | "lg" | "xl" | "xxs" | "xxl";
+  size?: 'sm' | 'xs' | 'lg' | 'xl' | 'xxs' | 'xxl';
   showName?: boolean;
   style?: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: "sm",
+  size: 'sm',
   showName: false,
 });
 
@@ -31,7 +31,7 @@ async function fetchProfile(did: string) {
     const result = await getCachedAgentProfile(did);
     profile.value = result || {};
   } catch (error) {
-    console.error("Error loading profile:", error);
+    console.error('Error loading profile:', error);
     profile.value = {};
   }
 }
@@ -39,7 +39,7 @@ async function fetchProfile(did: string) {
 watch(
   () => props.did,
   (newDid) => fetchProfile(newDid),
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

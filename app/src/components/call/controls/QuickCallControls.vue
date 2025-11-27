@@ -36,9 +36,9 @@
 </template>
 
 <script setup lang="ts">
-import TranscriptionIcon from "@/components/icons/TranscriptionIcon.vue";
-import { useAiStore, useMediaDevicesStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
+import TranscriptionIcon from '@/components/icons/TranscriptionIcon.vue';
+import { useAiStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
 
 const aiStore = useAiStore();
 const mediaDeviceStore = useMediaDevicesStore();

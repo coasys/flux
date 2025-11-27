@@ -31,7 +31,7 @@
 
           <j-box pt="400">
             <j-text nomargin size="500" color="ui-800" v-if="profile.bio">
-              {{ profile.bio || "No bio yet" }}
+              {{ profile.bio || 'No bio yet' }}
             </j-text>
           </j-box>
         </div>
@@ -78,7 +78,7 @@
                     <j-badge size="sm" variant="primary">
                       <j-icon size="xs" v-if="verifiedProofs[proof.deviceKey]" color="success-500" name="check" />
                       <j-icon size="xs" color="danger-500" name="cross" v-else />
-                      {{ verifiedProofs[proof.deviceKey] ? "Verified" : "Not verified" }}
+                      {{ verifiedProofs[proof.deviceKey] ? 'Verified' : 'Not verified' }}
                     </j-badge>
                     <j-box pt="200">
                       <j-text nomargin color="black">
@@ -117,21 +117,21 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import Modals from "@/views/main/profile/modals/Modals.vue";
-import { EntanglementProof, LinkExpression, Literal } from "@coasys/ad4m";
-import { getAgentWebLinks } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
-import { computed, onBeforeMount, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import Attestations from "./Attestations.vue";
-import WebLinkCard from "./WebLinkCard.vue";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import Modals from '@/views/main/profile/modals/Modals.vue';
+import { EntanglementProof, LinkExpression, Literal } from '@coasys/ad4m';
+import { getAgentWebLinks } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
+import { computed, onBeforeMount, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import Attestations from './Attestations.vue';
+import WebLinkCard from './WebLinkCard.vue';
 // @ts-ignore
-import jazzicon from "@metamask/jazzicon";
-import { storeToRefs } from "pinia";
+import jazzicon from '@metamask/jazzicon';
+import { storeToRefs } from 'pinia';
 
-defineOptions({ name: "ProfileView" });
+defineOptions({ name: 'ProfileView' });
 
 const route = useRoute();
 const router = useRouter();
@@ -145,16 +145,16 @@ const { me, myProfile } = storeToRefs(appStore);
 const { ad4mClient } = appStore;
 
 const profile = ref<Profile | null>(null);
-const currentTab = ref("web3");
+const currentTab = ref('web3');
 const showAddProofModal = ref(false); // TODO: Currently not used
 const showEditLinkModal = ref(false); // TODO: Currently not used
 const weblinks = ref<any[]>([]);
 const editArea = ref(null);
 const verifiedProofs = ref<Record<string, boolean>>({});
-const selectedAddress = ref("");
+const selectedAddress = ref('');
 const proofs = ref<EntanglementProof[]>([]);
 
-const did = computed((): string => (route.params.did as string) || me.value?.did || "");
+const did = computed((): string => (route.params.did as string) || me.value?.did || '');
 const sameAgent = computed(() => did.value === me.value?.did);
 const hasHistory = computed(() => router?.options?.history?.state?.back);
 
@@ -168,8 +168,8 @@ function getIcon(address: string) {
 }
 
 function shortETH(address: string) {
-  if (!address || address.length !== 42 || !address.startsWith("0x")) {
-    return "Invalid ETH Address";
+  if (!address || address.length !== 42 || !address.startsWith('0x')) {
+    return 'Invalid ETH Address';
   }
   return `${address.substring(0, 8)}...${address.substring(address.length - 4)}`;
 }
@@ -181,7 +181,7 @@ async function getEntanglementProofs() {
     // Map to dedupe array
     const seen = new Set<string>();
     const proofLinks = agent.perspective?.links
-      ? agent.perspective.links.filter((l) => l.data.predicate === "ad4m://entanglement_proof")
+      ? agent.perspective.links.filter((l) => l.data.predicate === 'ad4m://entanglement_proof')
       : [];
 
     const expressions = await Promise.all(proofLinks?.map((link) => ad4mClient.expression.get(link.data.target)));
@@ -202,13 +202,13 @@ async function getEntanglementProofs() {
         agent.did,
         proof.did,
         proof.deviceKey,
-        proof.deviceKeySignedByDid
+        proof.deviceKeySignedByDid,
       );
       verifiedProofs.value[proof.deviceKey] = isVerified;
     }
 
     proofs.value = filteredProofs;
-    selectedAddress.value = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
+    selectedAddress.value = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : '';
   }
 }
 
@@ -216,8 +216,8 @@ async function removeProof(proof: EntanglementProof) {
   const proofLink =
     me.value?.perspective?.links.filter((l: any) => {
       return (
-        l.data.predicate === "ad4m://entanglement_proof" &&
-        l.data.target.startsWith("literal://") &&
+        l.data.predicate === 'ad4m://entanglement_proof' &&
+        l.data.target.startsWith('literal://') &&
         Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
       );
     }) || [];
@@ -245,14 +245,14 @@ async function getAgentAreas() {
   weblinks.value = fetchedWebLinks;
 }
 
-onBeforeMount(() => themeStore.changeCurrentTheme("global"));
+onBeforeMount(() => themeStore.changeCurrentTheme('global'));
 
 // Watchers
 watch(
   () => modalStore.showAddWebLink,
   (val) => {
     if (!val) getAgentAreas();
-  }
+  },
 );
 
 watch(showAddProofModal, (val) => {
@@ -271,7 +271,7 @@ watch(
       profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, true);
       getAgentAreas();
     }
-  }
+  },
 );
 
 watch(
@@ -280,7 +280,7 @@ watch(
     getAgentAreas();
     getEntanglementProofs();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Watch for changes to myProfile and update profile state if viewing my profile
@@ -289,7 +289,7 @@ watch(
   (newProfile) => {
     if (!route.params.did || route.params.did === me.value?.did) profile.value = newProfile;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 // Load profile when route changes
@@ -299,7 +299,7 @@ watch(
     const agentDid = Array.isArray(newDid) ? newDid[0] : newDid || me.value?.did;
     profile.value = await getCachedAgentProfile(agentDid);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

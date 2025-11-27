@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -10,25 +10,25 @@ const styles = css`
     --j-spinner-color: var(--j-color-primary-500);
   }
 
-  :host([size="xxs"]) {
+  :host([size='xxs']) {
     --j-spinner-size: var(--j-size-xxs);
     --j-spinner-stroke: 1px;
     --j-spinner-color: var(--j-color-primary-500);
   }
 
-  :host([size="xs"]) {
+  :host([size='xs']) {
     --j-spinner-size: var(--j-size-xs);
     --j-spinner-stroke: 2px;
     --j-spinner-color: var(--j-color-primary-500);
   }
 
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-spinner-size: var(--j-size-sm);
     --j-spinner-stroke: 2px;
     --j-spinner-color: var(--j-color-primary-500);
   }
 
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-spinner-size: var(--j-size-lg);
     --j-spinner-stroke: 4px;
     --j-spinner-color: var(--j-color-primary-500);
@@ -71,7 +71,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-spinner")
+@customElement('j-spinner')
 export default class Component extends LitElement {
   static styles = [sharedStyles, styles];
 

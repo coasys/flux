@@ -13,12 +13,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAiStore, useUiStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { nextTick, onMounted, onUnmounted, onUpdated, ref } from "vue";
-import ProcessingWidget from "./ProcessingWidget.vue";
-import ProfileWidget from "./ProfileWidget.vue";
-import TranscriberWidget from "./TranscriberWidget.vue";
+import { useAiStore, useUiStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { nextTick, onMounted, onUnmounted, onUpdated, ref } from 'vue';
+import ProcessingWidget from './ProcessingWidget.vue';
+import ProfileWidget from './ProfileWidget.vue';
+import TranscriberWidget from './TranscriberWidget.vue';
 
 defineProps<{ callRouteData: { communityName: string; channelName: string; conversationName: string } }>();
 

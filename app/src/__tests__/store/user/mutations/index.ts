@@ -1,8 +1,8 @@
-import { useUserStore } from "@/store/user";
-import { Pinia, createPinia, setActivePinia } from "pinia";
-import initAgent from "../../../fixtures/initAgent.json";
+import { useUserStore } from '@/store/user';
+import { Pinia, createPinia, setActivePinia } from 'pinia';
+import initAgent from '../../../fixtures/initAgent.json';
 
-describe("User Mutations", () => {
+describe('User Mutations', () => {
   let store: Pinia;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe("User Mutations", () => {
     setActivePinia(store);
   });
 
-  test("Initial user store", () => {
+  test('Initial user store', () => {
     const userStore = useUserStore();
     const initialState = userStore;
 
@@ -18,18 +18,18 @@ describe("User Mutations", () => {
     expect(initialState.agent).toStrictEqual({
       isInitialized: false,
       isUnlocked: false,
-      did: "",
-      didDocument: "",
+      did: '',
+      didDocument: '',
     });
   });
 
-  test("Update Agent Status", () => {
+  test('Update Agent Status', () => {
     const userStore = useUserStore();
     expect(userStore.agent).toStrictEqual({
       isInitialized: false,
       isUnlocked: false,
-      did: "",
-      didDocument: "",
+      did: '',
+      didDocument: '',
     });
 
     userStore.updateAgentStatus(initAgent);
@@ -37,7 +37,7 @@ describe("User Mutations", () => {
     expect(userStore.agent).toStrictEqual(initAgent);
   });
 
-  test("Update Agent Lock State", () => {
+  test('Update Agent Lock State', () => {
     const userStore = useUserStore();
     expect(userStore.agent.isUnlocked).toBeFalsy();
 
@@ -46,17 +46,17 @@ describe("User Mutations", () => {
     expect(userStore.agent.isUnlocked).toBeTruthy();
   });
 
-  test("Set User Profile", () => {
+  test('Set User Profile', () => {
     const userStore = useUserStore();
     expect(userStore.profile).toBeNull();
 
     const profile = {
-      givenName: "jhon",
-      familyName: "doe",
-      email: "jhon@test.com",
-      username: "jhon",
-      profilePicture: "test",
-      profileThumbnailPicture: "test",
+      givenName: 'jhon',
+      familyName: 'doe',
+      email: 'jhon@test.com',
+      username: 'jhon',
+      profilePicture: 'test',
+      profileThumbnailPicture: 'test',
     };
 
     userStore.setUserProfile(profile);

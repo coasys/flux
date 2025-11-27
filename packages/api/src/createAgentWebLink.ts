@@ -1,7 +1,7 @@
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { createLiteralObject } from "@coasys/flux-utils";
-import { profile } from "@coasys/flux-constants";
-import { WebLink } from "@coasys/flux-types";
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { createLiteralObject } from '@coasys/flux-utils';
+import { profile } from '@coasys/flux-constants';
+import { WebLink } from '@coasys/flux-types';
 
 const { AREA_WEBLINK, OG_DESCRIPTION, OG_IMAGE, OG_LINK, OG_TITLE } = profile;
 
@@ -17,13 +17,13 @@ export default async function createAgentWebLink(payload: {
     parent: {
       source: `self`,
       predicate: AREA_WEBLINK,
-      target: payload.url || "",
+      target: payload.url || '',
     },
     children: {
-      [OG_TITLE]: payload.title || "",
-      [OG_LINK]: payload.url || "",
-      [OG_DESCRIPTION]: payload.description || "",
-      [OG_IMAGE]: payload.imageUrl || "",
+      [OG_TITLE]: payload.title || '',
+      [OG_LINK]: payload.url || '',
+      [OG_DESCRIPTION]: payload.description || '',
+      [OG_IMAGE]: payload.imageUrl || '',
     },
   });
 

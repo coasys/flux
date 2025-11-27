@@ -1,3 +1,3 @@
-import NewClass from "./NewClass";
+import NewClass from './NewClass';
 
 export default NewClass;

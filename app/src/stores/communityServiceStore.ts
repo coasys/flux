@@ -1,9 +1,9 @@
-import { CommunityService } from "@/composables/useCommunityService";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { CommunityService } from '@/composables/useCommunityService';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 export const useCommunityServiceStore = defineStore(
-  "communityServiceStore",
+  'communityServiceStore',
   () => {
     const communityServices = ref<Record<string, CommunityService>>({});
 
@@ -26,5 +26,5 @@ export const useCommunityServiceStore = defineStore(
       deleteCommunityService,
     };
   },
-  { persist: false }
+  { persist: false },
 );

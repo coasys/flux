@@ -1,8 +1,5 @@
 // Debounced function that executes the function immediately, then queues subsequent actions
-export function debounce<F extends Function>(
-  eventHandler: F,
-  milliseconds = 500
-): F {
+export function debounce<F extends Function>(eventHandler: F, milliseconds = 500): F {
   let timer: ReturnType<typeof setTimeout> | undefined;
   return function (this: unknown, ...args: unknown[]) {
     const isFirstExecution = timer === undefined;

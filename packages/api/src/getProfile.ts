@@ -1,8 +1,8 @@
-import { profile } from "@coasys/flux-constants";
-import { Profile } from "@coasys/flux-types";
-import { mapLiteralLinks } from "@coasys/flux-utils";
-import { Ad4mClient } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { profile } from '@coasys/flux-constants';
+import { Profile } from '@coasys/flux-types';
+import { mapLiteralLinks } from '@coasys/flux-utils';
+import { Ad4mClient } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 const {
   HAS_USERNAME,
@@ -22,19 +22,19 @@ export interface Payload {
 }
 
 export default async function getProfile(did: string): Promise<Profile> {
-  const cleanedDid = did.replace("did://", "");
+  const cleanedDid = did.replace('did://', '');
   const client: Ad4mClient = await getAd4mClient();
 
   let profile: Profile = {
-    username: "",
-    bio: "",
-    email: "",
-    profileBackground: "",
-    profilePicture: "",
-    profileThumbnailPicture: "",
-    givenName: "",
-    familyName: "",
-    did: "",
+    username: '',
+    bio: '',
+    email: '',
+    profileBackground: '',
+    profilePicture: '',
+    profileThumbnailPicture: '',
+    givenName: '',
+    familyName: '',
+    did: '',
   };
 
   const agentPerspective = await client.agent.byDID(cleanedDid);
@@ -46,7 +46,7 @@ export default async function getProfile(did: string): Promise<Profile> {
       links.filter((e) => e.data.source === did),
       {
         username: HAS_USERNAME,
-      }
+      },
     );
 
     let mappedProfile: any = mapLiteralLinks(
@@ -60,7 +60,7 @@ export default async function getProfile(did: string): Promise<Profile> {
         profilePicture: HAS_PROFILE_IMAGE,
         profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
         profileBackground: HAS_BG_IMAGE,
-      }
+      },
     );
 
     if (mappedProfile.profilePicture) {
@@ -68,21 +68,17 @@ export default async function getProfile(did: string): Promise<Profile> {
       if (res) {
         const { data } = res;
         const { data_base64, file_type } = JSON.parse(data);
-        mappedProfile.profilePicture =
-          data_base64 && `data:${file_type};base64, ${data_base64}`;
+        mappedProfile.profilePicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
       }
     }
 
     if (mappedProfile.profileThumbnailPicture) {
-      const res = await client.expression.get(
-        mappedProfile.profileThumbnailPicture
-      );
+      const res = await client.expression.get(mappedProfile.profileThumbnailPicture);
       if (res) {
         const { data } = res;
         const { data_base64, file_type } = JSON.parse(data);
 
-        mappedProfile.profileThumbnailPicture =
-          data_base64 && `data:${file_type};base64, ${data_base64}`;
+        mappedProfile.profileThumbnailPicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
       }
     }
 
@@ -92,8 +88,7 @@ export default async function getProfile(did: string): Promise<Profile> {
         const { data } = res;
         const { data_base64, file_type } = JSON.parse(data);
 
-        mappedProfile.profileBackground =
-          data_base64 && `data:${file_type};base64, ${data_base64}`;
+        mappedProfile.profileBackground = data_base64 && `data:${file_type};base64, ${data_base64}`;
       }
     }
 

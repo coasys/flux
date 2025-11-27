@@ -1,4 +1,4 @@
-import { PropertyValueMap } from "@coasys/flux-types";
+import { PropertyValueMap } from '@coasys/flux-types';
 
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -10,9 +10,9 @@ export function propertyNameToSetterName(property: string): string {
 }
 
 export function pluralToSingular(plural: string): string {
-  if (plural.endsWith("ies")) {
-    return plural.slice(0, -3) + "y";
-  } else if (plural.endsWith("s")) {
+  if (plural.endsWith('ies')) {
+    return plural.slice(0, -3) + 'y';
+  } else if (plural.endsWith('s')) {
     return plural.slice(0, -1);
   } else {
     return plural;
@@ -37,7 +37,7 @@ export function setProperties(subject: any, properties: PropertyValueMap) {
       if (adderFunction) {
         adderFunction(properties[key]);
       } else {
-        throw "No adder function found for collection: " + key;
+        throw 'No adder function found for collection: ' + key;
       }
     } else {
       // it's a property
@@ -46,7 +46,7 @@ export function setProperties(subject: any, properties: PropertyValueMap) {
       if (setterFunction) {
         setterFunction(properties[key]);
       } else {
-        throw "No setter function found for property: " + key;
+        throw 'No setter function found for property: ' + key;
       }
     }
   });

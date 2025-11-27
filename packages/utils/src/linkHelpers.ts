@@ -1,19 +1,16 @@
-import { Link, LinkInput } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { LinkExpression, Literal } from "@coasys/ad4m";
-import { community } from "@coasys/flux-constants";
-import { EntryType, PropertyMap, PredicateMap } from "@coasys/flux-types";
+import { Link, LinkInput } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { LinkExpression, Literal } from '@coasys/ad4m';
+import { community } from '@coasys/flux-constants';
+import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
 
-const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, REPLY_TO, ZOME } =
-  community;
+const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, REPLY_TO, ZOME } = community;
 
 export const findLink = {
-  name: (link: LinkExpression) => link.data.predicate === "rdf://name",
-  description: (link: LinkExpression) =>
-    link.data.predicate === "rdf://description",
-  language: (link: LinkExpression) => link.data.predicate === "language",
-  dateCreated: (link: LinkExpression) =>
-    link.data.predicate === "rdf://dateCreated",
+  name: (link: LinkExpression) => link.data.predicate === 'rdf://name',
+  description: (link: LinkExpression) => link.data.predicate === 'rdf://description',
+  language: (link: LinkExpression) => link.data.predicate === 'language',
+  dateCreated: (link: LinkExpression) => link.data.predicate === 'rdf://dateCreated',
 };
 
 export const linkIs = {
@@ -23,18 +20,14 @@ export const linkIs = {
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
   channel: (link: LinkExpression) => link.data.predicate === CHANNEL,
   member: (link: LinkExpression) => link.data.predicate === MEMBER,
-  hideNeighbourhoodCard: (link: LinkExpression) =>
-    link.data.predicate === CARD_HIDDEN,
+  hideNeighbourhoodCard: (link: LinkExpression) => link.data.predicate === CARD_HIDDEN,
   editedMessage: (link: LinkExpression) => link.data.predicate === EDITED_TO,
   socialDNA: (link: LinkExpression) => link.data.predicate === ZOME,
 
   // TODO: SHould we check if the link is proof.valid?
 };
 
-export function mapLiteralLinks(
-  links: LinkExpression[] | undefined,
-  map: PropertyMap
-) {
+export function mapLiteralLinks(links: LinkExpression[] | undefined, map: PropertyMap) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
@@ -42,11 +35,11 @@ export function mapLiteralLinks(
     if (link) {
       let data;
 
-      if (link.data.target.startsWith("literal://string:")) {
+      if (link.data.target.startsWith('literal://string:')) {
         data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith("literal://number:")) {
+      } else if (link.data.target.startsWith('literal://number:')) {
         data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith("literal://json:")) {
+      } else if (link.data.target.startsWith('literal://json:')) {
         data = Literal.fromUrl(link.data.target).get().data;
       } else {
         data = link.data.target;
@@ -68,11 +61,11 @@ export async function createLiteralLinks(source: string, map: PredicateMap) {
 
   const promises = targets
     .filter((predicate: any) => {
-      return typeof map[predicate] === "string";
+      return typeof map[predicate] === 'string';
     })
     .map(async (predicate: string) => {
       const message = map[predicate];
-      const exp = await client.expression.create(message, "literal");
+      const exp = await client.expression.create(message, 'literal');
       return new Link({ source, predicate, target: exp });
     });
 
@@ -85,7 +78,7 @@ export async function createLinks(source: string, map: PredicateMap) {
 
   const links = targets
     .filter((predicate: any) => {
-      const isString = typeof map[predicate] === "string";
+      const isString = typeof map[predicate] === 'string';
       const isArray = Array.isArray(map[predicate]);
       return isString || isArray;
     })
@@ -99,15 +92,9 @@ export async function createLinks(source: string, map: PredicateMap) {
   return links.flat();
 }
 
-export async function createLiteralObject({
-  parent,
-  children,
-}: {
-  parent: LinkInput;
-  children: PredicateMap;
-}) {
+export async function createLiteralObject({ parent, children }: { parent: LinkInput; children: PredicateMap }) {
   const client = await getAd4mClient();
-  const expUrl = await client.expression.create(parent.target, "literal");
+  const expUrl = await client.expression.create(parent.target, 'literal');
 
   const parentLink = new Link({
     source: parent.source,
@@ -120,15 +107,10 @@ export async function createLiteralObject({
   return [parentLink, ...childrenLinks];
 }
 
-export async function getLiteralObjectLinks(
-  targetExp: string,
-  links: LinkExpression[]
-) {
+export async function getLiteralObjectLinks(targetExp: string, links: LinkExpression[]) {
   const parentLink = links.find((l) => l.data.target === targetExp);
   if (parentLink) {
-    const associatedLinks = links.filter(
-      (link) => link.data.source === targetExp
-    );
+    const associatedLinks = links.filter((link) => link.data.source === targetExp);
 
     return [parentLink, ...associatedLinks];
   } else {

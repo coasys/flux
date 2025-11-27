@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import ChangeChannelModal from "./ChangeChannelModal.vue";
-import EditChannelModal from "./EditChannelModal.vue";
-import JoiningCommunityModal from "./JoiningCommunityModal.vue";
-import ProfileModal from "./ProfileModal.vue";
+import ChangeChannelModal from './ChangeChannelModal.vue';
+import EditChannelModal from './EditChannelModal.vue';
+import JoiningCommunityModal from './JoiningCommunityModal.vue';
+import ProfileModal from './ProfileModal.vue';
 </script>

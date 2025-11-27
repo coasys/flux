@@ -1,8 +1,8 @@
-import { Me } from "@coasys/flux-api";
-import { version } from "../../../../package.json";
-import { getForVersion } from "@coasys/flux-utils";
-import { WebRTC } from "@coasys/flux-react-web";
-import Select from "../../Select";
+import { Me } from '@coasys/flux-api';
+import { version } from '../../../../package.json';
+import { getForVersion } from '@coasys/flux-utils';
+import { WebRTC } from '@coasys/flux-react-web';
+import Select from '../../Select';
 
 type Props = {
   webRTC: WebRTC;
@@ -10,30 +10,22 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
-  const videoTrack = webRTC.localStream
-    ?.getTracks()
-    ?.find((track) => track.kind === "video");
+  const videoTrack = webRTC.localStream?.getTracks()?.find((track) => track.kind === 'video');
 
-  const audioTrack = webRTC.localStream
-    ?.getTracks()
-    ?.find((track) => track.kind === "audio");
+  const audioTrack = webRTC.localStream?.getTracks()?.find((track) => track.kind === 'audio');
 
   const selectedVideoDeviceId =
-    typeof webRTC.localState.settings.video !== "boolean" &&
-    webRTC.localState.settings.video?.deviceId
+    typeof webRTC.localState.settings.video !== 'boolean' && webRTC.localState.settings.video?.deviceId
       ? webRTC.localState.settings.video?.deviceId
-      : videoTrack?.getSettings().deviceId ||
-        getForVersion(version, "cameraDeviceId");
+      : videoTrack?.getSettings().deviceId || getForVersion(version, 'cameraDeviceId');
 
   const selectedAudioDeviceId =
-    typeof webRTC.localState.settings.audio !== "boolean" &&
-    webRTC.localState.settings.audio?.deviceId
+    typeof webRTC.localState.settings.audio !== 'boolean' && webRTC.localState.settings.audio?.deviceId
       ? webRTC.localState.settings.audio?.deviceId
-      : audioTrack?.getSettings().deviceId ||
-        getForVersion(version, "audioDeviceId");
+      : audioTrack?.getSettings().deviceId || getForVersion(version, 'audioDeviceId');
 
-  const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
-  const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");
+  const videoDevices = webRTC?.devices?.filter((d) => d.kind === 'videoinput');
+  const audioDevices = webRTC?.devices?.filter((d) => d.kind === 'audioinput');
 
   return (
     <div>

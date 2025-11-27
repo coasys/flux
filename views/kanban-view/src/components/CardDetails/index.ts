@@ -1,3 +1,3 @@
-import CardDetails from "./CardDetails";
+import CardDetails from './CardDetails';
 
 export default CardDetails;

@@ -16,8 +16,8 @@ Input component is used to get user input in forms. It can be used to get text, 
 <j-input label="Name"></j-input>
 
 <script>
-  const input = document.querySelector("j-input");
-  input.addEventListener("input", (e) => {
+  const input = document.querySelector('j-input');
+  input.addEventListener('input', (e) => {
     console.log(e.target.value);
   });
 </script>
@@ -25,30 +25,20 @@ Input component is used to get user input in forms. It can be used to get text, 
 
 ```js [preact]
 export default function Checkbox() {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
 
-  return (
-    <j-input
-      label="Name"
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    ></j-input>
-  );
+  return <j-input label="Name" value={value} onChange={(e) => setValue(e.target.value)}></j-input>;
 }
 ```
 
 ```vue [vue]
 <template>
-  <j-input
-    label="Name"
-    :value="value"
-    @change="(e) => (value = e.target.value)"
-  ></j-input>
+  <j-input label="Name" :value="value" @change="(e) => (value = e.target.value)"></j-input>
 </template>
 
 <script setup>
-import { ref } from "vue";
-const value = ref("");
+import { ref } from 'vue';
+const value = ref('');
 </script>
 ```
 
@@ -73,11 +63,7 @@ Use the pattern property to set a regular expression that the input's value must
 <j-input pattern="[A-Za-z]+" autovalidate errortext="Please enter only letters"></j-input>
 
 ```html
-<j-input
-  pattern="[A-Za-z]+"
-  autovalidate
-  errortext="Please enter only letters"
-></j-input>
+<j-input pattern="[A-Za-z]+" autovalidate errortext="Please enter only letters"></j-input>
 ```
 
 ### Label <Badge type="info" text="string" />
@@ -126,11 +112,7 @@ Use the error-text property to set the error message that should be displayed if
 <j-input pattern="[A-Za-z]+" autvalidate errortext="Only alphabetic characters allowed"></j-input>
 
 ```html
-<j-input
-  pattern="[A-Za-z]+"
-  autovalidate
-  errortext="Only alphabetic characters allowed"
-></j-input>
+<j-input pattern="[A-Za-z]+" autovalidate errortext="Only alphabetic characters allowed"></j-input>
 ```
 
 ### HelpText <Badge type="info" text="string" />
@@ -274,9 +256,9 @@ Use the end slot to add content to the end of the input. You can use this slot t
 The change event is fired when the value of the input is changed by the user. You can add an event listener to the input element to handle this event, like so:
 
 ```js
-const input = document.querySelector("j-input");
-input.addEventListener("change", (event) => {
-  console.log("Input value changed:", event.target.value);
+const input = document.querySelector('j-input');
+input.addEventListener('change', (event) => {
+  console.log('Input value changed:', event.target.value);
 });
 ```
 
@@ -285,9 +267,9 @@ input.addEventListener("change", (event) => {
 The input event is fired when the value of the input is changed, either by the user or programmatically. You can add an event listener to the input element to handle this event, like so:
 
 ```js
-const input = document.querySelector("j-input");
-input.addEventListener("input", (event) => {
-  console.log("Input value changed:", event.target.value);
+const input = document.querySelector('j-input');
+input.addEventListener('input', (event) => {
+  console.log('Input value changed:', event.target.value);
 });
 ```
 
@@ -296,8 +278,8 @@ input.addEventListener("input", (event) => {
 The validate event is fired when the input is validated. You can add an event listener to the input element to handle this event, like so:
 
 ```js
-const input = document.querySelector("j-input");
-input.addEventListener("validate", () => {
+const input = document.querySelector('j-input');
+input.addEventListener('validate', () => {
   // Do something when the input is validated
 });
 ```
@@ -307,8 +289,8 @@ input.addEventListener("validate", () => {
 The blur event is fired when the input loses focus. You can add an event listener to the input element to handle this event, like so:
 
 ```js
-const input = document.querySelector("j-input");
-input.addEventListener("blur", () => {
+const input = document.querySelector('j-input');
+input.addEventListener('blur', () => {
   // Do something when the input loses focus
 });
 ```
@@ -320,7 +302,7 @@ input.addEventListener("blur", () => {
 The validate() method is used to validate the input. It returns a boolean value indicating whether the input is valid or not.
 
 ```js
-const input = document.querySelector("j-input");
+const input = document.querySelector('j-input');
 const isValid = input.validate();
 ```
 
@@ -329,6 +311,6 @@ const isValid = input.validate();
 The focus() method is used to give focus to the input.
 
 ```js
-const input = document.querySelector("j-input");
+const input = document.querySelector('j-input');
 input.focus();
 ```
