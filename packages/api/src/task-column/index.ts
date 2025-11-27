@@ -1,5 +1,4 @@
 import { ModelOptions, Ad4mModel, Flag, Property } from '@coasys/ad4m';
-import Task from '../task';
 
 @ModelOptions({ name: 'TaskColumn' })
 export default class TaskColumn extends Ad4mModel {
@@ -15,8 +14,10 @@ export default class TaskColumn extends Ad4mModel {
   })
   columnName: string;
 
-  // async tasks(): Promise<Task[]> {
-  //   // find the task entities
-  //   return await Task.findAll(this.perspective, { source: this.baseExpression });
-  // }
+  @Property({
+    through: 'flux://ordered_task_ids',
+    resolveLanguage: 'literal',
+    writable: true,
+  })
+  orderedTaskIds: string;
 }

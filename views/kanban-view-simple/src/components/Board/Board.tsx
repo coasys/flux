@@ -4,7 +4,7 @@ import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useState, useEffect, Fragment } from 'react';
 import { TaskColumn } from '@coasys/flux-api';
-import { DragDropContext } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import styles from './Board.module.scss';
 import Column from '../Column';
 
@@ -27,7 +27,6 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
     const profiles = await Promise.all([me.did, ...others].map(getProfile));
-    console.log('Fetched profiles:', profiles);
     setAgentProfiles([...profiles, { did: 'a' }, { did: 'b' }]); // TODO: remove Partial
   }
 
@@ -37,6 +36,8 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     // Create and save the new column
     const newColumn = new TaskColumn(perspective, undefined, source);
     newColumn.columnName = newColumnName;
+    newColumn.orderedTaskIds = JSON.stringify([]);
+
     await newColumn.save();
 
     // Reset state and hide the modal
@@ -45,27 +46,62 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     setShowNewColumnModal(false);
   }
 
-  async function onDragEnd(result) {
-    const { destination, source, draggableId } = result;
+  async function updateTaskPosition(dropResult: DropResult) {
+    const { destination, source, draggableId } = dropResult;
 
-    // If there is no destination, do nothing
+    // If there is no column destination, do nothing
     if (!destination) return;
 
-    // If the draggable is dropped in its original position, do not do anything
+    // If the task is dropped in its original position, do not do anything
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    // Remove old link
-    const oldLinks = await perspective.get(
-      new LinkQuery({ source: source.droppableId, predicate: 'ad4m://has_child', target: draggableId }),
-    );
-    await perspective.removeLinks([oldLinks[0]]);
+    // If the task is dropped in a different column
+    if (destination.droppableId !== source.droppableId) {
+      // Remove old link
+      const oldLinks = await perspective.get(
+        new LinkQuery({ source: source.droppableId, predicate: 'ad4m://has_child', target: draggableId }),
+      );
+      await perspective.removeLinks([oldLinks[0]]);
 
-    // Add new link
-    await perspective.addLinks([
-      { source: destination.droppableId, predicate: 'ad4m://has_child', target: draggableId },
-    ]);
+      // Update orderedTaskIds in source column
+      const sourceColumn = columns.find((col) => col.baseExpression === source.droppableId);
+      if (sourceColumn) {
+        const orderedIds = JSON.parse(sourceColumn.orderedTaskIds);
+        sourceColumn.orderedTaskIds = JSON.stringify(orderedIds.filter((id) => id !== draggableId));
+        await sourceColumn.update();
+      }
+
+      // Add new link
+      await perspective.addLinks([
+        { source: destination.droppableId, predicate: 'ad4m://has_child', target: draggableId },
+      ]);
+
+      // Update orderedTaskIds in destination column
+      const destinationColumn = columns.find((col) => col.baseExpression === destination.droppableId);
+      if (destinationColumn) {
+        const newOrderedTaskIds = JSON.parse(destinationColumn.orderedTaskIds);
+        newOrderedTaskIds.splice(destination.index, 0, draggableId);
+        destinationColumn.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+        await destinationColumn.update();
+      }
+    } else {
+      // If the task is reordered within the same column
+      const column = columns.find((col) => col.baseExpression === source.droppableId);
+
+      // Update orderedTaskIds in the column
+      const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
+
+      // Remove the task from its original position
+      newOrderedTaskIds.splice(source.index, 1);
+
+      // Insert the task at the new position
+      newOrderedTaskIds.splice(destination.index, 0, draggableId);
+      column.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+      await column.update();
+    }
   }
 
+  // Fetch agent profiles on component mount
   useEffect(() => {
     if (getProfile) getProfiles();
   }, [perspective.uuid, getProfile]);
@@ -74,7 +110,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     <>
       <div className={styles.board}>
         {/* Columns */}
-        <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext onDragEnd={updateTaskPosition}>
           {columns.map((column) => (
             <Column
               key={column.baseExpression}

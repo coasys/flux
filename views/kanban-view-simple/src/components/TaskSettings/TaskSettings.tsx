@@ -45,6 +45,22 @@ export default function TaskSettings({
     return agentProfiles.filter((p) => taskAssignees.includes(p.did));
   }, [taskAssignees, agentProfiles]);
 
+  async function linkTaskToColumn(task: Task, columnName: string) {
+    // Get the column by name
+    const column = columns.find((col) => col.columnName === columnName);
+    if (!column) throw new Error('Column not found');
+
+    // Link the task to the column
+    await perspective.addLinks([
+      { source: column.baseExpression, predicate: 'ad4m://has_child', target: task.baseExpression },
+    ]);
+
+    // Store the task position in the column
+    const updatedOrderedTaskIds = [...(JSON.parse(column.orderedTaskIds) || []), task.baseExpression];
+    column.orderedTaskIds = JSON.stringify(updatedOrderedTaskIds);
+    await column.update();
+  }
+
   async function saveTask() {
     setSaving(true);
 
@@ -57,17 +73,14 @@ export default function TaskSettings({
 
       // Update column if changed
       if (column.columnName !== taskColumn) {
-        // Remove link from old column
+        // Unlink task from old column
         const oldLinks = await perspective.get(
           new LinkQuery({ source: column.baseExpression, predicate: 'ad4m://has_child', target: task.baseExpression }),
         );
         await perspective.removeLinks([oldLinks[0]]);
 
-        // Add link to new column
-        const newColumn = columns.find((col) => col.columnName === taskColumn);
-        await perspective.addLinks([
-          { source: newColumn?.baseExpression, predicate: 'ad4m://has_child', target: task.baseExpression },
-        ]);
+        // Link task to new column
+        await linkTaskToColumn(task, taskColumn);
       }
 
       // Update assignees if changed
@@ -95,10 +108,7 @@ export default function TaskSettings({
       await newTask.save();
 
       // Link task to column
-      const selectedColumn = columns.find((col) => col.columnName === taskColumn);
-      await perspective.addLinks([
-        { source: selectedColumn?.baseExpression, predicate: 'ad4m://has_child', target: newTask.baseExpression },
-      ]);
+      await linkTaskToColumn(newTask, taskColumn);
     }
 
     setSaving(false);
@@ -203,10 +213,12 @@ export default function TaskSettings({
         </j-flex>
       </j-box>
 
-      <div className={styles.commentSection}>
-        {/* @ts-ignore */}
-        <comment-section perspective={perspective} source={task.baseExpression} agent={agent} />
-      </div>
+      {task && (
+        <div className={styles.commentSection}>
+          {/* @ts-ignore */}
+          <comment-section perspective={perspective} source={task.baseExpression} agent={agent} />
+        </div>
+      )}
     </j-modal>
   );
 }

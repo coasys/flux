@@ -21,8 +21,9 @@
     flex-direction: column;
     height: calc(100% - 80px);
     gap: var(--j-space-300);
-    overflow-y: auto;
     border-radius: var(--j-border-radius);
+    overflow-y: auto;
+    overflow-x: hidden;
 
     &.isDraggingOver {
       background-color: var(--j-color-primary-100);
