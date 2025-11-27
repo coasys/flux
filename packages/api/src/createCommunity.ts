@@ -13,6 +13,8 @@ import Embedding from './embedding';
 import Message from './message';
 import SemanticRelationship from './semantic-relationship';
 import Topic from './topic';
+import TaskColumn from './task-column';
+import Task from './task';
 
 export interface Payload {
   linkLangAddress?: string;
@@ -50,6 +52,8 @@ export default async function createCommunity({
       perspective.ensureSDNASubjectClass(Embedding),
       perspective.ensureSDNASubjectClass(SemanticRelationship),
       perspective.ensureSDNASubjectClass(Message),
+      perspective.ensureSDNASubjectClass(TaskColumn),
+      perspective.ensureSDNASubjectClass(Task),
     ]);
 
     // Create a neighbourhood from the perspective
