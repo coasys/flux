@@ -243,17 +243,13 @@ export default class Conversation extends Ad4mModel {
       return await Promise.all(
         (surrealResult || []).map(async (subgroup: any) => {
           // Query to get timestamps for items in this subgroup
+          // Using graph traversal from subgroup children that are also channel children
           const timestampQuery = `
             SELECT VALUE timestamp
             FROM link
-            WHERE out.uri IN (
-              SELECT VALUE out.uri
-              FROM link
-              WHERE in.uri = '${subgroup.baseExpression}'
-                AND predicate = 'ad4m://has_child'
-            )
-            AND predicate = 'ad4m://has_child'
-            AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_channel'
+            WHERE in.uri = '${subgroup.baseExpression}'
+              AND predicate = 'ad4m://has_child'
+              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_channel'][0] IS NOT NONE
             ORDER BY timestamp ASC
           `;
 
