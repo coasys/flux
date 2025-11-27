@@ -231,7 +231,6 @@ onMounted(async () => {
   // Fetch apps from npm, use local apps if request fails
   try {
     const res = await getAllFluxApps();
-    console.log('res', res);
     isLoading.value = false;
 
     const allApps = [
@@ -247,8 +246,6 @@ onMounted(async () => {
         version: '0.10.1',
       },
     ];
-
-    console.log('allApps', allApps);
 
     const filtered = allApps.filter((pkg) => {
       try {
