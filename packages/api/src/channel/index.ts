@@ -51,6 +51,50 @@ export class Channel extends Ad4mModel {
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
     try {
+      // const prologQuery = `
+      //   findall([ItemId, Author, Timestamp, Type, Text], (
+      //     % 1. Get channel item
+      //     triple("${this.baseExpression}", "ad4m://has_child", ItemId),
+      //
+      //     % 2. Ensure item is not yet connected to a subgroup (i.e unprocessed)
+      //     findall(SubgroupItem, (
+      //       subject_class("ConversationSubgroup", CS),
+      //       instance(CS, Subgroup),
+      //       triple(Subgroup, "ad4m://has_child", SubgroupItem)
+      //     ), SubgroupItems),
+      //     findall(X, (member(ItemId, SubgroupItems)), []),
+      //
+      //     % 3. Get timestamp and author
+      //     findall(
+      //       [Timestamp, Author],
+      //       link(_, "ad4m://has_child", ItemId, Timestamp, Author),
+      //       AllData
+      //     ),
+      //     sort(AllData, SortedData),
+      //     SortedData = [[Timestamp, Author]|_],
+      //
+      //     % 4. Check item type and get text
+      //     (
+      //       Type = "Message",
+      //       subject_class("Message", MessageClass),
+      //       instance(MessageClass, ItemId),
+      //       property_getter(MessageClass, ItemId, "body", Text)
+      //       ;
+      //       Type = "Post",
+      //       subject_class("Post", PostClass),
+      //       instance(PostClass, ItemId),
+      //       property_getter(PostClass, ItemId, "title", Text)
+      //       ;
+      //       Type = "Task",
+      //       subject_class("Task", TaskClass),
+      //       instance(TaskClass, ItemId),
+      //       property_getter(TaskClass, ItemId, "name", Text)
+      //     )
+      //   ), Items),
+      //   % 5. Remove duplicates
+      //   sort(Items, UniqueItems).
+      // `;
+
       const surrealQuery = `
         SELECT
           out.uri AS baseExpression,
@@ -111,6 +155,30 @@ export class Channel extends Ad4mModel {
   async totalItemCount(): Promise<number> {
     // Find the total number of items in the channel
     try {
+      // const prologQuery = `
+      //   findall(Count, (
+      //     findall(Item, (
+      //       % 1. Get items linked to channel
+      //       triple("${this.baseExpression}", "ad4m://has_child", Item),
+      //
+      //       % 2. Check item is of valid type
+      //       (
+      //         subject_class("Message", MC),
+      //         instance(MC, Item)
+      //         ;
+      //         subject_class("Post", PC),
+      //         instance(PC, Item)
+      //         ;
+      //         subject_class("Task", TC),
+      //         instance(TC, Item)
+      //       )
+      //     ), Items),
+      //
+      //     % 3. Get length of valid items
+      //     length(Items, Count)
+      //   ), [TotalCount]).
+      // `;
+
       const surrealQuery = `
         SELECT count() AS count
         FROM link
@@ -134,6 +202,30 @@ export class Channel extends Ad4mModel {
   async allAuthors(): Promise<string[]> {
     // Find the did of everyone who has created an item in the channel
     try {
+      // const prologQuery = `
+      //   findall(Author, (
+      //     % 1. Get channel item
+      //     triple("${this.baseExpression}", "ad4m://has_child", ItemId),
+      //
+      //     % 2. Get author from link
+      //     link(_, "ad4m://has_child", ItemId, _, Author),
+      //
+      //     % 3. Check item is of valid type
+      //     (
+      //       subject_class("Message", MessageClass),
+      //       instance(MessageClass, ItemId)
+      //       ;
+      //       subject_class("Post", PostClass),
+      //       instance(PostClass, ItemId)
+      //       ;
+      //       subject_class("Task", TaskClass),
+      //       instance(TaskClass, ItemId)
+      //     )
+      //   ), AuthorsWithDuplicates),
+      //   % 4. Remove duplicates
+      //   sort(AuthorsWithDuplicates, UniqueAuthors).
+      // `;
+
       const surrealQuery = `
         SELECT VALUE author
         FROM link
