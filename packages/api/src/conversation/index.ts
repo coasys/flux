@@ -62,13 +62,16 @@ export default class Conversation extends Ad4mModel {
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
 
-      // Get unique participants
+      // Get unique participants - get authors from items in subgroups
+      // We need to traverse: Conversation -> Subgroups -> Items -> get authors
       const participantsQuery = `
         SELECT VALUE author
         FROM link
-        WHERE in->link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.baseExpression}'][0] IS NOT NONE
+        WHERE in.uri = '${this.baseExpression}'
           AND predicate = 'ad4m://has_child'
-          AND author IS NOT NONE
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+          AND out->link[WHERE predicate = 'ad4m://has_child'].author IS NOT NONE
+        GROUP BY author
       `;
 
       const [countResult, participantsResult] = await Promise.all([
