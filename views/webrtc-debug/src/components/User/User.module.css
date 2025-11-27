@@ -42,7 +42,6 @@
   transform: translateX(-50%);
 }
 
-.wrapper[data-drawing="true"] .pencil {
+.wrapper[data-drawing='true'] .pencil {
   display: block;
 }
-

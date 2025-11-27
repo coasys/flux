@@ -1,9 +1,5 @@
-import {
-  LinkExpression,
-  LinkQuery,
-  PerspectiveProxy,
-} from "@coasys/ad4m";
-import { useState, useEffect } from "preact/hooks";
+import { LinkExpression, LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { useState, useEffect } from 'preact/hooks';
 
 export function useAssociations({
   source,
@@ -26,9 +22,7 @@ export function useAssociations({
   }
 
   async function remove(target: string) {
-    const links = await perspective.get(
-      new LinkQuery({ source, predicate, target })
-    );
+    const links = await perspective.get(new LinkQuery({ source, predicate, target }));
     perspective.removeLinks(links);
   }
 
@@ -53,12 +47,12 @@ export function useAssociations({
   useEffect(() => {
     fetchLinks();
 
-    perspective.addListener("link-added", handleLinkAdded);
-    perspective.addListener("link-removed", handleLinkRemoved);
+    perspective.addListener('link-added', handleLinkAdded);
+    perspective.addListener('link-removed', handleLinkRemoved);
 
     return () => {
-      perspective.removeListener("link-removed", handleLinkRemoved);
-      perspective.removeListener("link-added", handleLinkAdded);
+      perspective.removeListener('link-removed', handleLinkRemoved);
+      perspective.removeListener('link-added', handleLinkAdded);
     };
   }, [perspective.uuid, source]);
 

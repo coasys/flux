@@ -1,17 +1,17 @@
-import { LitElement, html, css } from "lit";
-import sharedStyles from "../../shared/styles";
+import { LitElement, html, css } from 'lit';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
     --j-checkbox-size: var(--j-size-md);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-checkbox-size: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-checkbox-size: var(--j-size-lg);
   }
-  :host([disabled]) [part="base"] {
+  :host([disabled]) [part='base'] {
     opacity: 0.5;
     cursor: default;
   }
@@ -21,19 +21,17 @@ const styles = css`
     clip: rect(1px, 1px, 1px, 1px);
     vertical-align: middle;
   }
-  [part="base"] {
+  [part='base'] {
     cursor: pointer;
     display: flex;
     height: var(--j-checkbox-size);
     align-items: center;
     gap: var(--j-space-400);
   }
-  :host(:not([disabled]):not([checked]))
-    [part="base"]:hover
-    [part="indicator"] {
+  :host(:not([disabled]):not([checked])) [part='base']:hover [part='indicator'] {
     border-color: var(--j-color-ui-300);
   }
-  [part="indicator"] {
+  [part='indicator'] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -43,13 +41,13 @@ const styles = css`
     border-radius: var(--j-border-radius);
     color: var(--j-color-white);
   }
-  [part="checkmark"] {
+  [part='checkmark'] {
     display: none;
   }
-  :host([checked]) [part="checkmark"] {
+  :host([checked]) [part='checkmark'] {
     display: contents;
   }
-  :host([checked]) [part="indicator"] {
+  :host([checked]) [part='indicator'] {
     border-color: var(--j-color-primary-500);
     background: var(--j-color-primary-500);
   }
@@ -108,7 +106,7 @@ class Checkbox extends LitElement {
   _handleChange(e) {
     e.stopPropagation();
     this.checked = e.target.checked;
-    this.dispatchEvent(new CustomEvent("change", e));
+    this.dispatchEvent(new CustomEvent('change', e));
   }
 
   render() {
@@ -132,6 +130,6 @@ class Checkbox extends LitElement {
   }
 }
 
-customElements.define("j-checkbox", Checkbox);
+customElements.define('j-checkbox', Checkbox);
 
 export default Checkbox;

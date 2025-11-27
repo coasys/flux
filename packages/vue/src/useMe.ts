@@ -1,9 +1,9 @@
-import { computed, ref, watch } from "vue";
-import { Agent, AgentStatus } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { mapLiteralLinks } from "@coasys/flux-utils";
-import { profile } from "@coasys/flux-constants";
-import { Profile } from "@coasys/flux-types";
+import { computed, ref, watch } from 'vue';
+import { Agent, AgentStatus } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { mapLiteralLinks } from '@coasys/flux-utils';
+import { profile } from '@coasys/flux-constants';
+import { Profile } from '@coasys/flux-types';
 
 const {
   FLUX_PROFILE,
@@ -40,7 +40,7 @@ export function useMe(client: AgentClient) {
         });
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   const profile = computed<Profile | null>(() => {
@@ -57,7 +57,7 @@ export function useMe(client: AgentClient) {
           profilePicture: HAS_PROFILE_IMAGE,
           profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
           profileBackground: HAS_BG_IMAGE,
-        }
+        },
       ) as Profile;
     } else {
       return null;

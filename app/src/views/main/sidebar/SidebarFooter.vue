@@ -20,12 +20,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Profile } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useAppStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Profile } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -39,7 +39,7 @@ function logOut(): void {
 }
 
 function goToSettings(): void {
-  router.push({ name: "settings" });
+  router.push({ name: 'settings' });
   showBottomOptions.value = false;
 }
 

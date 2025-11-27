@@ -47,9 +47,8 @@ First let's have a look at the markup we need to create our grid of cards:
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
+        standard dummy text ever since the 1500s.
       </j-text>
       <j-button variant="primary">Read more</j-button>
     </j-box>
@@ -60,9 +59,8 @@ First let's have a look at the markup we need to create our grid of cards:
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
+        standard dummy text ever since the 1500s.
       </j-text>
       <j-button variant="primary">Read more</j-button>
     </j-box>
@@ -73,9 +71,8 @@ First let's have a look at the markup we need to create our grid of cards:
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
+        standard dummy text ever since the 1500s.
       </j-text>
       <j-button variant="primary">Read more</j-button>
     </j-box>

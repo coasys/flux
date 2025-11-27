@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { Me } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
-import characters from "../../sprites/characters";
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { Profile } from '@coasys/flux-types';
+import { getProfile } from '@coasys/flux-api';
+import { Me } from '@coasys/flux-api';
+import { WebRTC } from '@coasys/flux-react-web';
+import characters from '../../sprites/characters';
 
-import User from "../User";
+import User from '../User';
 
-import styles from "./JoinScreen.module.css";
+import styles from './JoinScreen.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -15,11 +15,7 @@ type Props = {
   onToggleSettings: () => void;
 };
 
-export default function JoinScreen({
-  webRTC,
-  currentUser,
-  onToggleSettings,
-}: Props) {
+export default function JoinScreen({ webRTC, currentUser, onToggleSettings }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
   const [selectedSpriteIndex, setSelectedSpriteIndex] = useState(0);
@@ -31,9 +27,7 @@ export default function JoinScreen({
 
   const onPrevSprite = () => {
     const isFirst = selectedSpriteIndex === 0;
-    setSelectedSpriteIndex(
-      isFirst ? characters.frames.length - 1 : selectedSpriteIndex - 1
-    );
+    setSelectedSpriteIndex(isFirst ? characters.frames.length - 1 : selectedSpriteIndex - 1);
   };
 
   // Get user details
@@ -62,31 +56,14 @@ export default function JoinScreen({
       <j-box pt="200">
         <div className={styles.editor}>
           <div className={styles.button}>
-            <j-button
-              variant="transparent"
-              square
-              circle
-              size="lg"
-              onClick={onPrevSprite}
-            >
+            <j-button variant="transparent" square circle size="lg" onClick={onPrevSprite}>
               <j-icon name="arrow-left"></j-icon>
             </j-button>
           </div>
 
-          <User
-            webRTC={webRTC}
-            userId={currentUser?.did}
-            spriteIndex={selectedSpriteIndex}
-            isLocalUser
-          />
+          <User webRTC={webRTC} userId={currentUser?.did} spriteIndex={selectedSpriteIndex} isLocalUser />
           <div className={styles.button}>
-            <j-button
-              variant="transparent"
-              square
-              circle
-              size="lg"
-              onClick={onNextSprite}
-            >
+            <j-button variant="transparent" square circle size="lg" onClick={onNextSprite}>
               <j-icon name="arrow-right"></j-icon>
             </j-button>
           </div>
@@ -97,9 +74,7 @@ export default function JoinScreen({
         <j-toggle
           checked={webRTC.localState.settings.video}
           disabled={webRTC.isLoading || !webRTC.audioPermissionGranted}
-          onChange={() =>
-            webRTC.onToggleCamera(!webRTC.localState.settings.video)
-          }
+          onChange={() => webRTC.onToggleCamera(!webRTC.localState.settings.video)}
         >
           Join with camera!
         </j-toggle>
@@ -135,9 +110,7 @@ export default function JoinScreen({
       <>
         {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
-            <j-text variant="warning">
-              Please allow camera/microphone access to join.
-            </j-text>
+            <j-text variant="warning">Please allow camera/microphone access to join.</j-text>
           </j-box>
         )}
       </>

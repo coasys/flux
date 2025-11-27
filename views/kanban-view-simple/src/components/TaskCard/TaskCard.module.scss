@@ -1,0 +1,10 @@
+.wrapper {
+  .task {
+    display: flex;
+    flex-direction: column;
+    padding: var(--j-space-400);
+    gap: var(--j-space-400);
+    border-radius: var(--j-border-radius);
+    background-color: var(--j-color-ui-200);
+  }
+}

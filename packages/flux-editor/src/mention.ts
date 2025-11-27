@@ -1,37 +1,34 @@
-import { mergeAttributes, Node } from "@tiptap/core";
-import { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import { PluginKey } from "@tiptap/pm/state";
-import Suggestion, { SuggestionOptions } from "@tiptap/suggestion";
+import { mergeAttributes, Node } from '@tiptap/core';
+import { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { PluginKey } from '@tiptap/pm/state';
+import Suggestion, { SuggestionOptions } from '@tiptap/suggestion';
 
 export type MentionOptions = {
   HTMLAttributes: Record<string, any>;
-  renderLabel: (props: {
-    options: MentionOptions;
-    node: ProseMirrorNode;
-  }) => string;
-  suggestion: Omit<SuggestionOptions, "editor">;
+  renderLabel: (props: { options: MentionOptions; node: ProseMirrorNode }) => string;
+  suggestion: Omit<SuggestionOptions, 'editor'>;
 };
 
-export const MentionPluginKey = new PluginKey("mention");
+export const MentionPluginKey = new PluginKey('mention');
 
 export default Node.create<MentionOptions>({
-  name: "mention",
+  name: 'mention',
 
   addOptions() {
     return {
       HTMLAttributes: {},
       renderLabel({ node }) {
-        const isMention = node.attrs.id.startsWith("did:");
-        return `${isMention ? "@" : "#"}${node.attrs.label ?? node.attrs.id}`;
+        const isMention = node.attrs.id.startsWith('did:');
+        return `${isMention ? '@' : '#'}${node.attrs.label ?? node.attrs.id}`;
       },
       suggestion: {
-        char: "@",
+        char: '@',
         pluginKey: MentionPluginKey,
         command: ({ editor, range, props }) => {
           // increase range.to by one when the next node is of type "text"
           // and starts with a space character
           const nodeAfter = editor.view.state.selection.$to.nodeAfter;
-          const overrideSpace = nodeAfter?.text?.startsWith(" ");
+          const overrideSpace = nodeAfter?.text?.startsWith(' ');
 
           if (overrideSpace) {
             range.to += 1;
@@ -46,8 +43,8 @@ export default Node.create<MentionOptions>({
                 attrs: props,
               },
               {
-                type: "text",
-                text: " ",
+                type: 'text',
+                text: ' ',
               },
             ])
             .run();
@@ -64,7 +61,7 @@ export default Node.create<MentionOptions>({
       },
     };
   },
-  group: "inline",
+  group: 'inline',
   inline: true,
   selectable: false,
   atom: true,
@@ -73,7 +70,7 @@ export default Node.create<MentionOptions>({
     return {
       id: {
         default: null,
-        parseHTML: (element) => element.getAttribute("href"),
+        parseHTML: (element) => element.getAttribute('href'),
         renderHTML: (attributes) => {
           if (!attributes.id) {
             return {};
@@ -87,14 +84,14 @@ export default Node.create<MentionOptions>({
 
       label: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-label"),
+        parseHTML: (element) => element.getAttribute('data-label'),
         renderHTML: (attributes) => {
           if (!attributes.label) {
             return {};
           }
 
           return {
-            "data-label": attributes.label,
+            'data-label': attributes.label,
           };
         },
       },
@@ -111,12 +108,8 @@ export default Node.create<MentionOptions>({
 
   renderHTML({ node, HTMLAttributes }) {
     return [
-      "a",
-      mergeAttributes(
-        { "data-type": this.name },
-        this.options.HTMLAttributes,
-        HTMLAttributes
-      ),
+      'a',
+      mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
       this.options.renderLabel({
         options: this.options,
         node,
@@ -146,11 +139,7 @@ export default Node.create<MentionOptions>({
           state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
             if (node.type.name === this.name) {
               isMention = true;
-              tr.insertText(
-                this.options.suggestion.char || "",
-                pos,
-                pos + node.nodeSize
-              );
+              tr.insertText(this.options.suggestion.char || '', pos, pos + node.nodeSize);
 
               return false;
             }

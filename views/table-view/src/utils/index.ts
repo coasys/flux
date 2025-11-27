@@ -1,8 +1,8 @@
-import { useRef, useEffect } from "preact/hooks";
+import { useRef, useEffect } from 'preact/hooks';
 
 export async function getEntry(entry) {
   const getters = Object.entries(Object.getOwnPropertyDescriptors(entry))
-    .filter(([key, descriptor]) => typeof descriptor.get === "function")
+    .filter(([key, descriptor]) => typeof descriptor.get === 'function')
     .map(([key]) => key);
 
   const promises = getters.map((getter) => entry[getter]);
@@ -47,21 +47,21 @@ export function isValidDate(string) {
 export function pluralize(word: string): string {
   const lastChar = word[word.length - 1];
   const secondLastChar = word[word.length - 2];
-  if (lastChar === "y" && !isVowel(secondLastChar)) {
-    return word.slice(0, -1) + "ies";
+  if (lastChar === 'y' && !isVowel(secondLastChar)) {
+    return word.slice(0, -1) + 'ies';
   } else if (
-    lastChar === "s" ||
-    lastChar === "x" ||
-    lastChar === "z" ||
-    (secondLastChar === "c" && lastChar === "h") ||
-    (secondLastChar === "s" && lastChar === "h")
+    lastChar === 's' ||
+    lastChar === 'x' ||
+    lastChar === 'z' ||
+    (secondLastChar === 'c' && lastChar === 'h') ||
+    (secondLastChar === 's' && lastChar === 'h')
   ) {
-    return word + "es";
+    return word + 'es';
   } else {
-    return word + "s";
+    return word + 's';
   }
 }
 
 export function isVowel(char: string): boolean {
-  return ["a", "e", "i", "o", "u"].includes(char.toLowerCase());
+  return ['a', 'e', 'i', 'o', 'u'].includes(char.toLowerCase());
 }

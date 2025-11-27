@@ -21,20 +21,20 @@
 </template>
 
 <script setup lang="ts">
-import { useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
-import DebugItem from "./DebugItem.vue";
+import { useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import DebugItem from './DebugItem.vue';
 
 const webrtcStore = useWebrtcStore();
 const { inCall, agentsInCall, peerConnections } = storeToRefs(webrtcStore);
 
 const peers = computed(() =>
   Array.from(peerConnections.value.values()).map((peer) => {
-    console.log("peer", peer);
+    console.log('peer', peer);
     const agentState = agentsInCall.value.find((agent) => agent.did === peer.did);
     return { ...peer, agentState };
-  })
+  }),
 );
 </script>
 

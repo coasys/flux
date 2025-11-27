@@ -1,14 +1,14 @@
-import { LitElement, html, css } from "lit";
-import sharedStyles from "../../shared/styles";
+import { LitElement, html, css } from 'lit';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
     --j-toggle-size: var(--j-size-md);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-toggle-size: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-toggle-size: var(--j-size-lg);
   }
   input {
@@ -17,21 +17,21 @@ const styles = css`
     clip: rect(1px, 1px, 1px, 1px);
     vertical-align: middle;
   }
-  [part="base"] {
+  [part='base'] {
     cursor: pointer;
     display: flex;
     height: var(--j-toggle-size);
     align-items: center;
     gap: var(--j-space-400);
   }
-  :host([disabled]) [part="base"] {
+  :host([disabled]) [part='base'] {
     opacity: 0.5;
     cursor: default;
   }
-  :host(:not([disabled]):not([checked])) [part="base"]:hover [part="toggle"] {
+  :host(:not([disabled]):not([checked])) [part='base']:hover [part='toggle'] {
     background: var(--j-color-ui-300);
   }
-  [part="toggle"] {
+  [part='toggle'] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -43,10 +43,10 @@ const styles = css`
     position: relative;
     border-radius: 300px;
   }
-  :host([checked]) [part="toggle"] {
+  :host([checked]) [part='toggle'] {
     background: var(--j-color-primary-500);
   }
-  [part="indicator"] {
+  [part='indicator'] {
     position: absolute;
     transition: all 0.2s ease;
     top: 50%;
@@ -58,7 +58,7 @@ const styles = css`
     width: calc(var(--j-toggle-size) * 0.4);
     height: calc(var(--j-toggle-size) * 0.4);
   }
-  :host([checked]) [part="indicator"] {
+  :host([checked]) [part='indicator'] {
     left: calc(100% - 5px);
     transform: translateY(-50%) translateX(-100%);
   }
@@ -117,7 +117,7 @@ class Toggle extends LitElement {
   _handleChange(e) {
     e.stopPropagation();
     this.checked = e.target.checked;
-    this.dispatchEvent(new CustomEvent("change"));
+    this.dispatchEvent(new CustomEvent('change'));
   }
 
   render() {
@@ -139,6 +139,6 @@ class Toggle extends LitElement {
   }
 }
 
-customElements.define("j-toggle", Toggle);
+customElements.define('j-toggle', Toggle);
 
 export default Toggle;

@@ -1,6 +1,6 @@
-import { useState } from "preact/hooks";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import styles from "./NewClass.module.css";
+import { useState } from 'preact/hooks';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import styles from './NewClass.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -22,17 +22,17 @@ type Column = {
 };
 
 export default function NewClass({ perspective, onSaved }: Props) {
-  const [name, setName] = useState("");
-  const [optionName, setOptionName] = useState("");
-  const [optionValue, setOptionValue] = useState("");
+  const [name, setName] = useState('');
+  const [optionName, setOptionName] = useState('');
+  const [optionValue, setOptionValue] = useState('');
 
   const [columns, setColumns] = useState<Record<string, Column>>({
     dj4523ljd: {
-      name: "title",
-      defaultValue: "Title",
+      name: 'title',
+      defaultValue: 'Title',
       options: [],
-      language: "literal",
-      predicate: "rdf://title",
+      language: 'literal',
+      predicate: 'rdf://title',
       required: true,
     },
   });
@@ -58,15 +58,12 @@ export default function NewClass({ perspective, onSaved }: Props) {
       ...columns,
       [id]: {
         ...columns[id],
-        options: [
-          ...columns[id].options,
-          { name: optionName, value: optionValue },
-        ],
+        options: [...columns[id].options, { name: optionName, value: optionValue }],
       },
     });
 
-    setOptionName("");
-    setOptionValue("");
+    setOptionName('');
+    setOptionValue('');
   }
 
   function removeOption(id, index) {
@@ -84,9 +81,7 @@ export default function NewClass({ perspective, onSaved }: Props) {
       ...columns,
       [id]: {
         ...columns[id],
-        options: columns[id].options.map((o, i) =>
-          i === index ? { name: value, value } : o
-        ),
+        options: columns[id].options.map((o, i) => (i === index ? { name: value, value } : o)),
       },
     });
   }
@@ -96,10 +91,10 @@ export default function NewClass({ perspective, onSaved }: Props) {
     setColumns({
       ...columns,
       [id]: {
-        name: "",
-        defaultValue: "",
-        language: "literal",
-        predicate: "",
+        name: '',
+        defaultValue: '',
+        language: 'literal',
+        predicate: '',
         required: false,
         options: [],
       },
@@ -118,11 +113,7 @@ export default function NewClass({ perspective, onSaved }: Props) {
         </j-text>
       </j-box>
 
-      <j-input
-        size="xl"
-        value={name}
-        onchange={(e) => setName(e.target.value)}
-      ></j-input>
+      <j-input size="xl" value={name} onchange={(e) => setName(e.target.value)}></j-input>
 
       <j-box pt="800" pb="300">
         <j-text size="600" weight="500">
@@ -138,7 +129,7 @@ export default function NewClass({ perspective, onSaved }: Props) {
                 <j-flex j="between" a="center">
                   <j-flex gap="400">
                     <j-text size="500" weight="600" nomargin>
-                      {column.name || "empty"}
+                      {column.name || 'empty'}
                     </j-text>
                     {column.required && <j-badge size="sm">Required</j-badge>}
                   </j-flex>
@@ -153,25 +144,21 @@ export default function NewClass({ perspective, onSaved }: Props) {
                     label="Name"
                     size="lg"
                     value={column.name}
-                    onInput={(e) => updateColumn(id, "name", e.target.value)}
+                    onInput={(e) => updateColumn(id, 'name', e.target.value)}
                     className={styles.input}
                   ></j-input>
                   <j-input
                     size="lg"
                     label="Predicate"
                     value={column.predicate}
-                    onChange={(e) =>
-                      updateColumn(id, "predicate", e.target.value)
-                    }
+                    onChange={(e) => updateColumn(id, 'predicate', e.target.value)}
                     className={styles.input}
                   ></j-input>
                   <j-input
                     size="lg"
                     label="Language"
                     value={column.language}
-                    onChange={(e) =>
-                      updateColumn(id, "language", e.target.value)
-                    }
+                    onChange={(e) => updateColumn(id, 'language', e.target.value)}
                     className={styles.input}
                   ></j-input>
 
@@ -181,19 +168,10 @@ export default function NewClass({ perspective, onSaved }: Props) {
                     </j-text>
                     {column.options.map((option, index) => (
                       <j-flex gap="200">
-                        <j-input
-                          full
-                          autofocus
-                          onchange={(e) =>
-                            updateOption(id, index, e.target.value)
-                          }
-                        >
+                        <j-input full autofocus onchange={(e) => updateOption(id, index, e.target.value)}>
                           {option.name}
                         </j-input>
-                        <j-button
-                          variant="ghost"
-                          onclick={() => removeOption(id, index)}
-                        >
+                        <j-button variant="ghost" onclick={() => removeOption(id, index)}>
                           <j-icon name="x"></j-icon>
                         </j-button>
                       </j-flex>
@@ -209,18 +187,11 @@ export default function NewClass({ perspective, onSaved }: Props) {
                     size="lg"
                     label="Default value"
                     value={column.defaultValue}
-                    onChange={(e) =>
-                      updateColumn(id, "defaultValue", e.target.value)
-                    }
+                    onChange={(e) => updateColumn(id, 'defaultValue', e.target.value)}
                     className={styles.input}
                   ></j-input>
 
-                  <j-toggle
-                    checked={column.required}
-                    onChange={(e) =>
-                      updateColumn(id, "required", e.target.checked)
-                    }
-                  >
+                  <j-toggle checked={column.required} onChange={(e) => updateColumn(id, 'required', e.target.checked)}>
                     Required
                   </j-toggle>
                 </j-flex>
@@ -256,26 +227,17 @@ export default function NewClass({ perspective, onSaved }: Props) {
 async function generateSDNA(
   name: string,
   columns: Record<string, Column>,
-  perspective: PerspectiveProxy
+  perspective: PerspectiveProxy,
 ): Promise<string> {
   const atom = makeRandomPrologAtom(6);
-  let constructorActions = "";
-  let instancePredicates = "";
-  let propertiesString = "";
+  let constructorActions = '';
+  let instancePredicates = '';
+  let propertiesString = '';
 
   for await (const column of Object.values(columns)) {
-    const {
-      name: columnName,
-      required,
-      predicate,
-      defaultValue,
-      language,
-    } = column;
+    const { name: columnName, required, predicate, defaultValue, language } = column;
 
-    const expression = await perspective.createExpression(
-      defaultValue,
-      language
-    );
+    const expression = await perspective.createExpression(defaultValue, language);
 
     if (defaultValue) {
       constructorActions += `{action: "addLink", source: "this", predicate: "${predicate}", target: "${expression}"},`;
@@ -293,7 +255,7 @@ async function generateSDNA(
     }
     */
 
-    let namedOptionsString = "";
+    let namedOptionsString = '';
 
     for (const option of column.options) {
       namedOptionsString += `property_named_option(${atom}, "${columnName}", "${option.value}", "${option.name}").\n`;
@@ -310,10 +272,10 @@ async function generateSDNA(
   }
 
   // Replace the last comma with a space to format the Prolog string properly
-  constructorActions = constructorActions.replace(/,*$/, "");
-  instancePredicates = instancePredicates.replace(/,*$/, "");
+  constructorActions = constructorActions.replace(/,*$/, '');
+  instancePredicates = instancePredicates.replace(/,*$/, '');
   // Replace the or operator (;)
-  instancePredicates = instancePredicates.replace(/;*$/, "");
+  instancePredicates = instancePredicates.replace(/;*$/, '');
 
   const prologString = `
     subject_class("${name}", ${atom}).
@@ -326,8 +288,8 @@ async function generateSDNA(
 }
 
 export function makeRandomPrologAtom(length: number): string {
-  let result = "";
-  let characters = "abcdefghijklmnopqrstuvwxyz";
+  let result = '';
+  let characters = 'abcdefghijklmnopqrstuvwxyz';
   let charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));

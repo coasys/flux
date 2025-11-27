@@ -1,7 +1,7 @@
-import SimplePeerInstance from "simple-peer/simplepeer.min.js";
-import type { SimplePeer, Options, Instance } from "simple-peer";
+import SimplePeerInstance from 'simple-peer/simplepeer.min.js';
+import type { SimplePeer, Options, Instance } from 'simple-peer';
 
-import { Literal, NeighbourhoodProxy } from "@coasys/ad4m";
+import { Literal, NeighbourhoodProxy } from '@coasys/ad4m';
 
 export interface AD4MPeerInstance extends Instance {}
 
@@ -33,7 +33,7 @@ export class AD4MPeer {
   }
 
   public connect() {
-    console.log("creating peer");
+    console.log('creating peer');
     this.peer = this.createPeer();
 
     return this.peer;
@@ -43,14 +43,14 @@ export class AD4MPeer {
     if (this.peer) {
       // Remove all tracks from the peer connection
       if (this.peer.streams) {
-        this.peer.streams.forEach(stream => {
-          stream.getTracks().forEach(track => {
+        this.peer.streams.forEach((stream) => {
+          stream.getTracks().forEach((track) => {
             track.stop();
             stream.removeTrack(track);
           });
         });
       }
-      
+
       // Clean up the peer connection
       this.peer.destroy();
       // @ts-ignore
@@ -67,7 +67,7 @@ export class AD4MPeer {
     }) as Instance;
 
     // Local peerjs instance has data it wants to send to remote peer
-    peer.on("signal", (signal) => {
+    peer.on('signal', (signal) => {
       const data = {
         signalData: signal,
         targetPeer: this.did,
@@ -77,7 +77,7 @@ export class AD4MPeer {
         links: [
           {
             source: this.source,
-            predicate: "peer-signal",
+            predicate: 'peer-signal',
             target: Literal.from(data).toUrl(),
           },
         ],
@@ -85,16 +85,16 @@ export class AD4MPeer {
     });
 
     const cleanup = () => {
-      console.log("cleanup");
+      console.log('cleanup');
     };
 
-    peer.on("error", (err) => {
+    peer.on('error', (err) => {
       cleanup();
     });
 
-    peer.on("close", cleanup);
+    peer.on('close', cleanup);
 
-    peer.on("connect", () => {
+    peer.on('connect', () => {
       cleanup();
     });
 

@@ -40,21 +40,21 @@
 </template>
 
 <script setup lang="ts">
-import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/stores";
-import { Community } from "@coasys/flux-api";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
-import { ref, watch } from "vue";
+import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useModalStore } from '@/stores';
+import { Community } from '@coasys/flux-api';
+import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
+import { ref, watch } from 'vue';
 
 const modalStore = useModalStore();
 
 const { perspective, community } = useCommunityService();
 
 const isUpdatingCommunity = ref(false);
-const communityName = ref("");
-const communityDescription = ref("");
-const communityImage = ref("");
+const communityName = ref('');
+const communityDescription = ref('');
+const communityImage = ref('');
 
 async function updateCommunity() {
   try {
@@ -74,8 +74,8 @@ async function updateCommunity() {
     communityModel.image = compressedImage
       ? {
           data_base64: compressedImage,
-          name: "form-image",
-          file_type: "image/png",
+          name: 'form-image',
+          file_type: 'image/png',
         }
       : undefined;
 
@@ -92,12 +92,12 @@ watch(
   community,
   async (newCommunity) => {
     if (newCommunity) {
-      communityName.value = newCommunity.name || "";
-      communityDescription.value = newCommunity.description || "";
+      communityName.value = newCommunity.name || '';
+      communityDescription.value = newCommunity.description || '';
       // @ts-ignore
-      communityImage.value = newCommunity.image || "";
+      communityImage.value = newCommunity.image || '';
     }
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 </script>

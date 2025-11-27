@@ -1,16 +1,16 @@
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { useWebRTC } from "@coasys/flux-react-web";
-import useKeyEvent from "../../hooks/useKeyEvent";
-import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-import { getMe, Me } from "@coasys/flux-api";
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
+import { useWebRTC } from '@coasys/flux-react-web';
+import useKeyEvent from '../../hooks/useKeyEvent';
+import useIntersectionObserver from '../../hooks/useIntersectionObserver';
+import { getMe, Me } from '@coasys/flux-api';
 
-import UserGrid from "../UserGrid";
-import UiContext from "../../context/UiContext";
-import JoinScreen from "../JoinScreen";
-import Overlay from "../Overlay/Overlay";
-import Debug from "../Debug";
+import UserGrid from '../UserGrid';
+import UiContext from '../../context/UiContext';
+import JoinScreen from '../JoinScreen';
+import Overlay from '../Overlay/Overlay';
+import Debug from '../Debug';
 
-import styles from "./Channel.module.css";
+import styles from './Channel.module.css';
 
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
@@ -30,7 +30,7 @@ export default function Channel({ source, uuid }) {
     uuid,
   });
 
-  useKeyEvent("KeyD", () => {
+  useKeyEvent('KeyD', () => {
     toggleShowDebug(!showDebug);
   });
 
@@ -49,11 +49,7 @@ export default function Channel({ source, uuid }) {
   return (
     <section className={styles.outer} ref={wrapperEl}>
       {!webRTC.hasJoined && (
-        <JoinScreen
-          webRTC={webRTC}
-          currentUser={agent}
-          onToggleSettings={() => toggleShowSettings(!showSettings)}
-        />
+        <JoinScreen webRTC={webRTC} currentUser={agent} onToggleSettings={() => toggleShowSettings(!showSettings)} />
       )}
 
       {webRTC.hasJoined && (

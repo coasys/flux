@@ -1,12 +1,12 @@
-import { useMemo, useRef, useState } from "preact/hooks";
-import { createContext } from "preact";
-import { Howl } from "howler";
-import joinMp3 from "../assets/join.mp3";
-import leaveMp3 from "../assets/leave.mp3";
+import { useMemo, useRef, useState } from 'preact/hooks';
+import { createContext } from 'preact';
+import { Howl } from 'howler';
+import joinMp3 from '../assets/join.mp3';
+import leaveMp3 from '../assets/leave.mp3';
 
 export type Notification = {
   id: string;
-  type: "connect" | "join" | "leave";
+  type: 'connect' | 'join' | 'leave';
   userId: string;
 };
 
@@ -65,16 +65,16 @@ export function UiProvider({ children }: any) {
         return;
       }
 
-      if (notification.type === "join") {
+      if (notification.type === 'join') {
         soundPlaying.current = true;
         joinSound.play();
       }
-      if (notification.type === "leave") {
+      if (notification.type === 'leave') {
         soundPlaying.current = true;
         leaveSound.play();
       }
     },
-    [soundPlaying]
+    [soundPlaying],
   );
 
   return (
@@ -88,18 +88,13 @@ export function UiProvider({ children }: any) {
             const id = String(Date.now());
             setState((oldState) => ({
               ...oldState,
-              notifications: [
-                ...oldState.notifications,
-                { id, ...notification },
-              ],
+              notifications: [...oldState.notifications, { id, ...notification }],
             }));
             setTimeout(() => {
               soundPlaying.current = false;
               setState((oldState) => ({
                 ...oldState,
-                notifications: oldState.notifications.filter(
-                  (n) => n.id !== id
-                ),
+                notifications: oldState.notifications.filter((n) => n.id !== id),
               }));
             }, 3000);
           },

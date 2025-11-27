@@ -1,13 +1,13 @@
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { Profile } from "@coasys/flux-types";
-import * as d3 from "d3";
-import { useEffect, useMemo, useState } from "preact/hooks";
-import Answer from "../../models/Answer";
-import Vote from "../../models/Vote";
-import AnswerCard from "../AnswerCard";
-import Avatar from "../Avatar";
-import PieChart from "../PieChart";
-import styles from "./PollCard.module.scss";
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { Profile } from '@coasys/flux-types';
+import * as d3 from 'd3';
+import { useEffect, useMemo, useState } from 'preact/hooks';
+import Answer from '../../models/Answer';
+import Vote from '../../models/Vote';
+import AnswerCard from '../AnswerCard';
+import Avatar from '../Avatar';
+import PieChart from '../PieChart';
+import styles from './PollCard.module.scss';
 
 // todo:
 // + set up adding new answers
@@ -35,7 +35,7 @@ export default function PollCard(props: {
 
   function findPercentage(answer) {
     let percent = 0;
-    if (voteType === "weighted-choice") percent = totalPoints ? (100 / totalPoints) * answer.totalPoints : 0;
+    if (voteType === 'weighted-choice') percent = totalPoints ? (100 / totalPoints) * answer.totalPoints : 0;
     else percent = totalVotes ? (100 / totalVotes) * answer.totalVotes : 0;
     return +percent.toFixed(1);
   }
@@ -52,7 +52,7 @@ export default function PollCard(props: {
             const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
             newTotalVotes += votes.length;
             let totalAnswerPoints = 0;
-            if (voteType === "weighted-choice") {
+            if (voteType === 'weighted-choice') {
               totalAnswerPoints = votes.map((vote) => vote.score).reduce((a, b) => a + b, 0);
               newTotalPoints += totalAnswerPoints;
             }
@@ -64,10 +64,10 @@ export default function PollCard(props: {
               totalPoints: totalAnswerPoints,
               myPoints: previousVote?.score || 0,
             });
-          })
-      )
+          }),
+      ),
     )) as any;
-    if (voteType === "weighted-choice") newAnswers.sort((a, b) => b.totalPoints - a.totalPoints);
+    if (voteType === 'weighted-choice') newAnswers.sort((a, b) => b.totalPoints - a.totalPoints);
     else newAnswers.sort((a, b) => b.totalVotes - a.totalVotes);
     setTotalVotes(newTotalVotes);
     setTotalPoints(newTotalPoints);
@@ -81,7 +81,7 @@ export default function PollCard(props: {
         const votes = await Vote.findAll(perspective, { source: answer.baseExpression });
         const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
         if (previousVote) await previousVote.delete();
-      })
+      }),
     );
   }
 
@@ -100,11 +100,11 @@ export default function PollCard(props: {
   async function vote(answerId: string, value?: number) {
     const votes = await Vote.findAll(perspective, { source: answerId });
     const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-    if (voteType === "single-choice") {
+    if (voteType === 'single-choice') {
       previousVote ? await previousVote.delete() : await removePreviousVotes().then(() => createVote(answerId, 100));
-    } else if (voteType === "multiple-choice") {
+    } else if (voteType === 'multiple-choice') {
       previousVote ? await previousVote.delete() : await createVote(answerId, 100);
-    } else if (voteType === "weighted-choice") {
+    } else if (voteType === 'weighted-choice') {
       previousVote ? await updateVote(previousVote.baseExpression, value) : await createVote(answerId, value);
     }
     buildAnswerData();

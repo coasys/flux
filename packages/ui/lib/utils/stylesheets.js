@@ -12,6 +12,6 @@ export function generateStylesheets(properties, variables) {
   }, []);
 }
 
-export function generateVariable(variable, value, fallback = "0") {
+export function generateVariable(variable, value, fallback = '0') {
   return value ? `var(--${variable}-${value})` : fallback;
 }

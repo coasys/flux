@@ -1,2 +1,2 @@
-import MenuGroupItem from "./MenuGroup";
+import MenuGroupItem from './MenuGroup';
 export default MenuGroupItem;

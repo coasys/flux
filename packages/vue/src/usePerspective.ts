@@ -1,9 +1,9 @@
-import { ref, watch, shallowRef } from "vue";
-import { usePerspectives } from "./usePerspectives";
-import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
+import { ref, watch, shallowRef } from 'vue';
+import { usePerspectives } from './usePerspectives';
+import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
 
 export function usePerspective(client: Ad4mClient, uuid: string | Function) {
-  const uuidRef = typeof uuid === "function" ? ref(uuid()) : ref(uuid);
+  const uuidRef = typeof uuid === 'function' ? ref(uuid()) : ref(uuid);
 
   const { perspectives } = usePerspectives(client);
 
@@ -21,7 +21,7 @@ export function usePerspective(client: Ad4mClient, uuid: string | Function) {
       const pers = perspectives[id];
       data.value = { ...data.value, perspective: pers };
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   watch(
@@ -29,7 +29,7 @@ export function usePerspective(client: Ad4mClient, uuid: string | Function) {
     (id) => {
       uuidRef.value = id as string;
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   return { data };

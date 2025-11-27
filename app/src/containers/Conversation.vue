@@ -5,7 +5,7 @@
         <j-icon name="robot" color="ui-500" />
         <j-text nomargin>LLM processing:</j-text>
         <j-text nomargin weight="800">
-          {{ defaultLLM ? (defaultLLM.local ? "Localy" : "Remotely") : "Disabled" }}
+          {{ defaultLLM ? (defaultLLM.local ? 'Localy' : 'Remotely') : 'Disabled' }}
         </j-text>
         <j-icon :name="defaultLLM ? (defaultLLM.local ? 'house-fill' : 'broadcast-pin') : 'x-lg'" color="ui-500" />
         <j-icon
@@ -41,7 +41,7 @@
               <j-flex a="center" gap="300">
                 <j-text nomargin>LLM processing:</j-text>
                 <j-text nomargin weight="800">
-                  {{ defaultLLM ? (defaultLLM.local ? "Localy" : "Remotely") : "Disabled" }}
+                  {{ defaultLLM ? (defaultLLM.local ? 'Localy' : 'Remotely') : 'Disabled' }}
                 </j-text>
                 <j-icon
                   :name="defaultLLM ? (defaultLLM.local ? 'house-fill' : 'broadcast-pin') : 'x-lg'"
@@ -89,7 +89,7 @@
                     {{ showApiKey ? defaultLLM.api.apiKey : maskedApiKey }}
                   </j-text>
                   <j-button size="xs" @click="showApiKey = !showApiKey">
-                    {{ showApiKey ? "Hide" : "Show" }}
+                    {{ showApiKey ? 'Hide' : 'Show' }}
                   </j-button>
                 </j-flex>
                 <j-flex gap="300">
@@ -111,7 +111,13 @@
       <j-badge variant="danger">
         <j-icon name="exclamation-triangle" style="margin-right: 10px" />
         Holochain signals disrupted. Processing paused until connection restored.
-        <j-button size="xs" variant="danger" @click="appStore.restartHolochain" style="margin-left: 10px" :loading="holochainRestarting">
+        <j-button
+          size="xs"
+          variant="danger"
+          @click="appStore.restartHolochain"
+          style="margin-left: 10px"
+          :loading="holochainRestarting"
+        >
           Restart Holochain
         </j-button>
       </j-badge>
@@ -141,16 +147,16 @@
 </template>
 
 <script setup lang="ts">
-import MatchColumn from "@/components/conversation/match/MatchColumn.vue";
-import TimelineColumn from "@/components/conversation/timeline/TimelineColumn.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useAiStore, useUiStore, useWebrtcStore, useAppStore } from "@/stores";
-import { SemanticRelationship, Topic } from "@coasys/flux-api";
-import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
-import { cos_sim } from "@xenova/transformers";
-import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import MatchColumn from '@/components/conversation/match/MatchColumn.vue';
+import TimelineColumn from '@/components/conversation/timeline/TimelineColumn.vue';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useAiStore, useUiStore, useWebrtcStore, useAppStore } from '@/stores';
+import { SemanticRelationship, Topic } from '@coasys/flux-api';
+import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from '@coasys/flux-utils';
+import { cos_sim } from '@xenova/transformers';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -168,12 +174,12 @@ const MINIMUM_MATCH_SCORE = 0.2;
 
 const matches = ref<SynergyMatch[]>([]);
 const selectedTopic = ref<SynergyTopic | null>(null);
-const searchItemId = ref("");
+const searchItemId = ref('');
 const searching = ref(false);
-const searchType = ref<SearchType>("");
+const searchType = ref<SearchType>('');
 const filterSettings = ref<FilterSettings>({
-  grouping: "Conversations",
-  itemType: "All Types",
+  grouping: 'Conversations',
+  itemType: 'All Types',
   includeChannel: false,
 });
 const showMatchColumn = ref(false);
@@ -183,8 +189,8 @@ const contentRef = ref<HTMLElement | null>(null);
 const contentWidth = ref(0);
 const showApiKey = ref(false);
 const maskedApiKey = computed(() => {
-  const key = defaultLLM.value?.api?.apiKey || "";
-  return key ? key.replace(/.(?=.{4})/g, "•") : "";
+  const key = defaultLLM.value?.api?.apiKey || '';
+  return key ? key.replace(/.(?=.{4})/g, '•') : '';
 });
 
 const collapsed = computed(() => contentWidth.value < 1000);
@@ -210,10 +216,10 @@ async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
   let allEmbeddings = [] as SynergyMatch[];
   const { grouping, itemType } = filterSettings.value;
 
-  if (grouping === "Conversations") allEmbeddings = await semanticRelationship.allConversationEmbeddings();
-  if (grouping === "Subgroups") allEmbeddings = await semanticRelationship.allSubgroupEmbeddings();
-  if (grouping === "Items") {
-    if (itemType === "All Types") allEmbeddings = await semanticRelationship.allItemEmbeddings();
+  if (grouping === 'Conversations') allEmbeddings = await semanticRelationship.allConversationEmbeddings();
+  if (grouping === 'Subgroups') allEmbeddings = await semanticRelationship.allSubgroupEmbeddings();
+  if (grouping === 'Items') {
+    if (itemType === 'All Types') allEmbeddings = await semanticRelationship.allItemEmbeddings();
     else allEmbeddings = await semanticRelationship.allItemEmbeddingsByType(itemType);
   }
 
@@ -227,7 +233,7 @@ async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
       // Generate a similarity score for the embedding
       const score = await cos_sim(sourceEmbedding, embedding);
       return { baseExpression, channelId, channelName, type, score };
-    })
+    }),
   );
   return matches.filter((item) => item && item.score > MINIMUM_MATCH_SCORE) as SynergyMatch[];
 }
@@ -236,15 +242,15 @@ async function findTopicMatches(itemId: string, topicId: string): Promise<Synerg
   const { grouping } = filterSettings.value;
   // Todo: remove option for "Items" grouping so this isn't necessary
   // If the grouping is "Items", we need to change it to "Conversations" as topics no longer have topic tags
-  let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
-  if (grouping === "Items") {
-    filterSettings.value = { ...filterSettings.value, grouping: "Conversations" };
+  let currentGrouping = grouping === 'Items' ? 'Conversations' : grouping;
+  if (grouping === 'Items') {
+    filterSettings.value = { ...filterSettings.value, grouping: 'Conversations' };
   }
 
   // Find matches
   const topic = new Topic(perspective, topicId);
   const topicMatches =
-    currentGrouping === "Conversations" ? await topic.linkedConversations() : await topic.linkedSubgroups();
+    currentGrouping === 'Conversations' ? await topic.linkedConversations() : await topic.linkedSubgroups();
 
   // Filter out results that don't match the search filters
   const filteredMatches = topicMatches.map((relationship) => {
@@ -264,19 +270,19 @@ async function search(type: SearchType, itemId: string, topic?: SynergyTopic) {
   showMatchColumn.value = true;
   searchType.value = type;
   searchItemId.value = itemId;
-  selectedTopic.value = type === "topic" && topic ? topic : null;
+  selectedTopic.value = type === 'topic' && topic ? topic : null;
 
   try {
     const newMatches =
-      type === "topic" ? await findTopicMatches(itemId, topic!.baseExpression) : await findEmbeddingMatches(itemId);
+      type === 'topic' ? await findTopicMatches(itemId, topic!.baseExpression) : await findEmbeddingMatches(itemId);
 
     const sortedMatches = newMatches
-      .filter((match): match is SynergyMatch & { score: number } => typeof match.score === "number")
+      .filter((match): match is SynergyMatch & { score: number } => typeof match.score === 'number')
       .sort((a, b) => b.score - a.score);
 
     matches.value = sortedMatches;
   } catch (error) {
-    console.error("Search failed:", error);
+    console.error('Search failed:', error);
     matches.value = [];
   } finally {
     searching.value = false;
@@ -284,12 +290,12 @@ async function search(type: SearchType, itemId: string, topic?: SynergyTopic) {
 }
 
 const matchText = computed((): string => {
-  if (!searchType.value) return "";
-  if (searching.value) return "Searching for matches...";
+  if (!searchType.value) return '';
+  if (searching.value) return 'Searching for matches...';
   if (matches.value.length === 0) {
-    return `No ${searchType.value} matches ${searchType.value === "topic" ? `for #${selectedTopic.value?.name}` : ""}`;
+    return `No ${searchType.value} matches ${searchType.value === 'topic' ? `for #${selectedTopic.value?.name}` : ''}`;
   }
-  return `${matches.value.length} match${matches.value.length > 1 ? "es" : ""} ${searchType.value === "topic" ? `for #${selectedTopic.value?.name}` : ""}`;
+  return `${matches.value.length} match${matches.value.length > 1 ? 'es' : ''} ${searchType.value === 'topic' ? `for #${selectedTopic.value?.name}` : ''}`;
 });
 
 function setFilterSettings(newSettings: FilterSettings) {
@@ -304,7 +310,7 @@ watch(
       search(searchType.value, searchItemId.value, selectedTopic.value || undefined);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 

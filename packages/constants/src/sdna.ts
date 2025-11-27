@@ -1,17 +1,12 @@
-import {
-  REACTION,
-  REPLY_TO,
-  EDITED_TO,
-  CARD_HIDDEN,
-} from "./communityPredicates";
-import { EntryType } from "@coasys/flux-types";
+import { REACTION, REPLY_TO, EDITED_TO, CARD_HIDDEN } from './communityPredicates';
+import { EntryType } from '@coasys/flux-types';
 
 export const emojiCount = 3;
-export const emoji = "1f44d";
+export const emoji = '1f44d';
 export const DEFAULT_LIMIT = 50;
 
 export const LATEST_SDNA_VERSION = 8;
-export const SDNA_CREATION_DATE = new Date("2022-11-18T17:22:56Z");
+export const SDNA_CREATION_DATE = new Date('2022-11-18T17:22:56Z');
 
 //Note: in the prolog queries below, the $ values are to be string templated before use
 

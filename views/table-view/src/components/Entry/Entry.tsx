@@ -1,8 +1,8 @@
-import { useEffect, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@coasys/ad4m";
-import { getEntry } from "../../utils";
-import DisplayValue from "../DisplayValue";
-import styles from "./Entry.module.css";
+import { useEffect, useState } from 'preact/hooks';
+import { PerspectiveProxy, Literal } from '@coasys/ad4m';
+import { getEntry } from '../../utils';
+import DisplayValue from '../DisplayValue';
+import styles from './Entry.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -10,11 +10,7 @@ type Props = {
   onUrlClick?: Function;
 };
 
-export default function Entry({
-  perspective,
-  source,
-  onUrlClick = () => {},
-}: Props) {
+export default function Entry({ perspective, source, onUrlClick = () => {} }: Props) {
   const [proxy, setProxy] = useState();
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
@@ -24,9 +20,7 @@ export default function Entry({
   }, [source, perspective.uuid]);
 
   async function fetchSourceClasses(source) {
-    const classResults = await perspective.infer(
-      `subject_class(ClassName, C), instance(C, "${source}").`
-    );
+    const classResults = await perspective.infer(`subject_class(ClassName, C), instance(C, "${source}").`);
 
     if (classResults?.length > 0) {
       setClasses([...new Set(classResults.map((c) => c.ClassName))]);
@@ -54,10 +48,7 @@ export default function Entry({
   if (entry) {
     const properties = Object.entries(entry);
     const defaultName =
-      entry?.name ||
-      entry?.title ||
-      (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
-      source;
+      entry?.name || entry?.title || (source?.startsWith('literal://') && Literal.fromUrl(source).get()) || source;
 
     return (
       <div>
@@ -67,10 +58,7 @@ export default function Entry({
           </j-text>
         </j-flex>
         <j-box pt="100" pb="800">
-          <h2
-            className={styles.entryTitle}
-            onClick={() => onUrlClick(source, true)}
-          >
+          <h2 className={styles.entryTitle} onClick={() => onUrlClick(source, true)}>
             {defaultName}
           </h2>
         </j-box>
@@ -82,22 +70,14 @@ export default function Entry({
                 {key}
               </j-text>
               <j-text nomargin color="black">
-                <DisplayValue
-                  onUpdate={(value) => onUpdate(key, value)}
-                  onUrlClick={onUrlClick}
-                  value={value}
-                />
+                <DisplayValue onUpdate={(value) => onUpdate(key, value)} onUrlClick={onUrlClick} value={value} />
               </j-text>
             </j-flex>
           ))}
         </j-flex>
 
         <j-box pt="800">
-          <j-button
-            size="lg"
-            variant="primary"
-            onClick={() => onUrlClick(source, true)}
-          >
+          <j-button size="lg" variant="primary" onClick={() => onUrlClick(source, true)}>
             Go to {classes[0]}
           </j-button>
         </j-box>

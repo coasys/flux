@@ -9,8 +9,8 @@
 </template>
 
 <script setup lang="ts">
-import { HourglassIcon } from "@/components/icons";
-import { ref } from "vue";
+import { HourglassIcon } from '@/components/icons';
+import { ref } from 'vue';
 
 // Todo: get and update this in the app store
 const isJoiningCommunity = ref(false);

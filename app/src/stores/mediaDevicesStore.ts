@@ -1,7 +1,7 @@
 // import { videoDimensions } from "@coasys/flux-constants/src/videoSettings";
-import { defineStore } from "pinia";
-import { computed, ref } from "vue";
-import { useAppStore } from "./appStore";
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+import { useAppStore } from './appStore';
 
 // TODO: create return type for store?
 
@@ -29,7 +29,7 @@ export type MediaPermissions = {
 };
 
 export const useMediaDevicesStore = defineStore(
-  "mediaDevices",
+  'mediaDevices',
   () => {
     const appStore = useAppStore();
 
@@ -47,8 +47,8 @@ export const useMediaDevicesStore = defineStore(
     let savedVideoTrack: MediaStreamTrack | null = null;
 
     // Computed properties
-    const cameras = computed(() => availableDevices.value.filter((device) => device.kind === "videoinput"));
-    const microphones = computed(() => availableDevices.value.filter((device) => device.kind === "audioinput"));
+    const cameras = computed(() => availableDevices.value.filter((device) => device.kind === 'videoinput'));
+    const microphones = computed(() => availableDevices.value.filter((device) => device.kind === 'audioinput'));
     const mediaSettings = computed<MediaSettings>(() => ({
       audioEnabled: audioEnabled.value,
       videoEnabled: videoEnabled.value,
@@ -80,7 +80,7 @@ export const useMediaDevicesStore = defineStore(
         await findAvailableDevices();
         await checkPermissions();
       } catch (err) {
-        console.error("Media permissions error:", err);
+        console.error('Media permissions error:', err);
 
         // Update media permission and error states
         microphone.requested = microphone.requested || audioEnabled.value;
@@ -106,7 +106,7 @@ export const useMediaDevicesStore = defineStore(
           activeMicrophoneId.value = microphones.value[0].deviceId;
         }
       } catch (err) {
-        console.error("Failed to get device list:", err);
+        console.error('Failed to get device list:', err);
       }
     }
 
@@ -116,25 +116,25 @@ export const useMediaDevicesStore = defineStore(
         if (stream.value) {
           const hasVideo = stream.value.getVideoTracks().length > 0;
           const hasAudio = stream.value.getAudioTracks().length > 0;
-          
+
           if (hasVideo) {
             mediaPermissions.value.camera.granted = true;
           } else {
             // No video tracks - sync the enabled state
             mediaPermissions.value.camera.granted = false;
             if (videoEnabled.value && mediaPermissions.value.camera.requested) {
-              console.log("Video tracks removed - syncing videoEnabled to false");
+              console.log('Video tracks removed - syncing videoEnabled to false');
               videoEnabled.value = false;
             }
           }
-          
+
           if (hasAudio) {
             mediaPermissions.value.microphone.granted = true;
           } else {
             // No audio tracks - sync the enabled state
             mediaPermissions.value.microphone.granted = false;
             if (audioEnabled.value && mediaPermissions.value.microphone.requested) {
-              console.log("Audio tracks removed - syncing audioEnabled to false");
+              console.log('Audio tracks removed - syncing audioEnabled to false');
               audioEnabled.value = false;
             }
           }
@@ -143,32 +143,36 @@ export const useMediaDevicesStore = defineStore(
         // Try Permissions API as additional check
         if (navigator.permissions) {
           try {
-            const cameraPermission = await navigator.permissions.query({ name: "camera" as PermissionName });
-            const microphonePermission = await navigator.permissions.query({ name: "microphone" as PermissionName });
+            const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+            const microphonePermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
 
-            if (cameraPermission.state === "granted") mediaPermissions.value.camera.granted = true;
-            if (microphonePermission.state === "granted") mediaPermissions.value.microphone.granted = true;
-            
+            if (cameraPermission.state === 'granted') mediaPermissions.value.camera.granted = true;
+            if (microphonePermission.state === 'granted') mediaPermissions.value.microphone.granted = true;
+
             // If permissions are denied, sync enabled states
-            if (cameraPermission.state === "denied" && videoEnabled.value && mediaPermissions.value.camera.requested) {
-              console.log("Camera permission denied - syncing videoEnabled to false");
+            if (cameraPermission.state === 'denied' && videoEnabled.value && mediaPermissions.value.camera.requested) {
+              console.log('Camera permission denied - syncing videoEnabled to false');
               videoEnabled.value = false;
             }
-            if (microphonePermission.state === "denied" && audioEnabled.value && mediaPermissions.value.microphone.requested) {
-              console.log("Microphone permission denied - syncing audioEnabled to false");
+            if (
+              microphonePermission.state === 'denied' &&
+              audioEnabled.value &&
+              mediaPermissions.value.microphone.requested
+            ) {
+              console.log('Microphone permission denied - syncing audioEnabled to false');
               audioEnabled.value = false;
             }
           } catch (err) {
             // Permissions API not supported
-            console.log("Permissions API not available for camera/microphone");
+            console.log('Permissions API not available for camera/microphone');
           }
         }
 
         // Fallback to checking device labels
         if (!mediaPermissions.value.camera.granted || !mediaPermissions.value.microphone.granted) {
           await findAvailableDevices();
-          const cameras = availableDevices.value.filter((d) => d.kind === "videoinput");
-          const mics = availableDevices.value.filter((d) => d.kind === "audioinput");
+          const cameras = availableDevices.value.filter((d) => d.kind === 'videoinput');
+          const mics = availableDevices.value.filter((d) => d.kind === 'audioinput');
 
           if (!mediaPermissions.value.camera.granted) {
             mediaPermissions.value.camera.granted = cameras.some((d) => !!d.label);
@@ -178,7 +182,7 @@ export const useMediaDevicesStore = defineStore(
           }
         }
       } catch (error) {
-        console.error("Error checking media permissions:", error);
+        console.error('Error checking media permissions:', error);
       }
     }
 
@@ -207,13 +211,13 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(newVideoTrack);
 
         // Update peer connections (lazy import to avoid circular dependency)
-        const { useWebrtcStore } = await import("./webrtcStore");
+        const { useWebrtcStore } = await import('./webrtcStore');
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(newVideoTrack, oldVideoTrack);
 
-        console.log("✅ Successfully switched camera");
+        console.log('✅ Successfully switched camera');
       } catch (error) {
-        console.error("❌ Failed to switch camera:", error);
+        console.error('❌ Failed to switch camera:', error);
         activeCameraId.value = previousId;
       }
     }
@@ -241,13 +245,13 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(newAudioTrack);
 
         // Update peer connections
-        const { useWebrtcStore } = await import("./webrtcStore");
+        const { useWebrtcStore } = await import('./webrtcStore');
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceAudioTrack(newAudioTrack, oldAudioTrack);
 
-        console.log("✅ Successfully switched microphone");
+        console.log('✅ Successfully switched microphone');
       } catch (error) {
-        console.error("❌ Failed to switch microphone:", error);
+        console.error('❌ Failed to switch microphone:', error);
         activeMicrophoneId.value = previousId;
       }
     }
@@ -293,25 +297,25 @@ export const useMediaDevicesStore = defineStore(
             stream.value.addTrack(newAudioTrack);
 
             // Update peer connections
-            const { useWebrtcStore } = await import("./webrtcStore");
+            const { useWebrtcStore } = await import('./webrtcStore');
             const webrtcStore = useWebrtcStore();
             await webrtcStore.addTrack(newAudioTrack, stream.value);
 
-            console.log("✅ Added new audio track");
+            console.log('✅ Added new audio track');
           } catch (error) {
-            console.error("❌ Failed to add audio track:", error);
+            console.error('❌ Failed to add audio track:', error);
             // Revert the state if it failed
             audioEnabled.value = false;
           }
         } else {
           // Just enable existing tracks
           existingAudioTracks.forEach((track) => (track.enabled = true));
-          console.log("✅ Enabled existing audio tracks");
+          console.log('✅ Enabled existing audio tracks');
         }
       } else {
         // Disabling audio - just disable tracks (don't remove them)
         stream.value.getAudioTracks().forEach((track) => (track.enabled = false));
-        console.log("✅ Disabled audio tracks");
+        console.log('✅ Disabled audio tracks');
       }
     }
 
@@ -327,7 +331,7 @@ export const useMediaDevicesStore = defineStore(
         if (existingVideoTracks.length) {
           // Enable existing tracks
           existingVideoTracks.forEach((track) => (track.enabled = true));
-          console.log("✅ Enabled existing video tracks");
+          console.log('✅ Enabled existing video tracks');
         } else {
           // Need to add video track
           const deviceId = activeCameraId.value ? { ideal: activeCameraId.value } : undefined;
@@ -344,16 +348,18 @@ export const useMediaDevicesStore = defineStore(
               stream.value.addTrack(newVideoTrack);
 
               // Update peer connections
-              const { useWebrtcStore } = await import("./webrtcStore");
+              const { useWebrtcStore } = await import('./webrtcStore');
               const webrtcStore = useWebrtcStore();
               await webrtcStore.addTrack(newVideoTrack, stream.value);
             }
 
-            console.log("✅ Added new video track");
+            console.log('✅ Added new video track');
           } catch (error) {
-            console.error("❌ Failed to add video track:", error);
+            console.error('❌ Failed to add video track:', error);
 
-            appStore.showDangerToast({ message: "Unable to access camera. Please grant camera permissions in your browser." });
+            appStore.showDangerToast({
+              message: 'Unable to access camera. Please grant camera permissions in your browser.',
+            });
             // Revert the state if it failed
             videoEnabled.value = false;
           }
@@ -362,7 +368,7 @@ export const useMediaDevicesStore = defineStore(
         // Disabling video - disable tracks with animation delay
         await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
         existingVideoTracks.forEach((track) => (track.enabled = false));
-        console.log("✅ Disabled video tracks");
+        console.log('✅ Disabled video tracks');
       }
     }
 
@@ -398,13 +404,13 @@ export const useMediaDevicesStore = defineStore(
         stream.value.addTrack(screenShareTrack);
 
         // Update peer connections
-        const { useWebrtcStore } = await import("./webrtcStore");
+        const { useWebrtcStore } = await import('./webrtcStore');
         const webrtcStore = useWebrtcStore();
         await webrtcStore.replaceVideoTrack(screenShareTrack, existingVideoTrack);
 
-        console.log("✅ Successfully started screen share");
+        console.log('✅ Successfully started screen share');
       } catch (error) {
-        console.error("❌ Error starting screen share:", error);
+        console.error('❌ Error starting screen share:', error);
         screenShareEnabled.value = false;
       }
     }
@@ -432,28 +438,28 @@ export const useMediaDevicesStore = defineStore(
           stream.value.addTrack(savedVideoTrack);
 
           // Update peer connections
-          const { useWebrtcStore } = await import("./webrtcStore");
+          const { useWebrtcStore } = await import('./webrtcStore');
           const webrtcStore = useWebrtcStore();
           await webrtcStore.replaceVideoTrack(savedVideoTrack, screenShareTrack);
 
           savedVideoTrack = null; // Clear the saved track
         } else {
           // No saved track - just remove screen share from peers
-          const { useWebrtcStore } = await import("./webrtcStore");
+          const { useWebrtcStore } = await import('./webrtcStore');
           const webrtcStore = useWebrtcStore();
           await webrtcStore.removeTrack(screenShareTrack);
         }
 
-        console.log("✅ Successfully stopped screen share");
+        console.log('✅ Successfully stopped screen share');
       } catch (error) {
-        console.error("❌ Error stopping screen share:", error);
+        console.error('❌ Error stopping screen share:', error);
       }
     }
 
     async function toggleScreenShare() {
       if (!stream.value) return;
       if (!navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("Screen sharing not supported in this browser");
+        throw new Error('Screen sharing not supported in this browser');
       }
 
       // Handle stream updates
@@ -468,10 +474,10 @@ export const useMediaDevicesStore = defineStore(
     checkPermissions();
 
     // Set up device change listener
-    navigator.mediaDevices.addEventListener("devicechange", findAvailableDevices);
-    window.addEventListener("beforeunload", () => {
+    navigator.mediaDevices.addEventListener('devicechange', findAvailableDevices);
+    window.addEventListener('beforeunload', () => {
       resetMediaDevices();
-      navigator.mediaDevices.removeEventListener("devicechange", findAvailableDevices);
+      navigator.mediaDevices.removeEventListener('devicechange', findAvailableDevices);
     });
 
     return {
@@ -501,5 +507,5 @@ export const useMediaDevicesStore = defineStore(
       toggleScreenShare,
     };
   },
-  { persist: true }
+  { persist: true },
 );

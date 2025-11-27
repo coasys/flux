@@ -1,9 +1,9 @@
-import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { Message } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
-import { useMemo } from "preact/hooks";
-import styles from "./Card.module.css";
+import { Ad4mModel, PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { Message } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
+import { useMemo } from 'preact/hooks';
+import styles from './Card.module.css';
 
 type Props = {
   task: Ad4mModel & { assignees: string[]; name?: string; title?: string };
@@ -27,7 +27,7 @@ export default function Card({ task, onClick, perspective, agentProfiles }: Prop
   return (
     <div className={styles.card} onClick={onClick}>
       <j-text size="500" color="ui-800" nomargin>
-        {task?.name || task?.title || "<Unnamed>"}
+        {task?.name || task?.title || '<Unnamed>'}
       </j-text>
 
       <j-flex a="center" j="between">

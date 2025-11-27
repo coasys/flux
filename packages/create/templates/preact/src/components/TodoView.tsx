@@ -1,10 +1,10 @@
-import { useState } from "preact/hooks";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
+import { useState } from 'preact/hooks';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
 
-import Todo from "../subjects/Todo";
+import Todo from '../subjects/Todo';
 
-import styles from "../Plugin.module.css";
+import styles from '../Plugin.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -12,16 +12,16 @@ type Props = {
 };
 
 export default function TodoView({ perspective, source }: Props) {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
 
   const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
 
   async function createTodo(event: React.KeyboardEvent<Element>) {
-    if (event.key !== "Enter") return;
+    if (event.key !== 'Enter') return;
     const todo = new Todo(perspective, undefined, source);
     todo.title = title;
     await todo.save();
-    setTitle("");
+    setTitle('');
   }
 
   function toggleTodo({ id, done }) {
@@ -38,13 +38,7 @@ export default function TodoView({ perspective, source }: Props) {
   return (
     <div>
       <j-box pt="900" pb="400">
-        <j-text
-          uppercase
-          size="300"
-          weight="800"
-          color="primary-500"
-          variant="success"
-        >
+        <j-text uppercase size="300" weight="800" color="primary-500" variant="success">
           Make a new todo
         </j-text>
       </j-box>
@@ -63,11 +57,9 @@ export default function TodoView({ perspective, source }: Props) {
           {todos.map((todo) => (
             <j-box bg="ui-50" p="400" radius="md">
               <j-flex j="between">
-                <div className={todo.done ? styles.doneTodo : ""}>
+                <div className={todo.done ? styles.doneTodo : ''}>
                   <j-checkbox
-                    onChange={(e) =>
-                      toggleTodo({ id: todo.baseExpression, done: e.target.checked })
-                    }
+                    onChange={(e) => toggleTodo({ id: todo.baseExpression, done: e.target.checked })}
                     checked={todo.done}
                     style="--j-border-radius: 50%;"
                     size="sm"

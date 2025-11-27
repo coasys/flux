@@ -16,8 +16,8 @@ Checkbox component is used to enable users to select one or more items from a gr
 <j-checkbox checked>Checked</j-checkbox>
 
 <script>
-  const checkbox = document.querySelector("j-checkbox");
-  checkbox.addEventListener("change", (e) => {
+  const checkbox = document.querySelector('j-checkbox');
+  checkbox.addEventListener('change', (e) => {
     console.log(e.target.checked);
   });
 </script>
@@ -27,25 +27,17 @@ Checkbox component is used to enable users to select one or more items from a gr
 export default function Checkbox() {
   const [checked, setChecked] = useState(false);
 
-  return (
-    <j-checkbox
-      checked={checked}
-      onChange={(e) => setChecked(e.target.checked)}
-    ></j-checkbox>
-  );
+  return <j-checkbox checked={checked} onChange={(e) => setChecked(e.target.checked)}></j-checkbox>;
 }
 ```
 
 ```vue [vue]
 <template>
-  <j-checkbox
-    :checked="checked"
-    @change="(e) => (checked = e.target.checked)"
-  ></j-checkbox>
+  <j-checkbox :checked="checked" @change="(e) => (checked = e.target.checked)"></j-checkbox>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 const checked = ref(false);
 </script>
 ```
@@ -120,8 +112,8 @@ and its state changes. You can add an event listener to the checkbox element to
 handle this event, like so:
 
 ```js
-const checkbox = document.querySelector("j-checkbox");
-checkbox.addEventListener("change", () => {
+const checkbox = document.querySelector('j-checkbox');
+checkbox.addEventListener('change', () => {
   // Do something when the checkbox state changes
 });
 ```

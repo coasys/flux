@@ -1,58 +1,56 @@
-import initAgentFixture from "../../../fixtures/initAgent.json";
-import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
-import { AgentStatus, PerspectiveHandle } from "@coasys/ad4m";
-import { createPinia, Pinia, setActivePinia } from "pinia";
-import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
-import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
+import initAgentFixture from '../../../fixtures/initAgent.json';
+import addPerspectiveFixture from '../../../fixtures/addPerspective.json';
+import { AgentStatus, PerspectiveHandle } from '@coasys/ad4m';
+import { createPinia, Pinia, setActivePinia } from 'pinia';
+import { useUserStore } from '@/store/user';
+import { ad4mClient } from '@/app';
+import agentByDIDLinksFixture from '../../../fixtures/agentByDIDLinks.json';
 import {
   FLUX_PROXY_PROFILE_NAME,
   HAS_BG_IMAGE,
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants/profile";
+} from 'utils/constants/profile';
 
-describe("Store Actions", () => {
+describe('Store Actions', () => {
   let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
-    jest
-      .spyOn(ad4mClient.agent, "generate")
-      .mockImplementation(async (password) => {
-        if (password) {
-          return initAgentFixture as AgentStatus;
-        } else {
-          throw Error("No Password passed");
-        }
-      });
+    jest.spyOn(ad4mClient.agent, 'generate').mockImplementation(async (password) => {
+      if (password) {
+        return initAgentFixture as AgentStatus;
+      } else {
+        throw Error('No Password passed');
+      }
+    });
 
     jest
-      .spyOn(ad4mClient.agent, "status")
+      .spyOn(ad4mClient.agent, 'status')
       // @ts-ignore
       .mockReturnValue(initAgentFixture);
 
     jest
-      .spyOn(ad4mClient.agent, "updatePublicPerspective")
+      .spyOn(ad4mClient.agent, 'updatePublicPerspective')
       // @ts-ignore
       .mockReturnValue(true);
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "add")
+      .spyOn(ad4mClient.perspective, 'add')
       // @ts-ignore
       .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "snapshotByUUID")
+      .spyOn(ad4mClient.perspective, 'snapshotByUUID')
       // @ts-ignore
       .mockResolvedValue({ links: [] });
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "all")
+      .spyOn(ad4mClient.perspective, 'all')
       // @ts-ignore
       .mockResolvedValue([
         {
@@ -61,13 +59,13 @@ describe("Store Actions", () => {
           neighbourhood: null,
           // @ts-ignore
           sharedUrl: null,
-          uuid: "2a912c2c-6d30-46f2-b451-880349fced08",
+          uuid: '2a912c2c-6d30-46f2-b451-880349fced08',
         },
       ]);
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "addLink")
+      .spyOn(ad4mClient.perspective, 'addLink')
       // @ts-ignore
       .mockImplementation((_, link) => {
         if (link.predicate === HAS_USERNAME) {
@@ -83,28 +81,28 @@ describe("Store Actions", () => {
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.expression, "create")
+      .spyOn(ad4mClient.expression, 'create')
       // @ts-ignore
-      .mockResolvedValue("lang://exp");
+      .mockResolvedValue('lang://exp');
 
     store = createPinia();
     setActivePinia(store);
   });
 
-  test("Create User with all the property", async () => {
+  test('Create User with all the property', async () => {
     const userStore = useUserStore();
     expect(userStore.agent.isInitialized).toBeFalsy();
     expect(userStore.agent.isInitialized).toBeFalsy();
-    expect(userStore.agent.did).toBe("");
+    expect(userStore.agent.did).toBe('');
     expect(userStore.profile).toBeNull();
 
     const profile = {
-      givenName: "",
-      familyName: "",
-      email: "",
-      username: "jhon",
-      bio: "",
-      profilePicture: "",
+      givenName: '',
+      familyName: '',
+      email: '',
+      username: 'jhon',
+      bio: '',
+      profilePicture: '',
       profileThumbnailPicture: undefined,
     };
 

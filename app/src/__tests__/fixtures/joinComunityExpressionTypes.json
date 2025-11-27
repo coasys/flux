@@ -7,11 +7,7 @@
     "templated": true,
     "templateSourceLanguageAddress": "QmPyHuezrCdbrL1HjSzMq1o2DhUCoPq36xhuYytHnsCunB",
     "templateAppliedParams": "{\"name\":\"test-shortform-expression\",\"uid\":\"d6066d24-3619-408b-a82e-0142c515ca95\"}",
-    "possibleTemplateParams": [
-      "uid",
-      "name",
-      "description"
-    ],
+    "possibleTemplateParams": ["uid", "name", "description"],
     "sourceCodeLink": "https://github.com/juntofoundation/ad4m-languages"
   },
   {
@@ -22,11 +18,7 @@
     "templated": true,
     "templateSourceLanguageAddress": "QmXVGtL3dSV6kDqXPMniZx4Gn9qZfoh9HoW8vWTspVe7r6",
     "templateAppliedParams": "{\"name\":\"test-group-expression\",\"uid\":\"d6066d24-3619-408b-a82e-0142c515ca95\"}",
-    "possibleTemplateParams": [
-      "uid",
-      "name",
-      "description"
-    ],
+    "possibleTemplateParams": ["uid", "name", "description"],
     "sourceCodeLink": "https://github.com/juntofoundation/ad4m-languages"
   },
   {
@@ -37,11 +29,7 @@
     "templated": true,
     "templateSourceLanguageAddress": "QmdBmy37AxY9wMVKayJYjEr23iDc6uWntKSp3P3BzCxVjq",
     "templateAppliedParams": "{\"name\":\"test-profile-expression\",\"uid\":\"d6066d24-3619-408b-a82e-0142c515ca95\"}",
-    "possibleTemplateParams": [
-      "uid",
-      "name",
-      "description"
-    ],
+    "possibleTemplateParams": ["uid", "name", "description"],
     "sourceCodeLink": "https://github.com/juntofoundation/profiles"
   }
 ]

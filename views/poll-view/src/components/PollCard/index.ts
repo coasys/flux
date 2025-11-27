@@ -1,3 +1,3 @@
-import PollCard from "./PollCard";
+import PollCard from './PollCard';
 
 export default PollCard;

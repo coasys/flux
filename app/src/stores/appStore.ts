@@ -1,20 +1,20 @@
-import iconPath from "@/assets/images/icon.png";
-import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { ToastState, UpdateState } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Ad4mClient, Agent, PerspectiveProxy } from "@coasys/ad4m";
-import { Community, joinCommunity } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
-import { defineStore } from "pinia";
-import { computed, ref, shallowRef, toRaw } from "vue";
+import iconPath from '@/assets/images/icon.png';
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from '@/constants';
+import { ToastState, UpdateState } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Ad4mClient, Agent, PerspectiveProxy } from '@coasys/ad4m';
+import { Community, joinCommunity } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
+import { defineStore } from 'pinia';
+import { computed, ref, shallowRef, toRaw } from 'vue';
 
 export const useAppStore = defineStore(
-  "appStore",
+  'appStore',
   () => {
-    const me = ref<Agent>({ did: "" });
+    const me = ref<Agent>({ did: '' });
     const myProfile = ref<Profile | null>(null);
-    const updateState = ref<UpdateState>("not-available");
-    const toast = ref<ToastState>({ variant: undefined, message: "", open: false });
+    const updateState = ref<UpdateState>('not-available');
+    const toast = ref<ToastState>({ variant: undefined, message: '', open: false });
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
     const myPerspectives = ref<PerspectiveProxy[]>([]);
     const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
@@ -25,7 +25,7 @@ export const useAppStore = defineStore(
 
     // Wrap the Ad4mClient in a computed property to prevent access before initialization and avoid null checks
     const ad4mClient = computed(() => {
-      if (!ad4mClientRef.value) console.error("Trying to access Ad4mClient before initialization");
+      if (!ad4mClientRef.value) console.error('Trying to access Ad4mClient before initialization');
       return ad4mClientRef.value as Ad4mClient;
     });
 
@@ -44,11 +44,11 @@ export const useAppStore = defineStore(
     }
 
     function showSuccessToast(payload: { message: string }): void {
-      toast.value = { variant: "success", open: true, ...payload };
+      toast.value = { variant: 'success', open: true, ...payload };
     }
 
     function showDangerToast(payload: { message: string }): void {
-      toast.value = { variant: "danger", open: true, ...payload };
+      toast.value = { variant: 'danger', open: true, ...payload };
     }
 
     function setUpdateState({ updateState: newUpdateState }: { updateState: UpdateState }): void {
@@ -63,10 +63,10 @@ export const useAppStore = defineStore(
     async function changeNotificationState(payload: boolean): Promise<void> {
       if (payload) {
         const notificationState = await Notification.requestPermission();
-        if (notificationState === "granted")
-          new Notification("Flux", { body: "Notifications Enabled!", icon: iconPath });
-        if (notificationState === "denied") {
-          showDangerToast({ message: "Notification is disabled from the browser please enable from there first" });
+        if (notificationState === 'granted')
+          new Notification('Flux', { body: 'Notifications Enabled!', icon: iconPath });
+        if (notificationState === 'denied') {
+          showDangerToast({ message: 'Notification is disabled from the browser please enable from there first' });
           setGlobalNotification(false);
         }
       }
@@ -94,7 +94,7 @@ export const useAppStore = defineStore(
           .map(async (perspective) => {
             const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
             return community ? ([perspective.uuid, community] as const) : null;
-          })
+          }),
       );
 
       // Filter out null results and create object from entries
@@ -112,7 +112,7 @@ export const useAppStore = defineStore(
       try {
         holochainRestarting.value = true;
         await ad4mClient.value.runtime.restartHolochain();
-        showSuccessToast({ message: "Holochain restarted successfully" });
+        showSuccessToast({ message: 'Holochain restarted successfully' });
       } catch (e) {
         showDangerToast({ message: e.message });
         throw e;
@@ -150,5 +150,5 @@ export const useAppStore = defineStore(
       restartHolochain,
     };
   },
-  { persist: { omit: ["myPerspectives", "myCommunities"] } }
+  { persist: { omit: ['myPerspectives', 'myCommunities'] } },
 );

@@ -1,14 +1,14 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import "@coasys/flux-ui/dist/main.d.ts";
-import { useContext } from "preact/hooks";
-import Header from "./components/Header";
-import Overlay from "./components/Overlay/Overlay";
-import Post from "./components/Post";
-import PostList from "./components/PostList";
-import UIContext, { UIProvider, View } from "./context/UIContext";
-import styles from "./index.module.css";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import '@coasys/flux-ui/dist/main.d.ts';
+import { useContext } from 'preact/hooks';
+import Header from './components/Header';
+import Overlay from './components/Overlay/Overlay';
+import Post from './components/Post';
+import PostList from './components/PostList';
+import UIContext, { UIProvider, View } from './context/UIContext';
+import styles from './index.module.css';
 
 type Props = {
   agent: AgentClient;

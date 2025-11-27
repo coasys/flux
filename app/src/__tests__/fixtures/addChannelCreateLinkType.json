@@ -6,7 +6,7 @@
     "target": "sioc://space",
     "__typename": "Link"
   },
-  "proof":{
+  "proof": {
     "invalid": false,
     "key": "#zQ3shWoZNT5PAeiA5AKGZdN5JhPGoPR5LYnpE1EpWWWFidoKw",
     "signature": "e825d504942b6ff9129f2051b511b4c18806bc30992ef031c636e855bdf75c0e1f4800b265cb57356c45b9b0e983516b48cde87d99125afdc9824ce339cb7233",

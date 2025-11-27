@@ -3,9 +3,9 @@
     <j-avatar size="xl" :initials="name?.charAt(0).toUpperCase()" :url="url" />
     <div>
       <j-text size="600" color="black" weight="bold">
-        {{ name || "Unknown Community" }}
+        {{ name || 'Unknown Community' }}
       </j-text>
-      <j-text nomargin size="500" color="ui-400">{{ description || "No description" }}</j-text>
+      <j-text nomargin size="500" color="ui-400">{{ description || 'No description' }}</j-text>
     </div>
   </router-link>
 </template>

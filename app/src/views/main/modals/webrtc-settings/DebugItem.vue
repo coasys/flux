@@ -1,8 +1,8 @@
 <template>
   <div class="item">
     <div class="details">
-      <span>{{ peer.agentState.username || peer.did || "Unknown user" }}</span>
-      <span>({{ peer.peer.connection?.peerConnection?.iceConnectionState || "Not connected" }})</span>
+      <span>{{ peer.agentState.username || peer.did || 'Unknown user' }}</span>
+      <span>({{ peer.peer.connection?.peerConnection?.iceConnectionState || 'Not connected' }})</span>
     </div>
     <div>
       <j-button variant="transparent" size="xs" @click="sendSignal(peer.did)"> Send signal </j-button>

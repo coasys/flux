@@ -1,7 +1,7 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
-import { generateVariable } from "../../utils/stylesheets";
+import { html, css, LitElement, adoptStyles } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
+import { generateVariable } from '../../utils/stylesheets';
 
 // TODO: Do we need this type  of generic component?
 
@@ -20,7 +20,7 @@ const styles = css`
   :host([inline]) {
     --j-box-display: inline-block;
   }
-  [part="base"] {
+  [part='base'] {
     color: var(--j-box-color);
     border-radius: var(--j-box-border-radius);
     background-color: var(--j-box-bg-color);
@@ -29,7 +29,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-box")
+@customElement('j-box')
 export default class Box extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -177,15 +177,15 @@ export default class Box extends LitElement {
         --j-box-color: var(--j-color-${this.color});
         --j-box-border-radius: var(--j-border-radius-${this.radius});
         --j-box-padding: 
-          ${generateVariable("j-space", this.pt || this.py || this.p)}
-          ${generateVariable("j-space", this.pr || this.px || this.p)}
-          ${generateVariable("j-space", this.pb || this.py || this.p)}
-          ${generateVariable("j-space", this.pl || this.px || this.p)};
+          ${generateVariable('j-space', this.pt || this.py || this.p)}
+          ${generateVariable('j-space', this.pr || this.px || this.p)}
+          ${generateVariable('j-space', this.pb || this.py || this.p)}
+          ${generateVariable('j-space', this.pl || this.px || this.p)};
         --j-box-margin: 
-          ${generateVariable("j-space", this.mt || this.my || this.m)}
-          ${generateVariable("j-space", this.mr || this.mx || this.m)}
-          ${generateVariable("j-space", this.mb || this.my || this.m)}
-          ${generateVariable("j-space", this.ml || this.mx || this.m)}  
+          ${generateVariable('j-space', this.mt || this.my || this.m)}
+          ${generateVariable('j-space', this.mr || this.mx || this.m)}
+          ${generateVariable('j-space', this.mb || this.my || this.m)}
+          ${generateVariable('j-space', this.ml || this.mx || this.m)}  
       }
     `);
 

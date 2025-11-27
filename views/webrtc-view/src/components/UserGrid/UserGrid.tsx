@@ -1,15 +1,15 @@
-import { WebRTC } from "@coasys/flux-react-web";
-import { Howl } from "howler";
-import { useEffect, useState } from "preact/hooks";
-import guitarWav from "../../assets/guitar.wav";
-import kissWav from "../../assets/kiss.wav";
-import pigWav from "../../assets/pig.wav";
-import popWav from "../../assets/pop.wav";
-import { Reaction } from "../../types";
-import Item from "./Item";
+import { WebRTC } from '@coasys/flux-react-web';
+import { Howl } from 'howler';
+import { useEffect, useState } from 'preact/hooks';
+import guitarWav from '../../assets/guitar.wav';
+import kissWav from '../../assets/kiss.wav';
+import pigWav from '../../assets/pig.wav';
+import popWav from '../../assets/pop.wav';
+import { Reaction } from '../../types';
+import Item from './Item';
 
-import { Profile } from "@coasys/flux-types";
-import styles from "./UserGrid.module.css";
+import { Profile } from '@coasys/flux-types';
+import styles from './UserGrid.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -50,11 +50,11 @@ export default function UserGrid({ webRTC, profile, getProfile }: Props) {
 
     const newReaction = webRTC.reactions[webRTC.reactions.length - 1];
 
-    if (newReaction.reaction === "💋" || newReaction.reaction === "😘") {
+    if (newReaction.reaction === '💋' || newReaction.reaction === '😘') {
       kissSound.play();
-    } else if (newReaction.reaction === "🎸") {
+    } else if (newReaction.reaction === '🎸') {
       guitarSound.play();
-    } else if (newReaction.reaction === "🐷" || newReaction.reaction === "🐖") {
+    } else if (newReaction.reaction === '🐷' || newReaction.reaction === '🐖') {
       pigSound.play();
     } else {
       popSound.play();
@@ -86,7 +86,7 @@ export default function UserGrid({ webRTC, profile, getProfile }: Props) {
     });
 
   return (
-    <div className={styles.grid} style={{ "--grid-col-size": gridColSize } as any}>
+    <div className={styles.grid} style={{ '--grid-col-size': gridColSize } as any}>
       {webRTC.localStream && (
         <Item
           webRTC={webRTC}

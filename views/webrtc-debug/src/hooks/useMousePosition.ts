@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState } from 'preact/hooks';
 
 const useMousePosition = () => {
   const [mousePosition, setMousePosition] = useState({
@@ -11,10 +11,10 @@ const useMousePosition = () => {
       setMousePosition({ x: ev.clientX, y: ev.clientY });
     };
 
-    window.addEventListener("mousemove", updateMousePosition);
+    window.addEventListener('mousemove', updateMousePosition);
 
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition);
+      window.removeEventListener('mousemove', updateMousePosition);
     };
   }, []);
 

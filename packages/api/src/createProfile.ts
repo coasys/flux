@@ -1,8 +1,8 @@
-import { agents, languages, profile } from "@coasys/flux-constants";
-import { resizeImage, dataURItoBlob, blobToDataURL } from "@coasys/flux-utils";
-import { Ad4mClient, Link, LinkExpression, LinkMutations } from "@coasys/ad4m";
-import { Profile } from "@coasys/flux-types";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { agents, languages, profile } from '@coasys/flux-constants';
+import { resizeImage, dataURItoBlob, blobToDataURL } from '@coasys/flux-utils';
+import { Ad4mClient, Link, LinkExpression, LinkMutations } from '@coasys/ad4m';
+import { Profile } from '@coasys/flux-types';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const {
@@ -26,9 +26,9 @@ export interface Payload {
 }
 
 export default async ({
-  givenName = "",
-  familyName = "",
-  email = "",
+  givenName = '',
+  familyName = '',
+  email = '',
   username,
   profileThumbnailPicture,
   profileBackground,
@@ -47,29 +47,29 @@ export default async ({
 
     if (profilePicture) {
       const compressedProfileImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(profilePicture as string), 0.6)
+        await resizeImage(dataURItoBlob(profilePicture as string), 0.6),
       );
 
       profileImage = await client.expression.create(
         {
           data_base64: compressedProfileImage,
-          name: "profile-image",
-          file_type: "image/png",
+          name: 'profile-image',
+          file_type: 'image/png',
         },
-        FILE_STORAGE_LANGUAGE
+        FILE_STORAGE_LANGUAGE,
       );
 
       const compressedpThumbnailImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(profilePicture as string), 0.3)
+        await resizeImage(dataURItoBlob(profilePicture as string), 0.3),
       );
 
       thumbnailImage = await client.expression.create(
         {
           data_base64: compressedpThumbnailImage,
-          name: "thumbnail-image",
-          file_type: "image/png",
+          name: 'thumbnail-image',
+          file_type: 'image/png',
         },
-        FILE_STORAGE_LANGUAGE
+        FILE_STORAGE_LANGUAGE,
       );
 
       additions.push(
@@ -77,7 +77,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: profileImage,
           predicate: HAS_PROFILE_IMAGE,
-        })
+        }),
       );
 
       additions.push(
@@ -85,7 +85,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: thumbnailImage,
           predicate: HAS_THUMBNAIL_IMAGE,
-        })
+        }),
       );
     }
 
@@ -95,7 +95,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: givenName,
           predicate: HAS_GIVEN_NAME,
-        })
+        }),
       );
     }
 
@@ -105,7 +105,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: familyName,
           predicate: HAS_FAMILY_NAME,
-        })
+        }),
       );
     }
 
@@ -115,7 +115,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: email,
           predicate: HAS_EMAIL,
-        })
+        }),
       );
     }
 
@@ -125,7 +125,7 @@ export default async ({
           source: FLUX_PROFILE,
           target: username,
           predicate: HAS_USERNAME,
-        })
+        }),
       );
     }
 
@@ -142,10 +142,10 @@ export default async ({
       email: email,
       givenName: givenName,
       familyName: familyName,
-      profileBackground: "",
-      profilePicture: profileImage || "",
-      profileThumbnailPicture: thumbnailImage || "",
-      bio: "",
+      profileBackground: '',
+      profilePicture: profileImage || '',
+      profileThumbnailPicture: thumbnailImage || '',
+      bio: '',
     };
   } catch (e) {
     throw new Error(e);

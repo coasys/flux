@@ -1,16 +1,16 @@
-import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useMemo } from "preact/hooks";
-import { useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import Card from "../Card";
-import CardDetails from "../CardDetails";
-import styles from "./Board.module.css";
+import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useMemo } from 'preact/hooks';
+import { useState } from 'react';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import Card from '../Card';
+import CardDetails from '../CardDetails';
+import styles from './Board.module.css';
 
 // @ts-ignore
-import taskSDNA from "./Task.pl?raw";
+import taskSDNA from './Task.pl?raw';
 
 type BoardProps = {
   perspective: PerspectiveProxy;
@@ -26,10 +26,10 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   const [currentTask, setCurrentTask] = useState<
     (Ad4mModel & { assignees: string[]; name: string; title: string }) | null
   >(null);
-  const [columnName, setColumnName] = useState("");
+  const [columnName, setColumnName] = useState('');
   const [classes, setClasses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState("");
-  const [selectedProperty, setSelectedProperty] = useState("");
+  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedProperty, setSelectedProperty] = useState('');
   const [namedOptions, setNamedOptions] = useState<NamedOptions>({});
   const [tasks, setTasks] = useState([]);
   const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
@@ -59,7 +59,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     const model = (await perspective.createSubject(selectedClass, baseExpression)) as Ad4mModel;
     await setValue(model, property, value);
     // link to channel
-    await perspective.addLinks([{ source, predicate: "ad4m://has_child", target: baseExpression }]);
+    await perspective.addLinks([{ source, predicate: 'ad4m://has_child', target: baseExpression }]);
   }
 
   async function onDragEnd(result) {
@@ -97,7 +97,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       // Create a new column with the given name
       const value = `task://${columnName.toLowerCase()}`;
       const sdnaCode = `property_named_option(${atom}, "${selectedProperty}", "${value}", "${columnName}").`;
-      await perspective.addSdna(columnName, sdnaCode, "custom");
+      await perspective.addSdna(columnName, sdnaCode, 'custom');
 
       // Reload the columns
       loadColumns();
@@ -106,12 +106,12 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     }
 
     // Reset the column name and hide the modal
-    setColumnName("");
+    setColumnName('');
     setShowAddColumn(false);
   }
 
   function transformData(tasks: Ad4mModel[], property: string, options: NamedOption[]) {
-    const defaultColumns = { Unknown: { id: "unknown", title: "unknown", taskIds: [] } };
+    const defaultColumns = { Unknown: { id: 'unknown', title: 'unknown', taskIds: [] } };
     options.forEach((opt) => (defaultColumns[opt.value] = { id: opt.value, title: opt.label, taskIds: [] }));
 
     // Create a map of task IDs to their full Ad4mModel instances
@@ -121,7 +121,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     // Organize tasks into columns while preserving the full Ad4mModel instances
     const columns = { ...defaultColumns };
     tasks.forEach((task) => {
-      const columnId = task[property] || "unknown";
+      const columnId = task[property] || 'unknown';
       if (!columns[columnId]) columns[columnId] = { id: columnId, title: columnId, taskIds: [] };
       columns[columnId].taskIds.push(task.baseExpression);
     });
@@ -197,7 +197,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
       if (!hasTask) {
         perspective
-          .addSdna("Task", taskSDNA, "subject_class")
+          .addSdna('Task', taskSDNA, 'subject_class')
           .then(() => getClasses(perspective, source).then(setClasses));
       }
     });
@@ -217,7 +217,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }, [perspective.uuid, selectedClass]);
 
   useEffect(() => {
-    setSelectedClass(classes[0] || "");
+    setSelectedClass(classes[0] || '');
   }, [classes.length]);
 
   return (
@@ -264,7 +264,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className={`${styles.tasks} ${snapshot.isDraggingOver ? styles.isDraggingOver : ""}`}
+                          className={`${styles.tasks} ${snapshot.isDraggingOver ? styles.isDraggingOver : ''}`}
                         >
                           {tasks.map((task, index) => (
                             <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index}>
@@ -273,7 +273,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`${styles.task} ${snapshot.isDragging ? styles.isDragging : ""}`}
+                                  className={`${styles.task} ${snapshot.isDragging ? styles.isDragging : ''}`}
                                 >
                                   <Card
                                     perspective={perspective}

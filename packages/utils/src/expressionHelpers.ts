@@ -1,10 +1,8 @@
-import { Message, Messages } from "@coasys/flux-types";
-import { Expression, LinkExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Message, Messages } from '@coasys/flux-types';
+import { Expression, LinkExpression } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
-export async function getExpression(
-  link: LinkExpression
-): Promise<Expression | null> {
+export async function getExpression(link: LinkExpression): Promise<Expression | null> {
   const client = await getAd4mClient();
 
   const expression = await client.expression.get(link.data.target);
@@ -20,12 +18,9 @@ export async function getExpressions(expressionLinks: LinkExpression[]) {
   return await Promise.all(linkPromises);
 }
 
-export function sortExpressionsByTimestamp(
-  expressions: Messages,
-  order: "asc" | "desc"
-): Message[] {
+export function sortExpressionsByTimestamp(expressions: Messages, order: 'asc' | 'desc'): Message[] {
   return Object.values(expressions).sort((a, b) => {
-    return order === "asc"
+    return order === 'asc'
       ? new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       : new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
   });

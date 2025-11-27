@@ -1,3 +1,3 @@
-import DisplayValue from "./DisplayValue";
+import DisplayValue from './DisplayValue';
 
 export default DisplayValue;

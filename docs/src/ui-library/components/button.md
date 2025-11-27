@@ -119,8 +119,8 @@ Use the `circle` property to make the button circular. When the circle property 
 The `click` event is fired when the button is clicked. You can add an event listener to the button element to handle this event, like so:
 
 ```js
-const button = document.querySelector("j-button");
-button.addEventListener("click", () => {
+const button = document.querySelector('j-button');
+button.addEventListener('click', () => {
   // Do something when the button is clicked
 });
 ```

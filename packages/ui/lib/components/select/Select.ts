@@ -1,27 +1,27 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import { createPopper } from "@popperjs/core";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { createPopper } from '@popperjs/core';
+import sharedStyles from '../../shared/styles';
 
 const keyCodes = {
-  32: "space",
-  27: "escape",
-  13: "enter",
-  8: "backspace",
-  38: "up",
-  40: "down",
+  32: 'space',
+  27: 'escape',
+  13: 'enter',
+  8: 'backspace',
+  38: 'up',
+  40: 'down',
 };
 
 const styles = css`
   :host {
   }
-  [part="base"] {
+  [part='base'] {
     position: relative;
   }
-  [part="input"]::part(input-field) {
+  [part='input']::part(input-field) {
     cursor: pointer;
   }
-  [part="menu"] {
+  [part='menu'] {
     background: var(--j-color-white);
     position: absolute;
     left: 0;
@@ -33,14 +33,14 @@ const styles = css`
     border-radius: var(--j-border-radius);
     visibility: hidden;
   }
-  :host([open]) [part="menu"] {
+  :host([open]) [part='menu'] {
     height: fit-content;
     visibility: visible;
     z-index: 999;
   }
 `;
 
-@customElement("j-select")
+@customElement('j-select')
 export default class Select extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -91,7 +91,7 @@ export default class Select extends LitElement {
   }
 
   get optionElements() {
-    return [...this.querySelectorAll("*")].filter((child: any) => child.value);
+    return [...this.querySelectorAll('*')].filter((child: any) => child.value);
   }
 
   get selectedElement() {
@@ -99,22 +99,22 @@ export default class Select extends LitElement {
   }
 
   get activeElement() {
-    return this.optionElements.find((el) => el.hasAttribute("active")) as any;
+    return this.optionElements.find((el) => el.hasAttribute('active')) as any;
   }
 
   firstUpdated() {
     const selectedElement = this.selectedElement as any;
-    this.inputValue = selectedElement?.label || selectedElement?.value || "";
+    this.inputValue = selectedElement?.label || selectedElement?.value || '';
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener("keydown", this._handleKeyDown);
-    window.addEventListener("click", this._handleClickOutside);
+    this.addEventListener('keydown', this._handleKeyDown);
+    window.addEventListener('click', this._handleClickOutside);
   }
 
   disconnectedCallback() {
-    window.removeEventListener("click", this._handleClickOutside);
+    window.removeEventListener('click', this._handleClickOutside);
     super.disconnectedCallback();
   }
 
@@ -133,7 +133,7 @@ export default class Select extends LitElement {
   }
 
   _handleNavMouseOver(e) {
-    this.optionElements.forEach((el) => el.removeAttribute("active"));
+    this.optionElements.forEach((el) => el.removeAttribute('active'));
   }
 
   _handleKeyDown(e) {
@@ -142,59 +142,55 @@ export default class Select extends LitElement {
 
     const keyName = keyCodes[keyCode];
 
-    if (keyName === "escape") {
+    if (keyName === 'escape') {
       this.open = false;
       return;
     }
 
-    if ((keyName === "up" || "down" || "enter" || "space") && !this.open) {
+    if ((keyName === 'up' || 'down' || 'enter' || 'space') && !this.open) {
       this.open = true;
       this.optionElements.forEach((el, index) => {
-        if (index === 0) el.setAttribute("active", "");
-        else el.removeAttribute("active");
+        if (index === 0) el.setAttribute('active', '');
+        else el.removeAttribute('active');
       });
       return;
     }
 
-    if (keyName === "enter" && this.open && this.activeElement) {
+    if (keyName === 'enter' && this.open && this.activeElement) {
       this.open = false;
       this.value = this.activeElement.value;
       this.inputValue = this.activeElement.label;
     }
 
-    if (keyName === "down" && this.open) {
-      const activeIndex = this.optionElements.findIndex((el) =>
-        el.hasAttribute("active")
-      );
-      this.activeElement?.removeAttribute("active");
+    if (keyName === 'down' && this.open) {
+      const activeIndex = this.optionElements.findIndex((el) => el.hasAttribute('active'));
+      this.activeElement?.removeAttribute('active');
 
       const firstOption = this.optionElements[0];
 
       this.optionElements.forEach((el, index) => {
         if (activeIndex === -1) {
-          firstOption.setAttribute("active", "");
+          firstOption.setAttribute('active', '');
         } else if (activeIndex >= this.optionElements.length - 1) {
-          firstOption.setAttribute("active", "");
+          firstOption.setAttribute('active', '');
         } else if (index === activeIndex + 1) {
-          el.setAttribute("active", "");
+          el.setAttribute('active', '');
         }
       });
     }
 
-    if (keyName === "up" && this.open) {
-      const activeIndex = this.optionElements.findIndex((el) =>
-        el.hasAttribute("active")
-      );
+    if (keyName === 'up' && this.open) {
+      const activeIndex = this.optionElements.findIndex((el) => el.hasAttribute('active'));
 
-      this.activeElement?.removeAttribute("active");
+      this.activeElement?.removeAttribute('active');
 
       const lastOption = this.optionElements[this.optionElements.length - 1];
 
       this.optionElements.forEach((el, index) => {
         if (activeIndex === 0 || activeIndex === -1) {
-          lastOption.setAttribute("active", "");
+          lastOption.setAttribute('active', '');
         } else if (index === activeIndex - 1) {
-          el.setAttribute("active", "");
+          el.setAttribute('active', '');
         }
       });
     }
@@ -210,19 +206,19 @@ export default class Select extends LitElement {
   _handleSlotChange(e) {
     const slottedElements = e.target.assignedNodes();
     [...slottedElements].forEach((el) => {
-      el.removeEventListener("mousedown", this._handleOptionClick);
-      el.addEventListener("mousedown", this._handleOptionClick);
+      el.removeEventListener('mousedown', this._handleOptionClick);
+      el.addEventListener('mousedown', this._handleOptionClick);
     });
   }
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("value")) {
-      this.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+    if (changedProperties.has('value')) {
+      this.dispatchEvent(new CustomEvent('change', { bubbles: true }));
       this.optionElements.forEach((option: any) => {
         if (option.value === this.value) {
-          option.setAttribute("selected", "");
+          option.setAttribute('selected', '');
         } else {
-          option.removeAttribute("selected");
+          option.removeAttribute('selected');
         }
       });
     }
@@ -232,13 +228,7 @@ export default class Select extends LitElement {
 
   render() {
     return html` <div part="base">
-      <j-input
-        label=${this.label}
-        readonly
-        @click=${this._handleInputClick}
-        .value=${this.inputValue}
-        part="input"
-      >
+      <j-input label=${this.label} readonly @click=${this._handleInputClick} .value=${this.inputValue} part="input">
         <j-icon size="sm" slot="end" part="arrow" name="chevron-down"></j-icon>
       </j-input>
 

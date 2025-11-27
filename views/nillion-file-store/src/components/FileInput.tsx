@@ -1,6 +1,6 @@
-import { useRef } from "preact/hooks";
+import { useRef } from 'preact/hooks';
 
-import styles from "./FileView.module.css";
+import styles from './FileView.module.css';
 
 //@ts-ignore
 export default function FileInputComponent({ onFileUpload }) {
@@ -8,9 +8,9 @@ export default function FileInputComponent({ onFileUpload }) {
 
   const handleFileChange = (event: any) => {
     const file = event.target.files?.[0];
-    console.log("File:", file);
+    console.log('File:', file);
     if (!file) {
-      console.log("No file selected.");
+      console.log('No file selected.');
       return;
     }
 

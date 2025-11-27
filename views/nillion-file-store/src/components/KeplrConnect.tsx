@@ -1,17 +1,14 @@
-import { useEffect, useState } from "preact/hooks";
-import { createNilChainClientAndKeplrWallet } from "../helpers/keplr";
-import { getKeplr } from "../helpers/keplr";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { useEffect, useState } from 'preact/hooks';
+import { createNilChainClientAndKeplrWallet } from '../helpers/keplr';
+import { getKeplr } from '../helpers/keplr';
+import { SigningStargateClient } from '@cosmjs/stargate';
 
 interface KeplrConnectButtonProps {
   setChainClient: (client: SigningStargateClient | null) => void;
   setWallet: (key: any | null) => void;
 }
 
-const KeplrConnectButton: React.FC<KeplrConnectButtonProps> = ({
-  setChainClient,
-  setWallet,
-}) => {
+const KeplrConnectButton: React.FC<KeplrConnectButtonProps> = ({ setChainClient, setWallet }) => {
   const [currentAccount, setCurrentAccount] = useState<null | string>(null);
   const [loading, setLoading] = useState(false);
   const [foundKeplrWallet, setFoundKeplrWallet] = useState(false);
@@ -29,8 +26,7 @@ const KeplrConnectButton: React.FC<KeplrConnectButtonProps> = ({
   const handleConnect = async () => {
     setLoading(true);
     try {
-      const [nilChainClient, nilChainWallet] =
-        await createNilChainClientAndKeplrWallet();
+      const [nilChainClient, nilChainWallet] = await createNilChainClientAndKeplrWallet();
       setChainClient(nilChainClient);
       setWallet(nilChainWallet);
 
@@ -38,7 +34,7 @@ const KeplrConnectButton: React.FC<KeplrConnectButtonProps> = ({
       const currentAddress = account.address;
       setCurrentAccount(currentAddress);
     } catch (error) {
-      console.error("Failed to connect wallet", error);
+      console.error('Failed to connect wallet', error);
     }
     setLoading(false);
   };
@@ -52,26 +48,17 @@ const KeplrConnectButton: React.FC<KeplrConnectButtonProps> = ({
   return foundKeplrWallet ? (
     <>
       {!currentAccount ? (
-        <j-button
-          variant="primary"
-          color="primary"
-          onClick={handleConnect}
-          disabled={loading}
-        >
+        <j-button variant="primary" color="primary" onClick={handleConnect} disabled={loading}>
           {loading ? (
             <>
-              Connecting... <j-spinner size="sm" />{" "}
+              Connecting... <j-spinner size="sm" />{' '}
             </>
           ) : (
-            "Connect Nillion Wallet"
+            'Connect Nillion Wallet'
           )}
         </j-button>
       ) : (
-        <j-button
-          variant="primary"
-          color="secondary"
-          onClick={handleDisconnect}
-        >
+        <j-button variant="primary" color="secondary" onClick={handleDisconnect}>
           Disconnect Nillion Wallet
         </j-button>
       )}

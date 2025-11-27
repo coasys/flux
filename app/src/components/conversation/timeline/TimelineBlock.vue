@@ -165,12 +165,12 @@
 </template>
 
 <script setup lang="ts">
-import Avatar from "@/components/conversation/avatar/Avatar.vue";
-import PercentageRing from "@/components/conversation/percentage-ring/PercentageRing.vue";
-import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, SubwayTimelineCurveIcon } from "@/components/icons";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { LinkQuery } from "@coasys/ad4m";
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
+import Avatar from '@/components/conversation/avatar/Avatar.vue';
+import PercentageRing from '@/components/conversation/percentage-ring/PercentageRing.vue';
+import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, SubwayTimelineCurveIcon } from '@/components/icons';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { LinkQuery } from '@coasys/ad4m';
+import { Conversation, ConversationSubgroup } from '@coasys/flux-api';
 import {
   BlockType,
   GroupingOption,
@@ -180,8 +180,8 @@ import {
   SynergyItem,
   SynergyMatch,
   SynergyTopic,
-} from "@coasys/flux-utils";
-import { computed, ref, watch } from "vue";
+} from '@coasys/flux-utils';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
   blockType: BlockType;
@@ -217,19 +217,19 @@ const firstLoad = ref(true);
 
 const matchIndex = computed(() =>
   props.match
-    ? props.blockType === "conversation"
+    ? props.blockType === 'conversation'
       ? props.matchIndexes?.subgroup
       : props.matchIndexes?.item
-    : undefined
+    : undefined,
 );
 
 const onMatchTree = computed(() =>
   props.match
-    ? (props.blockType === "conversation" && props.data.index === props.matchIndexes?.conversation) ||
-      (props.blockType === "subgroup" &&
+    ? (props.blockType === 'conversation' && props.data.index === props.matchIndexes?.conversation) ||
+      (props.blockType === 'subgroup' &&
         (props.data as SynergyGroup).parentIndex === props.matchIndexes?.conversation &&
         props.data.index === props.matchIndexes?.subgroup)
-    : false
+    : false,
 );
 
 const visibleChildren = computed(() =>
@@ -238,18 +238,18 @@ const visibleChildren = computed(() =>
     child.index = i;
     if (onMatchTree.value) {
       // skip if below match
-      if (props.zoom === "Conversations") return true;
-      if (props.zoom === "Subgroups" && props.blockType === "subgroup") return true;
+      if (props.zoom === 'Conversations') return true;
+      if (props.zoom === 'Subgroups' && props.blockType === 'subgroup') return true;
       // skip if collapsed
       if (collapseBefore.value && collapseAfter.value) return i === matchIndex.value;
       else if (collapseBefore.value) return i >= matchIndex.value!;
       else if (collapseAfter.value) return i <= matchIndex.value!;
     }
     return true;
-  })
+  }),
 );
 
-const group = computed<SynergyGroup | null>(() => (props.blockType !== "item" ? (props.data as SynergyGroup) : null));
+const group = computed<SynergyGroup | null>(() => (props.blockType !== 'item' ? (props.data as SynergyGroup) : null));
 
 const subgroupDurationMins = computed(() => {
   const g = group.value;
@@ -265,7 +265,7 @@ async function getConversationStats() {
     totalChildren.value = stats.totalSubgroups;
     participants.value = stats.participants;
   } catch (error) {
-    console.error("Error fetching conversation stats:", error);
+    console.error('Error fetching conversation stats:', error);
     totalChildren.value = 0;
     participants.value = [];
   }
@@ -278,7 +278,7 @@ async function getSubgroupStats() {
     totalChildren.value = stats.totalItems;
     participants.value = stats.participants;
   } catch (error) {
-    console.error("Error fetching subgroup stats:", error);
+    console.error('Error fetching subgroup stats:', error);
     totalChildren.value = 0;
     participants.value = [];
   }
@@ -289,7 +289,7 @@ async function getConversationTopics() {
     const conversation = new Conversation(perspective, props.data.baseExpression);
     topics.value = await conversation.topics();
   } catch (error) {
-    console.error("Error fetching conversation topics:", error);
+    console.error('Error fetching conversation topics:', error);
     topics.value = [];
   }
 }
@@ -299,7 +299,7 @@ async function getSubgroupTopics() {
     const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
     topics.value = await subgroup.topics();
   } catch (error) {
-    console.error("Error fetching subgroup topics:", error);
+    console.error('Error fetching subgroup topics:', error);
     topics.value = [];
   }
 }
@@ -325,7 +325,7 @@ async function getSubgroups() {
     }
     children.value = subgroups;
   } catch (error) {
-    console.error("Error fetching subgroups:", error);
+    console.error('Error fetching subgroups:', error);
     children.value = [];
   }
 }
@@ -333,20 +333,20 @@ async function getSubgroups() {
 async function removeDuplicateItems(itemIds: string[]) {
   try {
     // Used to remove duplicate items from the subgroup if added multiple times due to network errors
-    console.log("Removing duplicate items from subgroup", itemIds);
+    console.log('Removing duplicate items from subgroup', itemIds);
     const duplicateLinks = await Promise.all(
       itemIds.map(async (itemId) => {
         // Grab all links connecting the item to the subgroup
         const links = await perspective.get(
-          new LinkQuery({ source: props.data.baseExpression, predicate: "ad4m://has_child", target: itemId })
+          new LinkQuery({ source: props.data.baseExpression, predicate: 'ad4m://has_child', target: itemId }),
         );
         // Remove all except the first link
         return links.slice(1);
-      })
+      }),
     );
     await perspective.removeLinks(duplicateLinks.flat());
   } catch (error) {
-    console.error("Error removing duplicate items:", error);
+    console.error('Error removing duplicate items:', error);
   }
 }
 
@@ -383,7 +383,7 @@ async function getItems() {
       await removeDuplicateItems(duplicateItems);
     }
   } catch (error) {
-    console.error("Error fetching items:", error);
+    console.error('Error fetching items:', error);
     children.value = [];
   }
 }
@@ -393,8 +393,8 @@ function onGroupClick() {
     props.setSelectedItemId?.(selected.value ? null : props.data.baseExpression);
   }
   if (!selected.value) {
-    if (props.blockType === "conversation") getConversationTopics();
-    if (props.blockType === "subgroup") getSubgroupTopics();
+    if (props.blockType === 'conversation') getConversationTopics();
+    if (props.blockType === 'subgroup') getSubgroupTopics();
   }
 }
 
@@ -404,11 +404,11 @@ watch(
   () => {
     if (firstLoad.value || props.lastChild) {
       firstLoad.value = false;
-      if (props.blockType === "conversation") getConversationStats();
-      if (props.blockType === "subgroup") getSubgroupStats();
+      if (props.blockType === 'conversation') getConversationStats();
+      if (props.blockType === 'subgroup') getSubgroupStats();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Get data when expanding children or refresh triggered & children expanded
@@ -417,15 +417,15 @@ watch(
   () => {
     // False on first load. Updated when zoom useEffect below fires and later when children are expanded by user
     if (showChildren.value) {
-      if (props.blockType === "conversation") getSubgroups();
-      if (props.blockType === "subgroup") getItems();
+      if (props.blockType === 'conversation') getSubgroups();
+      if (props.blockType === 'subgroup') getItems();
       // Deselects block when clicked on if not a match and not the currently selected item
       if (!props.match && props.selectedItemId !== props.data.baseExpression) {
         props.setSelectedItemId?.(null);
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Expand or collapse children based on zoom level
@@ -434,16 +434,16 @@ watch(
   () => {
     // If a match and loading has finished at the level above, stop further expansion
     if (!props.match || props.loading) {
-      if (props.zoom === "Conversations") {
+      if (props.zoom === 'Conversations') {
         showChildren.value = false;
-      } else if (props.zoom === "Subgroups") {
-        showChildren.value = props.blockType === "conversation";
+      } else if (props.zoom === 'Subgroups') {
+        showChildren.value = props.blockType === 'conversation';
       } else {
         showChildren.value = true;
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Mark as selected & get topics if match
@@ -455,11 +455,11 @@ watch(
     selected.value = isSelected || isMatch;
 
     if (isMatch) {
-      if (props.blockType === "conversation") getConversationTopics();
-      if (props.blockType === "subgroup") getSubgroupTopics();
+      if (props.blockType === 'conversation') getConversationTopics();
+      if (props.blockType === 'subgroup') getSubgroupTopics();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Scroll to matching item
@@ -473,12 +473,12 @@ watch(
       if (item && timeline) {
         timeline.scrollBy({
           top: item.getBoundingClientRect().top - 550,
-          behavior: "smooth",
+          behavior: 'smooth',
         });
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

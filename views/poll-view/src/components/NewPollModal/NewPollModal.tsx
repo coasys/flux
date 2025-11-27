@@ -1,9 +1,9 @@
-import * as d3 from "d3";
-import { useRef, useState } from "preact/hooks";
-import Answer from "../../models/Answer";
-import Poll from "../../models/Poll";
-import AnswerCard from "../AnswerCard";
-import styles from "./NewPollModal.module.scss";
+import * as d3 from 'd3';
+import { useRef, useState } from 'preact/hooks';
+import Answer from '../../models/Answer';
+import Poll from '../../models/Poll';
+import AnswerCard from '../AnswerCard';
+import styles from './NewPollModal.module.scss';
 
 type Props = {
   perspective: any;
@@ -12,29 +12,29 @@ type Props = {
   close: () => void;
 };
 
-type VoteTypes = "single-choice" | "multiple-choice" | "weighted-choice";
-const voteTypes = ["single-choice", "multiple-choice", "weighted-choice"] as VoteTypes[];
+type VoteTypes = 'single-choice' | 'multiple-choice' | 'weighted-choice';
+const voteTypes = ['single-choice', 'multiple-choice', 'weighted-choice'] as VoteTypes[];
 
 export default function PollView({ perspective, source, myDid, close }: Props) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [newAnswer, setNewAnswer] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [newAnswer, setNewAnswer] = useState('');
   const [answers, setAnswers] = useState<any[]>([]);
   const [voteType, setVoteType] = useState<VoteTypes>(voteTypes[0]);
   const [answersLocked, setAnswersLocked] = useState(true);
-  const [titleError, setTitleError] = useState("");
-  const [answersError, setAnswersError] = useState("");
+  const [titleError, setTitleError] = useState('');
+  const [answersError, setAnswersError] = useState('');
   const [loading, setLoading] = useState(false);
   const colorScale = useRef(d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis));
 
   function addAnswer() {
-    if (!newAnswer) setAnswersError("Required");
+    if (!newAnswer) setAnswersError('Required');
     else {
-      setAnswersError("");
+      setAnswersError('');
       const newAnswers = [...answers, { text: newAnswer }];
       colorScale.current = d3.scaleSequential().domain([0, newAnswers.length]).interpolator(d3.interpolateViridis);
       setAnswers(newAnswers);
-      setNewAnswer("");
+      setNewAnswer('');
     }
   }
 
@@ -46,9 +46,9 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
   }
 
   async function createPoll() {
-    setTitleError(title ? "" : "Required");
+    setTitleError(title ? '' : 'Required');
     const answersValid = !answersLocked || answers.length > 1;
-    setAnswersError(answersValid ? "" : "At least 2 answers required for locked polls");
+    setAnswersError(answersValid ? '' : 'At least 2 answers required for locked polls');
     if (title && answersValid) {
       setLoading(true);
       const newPoll = new Poll(perspective, undefined, source);
@@ -63,7 +63,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
           const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
           newAnswer.text = answer.text;
           return newAnswer.save();
-        })
+        }),
       )
         .then(() => close())
         .catch(console.log);
@@ -77,7 +77,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
         <j-flex direction="column" gap="600" a="center">
           <j-text variant="heading-lg">New poll</j-text>
 
-          <j-flex direction="column" gap="500" style={{ alignSelf: "stretch" }}>
+          <j-flex direction="column" gap="500" style={{ alignSelf: 'stretch' }}>
             <j-input
               label="Title"
               value={title}
@@ -99,7 +99,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
                 onChange={(e) => setNewAnswer((e.target as HTMLTextAreaElement).value)}
                 errortext={answersError}
                 error={!!answersError}
-                style={{ width: "100%" }}
+                style={{ width: '100%' }}
               />
               <j-button onClick={addAnswer} style={{ marginTop: 26 }}>
                 Add Answer

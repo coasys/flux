@@ -1,13 +1,7 @@
-import {
-  PerspectiveProxy,
-  Link,
-  Subject,
-  Literal,
-  LinkQuery,
-} from "@coasys/ad4m";
-import { community } from "@coasys/flux-constants";
-import { setProperties } from "./model";
-import { v4 as uuidv4 } from "uuid";
+import { PerspectiveProxy, Link, Subject, Literal, LinkQuery } from '@coasys/ad4m';
+import { community } from '@coasys/flux-constants';
+import { setProperties } from './model';
+import { v4 as uuidv4 } from 'uuid';
 
 const { SELF } = community;
 
@@ -25,47 +19,39 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   constructor(subject: { new (): SubjectClass } | string, props: ModelProps) {
     this.perspective = props.perspective;
     this.source = props.source || this.source;
-    this.subject = typeof subject === "string" ? subject : new subject();
+    this.subject = typeof subject === 'string' ? subject : new subject();
     this.tempSubject = subject;
   }
 
   get className(): string {
-    return typeof this.subject === "string"
-      ? this.subject
-      : this.subject.className;
+    return typeof this.subject === 'string' ? this.subject : this.subject.className;
   }
 
   async ensureSubject() {
-    if (typeof this.tempSubject === "string") return;
+    if (typeof this.tempSubject === 'string') return;
     await this.perspective.ensureSDNASubjectClass(this.tempSubject);
   }
 
-  async create(
-    data: SubjectClass,
-    id?: string,
-    source?: string
-  ): Promise<SubjectClass> {
+  async create(data: SubjectClass, id?: string, source?: string): Promise<SubjectClass> {
     await this.ensureSubject();
     const base = id || Literal.from(uuidv4()).toUrl();
 
     let newInstance = await this.perspective.createSubject(this.subject, base);
 
     if (!newInstance) {
-      throw "Failed to create new instance of " + this.subject;
+      throw 'Failed to create new instance of ' + this.subject;
     }
 
     // Connect new instance to source
     await this.perspective.add(
       new Link({
         source: source || this.source,
-        predicate: "ad4m://has_child",
+        predicate: 'ad4m://has_child',
         target: base,
-      })
+      }),
     );
 
-    Object.keys(data).forEach((key) =>
-      data[key] === undefined || data[key] === null ? delete data[key] : {}
-    );
+    Object.keys(data).forEach((key) => (data[key] === undefined || data[key] === null ? delete data[key] : {}));
 
     setProperties(newInstance, data);
 
@@ -78,12 +64,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const instance = await this.get(id);
 
     if (!instance) {
-      throw "Failed to find instance of " + this.subject + " with id " + id;
+      throw 'Failed to find instance of ' + this.subject + ' with id ' + id;
     }
 
-    Object.keys(data).forEach((key) =>
-      data[key] === undefined ? delete data[key] : {}
-    );
+    Object.keys(data).forEach((key) => (data[key] === undefined ? delete data[key] : {}));
 
     setProperties(instance, data);
 
@@ -93,9 +77,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async remove(id: string) {
     if (this.perspective) {
       const linksTo = await this.perspective.get(new LinkQuery({ target: id }));
-      const linksFrom = await this.perspective.get(
-        new LinkQuery({ source: id })
-      );
+      const linksFrom = await this.perspective.get(new LinkQuery({ source: id }));
       this.perspective.removeLinks([...linksFrom, ...linksTo]);
     }
   }
@@ -103,10 +85,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async get(id: string): Promise<SubjectClass | null> {
     await this.ensureSubject();
     if (id) {
-      const subjectProxy = await this.perspective.getSubjectProxy(
-        id,
-        this.subject
-      );
+      const subjectProxy = await this.perspective.getSubjectProxy(id, this.subject);
       return subjectProxy || null;
     } else {
       const all = await this.getAll();
@@ -125,12 +104,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   private async getSubjectData(entry: any) {
-    let links = await this.perspective.get(
-      new LinkQuery({ source: entry.baseExpression })
-    );
+    let links = await this.perspective.get(new LinkQuery({ source: entry.baseExpression }));
 
     const getters = Object.entries(Object.getOwnPropertyDescriptors(entry))
-      .filter(([key, descriptor]) => typeof descriptor.get === "function")
+      .filter(([key, descriptor]) => typeof descriptor.get === 'function')
       .map(([key]) => key);
 
     const promises = getters.map((getter) => entry[getter]);
@@ -138,8 +115,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       return getters.reduce((acc, getter, index) => {
         let value = values[index];
         if (this.tempSubject.prototype?.__properties[getter]?.transform) {
-          value =
-            this.tempSubject.prototype.__properties[getter].transform(value);
+          value = this.tempSubject.prototype.__properties[getter].transform(value);
         }
 
         return {
@@ -164,17 +140,14 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       try {
         const queryResponse = (
           await this.perspective.infer(
-            `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength), sort(AllData, SortedData).`
+            `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength), sort(AllData, SortedData).`,
           )
         )[0];
 
         if (queryResponse.SortedData >= query.size) {
-          const isOutofBound =
-            query.size * query.page > queryResponse.DataLength;
+          const isOutofBound = query.size * query.page > queryResponse.DataLength;
 
-          const newPageSize = isOutofBound
-            ? queryResponse.DataLength - query.size * (query.page - 1)
-            : query.size;
+          const newPageSize = isOutofBound ? queryResponse.DataLength - query.size * (query.page - 1) : query.size;
 
           const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`;
           res = await this.perspective.infer(mainQuery);
@@ -185,55 +158,41 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
           }));
         } else {
           res = await this.perspective.infer(
-            `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+            `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`,
           );
         }
       } catch (e) {
-        console.log("Query failed", e);
+        console.log('Query failed', e);
       }
     } else {
       res = await this.perspective.infer(
-        `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+        `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`,
       );
     }
 
-    const results =
-      res &&
-      res.filter(
-        (obj, index, self) =>
-          index === self.findIndex((t) => t.Base === obj.Base)
-      );
+    const results = res && res.filter((obj, index, self) => index === self.findIndex((t) => t.Base === obj.Base));
 
     if (!res) return [];
 
     const data = await Promise.all(
       results.map(async (result) => {
-        let subject = new Subject(
-          this.perspective!,
-          result.Base,
-          this.className
-        );
+        let subject = new Subject(this.perspective!, result.Base, this.className);
 
         await subject.init();
 
         return subject;
-      })
+      }),
     );
 
     return data;
   }
 
-  async getAllData(
-    source?: string,
-    query?: QueryOptions
-  ): Promise<SubjectClass[]> {
+  async getAllData(source?: string, query?: QueryOptions): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
     const subjects = await this.getAll(source, query);
 
-    const entries = await Promise.all(
-      subjects.map((e) => this.getSubjectData(e))
-    );
+    const entries = await Promise.all(subjects.map((e) => this.getSubjectData(e)));
 
     return entries;
   }

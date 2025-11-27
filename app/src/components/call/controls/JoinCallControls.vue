@@ -1,10 +1,6 @@
 <template>
   <div class="join-call-controls">
-    <j-toggle
-      :checked="mediaSettings.videoEnabled"
-      :disabled="videoDisabled"
-      @change="mediaDeviceStore.toggleVideo"
-    >
+    <j-toggle :checked="mediaSettings.videoEnabled" :disabled="videoDisabled" @change="mediaDeviceStore.toggleVideo">
       Join with camera!
     </j-toggle>
 
@@ -21,9 +17,7 @@
     <div v-if="!streamLoading && audioDisabled" class="audio-disabled-warning">
       <j-flex gap="300" a="center">
         <j-icon name="mic-mute" size="md" color="warning-500" />
-        <j-text size="500" nomargin color="warning-500">
-          Audio is disabled
-        </j-text>
+        <j-text size="500" nomargin color="warning-500"> Audio is disabled </j-text>
       </j-flex>
       <j-text size="400" nomargin color="warning-500">
         Please enable a microphone in the browser to join the call.
@@ -33,9 +27,9 @@
 </template>
 
 <script setup lang="ts">
-import { useMediaDevicesStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { useMediaDevicesStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 const mediaDeviceStore = useMediaDevicesStore();
 const webrtcStore = useWebrtcStore();

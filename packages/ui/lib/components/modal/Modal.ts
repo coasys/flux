@@ -1,12 +1,11 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
     --j-modal-backdrop-bg-color: rgba(0, 0, 0, 0.1);
-    --j-modal-backdrop-transition: all 0.2s
-      cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    --j-modal-backdrop-transition: all 0.2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     --j-modal-transition: all 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     --j-modal-box-shadow: none;
     --j-modal-width: clamp(600px, 50vw, 800px);
@@ -21,27 +20,27 @@ const styles = css`
     --j-modal-max-height: 90vh;
   }
 
-  :host([size="xs"]) {
+  :host([size='xs']) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 30vw, 500px);
   }
 
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 40vw, 600px);
   }
 
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 50vw, 1000px);
   }
 
-  :host([size="xl"]) {
+  :host([size='xl']) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 60vw, 1200px);
   }
 
-  :host([size="fullscreen"]) {
+  :host([size='fullscreen']) {
     --j-modal-width-mobile: 100vw;
     --j-modal-width: 100vw;
     --j-modal-height: 100vh;
@@ -66,12 +65,12 @@ const styles = css`
     visibility: visible;
   }
 
-  :host([open]) [part="modal"] {
+  :host([open]) [part='modal'] {
     opacity: 1;
     transform: scale(1);
   }
 
-  [part="modal"] {
+  [part='modal'] {
     transition: all 0.2s ease;
     opacity: 0;
     transform: scale(0.95);
@@ -92,17 +91,17 @@ const styles = css`
     :host {
       --j-modal-align: center;
     }
-    [part="modal"] {
+    [part='modal'] {
       width: var(--j-modal-width);
     }
   }
 
-  [part="content"] {
+  [part='content'] {
     flex: 1;
     overflow-y: auto;
   }
 
-  [part="close-button"] {
+  [part='close-button'] {
     cursor: pointer;
     padding: 0;
     background: none;
@@ -116,12 +115,12 @@ const styles = css`
     top: var(--j-space-600);
   }
 
-  [part="close-icon"] {
+  [part='close-icon'] {
     width: 15px;
     height: 15px;
   }
 
-  [part="backdrop"] {
+  [part='backdrop'] {
     opacity: 0;
     transition: opacity 0.2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     overflow: visible;
@@ -134,12 +133,12 @@ const styles = css`
     background: rgba(0, 0, 0, 0.6);
   }
 
-  :host([open]) [part="backdrop"] {
+  :host([open]) [part='backdrop'] {
     opacity: 1;
   }
 `;
 
-@customElement("j-modal")
+@customElement('j-modal')
 export default class Menu extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -161,9 +160,9 @@ export default class Menu extends LitElement {
     reflect: true,
     hasChanged(newVal) {
       if (newVal) {
-        document.body.style.overflow = "hidden";
+        document.body.style.overflow = 'hidden';
       } else {
-        document.body.style.overflow = "visible";
+        document.body.style.overflow = 'visible';
       }
       return true;
     },
@@ -171,14 +170,14 @@ export default class Menu extends LitElement {
   open = false;
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("open")) {
-      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+    if (changedProperties.has('open')) {
+      this.dispatchEvent(new CustomEvent('toggle', { bubbles: true }));
     }
     return true;
   }
 
   disconnectedCallback() {
-    document.body.style.overflow = "visible";
+    document.body.style.overflow = 'visible';
   }
 
   render() {
@@ -186,11 +185,7 @@ export default class Menu extends LitElement {
       <div part="backdrop" @click=${() => (this.open = false)}></div>
       <div part="modal">
         <button @click=${() => (this.open = false)} part="close-button">
-          <svg
-            part="close-icon"
-            viewBox="0 0 329.26933 329"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg part="close-icon" viewBox="0 0 329.26933 329" xmlns="http://www.w3.org/2000/svg">
             <path
               d="m194.800781 164.769531 128.210938-128.214843c8.34375-8.339844 8.34375-21.824219 0-30.164063-8.339844-8.339844-21.824219-8.339844-30.164063 0l-128.214844 128.214844-128.210937-128.214844c-8.34375-8.339844-21.824219-8.339844-30.164063 0-8.34375 8.339844-8.34375 21.824219 0 30.164063l128.210938 128.214843-128.210938 128.214844c-8.34375 8.339844-8.34375 21.824219 0 30.164063 4.15625 4.160156 9.621094 6.25 15.082032 6.25 5.460937 0 10.921875-2.089844 15.082031-6.25l128.210937-128.214844 128.214844 128.214844c4.160156 4.160156 9.621094 6.25 15.082032 6.25 5.460937 0 10.921874-2.089844 15.082031-6.25 8.34375-8.339844 8.34375-21.824219 0-30.164063zm0 0"
             />

@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -14,17 +14,17 @@ const styles = css`
     overflow-x: auto;
   }
 
-  [part="base"] {
+  [part='base'] {
     display: inline-flex;
     align-items: center;
     flex-wrap: nowrap;
     border-radius: var(--j-tabs-border-radius);
     padding: var(--j-tabs-padding);
   }
-  :host([wrap]) [part="base"] {
+  :host([wrap]) [part='base'] {
     flex-wrap: wrap;
   }
-  :host([vertical]) [part="base"] {
+  :host([vertical]) [part='base'] {
     flex-direction: column;
     --j-tab-item-text-align: left;
     --j-tab-item-width: 100%;
@@ -32,18 +32,18 @@ const styles = css`
   :host([vertical]) ::slotted(*[checked]) {
     --j-tab-item-box-shadow: 2px 0px 0px 0px var(--j-color-primary-500);
   }
-  :host([full]) [part="base"] {
+  :host([full]) [part='base'] {
     width: 100%;
     display: flex;
   }
   :host([full]) {
     --j-tab-item-width: 100%;
   }
-  :host([size="sm"]) ::slotted(*) {
+  :host([size='sm']) ::slotted(*) {
     --j-tab-item-height: var(--j-size-sm);
     --j-tab-item-font-size: var(--j-font-size-400);
   }
-  :host([size="lg"]) ::slotted(*) {
+  :host([size='lg']) ::slotted(*) {
     --j-tab-item-height: var(--j-size-lg);
     --j-tab-item-font-size: var(--j-font-size-600);
   }
@@ -54,28 +54,28 @@ const styles = css`
     --j-tab-item-color: var(--j-color-black);
     --j-tab-item-box-shadow: 0px 2px 0px 0px var(--j-color-primary-500);
   }
-  :host([variant="button"]) [part="base"] {
+  :host([variant='button']) [part='base'] {
     border-radius: var(--j-border-radius);
     padding: var(--j-space-300);
     background: var(--j-color-ui-50);
   }
-  :host([variant="button"]) ::slotted(*) {
+  :host([variant='button']) ::slotted(*) {
     --j-tab-item-border-radius: var(--j-border-radius);
     --j-tab-item-box-shadow: none;
     --j-tab-item-color: var(--j-color-ui-600);
   }
-  :host([variant="button"]) ::slotted(*:hover) {
+  :host([variant='button']) ::slotted(*:hover) {
     --j-tab-item-box-shadow: none;
     --j-tab-item-color: var(--j-color-ui-700);
   }
-  :host([variant="button"]) ::slotted(*[checked]) {
+  :host([variant='button']) ::slotted(*[checked]) {
     --j-tab-item-background: var(--j-color-primary-100);
     --j-tab-item-box-shadow: none;
     --j-tab-item-color: var(--j-color-black);
   }
 `;
 
-@customElement("j-tabs")
+@customElement('j-tabs')
 export default class Menu extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -132,17 +132,15 @@ export default class Menu extends LitElement {
   }
 
   get selectedElement() {
-    return this.optionElements.find(
-      (opt: any) => opt.value === this.value
-    ) as any;
+    return this.optionElements.find((opt: any) => opt.value === this.value) as any;
   }
 
   firstUpdated() {}
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("value")) {
+    if (changedProperties.has('value')) {
       this.selectTab(this.value);
-      this.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+      this.dispatchEvent(new CustomEvent('change', { bubbles: true }));
     }
     return true;
   }
@@ -164,7 +162,7 @@ export default class Menu extends LitElement {
       }, 100);
     }
 
-    this.addEventListener("tab-selected", (e: any) => {
+    this.addEventListener('tab-selected', (e: any) => {
       e.stopPropagation();
       this.selectTab(e.target.value);
     });

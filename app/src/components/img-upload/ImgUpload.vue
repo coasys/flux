@@ -41,9 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { Cropper } from "vue-advanced-cropper";
-import "vue-advanced-cropper/dist/style.css";
+import { ref, watch } from 'vue';
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
 interface Props {
   value?: string;
@@ -52,7 +52,7 @@ interface Props {
   icon?: string;
 }
 
-withDefaults(defineProps<Props>(), { icon: "person-fill" });
+withDefaults(defineProps<Props>(), { icon: 'person-fill' });
 
 const emit = defineEmits<{ change: [value: string | null]; hide: [value: boolean] }>();
 
@@ -61,7 +61,7 @@ const cropper = ref<InstanceType<typeof Cropper>>();
 const tempProfileImage = ref<string | null>(null);
 
 function onFileClick() {
-  document.getElementById("bannerFileInput")?.click();
+  document.getElementById('bannerFileInput')?.click();
 }
 
 function selectFile(e: Event) {
@@ -83,12 +83,12 @@ function removeImage(e: Event) {
   e.preventDefault();
   e.stopPropagation();
 
-  if (fileInput.value) fileInput.value.value = "";
-  emit("change", null);
+  if (fileInput.value) fileInput.value.value = '';
+  emit('change', null);
 }
 
 function clearImage() {
-  if (fileInput.value) fileInput.value.value = "";
+  if (fileInput.value) fileInput.value.value = '';
   tempProfileImage.value = null;
 }
 
@@ -98,10 +98,10 @@ function selectImage() {
   const result = cropper.value.getResult();
   const data = result.canvas.toDataURL();
   tempProfileImage.value = null;
-  emit("change", data);
+  emit('change', data);
 }
 
-watch(tempProfileImage, (newValue) => emit("hide", newValue !== null));
+watch(tempProfileImage, (newValue) => emit('hide', newValue !== null));
 </script>
 
 <style lang="scss" scoped>

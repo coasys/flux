@@ -1,17 +1,17 @@
-const components = require("./components.json");
-const fs = require("fs");
-var getDirName = require("path").dirname;
+const components = require('./components.json');
+const fs = require('fs');
+var getDirName = require('path').dirname;
 
 const snakeToPascal = (string) => {
   return string
-    .split("/")
+    .split('/')
     .map((snake) =>
       snake
-        .split("-")
+        .split('-')
         .map((substr) => substr.charAt(0).toUpperCase() + substr.slice(1))
-        .join("")
+        .join(''),
     )
-    .join("/");
+    .join('/');
 };
 
 const finalList = [];
@@ -26,10 +26,10 @@ for (const tag of components.tags) {
     for (const attribute of tag.attributes) {
       let type = attribute.type;
 
-      if (attribute.type === "String") {
-        type = "string";
-      } else if (attribute.type === "Boolean") {
-        type = "boolean";
+      if (attribute.type === 'String') {
+        type = 'string';
+      } else if (attribute.type === 'Boolean') {
+        type = 'boolean';
       }
 
       list.push(`${attribute.name}?: ${type};\n\t`);
@@ -37,10 +37,8 @@ for (const tag of components.tags) {
   }
 
   const newType = `
-type ${snakeToPascal(
-    tag.name
-  )}Props = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
-  ${list.join("")}
+type ${snakeToPascal(tag.name)}Props = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
+  ${list.join('')}
 }
   `;
 
@@ -53,7 +51,7 @@ import "construct-style-sheets-polyfill";
 declare module 'preact' {
   namespace JSX {
       interface IntrinsicElements {
-        ${componentList.join("\t\t\t\t")}
+        ${componentList.join('\t\t\t\t')}
       }
   }
 }
@@ -61,12 +59,12 @@ declare module 'preact' {
 declare global {
   namespace JSX {
       interface IntrinsicElements {
-        ${componentList.join("\t\t\t\t")}
+        ${componentList.join('\t\t\t\t')}
       }
   }
 }
 
-${finalList.join("\n")}
+${finalList.join('\n')}
 `;
 
 function writeFile(path, contents, cb) {
@@ -77,4 +75,4 @@ function writeFile(path, contents, cb) {
   });
 }
 
-writeFile("./dist/main.d.ts", finalString, () => {});
+writeFile('./dist/main.d.ts', finalString, () => {});

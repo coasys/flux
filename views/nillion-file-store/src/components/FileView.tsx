@@ -1,27 +1,27 @@
-import { useEffect, useState, useRef } from "preact/hooks";
-import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { getProfile } from "@coasys/flux-api";
-import { v4 } from "uuid";
-import * as nil from "@nillion/client-web";
+import { useEffect, useState, useRef } from 'preact/hooks';
+import { AgentClient, PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { getProfile } from '@coasys/flux-api';
+import { v4 } from 'uuid';
+import * as nil from '@nillion/client-web';
 
-import { NillionContextProvider, useClient } from "../context/nillion.jsx";
-import { getQuote } from "../helpers/getQuote";
-import { storeSecrets } from "../helpers/storeSecrets";
-import { payWithKeplrWallet, PaymentResult } from "../helpers/keplr";
-import KeplrConnectButton from "./KeplrConnect";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { NillionContextProvider, useClient } from '../context/nillion.jsx';
+import { getQuote } from '../helpers/getQuote';
+import { storeSecrets } from '../helpers/storeSecrets';
+import { payWithKeplrWallet, PaymentResult } from '../helpers/keplr';
+import KeplrConnectButton from './KeplrConnect';
+import { SigningStargateClient } from '@cosmjs/stargate';
 
-import File from "../subjects/File";
-import NillionUser from "../subjects/NillionUsers";
+import File from '../subjects/File';
+import NillionUser from '../subjects/NillionUsers';
 
-import FileViewHeading from "./FileViewHeading";
-import FileInputComponent from "./FileInput";
-import QuoteView from "./QuoteView";
-import Files from "./Files";
-import AddPermissions from "./AddPermissions";
+import FileViewHeading from './FileViewHeading';
+import FileInputComponent from './FileInput';
+import QuoteView from './QuoteView';
+import Files from './Files';
+import AddPermissions from './AddPermissions';
 
-import styles from "./FileView.module.css";
+import styles from './FileView.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -31,11 +31,7 @@ type Props = {
 
 export default function AppWithProvider({ perspective, source, agent }: Props) {
   return (
-    <NillionContextProvider
-      agent={agent}
-      perspective={perspective}
-      source={source}
-    >
+    <NillionContextProvider agent={agent} perspective={perspective} source={source}>
       <FileView perspective={perspective} source={source} agent={agent} />
     </NillionContextProvider>
   );
@@ -60,27 +56,23 @@ export function FileView({ perspective, source, agent }: Props) {
   const { client, nillion } = useClient();
 
   const [showNotification, setShowNotification] = useState<boolean>(false);
-  const [notificationText, setNotificationText] = useState<string>("");
-  const [variant, setVariant] = useState<
-    "" | "success" | "danger" | "warning" | undefined
-  >("success");
+  const [notificationText, setNotificationText] = useState<string>('');
+  const [variant, setVariant] = useState<'' | 'success' | 'danger' | 'warning' | undefined>('success');
 
-  const [fileName, setFileName] = useState<string>("");
+  const [fileName, setFileName] = useState<string>('');
   //Stores the id of the secret as its inserted into NadaValues
-  const [secretId, setSecretId] = useState<string>("");
+  const [secretId, setSecretId] = useState<string>('');
   //Stores the id of the store operation
-  const [storeId, setStoreId] = useState<string>("");
+  const [storeId, setStoreId] = useState<string>('');
   //Stores the quote for storing the file
   const [quote, setQuote] = useState<QuoteState | null>(null);
   //Stores the payment receipt for storing the file
-  const [paymentReceipt, setPaymentReceipt] =
-    useState<nil.PaymentReceipt | null>(null);
+  const [paymentReceipt, setPaymentReceipt] = useState<nil.PaymentReceipt | null>(null);
 
   //Stores a map of did to user profile
   const [profiles, setProfiles] = useState(new Map<string, any>());
   //Signing client
-  const [signingClient, setSigningClient] =
-    useState<SigningStargateClient | null>(null);
+  const [signingClient, setSigningClient] = useState<SigningStargateClient | null>(null);
   //Wallet key
   const [wallet, setWallet] = useState<any | null>(null);
   //Connected address
@@ -88,8 +80,7 @@ export function FileView({ perspective, source, agent }: Props) {
   //Other agents in neighbourhood
   const [otherAgents, setOtherAgents] = useState<string[]>([]);
   //State for processing permissions
-  const [processingPermissions, setProcessingPermissions] =
-    useState<Boolean>(false);
+  const [processingPermissions, setProcessingPermissions] = useState<Boolean>(false);
   //Permission set for secret to be stored
   const [permissions, setPermissions] = useState<UserPermission[]>([]);
   const [ttlValue, setTtlValue] = useState<number>(30);
@@ -116,12 +107,12 @@ export function FileView({ perspective, source, agent }: Props) {
     if (!client) return;
     //Create a mapping in ADAM between the nillion user and the agent did
     const createNillionUser = async () => {
-      console.log("Creating nillion user...", client.user_id);
+      console.log('Creating nillion user...', client.user_id);
       const me = await agent.me();
       const newNillionUser = new NillionUser(perspective, me.did, source);
       newNillionUser.userId = client.user_id;
       await newNillionUser.save();
-      console.log("Nillion user created", newNillionUser);
+      console.log('Nillion user created', newNillionUser);
     };
 
     createNillionUser();
@@ -143,20 +134,20 @@ export function FileView({ perspective, source, agent }: Props) {
     //Fetch the other agents in the neighbourhood
     const fetchMembers = async () => {
       const me = await agent.me();
-      console.log("Got me:", me);
+      console.log('Got me:', me);
       setOtherAgents([me.did]);
 
       const neighbourhood = perspective?.getNeighbourhoodProxy();
       if (perspective.neighbourhood) {
         if (neighbourhood) {
           const others = await neighbourhood?.otherAgents();
-          console.log("Got others:", others);
+          console.log('Got others:', others);
           setOtherAgents([...others, me.did]);
         }
       }
     };
 
-    console.log("Fetching neighbourhood members...");
+    console.log('Fetching neighbourhood members...');
     fetchMembers();
   }, [perspective]);
 
@@ -175,9 +166,9 @@ export function FileView({ perspective, source, agent }: Props) {
   }, [wallet]);
 
   const resetState = () => {
-    setFileName("");
-    setSecretId("");
-    setStoreId("");
+    setFileName('');
+    setSecretId('');
+    setStoreId('');
     setQuote(null);
     setPaymentReceipt(null);
     setProcessingPermissions(false);
@@ -188,11 +179,11 @@ export function FileView({ perspective, source, agent }: Props) {
 
   const fetchQuote = async (name: string, byteArray: Uint8Array) => {
     setCurrentFile(byteArray);
-    console.log("Fetching quote...");
-    console.log("For byteArray with length:", byteArray.length);
-    console.log("Nillion:", nillion);
-    console.log("Client:", client);
-    console.log("");
+    console.log('Fetching quote...');
+    console.log('For byteArray with length:', byteArray.length);
+    console.log('Nillion:', nillion);
+    console.log('Client:', client);
+    console.log('');
 
     setFileName(name);
 
@@ -200,34 +191,27 @@ export function FileView({ perspective, source, agent }: Props) {
       let newStoreId = v4();
       setSecretId(newStoreId);
 
-      console.log("SecretId being set to:", newStoreId);
+      console.log('SecretId being set to:', newStoreId);
 
       const secretForQuote = new nillion.NadaValues();
 
       const newSecretBlob = nillion.NadaValue.new_secret_blob(byteArray);
       secretForQuote.insert(newStoreId, newSecretBlob);
 
-      console.log(
-        "Secret for quote:  ",
-        secretForQuote,
-        secretForQuote.toJSON()
-      );
+      console.log('Secret for quote:  ', secretForQuote, secretForQuote.toJSON());
 
-      console.log("Constructing store operation with ttl:", ttlValue);
+      console.log('Constructing store operation with ttl:', ttlValue);
 
-      const storeOperation = nillion.Operation.store_values(
-        secretForQuote,
-        ttlValue
-      );
+      const storeOperation = nillion.Operation.store_values(secretForQuote, ttlValue);
 
-      console.log("Store operation:", storeOperation, storeOperation.toJSON());
+      console.log('Store operation:', storeOperation, storeOperation.toJSON());
 
       const quote = await getQuote({
         client: client,
         operation: storeOperation,
       });
 
-      console.log("Got quote:", quote, quote.toJSON());
+      console.log('Got quote:', quote, quote.toJSON());
 
       setQuote({
         quote,
@@ -235,7 +219,7 @@ export function FileView({ perspective, source, agent }: Props) {
         secret: secretForQuote,
         rawSecret: byteArray,
         operation: storeOperation,
-        type: "store",
+        type: 'store',
       });
     }
   };
@@ -248,20 +232,20 @@ export function FileView({ perspective, source, agent }: Props) {
           signingClient!,
           wallet,
           quote,
-          `store secret: ${fileName}`
+          `store secret: ${fileName}`,
         );
 
         const { receipt, error, tx } = paymentResult;
 
-        console.log("Payment receipt:", receipt, receipt?.toJSON());
-        console.log("Payment error:", error);
-        console.log("Payment tx:", tx);
+        console.log('Payment receipt:', receipt, receipt?.toJSON());
+        console.log('Payment error:', error);
+        console.log('Payment tx:', tx);
 
         if (error) {
           throw new Error(error);
         }
 
-        setVariant("success");
+        setVariant('success');
         setNotificationText(`Transaction confirmed with address: ${tx}.`);
         setShowNotification(true);
 
@@ -269,13 +253,13 @@ export function FileView({ perspective, source, agent }: Props) {
 
         const user_id = client.user_id;
         const otherReadPermissions = permissions
-          .filter((permission) => permission.op === "read")
+          .filter((permission) => permission.op === 'read')
           .map((permission) => permission.nillionAgentId);
         const otherWritePermissions = permissions
-          .filter((permission) => permission.op === "write")
+          .filter((permission) => permission.op === 'write')
           .map((permission) => permission.nillionAgentId);
         const otherDeletePermissions = permissions
-          .filter((permission) => permission.op === "delete")
+          .filter((permission) => permission.op === 'delete')
           .map((permission) => permission.nillionAgentId);
 
         const nillionPermissions = new nillion.Permissions();
@@ -299,7 +283,7 @@ export function FileView({ perspective, source, agent }: Props) {
           permissions: nillionPermissions,
         });
 
-        console.log("storeSecrets completed", storeId);
+        console.log('storeSecrets completed', storeId);
 
         const sizeInMB = quote.rawSecret!.length / 1_048_576;
 
@@ -312,40 +296,31 @@ export function FileView({ perspective, source, agent }: Props) {
 
         setShowLoader(false);
 
-        setVariant("success");
-        setNotificationText(
-          `File stored successfully on Nillion with Secret ID: ${secretId}.`
-        );
+        setVariant('success');
+        setNotificationText(`File stored successfully on Nillion with Secret ID: ${secretId}.`);
         setShowNotification(true);
       } else {
-        console.log("No quote available.");
+        console.log('No quote available.');
       }
     } catch (error: any) {
-      console.log("Got error", error, error.message);
+      console.log('Got error', error, error.message);
       setShowLoader(false);
-      if (error.message.includes("Request rejected")) {
-        setNotificationText("Transaction rejected.");
-        setVariant("");
+      if (error.message.includes('Request rejected')) {
+        setNotificationText('Transaction rejected.');
+        setVariant('');
         setShowNotification(true);
       } else {
-        setNotificationText(
-          "Error storing file. Please report and quote the following error: " +
-            error
-        );
-        setVariant("danger");
+        setNotificationText('Error storing file. Please report and quote the following error: ' + error);
+        setVariant('danger');
         setShowNotification(true);
       }
-      console.error("Error storing file", error);
+      console.error('Error storing file', error);
     } finally {
       resetState();
     }
   };
 
-  const handleGetQuote = async (
-    name: string,
-    storeId: string,
-    secretId: string
-  ) => {
+  const handleGetQuote = async (name: string, storeId: string, secretId: string) => {
     resetState();
     setFileName(name);
     setStoreId(storeId);
@@ -363,7 +338,7 @@ export function FileView({ perspective, source, agent }: Props) {
         quote,
         quoteJson: quote.toJSON(),
         operation,
-        type: "get",
+        type: 'get',
       });
     }
   };
@@ -377,7 +352,7 @@ export function FileView({ perspective, source, agent }: Props) {
     return (
       <j-flex j="center" a="center" wrap gap="500" direction="column">
         <FileViewHeading />
-        <div style={{ height: "300px", display: "grid", placeItems: "center" }}>
+        <div style={{ height: '300px', display: 'grid', placeItems: 'center' }}>
           <KeplrConnectButton
             setChainClient={(signingclient) => setSigningClient(signingclient)}
             setWallet={(key) => setWallet(key)}
@@ -451,11 +426,7 @@ export function FileView({ perspective, source, agent }: Props) {
         />
       </j-flex>
 
-      <j-toast
-        variant={variant}
-        open={showNotification}
-        onToggle={(e) => setShowNotification(e.target.open)}
-      >
+      <j-toast variant={variant} open={showNotification} onToggle={(e) => setShowNotification(e.target.open)}>
         {notificationText}
       </j-toast>
     </>

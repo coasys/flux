@@ -1,7 +1,7 @@
 export const isSupported = (): boolean => {
   try {
-    localStorage.setItem("test", "");
-    localStorage.removeItem("test");
+    localStorage.setItem('test', '');
+    localStorage.removeItem('test');
   } catch (e) {
     return false;
   }
@@ -27,11 +27,7 @@ export const remove = (key: string): void => {
   }
 };
 
-export const setForVersion = (
-  version: string,
-  key: string,
-  value: string
-): void => {
+export const setForVersion = (version: string, key: string, value: string): void => {
   if (isSupported()) {
     localStorage.setItem(`${version}/${key}`, value);
   }

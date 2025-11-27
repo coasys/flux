@@ -16,7 +16,7 @@
           :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
         />
         <j-text color="black" weight="700" size="500" nomargin>
-          {{ channel.isConversation ? conversation?.conversationName || "" : channel.name }}
+          {{ channel.isConversation ? conversation?.conversationName || '' : channel.name }}
         </j-text>
       </j-flex>
     </div>
@@ -25,7 +25,7 @@
       <template v-if="!callWindowOpen && (!inCall || callRoute.channelId === channelId)">
         <j-button size="sm" variant="primary" :onClick="() => uiStore.setCallWindowOpen(true)">
           <j-icon size="sm" name="telephone" style="margin-right: -5px" />
-          {{ `${inCall ? "Open call window" : agentsInCall.length ? "Join call" : "Start call"}` }}
+          {{ `${inCall ? 'Open call window' : agentsInCall.length ? 'Join call' : 'Start call'}` }}
         </j-button>
 
         <AvatarGroup
@@ -44,7 +44,7 @@
         @click="togglePinned"
       >
         <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
-        {{ channel.isPinned ? "Pinned" : "Pin" }}
+        {{ channel.isPinned ? 'Pinned' : 'Pin' }}
       </button>
       <!-- <button v-else class="header-button highlighted" @click="goToEditChannel">
         <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
@@ -72,18 +72,18 @@
 </template>
 
 <script setup lang="ts">
-import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChevronLeftIcon } from "@/components/icons";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useRouteParams } from "@/composables/useRouteParams";
-import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from "@/stores";
-import { useModel } from "@coasys/ad4m-vue-hooks";
-import { App, Channel } from "@coasys/flux-api";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
-import { useRouter } from "vue-router";
+import AvatarGroup from '@/components/avatar-group/AvatarGroup.vue';
+import { ChevronLeftIcon } from '@/components/icons';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useRouteParams } from '@/composables/useRouteParams';
+import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores';
+import { useModel } from '@coasys/ad4m-vue-hooks';
+import { App, Channel } from '@coasys/flux-api';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
-defineOptions({ name: "Header" });
+defineOptions({ name: 'Header' });
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -102,7 +102,7 @@ const channel = computed(() => allChannels.value.find((c) => c.baseExpression ==
 const conversation = computed(() =>
   channel.value?.isConversation
     ? recentConversations.value.find((c) => c.channel.baseExpression === channelId.value)?.conversation
-    : null
+    : null,
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId.value)?.value || []);
@@ -114,7 +114,7 @@ function goToEditChannel() {
 }
 
 function changeCurrentView(viewId: string) {
-  router.push({ name: "view", params: { communityId: communityId.value, channelId: channelId.value, viewId } });
+  router.push({ name: 'view', params: { communityId: communityId.value, channelId: channelId.value, viewId } });
 }
 
 async function togglePinned() {
@@ -125,8 +125,8 @@ async function togglePinned() {
     channelModel.isPinned = !channel.value.isPinned;
     await channelModel.update();
   } catch (error) {
-    console.error("Error toggling pinned state:", error);
-    appStore.showDangerToast({ message: "Failed to update pinned state" });
+    console.error('Error toggling pinned state:', error);
+    appStore.showDangerToast({ message: 'Failed to update pinned state' });
   }
 }
 </script>

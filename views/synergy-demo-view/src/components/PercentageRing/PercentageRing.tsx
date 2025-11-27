@@ -1,4 +1,4 @@
-import styles from "./PercentageRing.module.scss";
+import styles from './PercentageRing.module.scss';
 
 type Props = { ringSize: number; fontSize: number; score: number };
 

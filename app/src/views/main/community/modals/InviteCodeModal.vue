@@ -16,9 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useModalStore } from "@/stores";
-import { ref } from "vue";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useAppStore, useModalStore } from '@/stores';
+import { ref } from 'vue';
 
 const appStore = useAppStore();
 const modalStore = useModalStore();
@@ -29,17 +29,17 @@ const hasCopied = ref(false);
 
 async function getInviteCode() {
   const url = perspective.sharedUrl;
-  if (!url) return appStore.showDangerToast({ message: "No invite code available yet." });
+  if (!url) return appStore.showDangerToast({ message: 'No invite code available yet.' });
 
   const text = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
 
   try {
     await navigator.clipboard.writeText(text);
     hasCopied.value = true;
-    appStore.showSuccessToast({ message: "Your custom invite code is copied to your clipboard!" });
+    appStore.showSuccessToast({ message: 'Your custom invite code is copied to your clipboard!' });
   } catch (error) {
-    console.error("Failed to copy to clipboard:", error);
-    appStore.showDangerToast({ message: "Failed to copy invite code. Please try again." });
+    console.error('Failed to copy to clipboard:', error);
+    appStore.showDangerToast({ message: 'Failed to copy invite code. Please try again.' });
   }
 }
 

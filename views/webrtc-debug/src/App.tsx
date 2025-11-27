@@ -1,5 +1,5 @@
-import { UiProvider } from "./context/UiContext";
-import Channel from "./components/Channel";
+import { UiProvider } from './context/UiContext';
+import Channel from './components/Channel';
 
 export default function App({ perspective, source }) {
   if (!perspective?.uuid || !source) {

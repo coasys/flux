@@ -1,7 +1,7 @@
-import { useAppStore, useModalStore, useThemeStore, useUiStore } from "@/stores";
-import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useAppStore, useModalStore, useThemeStore, useUiStore } from '@/stores';
+import { createPinia, Pinia, setActivePinia } from 'pinia';
 
-describe("App Mutations", () => {
+describe('App Mutations', () => {
   let store: Pinia;
   let date: Date;
 
@@ -13,7 +13,7 @@ describe("App Mutations", () => {
     setActivePinia(store);
   });
 
-  test("toggleCommunitySidebar", () => {
+  test('toggleCommunitySidebar', () => {
     const uiStore = useUiStore();
 
     expect(uiStore.showCommunitySidebar).toBeTruthy();
@@ -23,7 +23,7 @@ describe("App Mutations", () => {
     expect(uiStore.showCommunitySidebar).toBeFalsy();
   });
 
-  test("setCommunitySidebarOpen", () => {
+  test('setCommunitySidebarOpen', () => {
     const uiStore = useUiStore();
 
     expect(uiStore.showCommunitySidebar).toBeTruthy();
@@ -33,114 +33,114 @@ describe("App Mutations", () => {
     expect(uiStore.showCommunitySidebar).toBeFalsy();
   });
 
-  test("setCurrentTheme", () => {
+  test('setCurrentTheme', () => {
     const themeStore = useThemeStore();
 
-    expect(themeStore.currentTheme).toBe("global");
+    expect(themeStore.currentTheme).toBe('global');
 
-    themeStore.setCurrentTheme("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
+    themeStore.setCurrentTheme('bebd2ac2-1e80-44d2-b807-0163c2bcef40');
 
-    expect(themeStore.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
+    expect(themeStore.currentTheme).toBe('bebd2ac2-1e80-44d2-b807-0163c2bcef40');
   });
 
-  test("setGlobalTheme", () => {
+  test('setGlobalTheme', () => {
     const themeStore = useThemeStore();
 
     expect(themeStore.globalTheme).toStrictEqual({
-      fontFamily: "Poppins",
-      fontSize: "md",
+      fontFamily: 'Poppins',
+      fontSize: 'md',
       hue: 270,
-      name: "dark",
+      name: 'dark',
       saturation: 60,
     });
 
     // @ts-ignore
-    themeStore.setGlobalTheme({ fontFamily: "Arial", hue: 70 });
+    themeStore.setGlobalTheme({ fontFamily: 'Arial', hue: 70 });
 
     expect(themeStore.globalTheme).toStrictEqual({
-      fontFamily: "Arial",
-      fontSize: "md",
+      fontFamily: 'Arial',
+      fontSize: 'md',
       hue: 70,
-      name: "dark",
+      name: 'dark',
       saturation: 60,
     });
   });
 
-  test("setToast", () => {
+  test('setToast', () => {
     const appStore = useAppStore();
 
     expect(appStore.toast).toStrictEqual({
-      variant: "",
+      variant: '',
       open: false,
-      message: "",
+      message: '',
     });
 
-    appStore.setToast({ message: "error", open: true, variant: "error" });
+    appStore.setToast({ message: 'error', open: true, variant: 'error' });
 
     expect(appStore.toast).toStrictEqual({
-      variant: "error",
+      variant: 'error',
       open: true,
-      message: "error",
+      message: 'error',
     });
   });
 
-  test("showSuccessToast", () => {
+  test('showSuccessToast', () => {
     const appStore = useAppStore();
 
     expect(appStore.toast).toStrictEqual({
-      variant: "",
+      variant: '',
       open: false,
-      message: "",
+      message: '',
     });
 
-    appStore.showSuccessToast({ message: "success" });
+    appStore.showSuccessToast({ message: 'success' });
 
     expect(appStore.toast).toStrictEqual({
-      variant: "success",
+      variant: 'success',
       open: true,
-      message: "success",
+      message: 'success',
     });
   });
 
-  test("showDangerToast", () => {
+  test('showDangerToast', () => {
     const appStore = useAppStore();
 
     expect(appStore.toast).toStrictEqual({
-      variant: "",
+      variant: '',
       open: false,
-      message: "",
+      message: '',
     });
 
-    appStore.showDangerToast({ message: "error" });
+    appStore.showDangerToast({ message: 'error' });
 
     expect(appStore.toast).toStrictEqual({
-      variant: "danger",
+      variant: 'danger',
       open: true,
-      message: "error",
+      message: 'error',
     });
   });
 
-  test("setWindowState", () => {
+  test('setWindowState', () => {
     const uiStore = useUiStore();
 
-    expect(uiStore.windowState).toBe("visible");
+    expect(uiStore.windowState).toBe('visible');
 
-    uiStore.setWindowState("foreground");
+    uiStore.setWindowState('foreground');
 
-    expect(uiStore.windowState).toBe("foreground");
+    expect(uiStore.windowState).toBe('foreground');
   });
 
-  test("setUpdateState", () => {
+  test('setUpdateState', () => {
     const appStore = useAppStore();
 
-    expect(appStore.updateState).toBe("not-available");
+    expect(appStore.updateState).toBe('not-available');
 
-    appStore.setUpdateState({ updateState: "available" });
+    appStore.setUpdateState({ updateState: 'available' });
 
-    expect(appStore.updateState).toBe("available");
+    expect(appStore.updateState).toBe('available');
   });
 
-  test("setGlobalLoading", () => {
+  test('setGlobalLoading', () => {
     const uiStore = useUiStore();
 
     expect(uiStore.showGlobalLoading).toBeFalsy();
@@ -150,22 +150,22 @@ describe("App Mutations", () => {
     expect(uiStore.showGlobalLoading).toBeTruthy();
   });
 
-  test("setGlobalError", () => {
+  test('setGlobalError', () => {
     const uiStore = useUiStore();
 
     expect(uiStore.globalError.show).toBeFalsy();
-    expect(uiStore.globalError.message).toBe("");
+    expect(uiStore.globalError.message).toBe('');
 
     uiStore.setGlobalError({
       show: true,
-      message: "error",
+      message: 'error',
     });
 
     expect(uiStore.globalError.show).toBeTruthy();
-    expect(uiStore.globalError.message).toBe("error");
+    expect(uiStore.globalError.message).toBe('error');
   });
 
-  test("setShowCreateCommunity", () => {
+  test('setShowCreateCommunity', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showCreateCommunity).toBeFalsy();
@@ -175,7 +175,7 @@ describe("App Mutations", () => {
     expect(modalStore.showCreateCommunity).toBeTruthy();
   });
 
-  test("setShowEditCommunity", () => {
+  test('setShowEditCommunity', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showEditCommunity).toBeFalsy();
@@ -185,7 +185,7 @@ describe("App Mutations", () => {
     expect(modalStore.showEditCommunity).toBeTruthy();
   });
 
-  test("setShowCommunityMembers", () => {
+  test('setShowCommunityMembers', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showCommunityMembers).toBeFalsy();
@@ -195,7 +195,7 @@ describe("App Mutations", () => {
     expect(modalStore.showCommunityMembers).toBeTruthy();
   });
 
-  test("setShowCreateChannel", () => {
+  test('setShowCreateChannel', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showCreateChannel).toBeFalsy();
@@ -205,7 +205,7 @@ describe("App Mutations", () => {
     expect(modalStore.showCreateChannel).toBeTruthy();
   });
 
-  test("setShowEditProfile", () => {
+  test('setShowEditProfile', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showEditProfile).toBeFalsy();
@@ -215,7 +215,7 @@ describe("App Mutations", () => {
     expect(modalStore.showEditProfile).toBeTruthy();
   });
 
-  test("setShowDisclaimer", () => {
+  test('setShowDisclaimer', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showDisclaimer).toBeTruthy();
@@ -225,7 +225,7 @@ describe("App Mutations", () => {
     expect(modalStore.showDisclaimer).toBeFalsy();
   });
 
-  test("setShowSettings", () => {
+  test('setShowSettings', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showSettings).toBeFalsy();
@@ -235,7 +235,7 @@ describe("App Mutations", () => {
     expect(modalStore.showSettings).toBeTruthy();
   });
 
-  test("setShowCommunitySettings", () => {
+  test('setShowCommunitySettings', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showCommunitySettings).toBeFalsy();
@@ -245,7 +245,7 @@ describe("App Mutations", () => {
     expect(modalStore.showCommunitySettings).toBeTruthy();
   });
 
-  test("setShowInviteCode", () => {
+  test('setShowInviteCode', () => {
     const modalStore = useModalStore();
 
     expect(modalStore.showInviteCode).toBeFalsy();

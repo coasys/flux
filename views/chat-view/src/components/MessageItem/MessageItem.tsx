@@ -1,10 +1,10 @@
-import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Message } from "@coasys/flux-api";
-import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useState } from "preact/hooks";
-import styles from "./MessageItem.module.css";
+import { LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Message } from '@coasys/flux-api';
+import { REACTION } from '@coasys/flux-constants/src/communityPredicates';
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useState } from 'preact/hooks';
+import styles from './MessageItem.module.css';
 
 export default function MessageItem({
   showAvatar,
@@ -56,7 +56,7 @@ export default function MessageItem({
         source: message.baseExpression,
         predicate: REACTION,
         target: expression,
-      })
+      }),
     );
 
     const myReactions = reactions.filter((l) => l.author === me.did);
@@ -85,7 +85,7 @@ export default function MessageItem({
         setReplyProfile(await getProfile(replies[0].author));
       }
     } catch (error) {
-      console.error("Failed to fetch reply message:", error);
+      console.error('Failed to fetch reply message:', error);
     }
   }
 
@@ -129,10 +129,10 @@ export default function MessageItem({
         {message.reactions.length > 0 && (
           <div className={styles.reactions}>
             {Object.entries(reactionCounts).map(([emoji, count]) => {
-              if (!emoji.startsWith("emoji://")) return null;
+              if (!emoji.startsWith('emoji://')) return null;
               return (
                 <span className={styles.reaction} onClick={() => onTogggleEmoji(emoji)}>
-                  {hexToEmoji(emoji.split("emoji://")[1])}
+                  {hexToEmoji(emoji.split('emoji://')[1])}
                 </span>
               );
             })}
@@ -178,7 +178,7 @@ function hexToEmoji(hex: string): string | null {
     return String.fromCodePoint(codePoint);
   } catch (error) {
     // Handle invalid input gracefully (e.g., non-hexadecimal input)
-    console.error("Invalid input:", error);
+    console.error('Invalid input:', error);
     return null;
   }
 }

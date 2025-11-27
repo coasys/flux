@@ -1,59 +1,59 @@
 export default {
   Colors: [
     {
-      name: "Primary",
-      prefix: "primary",
+      name: 'Primary',
+      prefix: 'primary',
       values: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
     {
-      name: "UI",
-      prefix: "ui",
+      name: 'UI',
+      prefix: 'ui',
       values: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
     {
-      name: "Success",
-      prefix: "success",
+      name: 'Success',
+      prefix: 'success',
       values: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
     {
-      name: "Danger",
-      prefix: "danger",
+      name: 'Danger',
+      prefix: 'danger',
       values: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
     {
-      name: "Warning",
-      prefix: "warning",
+      name: 'Warning',
+      prefix: 'warning',
       values: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
     {
-      name: "Black",
-      prefix: "black",
+      name: 'Black',
+      prefix: 'black',
     },
     {
-      name: "White",
-      prefix: "white",
+      name: 'White',
+      prefix: 'white',
     },
     {
-      name: "Focus",
-      prefix: "focus",
+      name: 'Focus',
+      prefix: 'focus',
     },
   ],
   Spacing: [
     {
-      name: "",
+      name: '',
       values: [100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
   ],
   Typography: [
     {
-      name: "Font Size",
-      prefix: "font-size",
+      name: 'Font Size',
+      prefix: 'font-size',
       values: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000],
     },
   ],
   Depth: [
     {
-      name: "",
+      name: '',
       values: [100, 200, 300, 400, 500, 600, 700, 800, 900],
     },
   ],

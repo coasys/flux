@@ -1,6 +1,6 @@
 .editor {
   --body-min-height: auto;
-  --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+  --grid-template-areas: 'toolbar toolbar toolbar' 'body body footer';
 }
 .editor::part(base) {
   background: var(--j-color-white);
@@ -8,7 +8,7 @@
 .editor::part(toolbar) {
   display: none;
 }
-.editor[aria-expanded="true"]::part(toolbar) {
+.editor[aria-expanded='true']::part(toolbar) {
   display: block;
 }
 .editor::part(footer) {
@@ -25,15 +25,15 @@
   position: relative;
 }
 
-.wrapper[data-threaded="true"][data-show-thread="true"] > .inner {
+.wrapper[data-threaded='true'][data-show-thread='true'] > .inner {
   display: none;
 }
 
-.wrapper[data-show-thread="true"] > .thread {
+.wrapper[data-show-thread='true'] > .thread {
   display: block;
 }
 
-.wrapper[data-threaded="true"][data-show-thread="true"] > .thread {
+.wrapper[data-threaded='true'][data-show-thread='true'] > .thread {
   position: absolute;
   right: 0;
   width: 100%;

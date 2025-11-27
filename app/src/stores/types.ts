@@ -1,7 +1,7 @@
-import { Agent } from "@coasys/ad4m";
+import { Agent } from '@coasys/ad4m';
 
-export type WindowState = "minimize" | "visible" | "foreground";
-export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
+export type WindowState = 'minimize' | 'visible' | 'foreground';
+export type UpdateState = 'available' | 'not-available' | 'downloading' | 'downloaded' | 'checking';
 
 export interface Payload {
   communityId: string;
@@ -10,7 +10,7 @@ export interface Payload {
 }
 
 export interface ToastState {
-  variant?: "success" | "danger" | "error";
+  variant?: 'success' | 'danger' | 'error';
   message?: string;
   open: boolean;
 }

@@ -94,11 +94,7 @@ Use the hourCycle property to set the hour cycle in the formatted timestamp. Thi
 
 ```html
 <j-timestamp hourCycle="h12" value="2023-04-05T12:34:56Z"></j-timestamp>
-<j-timestamp
-  timeStyle="short"
-  hourCycle="h12"
-  value="2023-04-05T12:34:56Z"
-></j-timestamp>
+<j-timestamp timeStyle="short" hourCycle="h12" value="2023-04-05T12:34:56Z"></j-timestamp>
 ```
 
 ### timeZone <Badge type="info" text="string" />
@@ -108,11 +104,7 @@ Use the timeZone property to set the time zone of the timestamp. This property c
 <j-timestamp timeStyle="long" timeZone="America/Los_Angeles" value="2023-04-05T12:34:56Z"></j-timestamp>
 
 ```html
-<j-timestamp
-  timeStyle="long"
-  timeZone="America/Los_Angeles"
-  value="2023-04-05T12:34:56Z"
-></j-timestamp>
+<j-timestamp timeStyle="long" timeZone="America/Los_Angeles" value="2023-04-05T12:34:56Z"></j-timestamp>
 ```
 
 ### weekday <Badge type="info" text="string" />

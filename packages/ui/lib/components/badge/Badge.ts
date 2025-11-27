@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -10,31 +10,31 @@ const styles = css`
     --j-badge-font-size: var(--j-font-size-400);
     --j-badge-padding: var(--j-space-200) var(--j-space-300);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-badge-font-size: var(--j-font-size-300);
     --j-badge-padding: var(--j-space-100) var(--j-space-200);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-badge-font-size: var(--j-font-size-500);
     --j-badge-padding: var(--j-space-300) var(--j-space-500);
   }
-  :host([variant="primary"]) {
+  :host([variant='primary']) {
     --j-badge-bg: var(--j-color-primary-100);
     --j-badge-color: var(--j-color-primary-600);
   }
-  :host([variant="success"]) {
+  :host([variant='success']) {
     --j-badge-bg: var(--j-color-success-100);
     --j-badge-color: var(--j-color-success-600);
   }
-  :host([variant="warning"]) {
+  :host([variant='warning']) {
     --j-badge-bg: var(--j-color-warning-100);
     --j-badge-color: var(--j-color-warning-600);
   }
-  :host([variant="danger"]) {
+  :host([variant='danger']) {
     --j-badge-bg: var(--j-color-danger-100);
     --j-badge-color: var(--j-color-danger-600);
   }
-  [part="base"] {
+  [part='base'] {
     font-size: var(--j-badge-font-size);
     border-radius: var(--j-badge-border-radius);
     display: inline-flex;
@@ -46,7 +46,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-badge")
+@customElement('j-badge')
 export default class Badge extends LitElement {
   static styles = [sharedStyles, styles];
 

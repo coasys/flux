@@ -1,3 +1,3 @@
-import TimelineColumn from "./TimelineColumn";
+import TimelineColumn from './TimelineColumn';
 
 export default TimelineColumn;

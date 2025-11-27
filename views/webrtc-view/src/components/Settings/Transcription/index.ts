@@ -1,3 +1,3 @@
-import Transcription from "./Transcription";
+import Transcription from './Transcription';
 
 export default Transcription;

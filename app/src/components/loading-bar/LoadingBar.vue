@@ -20,11 +20,7 @@
   height: 100%;
   position: absolute;
   border-radius: 50px;
-  background: linear-gradient(
-    45deg,
-    var(--j-color-primary-500),
-    var(--j-color-primary-300)
-  );
+  background: linear-gradient(45deg, var(--j-color-primary-500), var(--j-color-primary-300));
   left: 0%;
 }
 

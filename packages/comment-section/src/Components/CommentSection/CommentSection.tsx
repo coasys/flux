@@ -1,12 +1,12 @@
-import CommentItem from "../CommentItem";
-import { useState, useRef } from "preact/hooks";
-import { Message } from "@coasys/flux-api";
-import { useModel, useMe } from "@coasys/ad4m-react-hooks";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import styles from "./CommentSection.module.css";
-import Avatar from "../Avatar";
-import { profileFormatter } from "@coasys/flux-utils";
+import CommentItem from '../CommentItem';
+import { useState, useRef } from 'preact/hooks';
+import { Message } from '@coasys/flux-api';
+import { useModel, useMe } from '@coasys/ad4m-react-hooks';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import styles from './CommentSection.module.css';
+import Avatar from '../Avatar';
+import { profileFormatter } from '@coasys/flux-utils';
 
 export default function CommentSection({
   agent,
@@ -25,7 +25,7 @@ export default function CommentSection({
   const { entries: comments } = useModel({ perspective, model: Message, query: { source } });
 
   function onKeydown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
     }
@@ -47,11 +47,7 @@ export default function CommentSection({
     <div className={styles.base} part="base">
       <j-flex a="center" gap="400">
         <div>
-          <Avatar
-            size="sm"
-            did={myAgent.me?.did}
-            url={myAgent.profile?.profileThumbnailPicture}
-          ></Avatar>
+          <Avatar size="sm" did={myAgent.me?.did} url={myAgent.profile?.profileThumbnailPicture}></Avatar>
         </div>
         <flux-editor
           part="editor"
@@ -74,12 +70,7 @@ export default function CommentSection({
             >
               <j-icon size="sm" name="type"></j-icon>
             </j-button>
-            <j-button
-              onClick={submit}
-              className={styles.submitButton}
-              size="sm"
-              variant="primary"
-            >
+            <j-button onClick={submit} className={styles.submitButton} size="sm" variant="primary">
               Publish
             </j-button>
           </footer>
@@ -88,11 +79,7 @@ export default function CommentSection({
       {comments.length > 0 && (
         <div className={styles.comments} part="comments">
           {comments.map((comment) => (
-            <CommentItem
-              agent={agent}
-              perspective={perspective}
-              comment={comment}
-            ></CommentItem>
+            <CommentItem agent={agent} perspective={perspective} comment={comment}></CommentItem>
           ))}
         </div>
       )}

@@ -72,7 +72,7 @@ When using `create-flux-app`, you should not need to do this. Theming is control
 To use them in your project import one of them like this:
 
 ```js
-import "@fluxsocial/ui/themes/{name}.css";
+import '@fluxsocial/ui/themes/{name}.css';
 ```
 
 And then add the name to the html element like this:

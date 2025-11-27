@@ -1,7 +1,7 @@
-import { ref, watch, ShallowRef } from "vue";
-import { SubjectRepository, getPerspectiveMeta } from "@coasys/flux-api";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { Community } from "@coasys/flux-api";
+import { ref, watch, ShallowRef } from 'vue';
+import { SubjectRepository, getPerspectiveMeta } from '@coasys/flux-api';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { Community } from '@coasys/flux-api';
 
 async function getCommunity(p: PerspectiveProxy): Promise<Community> {
   const subject = new SubjectRepository(Community, {
@@ -18,28 +18,28 @@ async function getCommunity(p: PerspectiveProxy): Promise<Community> {
       return {
         // @ts-ignore
         uuid: p.uuid,
-        author: meta.author || "",
+        author: meta.author || '',
         timestamp: new Date(),
-        name: p.name || meta.name || "Unkown Community",
-        description: meta.description || "",
-        image: "",
-        thumbnail: "",
+        name: p.name || meta.name || 'Unkown Community',
+        description: meta.description || '',
+        image: '',
+        thumbnail: '',
         neighbourhoodUrl: p.sharedUrl!,
-        id: "",
+        id: '',
         state: p.state,
       };
     } catch (e) {
       return {
         // @ts-ignore
         uuid: p.uuid,
-        author: "",
+        author: '',
         timestamp: new Date(),
-        name: p.name || "Unkown Community",
-        description: "",
-        image: "",
-        thumbnail: "",
+        name: p.name || 'Unkown Community',
+        description: '',
+        image: '',
+        thumbnail: '',
         neighbourhoodUrl: p.sharedUrl!,
-        id: "",
+        id: '',
         state: p.state,
       };
     }
@@ -49,7 +49,7 @@ async function getCommunity(p: PerspectiveProxy): Promise<Community> {
 export function useCommunities(
   neighbourhoods: ShallowRef<{
     [x: string]: PerspectiveProxy;
-  }>
+  }>,
 ) {
   let communities = ref<{ [x: string]: Community }>({});
 
@@ -73,7 +73,7 @@ export function useCommunities(
         communities.value = { ...communities.value, [p.uuid]: community };
       }, {});
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   return { communities };

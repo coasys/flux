@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -17,7 +17,7 @@ const styles = css`
     --j-button-border-radius: var(--j-border-radius);
     --j-button-font-size: var(--j-font-size-500);
   }
-  [part="base"] {
+  [part='base'] {
     opacity: var(--j-button-opacity);
     text-decoration: var(--j-button-text-decoration);
     transition: box-shadow 0.2s ease;
@@ -43,7 +43,7 @@ const styles = css`
     white-space: nowrap;
   }
 
-  :host([disabled]) [part="base"] {
+  :host([disabled]) [part='base'] {
     --j-button-opacity: 0.5;
     cursor: default;
   }
@@ -62,83 +62,83 @@ const styles = css`
     --j-spinner-color: var(--j-button-color);
   }
 
-  :host([loading]) [part="base"] slot {
+  :host([loading]) [part='base'] slot {
     visibility: hidden;
     opacity: 0;
   }
 
-  :host([variant="primary"]) {
+  :host([variant='primary']) {
     --j-button-bg: var(--j-color-primary-600);
     --j-button-color: var(--j-color-white);
     --j-button-border: 1px solid transparent;
   }
 
-  :host([variant="primary"]:hover) {
+  :host([variant='primary']:hover) {
     --j-button-bg: var(--j-color-primary-700);
     cursor: pointer;
   }
 
-  :host([variant="link"]) {
+  :host([variant='link']) {
     --j-button-color: var(--j-color-primary-700);
     --j-button-bg: transparent;
     --j-button-border: 1px solid transparent;
   }
 
-  :host([variant="link"]:hover) {
+  :host([variant='link']:hover) {
     --j-button-bg: transparent;
     --j-button-text-decoration: underline;
     --j-button-color: var(--j-color-primary-600);
   }
 
-  :host([variant="subtle"]) {
+  :host([variant='subtle']) {
     --j-button-bg: rgb(0 0 0 / 10%);
     --j-button-color: var(--j-color-ui-800);
     --j-button-border: 1px solid transparent;
   }
 
-  :host([variant="subtle"]:hover) {
+  :host([variant='subtle']:hover) {
     --j-button-color: var(--j-color-black);
     --j-button-bg: rgb(0 0 0 / 15%);
   }
 
-  :host([variant="ghost"]) {
+  :host([variant='ghost']) {
     --j-button-opacity: 0.5;
     --j-button-bg: transparent;
     --j-button-color: currentColor;
     --j-button-border: 1px solid transparent;
   }
 
-  :host([variant="ghost"]:hover) {
+  :host([variant='ghost']:hover) {
     --j-button-opacity: 1;
   }
 
-  :host([variant="danger"]) {
+  :host([variant='danger']) {
     --j-button-bg: var(--j-color-danger-200);
     --j-button-color: currentColor;
     --j-button-border: 1px solid transparent;
   }
 
-  :host([variant="danger"]:hover) {
+  :host([variant='danger']:hover) {
     --j-button-opacity: 1;
   }
 
-  :host([size="xs"]) {
+  :host([size='xs']) {
     --j-button-font-size: var(--j-font-size-400);
     --j-button-padding: 0 var(--j-space-200);
     --j-button-height: var(--j-size-xs);
   }
 
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-button-font-size: var(--j-font-size-400);
     --j-button-padding: 0 var(--j-space-300);
     --j-button-height: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-button-font-size: var(--j-font-size-500);
     --j-button-height: var(--j-size-lg);
     --j-button-padding: 0 var(--j-space-600);
   }
-  :host([size="xl"]) {
+  :host([size='xl']) {
     --j-button-font-size: var(--j-font-size-600);
     --j-button-height: var(--j-size-xl);
     --j-button-padding: 0 var(--j-space-600);
@@ -157,7 +157,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-button")
+@customElement('j-button')
 export default class Button extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -235,12 +235,7 @@ export default class Button extends LitElement {
   render() {
     return this.href
       ? html`
-          <a
-            href=${this.href}
-            @click=${this.handleClick}
-            target="_blank"
-            part="base"
-          >
+          <a href=${this.href} @click=${this.handleClick} target="_blank" part="base">
             <j-spinner></j-spinner>
             <slot name="start"></slot>
             <slot></slot>
@@ -248,11 +243,7 @@ export default class Button extends LitElement {
           </a>
         `
       : html`
-          <button
-            ?disabled=${this.disabled || this.loading}
-            @click=${this.handleClick}
-            part="base"
-          >
+          <button ?disabled=${this.disabled || this.loading} @click=${this.handleClick} part="base">
             <j-spinner></j-spinner>
             <slot name="start"></slot>
             <slot></slot>

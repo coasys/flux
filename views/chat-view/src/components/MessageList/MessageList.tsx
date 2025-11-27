@@ -1,11 +1,11 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Message } from "@coasys/flux-api";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { Virtuoso } from "react-virtuoso";
-import MessageItem from "../MessageItem";
-import styles from "./MessageList.module.css";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Message } from '@coasys/flux-api';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { Virtuoso } from 'react-virtuoso';
+import MessageItem from '../MessageItem';
+import styles from './MessageList.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -40,7 +40,7 @@ export default function MessageList({
   const { entries, loading, totalCount, loadMore } = useModel({
     perspective,
     model: Message,
-    query: { source, order: { timestamp: "DESC" } },
+    query: { source, order: { timestamp: 'DESC' } },
     pageSize: PAGE_SIZE,
   });
 
@@ -91,13 +91,13 @@ export default function MessageList({
         <j-button
           circle
           variant="primary"
-          onClick={() => virtuosoRef.current.scrollToIndex({ index: messages.length - 1, behavior: "smooth" })}
+          onClick={() => virtuosoRef.current.scrollToIndex({ index: messages.length - 1, behavior: 'smooth' })}
           style={{
-            position: "absolute",
-            right: "var(--j-space-500)",
+            position: 'absolute',
+            right: 'var(--j-space-500)',
             zIndex: 10,
-            bottom: "var(--j-space-300)",
-            transform: "translate(-1rem, -2rem)",
+            bottom: 'var(--j-space-300)',
+            transform: 'translate(-1rem, -2rem)',
           }}
         >
           <j-icon size="sm" name="arrow-down"></j-icon>
@@ -125,7 +125,7 @@ export default function MessageList({
           },
         }}
         ref={virtuosoRef}
-        followOutput={"smooth"}
+        followOutput={'smooth'}
         atBottomStateChange={setAtBottom}
         className={styles.scroller}
         alignToBottom

@@ -23,8 +23,8 @@ Then import it in your app:
 ::: code-group
 
 ```js [bundler]
-import "@coasys/flux-ui/dist/main.css";
-import "@coasys/flux-ui";
+import '@coasys/flux-ui/dist/main.css';
+import '@coasys/flux-ui';
 ```
 
 ```html [cdn]

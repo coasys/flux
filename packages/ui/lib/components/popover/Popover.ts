@@ -1,7 +1,7 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { createPopper } from "@popperjs/core";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { createPopper } from '@popperjs/core';
+import sharedStyles from '../../shared/styles';
 
 const generateGetBoundingClientRect = (x = 0, y = 0) => {
   return () => ({
@@ -15,28 +15,28 @@ const generateGetBoundingClientRect = (x = 0, y = 0) => {
 };
 
 type Placement =
-  | "auto"
-  | "auto-start"
-  | "auto-end"
-  | "top"
-  | "top-start"
-  | "top-end"
-  | "bottom"
-  | "bottom-start"
-  | "bottom-end"
-  | "right"
-  | "right-start"
-  | "right-end"
-  | "left"
-  | "left-start"
-  | "left-end";
+  | 'auto'
+  | 'auto-start'
+  | 'auto-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'right'
+  | 'right-start'
+  | 'right-end'
+  | 'left'
+  | 'left-start'
+  | 'left-end';
 
 const styles = css`
-  :host [part="content"] {
+  :host [part='content'] {
     z-index: 999;
     display: none;
   }
-  :host([open]) [part="content"] {
+  :host([open]) [part='content'] {
     display: inline-block;
     animation: fade-in 0.2s ease;
   }
@@ -51,7 +51,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-popover")
+@customElement('j-popover')
 export default class Popover extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -69,7 +69,7 @@ export default class Popover extends LitElement {
    * @attr
    */
   @property({ type: String, reflect: true })
-  placement = "auto";
+  placement = 'auto';
 
   /**
    * Open
@@ -77,7 +77,7 @@ export default class Popover extends LitElement {
    * @attr
    */
   @property({ type: String, reflect: true })
-  event = "click";
+  event = 'click';
 
   @state()
   clientY = 0;
@@ -99,14 +99,12 @@ export default class Popover extends LitElement {
   }
 
   get triggerAssignedNode(): Node {
-    const slot: HTMLSlotElement =
-      this.renderRoot.querySelector("[name='trigger']");
+    const slot: HTMLSlotElement = this.renderRoot.querySelector("[name='trigger']");
     return slot.assignedNodes()[0];
   }
 
   get contentAssignedNode(): Node {
-    const slot: HTMLSlotElement =
-      this.renderRoot.querySelector("[name='content']");
+    const slot: HTMLSlotElement = this.renderRoot.querySelector("[name='content']");
     return slot.assignedNodes()[0];
   }
 
@@ -120,14 +118,14 @@ export default class Popover extends LitElement {
       this.open = !this.open;
     });
 
-    if (this.event === "mouseover") {
-      trigger.addEventListener("mouseover", () => (this.open = true));
-      trigger.addEventListener("mouseleave", () => (this.open = false));
-      trigger.addEventListener("mouseleave", () => (this.open = false));
+    if (this.event === 'mouseover') {
+      trigger.addEventListener('mouseover', () => (this.open = true));
+      trigger.addEventListener('mouseleave', () => (this.open = false));
+      trigger.addEventListener('mouseleave', () => (this.open = false));
     }
 
     // Handle click outside
-    window.addEventListener("mousedown", (e) => {
+    window.addEventListener('mousedown', (e) => {
       var path = e.path || (e.composedPath && e.composedPath());
 
       const clickedTrigger = path.includes(this.triggerAssignedNode);
@@ -143,7 +141,7 @@ export default class Popover extends LitElement {
     const trigger = this.triggerPart;
     const content = this.contentPart;
 
-    if (this.event === "contextmenu") {
+    if (this.event === 'contextmenu') {
       const virtualElement = {
         contextElement: trigger,
         getBoundingClientRect: generateGetBoundingClientRect(),
@@ -151,10 +149,10 @@ export default class Popover extends LitElement {
 
       const instance = createPopper(virtualElement, content, {
         placement: this.placement as Placement,
-        strategy: "fixed",
+        strategy: 'fixed',
         modifiers: [
           {
-            name: "offset",
+            name: 'offset',
             options: {
               offset: [10, 10],
             },
@@ -162,24 +160,21 @@ export default class Popover extends LitElement {
         ],
       });
 
-      virtualElement.getBoundingClientRect = generateGetBoundingClientRect(
-        this.clientX,
-        this.clientY
-      );
+      virtualElement.getBoundingClientRect = generateGetBoundingClientRect(this.clientX, this.clientY);
       instance.update();
     } else {
       createPopper(trigger, content, {
         placement: this.placement as Placement,
-        strategy: "fixed",
+        strategy: 'fixed',
         modifiers: [
           {
-            name: "offset",
+            name: 'offset',
             options: {
               offset: [10, 10],
             },
           },
           {
-            name: "computeStyles",
+            name: 'computeStyles',
             options: {
               gpuAcceleration: false, // true by default
             },
@@ -190,8 +185,8 @@ export default class Popover extends LitElement {
   }
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("open")) {
-      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+    if (changedProperties.has('open')) {
+      this.dispatchEvent(new CustomEvent('toggle', { bubbles: true }));
       if (this.open) {
         this._createPopover();
       }

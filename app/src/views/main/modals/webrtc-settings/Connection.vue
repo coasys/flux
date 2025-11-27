@@ -69,27 +69,27 @@
 </template>
 
 <script setup lang="ts">
-import { useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 const webrtcStore = useWebrtcStore();
 
 const { iceServers, inCall } = storeToRefs(webrtcStore);
 
 const showAddNew = ref(false);
-const url = ref("");
-const username = ref("");
-const credential = ref("");
+const url = ref('');
+const username = ref('');
+const credential = ref('');
 
 async function addServer() {
   const newServer = { urls: url.value, username: username.value, credential: credential.value };
   webrtcStore.addIceServer(newServer);
 
   // Reset input state
-  url.value = "";
-  username.value = "";
-  credential.value = "";
+  url.value = '';
+  username.value = '';
+  credential.value = '';
   showAddNew.value = false;
 }
 </script>

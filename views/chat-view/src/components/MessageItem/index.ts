@@ -1,3 +1,3 @@
-import MessageItem from "./MessageItem";
+import MessageItem from './MessageItem';
 
 export default MessageItem;

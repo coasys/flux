@@ -1,5 +1,5 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal, Optional } from "@coasys/ad4m";
-import { SynergyMatch } from "@coasys/flux-utils";
+import { ModelOptions, Ad4mModel, Flag, Property, Literal, Optional } from '@coasys/ad4m';
+import { SynergyMatch } from '@coasys/flux-utils';
 
 const CHANNEL_FROM_ITEM = `
   % Find Channel that owns this Item
@@ -24,30 +24,30 @@ const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
   property_getter(E, EmbeddingId, "embedding", Embedding)
 `;
 
-@ModelOptions({ name: "SemanticRelationship" })
+@ModelOptions({ name: 'SemanticRelationship' })
 export default class SemanticRelationship extends Ad4mModel {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://has_semantic_relationship",
+    through: 'flux://entry_type',
+    value: 'flux://has_semantic_relationship',
   })
   type: string;
 
   @Property({
-    through: "flux://has_expression",
+    through: 'flux://has_expression',
     writable: true,
   })
   expression: string; // base url of expression
 
   @Optional({
-    through: "flux://has_tag",
+    through: 'flux://has_tag',
     writable: true,
   })
   tag: string; // base url of semantic tag
 
   @Optional({
-    through: "flux://has_relevance",
+    through: 'flux://has_relevance',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   relevance: number; // 0 - 100
 
@@ -55,17 +55,17 @@ export default class SemanticRelationship extends Ad4mModel {
     // get the embedding of a specific item
     try {
       const result = await this.perspective.infer(`
-        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace("ItemId", `"${itemId}"`)}
+        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace('ItemId', `"${itemId}"`)}
         ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}.
       `);
 
-      if (!result?.[0]?.Embedding) return []
+      if (!result?.[0]?.Embedding) return [];
       else {
         const embeddingExpression = await this.perspective.getExpression(result[0].Embedding);
         return JSON.parse(embeddingExpression.data);
-      };
+      }
     } catch (error) {
-      console.error("Error getting items embedding", error);
+      console.error('Error getting items embedding', error);
       return [];
     }
   }
@@ -85,18 +85,20 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-        const embeddingExpression = await this.perspective.getExpression(embedding);
-        return {
-          baseExpression,
-          type: "Conversation",
-          embedding: JSON.parse(embeddingExpression.data),
-          channelId,
-          channelName: Literal.fromUrl(channelName).get().data,
-        }
-      }));
+      return Promise.all(
+        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+          const embeddingExpression = await this.perspective.getExpression(embedding);
+          return {
+            baseExpression,
+            type: 'Conversation',
+            embedding: JSON.parse(embeddingExpression.data),
+            channelId,
+            channelName: Literal.fromUrl(channelName).get().data,
+          };
+        }),
+      );
     } catch (error) {
-      console.error("Error getting all conversation embedding", error);
+      console.error('Error getting all conversation embedding', error);
       return [];
     }
   }
@@ -115,24 +117,26 @@ export default class SemanticRelationship extends Ad4mModel {
           instance(CC, Conversation),
           triple(Conversation, "ad4m://has_child", ItemId),
 
-          ${CHANNEL_FROM_ITEM.replace("ItemId", "Conversation")}
+          ${CHANNEL_FROM_ITEM.replace('ItemId', 'Conversation')}
           ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
           ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
         ), Embeddings).
       `);
 
-      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-        const embeddingExpression = await this.perspective.getExpression(embedding);
-        return {
-          baseExpression,
-          type: "Subgroup",
-          embedding: JSON.parse(embeddingExpression.data),
-          channelId,
-          channelName: Literal.fromUrl(channelName).get().data,
-        }
-      }))
+      return Promise.all(
+        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+          const embeddingExpression = await this.perspective.getExpression(embedding);
+          return {
+            baseExpression,
+            type: 'Subgroup',
+            embedding: JSON.parse(embeddingExpression.data),
+            channelId,
+            channelName: Literal.fromUrl(channelName).get().data,
+          };
+        }),
+      );
     } catch (error) {
-      console.error("Error getting all conversation embedding", error);
+      console.error('Error getting all conversation embedding', error);
       return [];
     }
   }
@@ -163,18 +167,20 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, type, embedding, channelId, channelName]) => {
-        const embeddingExpression = await this.perspective.getExpression(embedding);
-        return {
-          baseExpression,
-          type,
-          embedding: JSON.parse(embeddingExpression.data),
-          channelId,
-          channelName: Literal.fromUrl(channelName).get().data,
-        }
-      }));
+      return Promise.all(
+        (result[0]?.Embeddings || []).map(async ([baseExpression, type, embedding, channelId, channelName]) => {
+          const embeddingExpression = await this.perspective.getExpression(embedding);
+          return {
+            baseExpression,
+            type,
+            embedding: JSON.parse(embeddingExpression.data),
+            channelId,
+            channelName: Literal.fromUrl(channelName).get().data,
+          };
+        }),
+      );
     } catch (error) {
-      console.error("Error getting all conversation embedding", error);
+      console.error('Error getting all conversation embedding', error);
       return [];
     }
   }
@@ -194,18 +200,20 @@ export default class SemanticRelationship extends Ad4mModel {
         ), Embeddings).
       `);
 
-      return Promise.all((result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-        const embeddingExpression = await this.perspective.getExpression(embedding);
-        return {
-          baseExpression,
-          type: itemType,
-          embedding: JSON.parse(embeddingExpression.data),
-          channelId,
-          channelName: Literal.fromUrl(channelName).get().data,
-        }
-      }));
+      return Promise.all(
+        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
+          const embeddingExpression = await this.perspective.getExpression(embedding);
+          return {
+            baseExpression,
+            type: itemType,
+            embedding: JSON.parse(embeddingExpression.data),
+            channelId,
+            channelName: Literal.fromUrl(channelName).get().data,
+          };
+        }),
+      );
     } catch (error) {
-      console.error("Error getting all conversation embedding", error);
+      console.error('Error getting all conversation embedding', error);
       return [];
     }
   }

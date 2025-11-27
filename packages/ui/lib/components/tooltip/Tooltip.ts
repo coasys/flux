@@ -1,33 +1,33 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { createPopper } from "@popperjs/core";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { createPopper } from '@popperjs/core';
+import sharedStyles from '../../shared/styles';
 
 type Placement =
-  | "auto"
-  | "auto-start"
-  | "auto-end"
-  | "top"
-  | "top-start"
-  | "top-end"
-  | "bottom"
-  | "bottom-start"
-  | "bottom-end"
-  | "right"
-  | "right-start"
-  | "right-end"
-  | "left"
-  | "left-start"
-  | "left-end";
+  | 'auto'
+  | 'auto-start'
+  | 'auto-end'
+  | 'top'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'right'
+  | 'right-start'
+  | 'right-end'
+  | 'left'
+  | 'left-start'
+  | 'left-end';
 
 const styles = css`
-  :host([open]) [part="tooltip"] {
+  :host([open]) [part='tooltip'] {
     display: inline-block;
   }
-  [part="base"] {
+  [part='base'] {
     display: inline-block;
   }
-  [part="tooltip"] {
+  [part='tooltip'] {
     white-space: nowrap;
     z-index: 999;
     display: none;
@@ -38,45 +38,45 @@ const styles = css`
     color: white;
     border-radius: var(--j-border-radius);
   }
-  [part="content"] {
+  [part='content'] {
     display: inline-block;
     position: relative;
   }
-  [part="arrow"],
-  [part="arrow"]::before {
+  [part='arrow'],
+  [part='arrow']::before {
     position: absolute;
     width: 8px;
     height: 8px;
     background: inherit;
   }
 
-  [part="arrow"] {
+  [part='arrow'] {
     visibility: hidden;
   }
 
-  [part="arrow"]::before {
+  [part='arrow']::before {
     visibility: visible;
-    content: "";
+    content: '';
     transform: rotate(45deg);
   }
-  [part="tooltip"][data-popper-placement^="top"] > [part="arrow"] {
+  [part='tooltip'][data-popper-placement^='top'] > [part='arrow'] {
     bottom: -4px;
   }
 
-  [part="tooltip"][data-popper-placement^="bottom"] > [part="arrow"] {
+  [part='tooltip'][data-popper-placement^='bottom'] > [part='arrow'] {
     top: -4px;
   }
 
-  [part="tooltip"][data-popper-placement^="left"] > [part="arrow"] {
+  [part='tooltip'][data-popper-placement^='left'] > [part='arrow'] {
     right: -4px;
   }
 
-  [part="tooltip"][data-popper-placement^="right"] > [part="arrow"] {
+  [part='tooltip'][data-popper-placement^='right'] > [part='arrow'] {
     left: -4px;
   }
 `;
 
-@customElement("j-tooltip")
+@customElement('j-tooltip')
 export default class Tooltip extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -102,7 +102,7 @@ export default class Tooltip extends LitElement {
    * @attr
    */
   @property({ type: String, reflect: true })
-  strategy: "absolute" | "fixed" = "absolute";
+  strategy: 'absolute' | 'fixed' = 'absolute';
 
   /**
    * Placement
@@ -110,7 +110,7 @@ export default class Tooltip extends LitElement {
    * @attr
    */
   @property({ type: String, reflect: true })
-  placement = "auto";
+  placement = 'auto';
 
   @state()
   popperInstance = null;
@@ -124,7 +124,7 @@ export default class Tooltip extends LitElement {
   }
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("open")) {
+    if (changedProperties.has('open')) {
       if (this.open) {
         if (this.popperInstance) {
           this.popperInstance.setOptions({ placement: this.placement });
@@ -133,9 +133,9 @@ export default class Tooltip extends LitElement {
           this.createTooltip();
         }
       } else {
-        this.tooltipEl?.removeAttribute("data-show");
+        this.tooltipEl?.removeAttribute('data-show');
       }
-      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+      this.dispatchEvent(new CustomEvent('toggle', { bubbles: true }));
     }
     return true;
   }
@@ -147,7 +147,7 @@ export default class Tooltip extends LitElement {
         strategy: this.strategy,
         modifiers: [
           {
-            name: "offset",
+            name: 'offset',
             options: {
               offset: [0, 10],
             },
@@ -163,10 +163,10 @@ export default class Tooltip extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListener("mouseover", () => this.show());
-    this.addEventListener("mouseleave", () => this.hide());
-    this.addEventListener("focusin", () => this.show());
-    this.addEventListener("focusout", () => this.hide());
+    this.addEventListener('mouseover', () => this.show());
+    this.addEventListener('mouseleave', () => this.hide());
+    this.addEventListener('focusin', () => this.show());
+    this.addEventListener('focusout', () => this.hide());
   }
 
   show() {
@@ -184,11 +184,7 @@ export default class Tooltip extends LitElement {
           <slot name="title">${this.title}</slot>
           <div part="arrow" data-popper-arrow></div>
         </div>
-        <div
-          part="content"
-          @click=${() => this.hide()}
-          @contextmenu=${() => this.hide()}
-        >
+        <div part="content" @click=${() => this.hide()} @contextmenu=${() => this.hide()}>
           <slot></slot>
         </div>
       </div>

@@ -31,7 +31,7 @@
       </div>
 
       <!-- Loading state -->
-      <div v-if="loading" style="margin-top: 200px;">
+      <div v-if="loading" style="margin-top: 200px">
         <j-flex direction="column" gap="500" a="center" j="center" class="loading-state">
           <j-spinner />
           <j-text nomargin>Loading timeline...</j-text>
@@ -102,18 +102,18 @@
 </template>
 
 <script setup lang="ts">
-import Avatar from "@/components/conversation/avatar/Avatar.vue";
-import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
-import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { llmProcessingSteps, useAiStore } from "@/stores";
-import { closeMenu } from "@/utils/helperFunctions";
-import { Channel } from "@coasys/flux-api";
-import { ProcessingState } from "@coasys/flux-types";
-import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
-import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import Avatar from '@/components/conversation/avatar/Avatar.vue';
+import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
+import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { llmProcessingSteps, useAiStore } from '@/stores';
+import { closeMenu } from '@/utils/helperFunctions';
+import { Channel } from '@coasys/flux-api';
+import { ProcessingState } from '@coasys/flux-types';
+import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
+import { storeToRefs } from 'pinia';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 interface Props {
   selectedTopicId: string;
@@ -137,7 +137,7 @@ const channelId = route.params.channelId as string;
 const conversations = ref<SynergyGroup[]>([]);
 const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
-const selectedItemId = ref("");
+const selectedItemId = ref('');
 const zoom = ref<GroupingOption>(groupingOptions[0]);
 const refreshTrigger = ref(0);
 const gettingData = ref(false);
@@ -187,7 +187,7 @@ async function getData(firstRun?: boolean): Promise<void> {
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
     }
   } catch (error) {
-    console.error("Error fetching conversations or unprocessed items:", error);
+    console.error('Error fetching conversations or unprocessed items:', error);
     gettingData.value = false;
   }
 }
@@ -221,7 +221,7 @@ function handleLinkAdded() {
 }
 
 function setSelectedItemId(id: string | null) {
-  selectedItemId.value = id || "";
+  selectedItemId.value = id || '';
 }
 
 onMounted(() => {
@@ -230,13 +230,13 @@ onMounted(() => {
     getData(true);
 
     // Listen for link-added events from the perspective
-    perspective.addListener("link-added", handleLinkAdded);
+    perspective.addListener('link-added', handleLinkAdded);
   }
 });
 
 onUnmounted(() => {
   // Remove the link-added listener when the component is unmounted
-  if (signallingService) perspective.removeListener("link-added", handleLinkAdded);
+  if (signallingService) perspective.removeListener('link-added', handleLinkAdded);
 
   // Clear timeouts
   if (linkAddedTimeout.value) clearTimeout(linkAddedTimeout.value);
@@ -247,13 +247,13 @@ watch(
   (newAgents) => {
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(
-      (agent) => agent.processing && agent.processing.channelId === channelId
+      (agent) => agent.processing && agent.processing.channelId === channelId,
     );
 
     // Update the progress bar with the latest processing state
     processingState.value = processingAgents[0]?.processing || null;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

@@ -1,10 +1,10 @@
-import { Me } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
+import { Me } from '@coasys/flux-api';
+import { WebRTC } from '@coasys/flux-react-web';
 
-import Item from "./Item";
-import ItemMe from "./ItemMe";
+import Item from './Item';
+import ItemMe from './ItemMe';
 
-import styles from "./Debug.module.css";
+import styles from './Debug.module.css';
 
 type Props = {
   webRTC: WebRTC;

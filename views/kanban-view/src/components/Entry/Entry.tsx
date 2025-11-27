@@ -1,6 +1,6 @@
-import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
-import { useEffect, useState } from "preact/hooks";
-import DisplayValue from "../DisplayValue";
+import { Ad4mModel, PerspectiveProxy } from '@coasys/ad4m';
+import { useEffect, useState } from 'preact/hooks';
+import DisplayValue from '../DisplayValue';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -34,11 +34,11 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
 
   if (task) {
     const properties = Object.entries(task).filter(([key, value]) => {
-      return !(key === "author" || key === "timestamp" || key === "id" || key === "title" || key === "name");
+      return !(key === 'author' || key === 'timestamp' || key === 'id' || key === 'title' || key === 'name');
     });
 
-    const titleName = Object.hasOwn(task, "name") ? "name" : Object.hasOwn(task, "title") ? "title" : "";
-    const defaultName = task?.name || task?.title || "";
+    const titleName = Object.hasOwn(task, 'name') ? 'name' : Object.hasOwn(task, 'title') ? 'title' : '';
+    const defaultName = task?.name || task?.title || '';
 
     return (
       <div>

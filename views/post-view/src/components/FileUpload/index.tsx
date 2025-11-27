@@ -1,6 +1,6 @@
-import { useEffect, useState } from "preact/hooks";
-import { useDropzone } from "react-dropzone";
-import styles from "./index.module.css";
+import { useEffect, useState } from 'preact/hooks';
+import { useDropzone } from 'react-dropzone';
+import styles from './index.module.css';
 
 type FluxFile = File & {
   preview: string;
@@ -15,15 +15,15 @@ export default function FileUpload({ onChange }: Props) {
   const { getRootProps, getInputProps, isFocused } = useDropzone({
     maxFiles: 1,
     accept: {
-      "image/*": [],
+      'image/*': [],
     },
     onDrop: (acceptedFiles) => {
       setFiles(
         acceptedFiles.map((file) =>
           Object.assign(file, {
             preview: URL.createObjectURL(file),
-          })
-        )
+          }),
+        ),
       );
     },
   });
@@ -43,12 +43,7 @@ export default function FileUpload({ onChange }: Props) {
         }}
       />
 
-      <j-button
-        className={styles.removeButton}
-        square
-        variant="ghost"
-        onClick={() => setFiles([])}
-      >
+      <j-button className={styles.removeButton} square variant="ghost" onClick={() => setFiles([])}>
         Remove
       </j-button>
     </div>
@@ -59,10 +54,7 @@ export default function FileUpload({ onChange }: Props) {
     return () => files.forEach((file) => URL.revokeObjectURL(file.preview));
   }, []);
 
-  const dropZoneStyles = [
-    styles.dropZone,
-    isFocused ? styles.isFocused : "",
-  ].join(" ");
+  const dropZoneStyles = [styles.dropZone, isFocused ? styles.isFocused : ''].join(' ');
 
   return (
     <section className={styles.fileUpload}>

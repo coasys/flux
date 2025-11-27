@@ -9,7 +9,7 @@
 .editor {
   padding: 0;
   --body-min-height: var(--j-comment-section-size);
-  --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+  --grid-template-areas: 'toolbar toolbar toolbar' 'body body footer';
 }
 .editor::part(base) {
   background: var(--j-color-white);
@@ -21,7 +21,7 @@
   padding: 0;
 }
 
-.editor[aria-expanded="true"]::part(toolbar) {
+.editor[aria-expanded='true']::part(toolbar) {
   display: block;
 }
 .editor::part(footer) {

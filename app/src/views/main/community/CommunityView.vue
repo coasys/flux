@@ -107,16 +107,16 @@
 </template>
 
 <script setup lang="ts">
-import { HourglassIcon } from "@/components/icons";
-import { CommunityServiceKey, createCommunityService } from "@/composables/useCommunityService";
-import CommunityLayout from "@/layout/CommunityLayout.vue";
-import { useCommunityServiceStore, useModalStore } from "@/stores";
-import Modals from "@/views/main/community/modals/Modals.vue";
-import Sidebar from "@/views/main/community/sidebar/Sidebar.vue";
-import { onMounted, onUnmounted, provide } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { HourglassIcon } from '@/components/icons';
+import { CommunityServiceKey, createCommunityService } from '@/composables/useCommunityService';
+import CommunityLayout from '@/layout/CommunityLayout.vue';
+import { useCommunityServiceStore, useModalStore } from '@/stores';
+import Modals from '@/views/main/community/modals/Modals.vue';
+import Sidebar from '@/views/main/community/sidebar/Sidebar.vue';
+import { onMounted, onUnmounted, provide } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-defineOptions({ name: "CommunityView" });
+defineOptions({ name: 'CommunityView' });
 const { communityId, channelId } = defineProps({
   communityId: { type: String, required: true },
   channelId: { type: String },
@@ -141,7 +141,7 @@ const {
 } = communityService;
 
 function navigateToChannel(channelId?: string) {
-  router.push({ name: "channel", params: { communityId, channelId } });
+  router.push({ name: 'channel', params: { communityId, channelId } });
 }
 
 onMounted(() => signallingService.startSignalling());

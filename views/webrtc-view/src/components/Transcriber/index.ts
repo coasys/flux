@@ -1,3 +1,3 @@
-import Transcriber from "./Transcriber";
+import Transcriber from './Transcriber';
 
 export default Transcriber;

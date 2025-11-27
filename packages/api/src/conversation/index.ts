@@ -1,32 +1,32 @@
-import { Ad4mModel, Flag, Link, Literal, ModelOptions, Optional } from "@coasys/ad4m";
-import { getProfile, Topic } from "@coasys/flux-api";
-import { ProcessingState, Profile } from "@coasys/flux-types";
-import { SynergyGroup, SynergyItem, SynergyTopic } from "@coasys/flux-utils";
-import ConversationSubgroup from "../conversation-subgroup";
-import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from "./LLMutils";
-import { createEmbedding, removeEmbedding } from "./util";
+import { Ad4mModel, Flag, Link, Literal, ModelOptions, Optional } from '@coasys/ad4m';
+import { getProfile, Topic } from '@coasys/flux-api';
+import { ProcessingState, Profile } from '@coasys/flux-types';
+import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
+import ConversationSubgroup from '../conversation-subgroup';
+import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
+import { createEmbedding, removeEmbedding } from './util';
 
 @ModelOptions({
-  name: "Conversation",
+  name: 'Conversation',
 })
 export default class Conversation extends Ad4mModel {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://conversation",
+    through: 'flux://entry_type',
+    value: 'flux://conversation',
   })
   type: string;
 
   @Optional({
-    through: "flux://has_name",
+    through: 'flux://has_name',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   conversationName: string;
 
   @Optional({
-    through: "flux://has_summary",
+    through: 'flux://has_summary',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   summary: string;
 
@@ -55,7 +55,7 @@ export default class Conversation extends Ad4mModel {
       const [totalSubgroups, participants] = result[0]?.Stats ?? [];
       return { totalSubgroups: totalSubgroups ?? 0, participants: participants ?? [] };
     } catch (error) {
-      console.error("Error getting conversation stats:", error);
+      console.error('Error getting conversation stats:', error);
       return { totalSubgroups: 0, participants: [] };
     }
   }
@@ -98,11 +98,11 @@ export default class Conversation extends Ad4mModel {
           ([baseExpression, name]): SynergyTopic => ({
             baseExpression,
             name: Literal.fromUrl(name).get(),
-          })
+          }),
         ) || []
       );
     } catch (error) {
-      console.error("Error getting conversation topics:", error);
+      console.error('Error getting conversation topics:', error);
       return [];
     }
   }
@@ -167,19 +167,19 @@ export default class Conversation extends Ad4mModel {
         baseExpression,
         name: Literal.fromUrl(subgroupName).get().data,
         // handle the empty array that's returned if no summary is present
-        summary: Array.isArray(summary) ? "" : Literal.fromUrl(summary).get().data,
+        summary: Array.isArray(summary) ? '' : Literal.fromUrl(summary).get().data,
         start: parseInt(start, 10),
         end: parseInt(end, 10),
       }));
     } catch (error) {
-      console.error("Error getting conversation subgroups:", error);
+      console.error('Error getting conversation subgroups:', error);
       return [];
     }
   }
 
   private async detectNewGroup(
     currentSubgroup: ConversationSubgroup | null,
-    unprocessedItems: SynergyItem[]
+    unprocessedItems: SynergyItem[],
   ): Promise<{
     group: { n: string; s: string };
     newGroup?: { n: string; s: string; firstItemId: string };
@@ -190,7 +190,7 @@ export default class Conversation extends Ad4mModel {
       unprocessedItems.map(async (item) => ({
         ...item,
         ...(await getProfile(item.author)),
-      }))
+      })),
     );
 
     let inputGroup;
@@ -211,7 +211,7 @@ export default class Conversation extends Ad4mModel {
       {
         group: inputGroup,
         unprocessedItems: unprocessedItemsWithProfile.map((item, index) => {
-          const text = item.text?.replace(/<[^>]*>/g, "") || "undefined";
+          const text = item.text?.replace(/<[^>]*>/g, '') || 'undefined';
           let author = item.givenName;
           if (!author || author.length === 0) {
             author = item.username;
@@ -224,7 +224,7 @@ export default class Conversation extends Ad4mModel {
           };
         }),
       },
-      this.perspective.ai
+      this.perspective.ai,
     );
 
     // Error correct firstItemId
@@ -249,7 +249,7 @@ export default class Conversation extends Ad4mModel {
     group: ConversationSubgroup,
     newMessages: string[],
     batchId: string,
-    isNewGroup?: boolean
+    isNewGroup?: boolean,
   ) {
     const { topics } = await ensureLLMTasks(this.perspective.ai);
     let currentTopics = (await group.topicsWithRelevance()) as any;
@@ -259,7 +259,7 @@ export default class Conversation extends Ad4mModel {
         topics: currentTopics.map((t) => ({ n: t.name, rel: t.relevance })),
         messages: newMessages,
       },
-      this.perspective.ai
+      this.perspective.ai,
     );
 
     const topicMatches = await Topic.findAll(this.perspective, {
@@ -269,7 +269,7 @@ export default class Conversation extends Ad4mModel {
       currentNewTopics.map((topic) => {
         const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
         group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
-      })
+      }),
     );
   }
 
@@ -283,7 +283,7 @@ export default class Conversation extends Ad4mModel {
 
   async processNewExpressions(
     unprocessedItems: SynergyItem[],
-    updateProcessingState: (newState: Partial<ProcessingState> | null) => void
+    updateProcessingState: (newState: Partial<ProcessingState> | null) => void,
   ) {
     const showLogs = false; // Set to true to enable detailed logging
     const duration = (start, end) => `${((end - start) / 1000).toFixed(1)} secs`;
@@ -295,7 +295,7 @@ export default class Conversation extends Ad4mModel {
     const currentSubgroup: ConversationSubgroup | null = subgroups.length ? subgroups[subgroups.length - 1] : null;
 
     unprocessedItems = unprocessedItems.map((item) => {
-      if (!item.text) item.text = "";
+      if (!item.text) item.text = '';
       return item;
     });
     const batchId = await this.perspective.createBatch();
@@ -331,7 +331,7 @@ export default class Conversation extends Ad4mModel {
     if (detectResult.newGroup) {
       newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
-        (item) => item.baseExpression === detectResult.newGroup.firstItemId
+        (item) => item.baseExpression === detectResult.newGroup.firstItemId,
       );
     }
 
@@ -350,7 +350,7 @@ export default class Conversation extends Ad4mModel {
       }
       newLinks.push({
         source: itemsSubgroup.baseExpression,
-        predicate: "ad4m://has_child",
+        predicate: 'ad4m://has_child',
         target: item.baseExpression,
       });
     }
@@ -393,7 +393,7 @@ export default class Conversation extends Ad4mModel {
     const endConversationTask = new Date().getTime();
     if (showLogs)
       console.log(
-        `🤖 3: LLM conversation updating complete! (${duration(startConversationTask, endConversationTask)})`
+        `🤖 3: LLM conversation updating complete! (${duration(startConversationTask, endConversationTask)})`,
       );
 
     // ------------ saving all new data ------------------
@@ -405,35 +405,35 @@ export default class Conversation extends Ad4mModel {
     this.summary = newConversationInfo.s;
     await this.update(batchId);
     const end1 = new Date().getTime();
-    if (showLogs) console.log("Conversation info updated: ", duration(start1, end1));
+    if (showLogs) console.log('Conversation info updated: ', duration(start1, end1));
 
     // Save current group
     if (currentSubgroup) {
-      if (showLogs) console.log("Current subgroup updating:", currentSubgroup);
+      if (showLogs) console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
       await currentSubgroup.update(batchId);
       const end2 = new Date().getTime();
-      if (showLogs) console.log("Current subgroup info updated: ", duration(start2, end2));
+      if (showLogs) console.log('Current subgroup info updated: ', duration(start2, end2));
     }
 
     updateProcessingState({ step: 7 });
     // create vector embeddings for each unprocessed item
-    if (showLogs) console.log("Creating vector embeddings for each unprocessed item...", unprocessedItems);
+    if (showLogs) console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
     const start3 = new Date().getTime();
     await Promise.all(
       unprocessedItems.map((item, index) =>
-        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1)
-      )
+        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1),
+      ),
     );
     const end3 = new Date().getTime();
-    if (showLogs) console.log("Vector embeddings for each unprocessed item created: ", duration(start3, end3));
+    if (showLogs) console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
 
     // update vector embedding for conversation
     const start4 = new Date().getTime();
     await removeEmbedding(this.perspective, this.baseExpression, batchId);
     await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
     const end4 = new Date().getTime();
-    if (showLogs) console.log("Vector embedding for conversation created: ", duration(start4, end4));
+    if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
     // update vector embedding for currentSubgroup if returned from LLM
     if (currentSubgroup) {
@@ -444,10 +444,10 @@ export default class Conversation extends Ad4mModel {
         currentSubgroup.summary,
         currentSubgroup.baseExpression,
         this.perspective.ai,
-        batchId
+        batchId,
       );
       const end5 = new Date().getTime();
-      if (showLogs) console.log("Vector embedding for currentSubgroup created: ", duration(start5, end5));
+      if (showLogs) console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
     }
     // create vector embedding for new subgroup if returned from LLM
     if (newSubgroupEntity) {
@@ -457,16 +457,16 @@ export default class Conversation extends Ad4mModel {
         newSubgroupEntity.summary,
         newSubgroupEntity.baseExpression,
         this.perspective.ai,
-        batchId
+        batchId,
       );
       const end6 = new Date().getTime();
-      if (showLogs) console.log("Vector embedding for new subgroup created: ", duration(start6, end6));
+      if (showLogs) console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
     }
 
     // batch commit all new links (currently only "ad4m://has_child" links)
     // i.e. sorting messages into current and/or new sub-group
     const start7 = new Date().getTime();
-    await this.perspective.addLinks(newLinks, "shared", batchId);
+    await this.perspective.addLinks(newLinks, 'shared', batchId);
     const end7 = new Date().getTime();
     if (showLogs) console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
 
@@ -476,9 +476,9 @@ export default class Conversation extends Ad4mModel {
 
     console.log(`🤖 LLM processing complete in ${duration(startProcessing, endProcessing)}`);
     const startBatchCommit = new Date().getTime();
-    if (showLogs) console.log("Committing batch...");
+    if (showLogs) console.log('Committing batch...');
     await this.perspective.commitBatch(batchId);
     const endBatchCommit = new Date().getTime();
-    if (showLogs) console.log("Batch committed in: ", duration(startBatchCommit, endBatchCommit));
+    if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
 }

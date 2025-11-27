@@ -206,15 +206,15 @@
 </template>
 
 <script setup lang="ts">
-import { Ad4mLogoIcon, RecordingIcon } from "@/components/icons";
-import { useAiStore, useMediaDevicesStore, useWebrtcStore } from "@/stores";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect";
-import { Message } from "@coasys/flux-api";
-import { detectBrowser } from "@coasys/flux-utils";
-import { storeToRefs } from "pinia";
-import { v4 as uuidv4 } from "uuid";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
+import { useAiStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect';
+import { Message } from '@coasys/flux-api';
+import { detectBrowser } from '@coasys/flux-utils';
+import { storeToRefs } from 'pinia';
+import { v4 as uuidv4 } from 'uuid';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const mediaDevicesStore = useMediaDevicesStore();
 const aiStore = useAiStore();
@@ -234,7 +234,7 @@ const browser = detectBrowser();
 
 const transcripts = ref<any[]>([]);
 const useRemoteService = ref(false);
-const previewText = ref("");
+const previewText = ref('');
 const usingRemoteService = ref(false);
 const audioContext = ref<AudioContext | null>(null);
 const analyser = ref<AnalyserNode | null>(null);
@@ -245,12 +245,12 @@ const recognition = ref<any>(null);
 const timeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const streamId = ref<string | null>(null);
 const fastStreamId = ref<string | null>(null);
-const transcriptId = ref<string>("");
+const transcriptId = ref<string>('');
 const volumeCheckInterval = ref<ReturnType<typeof setInterval> | null>(null);
 const infoModalOpen = ref(false);
 
 const modelsReady = computed(
-  () => whisperLoadingStatus.value?.progress === 100 && whisperTinyLoadingStatus.value?.progress === 100
+  () => whisperLoadingStatus.value?.progress === 100 && whisperTinyLoadingStatus.value?.progress === 100,
 );
 
 function renderVolume() {
@@ -258,7 +258,7 @@ function renderVolume() {
     analyser.value.getByteTimeDomainData(dataArray.value);
     const maxValue = Math.max(...dataArray.value);
     const percentage = ((maxValue - 128) / 128) * 100;
-    const volume = document.getElementById("volume");
+    const volume = document.getElementById('volume');
     if (volume) volume.style.width = `${percentage < 3 ? 0 : percentage}%`;
     requestAnimationFrame(renderVolume);
   }
@@ -272,29 +272,29 @@ async function saveMessage() {
   if (!perspective) return;
 
   // Fetch latest text & mark message as saving
-  let text = "";
-  previewText.value = "";
+  let text = '';
+  previewText.value = '';
   transcripts.value = transcripts.value.map((t) => {
     if (t.id === transcriptId.value) {
       text = t.text;
-      if (text) t.state = "saved";
-      else t.state = "aborted";
+      if (text) t.state = 'saved';
+      else t.state = 'aborted';
     }
     return t;
   });
 
   // Store id for outro transitions
   const previousId = transcriptId.value;
-  transcriptId.value = "";
+  transcriptId.value = '';
 
   // Trigger outro transitions
   const transcriptCard = document.getElementById(`transcript-${previousId}`);
 
   if (text) {
     if (transcriptCard) {
-      transcriptCard.classList.add("slideRight");
+      transcriptCard.classList.add('slideRight');
       setTimeout(() => {
-        transcriptCard.classList.add("hide");
+        transcriptCard.classList.add('hide');
         setTimeout(() => {
           transcripts.value = [];
         }, 500);
@@ -306,9 +306,9 @@ async function saveMessage() {
     await newMessage.save();
   } else {
     if (transcriptCard) {
-      transcriptCard.classList.add("slideLeft");
+      transcriptCard.classList.add('slideLeft');
       setTimeout(() => {
-        transcriptCard.classList.add("hide");
+        transcriptCard.classList.add('hide');
         setTimeout(() => {
           transcripts.value = [];
         }, 500);
@@ -318,7 +318,7 @@ async function saveMessage() {
 }
 
 function addCurrentTranscript(text?: string) {
-  if (!text) text = "";
+  if (!text) text = '';
 
   // Search for existing transcript
   const existingIndex = transcripts.value.findIndex((t) => t.id === transcriptId.value);
@@ -336,7 +336,7 @@ function addCurrentTranscript(text?: string) {
   } else {
     // Otherwise initialise new transcript
     transcriptId.value = uuidv4();
-    transcripts.value = [{ id: transcriptId.value, timestamp: new Date(), state: "transcribing", text }];
+    transcripts.value = [{ id: transcriptId.value, timestamp: new Date(), state: 'transcribing', text }];
   }
 }
 
@@ -350,7 +350,7 @@ function resetSaveTimeout() {
 // Fires every time a new chunk of text is sent back from the AI service
 async function handleTranscriptionText(text: string) {
   // Clear preview text when we get final text
-  previewText.value = "";
+  previewText.value = '';
   addCurrentTranscript(text);
 
   // Check current transcript length and save if it exceeds max length
@@ -395,12 +395,12 @@ function startRemoteTranscription() {
     }
   }, volumeCheckIntervalDuration);
 
-  let transcript = "";
-  let interimTranscript = "";
-  let accumulatedText = "";
+  let transcript = '';
+  let interimTranscript = '';
+  let accumulatedText = '';
   recognition.value.onresult = (event: any) => {
-    let interim = "";
-    let final = "";
+    let interim = '';
+    let final = '';
 
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
@@ -440,18 +440,18 @@ function startRemoteTranscription() {
       timeout.value = setTimeout(async () => {
         if (accumulatedText.length > 0) {
           await saveMessage();
-          accumulatedText = "";
-          transcript = "";
-          interimTranscript = "";
-          transcriptId.value = "";
+          accumulatedText = '';
+          transcript = '';
+          interimTranscript = '';
+          transcriptId.value = '';
         }
       }, silenceTimeout * 1000);
     }
   };
 
   recognition.value.onerror = (event: any) => {
-    if (event.error === "no-speech") return; // Ignore no-speech errors (fires whenever user stops speaking)
-    console.error("Speech recognition error:", event.error);
+    if (event.error === 'no-speech') return; // Ignore no-speech errors (fires whenever user stops speaking)
+    console.error('Speech recognition error:', event.error);
   };
 
   recognition.value.onend = () => {
@@ -467,7 +467,7 @@ async function startLocalTransciption(stream: MediaStream) {
   const client = await getAd4mClient();
 
   const moreDemaningParams = { startThreshold: 0.8 };
-  streamId.value = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText, moreDemaningParams);
+  streamId.value = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
 
   const wordByWordParams = {
     startThreshold: 0.5, // Lower threshold to detect softer speech
@@ -478,15 +478,15 @@ async function startLocalTransciption(stream: MediaStream) {
   };
 
   fastStreamId.value = await client.ai.openTranscriptionStream(
-    "whisper_tiny_quantized",
+    'whisper_tiny_quantized',
     handleTranscriptionPreview,
-    wordByWordParams
+    wordByWordParams,
   );
 
   if (audioContext.value) {
-    await audioContext.value.audioWorklet.addModule("/audio-processor.js");
+    await audioContext.value.audioWorklet.addModule('/audio-processor.js');
     const mediaStreamSource = audioContext.value.createMediaStreamSource(stream);
-    const workletNode = new AudioWorkletNode(audioContext.value, "audio-processor");
+    const workletNode = new AudioWorkletNode(audioContext.value, 'audio-processor');
     mediaStreamSource.connect(workletNode);
 
     workletNode.port.onmessage = async (event) => {
@@ -495,7 +495,7 @@ async function startLocalTransciption(stream: MediaStream) {
         const client = await getAd4mClient();
         client.ai.feedTranscriptionStream(
           [fastStreamId.value, streamId.value].filter(Boolean) as string[],
-          audioData as any
+          audioData as any,
         );
       }
     };
@@ -576,7 +576,7 @@ function toggleRemoteService() {
 }
 
 function restartListening() {
-  console.log("Restarting listening with new settings");
+  console.log('Restarting listening with new settings');
   stopListening();
   startListening();
 }
@@ -593,7 +593,7 @@ watch(
   (audioNowEnabled) => {
     if (audioNowEnabled) startListening();
     else stopListening();
-  }
+  },
 );
 
 // Watch for remote service changes

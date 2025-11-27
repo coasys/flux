@@ -1,3 +1,3 @@
-import PollView from "./PollView";
+import PollView from './PollView';
 
 export default PollView;

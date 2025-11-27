@@ -1,5 +1,5 @@
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { languages } from "@coasys/flux-constants";
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { languages } from '@coasys/flux-constants';
 const { FILE_STORAGE_LANGUAGE } = languages;
 
 export async function getImage(expUrl: string): Promise<string> {
@@ -16,10 +16,10 @@ export async function getImage(expUrl: string): Promise<string> {
           resolve(correct);
         }
       } catch (e) {
-        resolve("");
+        resolve('');
       }
     }
 
-    resolve("");
+    resolve('');
   });
 }

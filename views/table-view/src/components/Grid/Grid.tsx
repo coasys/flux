@@ -1,5 +1,5 @@
-import styles from "./Grid.module.css";
-import DisplayValue from "../DisplayValue";
+import styles from './Grid.module.css';
+import DisplayValue from '../DisplayValue';
 
 type Props = {
   entries: any[];

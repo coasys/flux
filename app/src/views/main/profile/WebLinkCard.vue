@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores";
-import { getLiteralObjectLinks } from "@coasys/flux-utils";
-import { computed } from "vue";
+import { useAppStore } from '@/stores';
+import { getLiteralObjectLinks } from '@coasys/flux-utils';
+import { computed } from 'vue';
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -35,7 +35,7 @@ const props = defineProps({
   sameAgent: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["delete", "edit"]);
+const emit = defineEmits(['delete', 'edit']);
 
 const { ad4mClient } = useAppStore();
 
@@ -44,10 +44,10 @@ const hostname = computed(() => {
     try {
       return new URL(props.url).hostname;
     } catch (e) {
-      return "";
+      return '';
     }
   }
-  return "";
+  return '';
 });
 
 async function deleteLink() {
@@ -55,7 +55,7 @@ async function deleteLink() {
 
   if (perspective) {
     const links = await getLiteralObjectLinks(props.id, perspective.links);
-    emit("delete", links[0]);
+    emit('delete', links[0]);
     await ad4mClient.agent.mutatePublicPerspective({ removals: links, additions: [] });
   }
 }

@@ -1,5 +1,5 @@
-import { ref, effect, shallowRef, watch, triggerRef } from "vue";
-import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
+import { ref, effect, shallowRef, watch, triggerRef } from 'vue';
+import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
 
 type UUID = string;
 
@@ -23,18 +23,18 @@ watch(
       }
     }, {});
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function addListeners(p: PerspectiveProxy) {
-  p.addListener("link-added", (link) => {
+  p.addListener('link-added', (link) => {
     onAddedLinkCbs.value.forEach((cb) => {
       cb(p, link);
     });
     return null;
   });
 
-  p.removeListener("link-removed", (link) => {
+  p.removeListener('link-removed', (link) => {
     onAddedLinkCbs.value.forEach((cb) => {
       cb(p, link);
     });
@@ -89,13 +89,10 @@ export function usePerspectives(client: Ad4mClient) {
 
     // Remove new deleted perspectives
     client.perspective.addPerspectiveRemovedListener((uuid) => {
-      perspectives.value = Object.keys(perspectives.value).reduce(
-        (acc, key) => {
-          const p = perspectives.value[key];
-          return key === uuid ? acc : { ...acc, [key]: p };
-        },
-        {}
-      );
+      perspectives.value = Object.keys(perspectives.value).reduce((acc, key) => {
+        const p = perspectives.value[key];
+        return key === uuid ? acc : { ...acc, [key]: p };
+      }, {});
       return null;
     });
   }, {});

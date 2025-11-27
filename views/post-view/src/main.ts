@@ -1,20 +1,20 @@
-import "preact/debug";
+import 'preact/debug';
 
 if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
 
-import CommentSection from "@coasys/flux-comment-section";
-import FluxEditor from "@coasys/flux-editor";
-import { toCustomElement } from "@coasys/flux-react-web";
-import MyComponent from "./App";
+import CommentSection from '@coasys/flux-comment-section';
+import FluxEditor from '@coasys/flux-editor';
+import { toCustomElement } from '@coasys/flux-react-web';
+import MyComponent from './App';
 
-if (!customElements.get("comment-section")) {
-  customElements.define("comment-section", CommentSection);
+if (!customElements.get('comment-section')) {
+  customElements.define('comment-section', CommentSection);
 }
 
-if (!customElements.get("flux-editor")) {
-  customElements.define("flux-editor", FluxEditor);
+if (!customElements.get('flux-editor')) {
+  customElements.define('flux-editor', FluxEditor);
 }
 
-const CustomElement = toCustomElement(MyComponent, ["perspective", "agent", "source", "getProfile"], { shadow: false });
+const CustomElement = toCustomElement(MyComponent, ['perspective', 'agent', 'source', 'getProfile'], { shadow: false });
 
 export default CustomElement;

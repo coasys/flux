@@ -1,6 +1,6 @@
-import { EntryType, ModelProperty, Entry } from "@coasys/flux-types";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { Literal } from "@coasys/ad4m";
+import { EntryType, ModelProperty, Entry } from '@coasys/flux-types';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Literal } from '@coasys/ad4m';
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -32,15 +32,15 @@ export function generatePrologQuery({
   const sourceParam = source ? `"${source}"` : `Source`;
 
   const propertyNames = Object.keys(properties).reduce((acc, name) => {
-    const concatVal = acc === "" ? "" : ", ";
+    const concatVal = acc === '' ? '' : ', ';
     return acc.concat(concatVal, capitalizeFirstLetter(name));
-  }, "");
+  }, '');
 
   const findProperties = Object.keys(properties).reduce((acc, name) => {
     const property = properties[name];
-    const concatVal = acc === "" ? "" : ", ";
+    const concatVal = acc === '' ? '' : ', ';
     return acc.concat(concatVal, generateFindAll(name, property.predicate));
-  }, "");
+  }, '');
 
   const entryQuery = `
     entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames}):-
@@ -79,13 +79,12 @@ export async function queryProlog({
 }): Promise<Entry[]> {
   const client = await getAd4mClient();
 
-  const { query, assertQuery, assertEntry, retractQuery, retractEntry } =
-    generatePrologQuery({
-      id,
-      type,
-      source,
-      properties,
-    });
+  const { query, assertQuery, assertEntry, retractQuery, retractEntry } = generatePrologQuery({
+    id,
+    type,
+    source,
+    properties,
+  });
 
   //This queryProlog call is used to assert the entry_query() rule
   await client.perspective.queryProlog(perspectiveUuid, assertQuery);
@@ -93,10 +92,7 @@ export async function queryProlog({
   await client.perspective.queryProlog(perspectiveUuid, assertEntry);
 
   //This query is the one which actually fetches the results from the rules declared above
-  const prologResult = await client.perspective.queryProlog(
-    perspectiveUuid,
-    query
-  );
+  const prologResult = await client.perspective.queryProlog(perspectiveUuid, query);
 
   //This queryProlog call is used to retract the entry_query() rule, so that we dont get duplicate rules/results in the prolog engine
   await client.perspective.queryProlog(perspectiveUuid, retractQuery);
@@ -104,16 +100,14 @@ export async function queryProlog({
   await client.perspective.queryProlog(perspectiveUuid, retractEntry);
 
   const entries = extractPrologResults(prologResult, [
-    "Source",
-    "Id",
-    "Timestamp",
-    "Author",
+    'Source',
+    'Id',
+    'Timestamp',
+    'Author',
     ...Object.keys(properties).map((name) => capitalizeFirstLetter(name)),
   ]);
 
-  const result = await Promise.all(
-    entries.map((entry) => resolveEntryWithLatestProperties(entry, properties))
-  );
+  const result = await Promise.all(entries.map((entry) => resolveEntryWithLatestProperties(entry, properties)));
   return result;
 }
 
@@ -121,7 +115,7 @@ export async function resolveEntryWithLatestProperties(
   entry,
   properties: {
     [x: string]: ModelProperty;
-  }
+  },
 ): Promise<Entry> {
   const client = await getAd4mClient();
   const propertyNames = Object.keys(entry);
@@ -134,9 +128,9 @@ export async function resolveEntryWithLatestProperties(
     const isArray = Array.isArray(val);
 
     async function resolveExp(url) {
-      return url.startsWith("literal://")
+      return url.startsWith('literal://')
         ? Literal.fromUrl(url).get().data
-        : (await client.expression.get(url)).data.replace(/['"]+/g, "");
+        : (await client.expression.get(url)).data.replace(/['"]+/g, '');
     }
 
     if (!prop) {
@@ -173,10 +167,7 @@ export async function resolveEntryWithLatestProperties(
   return cleanedEntry;
 }
 
-export function extractPrologResults(
-  prologResults: any,
-  values: string[]
-): any[] {
+export function extractPrologResults(prologResults: any, values: string[]): any[] {
   if (prologResults === null || prologResults === false) {
     return [];
   }
@@ -192,7 +183,7 @@ export function extractPrologResults(
       const prologResultValue = prologResult[value];
 
       if (!prologResultValue.head) {
-        if (prologResultValue !== "[]" && !prologResultValue.variable) {
+        if (prologResultValue !== '[]' && !prologResultValue.variable) {
           result[value] = prologResultValue;
         } else {
           result[value] = [];
@@ -206,7 +197,7 @@ export function extractPrologResults(
           timestamp: new Date(prologResultValueHead.args[1].args[0]),
           author: prologResultValueHead.args[1].args[1],
         });
-        while (typeof prologResultValueTail !== "string") {
+        while (typeof prologResultValueTail !== 'string') {
           temp.push({
             content: prologResultValueTail.head.args[0],
             timestamp: new Date(prologResultValueTail.head.args[1].args[0]),

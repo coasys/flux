@@ -1,4 +1,4 @@
-import type { MediaPlayerWarning } from "@/components/media-player/MediaPlayer.vue";
+import type { MediaPlayerWarning } from '@/components/media-player/MediaPlayer.vue';
 import {
   useAppStore,
   useMediaDevicesStore,
@@ -6,9 +6,9 @@ import {
   useWebrtcStore,
   VideoLayoutOption,
   type MediaState,
-} from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed, watch } from "vue";
+} from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed, watch } from 'vue';
 
 export function useVideoLayout() {
   const appStore = useAppStore();
@@ -22,9 +22,9 @@ export function useVideoLayout() {
   const { inCall, peerConnections, disconnectedAgents } = storeToRefs(webrtcStore);
 
   const videoLayoutOptions: VideoLayoutOption[] = [
-    { label: "16/9 aspect ratio", class: "16-by-9", icon: "aspect-ratio" },
-    { label: "Flexible aspect ratio", class: "flexible", icon: "arrows-fullscreen" },
-    { label: "Focused", class: "focused", icon: "person-video2" },
+    { label: '16/9 aspect ratio', class: '16-by-9', icon: 'aspect-ratio' },
+    { label: 'Flexible aspect ratio', class: 'flexible', icon: 'arrows-fullscreen' },
+    { label: 'Focused', class: 'focused', icon: 'person-video2' },
   ];
 
   const peers = computed(() => Array.from(peerConnections.value.values()));
@@ -33,9 +33,9 @@ export function useVideoLayout() {
     const { microphone, camera } = mediaPermissions.value;
     const { audioEnabled, videoEnabled, screenShareEnabled } = mediaSettings.value;
 
-    let warning = "" as MediaPlayerWarning;
-    if (microphone && microphone.requested && !microphone.granted) warning = "mic-disabled";
-    else if (videoEnabled && camera && camera.requested && !camera.granted) warning = "camera-disabled";
+    let warning = '' as MediaPlayerWarning;
+    if (microphone && microphone.requested && !microphone.granted) warning = 'mic-disabled';
+    else if (videoEnabled && camera && camera.requested && !camera.granted) warning = 'camera-disabled';
 
     const myAgent = {
       isMe: true,
@@ -43,9 +43,9 @@ export function useVideoLayout() {
       inCall: inCall.value,
       stream: stream.value || undefined,
       streamReady: true,
-      audioState: (audioEnabled ? "on" : "off") as MediaState,
-      videoState: (videoEnabled ? "on" : "off") as MediaState,
-      screenShareState: (screenShareEnabled ? "on" : "off") as MediaState,
+      audioState: (audioEnabled ? 'on' : 'off') as MediaState,
+      videoState: (videoEnabled ? 'on' : 'off') as MediaState,
+      screenShareState: (screenShareEnabled ? 'on' : 'off') as MediaState,
       warning,
     };
 
@@ -58,7 +58,7 @@ export function useVideoLayout() {
       audioState: peer.audioState,
       videoState: peer.videoState,
       screenShareState: peer.screenShareState,
-      warning: "" as MediaPlayerWarning,
+      warning: '' as MediaPlayerWarning,
     }));
 
     return [myAgent, ...otherAgents];
@@ -76,7 +76,7 @@ export function useVideoLayout() {
 
   const numberOfColumns = computed(() => {
     const userCount = peers.value.length + 1;
-    if (userCount === 1 || callWindowWidth.value <= 600 || selectedVideoLayout.value.label === "Focused") return 1;
+    if (userCount === 1 || callWindowWidth.value <= 600 || selectedVideoLayout.value.label === 'Focused') return 1;
     else if ((userCount > 1 && userCount < 5) || (callWindowWidth.value > 600 && callWindowWidth.value <= 1200))
       return 2;
     else if (userCount > 4 && userCount < 10) return 3;
@@ -91,14 +91,14 @@ export function useVideoLayout() {
   function focusOnVideo(did: string) {
     if (!inCall.value) return;
     uiStore.setFocusedVideoId(did);
-    if (selectedVideoLayout.value.label !== "Focused") {
+    if (selectedVideoLayout.value.label !== 'Focused') {
       uiStore.setVideoLayout(videoLayoutOptions[2]);
     }
   }
 
   function closeFocusedVideoLayout() {
     uiStore.setVideoLayout(videoLayoutOptions[0]);
-    uiStore.setFocusedVideoId("");
+    uiStore.setFocusedVideoId('');
   }
 
   // Reset layout & focused video when the call window opens
@@ -114,7 +114,7 @@ export function useVideoLayout() {
         closeFocusedVideoLayout();
       }
     },
-    { deep: true }
+    { deep: true },
   );
 
   return {

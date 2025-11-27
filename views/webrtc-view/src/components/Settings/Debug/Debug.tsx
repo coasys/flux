@@ -1,13 +1,13 @@
-import { Profile } from "@coasys/flux-types";
-import { WebRTC } from "@coasys/flux-react-web";
+import { Profile } from '@coasys/flux-types';
+import { WebRTC } from '@coasys/flux-react-web';
 
-import Item from "./Item";
+import Item from './Item';
 
-import styles from "./Debug.module.css";
-import { defaultSettings } from "../../../constants";
-import { Peer } from "../../../types";
-import { useContext } from "preact/hooks";
-import UiContext from "../../../context/UiContext";
+import styles from './Debug.module.css';
+import { defaultSettings } from '../../../constants';
+import { Peer } from '../../../types';
+import { useContext } from 'preact/hooks';
+import UiContext from '../../../context/UiContext';
 
 type Props = {
   webRTC: WebRTC;
@@ -23,10 +23,8 @@ export default function VoiceVideo({ webRTC, profile }: Props) {
     <>
       <h3>Debug</h3>
       <h4>Connections:</h4>
-      <>{!webRTC.hasJoined && "Not yet joined"}</>
-      <>
-        {webRTC.hasJoined && webRTC.connections.length < 1 && "No connections"}
-      </>
+      <>{!webRTC.hasJoined && 'Not yet joined'}</>
+      <>{webRTC.hasJoined && webRTC.connections.length < 1 && 'No connections'}</>
       <ul className={styles.list}>
         {webRTC.connections.map((p) => (
           <li key={p.did}>
@@ -35,19 +33,10 @@ export default function VoiceVideo({ webRTC, profile }: Props) {
         ))}
       </ul>
       <div className={styles.footer}>
-        <j-button
-          variant="secondary"
-          size="xs"
-          onClick={() => toggleShowDebug(true)}
-        >
+        <j-button variant="secondary" size="xs" onClick={() => toggleShowDebug(true)}>
           Full debugger
         </j-button>
-        <j-button
-          variant="secondary"
-          size="xs"
-          onClick={webRTC.onSendTestBroadcast}
-          disabled={!webRTC.hasJoined}
-        >
+        <j-button variant="secondary" size="xs" onClick={webRTC.onSendTestBroadcast} disabled={!webRTC.hasJoined}>
           Send broadcast
         </j-button>
         <j-button variant="secondary" size="xs" onClick={webRTC.onGetStats}>

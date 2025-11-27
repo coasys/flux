@@ -1,12 +1,12 @@
-import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from "@coasys/ad4m";
-import { community } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
-import App from "../app";
+import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { community } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
+import App from '../app';
 
 const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
 
-@ModelOptions({ name: "Channel" })
+@ModelOptions({ name: 'Channel' })
 export class Channel extends Ad4mModel {
   @Flag({
     through: ENTRY_TYPE,
@@ -17,33 +17,33 @@ export class Channel extends Ad4mModel {
   @Property({
     through: CHANNEL_NAME,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   name: string;
 
   @Optional({
     through: CHANNEL_DESCRIPTION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   description: string;
 
   @Optional({
     through: CHANNEL_IS_CONVERSATION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   isConversation: boolean;
 
   @Optional({
     through: CHANNEL_IS_PINNED,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   isPinned: boolean;
 
   @Collection({
-    through: "ad4m://has_child",
+    through: 'ad4m://has_child',
     where: { isInstance: App },
   })
   views: string[] = [];
@@ -100,11 +100,11 @@ export class Channel extends Ad4mModel {
           author,
           timestamp: new Date(timestamp).toISOString(),
           text: Literal.fromUrl(text).get().data,
-          icon: icons[type] ? icons[type] : "question",
+          icon: icons[type] ? icons[type] : 'question',
         }))
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     } catch (error) {
-      console.error("Error getting channel items:", error);
+      console.error('Error getting channel items:', error);
       return [];
     }
   }
@@ -137,7 +137,7 @@ export class Channel extends Ad4mModel {
       `);
       return result[0]?.TotalCount || 0;
     } catch (error) {
-      console.error("Error getting total item count:", error);
+      console.error('Error getting total item count:', error);
       return 0;
     }
   }
@@ -170,7 +170,7 @@ export class Channel extends Ad4mModel {
       `);
       return result[0]?.UniqueAuthors || [];
     } catch (error) {
-      console.error("Error getting channel authors:", error);
+      console.error('Error getting channel authors:', error);
       return [];
     }
   }
@@ -203,7 +203,7 @@ export class Channel extends Ad4mModel {
         timestamp: new Date(timestamp).toISOString(),
       }));
     } catch (error) {
-      console.error("Error getting channel conversations:", error);
+      console.error('Error getting channel conversations:', error);
       return [];
     }
   }

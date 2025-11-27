@@ -1,13 +1,13 @@
-import { Theme } from "@/stores";
-import { setTheme } from "@/utils/themeHelper";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { Theme } from '@/stores';
+import { setTheme } from '@/utils/themeHelper';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 export const useThemeStore = defineStore(
-  "themeStore",
+  'themeStore',
   () => {
-    const globalTheme = ref<Theme>({ fontSize: "md", fontFamily: "DM Sans", name: "dark", hue: 270, saturation: 60 });
-    const currentTheme = ref("global");
+    const globalTheme = ref<Theme>({ fontSize: 'md', fontFamily: 'DM Sans', name: 'dark', hue: 270, saturation: 60 });
+    const currentTheme = ref('global');
 
     // Mutations
     function setCurrentTheme(payload: string): void {
@@ -20,9 +20,9 @@ export const useThemeStore = defineStore(
 
     // Actions
     async function changeCurrentTheme(payload: string): Promise<void> {
-      if (payload === "global") {
+      if (payload === 'global') {
         setTheme(globalTheme.value);
-        setCurrentTheme("global");
+        setCurrentTheme('global');
       } else {
         // Todo: Get local theme
         // const theme = dataStore.getLocalCommunityState(payload).theme;
@@ -41,7 +41,7 @@ export const useThemeStore = defineStore(
 
     async function updateGlobalTheme(payload: Partial<Theme>): Promise<void> {
       const mergedTheme = { ...globalTheme.value, ...payload };
-      if (currentTheme.value === "global") setTheme(mergedTheme);
+      if (currentTheme.value === 'global') setTheme(mergedTheme);
       setGlobalTheme(mergedTheme);
     }
 
@@ -60,5 +60,5 @@ export const useThemeStore = defineStore(
       updateGlobalTheme,
     };
   },
-  { persist: true }
+  { persist: true },
 );

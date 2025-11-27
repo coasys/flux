@@ -31,16 +31,16 @@
 </template>
 
 <script setup lang="ts">
-import { useModalStore } from "@/stores";
-import { ref } from "vue";
-import Connection from "./Connection.vue";
-import Debug from "./Debug.vue";
-import Transcription from "./Transcription.vue";
-import VoiceVideo from "./VoiceVideo.vue";
+import { useModalStore } from '@/stores';
+import { ref } from 'vue';
+import Connection from './Connection.vue';
+import Debug from './Debug.vue';
+import Transcription from './Transcription.vue';
+import VoiceVideo from './VoiceVideo.vue';
 
 const modalStore = useModalStore();
 
-const currentTab = ref("voice-video");
+const currentTab = ref('voice-video');
 </script>
 
 <style scoped>

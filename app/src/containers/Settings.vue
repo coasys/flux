@@ -26,14 +26,14 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from "@/stores";
-import { ref } from "vue";
-import Privacy from "./Privacy.vue";
-import ThemeEditor from "./ThemeEditor.vue";
+import { useUiStore } from '@/stores';
+import { ref } from 'vue';
+import Privacy from './Privacy.vue';
+import ThemeEditor from './ThemeEditor.vue';
 
 const uiStore = useUiStore();
 
-const currentView = ref("theme-editor");
+const currentView = ref('theme-editor');
 </script>
 
 <style scoped lang="scss">

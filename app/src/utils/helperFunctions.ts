@@ -5,7 +5,7 @@ export function closeMenu(menuId: string) {
     return;
   }
 
-  const items = menu.shadowRoot?.querySelector("details");
+  const items = menu.shadowRoot?.querySelector('details');
   if (items) items.open = false;
   else console.warn(`Details element not found in menu "${menuId}"`);
 }

@@ -3,10 +3,7 @@ interface ThrottledFunction extends Function {
   (nextValue: any): any;
 }
 
-export function throttle<F extends ThrottledFunction>(
-  eventHandler: F,
-  milliseconds = 500
-): F {
+export function throttle<F extends ThrottledFunction>(eventHandler: F, milliseconds = 500): F {
   let inThrottle: boolean;
   return function (this: unknown, ...args: unknown[]) {
     if (!inThrottle) {
