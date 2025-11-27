@@ -112,12 +112,7 @@ export class Channel extends Ad4mModel {
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
           )
-          AND out.uri NOT IN (
-            SELECT VALUE out.uri
-            FROM link
-            WHERE in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
-              AND predicate = 'ad4m://has_child'
-          )
+          AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'][0] IS NONE
         ORDER BY timestamp ASC
       `;
 
