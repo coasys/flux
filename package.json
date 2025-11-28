@@ -1,6 +1,6 @@
 {
   "name": "flux-monorepo",
-  "version": "0.8.1",
+  "version": "0.11.0",
   "workspaces": {
     "packages": [
       "packages/**/*",
@@ -22,7 +22,10 @@
     "dev": "turbo run dev --parallel",
     "publish-package": "turbo run publish-package",
     "lint": "turbo run lint",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "bump": "node scripts/monorepo-publish.js bump",
+    "publish:dry-run": "node scripts/monorepo-publish.js dry-run",
+    "publish:all": "node scripts/monorepo-publish.js publish"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
@@ -31,10 +34,10 @@
     "turbo": "latest"
   },
   "resolutions": {
-    "@coasys/ad4m": "0.10.1",
-    "@coasys/ad4m-connect": "0.10.1",
-    "@coasys/ad4m-vue-hooks": "0.10.1",
-    "@coasys/ad4m-react-hooks": "0.10.1"
+    "@coasys/ad4m": "0.11.0",
+    "@coasys/ad4m-connect": "0.11.0",
+    "@coasys/ad4m-vue-hooks": "0.11.0",
+    "@coasys/ad4m-react-hooks": "0.11.0"
   },
   "engines": {
     "node": ">=18.16.0"

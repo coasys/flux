@@ -18,6 +18,7 @@ export const useAppStore = defineStore(
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
     const myPerspectives = ref<PerspectiveProxy[]>([]);
     const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
+    const holochainRestarting = ref<boolean>(false);
 
     // Store a shallow ref of the Ad4mClient so we retain access to its methods
     const ad4mClientRef = shallowRef<Ad4mClient | null>(null);
@@ -107,6 +108,19 @@ export const useAppStore = defineStore(
       myProfile.value = await getCachedAgentProfile(me.value.did, true);
     }
 
+    async function restartHolochain() {
+      try {
+        holochainRestarting.value = true;
+        await ad4mClient.value.runtime.restartHolochain();
+        showSuccessToast({ message: "Holochain restarted successfully" });
+      } catch (e) {
+        showDangerToast({ message: e.message });
+        throw e;
+      } finally {
+        holochainRestarting.value = false;
+      }
+    }
+
     return {
       // State
       ad4mClient,
@@ -118,6 +132,7 @@ export const useAppStore = defineStore(
       myPerspectives,
       myCommunities,
       hasJoinedTestingCommunity,
+      holochainRestarting,
 
       // Mutations
       setAdamClient,
@@ -132,6 +147,7 @@ export const useAppStore = defineStore(
       joinTestingCommunity,
       getMyCommunities,
       refreshMyProfile,
+      restartHolochain,
     };
   },
   { persist: { omit: ["myPerspectives", "myCommunities"] } }
