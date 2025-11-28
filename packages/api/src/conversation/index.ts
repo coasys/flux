@@ -90,8 +90,8 @@ export default class Conversation extends Ad4mModel {
       }
 
       const participants: string[] = [...new Set(participantsResult as string[] || [])];
-      console.log('*** Conversation.stats() totalSubgroups:', totalSubgroups);
-      console.log('*** Conversation.stats() participants:', participants);
+      // console.log('*** Conversation.stats() totalSubgroups:', totalSubgroups);
+      // console.log('*** Conversation.stats() participants:', participants);
       return { totalSubgroups, participants };
     } catch (error) {
       console.error("Error getting conversation stats:", error);

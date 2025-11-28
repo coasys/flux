@@ -79,17 +79,17 @@ export default class ConversationSubgroup extends Ad4mModel {
           )
       `;
 
-      console.log('*** ConversationSubgroup.stats() surrealQuery:', surrealQuery);
+      // console.log('*** ConversationSubgroup.stats() surrealQuery:', surrealQuery);
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
-      console.log('*** ConversationSubgroup.stats() surrealResult:', surrealResult);
+      // console.log('*** ConversationSubgroup.stats() surrealResult:', surrealResult);
 
       const totalItems = surrealResult?.length || 0;
-      const participants: string[] = [...new Set(surrealResult?.map((r: any) => r.author).filter(Boolean) || [])];
+      const participants = [...new Set(surrealResult?.map((r: any) => r.author).filter(Boolean) || [])] as string[];
 
-      console.log('*** ConversationSubgroup.stats() totalItems:', totalItems);
-      console.log('*** ConversationSubgroup.stats() participants:', participants);
+      // console.log('*** ConversationSubgroup.stats() totalItems:', totalItems);
+      // console.log('*** ConversationSubgroup.stats() participants:', participants);
 
       return { totalItems, participants };
     } catch (error) {
@@ -210,12 +210,12 @@ export default class ConversationSubgroup extends Ad4mModel {
         ORDER BY timestamp ASC
       `;
 
-      console.log('*** ConversationSubgroup.itemsData() surrealQuery:', surrealQuery);
+      // console.log('*** ConversationSubgroup.itemsData() surrealQuery:', surrealQuery);
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
-      console.log('*** ConversationSubgroup.itemsData() surrealResult:', JSON.stringify(surrealResult, null, 2));
-      console.log('*** ConversationSubgroup.itemsData() count:', surrealResult?.length);
+      // console.log('*** ConversationSubgroup.itemsData() surrealResult:', JSON.stringify(surrealResult, null, 2));
+      // console.log('*** ConversationSubgroup.itemsData() count:', surrealResult?.length);
 
       return (surrealResult || []).map((item: any) => {
         let text = '';
@@ -249,63 +249,68 @@ export default class ConversationSubgroup extends Ad4mModel {
 
   // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
-    // const prologQuery = `
-    //   findall(TopicList, (
-    //     % First get all topic triples
-    //     findall([TopicBase, TopicName, Relevance], (
-    //       % 1. Find semantic relationships where expression = this subgroup
-    //       subject_class("SemanticRelationship", SR),
-    //       instance(SR, Relationship),
-    //       triple(Relationship, "flux://has_expression", "${this.baseExpression}"),
-    //
-    //       % 2. Get topic and relevance
-    //       triple(Relationship, "flux://has_tag", TopicBase),
-    //       property_getter(SR, Relationship, "relevance", Relevance),
-    //
-    //       % 3. Get topic name
-    //       subject_class("Topic", T),
-    //       instance(T, TopicBase),
-    //       property_getter(T, TopicBase, "topic", TopicName)
-    //     ), UnsortedTopics),
-    //
-    //     % 4. Remove duplicates via sort
-    //     sort(UnsortedTopics, TopicList)
-    //   ), [Topics]).
-    // `;
+    try {
+      // const prologQuery = `
+      //   findall(TopicList, (
+      //     % First get all topic triples
+      //     findall([TopicBase, TopicName, Relevance], (
+      //       % 1. Find semantic relationships where expression = this subgroup
+      //       subject_class("SemanticRelationship", SR),
+      //       instance(SR, Relationship),
+      //       triple(Relationship, "flux://has_expression", "${this.baseExpression}"),
+      //
+      //       % 2. Get topic and relevance
+      //       triple(Relationship, "flux://has_tag", TopicBase),
+      //       property_getter(SR, Relationship, "relevance", Relevance),
+      //
+      //       % 3. Get topic name
+      //       subject_class("Topic", T),
+      //       instance(T, TopicBase),
+      //       property_getter(T, TopicBase, "topic", TopicName)
+      //     ), UnsortedTopics),
+      //
+      //     % 4. Remove duplicates via sort
+      //     sort(UnsortedTopics, TopicList)
+      //   ), [Topics]).
+      // `;
 
-    const surrealQuery = `
-      SELECT
-        out.uri AS topicBase,
-        fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName,
-        fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
-      FROM link
-      WHERE predicate = 'flux://has_tag'
-        AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
-        AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
-        AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
-    `;
+      const surrealQuery = `
+        SELECT
+          out.uri AS topicBase,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName,
+          fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
+        FROM link
+        WHERE predicate = 'flux://has_tag'
+          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
+          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+      `;
 
-    const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
-    // Deduplicate by topicBase
-    const uniqueTopics = new Map<string, any>();
-    for (const topic of surrealResult || []) {
-      if (!uniqueTopics.has(topic.topicBase)) {
-        uniqueTopics.set(topic.topicBase, topic);
+      // Deduplicate by topicBase
+      const uniqueTopics = new Map<string, any>();
+      for (const topic of surrealResult || []) {
+        if (!uniqueTopics.has(topic.topicBase)) {
+          uniqueTopics.set(topic.topicBase, topic);
+        }
       }
-    }
 
-    return Array.from(uniqueTopics.values()).map(({ topicBase, topicName, relevance }) => ({
-      baseExpression: topicBase,
-      name: topicName,
-      relevance: parseInt(relevance, 10) || 0,
-    }));
+      return Array.from(uniqueTopics.values()).map(({ topicBase, topicName, relevance }) => ({
+        baseExpression: topicBase,
+        name: topicName,
+        relevance: parseInt(relevance, 10) || 0,
+      }));
+    } catch (error) {
+      console.error("Error getting subgroup topics with relevance:", error);
+      return [];
+    }
   }
 
-  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup?: boolean, existingTopic: Topic | null = null, batchId: string) {
+  async updateTopicWithRelevance(topicName: string, relevance: number, isNewGroup: boolean, existingTopic: Topic | null, batchId: string) {
     let topic = existingTopic;
     if (!topic) {
-      console.log('create new topic for:', topicName);
+      // console.log('create new topic for:', topicName);
       const newTopic = new Topic(this.perspective);
       newTopic.topic = Literal.from(topicName).toUrl();
       await newTopic.save(batchId);

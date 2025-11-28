@@ -138,6 +138,7 @@ export class Channel extends Ad4mModel {
           author: item.author,
           timestamp: new Date(item.timestamp).toISOString(),
           text,
+          type,
           icon: icons[type] ? icons[type] : "question",
         };
       });
@@ -187,7 +188,10 @@ export class Channel extends Ad4mModel {
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
-      return surrealResult[0]?.count || 0;
+      const countValue = surrealResult[0]?.count;
+      return typeof countValue === 'object' && countValue?.Int !== undefined
+        ? countValue.Int
+        : (countValue ?? 0);
     } catch (error) {
       console.error("Error getting total item count:", error);
       return 0;
@@ -276,6 +280,7 @@ export class Channel extends Ad4mModel {
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://has_name'][0] IS NOT NONE
           AND out->link[WHERE predicate = 'flux://has_summary'][0] IS NOT NONE
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation'
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
