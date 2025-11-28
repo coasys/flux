@@ -91,22 +91,26 @@ export default class Conversation extends Ad4mModel {
       // Get participants from all items in all subgroups
       let participants: string[] = [];
       if (subgroupUris.length > 0) {
-        const subgroupUrisList = `[${subgroupUris.map(u => `'${u}'`).join(',')}]`;
-        const itemsQuery = `
-          SELECT author
-          FROM link
-          WHERE in.uri IN ${subgroupUrisList}
-            AND predicate = 'ad4m://has_child'
-            AND (
-              out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-              OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-              OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-            )
-            AND author IS NOT NONE
-          GROUP BY author
-        `;
-        const itemsResult = await this.perspective.querySurrealDB(itemsQuery);
-        participants = [...new Set((itemsResult || []).map((r: any) => r.author).filter(Boolean))] as string[];
+        // For each subgroup, get all items and their authors
+        const itemsResults = await Promise.all(
+          subgroupUris.map(async (subgroupUri: string) => {
+            const itemsQuery = `
+              SELECT author
+              FROM link
+              WHERE in.uri = '${subgroupUri}'
+                AND predicate = 'ad4m://has_child'
+                AND (
+                  out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
+                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
+                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
+                )
+                AND author IS NOT NONE
+            `;
+            return await this.perspective.querySurrealDB(itemsQuery);
+          })
+        );
+        // Flatten and deduplicate
+        participants = [...new Set(itemsResults.flat().map((r: any) => r.author).filter(Boolean))];
       }
 
       return { totalSubgroups, participants };
