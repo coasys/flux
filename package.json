@@ -22,7 +22,10 @@
     "dev": "turbo run dev --parallel",
     "publish-package": "turbo run publish-package",
     "lint": "turbo run lint",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "bump": "node scripts/monorepo-publish.js bump",
+    "publish:dry-run": "node scripts/monorepo-publish.js dry-run",
+    "publish:all": "node scripts/monorepo-publish.js publish"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
