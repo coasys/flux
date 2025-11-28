@@ -64,7 +64,7 @@ function bumpVersion(pkgPath, newVersion, allPackageNames) {
 function publishPackage(pkgDir, dryRun = false) {
   const pkgJson = path.join(pkgDir, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgJson, 'utf8'));
-  const cmd = `npm publish${dryRun ? ' --dry-run' : ''}`;
+  const cmd = `npm publish --registry=https://registry.npmjs.org${dryRun ? ' --dry-run' : ''}`;
   console.log(`\n--- Publishing ${pkg.name} (${pkgDir}) ---`);
   try {
     execSync(cmd, { cwd: pkgDir, stdio: 'inherit' });
