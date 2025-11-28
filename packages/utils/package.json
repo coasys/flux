@@ -14,8 +14,8 @@
     "publish-package": "npm publish"
   },
   "dependencies": {
-    "@coasys/flux-constants": "0.10.1",
-    "@coasys/flux-types": "0.10.1",
+    "@coasys/flux-constants": "0.11.0",
+    "@coasys/flux-types": "0.11.0",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "openai": "^4.55.5"

@@ -14,9 +14,9 @@
     "publish-package": "npm publish"
   },
   "dependencies": {
-    "@coasys/flux-constants": "0.10.1",
-    "@coasys/flux-types": "0.10.1",
-    "@coasys/flux-utils": "0.10.1",
+    "@coasys/flux-constants": "0.11.0",
+    "@coasys/flux-types": "0.11.0",
+    "@coasys/flux-utils": "0.11.0",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
