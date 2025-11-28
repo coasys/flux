@@ -19,6 +19,7 @@ import { storeToRefs } from "pinia";
 import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { HEARTBEAT_INTERVAL, useSignallingService } from "./useSignallingService";
+import { fetchImageData } from "@/utils/helperFunctions";
 
 export interface ChannelData {
   channel: Partial<Channel>;
@@ -458,24 +459,19 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   });
 
-  watch(community, (newCommunity) => {
-    console.log("community changed:", newCommunity);
-    console.log("newCommunity.image:", newCommunity.image);
-    console.log("newCommunity.thumbnail:", newCommunity.thumbnail);
-    perspective.getExpression(newCommunity.image as string).then((expression) => {
-      console.log("image expression:", expression);
-      const { data } = expression;
-      const { data_base64 } = JSON.parse(data);
-      newCommunity.image =`data:image/png;base64,${data_base64}`
-    });
-
-    perspective.getExpression(newCommunity.thumbnail as string).then((expression) => {
-      console.log("thumbnail expression:", expression);
-      const { data } = expression;
-      const { data_base64 } = JSON.parse(data);
-      newCommunity.thumbnail =`data:image/png;base64,${data_base64}`
-    });
-  });
+  // Fetch and update community images from image URIs
+  watch(community, async (newCommunity) => {
+    if (!newCommunity) return;
+    // Store image URIs
+    const imageUri = newCommunity.image as string;
+    const thumbnailUri = newCommunity.thumbnail as string;
+    // Clear existing images to avoid displaying broken images during fetch
+    newCommunity.image = "";
+    newCommunity.thumbnail = "";
+    // Fetch and update images
+    newCommunity.image = await fetchImageData(perspective, imageUri);
+    newCommunity.thumbnail = await fetchImageData(perspective, thumbnailUri);
+  }, { immediate: true });
 
   return {
     perspective,
