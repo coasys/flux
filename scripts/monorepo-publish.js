@@ -42,11 +42,23 @@ function shouldSkip(pkgPath) {
   return SKIP_PACKAGES.includes(pkg.name);
 }
 
-function bumpVersion(pkgPath, newVersion) {
+function bumpVersion(pkgPath, newVersion, allPackageNames) {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   pkg.version = newVersion;
+
+  // Update internal dependencies
+  ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].forEach(depField => {
+    if (pkg[depField]) {
+      Object.keys(pkg[depField]).forEach(depName => {
+        if (allPackageNames.has(depName)) {
+          pkg[depField][depName] = newVersion;
+        }
+      });
+    }
+  });
+
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
-  console.log(`Bumped ${pkg.name} to ${newVersion}`);
+  console.log(`Bumped ${pkg.name} to ${newVersion} (and updated internal deps)`);
 }
 
 function publishPackage(pkgDir, dryRun = false) {
@@ -120,6 +132,7 @@ async function main() {
   const root = process.cwd();
   const pkgsUnsorted = findPackageJsons(root).filter(pkgPath => !shouldSkip(pkgPath));
   let pkgs = pkgsUnsorted;
+  const allPackageNames = new Set(pkgs.map(getPackageName));
 
   // Only sort for publish/dry-run, not bump
   if (mode !== 'bump') {
@@ -137,7 +150,7 @@ async function main() {
       console.error('Please provide a new version: node scripts/monorepo-publish.js bump 1.2.3');
       process.exit(1);
     }
-    pkgs.forEach(pkgPath => bumpVersion(pkgPath, newVersion));
+    pkgs.forEach(pkgPath => bumpVersion(pkgPath, newVersion, allPackageNames));
   } else {
     for (const pkgPath of pkgs) {
       const pkgDir = path.dirname(pkgPath);
