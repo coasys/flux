@@ -53,7 +53,6 @@ export default class Conversation extends Ad4mModel {
       //   ), [Stats]).
       // `;
 
-      // Count subgroups
       const countQuery = `
         SELECT count() AS count
         FROM link
@@ -62,24 +61,21 @@ export default class Conversation extends Ad4mModel {
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
 
-      // Get unique participants - get authors from items in subgroups
-      // We need to traverse: Conversation -> Subgroups -> Items -> get authors
-      const participantsQuery = `
-        SELECT VALUE author
+      const subgroupsQuery = `
+        SELECT out.uri AS subgroupUri
         FROM link
         WHERE in.uri = '${this.baseExpression}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
-          AND out->link[WHERE predicate = 'ad4m://has_child'].author IS NOT NONE
-        GROUP BY author
       `;
 
-      const [countResult, participantsResult] = await Promise.all([
+      // Execute both queries in parallel
+      const [countResult, subgroupsResult] = await Promise.all([
         this.perspective.querySurrealDB(countQuery),
-        this.perspective.querySurrealDB(participantsQuery),
+        this.perspective.querySurrealDB(subgroupsQuery),
       ]);
 
-      // Sum all count values - SurrealDB may return multiple result rows
+      // Extract total subgroup count
       let totalSubgroups = 0;
       for (const result of countResult || []) {
         const countValue = result?.count;
@@ -89,9 +85,34 @@ export default class Conversation extends Ad4mModel {
         totalSubgroups += count;
       }
 
-      const participants: string[] = [...new Set(participantsResult as string[] || [])];
-      // console.log('*** Conversation.stats() totalSubgroups:', totalSubgroups);
-      // console.log('*** Conversation.stats() participants:', participants);
+      // Extract subgroup URIs
+      const subgroupUris = (subgroupsResult || []).map((r: any) => r.subgroupUri);
+
+      // Get participants from all items in all subgroups
+      let participants: string[] = [];
+      if (subgroupUris.length > 0) {
+        // For each subgroup, get all items and their authors
+        const itemsResults = await Promise.all(
+          subgroupUris.map(async (subgroupUri: string) => {
+            const itemsQuery = `
+              SELECT author
+              FROM link
+              WHERE in.uri = '${subgroupUri}'
+                AND predicate = 'ad4m://has_child'
+                AND (
+                  out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
+                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
+                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
+                )
+                AND author IS NOT NONE
+            `;
+            return await this.perspective.querySurrealDB(itemsQuery);
+          })
+        );
+        // Flatten and deduplicate
+        participants = [...new Set(itemsResults.flat().map((r: any) => r.author).filter(Boolean))];
+      }
+
       return { totalSubgroups, participants };
     } catch (error) {
       console.error("Error getting conversation stats:", error);
