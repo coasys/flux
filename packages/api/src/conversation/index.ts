@@ -33,27 +33,66 @@ export default class Conversation extends Ad4mModel {
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
     // find the total subgroup count and the dids of participants in the conversation
     try {
-      const result = await this.perspective.infer(`
-        findall([SubgroupCount, SortedAuthors], (
-          % 1. Gather all subgroups and find the count
-          findall(Subgroup, (
-            subject_class("ConversationSubgroup", CS),
-            instance(CS, Subgroup),
-            triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
-          ), SubgroupList),
-          length(SubgroupList, SubgroupCount),
-    
-          % 2. Gather and deduplicate authors
-          findall(Author, (
-            member(S, SubgroupList),
-            triple(S, "ad4m://has_child", Item),
-            link(_, "ad4m://has_child", Item, _, Author)
-          ), AuthorList),
-          sort(AuthorList, SortedAuthors)
-        ), [Stats]).
-      `);
-      const [totalSubgroups, participants] = result[0]?.Stats ?? [];
-      return { totalSubgroups: totalSubgroups ?? 0, participants: participants ?? [] };
+      // const prologQuery = `
+      //   findall([SubgroupCount, SortedAuthors], (
+      //     % 1. Gather all subgroups and find the count
+      //     findall(Subgroup, (
+      //       subject_class("ConversationSubgroup", CS),
+      //       instance(CS, Subgroup),
+      //       triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
+      //     ), SubgroupList),
+      //     length(SubgroupList, SubgroupCount),
+      //
+      //     % 2. Gather and deduplicate authors
+      //     findall(Author, (
+      //       member(S, SubgroupList),
+      //       triple(S, "ad4m://has_child", Item),
+      //       link(_, "ad4m://has_child", Item, _, Author)
+      //     ), AuthorList),
+      //     sort(AuthorList, SortedAuthors)
+      //   ), [Stats]).
+      // `;
+
+      // Count subgroups
+      const countQuery = `
+        SELECT count() AS count
+        FROM link
+        WHERE in.uri = '${this.baseExpression}'
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+      `;
+
+      // Get unique participants - get authors from items in subgroups
+      // We need to traverse: Conversation -> Subgroups -> Items -> get authors
+      const participantsQuery = `
+        SELECT VALUE author
+        FROM link
+        WHERE in.uri = '${this.baseExpression}'
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+          AND out->link[WHERE predicate = 'ad4m://has_child'].author IS NOT NONE
+        GROUP BY author
+      `;
+
+      const [countResult, participantsResult] = await Promise.all([
+        this.perspective.querySurrealDB(countQuery),
+        this.perspective.querySurrealDB(participantsQuery),
+      ]);
+
+      // Sum all count values - SurrealDB may return multiple result rows
+      let totalSubgroups = 0;
+      for (const result of countResult || []) {
+        const countValue = result?.count;
+        const count = typeof countValue === 'object' && countValue?.Int !== undefined
+          ? countValue.Int
+          : (countValue ?? 0);
+        totalSubgroups += count;
+      }
+
+      const participants: string[] = [...new Set(participantsResult as string[] || [])];
+      // console.log('*** Conversation.stats() totalSubgroups:', totalSubgroups);
+      // console.log('*** Conversation.stats() participants:', participants);
+      return { totalSubgroups, participants };
     } catch (error) {
       console.error("Error getting conversation stats:", error);
       return { totalSubgroups: 0, participants: [] };
@@ -63,43 +102,65 @@ export default class Conversation extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the conversations topics (via its subgroups)
     try {
-      const result = await this.perspective.infer(`
-        % Get all topics and sort in one step
-        findall(TopicList, (
-          % First get all topic pairs
-          findall([TopicBase, TopicName], (
-            % 1. Gather subgroups
-            findall(Subgroup, (
-              subject_class("ConversationSubgroup", CS),
-              instance(CS, Subgroup),
-              triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
-            ), SubgroupList),
-    
-            % 2. Get topics from relationships
-            member(S, SubgroupList),
-            subject_class("SemanticRelationship", SR),
-            instance(SR, Relationship),
-            triple(Relationship, "flux://has_expression", S),
-            triple(Relationship, "flux://has_tag", TopicBase),
-            
-            % 3. Get topic names
-            subject_class("Topic", T),
-            instance(T, TopicBase),
-            property_getter(T, TopicBase, "topic", TopicName)
-          ), AllTopics),
-          
-          % Remove duplicates
-          sort(AllTopics, TopicList)
-        ), [Topics]).
-      `);
+      // const prologQuery = `
+      //   % Get all topics and sort in one step
+      //   findall(TopicList, (
+      //     % First get all topic pairs
+      //     findall([TopicBase, TopicName], (
+      //       % 1. Gather subgroups
+      //       findall(Subgroup, (
+      //         subject_class("ConversationSubgroup", CS),
+      //         instance(CS, Subgroup),
+      //         triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
+      //       ), SubgroupList),
+      //
+      //       % 2. Get topics from relationships
+      //       member(S, SubgroupList),
+      //       subject_class("SemanticRelationship", SR),
+      //       instance(SR, Relationship),
+      //       triple(Relationship, "flux://has_expression", S),
+      //       triple(Relationship, "flux://has_tag", TopicBase),
+      //
+      //       % 3. Get topic names
+      //       subject_class("Topic", T),
+      //       instance(T, TopicBase),
+      //       property_getter(T, TopicBase, "topic", TopicName)
+      //     ), AllTopics),
+      //
+      //     % Remove duplicates
+      //     sort(AllTopics, TopicList)
+      //   ), [Topics]).
+      // `;
 
-      return (
-        result[0]?.Topics?.map(
-          ([baseExpression, name]): SynergyTopic => ({
-            baseExpression,
-            name: Literal.fromUrl(name).get(),
-          })
-        ) || []
+      const surrealQuery = `
+        SELECT
+          out.uri AS topicBase,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName
+        FROM link
+        WHERE predicate = 'flux://has_tag'
+          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+          AND (
+            in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
+            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.baseExpression}'][0] IS NOT NONE
+          )
+      `;
+
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+
+      // Deduplicate by topicBase
+      const uniqueTopics = new Map<string, any>();
+      for (const topic of surrealResult || []) {
+        if (!uniqueTopics.has(topic.topicBase)) {
+          uniqueTopics.set(topic.topicBase, topic);
+        }
+      }
+
+      return Array.from(uniqueTopics.values()).map(
+        ({ topicBase, topicName }): SynergyTopic => ({
+          baseExpression: topicBase,
+          name: topicName,
+        })
       );
     } catch (error) {
       console.error("Error getting conversation topics:", error);
@@ -115,62 +176,94 @@ export default class Conversation extends Ad4mModel {
   async subgroupsData(): Promise<SynergyGroup[]> {
     // find the necissary data to render the conversations subgroups in timeline components (include timestamps for the first and last item in each subgroup)
     try {
-      const result = await this.perspective.infer(`
-        findall(SubgroupInfo, (
-          % 1. Identify all subgroups in the conversation
-          subject_class("ConversationSubgroup", CS),
-          instance(CS, Subgroup),
-          triple("${this.baseExpression}", "ad4m://has_child", Subgroup),
-      
-          % 2. Retrieve subgroup properties
-          property_getter(CS, Subgroup, "subgroupName", SubgroupName),
-          (property_getter(CS, Subgroup, "summary", S) -> Summary = S ; Summary = ""),
-      
-          % 3. Collect timestamps for valid items only
-          findall(Timestamp, (
-            triple(Subgroup, "ad4m://has_child", Item),
-            
-            % Check item is valid type
-            (
-              subject_class("Message", MC),
-              instance(MC, Item)
-              ;
-              subject_class("Post", PC),
-              instance(PC, Item)
-              ;
-              subject_class("Task", TC),
-              instance(TC, Item)
-            ),
-            
-            % Get items timestamp from link to channel
-            link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
-            subject_class("Channel", CH),
-            instance(CH, ChannelId)
-          ), Timestamps),
-      
-          % 4. Derive start and end from earliest & latest timestamps
-          (
-            Timestamps = []
-            -> StartTime = 0, EndTime = 0
-            ; sort(Timestamps, Sorted),
-              Sorted = [StartTime|_],
-              reverse(Sorted, [EndTime|_])
-          ),
-      
-          % 5. Build a single structure for each subgroup
-          SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
-        ), Subgroups).
-      `);
+      // const prologQuery = `
+      //   findall(SubgroupInfo, (
+      //     % 1. Identify all subgroups in the conversation
+      //     subject_class("ConversationSubgroup", CS),
+      //     instance(CS, Subgroup),
+      //     triple("${this.baseExpression}", "ad4m://has_child", Subgroup),
+      //
+      //     % 2. Retrieve subgroup properties
+      //     property_getter(CS, Subgroup, "subgroupName", SubgroupName),
+      //     (property_getter(CS, Subgroup, "summary", S) -> Summary = S ; Summary = ""),
+      //
+      //     % 3. Collect timestamps for valid items only
+      //     findall(Timestamp, (
+      //       triple(Subgroup, "ad4m://has_child", Item),
+      //
+      //       % Check item is valid type
+      //       (
+      //         subject_class("Message", MC),
+      //         instance(MC, Item)
+      //         ;
+      //         subject_class("Post", PC),
+      //         instance(PC, Item)
+      //         ;
+      //         subject_class("Task", TC),
+      //         instance(TC, Item)
+      //       ),
+      //
+      //       % Get items timestamp from link to channel
+      //       link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
+      //       subject_class("Channel", CH),
+      //       instance(CH, ChannelId)
+      //     ), Timestamps),
+      //
+      //     % 4. Derive start and end from earliest & latest timestamps
+      //     (
+      //       Timestamps = []
+      //       -> StartTime = 0, EndTime = 0
+      //       ; sort(Timestamps, Sorted),
+      //         Sorted = [StartTime|_],
+      //         reverse(Sorted, [EndTime|_])
+      //     ),
+      //
+      //     % 5. Build a single structure for each subgroup
+      //     SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
+      //   ), Subgroups).
+      // `;
 
-      // convert raw prolog output into a friendlier JS array
-      return (result[0]?.Subgroups || []).map(([baseExpression, subgroupName, summary, start, end]) => ({
-        baseExpression,
-        name: Literal.fromUrl(subgroupName).get().data,
-        // handle the empty array that's returned if no summary is present
-        summary: Array.isArray(summary) ? "" : Literal.fromUrl(summary).get().data,
-        start: parseInt(start, 10),
-        end: parseInt(end, 10),
-      }));
+      // Simplified query - get subgroups without timestamps first
+      const surrealQuery = `
+        SELECT
+          out.uri AS baseExpression,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
+        FROM link
+        WHERE in.uri = '${this.baseExpression}'
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+      `;
+
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+
+      // Get timestamps for each subgroup separately
+      return await Promise.all(
+        (surrealResult || []).map(async (subgroup: any) => {
+          // Query to get timestamps for items in this subgroup
+          // Using graph traversal from subgroup children that are also channel children
+          const timestampQuery = `
+            SELECT VALUE timestamp
+            FROM link
+            WHERE in.uri = '${subgroup.baseExpression}'
+              AND predicate = 'ad4m://has_child'
+              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_channel'][0] IS NOT NONE
+            ORDER BY timestamp ASC
+          `;
+
+          const timestamps = await this.perspective.querySurrealDB(timestampQuery);
+          const start = timestamps.length > 0 ? new Date(timestamps[0]).getTime() : 0;
+          const end = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]).getTime() : 0;
+
+          return {
+            baseExpression: subgroup.baseExpression,
+            name: subgroup.name || "",
+            summary: subgroup.summary || "",
+            start,
+            end,
+          };
+        })
+      );
     } catch (error) {
       console.error("Error getting conversation subgroups:", error);
       return [];
