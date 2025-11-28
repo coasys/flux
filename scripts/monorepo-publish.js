@@ -107,7 +107,7 @@ function getPackageName(pkgPath) {
 function getDependencies(pkgPath, allNames) {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   // Only consider dependencies that are also in the monorepo
-  const deps = Object.assign({}, pkg.dependencies, pkg.devDependencies);
+  const deps = Object.assign({}, pkg.dependencies, pkg.devDependencies, pkg.peerDependencies, pkg.optionalDependencies);
   return Object.keys(deps || {}).filter(dep => allNames.has(dep));
 }
 
