@@ -37,7 +37,7 @@ export class Community extends Ad4mModel {
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
+    //transform: (data) => (data?.data_base64 ? `data:image/png;base64,${data?.data_base64}` : data),
   })
   image: string | FileData;
 
@@ -45,7 +45,7 @@ export class Community extends Ad4mModel {
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
+    //transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
   })
   thumbnail: string | FileData;
 
