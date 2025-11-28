@@ -8,6 +8,8 @@ const SKIP_PACKAGES = [
     'flux-webrtc-debug-view',
     'my-first-flux-plugin',
     'my-first-vue-flux-plugin',
+    'flux',
+    'flux-monorepo',
     // add more package names to skip here
 ];
 
@@ -67,11 +69,33 @@ function publishPackage(pkgDir, dryRun = false) {
   const cmd = `npm publish --registry=https://registry.npmjs.org${dryRun ? ' --dry-run' : ''}`;
   console.log(`\n--- Publishing ${pkg.name} (${pkgDir}) ---`);
   try {
-    execSync(cmd, { cwd: pkgDir, stdio: 'inherit' });
+    // Use 'pipe' to capture output for error parsing
+    execSync(cmd, { cwd: pkgDir, stdio: 'pipe' });
     console.log(`${dryRun ? '[DRY RUN] ' : ''}Published ${pkg.name}`);
+    return { success: true };
   } catch (e) {
-    console.error(`\n[ERROR] Failed to publish ${pkg.name} (${pkgDir}):\n${e.message}\n`);
-    throw e;
+    let output = '';
+    if (e.stdout) output += e.stdout.toString();
+    if (e.stderr) output += e.stderr.toString();
+    const msg = (output || e.message || '').toLowerCase();
+
+    let reason = '';
+    if (msg.includes('e403') && msg.includes('cannot publish over the previously published versions')) {
+      reason = '(already published)';
+    } else if (msg.includes('e403')) {
+      reason = '(forbidden or no permission)';
+    } else if (msg.includes('eprivate')) {
+      reason = '(package is private)';
+    } else if (msg.includes('eneedauth') || msg.includes('need auth')) {
+      reason = '(not authenticated)';
+    } else if (msg.includes('version already exists')) {
+      reason = '(version already exists)';
+    } else if (msg.trim()) {
+      // fallback: show first line of error output
+      reason = '(' + msg.trim().split('\n')[0] + ')';
+    }
+    console.error(`\n[ERROR] Failed to publish ${pkg.name} (${pkgDir}):\n${output || e.message}\n`);
+    return { success: false, reason };
   }
 }
 
@@ -152,9 +176,29 @@ async function main() {
     }
     pkgs.forEach(pkgPath => bumpVersion(pkgPath, newVersion, allPackageNames));
   } else {
+    const successes = [];
+    const failures = [];
     for (const pkgPath of pkgs) {
       const pkgDir = path.dirname(pkgPath);
-      publishPackage(pkgDir, mode === 'dry-run');
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      const result = publishPackage(pkgDir, mode === 'dry-run');
+      if (result.success) {
+        successes.push(pkg.name);
+      } else {
+        failures.push({ name: pkg.name, reason: result.reason });
+      }
+    }
+    console.log('\n=== Publish Summary ===');
+    if (successes.length) {
+      console.log('✅ Published:');
+      successes.forEach(pkg => console.log(`  ✅ ${pkg}`));
+    }
+    if (failures.length) {
+      console.log('❌ Failed:');
+      failures.forEach(pkg => console.log(`  ❌ ${pkg.name} ${pkg.reason || ''}`));
+    }
+    if (!failures.length) {
+      console.log('🎉 All packages published successfully!');
     }
   }
 }
