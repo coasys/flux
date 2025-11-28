@@ -458,6 +458,25 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   });
 
+  watch(community, (newCommunity) => {
+    console.log("community changed:", newCommunity);
+    console.log("newCommunity.image:", newCommunity.image);
+    console.log("newCommunity.thumbnail:", newCommunity.thumbnail);
+    perspective.getExpression(newCommunity.image as string).then((expression) => {
+      console.log("image expression:", expression);
+      const { data } = expression;
+      const { data_base64 } = JSON.parse(data);
+      newCommunity.image =`data:image/png;base64,${data_base64}`
+    });
+
+    perspective.getExpression(newCommunity.thumbnail as string).then((expression) => {
+      console.log("thumbnail expression:", expression);
+      const { data } = expression;
+      const { data_base64 } = JSON.parse(data);
+      newCommunity.thumbnail =`data:image/png;base64,${data_base64}`
+    });
+  });
+
   return {
     perspective,
     neighbourhood,
