@@ -1250,7 +1250,7 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.2.tgz#a28a46630af1677f3e9c73f0e6921431d5340152"
   integrity sha512-AmRIX6QvFemItlY7/69ARkIAqitRQqJ2qwgZmD1KqgFb78pH+XFXm1guvS/a8CuOOm/IqZ4ddDbl20yxtBqzGA==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.10.1", "@coasys/ad4m-connect@0.11.0":
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.0.tgz#309aa8b6394c35422b19f892b47f196ca01858c3"
   integrity sha512-JW2s2ui1/wECeUFWsun6cmn0Hr1VNa6jtrMm9SDu9NwunhpV+DPXPKNIlUyTOKYc1oUjjmZEmlt0mLTisXiGsw==
@@ -1262,7 +1262,7 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.10.1", "@coasys/ad4m-react-hooks@0.11.0":
+"@coasys/ad4m-react-hooks@0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.11.0.tgz#f7bd01e39fa52cb5a110c71504715287132e0cf4"
   integrity sha512-X3PC5ZKT9sqQMOojpNrXMsEaToDq/NrbYLawcOBqUC/rNQAoJ9KV4H+BmoUwlUt8RfelkcrrHMpJ0edUOS024g==
@@ -1273,7 +1273,7 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.10.1", "@coasys/ad4m-vue-hooks@0.11.0":
+"@coasys/ad4m-vue-hooks@0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.11.0.tgz#d4f806ceb9fe44d91b15491c43345175d7d67492"
   integrity sha512-RFw6IcbPBYt1PtrBII/Bs0JGtQmXlvfMaTVppmM/XIPsZFWCjKGkSvr23LSZ/37j82nxZ0xazGCCjaYRsbLAnQ==
@@ -1281,7 +1281,7 @@
     "@coasys/ad4m" "workspace:0.11.0"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.10.1", "@coasys/ad4m@0.11.0", "@coasys/ad4m@workspace:0.11.0":
+"@coasys/ad4m@*", "@coasys/ad4m@0.11.0", "@coasys/ad4m@workspace:0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.11.0.tgz#cd283f01c7549a0570ead886f2e2f7a92a2f412a"
   integrity sha512-DBgb0ibxEGSv4L4iiH1GQOGxeE6GH2JoNzizIYFWFenH0zJUG2CoHsvNW20V35CqLq5oZ25k5NUmAaY3v1XYBQ==
