@@ -1,12 +1,13 @@
 import iconPath from '@/assets/images/icon.png';
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from '@/constants';
 import { ToastState, UpdateState } from '@/stores';
+import { fetchImageData } from '@/utils/helperFunctions';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Ad4mClient, Agent, PerspectiveProxy } from '@coasys/ad4m';
 import { Community, joinCommunity } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { defineStore } from 'pinia';
-import { computed, ref, shallowRef, toRaw } from 'vue';
+import { computed, ref, shallowRef, toRaw, watch } from 'vue';
 
 export const useAppStore = defineStore(
   'appStore',
@@ -93,13 +94,13 @@ export const useAppStore = defineStore(
           .filter((perspective) => perspective.neighbourhood)
           .map(async (perspective) => {
             const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
-            return community ? ([perspective.uuid, community] as const) : null;
+            if (!community) return null;
+            return [perspective.uuid, community] as const;
           }),
       );
 
       // Filter out null results and create object from entries
       const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
-
       myCommunities.value = { ...myCommunities.value, ...newCommunities };
     }
 
@@ -120,6 +121,30 @@ export const useAppStore = defineStore(
         holochainRestarting.value = false;
       }
     }
+
+    // Fetch and update community images from image URIs
+    watch(
+      myCommunities,
+      async (newCommunities) => {
+        await Promise.all(
+          Object.entries(newCommunities).map(async ([uuid, community]) => {
+            // Get original URIs
+            const imageUri = community.image as string;
+            const thumbnailUri = community.thumbnail as string;
+
+            // Clear existing images to avoid displaying broken images during fetch
+            community.image = '';
+            community.thumbnail = '';
+
+            // Fetch and update images
+            const communityPerspective = toRaw(myPerspectives.value).find((p) => p.uuid === uuid) as PerspectiveProxy;
+            community.image = await fetchImageData(communityPerspective, imageUri);
+            community.thumbnail = await fetchImageData(communityPerspective, thumbnailUri);
+          }),
+        );
+      },
+      { immediate: true },
+    );
 
     return {
       // State
