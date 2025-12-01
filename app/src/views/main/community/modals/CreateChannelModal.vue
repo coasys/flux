@@ -230,22 +230,8 @@ onMounted(async () => {
 
   // Fetch apps from npm, use local apps if request fails
   try {
-    const res = await getAllFluxApps();
+    const allApps = await getAllFluxApps();
     isLoading.value = false;
-
-    const allApps = [
-      ...res,
-      {
-        ad4mVersion: '0.10.1',
-        created: '2023-12-13T11:29:55.527Z',
-        description: 'Move items on a kanban board',
-        icon: 'kanban',
-        name: 'Kanban Simple',
-        org: '',
-        pkg: '@coasys/flux-kanban-view-simple',
-        version: '0.10.1',
-      },
-    ];
 
     const filtered = allApps.filter((pkg) => {
       try {
