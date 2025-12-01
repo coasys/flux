@@ -2,27 +2,9 @@
   "name": "@coasys/flux-post-view",
   "version": "0.11.0",
   "description": "",
-  "fluxapp": {
-    "name": "Posts",
-    "description": "Create a feed of posts",
-    "icon": "postcard"
-  },
-  "keywords": [
-    "flux-plugin",
-    "ad4m-view"
-  ],
+  "author": "",
+  "license": "ISC",
   "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/main.umd.cjs",
-  "module": "./dist/main.js",
-  "exports": {
-    ".": {
-      "import": "./dist/main.js",
-      "require": "./dist/main.umd.cjs"
-    }
-  },
   "scripts": {
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -32,11 +14,21 @@
     "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
-  "publishConfig": {
-    "access": "public"
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
   },
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
   "dependencies": {
     "@coasys/ad4m": "0.11.0",
     "@coasys/ad4m-react-hooks": "0.11.0",
@@ -65,5 +57,13 @@
     "npm-run-all": "^4.1.5",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^2.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "fluxapp": {
+    "name": "Posts",
+    "description": "Create a feed of posts",
+    "icon": "postcard"
   }
 }

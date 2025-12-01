@@ -2,13 +2,16 @@
   "name": "@coasys/flux-docs",
   "version": "0.11.0",
   "description": "",
-  "type": "module",
   "homepage": "https://docs.fluxsocial.io",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
   "scripts": {
     "start": "yarn dev",
     "build": "vitepress build",
     "dev": "vitepress dev"
   },
+  "keywords": [],
   "dependencies": {
     "@coasys/flux-container": "0.11.0",
     "@coasys/flux-ui": "0.11.0",
@@ -17,8 +20,5 @@
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }

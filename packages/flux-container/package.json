@@ -2,25 +2,22 @@
   "name": "@coasys/flux-container",
   "version": "0.11.0",
   "type": "module",
-  "module": "dist/flux-container.js",
-  "main": "dist/flux-container.js",
-  "exports": {
-    ".": "./dist/flux-container.js"
-  },
-  "types": "types/flux-container.d.ts",
-  "files": [
-    "dist",
-    "types"
-  ],
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },
-  "publishConfig": {
-    "access": "public"
+  "main": "dist/flux-container.js",
+  "module": "dist/flux-container.js",
+  "types": "types/flux-container.d.ts",
+  "exports": {
+    ".": "./dist/flux-container.js"
   },
+  "files": [
+    "dist",
+    "types"
+  ],
   "dependencies": {
     "@coasys/ad4m": "0.11.0",
     "@coasys/ad4m-connect": "0.11.0",
@@ -32,5 +29,8 @@
     "typescript": "^5.0.4",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

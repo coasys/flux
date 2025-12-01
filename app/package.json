@@ -2,11 +2,15 @@
   "name": "flux",
   "version": "0.11.0",
   "description": "A social web3 tool kit for communities",
-  "author": "josh@junto.foundation",
   "repository": {
     "type": "git",
     "url": "https://github.com/juntofoundation/flux.git"
   },
+  "author": "josh@junto.foundation",
+  "contributors": [
+    "eric@junto.foundation",
+    "kaichaosuna@gmail.com"
+  ],
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
@@ -89,9 +93,5 @@
     "vite-plugin-pwa": "^0.14.7",
     "vite-plugin-worker": "^1.0.5",
     "vue-devtools": "^5.1.4"
-  },
-  "contributors": [
-    "eric@junto.foundation",
-    "kaichaosuna@gmail.com"
-  ]
+  }
 }
