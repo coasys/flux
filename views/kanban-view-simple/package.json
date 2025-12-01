@@ -27,12 +27,14 @@
     "dev": "vite",
     "build": "vite build",
     "build:page": "vite build index.html",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@coasys/ad4m": "0.11.0",
     "@coasys/ad4m-react-hooks": "0.11.0",

@@ -30,8 +30,10 @@
     "dev": "npm-run-all --parallel dev:**",
     "dev:server": "vite",
     "dev:dist": "vite build --watch",
-    "release": "np --no-tests",
-    "publish-package": "npm publish"
+    "release": "np --no-tests"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "author": "",
   "license": "ISC",

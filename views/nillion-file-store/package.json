@@ -29,6 +29,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "preview": "vite preview"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

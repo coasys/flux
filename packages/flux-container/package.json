@@ -16,8 +16,10 @@
     "start": "npm run dev",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview",
-    "publish-package": "npm publish"
+    "serve": "vite preview"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@coasys/ad4m": "0.11.0",

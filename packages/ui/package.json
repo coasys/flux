@@ -10,7 +10,6 @@
     "dist"
   ],
   "publishConfig": {
-    "cache": "~/.npm",
     "access": "public"
   },
   "scripts": {
@@ -24,8 +23,7 @@
     "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
     "build:lib": "node esbuild-prod.js",
-    "visualize": "esbuild-visualizer --metadata ./meta.json",
-    "publish-package": "npm publish"
+    "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
   "dependencies": {
     "@coasys/flux-utils": "0.11.0",

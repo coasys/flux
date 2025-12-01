@@ -19,8 +19,10 @@
     "dev:serve": "vite",
     "dev:watch": "vite build --watch",
     "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "author": "",
   "license": "ISC",
