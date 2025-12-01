@@ -3,24 +3,20 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const SKIP_PACKAGES = [
-    'flux-electron',
-    '@coasys/flux-docs',
-    'flux-webrtc-debug-view',
-    'my-first-flux-plugin',
-    'my-first-vue-flux-plugin',
-    'flux',
-    'flux-monorepo',
-    // add more package names to skip here
+  'flux-electron',
+  '@coasys/flux-docs',
+  'flux-webrtc-debug-view',
+  'my-first-flux-plugin',
+  'my-first-vue-flux-plugin',
+  'flux',
+  'flux-monorepo',
+  // add more package names to skip here
 ];
 
 function findPackageJsons(dir, found = []) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
-    if (
-      entry.name === 'node_modules' ||
-      entry.name === 'dist' ||
-      entry.name.startsWith('.')
-    ) continue;
+    if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name.startsWith('.')) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       findPackageJsons(fullPath, found);
@@ -49,9 +45,9 @@ function bumpVersion(pkgPath, newVersion, allPackageNames) {
   pkg.version = newVersion;
 
   // Update internal dependencies
-  ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].forEach(depField => {
+  ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].forEach((depField) => {
     if (pkg[depField]) {
-      Object.keys(pkg[depField]).forEach(depName => {
+      Object.keys(pkg[depField]).forEach((depName) => {
         if (allPackageNames.has(depName)) {
           pkg[depField][depName] = newVersion;
         }
@@ -108,19 +104,19 @@ function getDependencies(pkgPath, allNames) {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   // Only consider dependencies that are also in the monorepo
   const deps = Object.assign({}, pkg.dependencies, pkg.devDependencies, pkg.peerDependencies, pkg.optionalDependencies);
-  return Object.keys(deps || {}).filter(dep => allNames.has(dep));
+  return Object.keys(deps || {}).filter((dep) => allNames.has(dep));
 }
 
 function topologicalSort(pkgs) {
   // Build name-to-path and dependency graph
   const nameToPath = {};
-  pkgs.forEach(pkgPath => {
+  pkgs.forEach((pkgPath) => {
     const name = getPackageName(pkgPath);
     nameToPath[name] = pkgPath;
   });
   const allNames = new Set(Object.keys(nameToPath));
   const graph = {};
-  pkgs.forEach(pkgPath => {
+  pkgs.forEach((pkgPath) => {
     const name = getPackageName(pkgPath);
     graph[name] = getDependencies(pkgPath, allNames);
   });
@@ -154,7 +150,7 @@ async function main() {
   }
 
   const root = process.cwd();
-  const pkgsUnsorted = findPackageJsons(root).filter(pkgPath => !shouldSkip(pkgPath));
+  const pkgsUnsorted = findPackageJsons(root).filter((pkgPath) => !shouldSkip(pkgPath));
   let pkgs = pkgsUnsorted;
   const allPackageNames = new Set(pkgs.map(getPackageName));
 
@@ -174,7 +170,7 @@ async function main() {
       console.error('Please provide a new version: node scripts/monorepo-publish.js bump 1.2.3');
       process.exit(1);
     }
-    pkgs.forEach(pkgPath => bumpVersion(pkgPath, newVersion, allPackageNames));
+    pkgs.forEach((pkgPath) => bumpVersion(pkgPath, newVersion, allPackageNames));
   } else {
     const successes = [];
     const failures = [];
@@ -191,11 +187,11 @@ async function main() {
     console.log('\n=== Publish Summary ===');
     if (successes.length) {
       console.log('✅ Published:');
-      successes.forEach(pkg => console.log(`  ✅ ${pkg}`));
+      successes.forEach((pkg) => console.log(`  ✅ ${pkg}`));
     }
     if (failures.length) {
       console.log('❌ Failed:');
-      failures.forEach(pkg => console.log(`  ❌ ${pkg.name} ${pkg.reason || ''}`));
+      failures.forEach((pkg) => console.log(`  ❌ ${pkg.name} ${pkg.reason || ''}`));
     }
     if (!failures.length) {
       console.log('🎉 All packages published successfully!');

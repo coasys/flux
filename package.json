@@ -26,7 +26,8 @@
     "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && yarn cache clean",
     "bump": "node scripts/monorepo-publish.js bump",
     "publish:dry-run": "node scripts/monorepo-publish.js dry-run",
-    "publish:all": "node scripts/monorepo-publish.js publish"
+    "publish:all": "node scripts/monorepo-publish.js publish",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "eslint-config-custom": "*",

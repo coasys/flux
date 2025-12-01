@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 
 // Usage: npx @coasys/create-flux-plugin
-const prompts = require("prompts");
-const fs = require("fs");
-const path = require("path");
+const prompts = require('prompts');
+const fs = require('fs');
+const path = require('path');
 
 async function run() {
   const response = await prompts([
     {
-      type: "text",
-      name: "projectName",
+      type: 'text',
+      name: 'projectName',
       message: `Give your plugin a name:`,
     },
     {
-      type: "multiselect",
-      name: "template",
-      message: "Pick a template",
+      type: 'multiselect',
+      name: 'template',
+      message: 'Pick a template',
       choices: [
-        { title: "preact", value: "preact", selected: true }
-        { title: "vue", value: "vue" }
+        { title: 'preact', value: 'preact', selected: true },
+        { title: 'vue', value: 'vue' },
       ],
-      hint: "- Space to select. Return to submit",
+      hint: '- Space to select. Return to submit',
     },
   ]);
 
@@ -44,25 +44,17 @@ async function run() {
   // up by the starter template repository). We can rename
   // the dotfiles after we have copied them over to the
   // new project directory.
-  fs.renameSync(
-    path.join(projectDir, "gitignore"),
-    path.join(projectDir, ".gitignore")
-  );
+  fs.renameSync(path.join(projectDir, 'gitignore'), path.join(projectDir, '.gitignore'));
 
-  const projectPackageJson = require(path.join(projectDir, "package.json"));
+  const projectPackageJson = require(path.join(projectDir, 'package.json'));
 
   // Update the project's package.json with the new project name
   projectPackageJson.name = projectName;
 
-  fs.writeFileSync(
-    path.join(projectDir, "package.json"),
-    JSON.stringify(projectPackageJson, null, 2)
-  );
+  fs.writeFileSync(path.join(projectDir, 'package.json'), JSON.stringify(projectPackageJson, null, 2));
 
-  console.log("Success! Your new plugin is ready.");
-  console.log(
-    `run cd ${projectName}, npm install, and npm run dev to start building`
-  );
+  console.log('Success! Your new plugin is ready.');
+  console.log(`run cd ${projectName}, npm install, and npm run dev to start building`);
 }
 
 run();
