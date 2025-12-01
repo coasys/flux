@@ -2,7 +2,7 @@ import { Profile } from '@coasys/flux-types';
 import styles from './AvatarGroup.module.scss';
 
 type Props = {
-  avatars: Partial<Profile>[]; // TODO: remove Partial
+  avatars: Profile[];
 };
 
 export default function AvatarGroup({ avatars }: Props) {

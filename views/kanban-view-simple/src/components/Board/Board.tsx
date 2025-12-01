@@ -19,7 +19,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   const [showNewColumnModal, setShowNewColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [newColumnLoading, setNewColumnLoading] = useState(false);
-  const [agentProfiles, setAgentProfiles] = useState<Partial<Profile>[]>([]); // TODO: remove Partial
+  const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
 
   const { entries: columns } = useModel({ perspective, model: TaskColumn, query: { source } });
 
@@ -27,7 +27,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
     const profiles = await Promise.all([me.did, ...others].map(getProfile));
-    setAgentProfiles([...profiles, { did: 'a' }, { did: 'b' }]); // TODO: remove Partial
+    setAgentProfiles(profiles);
   }
 
   async function addColumn() {

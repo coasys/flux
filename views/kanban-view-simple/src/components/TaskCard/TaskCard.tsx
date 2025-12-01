@@ -13,7 +13,7 @@ type Props = {
   perspective: PerspectiveProxy;
   source: string;
   agent: AgentClient;
-  agentProfiles: Partial<Profile>[]; // TODO: remove Partial
+  agentProfiles: Profile[];
   columns: TaskColumn[];
   column: TaskColumn;
   task: Task;
