@@ -21,7 +21,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   const [newColumnLoading, setNewColumnLoading] = useState(false);
   const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
 
-  const { entries: columns } = useModel({ perspective, model: TaskColumn, query: { source } });
+  const { entries: columns, setEntries } = useModel({ perspective, model: TaskColumn, query: { source } });
 
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
@@ -60,24 +60,26 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
 
     // If the task is dropped in a different column
     if (destination.droppableId !== source.droppableId) {
+      // Create a batch so we can group all changes
+      const batchId = await perspective.createBatch();
+
       // Remove old link
       const oldLinks = await perspective.get(
         new LinkQuery({ source: source.droppableId, predicate: 'ad4m://has_child', target: draggableId }),
       );
-      await perspective.removeLinks([oldLinks[0]]);
+      await perspective.removeLinks([oldLinks[0]], batchId);
 
       // Update orderedTaskIds in source column
       const sourceColumn = columns.find((col) => col.baseExpression === source.droppableId);
       if (sourceColumn) {
         const orderedIds = JSON.parse(sourceColumn.orderedTaskIds);
         sourceColumn.orderedTaskIds = JSON.stringify(orderedIds.filter((id) => id !== draggableId));
-        await sourceColumn.update();
+        await sourceColumn.update(batchId);
       }
 
       // Add new link
-      await perspective.addLinks([
-        { source: destination.droppableId, predicate: 'ad4m://has_child', target: draggableId },
-      ]);
+      const newLink = { source: destination.droppableId, predicate: 'ad4m://has_child', target: draggableId };
+      await perspective.addLinks([newLink], undefined, batchId);
 
       // Update orderedTaskIds in destination column
       const destinationColumn = columns.find((col) => col.baseExpression === destination.droppableId);
@@ -85,8 +87,19 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
         const newOrderedTaskIds = JSON.parse(destinationColumn.orderedTaskIds);
         newOrderedTaskIds.splice(destination.index, 0, draggableId);
         destinationColumn.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-        await destinationColumn.update();
+        await destinationColumn.update(batchId);
       }
+
+      // Optimistically update the UI
+      const updatedColumns = columns.map((col) => {
+        if (col.baseExpression === sourceColumn?.baseExpression) return sourceColumn;
+        if (col.baseExpression === destinationColumn?.baseExpression) return destinationColumn;
+        return col;
+      });
+      setEntries(updatedColumns);
+
+      // Apply batch updates in the perspective
+      perspective.commitBatch(batchId);
     } else {
       // If the task is reordered within the same column
       const column = columns.find((col) => col.baseExpression === source.droppableId);
@@ -100,6 +113,12 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       // Insert the task at the new position
       newOrderedTaskIds.splice(destination.index, 0, draggableId);
       column.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+
+      // Optimistically update the UI
+      const newColumns = columns.map((col) => (col.baseExpression === column.baseExpression ? column : col));
+      setEntries(newColumns);
+
+      // Apply the update in the perspective
       await column.update();
     }
   }
