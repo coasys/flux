@@ -26,7 +26,10 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
-    const profiles = await Promise.all([me.did, ...others].map(getProfile));
+    const agentDids = [me.did, ...others];
+    // Set minimal profiles while loading full ones
+    setAgentProfiles(agentDids.map((did) => ({ did }) as Profile));
+    const profiles = await Promise.all(agentDids.map(getProfile));
     setAgentProfiles(profiles);
   }
 
