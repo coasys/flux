@@ -8,6 +8,7 @@ import { Task, TaskColumn } from '@coasys/flux-api';
 import { Draggable } from 'react-beautiful-dnd';
 import TaskSettings from '../TaskSettings';
 import AvatarGroup from '../AvatarGroup';
+import { ColumnWithTasks } from '../Board/Board';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -15,19 +16,26 @@ type Props = {
   agent: AgentClient;
   agentProfiles: Profile[];
   columns: TaskColumn[];
-  column: TaskColumn;
+  column: ColumnWithTasks;
   task: Task;
   index: number;
+  updating: boolean;
 };
 
-export default function TaskCard({ perspective, source, agent, agentProfiles, columns, column, task, index }: Props) {
+export default function TaskCard({
+  perspective,
+  source,
+  agent,
+  agentProfiles,
+  columns,
+  column,
+  task,
+  index,
+  updating,
+}: Props) {
   const [showTaskSettings, setShowTaskSettings] = useState(false);
 
-  const { entries: comments } = useModel({
-    perspective,
-    model: Message,
-    query: { source: task.baseExpression },
-  });
+  const { entries: comments } = useModel({ perspective, model: Message, query: { source: task.baseExpression } });
 
   const assignedProfiles = useMemo(() => {
     return agentProfiles.filter((p) => task.assignees.includes(p.did));
@@ -35,8 +43,8 @@ export default function TaskCard({ perspective, source, agent, agentProfiles, co
 
   return (
     <>
-      <div className={styles.wrapper} onClick={() => setShowTaskSettings(true)}>
-        <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index}>
+      <div className={styles.wrapper} onClick={() => !updating && setShowTaskSettings(true)}>
+        <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index} isDragDisabled={updating}>
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}

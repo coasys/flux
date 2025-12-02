@@ -2,8 +2,8 @@ import { PerspectiveProxy, LinkQuery } from '@coasys/ad4m';
 import { useModel } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
-import { useState, useEffect, Fragment } from 'react';
-import { TaskColumn } from '@coasys/flux-api';
+import { useState, useEffect, Fragment, useMemo, useRef } from 'react';
+import { Task, TaskColumn } from '@coasys/flux-api';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import styles from './Board.module.scss';
 import Column from '../Column';
@@ -15,13 +15,20 @@ type BoardProps = {
   getProfile: (did: string) => Promise<Profile>;
 };
 
+export type ColumnWithTasks = TaskColumn & { tasks: Task[] };
+
 export default function Board({ perspective, source, agent, getProfile }: BoardProps) {
   const [showNewColumnModal, setShowNewColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [newColumnLoading, setNewColumnLoading] = useState(false);
   const [agentProfiles, setAgentProfiles] = useState<Profile[]>([]);
+  const [columnsWithTasks, setColumnsWithTasks] = useState<ColumnWithTasks[]>([]);
 
-  const { entries: columns, setEntries } = useModel({ perspective, model: TaskColumn, query: { source } });
+  const [updating, setUpdating] = useState(false);
+  const updatingRef = useRef(false);
+
+  const { entries: columns } = useModel({ perspective, model: TaskColumn, query: { source } });
+  const { entries: tasks } = useModel({ perspective, model: Task, query: { source } });
 
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
@@ -40,7 +47,6 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     const newColumn = new TaskColumn(perspective, undefined, source);
     newColumn.columnName = newColumnName;
     newColumn.orderedTaskIds = JSON.stringify([]);
-
     await newColumn.save();
 
     // Reset state and hide the modal
@@ -58,69 +64,101 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     // If the task is dropped in its original position, do not do anything
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    // If the task is dropped in a different column
-    if (destination.droppableId !== source.droppableId) {
-      // Create a batch so we can group all changes
-      const batchId = await perspective.createBatch();
+    // Set updating state to block concurrent updates
+    updatingRef.current = true;
+    setUpdating(true);
 
-      // Remove old link
-      const oldLinks = await perspective.get(
-        new LinkQuery({ source: source.droppableId, predicate: 'ad4m://has_child', target: draggableId }),
-      );
-      await perspective.removeLinks([oldLinks[0]], batchId);
+    try {
+      // If the task is dropped in a different column
+      if (destination.droppableId !== source.droppableId) {
+        // Optimistically update the UI
+        const newColumns = [...columnsWithTasks];
+        const sourceColumn = newColumns.find((col) => col.baseExpression === source.droppableId);
+        const destinationColumn = newColumns.find((col) => col.baseExpression === destination.droppableId);
 
-      // Update orderedTaskIds in source column
-      const sourceColumn = columns.find((col) => col.baseExpression === source.droppableId);
-      if (sourceColumn) {
-        const orderedIds = JSON.parse(sourceColumn.orderedTaskIds);
-        sourceColumn.orderedTaskIds = JSON.stringify(orderedIds.filter((id) => id !== draggableId));
-        await sourceColumn.update(batchId);
-      }
+        // Remove task from source column and add to destination column
+        const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
+        destinationColumn.tasks.splice(destination.index, 0, movedTask);
 
-      // Add new link
-      const newLink = { source: destination.droppableId, predicate: 'ad4m://has_child', target: draggableId };
-      await perspective.addLinks([newLink], undefined, batchId);
+        // Update orderedTaskIds in source column
+        const sourceOrderedTaskIds = JSON.parse(sourceColumn.orderedTaskIds);
+        sourceOrderedTaskIds.splice(source.index, 1);
+        sourceColumn.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
 
-      // Update orderedTaskIds in destination column
-      const destinationColumn = columns.find((col) => col.baseExpression === destination.droppableId);
-      if (destinationColumn) {
-        const newOrderedTaskIds = JSON.parse(destinationColumn.orderedTaskIds);
+        // Update orderedTaskIds in destination column
+        const destOrderedTaskIds = JSON.parse(destinationColumn.orderedTaskIds);
+        destOrderedTaskIds.splice(destination.index, 0, draggableId);
+        destinationColumn.orderedTaskIds = JSON.stringify(destOrderedTaskIds);
+
+        setColumnsWithTasks(newColumns);
+
+        // Update the perspective
+        const batchId = await perspective.createBatch();
+
+        // Update orderedTaskIds in source column
+        const sourceColumnModel = columns.find((col) => col.baseExpression === source.droppableId);
+        sourceColumnModel.orderedTaskIds = sourceColumn.orderedTaskIds;
+        await sourceColumnModel.update(batchId);
+
+        // Update orderedTaskIds in destination column
+        const destinationColumnModel = columns.find((col) => col.baseExpression === destination.droppableId);
+        destinationColumnModel.orderedTaskIds = destinationColumn.orderedTaskIds;
+        await destinationColumnModel.update(batchId);
+
+        // Apply batch updates
+        await perspective.commitBatch(batchId);
+      } else {
+        // If the task is reordered within the same column
+        const column = columnsWithTasks.find((col) => col.baseExpression === source.droppableId);
+
+        // Create the new orderedTaskIds
+        const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
+        newOrderedTaskIds.splice(source.index, 1);
         newOrderedTaskIds.splice(destination.index, 0, draggableId);
-        destinationColumn.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-        await destinationColumn.update(batchId);
+
+        // Optimistically update the UI
+        const newColumns = [...columnsWithTasks];
+        const newColumn = newColumns.find((col) => col.baseExpression === column.baseExpression);
+        const [movedTask] = newColumn.tasks.splice(source.index, 1);
+        newColumn.tasks.splice(destination.index, 0, movedTask);
+        newColumn.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+        setColumnsWithTasks(newColumns);
+
+        // Update the perspective
+        const columnModel = columns.find((col) => col.baseExpression === column.baseExpression);
+        columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+        await columnModel.update();
       }
-
-      // Optimistically update the UI
-      const updatedColumns = columns.map((col) => {
-        if (col.baseExpression === sourceColumn?.baseExpression) return sourceColumn;
-        if (col.baseExpression === destinationColumn?.baseExpression) return destinationColumn;
-        return col;
-      });
-      setEntries(updatedColumns);
-
-      // Apply batch updates in the perspective
-      perspective.commitBatch(batchId);
-    } else {
-      // If the task is reordered within the same column
-      const column = columns.find((col) => col.baseExpression === source.droppableId);
-
-      // Update orderedTaskIds in the column
-      const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
-
-      // Remove the task from its original position
-      newOrderedTaskIds.splice(source.index, 1);
-
-      // Insert the task at the new position
-      newOrderedTaskIds.splice(destination.index, 0, draggableId);
-      column.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-
-      // Optimistically update the UI
-      const newColumns = columns.map((col) => (col.baseExpression === column.baseExpression ? column : col));
-      setEntries(newColumns);
-
-      // Apply the update in the perspective
-      await column.update();
+    } finally {
+      updatingRef.current = false;
+      setUpdating(false);
     }
+  }
+
+  async function getColumnsWithTasks(newColumns: TaskColumn[]) {
+    const newColumnsWithTasks = (await Promise.all(
+      newColumns.map(async (column) => {
+        // Get tasks and order them by the columns orderedTaskIds property
+        const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
+        const tasks = await Task.findAll(perspective, { where: { base: taskIds } });
+        const orderedTasks = [];
+        for (const taskId of taskIds) {
+          const task = tasks.find((t) => t.baseExpression === taskId);
+          if (task) orderedTasks.push(task);
+        }
+
+        // Get the timestamp from the link connecting the column to the perspective for column sorting
+        const linkQuery = new LinkQuery({ source, predicate: 'ad4m://has_child', target: column.baseExpression });
+        const links = await perspective.get(linkQuery);
+        column.timestamp = links[0]?.timestamp || '';
+        return { ...column, baseExpression: column.baseExpression, tasks: orderedTasks };
+      }),
+    )) as ColumnWithTasks[];
+
+    // Sort columns by timestamp ascending
+    newColumnsWithTasks.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    setColumnsWithTasks(newColumnsWithTasks);
   }
 
   // Fetch agent profiles on component mount
@@ -128,12 +166,17 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     if (getProfile) getProfiles();
   }, [perspective.uuid, getProfile]);
 
+  // Update columns with tasks when columns or tasks change, unless an update is ongoing
+  useEffect(() => {
+    if (!updatingRef.current) getColumnsWithTasks(columns);
+  }, [columns, tasks]);
+
   return (
     <>
       <div className={styles.board}>
         {/* Columns */}
         <DragDropContext onDragEnd={updateTaskPosition}>
-          {columns.map((column) => (
+          {columnsWithTasks.map((column) => (
             <Column
               key={column.baseExpression}
               perspective={perspective}
@@ -142,9 +185,12 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
               agentProfiles={agentProfiles}
               columns={columns}
               column={column}
+              updating={updating}
             />
           ))}
         </DragDropContext>
+
+        {updating && <j-spinner />}
 
         {/* Create new column button */}
         <j-button variant="subtle" onClick={() => setShowNewColumnModal(true)}>

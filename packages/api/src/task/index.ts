@@ -25,14 +25,4 @@ export default class Task extends Ad4mModel {
     where: { isInstance: Message },
   })
   comments: string[] = [];
-
-  // state defined by link to column
-
-  //   async assignees(): Promise<Task[]> {
-  //     return await Task.findAll(this.perspective, { source: this.baseExpression });
-  //   }
-
-  //   async comments(): Promise<Message[]> {
-  //     return await Message.findAll(this.perspective, { source: this.baseExpression });
-  //   }
 }

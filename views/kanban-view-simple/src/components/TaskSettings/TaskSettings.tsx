@@ -1,11 +1,10 @@
 import { PerspectiveProxy, LinkQuery, AgentClient } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
-import { Message } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { useState, useMemo } from 'react';
 import styles from './TaskSettings.module.scss';
 import { Task, TaskColumn } from '@coasys/flux-api';
 import AvatarGroup from '../AvatarGroup';
+import { ColumnWithTasks } from '../Board/Board';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -13,7 +12,7 @@ type Props = {
   agent: AgentClient;
   agentProfiles: Profile[];
   columns: TaskColumn[];
-  column: TaskColumn;
+  column: ColumnWithTasks;
   task?: Task;
   close: () => void;
 };
@@ -35,80 +34,78 @@ export default function TaskSettings({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const { entries: comments } = useModel({
-    perspective,
-    model: Message,
-    query: { source: task?.baseExpression },
-  });
-
   const assignedProfiles = useMemo(() => {
     return agentProfiles.filter((p) => taskAssignees.includes(p.did));
   }, [taskAssignees, agentProfiles]);
-
-  async function linkTaskToColumn(task: Task, columnName: string) {
-    // Get the column by name
-    const column = columns.find((col) => col.columnName === columnName);
-    if (!column) throw new Error('Column not found');
-
-    // Link the task to the column
-    await perspective.addLinks([
-      { source: column.baseExpression, predicate: 'ad4m://has_child', target: task.baseExpression },
-    ]);
-
-    // Store the task position in the column
-    const updatedOrderedTaskIds = [...(JSON.parse(column.orderedTaskIds) || []), task.baseExpression];
-    column.orderedTaskIds = JSON.stringify(updatedOrderedTaskIds);
-    await column.update();
-  }
 
   async function saveTask() {
     setSaving(true);
 
     if (task) {
+      // Update existing task
+      const batchId = await perspective.createBatch();
+      const taskModel = new Task(perspective, task.baseExpression);
+      await taskModel.get();
+
       // Update task name if changed
       if (task.taskName !== taskName) {
-        task.taskName = taskName;
-        await task.update();
+        taskModel.taskName = taskName;
+        await taskModel.update(batchId);
       }
 
       // Update column if changed
       if (column.columnName !== taskColumn) {
-        // Unlink task from old column
-        const oldLinks = await perspective.get(
-          new LinkQuery({ source: column.baseExpression, predicate: 'ad4m://has_child', target: task.baseExpression }),
-        );
-        await perspective.removeLinks([oldLinks[0]]);
+        const source = columns.find((col) => col.columnName === column.columnName);
+        const destination = columns.find((col) => col.columnName === taskColumn);
 
-        // Link task to new column
-        await linkTaskToColumn(task, taskColumn);
+        // Update orderedTaskIds in source column
+        const sourceOrderedTaskIds = JSON.parse(source.orderedTaskIds).filter((id) => id !== task.baseExpression);
+        source.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
+        await source.update(batchId);
+
+        // Update orderedTaskIds in destination column
+        const destinationOrderedTaskIds = [...(JSON.parse(destination.orderedTaskIds) || []), task.baseExpression];
+        destination.orderedTaskIds = JSON.stringify(destinationOrderedTaskIds);
+        await destination.update(batchId);
       }
 
       // Update assignees if changed
       const additions = taskAssignees.filter((a) => !task.assignees.includes(a));
       const removals = task.assignees.filter((a) => !taskAssignees.includes(a));
 
-      // Add new assignees
       for (const assignee of additions) {
-        await perspective.addLinks([
-          { source: task.baseExpression, predicate: 'flux://task_assignee', target: assignee },
-        ]);
+        const newLink = { source: task.baseExpression, predicate: 'flux://task_assignee', target: assignee };
+        await perspective.addLinks([newLink], undefined, batchId);
       }
 
-      // Remove old assignees
       for (const assignee of removals) {
         const oldLinks = await perspective.get(
           new LinkQuery({ source: task.baseExpression, predicate: 'flux://task_assignee', target: assignee }),
         );
-        await perspective.removeLinks([oldLinks[0]]);
+        await perspective.removeLinks([oldLinks[0]], batchId);
       }
+
+      // Commit batch updates
+      await perspective.commitBatch(batchId);
     } else {
       // Create new task
-      const newTask = new Task(perspective, undefined, source);
-      newTask.taskName = taskName;
-      await newTask.save();
+      const batchId = await perspective.createBatch();
+      const newTaskModel = new Task(perspective, undefined, source);
+      newTaskModel.taskName = taskName;
+      await newTaskModel.save(batchId);
 
-      // Link task to column
-      await linkTaskToColumn(newTask, taskColumn);
+      // Link the task to the perspective
+      const newLink = { source, predicate: 'ad4m://has_child', target: newTaskModel.baseExpression };
+      await perspective.addLinks([newLink], undefined, batchId);
+
+      // Store the task position in the column
+      const columnModel = columns.find((col) => col.columnName === taskColumn);
+      const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.baseExpression];
+      columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+      await columnModel.update(batchId);
+
+      // Commit batch updates
+      await perspective.commitBatch(batchId);
     }
 
     setSaving(false);
@@ -117,7 +114,27 @@ export default function TaskSettings({
 
   async function deleteTask() {
     setDeleting(true);
-    await task.delete();
+
+    const batchId = await perspective.createBatch();
+
+    // Delete task model
+    const taskModel = new Task(perspective, task.baseExpression);
+    await taskModel.delete(batchId);
+
+    // Delete task link to perspective
+    const linkQuery = new LinkQuery({ source, predicate: 'ad4m://has_child', target: task.baseExpression });
+    const oldLinks = await perspective.get(linkQuery);
+    await perspective.removeLinks(oldLinks, batchId);
+
+    // Update orderedTaskIds in column
+    const columnModel = columns.find((col) => col.baseExpression === column.baseExpression);
+    const newOrderedTaskIds = JSON.parse(column.orderedTaskIds).filter((id: string) => id !== task.baseExpression);
+    columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
+    await columnModel.update(batchId);
+
+    // Commit batch updates
+    await perspective.commitBatch(batchId);
+
     setDeleting(false);
     close();
   }
@@ -136,7 +153,7 @@ export default function TaskSettings({
           {/* Name */}
           <j-flex a="center" gap="400">
             <j-text nomargin>Name</j-text>
-            <j-input value={taskName} onChange={(e) => setTaskName((e.target as HTMLTextAreaElement).value)} />
+            <j-input value={taskName} onInput={(e) => setTaskName((e.target as HTMLTextAreaElement).value)} />
           </j-flex>
 
           {/* Status */}
