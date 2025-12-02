@@ -282,7 +282,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   // Update columns with tasks when columns or tasks change, unless an update is ongoing
   useEffect(() => {
     if (board && !updatingRef.current) getColumnsWithTasks(columns, JSON.parse(board.orderedColumnIds));
-  }, [board, boards, columns, tasks]);
+  }, [board, columns, tasks]);
+
+  // Update board when boards subscription updates
+  useEffect(() => {
+    if (boards.length) setBoard(boards[0]);
+  }, [boards]);
 
   return (
     <>
