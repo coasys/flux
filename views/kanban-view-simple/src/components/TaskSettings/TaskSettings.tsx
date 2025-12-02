@@ -98,6 +98,16 @@ export default function TaskSettings({
       const newLink = { source: channelId, predicate: 'ad4m://has_child', target: newTaskModel.baseExpression };
       await perspective.addLinks([newLink], undefined, batchId);
 
+      // Add assignee links
+      for (const assignee of taskAssignees) {
+        const assigneeLink = {
+          source: newTaskModel.baseExpression,
+          predicate: 'flux://task_assignee',
+          target: assignee,
+        };
+        await perspective.addLinks([assigneeLink], undefined, batchId);
+      }
+
       // Store the task position in the column
       const columnModel = columns.find((col) => col.columnName === taskColumn);
       const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.baseExpression];
