@@ -24,6 +24,7 @@ import subscribeToSyncState from './subscribeToSyncState';
 import Topic from './topic';
 import Task from './task';
 import TaskColumn from './task-column';
+import TaskBoard from './task-board';
 import updateProfile from './updateProfile';
 export * from './npmApi';
 
@@ -54,5 +55,6 @@ export {
   Topic,
   Task,
   TaskColumn,
+  TaskBoard,
   updateProfile,
 };

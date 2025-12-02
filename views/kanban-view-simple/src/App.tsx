@@ -16,7 +16,7 @@ export default function App({ agent, perspective, source, getProfile }: Props) {
 
   return (
     <div className={styles.appContainer}>
-      <Board agent={agent} perspective={perspective} source={source} getProfile={getProfile} />
+      <Board agent={agent} perspective={perspective} channelId={source} getProfile={getProfile} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import { ColumnWithTasks } from '../Board/Board';
 
 type Props = {
   perspective: PerspectiveProxy;
-  source: string;
+  channelId: string;
   agent: AgentClient;
   agentProfiles: Profile[];
   columns: TaskColumn[];
@@ -24,7 +24,7 @@ type Props = {
 
 export default function TaskCard({
   perspective,
-  source,
+  channelId,
   agent,
   agentProfiles,
   columns,
@@ -77,7 +77,7 @@ export default function TaskCard({
       {showTaskSettings && (
         <TaskSettings
           perspective={perspective}
-          source={source}
+          channelId={channelId}
           agent={agent}
           agentProfiles={agentProfiles}
           columns={columns}

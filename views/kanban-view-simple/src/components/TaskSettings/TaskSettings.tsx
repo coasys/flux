@@ -8,7 +8,7 @@ import { ColumnWithTasks } from '../Board/Board';
 
 type Props = {
   perspective: PerspectiveProxy;
-  source: string;
+  channelId: string;
   agent: AgentClient;
   agentProfiles: Profile[];
   columns: TaskColumn[];
@@ -19,7 +19,7 @@ type Props = {
 
 export default function TaskSettings({
   perspective,
-  source,
+  channelId,
   agent,
   agentProfiles,
   columns,
@@ -90,12 +90,12 @@ export default function TaskSettings({
     } else {
       // Create new task
       const batchId = await perspective.createBatch();
-      const newTaskModel = new Task(perspective, undefined, source);
+      const newTaskModel = new Task(perspective, undefined, channelId);
       newTaskModel.taskName = taskName;
       await newTaskModel.save(batchId);
 
       // Link the task to the perspective
-      const newLink = { source, predicate: 'ad4m://has_child', target: newTaskModel.baseExpression };
+      const newLink = { source: channelId, predicate: 'ad4m://has_child', target: newTaskModel.baseExpression };
       await perspective.addLinks([newLink], undefined, batchId);
 
       // Store the task position in the column
@@ -122,7 +122,7 @@ export default function TaskSettings({
     await taskModel.delete(batchId);
 
     // Delete task link to perspective
-    const linkQuery = new LinkQuery({ source, predicate: 'ad4m://has_child', target: task.baseExpression });
+    const linkQuery = new LinkQuery({ source: channelId, predicate: 'ad4m://has_child', target: task.baseExpression });
     const oldLinks = await perspective.get(linkQuery);
     await perspective.removeLinks(oldLinks, batchId);
 
