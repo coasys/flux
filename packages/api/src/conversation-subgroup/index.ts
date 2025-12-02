@@ -193,8 +193,8 @@ export default class ConversationSubgroup extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS baseExpression,
-          author,
           timestamp,
+          out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
           fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
           fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
