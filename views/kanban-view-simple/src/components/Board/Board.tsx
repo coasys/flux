@@ -28,6 +28,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   const [updating, setUpdating] = useState(false);
   const updatingRef = useRef(false);
 
+  const { entries: boards } = useModel({ perspective, model: TaskBoard, query: { source: channelId } });
   const { entries: columns } = useModel({ perspective, model: TaskColumn, query: { source: channelId } });
   const { entries: tasks } = useModel({ perspective, model: Task, query: { source: channelId } });
 
@@ -281,7 +282,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   // Update columns with tasks when columns or tasks change, unless an update is ongoing
   useEffect(() => {
     if (board && !updatingRef.current) getColumnsWithTasks(columns, JSON.parse(board.orderedColumnIds));
-  }, [board, columns, tasks]);
+  }, [board, boards, columns, tasks]);
 
   return (
     <>
