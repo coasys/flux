@@ -150,19 +150,19 @@ async function main() {
   }
 
   const root = process.cwd();
-  const pkgsUnsorted = findPackageJsons(root).filter((pkgPath) => !shouldSkip(pkgPath));
-  let pkgs = pkgsUnsorted;
-  const allPackageNames = new Set(pkgs.map(getPackageName));
-
-  // Only sort for publish/dry-run, not bump/bump-ad4m
+  const allPkgPaths = findPackageJsons(root);
+  let pkgs = allPkgPaths;
+  // Only skip packages for publish/dry-run
   if (mode === 'dry-run' || mode === 'publish') {
+    pkgs = allPkgPaths.filter((pkgPath) => !shouldSkip(pkgPath));
     try {
-      pkgs = topologicalSort(pkgsUnsorted);
+      pkgs = topologicalSort(pkgs);
     } catch (e) {
       console.error('Dependency sort error:', e.message);
       process.exit(1);
     }
   }
+  const allPackageNames = new Set(allPkgPaths.map(getPackageName));
 
   if (mode === 'bump') {
     const newVersion = process.argv[3];
