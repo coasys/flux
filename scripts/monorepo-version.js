@@ -167,14 +167,14 @@ async function main() {
   if (mode === 'bump') {
     const newVersion = process.argv[3];
     if (!newVersion) {
-      console.error('Please provide a new version: node scripts/monorepo-publish.js bump 1.2.3');
+      console.error('Please provide a new version: node scripts/monorepo-version.js bump 1.2.3');
       process.exit(1);
     }
     pkgs.forEach((pkgPath) => bumpVersion(pkgPath, newVersion, allPackageNames));
   } else if (mode === 'bump-ad4m') {
     const newVersion = process.argv[3];
     if (!newVersion) {
-      console.error('Please provide a new version: node scripts/monorepo-publish.js bump-ad4m 1.2.3');
+      console.error('Please provide a new version: node scripts/monorepo-version.js bump-ad4m 1.2.3');
       process.exit(1);
     }
     // Find all AD4M packages
