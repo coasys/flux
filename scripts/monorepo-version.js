@@ -145,7 +145,7 @@ function topologicalSort(pkgs) {
 async function main() {
   const mode = process.argv[2];
   if (!['bump', 'dry-run', 'publish', 'bump-ad4m'].includes(mode)) {
-    console.log('Usage: node scripts/monorepo-publish.js bump|dry-run|publish|bump-ad4m [newVersion]');
+    console.log('Usage: node scripts/monorepo-version.js bump|dry-run|publish|bump-ad4m [newVersion]');
     process.exit(1);
   }
 
