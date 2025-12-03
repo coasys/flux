@@ -1266,7 +1266,7 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.3.tgz#a48438b600dfaee7b0832f0cfcd5583fc21b0b55"
   integrity sha512-nFlgSmtx6Zwaw0tEvZgQsWHBeOfWWB/AvEoCApopLT4mHkBVoSrwkLvy2PjZs5wxCbsmqvQczr3XCyTwaDZVQg==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.11.0", "@coasys/ad4m-connect@0.11.1":
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.11.1":
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.1.tgz#fce68b1458ab582870432dfa328cc2fca710561e"
   integrity sha512-tHvXwOxRa264LSU0761g/lSiwNfmPnMxSDtN0uIndwVCzOuRQuy2ns0euvHlxQFbZl6thmRHk/yYcm8MLVonww==
@@ -1278,7 +1278,7 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.11.0", "@coasys/ad4m-react-hooks@0.11.1":
+"@coasys/ad4m-react-hooks@0.11.1":
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.11.1.tgz#6f8f27d3b60c4e2697de7173f76cbd6ca1d17b69"
   integrity sha512-+3KLGtEDThBWx0b6k0R9Aa2D1mj5nqCI0bIYeg9q7MDpi/1rj9yP0vZua/jO+tL+/itJwu3YLItCa7scAZO7pQ==
@@ -1289,7 +1289,7 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.11.0", "@coasys/ad4m-vue-hooks@0.11.1":
+"@coasys/ad4m-vue-hooks@0.11.1":
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.11.1.tgz#f510f1b815018449729cc8508e04c6ebbaf8ea9f"
   integrity sha512-M5XQ4WSt9/L1fanMr7LzGqhny610XrCBm16jEz+ltT/Meii4gXVEtbusKP5yAYEvWGatQc/w6sFfjiMdMf3/aQ==
@@ -1297,7 +1297,7 @@
     "@coasys/ad4m" "workspace:0.11.1"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.11.0", "@coasys/ad4m@0.11.1", "@coasys/ad4m@workspace:0.11.1":
+"@coasys/ad4m@*", "@coasys/ad4m@0.11.1", "@coasys/ad4m@workspace:0.11.1":
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.11.1.tgz#15e8728c9d9ceda5cac466a9009018ac405e355e"
   integrity sha512-i0bORdGpbBrNfVzKnLzTo18PQIlDoLkgHlBmIYC/5OizrBxBZG4uznpSt/kAzHEXxTdgyERLMMBbB74GkWOgKw==
