@@ -5,13 +5,13 @@
   "scripts": {
     "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
-    "publish-package": "turbo run publish-package",
     "lint": "turbo run lint",
     "postinstall": "patch-package",
     "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && rm -f yarn.lock && yarn cache clean",
-    "bump": "node scripts/monorepo-publish.js bump",
-    "publish:dry-run": "node scripts/monorepo-publish.js dry-run",
-    "publish:all": "node scripts/monorepo-publish.js publish",
+    "bump-flux": "node scripts/monorepo-version.js bump",
+    "bump-ad4m": "node scripts/monorepo-version.js bump-ad4m",
+    "publish:dry-run": "node scripts/monorepo-version.js dry-run",
+    "publish:all": "node scripts/monorepo-version.js publish",
     "format": "prettier --write ."
   },
   "packageManager": "yarn@1.22.1",
