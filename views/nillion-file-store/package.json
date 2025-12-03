@@ -28,8 +28,8 @@
   ],
   "dependencies": {
     "@apollo/client": "=3.6.9",
-    "@coasys/ad4m": "0.11.0",
-    "@coasys/ad4m-react-hooks": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
+    "@coasys/ad4m-react-hooks": "0.11.1",
     "@coasys/flux-react-web": "0.11.0",
     "@coasys/flux-api": "0.11.0",
     "@coasys/flux-container": "0.11.0",

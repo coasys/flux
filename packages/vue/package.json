@@ -22,7 +22,7 @@
     "@coasys/flux-utils": "0.11.0"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
     "vue": "^3.2.47"
   },
   "publishConfig": {
