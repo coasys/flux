@@ -27,8 +27,8 @@
     "ad4m-view"
   ],
   "dependencies": {
-    "@coasys/ad4m": "0.11.0",
-    "@coasys/ad4m-vue-hooks": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
+    "@coasys/ad4m-vue-hooks": "0.11.1",
     "@coasys/flux-api": "0.11.0",
     "vue": "^3.5.12"
   },
