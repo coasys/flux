@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+// Packages to skip during publish/dry-run
 const SKIP_PACKAGES = [
   'flux-electron',
   '@coasys/flux-docs',
@@ -10,7 +11,6 @@ const SKIP_PACKAGES = [
   'my-first-vue-flux-plugin',
   'flux',
   'flux-monorepo',
-  // add more package names to skip here
 ];
 
 function findPackageJsons(dir, found = []) {
@@ -144,33 +144,83 @@ function topologicalSort(pkgs) {
 
 async function main() {
   const mode = process.argv[2];
-  if (!['bump', 'dry-run', 'publish'].includes(mode)) {
-    console.log('Usage: node scripts/monorepo-publish.js bump|dry-run|publish [newVersion]');
+  if (!['bump', 'dry-run', 'publish', 'bump-ad4m'].includes(mode)) {
+    console.log('Usage: node scripts/monorepo-version.js bump|dry-run|publish|bump-ad4m [newVersion]');
     process.exit(1);
   }
 
   const root = process.cwd();
-  const pkgsUnsorted = findPackageJsons(root).filter((pkgPath) => !shouldSkip(pkgPath));
-  let pkgs = pkgsUnsorted;
-  const allPackageNames = new Set(pkgs.map(getPackageName));
-
-  // Only sort for publish/dry-run, not bump
-  if (mode !== 'bump') {
+  const allPkgPaths = findPackageJsons(root);
+  let pkgs = allPkgPaths;
+  // Only skip packages for publish/dry-run
+  if (mode === 'dry-run' || mode === 'publish') {
+    pkgs = allPkgPaths.filter((pkgPath) => !shouldSkip(pkgPath));
     try {
-      pkgs = topologicalSort(pkgsUnsorted);
+      pkgs = topologicalSort(pkgs);
     } catch (e) {
       console.error('Dependency sort error:', e.message);
       process.exit(1);
     }
   }
+  const allPackageNames = new Set(allPkgPaths.map(getPackageName));
 
   if (mode === 'bump') {
     const newVersion = process.argv[3];
     if (!newVersion) {
-      console.error('Please provide a new version: node scripts/monorepo-publish.js bump 1.2.3');
+      console.error('Please provide a new version: node scripts/monorepo-version.js bump 1.2.3');
       process.exit(1);
     }
     pkgs.forEach((pkgPath) => bumpVersion(pkgPath, newVersion, allPackageNames));
+  } else if (mode === 'bump-ad4m') {
+    const newVersion = process.argv[3];
+    if (!newVersion) {
+      console.error('Please provide a new version: node scripts/monorepo-version.js bump-ad4m 1.2.3');
+      process.exit(1);
+    }
+    // Find all AD4M packages
+    const ad4mPrefix = '@coasys/ad4m';
+    // Bump all AD4M packages and update AD4M dependencies in all packages
+    pkgs.forEach((pkgPath) => {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      let changed = false;
+      // If this is an AD4M package, bump its version
+      if (pkg.name && pkg.name.startsWith(ad4mPrefix)) {
+        pkg.version = newVersion;
+        changed = true;
+      }
+      // Update AD4M dependencies in all packages
+      ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].forEach((depField) => {
+        if (pkg[depField]) {
+          Object.keys(pkg[depField]).forEach((depName) => {
+            if (depName.startsWith(ad4mPrefix)) {
+              pkg[depField][depName] = newVersion;
+              changed = true;
+            }
+          });
+        }
+      });
+      if (changed) {
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+        console.log(`Bumped ${pkg.name} to ${newVersion} (and updated AD4M deps)`);
+      }
+    });
+
+    // Also update AD4M versions in resolutions field of root package.json
+    const rootPkgPath = path.join(root, 'package.json');
+    const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
+    if (rootPkg.resolutions) {
+      let changed = false;
+      Object.keys(rootPkg.resolutions).forEach((resName) => {
+        if (resName.startsWith(ad4mPrefix)) {
+          rootPkg.resolutions[resName] = newVersion;
+          changed = true;
+        }
+      });
+      if (changed) {
+        fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
+        console.log(`Updated AD4M versions in root package.json resolutions to ${newVersion}`);
+      }
+    }
   } else {
     const successes = [];
     const failures = [];

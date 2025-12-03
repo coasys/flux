@@ -23,7 +23,7 @@
     "@coasys/flux-webrtc": "0.11.0"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
     "react": "*"
   },
   "publishConfig": {
