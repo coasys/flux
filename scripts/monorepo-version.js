@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+// Packages to skip during publish/dry-run
 const SKIP_PACKAGES = [
   'flux-electron',
   '@coasys/flux-docs',
@@ -10,7 +11,6 @@ const SKIP_PACKAGES = [
   'my-first-vue-flux-plugin',
   'flux',
   'flux-monorepo',
-  // add more package names to skip here
 ];
 
 function findPackageJsons(dir, found = []) {
