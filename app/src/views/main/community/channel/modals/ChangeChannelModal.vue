@@ -24,12 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useRouteParams } from "@/composables/useRouteParams";
-import { useModel } from "@coasys/ad4m-vue-hooks";
-import { App } from "@coasys/flux-api";
-import { computed, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useRouteParams } from '@/composables/useRouteParams';
+import { useModel } from '@coasys/ad4m-vue-hooks';
+import { App } from '@coasys/flux-api';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -39,14 +39,14 @@ const { perspective, allChannels } = useCommunityService();
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId.value } });
 
-const currentView = ref<string>("");
+const currentView = ref<string>('');
 const isChangeChannel = ref(false);
 
 const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId.value));
 
 function changeCurrentView(viewId: string) {
   const { communityId, channelId } = route.params;
-  router.push({ name: "view", params: { communityId, channelId, viewId } });
+  router.push({ name: 'view', params: { communityId, channelId, viewId } });
 }
 </script>
 

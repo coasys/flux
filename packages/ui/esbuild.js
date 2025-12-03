@@ -1,32 +1,30 @@
 (async () => {
-  let esbuild = require("esbuild");
+  let esbuild = require('esbuild');
 
-  let { copy } = require("esbuild-plugin-copy");
+  let { copy } = require('esbuild-plugin-copy');
 
-  let {
-    minifyHTMLLiteralsPlugin,
-  } = require("esbuild-plugin-minify-html-literals");
+  let { minifyHTMLLiteralsPlugin } = require('esbuild-plugin-minify-html-literals');
 
-  const isDev = process.env.NODE_ENV === "dev";
+  const isDev = process.env.NODE_ENV === 'dev';
 
   let result = await esbuild
     .build({
-      entryPoints: ["./lib/main.ts"],
+      entryPoints: ['./lib/main.ts'],
       metafile: !isDev,
       bundle: true,
-      format: "esm",
+      format: 'esm',
       minify: true,
       sourcemap: true,
-      target: ["es2020", "edge88", "firefox78", "chrome87", "safari14"],
-      outfile: "dist/main.js",
+      target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+      outfile: 'dist/main.js',
       watch: isDev,
       plugins: isDev
         ? [
             copy({
               assets: [
                 {
-                  from: ["./lib/themes/**/*"],
-                  to: ["./themes"],
+                  from: ['./lib/themes/**/*'],
+                  to: ['./themes'],
                 },
               ],
             }),
@@ -36,8 +34,8 @@
             copy({
               assets: [
                 {
-                  from: ["./lib/themes/**/*"],
-                  to: ["./themes"],
+                  from: ['./lib/themes/**/*'],
+                  to: ['./themes'],
                 },
               ],
             }),
@@ -51,6 +49,6 @@
     console.log(resultText);
 
     // Create meta.json file
-    require("fs").writeFileSync("meta.json", JSON.stringify(result.metafile));
+    require('fs').writeFileSync('meta.json', JSON.stringify(result.metafile));
   }
 })();

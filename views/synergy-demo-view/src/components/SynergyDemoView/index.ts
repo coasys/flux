@@ -1,3 +1,3 @@
-import SynergyDemoView from "./SynergyDemoView";
+import SynergyDemoView from './SynergyDemoView';
 
 export default SynergyDemoView;

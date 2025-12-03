@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { nextTick, ref, watch } from 'vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -33,31 +33,31 @@ watch(expanded, async (isExpanded) => {
 
     if (clonedEl.value) {
       // Find the close button in the cloned element
-      closeButtonRef.value = clonedEl.value.querySelector(".close-button");
+      closeButtonRef.value = clonedEl.value.querySelector('.close-button');
 
       // Add event listener to the close button
-      if (closeButtonRef.value) closeButtonRef.value.addEventListener("click", closeViewer);
+      if (closeButtonRef.value) closeButtonRef.value.addEventListener('click', closeViewer);
 
       // Append to body and set styles
       document.body.appendChild(clonedEl.value);
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
 
       // Trigger opacity transition
       setTimeout(() => {
-        if (clonedEl.value) clonedEl.value.style.opacity = "1";
+        if (clonedEl.value) clonedEl.value.style.opacity = '1';
       }, 0);
     }
   } else {
     // Close the expanded view
     if (clonedEl.value) {
-      clonedEl.value.style.opacity = "0";
+      clonedEl.value.style.opacity = '0';
 
       setTimeout(() => {
         if (clonedEl.value) {
           clonedEl.value.remove();
           clonedEl.value = null;
           closeButtonRef.value = null;
-          document.body.style.overflow = "auto";
+          document.body.style.overflow = 'auto';
         }
       }, 250);
     }

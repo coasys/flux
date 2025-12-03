@@ -30,13 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/stores";
-import { useModel } from "@coasys/ad4m-vue-hooks";
-import { Channel } from "@coasys/flux-api";
-import { storeToRefs } from "pinia";
-import { onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useModalStore } from '@/stores';
+import { useModel } from '@coasys/ad4m-vue-hooks';
+import { Channel } from '@coasys/flux-api';
+import { storeToRefs } from 'pinia';
+import { onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 interface Props {
   parentChannel: Channel;
@@ -64,17 +64,17 @@ function openNewSubChannelModal() {
 
 function navigateToChannel(channelId: string) {
   router.push({
-    name: "view",
-    params: { communityId: route.params.communityId, channelId, viewId: "sub-channels" },
+    name: 'view',
+    params: { communityId: route.params.communityId, channelId, viewId: 'sub-channels' },
   });
 }
 
 onMounted(() => {
-  console.log("SubChannels component mounted", props.parentChannel);
+  console.log('SubChannels component mounted', props.parentChannel);
 });
 
 watch(subChannels, (newSubChannels) => {
-  console.log("newSubChannels:", newSubChannels);
+  console.log('newSubChannels:', newSubChannels);
 });
 </script>
 

@@ -1,9 +1,9 @@
-import { useModel } from "@coasys/ad4m-react-hooks";
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useRef, useState } from "preact/hooks";
-import Vote from "../../models/Vote";
-import Avatar from "../Avatar";
-import styles from "./AnswerCard.module.scss";
+import { useModel } from '@coasys/ad4m-react-hooks';
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import Vote from '../../models/Vote';
+import Avatar from '../Avatar';
+import styles from './AnswerCard.module.scss';
 
 export default function AnswerCard(props: {
   perspective: any;
@@ -28,7 +28,7 @@ export default function AnswerCard(props: {
   const { entries: votes } = useModel({ perspective, model: Vote, query: { source: answer.baseExpression } });
 
   useEffect(() => {
-    window.addEventListener("mouseup", () => {
+    window.addEventListener('mouseup', () => {
       if (slidingRef.current) {
         slidingRef.current = false;
         vote(answer.baseExpression, pointsRef.current);
@@ -73,7 +73,7 @@ export default function AnswerCard(props: {
                 </j-text>
               </div>
 
-              {voteType === "weighted-choice" ? (
+              {voteType === 'weighted-choice' ? (
                 <j-flex gap="400" a="center">
                   <input
                     className={styles.slider}

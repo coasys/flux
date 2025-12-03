@@ -1,6 +1,5 @@
 {
-  "neighbourhood":
-  {
+  "neighbourhood": {
     "timestamp": "Mon Aug 02 2021 12:56:58 GMT+0530 (India Standard Time)",
     "currentExpressionLinks": {},
     "currentExpressionMessages": {},
@@ -22,10 +21,12 @@
       {
         "expressionType": 0,
         "languageAddress": "QmY54XwMW3Jm1YyQRRwc2NfAmVRmJapnXsNxa3Q1avAjK5"
-      }, {
+      },
+      {
         "expressionType": 1,
         "languageAddress": "QmbhWYKXXa53H5hSEsPEuQ9FJL1dBurBNkRF2391gsL9DV"
-      }, {
+      },
+      {
         "expressionType": 2,
         "languageAddress": "QmUbmDdBMpv2vWa2kXPxcmcUtArLwAHQQgqvJ4XuDBfhtX"
       }

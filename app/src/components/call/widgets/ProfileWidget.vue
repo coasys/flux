@@ -59,13 +59,13 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useMediaDevicesStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
-import { useRouter } from "vue-router";
-import AgentStatusSelector from "../controls/AgentStatusSelector.vue";
-import QuickCallControls from "../controls/QuickCallControls.vue";
-import UserActions from "../controls/UserActions.vue";
+import { useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import AgentStatusSelector from '../controls/AgentStatusSelector.vue';
+import QuickCallControls from '../controls/QuickCallControls.vue';
+import UserActions from '../controls/UserActions.vue';
 
 defineProps<{
   callRouteData: {
@@ -85,32 +85,32 @@ const { inCall, callRoute, callHealth } = storeToRefs(webrtcStore);
 const { mediaSettings } = storeToRefs(mediaDeviceStore);
 
 const callHealthColour = computed(() => {
-  if (callHealth.value === "healthy") return "success-500";
-  else if (callHealth.value === "warnings") return "warning-500";
-  return "danger-500";
+  if (callHealth.value === 'healthy') return 'success-500';
+  else if (callHealth.value === 'warnings') return 'warning-500';
+  return 'danger-500';
 });
 
 const connectionWarning = computed(() => {
-  if (callHealth.value === "healthy") return "";
-  else if (callHealth.value === "warnings") return "(unstable)";
-  else if (callHealth.value === "connections-lost") return "(lost peers)";
-  return "";
+  if (callHealth.value === 'healthy') return '';
+  else if (callHealth.value === 'warnings') return '(unstable)';
+  else if (callHealth.value === 'connections-lost') return '(lost peers)';
+  return '';
 });
 
 const connectionText = computed(() => {
-  if (mediaSettings.value?.videoEnabled) return "Video connected";
-  else if (mediaSettings.value?.audioEnabled) return "Voice connected";
-  return "Connected";
+  if (mediaSettings.value?.videoEnabled) return 'Video connected';
+  else if (mediaSettings.value?.audioEnabled) return 'Voice connected';
+  return 'Connected';
 });
 
 function goToProfile() {
   const did = me.value?.did;
   if (!did) return;
-  router.push({ name: "home", params: { did } });
+  router.push({ name: 'home', params: { did } });
 }
 
 function goToCallChannel() {
-  router.push({ name: "view", params: callRoute.value });
+  router.push({ name: 'view', params: callRoute.value });
 }
 </script>
 

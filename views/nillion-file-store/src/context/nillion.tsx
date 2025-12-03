@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import * as nil from "@nillion/client-web";
-import { NillionContextProviderProps } from "./nillion.d";
-import getConfig from "../config";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import * as nil from '@nillion/client-web';
+import { NillionContextProviderProps } from './nillion.d';
+import getConfig from '../config';
 
 interface NillionContextType {
   client: nil.NillionClient | null;
@@ -29,45 +29,37 @@ export const NillionContextProvider = (props: NillionContextProviderProps) => {
     const loadWasm = async () => {
       if (loaded.current || client !== null || nillion !== null) return;
       loaded.current = true;
-      console.log("Using Nillion Config", config);
+      console.log('Using Nillion Config', config);
 
       console.info(`>> STARTING LOAD nillion_client_js_browser`);
 
       await nil.default();
 
-      const signedNillionMessage = await agentClient.signMessage("nillion");
-      console.log("Signed Nillion Message", signedNillionMessage);
+      const signedNillionMessage = await agentClient.signMessage('nillion');
+      console.log('Signed Nillion Message', signedNillionMessage);
       const userKey = nil.UserKey.from_seed(
         //@ts-ignore
-        signedNillionMessage.signature.slice(0, 32)
+        signedNillionMessage.signature.slice(0, 32),
       );
-      console.log("Gen user key", userKey);
+      console.log('Gen user key', userKey);
 
       const defaultNodeKeySeed = `nillion-testnet-seed-${Math.floor(Math.random() * 10) + 1}`;
       var nodeKey = nil.NodeKey.from_seed(defaultNodeKeySeed);
 
-      const wasmclient = new nil.NillionClient(
-        userKey,
-        nodeKey,
-        config!.bootnodes
-      );
+      const wasmclient = new nil.NillionClient(userKey, nodeKey, config!.bootnodes);
       setState({ client: wasmclient, nillion: nil });
 
-      console.log("Finished init client");
+      console.log('Finished init client');
 
       const info = await wasmclient.cluster_information(config!.clusterId);
 
-      console.log("Cluster info", info);
+      console.log('Cluster info', info);
 
       console.info(`<< FINISHED LOAD nillion_client_js_browser`);
-      console.log("client", wasmclient);
+      console.log('client', wasmclient);
     };
     loadWasm();
   }, [setState]);
 
-  return (
-    <NillionContext.Provider value={{ client, nillion }}>
-      {props.children}
-    </NillionContext.Provider>
-  );
+  return <NillionContext.Provider value={{ client, nillion }}>{props.children}</NillionContext.Provider>;
 };

@@ -1,9 +1,9 @@
-import { computed, ref, watch } from "vue";
-import { Agent } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { mapLiteralLinks } from "@coasys/flux-utils";
-import { profile } from "@coasys/flux-constants";
-import { Profile } from "@coasys/flux-types";
+import { computed, ref, watch } from 'vue';
+import { Agent } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { mapLiteralLinks } from '@coasys/flux-utils';
+import { profile } from '@coasys/flux-constants';
+import { Profile } from '@coasys/flux-types';
 
 const {
   FLUX_PROFILE,
@@ -19,7 +19,7 @@ const {
 
 export function useAgent(client: AgentClient, did: string | Function) {
   const agent = ref<Agent | null>(null);
-  const didRef = typeof did === "function" ? (did as any) : ref(did);
+  const didRef = typeof did === 'function' ? (did as any) : ref(did);
 
   watch(
     [client, didRef],
@@ -28,7 +28,7 @@ export function useAgent(client: AgentClient, did: string | Function) {
         agent.value = await client.byDID(d);
       }
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   const profile = computed<Profile | null>(() => {
@@ -45,7 +45,7 @@ export function useAgent(client: AgentClient, did: string | Function) {
           profilePicture: HAS_PROFILE_IMAGE,
           profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
           profileBackground: HAS_BG_IMAGE,
-        }
+        },
       );
       return { ...prof, did: didRef.value } as Profile;
     } else {

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "preact/hooks";
+import { useRef, useEffect } from 'preact/hooks';
 
 // Hook
 const useKeyEvent = (key: string, cb: (event: KeyboardEvent) => void) => {
@@ -15,8 +15,8 @@ const useKeyEvent = (key: string, cb: (event: KeyboardEvent) => void) => {
       }
     };
 
-    document.addEventListener("keypress", handle);
-    return () => document.removeEventListener("keypress", handle);
+    document.addEventListener('keypress', handle);
+    return () => document.removeEventListener('keypress', handle);
   }, [key]);
 };
 

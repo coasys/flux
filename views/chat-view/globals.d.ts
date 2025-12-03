@@ -1,2 +1,2 @@
-declare module "*.module.css";
-declare module "*?worker&inline";
+declare module '*.module.css';
+declare module '*?worker&inline';

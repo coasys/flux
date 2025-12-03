@@ -34,9 +34,7 @@ Here is a minimal example of how you could compose a simple chat message with Fl
     <j-avatar size="sm" hash="did:1234"></j-avatar>
   </j-box>
   <j-box>
-    <j-box bg="primary-200" px="400" py="300" radius="md">
-      Sure, I'll be there soon!
-    </j-box>
+    <j-box bg="primary-200" px="400" py="300" radius="md"> Sure, I'll be there soon! </j-box>
     <j-text size="300" color="ui-400">
       <j-flex a="center" gap="200">
         <j-timestamp relative value="04/01/2023"></j-timestamp>

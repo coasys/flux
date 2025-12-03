@@ -21,11 +21,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/__tests__/**/*.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/__tests__/**/*.ts"],
   "exclude": ["node_modules", "__sapper__/*", "public/*", "ad4m/languages"]
 }

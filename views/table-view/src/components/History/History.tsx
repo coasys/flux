@@ -1,7 +1,7 @@
-import styles from "./History.module.css";
-import { useEffect, useState } from "preact/hooks";
-import { getEntry } from "../../utils";
-import { PerspectiveProxy, Literal } from "@coasys/ad4m";
+import styles from './History.module.css';
+import { useEffect, useState } from 'preact/hooks';
+import { getEntry } from '../../utils';
+import { PerspectiveProxy, Literal } from '@coasys/ad4m';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -44,9 +44,7 @@ function HistoryItem({ isLast, source, perspective, onClick }: ItemProps) {
   }, [source, perspective.uuid]);
 
   async function fetchSourceClasses(source) {
-    const classResults = await perspective.infer(
-      `subject_class(ClassName, C), instance(C, "${source}").`
-    );
+    const classResults = await perspective.infer(`subject_class(ClassName, C), instance(C, "${source}").`);
 
     if (classResults?.length > 0) {
       setClasses(classResults.map((c) => c.ClassName));
@@ -64,23 +62,16 @@ function HistoryItem({ isLast, source, perspective, onClick }: ItemProps) {
     classes[0] ||
     entry?.name ||
     entry?.title ||
-    (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+    (source?.startsWith('literal://') && Literal.fromUrl(source).get()) ||
     source;
 
   const title =
-    entry?.name ||
-    entry?.title ||
-    (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
-    source;
+    entry?.name || entry?.title || (source?.startsWith('literal://') && Literal.fromUrl(source).get()) || source;
 
   return (
     <>
       <j-tooltip title={title} placement="bottom">
-        <button
-          className={`${styles.historyItem} ${isLast && styles.isLast}`}
-          onClick={onClick}
-          nomargin
-        >
+        <button className={`${styles.historyItem} ${isLast && styles.isLast}`} onClick={onClick} nomargin>
           {defaultName}
         </button>
       </j-tooltip>

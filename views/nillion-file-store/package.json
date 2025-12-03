@@ -1,20 +1,16 @@
 {
   "name": "@coasys/nillion-file-store",
-  "description": "File storage powered by Nillion",
   "version": "0.11.0",
+  "description": "File storage powered by Nillion",
+  "author": "",
+  "license": "ISC",
   "type": "module",
-  "fluxapp": {
-    "name": "Nillion File Storage",
-    "description": "File storage powered by Nillion",
-    "icon": "cloud-download"
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preview": "vite preview"
   },
-  "keywords": [
-    "flux-plugin",
-    "ad4m-view"
-  ],
-  "files": [
-    "dist"
-  ],
   "main": "./dist/main.umd.cjs",
   "module": "./dist/main.js",
   "exports": {
@@ -23,14 +19,13 @@
       "require": "./dist/main.umd.cjs"
     }
   },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "preview": "vite preview"
-  },
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
   "dependencies": {
     "@apollo/client": "=3.6.9",
     "@coasys/ad4m": "0.11.0",
@@ -69,5 +64,13 @@
     "prettier": "3.3.3",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "fluxapp": {
+    "name": "Nillion File Storage",
+    "description": "File storage powered by Nillion",
+    "icon": "cloud-download"
   }
 }

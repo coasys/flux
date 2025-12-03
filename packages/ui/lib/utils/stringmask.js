@@ -1,7 +1,7 @@
 var tokens = {
-  "0": { pattern: /\d/, _default: "0" },
-  "9": { pattern: /\d/, optional: true },
-  "#": { pattern: /\d/, optional: true, recursive: true },
+  0: { pattern: /\d/, _default: '0' },
+  9: { pattern: /\d/, optional: true },
+  '#': { pattern: /\d/, optional: true, recursive: true },
   A: { pattern: /[a-zA-Z0-9]/ },
   S: { pattern: /[a-zA-Z]/ },
   U: {
@@ -32,13 +32,13 @@ function isEscaped(pattern, pos) {
 }
 
 function calcOptionalNumbersToUse(pattern, value) {
-  var numbersInP = pattern.replace(/[^0]/g, "").length;
-  var numbersInV = value.replace(/[^\d]/g, "").length;
+  var numbersInP = pattern.replace(/[^0]/g, '').length;
+  var numbersInV = value.replace(/[^\d]/g, '').length;
   return numbersInV - numbersInP;
 }
 
 function concatChar(text, character, options, token) {
-  if (token && typeof token.transform === "function") {
+  if (token && typeof token.transform === 'function') {
     character = token.transform(character);
   }
   if (options.reverse) {
@@ -50,7 +50,7 @@ function concatChar(text, character, options, token) {
 function hasMoreTokens(pattern, pos, inc) {
   var pc = pattern.charAt(pos);
   var token = tokens[pc];
-  if (pc === "") {
+  if (pc === '') {
     return false;
   }
   return token && !token.escape ? true : hasMoreTokens(pattern, pos + inc, inc);
@@ -59,18 +59,16 @@ function hasMoreTokens(pattern, pos, inc) {
 function hasMoreRecursiveTokens(pattern, pos, inc) {
   var pc = pattern.charAt(pos);
   var token = tokens[pc];
-  if (pc === "") {
+  if (pc === '') {
     return false;
   }
-  return token && token.recursive
-    ? true
-    : hasMoreRecursiveTokens(pattern, pos + inc, inc);
+  return token && token.recursive ? true : hasMoreRecursiveTokens(pattern, pos + inc, inc);
 }
 
 function insertChar(text, char, position) {
-  var t = text.split("");
+  var t = text.split('');
   t.splice(position, 0, char);
-  return t.join("");
+  return t.join('');
 }
 
 function StringMask(pattern, opt) {
@@ -84,12 +82,12 @@ function StringMask(pattern, opt) {
 
 StringMask.prototype.process = function proccess(value) {
   if (!value) {
-    return { result: "", valid: false };
+    return { result: '', valid: false };
   }
-  value = value + "";
+  value = value + '';
   var pattern2 = this.pattern;
   var valid = true;
-  var formatted = "";
+  var formatted = '';
   var valuePos = this.options.reverse ? value.length - 1 : 0;
   var patternPos = 0;
   var optionalNumbersToUse = calcOptionalNumbersToUse(pattern2, value);
@@ -104,18 +102,10 @@ StringMask.prototype.process = function proccess(value) {
   };
 
   function continueCondition(options) {
-    if (
-      !inRecursiveMode &&
-      !recursive.length &&
-      hasMoreTokens(pattern2, patternPos, steps.inc)
-    ) {
+    if (!inRecursiveMode && !recursive.length && hasMoreTokens(pattern2, patternPos, steps.inc)) {
       // continue in the normal iteration
       return true;
-    } else if (
-      !inRecursiveMode &&
-      recursive.length &&
-      hasMoreRecursiveTokens(pattern2, patternPos, steps.inc)
-    ) {
+    } else if (!inRecursiveMode && recursive.length && hasMoreRecursiveTokens(pattern2, patternPos, steps.inc)) {
       // continue looking for the recursive tokens
       // Note: all chars in the patterns after the recursive portion will be handled as static string
       return true;
@@ -146,11 +136,7 @@ StringMask.prototype.process = function proccess(value) {
    *
    * Note: The iteration must stop if an invalid char is found.
    */
-  for (
-    patternPos = steps.start;
-    continueCondition(this.options);
-    patternPos = patternPos + steps.inc
-  ) {
+  for (patternPos = steps.start; continueCondition(this.options); patternPos = patternPos + steps.inc) {
     // Value char
     var vc = value.charAt(valuePos);
     // Pattern char to match with the value char

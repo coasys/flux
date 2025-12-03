@@ -1,9 +1,9 @@
-import { useState, useEffect } from "preact/hooks";
-import { Peer } from "../../../../types";
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
+import { useState, useEffect } from 'preact/hooks';
+import { Peer } from '../../../../types';
+import { Profile } from '@coasys/flux-types';
+import { getProfile } from '@coasys/flux-api';
 
-import styles from "./Item.module.css";
+import styles from './Item.module.css';
 
 type Props = {
   peer: Peer;
@@ -12,7 +12,7 @@ type Props = {
 
 export default function Item({ peer, onSendSignal }: Props) {
   const [profile, setProfile] = useState<Profile>();
-  const [loadingState, setLoadingState] = useState("");
+  const [loadingState, setLoadingState] = useState('');
 
   // Get user details
   useEffect(() => {
@@ -29,15 +29,11 @@ export default function Item({ peer, onSendSignal }: Props) {
   return (
     <div className={styles.item}>
       <div className={styles.details}>
-        <span>{profile?.username || peer.did || "Unknown user"}</span>
+        <span>{profile?.username || peer.did || 'Unknown user'}</span>
         <span>({peer?.connection?.peerConnection?.iceConnectionState})</span>
       </div>
       <div>
-        <j-button
-          variant="transparent"
-          size="xs"
-          onClick={() => onSendSignal(peer.did)}
-        >
+        <j-button variant="transparent" size="xs" onClick={() => onSendSignal(peer.did)}>
           Send signal
         </j-button>
       </div>

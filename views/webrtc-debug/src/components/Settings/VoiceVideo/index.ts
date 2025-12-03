@@ -1,3 +1,3 @@
-import VoiceVideo from "./VoiceVideo";
+import VoiceVideo from './VoiceVideo';
 
 export default VoiceVideo;

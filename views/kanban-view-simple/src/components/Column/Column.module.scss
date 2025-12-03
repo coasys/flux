@@ -1,0 +1,38 @@
+.column {
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-100);
+  width: 300px;
+  height: 100%;
+  max-height: 70vh;
+  padding: var(--j-space-400);
+
+  .columnHeader,
+  .columnFooter {
+    display: flex;
+    height: 40px;
+
+    j-button::part(base) {
+      padding: 0;
+    }
+  }
+
+  .columnHeader {
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tasks {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 80px);
+    gap: var(--j-space-300);
+    border-radius: var(--j-border-radius);
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &.isDraggingOver {
+      background-color: var(--j-color-primary-100);
+      border: 2px dashed var(--j-color-primary-500);
+    }
+  }
+}

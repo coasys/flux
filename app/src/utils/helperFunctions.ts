@@ -1,4 +1,4 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
+import { PerspectiveProxy } from '@coasys/ad4m';
 
 export function closeMenu(menuId: string) {
   const menu = document.getElementById(menuId);
@@ -7,7 +7,7 @@ export function closeMenu(menuId: string) {
     return;
   }
 
-  const items = menu.shadowRoot?.querySelector("details");
+  const items = menu.shadowRoot?.querySelector('details');
   if (items) items.open = false;
   else console.warn(`Details element not found in menu "${menuId}"`);
 }
@@ -20,7 +20,7 @@ export async function fetchImageData(perspective: PerspectiveProxy, imageURI: st
     const { data_base64 } = JSON.parse(data);
     return `data:image/png;base64,${data_base64}`;
   } catch (e) {
-    console.warn("Failed to fetch image data for", imageURI, e);
+    console.warn('Failed to fetch image data for', imageURI, e);
     return '';
   }
 }

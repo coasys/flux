@@ -39,23 +39,23 @@
 </template>
 
 <script setup lang="ts">
-import { useRouteParams } from "@/composables/useRouteParams";
-import { Theme, useModalStore, useThemeStore } from "@/stores";
-import { computed, ref } from "vue";
+import { useRouteParams } from '@/composables/useRouteParams';
+import { Theme, useModalStore, useThemeStore } from '@/stores';
+import { computed, ref } from 'vue';
 
 const modalStore = useModalStore();
 const themeStore = useThemeStore();
 
 const { communityId } = useRouteParams();
 
-const currentView = ref("theme-editor");
+const currentView = ref('theme-editor');
 
-const showEditor = computed(() => currentView.value === "theme-editor");
+const showEditor = computed(() => currentView.value === 'theme-editor');
 
 function setuseLocalTheme(val: boolean) {
   // TODO: Set local theme
   // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
-  themeStore.changeCurrentTheme(val ? communityId.value : "global");
+  themeStore.changeCurrentTheme(val ? communityId.value : 'global');
 }
 
 function updateCommunityTheme(val: Theme) {

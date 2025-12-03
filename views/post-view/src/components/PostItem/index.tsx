@@ -1,9 +1,9 @@
-import { Profile } from "@coasys/flux-types";
-import { format, formatDistance } from "date-fns/esm";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { DisplayView } from "../../constants/options";
-import UIContext from "../../context/UIContext";
-import styles from "./index.module.css";
+import { Profile } from '@coasys/flux-types';
+import { format, formatDistance } from 'date-fns/esm';
+import { useContext, useEffect, useState } from 'preact/hooks';
+import { DisplayView } from '../../constants/options';
+import UIContext from '../../context/UIContext';
+import styles from './index.module.css';
 
 export default function PostItem({ post, displayView, getProfile }) {
   const { methods: UIMehthods } = useContext(UIContext);
@@ -13,7 +13,7 @@ export default function PostItem({ post, displayView, getProfile }) {
 
   async function fetchOgData(url) {
     try {
-      const data = await fetch("https://jsonlink.io/api/extract?url=" + url).then((res) => res.json());
+      const data = await fetch('https://jsonlink.io/api/extract?url=' + url).then((res) => res.json());
       setOgData(data);
     } catch (e) {}
   }
@@ -26,7 +26,7 @@ export default function PostItem({ post, displayView, getProfile }) {
     if (post.url) fetchOgData(post.url);
   }, [post.image, post.url]);
 
-  const popularStyle: string = post.isPopular ? styles.popularMessage : "";
+  const popularStyle: string = post.isPopular ? styles.popularMessage : '';
   const displayStyle: DisplayView =
     displayView === DisplayView.Compact ? styles.compact : displayView === DisplayView.Grid ? styles.grid : styles.card;
 
@@ -38,7 +38,7 @@ export default function PostItem({ post, displayView, getProfile }) {
   return (
     <div
       onClick={() => UIMehthods.goToPost(post.baseExpression)}
-      className={[styles.post, displayStyle, popularStyle].join(" ")}
+      className={[styles.post, displayStyle, popularStyle].join(' ')}
     >
       <div className={styles.postContentWrapper}>
         {showTite && (
@@ -54,7 +54,7 @@ export default function PostItem({ post, displayView, getProfile }) {
             </a>
             <j-flex a="center" gap="200">
               <a href={author?.did} className={styles.authorName}>
-                {author ? author.username || "No name" : <j-skeleton width="lg" height="text" />}
+                {author ? author.username || 'No name' : <j-skeleton width="lg" height="text" />}
               </a>
               <div className={styles.timestamp}>
                 <j-timestamp relative value={post.timestamp} />
@@ -77,11 +77,11 @@ export default function PostItem({ post, displayView, getProfile }) {
           <div className={styles.postDates}>
             <div className={styles.postDate}>
               <j-icon size="xs" name="calendar-event" />
-              {format(new Date(post.startDate), "dd.MMMM HH:HH")}
+              {format(new Date(post.startDate), 'dd.MMMM HH:HH')}
             </div>
             <div className={styles.postDate}>
               <j-icon size="xs" name="clock" />
-              <j-tooltip title={format(new Date(post.endDate), "dd.MMMM HH:HH")}>
+              <j-tooltip title={format(new Date(post.endDate), 'dd.MMMM HH:HH')}>
                 {formatDistance(new Date(post.startDate), new Date(post.endDate))}
               </j-tooltip>
             </div>
@@ -99,8 +99,8 @@ export default function PostItem({ post, displayView, getProfile }) {
         {showImage && <img className={styles.postImage} src={post.image} />}
         {showDates && (
           <div className={styles.calendar}>
-            <span className={styles.calendarMonth}>{format(new Date(post.startDate), "MMM")}</span>
-            <span className={styles.calendarDate}>{format(new Date(post.startDate), "dd")}th</span>
+            <span className={styles.calendarMonth}>{format(new Date(post.startDate), 'MMM')}</span>
+            <span className={styles.calendarDate}>{format(new Date(post.startDate), 'dd')}th</span>
           </div>
         )}
       </div>

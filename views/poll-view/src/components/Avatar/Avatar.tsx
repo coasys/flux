@@ -1,16 +1,16 @@
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useState } from "preact/hooks";
-import styles from "./Avatar.module.scss";
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useState } from 'preact/hooks';
+import styles from './Avatar.module.scss';
 
 type Props = {
   did: string;
-  size?: "sm" | "xs" | "lg" | "xl" | "xxs" | "xxl";
+  size?: 'sm' | 'xs' | 'lg' | 'xl' | 'xxs' | 'xxl';
   showName?: boolean;
   style?: any;
   getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function Avatar({ did, size = "sm", showName = false, style, getProfile }: Props) {
+export default function Avatar({ did, size = 'sm', showName = false, style, getProfile }: Props) {
   const [profile, setProfile] = useState<Partial<Profile>>({});
 
   async function getProfileData() {
@@ -24,7 +24,7 @@ export default function Avatar({ did, size = "sm", showName = false, style, getP
 
   return (
     <j-flex gap="300" a="center" style={style}>
-      <div className={styles.image} style={{ height: size === "xs" ? 28 : 36 }}>
+      <div className={styles.image} style={{ height: size === 'xs' ? 28 : 36 }}>
         <j-avatar size={size} src={profile.profileThumbnailPicture || null} hash={did} />
       </div>
       {showName && <j-text nomargin>{profile.username}</j-text>}

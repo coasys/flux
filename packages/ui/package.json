@@ -3,16 +3,8 @@
   "version": "0.11.0",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
-  "main": "dist/main.js",
-  "browser": "dist/main.js",
-  "types": "dist/main.d.ts",
-  "files": [
-    "dist"
-  ],
-  "publishConfig": {
-    "cache": "~/.npm",
-    "access": "public"
-  },
+  "author": "",
+  "license": "ISC",
   "scripts": {
     "prepare": "run-s build:*",
     "release": "np --no-2fa --no-tests --tag=latest",
@@ -24,9 +16,15 @@
     "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
     "build:lib": "node esbuild-prod.js",
-    "visualize": "esbuild-visualizer --metadata ./meta.json",
-    "publish-package": "npm publish"
+    "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
+  "main": "dist/main.js",
+  "browser": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
   "dependencies": {
     "@coasys/flux-utils": "0.11.0",
     "@popperjs/core": "^2.11.7",
@@ -44,7 +42,7 @@
     "npm-run-all": "^4.1.5",
     "web-component-analyzer": "^1.1.7"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "publishConfig": {
+    "access": "public"
+  }
 }

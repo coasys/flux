@@ -1,13 +1,13 @@
-import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from "@coasys/ad4m";
-import { community, languages } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import Message from "../message";
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { community, languages } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import Message from '../message';
 
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;
 
 @ModelOptions({
-  name: "Post",
+  name: 'Post',
 })
 export class Post extends Ad4mModel {
   @Flag({
@@ -19,14 +19,14 @@ export class Post extends Ad4mModel {
   @Property({
     through: TITLE,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   title: string;
 
   @Optional({
     through: BODY,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   body: string;
 
@@ -38,11 +38,11 @@ export class Post extends Ad4mModel {
   })
   image: string;
 
-  @Optional({ through: URL, writable: true, resolveLanguage: "literal" })
+  @Optional({ through: URL, writable: true, resolveLanguage: 'literal' })
   url: string;
 
   @Collection({
-    through: "ad4m://has_child",
+    through: 'ad4m://has_child',
     where: {
       isInstance: Message,
     },

@@ -29,7 +29,7 @@
       }
       flux-editor.chat {
         --body-min-height: auto;
-        --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+        --grid-template-areas: 'toolbar toolbar toolbar' 'body body footer';
       }
       flux-editor.chat::part(toolbar) {
         display: none;
@@ -51,13 +51,7 @@
           <j-button class="submit" circle square size="sm" variant="primary">
             <j-icon size="xs" name="send"></j-icon>
           </j-button>
-          <j-button
-            class="toggle-formatting"
-            circle
-            square
-            size="sm"
-            variant="ghost"
-          >
+          <j-button class="toggle-formatting" circle square size="sm" variant="ghost">
             <j-icon size="sm" name="type"></j-icon>
           </j-button>
         </footer>
@@ -65,20 +59,18 @@
     </flux-container>
 
     <script type="module">
-      import "@coasys/flux-container";
-      import Editor from "./src/flux-editor.ts";
+      import '@coasys/flux-container';
+      import Editor from './src/flux-editor.ts';
 
-      document
-        .querySelector(".toggle-formatting")
-        .addEventListener("click", () => {
-          document.querySelector("flux-editor").classList.toggle("showToolbar");
-        });
-
-      document.querySelector(".submit").addEventListener("click", () => {
-        document.querySelector("flux-editor").submit();
+      document.querySelector('.toggle-formatting').addEventListener('click', () => {
+        document.querySelector('flux-editor').classList.toggle('showToolbar');
       });
 
-      customElements.define("flux-editor", Editor);
+      document.querySelector('.submit').addEventListener('click', () => {
+        document.querySelector('flux-editor').submit();
+      });
+
+      customElements.define('flux-editor', Editor);
     </script>
   </body>
 </html>

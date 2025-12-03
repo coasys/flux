@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { property, customElement } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { property, customElement } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -9,98 +9,93 @@ const styles = css`
     --j-skeleton-border-radius: var(--j-border-radius, 0px);
     --j-skeleton-display: inline-block;
   }
-  [part="base"] {
+  [part='base'] {
     display: var(--j-skeleton-display);
     width: var(--j-skeleton-width);
     height: var(--j-skeleton-height);
     border-radius: var(--j-skeleton-border-radius);
-    background: linear-gradient(
-      90deg,
-      var(--j-color-ui-100) 0%,
-      var(--j-color-ui-200) 50%,
-      var(--j-color-ui-100) 100%
-    );
+    background: linear-gradient(90deg, var(--j-color-ui-100) 0%, var(--j-color-ui-200) 50%, var(--j-color-ui-100) 100%);
     animation: placeHolderShimmer 10s linear infinite;
   }
 
-  :host([height="xxs"]) {
+  :host([height='xxs']) {
     --j-skeleton-height: var(--j-size-xxs);
   }
 
-  :host([height="xs"]) {
+  :host([height='xs']) {
     --j-skeleton-height: var(--j-size-xs);
   }
 
-  :host([height="sm"]) {
+  :host([height='sm']) {
     --j-skeleton-height: var(--j-size-sm);
   }
 
-  :host([height="md"]) {
+  :host([height='md']) {
     --j-skeleton-height: var(--j-size-md);
   }
 
-  :host([height="lg"]) {
+  :host([height='lg']) {
     --j-skeleton-height: var(--j-size-lg);
   }
 
-  :host([height="xl"]) {
+  :host([height='xl']) {
     --j-skeleton-height: var(--j-size-xl);
   }
 
-  :host([height="xxl"]) {
+  :host([height='xxl']) {
     --j-skeleton-height: var(--j-size-xxl);
   }
 
-  :host([height="full"]) {
+  :host([height='full']) {
     --j-skeleton-height: 100%;
   }
 
-  :host([height="text"]) {
+  :host([height='text']) {
     --j-skeleton-height: 1em;
   }
 
-  :host([width="xxs"]) {
+  :host([width='xxs']) {
     --j-skeleton-width: var(--j-size-xxs);
   }
 
-  :host([width="xs"]) {
+  :host([width='xs']) {
     --j-skeleton-width: var(--j-size-xs);
   }
 
-  :host([width="sm"]) {
+  :host([width='sm']) {
     --j-skeleton-width: var(--j-size-sm);
   }
 
-  :host([width="md"]) {
+  :host([width='md']) {
     --j-skeleton-width: var(--j-size-md);
   }
 
-  :host([width="lg"]) {
+  :host([width='lg']) {
     --j-skeleton-width: var(--j-size-lg);
   }
 
-  :host([width="xl"]) {
+  :host([width='xl']) {
     --j-skeleton-width: var(--j-size-xl);
   }
 
-  :host([width="xxl"]) {
+  :host([width='xxl']) {
     --j-skeleton-width: var(--j-size-xxl);
   }
 
-  :host([width="full"]) {
+  :host([width='full']) {
     --j-skeleton-width: 100%;
     --j-skeleton-displa: block;
   }
 
-  :host([width="text"]) {
+  :host([width='text']) {
     --j-skeleton-width: 1em;
   }
 
-  :host([variant="circle"]) {
+  :host([variant='circle']) {
     --j-skeleton-border-radius: 50%;
   }
 
-  :host([variant="circle"]) [part="base"] {
+  :host([variant='circle']) [part='base'] {
     aspect-ratio: 1/1;
   }
 
@@ -114,7 +109,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-skeleton")
+@customElement('j-skeleton')
 export default class Skeleton extends LitElement {
   static styles = [styles, sharedStyles];
 
@@ -130,14 +125,14 @@ export default class Skeleton extends LitElement {
    * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
-  @property({ type: String, reflect: true }) height = "md";
+  @property({ type: String, reflect: true }) height = 'md';
 
   /**
    * Width
    * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
-  @property({ type: String, reflect: true }) width = "md";
+  @property({ type: String, reflect: true }) width = 'md';
 
   render() {
     return html`<div part="base"></div>`;

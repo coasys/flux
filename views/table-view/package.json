@@ -1,19 +1,16 @@
 {
   "name": "@coasys/flux-table-view",
   "version": "0.11.0",
-  "fluxapp": {
-    "name": "Table",
-    "description": "View and edit your channel data",
-    "icon": "file-earmark-spreadsheet"
-  },
-  "keywords": [
-    "flux-plugin",
-    "ad4m-view"
-  ],
+  "description": "",
+  "author": "",
+  "license": "ISC",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "main": "./dist/main.umd.cjs",
   "module": "./dist/main.js",
   "exports": {
@@ -22,16 +19,13 @@
       "require": "./dist/main.umd.cjs"
     }
   },
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
   "dependencies": {
     "@coasys/ad4m": "0.11.0",
     "@coasys/ad4m-react-hooks": "0.11.0",
@@ -48,5 +42,13 @@
     "@preact/preset-vite": "^2.5.0",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "fluxapp": {
+    "name": "Table",
+    "description": "View and edit your channel data",
+    "icon": "file-earmark-spreadsheet"
   }
 }

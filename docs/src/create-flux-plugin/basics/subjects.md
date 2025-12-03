@@ -17,8 +17,8 @@ Because Flux Plugins share a lot of functionality, it comes bundled with several
 - Post
 
 ```ts
-import { useSubject } from "@fluxapp/react";
-import { Community } from "@coasys/flux-api";
+import { useSubject } from '@fluxapp/react';
+import { Community } from '@coasys/flux-api';
 
 const { entry: community } = useSubject({
   perspective,
@@ -33,36 +33,36 @@ Defining your own models can be done by creating a new `ModelOptions` definition
 ```ts
 // models/Todo.ts
 
-import { ModelOptions, Property, Flag } from "@coasys/ad4m";
+import { ModelOptions, Property, Flag } from '@coasys/ad4m';
 
 @ModelOptions({
-  name: "Todo",
+  name: 'Todo',
 })
 export default class Todo {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://has_todo",
+    through: 'flux://entry_type',
+    value: 'flux://has_todo',
   })
   type: string;
 
   @Property({
-    through: "rdf://title",
+    through: 'rdf://title',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   title: string;
 
   @Property({
-    through: "rdf://description",
+    through: 'rdf://description',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   desc: string;
 
   @Property({
-    through: "rdf://status",
+    through: 'rdf://status',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   done: boolean;
 }

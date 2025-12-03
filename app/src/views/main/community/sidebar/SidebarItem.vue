@@ -66,15 +66,15 @@
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from "@/components/icons";
-import { ChannelData, useCommunityService } from "@/composables/useCommunityService";
-import { useRouteMemoryStore, useUiStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { AgentData, Profile } from "@coasys/flux-types";
-import { computed, defineOptions, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from '@/components/icons';
+import { ChannelData, useCommunityService } from '@/composables/useCommunityService';
+import { useRouteMemoryStore, useUiStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { AgentData, Profile } from '@coasys/flux-types';
+import { computed, defineOptions, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-defineOptions({ name: "SidebarItem" });
+defineOptions({ name: 'SidebarItem' });
 
 type Props = { item: ChannelData; isChild?: boolean };
 const { item } = defineProps<Props>();
@@ -91,9 +91,9 @@ const isDragging = ref(false);
 const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
 const selected = computed(() => item.channel.baseExpression === route.params.channelId);
-const agentsInCall = computed(() => aggregateAgents(expanded.value, item, "agentsInCall") || []);
+const agentsInCall = computed(() => aggregateAgents(expanded.value, item, 'agentsInCall') || []);
 
-function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: "agentsInChannel" | "agentsInCall") {
+function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agentsInChannel' | 'agentsInCall') {
   // If collapsed and children exist, aggregate agents from child channels
   if (!expanded && item.children?.length) {
     const childAgents = item.children.flatMap((child) => child[agentKey] || []);
@@ -114,10 +114,10 @@ function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
 function navigateToChannel() {
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = item.channel.baseExpression || "";
+  const channelId = item.channel.baseExpression || '';
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
-  const defaultViewId = item.channel.isConversation ? "conversation" : "conversations";
-  router.push({ name: "view", params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
+  const defaultViewId = item.channel.isConversation ? 'conversation' : 'conversations';
+  router.push({ name: 'view', params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
 
   // Toggle the community sidebar shut if open (only has effect on mobile)
   uiStore.toggleCommunitySidebar();
@@ -134,13 +134,13 @@ function handleDragStart(event: DragEvent) {
   if (!item.channel.isConversation) return;
 
   isDragging.value = true;
-  event.dataTransfer!.effectAllowed = "move";
+  event.dataTransfer!.effectAllowed = 'move';
   event.dataTransfer!.setData(
-    "application/json",
+    'application/json',
     JSON.stringify({
       conversationChannelId: item.channel.baseExpression!,
-      name: item.conversation?.conversationName || "",
-    })
+      name: item.conversation?.conversationName || '',
+    }),
   );
 
   // Prevent navigation when dragging starts
@@ -155,7 +155,7 @@ function handleDragOver(event: DragEvent) {
   if (item.channel.isConversation) return;
 
   event.preventDefault();
-  event.dataTransfer!.dropEffect = "move";
+  event.dataTransfer!.dropEffect = 'move';
   isDragOver.value = true;
 }
 
@@ -175,11 +175,11 @@ async function handleDrop(event: DragEvent) {
   isDragOver.value = false;
 
   try {
-    const dropData = event.dataTransfer!.getData("application/json");
+    const dropData = event.dataTransfer!.getData('application/json');
     const { conversationChannelId, name } = JSON.parse(dropData);
     await moveConversation(conversationChannelId, item.channel.baseExpression!, name);
   } catch (error) {
-    console.error("Error handling drop:", error);
+    console.error('Error handling drop:', error);
   }
 }
 
@@ -189,20 +189,20 @@ watch(() => route.params.channelId, expandIfInNestedChannel, { immediate: true }
 watch(
   [() => expanded.value, () => item],
   async () => {
-    const active = aggregateAgents(expanded.value, item, "agentsInChannel") || [];
+    const active = aggregateAgents(expanded.value, item, 'agentsInChannel') || [];
     const activeDids = new Set(active.map((a) => a.did));
     const inactive = await Promise.all(
       aggregateAllAuthors(expanded.value, item)
         .filter((did) => !activeDids.has(did))
         .map(async (did) => {
           const profile = (await getCachedAgentProfile(did)) || {};
-          return { ...profile, did, status: "inactive" };
-        })
+          return { ...profile, did, status: 'inactive' };
+        }),
     );
 
-    agentsInChannel.value = [...inactive, ...active.map((a) => ({ ...a, status: a.status || "active" }))];
+    agentsInChannel.value = [...inactive, ...active.map((a) => ({ ...a, status: a.status || 'active' }))];
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
@@ -230,7 +230,7 @@ watch(
     background-color: var(--j-color-ui-100);
   }
 
-  &[draggable="true"] {
+  &[draggable='true'] {
     cursor: grab;
 
     &:active {
@@ -254,7 +254,7 @@ watch(
   }
 
   // Prevent drag on non-draggable items
-  &:not([draggable="true"]) {
+  &:not([draggable='true']) {
     user-select: none;
   }
 

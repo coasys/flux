@@ -1,4 +1,4 @@
-import { IceServer, Settings } from "utils/helpers/WebRTCManager";
+import { IceServer, Settings } from 'utils/helpers/WebRTCManager';
 
 const frameRate = {
   min: 5,
@@ -28,7 +28,7 @@ export const defaultSettings = {
   screen: false,
   transcriber: {
     on: true,
-    selectedModel: "Base",
+    selectedModel: 'Base',
     previewTimeout: 0.4,
     messageTimeout: 5,
   },
@@ -36,19 +36,19 @@ export const defaultSettings = {
 
 export const defaultIceServers = [
   {
-    urls: "stun:relay.ad4m.dev:3478",
-    username: "openrelay",
-    credential: "openrelay",
+    urls: 'stun:relay.ad4m.dev:3478',
+    username: 'openrelay',
+    credential: 'openrelay',
   },
   {
-    urls: "turn:relay.ad4m.dev:443",
-    username: "openrelay",
-    credential: "openrelay",
+    urls: 'turn:relay.ad4m.dev:443',
+    username: 'openrelay',
+    credential: 'openrelay',
   },
   {
-    urls: "stun:stun.l.google.com:19302",
+    urls: 'stun:stun.l.google.com:19302',
   },
   {
-    urls: "stun:global.stun.twilio.com:3478",
+    urls: 'stun:global.stun.twilio.com:3478',
   },
 ] as IceServer[];

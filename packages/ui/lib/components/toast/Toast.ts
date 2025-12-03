@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -8,17 +8,17 @@ const styles = css`
     --j-toast-background: var(--j-color-primary-500);
     --j-toast-color: var(--j-color-white);
   }
-  :host([variant="success"]) {
+  :host([variant='success']) {
     --j-toast-border: 1px solid var(--j-color-success-400);
     --j-toast-background: var(--j-color-success-500);
     --j-toast-color: var(--j-color-white);
   }
-  :host([variant="danger"]) {
+  :host([variant='danger']) {
     --j-toast-border: 1px solid var(--j-color-danger-400);
     --j-toast-background: var(--j-color-danger-500);
     --j-toast-color: var(--j-color-white);
   }
-  :host([variant="warning"]) {
+  :host([variant='warning']) {
     --j-toast-border: 1px solid var(--j-color-warning-400);
     --j-toast-background: var(--j-color-warning-500);
     --j-toast-color: var(--j-color-white);
@@ -40,13 +40,13 @@ const styles = css`
     z-index: 999999;
   }
 
-  :host([open]) [part="base"] {
+  :host([open]) [part='base'] {
     opacity: 1;
     transform: translateY(0px);
     transition: all 0.2s ease;
   }
 
-  [part="base"] {
+  [part='base'] {
     opacity: 0;
     transform: translateY(10px);
     position: relative;
@@ -64,14 +64,14 @@ const styles = css`
     padding-right: var(--j-space-900);
   }
 
-  [part="base"] j-button {
+  [part='base'] j-button {
     position: absolute;
     top: var(--j-space-300);
     right: var(--j-space-300);
   }
 `;
 
-@customElement("j-toast")
+@customElement('j-toast')
 export default class Component extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -110,10 +110,10 @@ export default class Component extends LitElement {
     if (this.open) {
       clearTimeout(this.#timeout);
       this.autoClose();
-      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+      this.dispatchEvent(new CustomEvent('toggle', { bubbles: true }));
     } else {
       clearTimeout(this.#timeout);
-      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+      this.dispatchEvent(new CustomEvent('toggle', { bubbles: true }));
     }
     return true;
   }

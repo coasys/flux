@@ -1,23 +1,18 @@
-import { LitElement, html, property, state, css } from "lit-element";
-import { map } from "lit/directives/map.js";
-import { Editor } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import Mention from "./mention";
-import Placeholder from "@tiptap/extension-placeholder";
-import Link from "@tiptap/extension-link";
-import { PluginKey } from "prosemirror-state";
-import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
-import {
-  Channel,
-  Message,
-  SubjectRepository,
-  getProfile,
-} from "@coasys/flux-api";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import defaultActions from "./defaultActions";
-import { shouldPlaceAbove } from "./utils";
+import { LitElement, html, property, state, css } from 'lit-element';
+import { map } from 'lit/directives/map.js';
+import { Editor } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Mention from './mention';
+import Placeholder from '@tiptap/extension-placeholder';
+import Link from '@tiptap/extension-link';
+import { PluginKey } from 'prosemirror-state';
+import { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
+import { Channel, Message, SubjectRepository, getProfile } from '@coasys/flux-api';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import defaultActions from './defaultActions';
+import { shouldPlaceAbove } from './utils';
 
 type Suggestion = {
   id: string;
@@ -27,7 +22,7 @@ type Suggestion = {
 export default class MyElement extends LitElement {
   static styles = css`
     :host {
-      --grid-template-areas: "toolbar" "body" "footer";
+      --grid-template-areas: 'toolbar' 'body' 'footer';
       --body-min-height: 80px;
       display: block;
       width: 100%;
@@ -73,7 +68,7 @@ export default class MyElement extends LitElement {
       color: var(--j-color-primary-500);
     }
 
-    a:not([href^="http"]) {
+    a:not([href^='http']) {
       word-break: break-word;
       text-decoration: none;
       cursor: pointer;
@@ -126,7 +121,7 @@ export default class MyElement extends LitElement {
   source: null;
 
   @property({ type: String })
-  placeholder: "";
+  placeholder: '';
 
   @state()
   editor: Editor | null;
@@ -171,11 +166,11 @@ export default class MyElement extends LitElement {
   }
 
   get editorElement() {
-    return this.renderRoot.querySelector("#editor") as HTMLElement;
+    return this.renderRoot.querySelector('#editor') as HTMLElement;
   }
 
   get suggestionsEl() {
-    return this.renderRoot.querySelector("#suggestions") as HTMLElement;
+    return this.renderRoot.querySelector('#suggestions') as HTMLElement;
   }
 
   connectedCallback() {
@@ -183,7 +178,7 @@ export default class MyElement extends LitElement {
   }
 
   async updated(changedProperties) {
-    if (changedProperties.has("perspective")) {
+    if (changedProperties.has('perspective')) {
       this.fetchProfiles();
       this.fetchChannels();
     }
@@ -197,31 +192,31 @@ export default class MyElement extends LitElement {
           heading: false,
         }),
         Placeholder.configure({
-          placeholder: this.placeholder || "",
+          placeholder: this.placeholder || '',
         }),
         Link.configure({
-          protocols: ["neighbourhood"],
+          protocols: ['neighbourhood'],
         }),
         Mention.configure({
           suggestion: {
-            char: "#",
-            pluginKey: new PluginKey("hashKey"),
+            char: '#',
+            pluginKey: new PluginKey('hashKey'),
             items: ({ query }) => this.getChannelSuggestions(query),
             render: this.renderSuggestions,
           },
         }),
         Mention.configure({
           suggestion: {
-            char: "@",
-            pluginKey: new PluginKey("atKey"),
+            char: '@',
+            pluginKey: new PluginKey('atKey'),
             items: ({ query }) => this.getMentionSuggestions(query),
             render: this.renderSuggestions,
           },
         }),
       ],
     });
-    this.editor.on("blur", (e) => {
-      let event = new CustomEvent("change", {
+    this.editor.on('blur', (e) => {
+      let event = new CustomEvent('change', {
         detail: {
           json: e.editor.getJSON(),
           html: e.editor.getHTML(),
@@ -265,17 +260,17 @@ export default class MyElement extends LitElement {
       },
 
       onKeyDown: (props: SuggestionKeyDownProps) => {
-        if (props.event.key === "ArrowUp") {
+        if (props.event.key === 'ArrowUp') {
           this.upHandler();
           return true;
         }
 
-        if (props.event.key === "ArrowDown") {
+        if (props.event.key === 'ArrowDown') {
           this.downHandler();
           return true;
         }
 
-        if (props.event.key === "Enter") {
+        if (props.event.key === 'Enter') {
           props.event.stopPropagation();
           this.selectSuggestion(this.suggestionIndex);
           return true;
@@ -291,9 +286,7 @@ export default class MyElement extends LitElement {
   }
 
   upHandler() {
-    this.suggestionIndex =
-      (this.suggestionIndex + this.suggestions.length - 1) %
-      this.suggestions.length;
+    this.suggestionIndex = (this.suggestionIndex + this.suggestions.length - 1) % this.suggestions.length;
   }
 
   downHandler() {
@@ -305,8 +298,8 @@ export default class MyElement extends LitElement {
     this.suggestionCallback({ id: item.id, label: item.label });
   }
 
-  getSafeString(value: any = "") {
-    if (typeof value === "string") {
+  getSafeString(value: any = '') {
+    if (typeof value === 'string') {
       return value;
     }
     return String(value);
@@ -314,12 +307,8 @@ export default class MyElement extends LitElement {
 
   async getMentionSuggestions(query: string) {
     const matches = this.members
-      .filter((m) =>
-        this.getSafeString(m.username)
-          .toLowerCase()
-          .startsWith(query.toLowerCase())
-      )
-      .map((m) => ({ id: m.did, label: m.username || "anonymous" }))
+      .filter((m) => this.getSafeString(m.username).toLowerCase().startsWith(query.toLowerCase()))
+      .map((m) => ({ id: m.did, label: m.username || 'anonymous' }))
       .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
@@ -327,11 +316,9 @@ export default class MyElement extends LitElement {
   }
 
   async getChannelSuggestions(query: string) {
-    console.log("this.channels: ", this.channels);
+    console.log('this.channels: ', this.channels);
     const matches = this.channels
-      .filter((c) =>
-        this.getSafeString(c.name).toLowerCase().startsWith(query.toLowerCase())
-      )
+      .filter((c) => this.getSafeString(c.name).toLowerCase().startsWith(query.toLowerCase()))
       .map((channel) => ({ id: channel.id, label: channel.name }))
       .slice(0, 10) as Suggestion[];
 
@@ -344,9 +331,7 @@ export default class MyElement extends LitElement {
       const me = await this.agent.me();
       const neighbourhood = this.perspective.getNeighbourhoodProxy();
       const othersDids = await neighbourhood.otherAgents();
-      const profilePromises = [...othersDids, me.did].map(async (did) =>
-        getProfile(did)
-      );
+      const profilePromises = [...othersDids, me.did].map(async (did) => getProfile(did));
       const newProfiles = await Promise.all(profilePromises);
       this.members = newProfiles;
     }
@@ -360,7 +345,7 @@ export default class MyElement extends LitElement {
     if (this.perspective) {
       const model = new SubjectRepository(Channel, {
         perspective: this.perspective,
-        source: "ad4m://self",
+        source: 'ad4m://self',
       });
 
       model
@@ -382,7 +367,7 @@ export default class MyElement extends LitElement {
       const html = this.editor.getHTML();
       this.isCreating = true;
       const result = await repo.create({ body: html });
-      console.log("CREATED: ", result);
+      console.log('CREATED: ', result);
       this.editor.commands.clearContent();
     } catch (e) {
       console.log(e);
@@ -397,14 +382,11 @@ export default class MyElement extends LitElement {
         <div class="toolbar" part="toolbar">
           ${map(
             defaultActions,
-            (a) => html`<j-button square variant="ghost" @click=${() =>
-              this.editor?.commands[a.command]()}>
+            (a) => html`<j-button square variant="ghost" @click=${() => this.editor?.commands[a.command]()}>
                 <j-icon name=${a.icon}
-                  color=${
-                    this.editor?.isActive([a.name]) ? "primary-500" : "ui-500"
-                  }
+                  color=${this.editor?.isActive([a.name]) ? 'primary-500' : 'ui-500'}
                 ></j-icon>
-              </j-tooltip>`
+              </j-tooltip>`,
           )}
         </div>
 
@@ -412,11 +394,7 @@ export default class MyElement extends LitElement {
           <div class="editor" part="editor" id="editor"></div>
 
           ${this.suggestions.length
-            ? html` <div
-                class="suggestions"
-                part="suggestions"
-                id="suggestions"
-              >
+            ? html` <div class="suggestions" part="suggestions" id="suggestions">
                 <j-menu>
                   ${map(
                     this.suggestions,
@@ -431,7 +409,7 @@ export default class MyElement extends LitElement {
                           <j-avatar hash=${s.id} size="xs"></j-avatar>
                           <j-text variant="body" nomargin> ${s.label} </j-text>
                         </j-flex>
-                      </j-menu-item>`
+                      </j-menu-item>`,
                   )}
                 </j-menu>
               </div>`
@@ -439,14 +417,7 @@ export default class MyElement extends LitElement {
         </div>
         <slot class="footer" name="footer" part="footer">
           <slot name="trigger">
-            <j-button
-              ?loading=${this.isCreating}
-              variant="primary"
-              size="sm"
-              @click=${this.submit}
-            >
-              Create
-            </j-button>
+            <j-button ?loading=${this.isCreating} variant="primary" size="sm" @click=${this.submit}> Create </j-button>
           </slot>
         </slot>
       </div>

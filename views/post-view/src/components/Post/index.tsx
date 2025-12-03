@@ -1,13 +1,13 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { useMe, useModel } from "@coasys/ad4m-react-hooks";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Post as PostSubject } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
-import { profileFormatter } from "@coasys/flux-utils";
-import { useContext, useEffect, useState } from "preact/hooks";
-import UIContext from "../../context/UIContext";
-import { getTimeSince } from "../../utils";
-import styles from "./index.module.css";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { useMe, useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Post as PostSubject } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
+import { profileFormatter } from '@coasys/flux-utils';
+import { useContext, useEffect, useState } from 'preact/hooks';
+import UIContext from '../../context/UIContext';
+import { getTimeSince } from '../../utils';
+import styles from './index.module.css';
 
 export default function Post({
   agent,
@@ -31,7 +31,7 @@ export default function Post({
 
   async function fetchOgData(url) {
     try {
-      const data = await fetch("https://jsonlink.io/api/extract?url=" + url).then((res) => res.json());
+      const data = await fetch('https://jsonlink.io/api/extract?url=' + url).then((res) => res.json());
       setOgData(data);
     } catch (e) {}
   }
@@ -86,7 +86,7 @@ export default function Post({
           </a>
           <div>
             <a className={styles.authorName} href={author?.did}>
-              {author ? author.username || "No name" : <j-skeleton width="lg" height="text" />}
+              {author ? author.username || 'No name' : <j-skeleton width="lg" height="text" />}
             </a>
             <div className={styles.timestamp}>{getTimeSince(new Date(post.timestamp), new Date())}</div>
           </div>

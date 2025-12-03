@@ -2,7 +2,7 @@
   <j-modal :open="modalStore.showEditChannel" @toggle="(e: any) => (modalStore.showEditChannel = e.target.open)">
     <j-box p="800">
       <j-flex direction="column" gap="500">
-        <j-text variant="heading-sm">Edit {{ isConversation ? "Conversation" : "Channel" }}</j-text>
+        <j-text variant="heading-sm">Edit {{ isConversation ? 'Conversation' : 'Channel' }}</j-text>
 
         <j-input
           size="lg"
@@ -55,7 +55,7 @@
                     :loading="loadedPlugins[app.pkg] === 'loading'"
                     @click="() => toggleView(app)"
                   >
-                    {{ isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded" ? "Remove" : "Add" }}
+                    {{ isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded' ? 'Remove' : 'Add' }}
                   </j-button>
                 </div>
               </j-flex>
@@ -83,10 +83,10 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore } from "@/stores";
-import fetchFluxApp from "@/utils/fetchFluxApp";
-import { useModel } from "@coasys/ad4m-vue-hooks";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useModalStore } from '@/stores';
+import fetchFluxApp from '@/utils/fetchFluxApp';
+import { useModel } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
@@ -95,10 +95,10 @@ import {
   generateWCName,
   getAllFluxApps,
   getOfflineFluxApps,
-} from "@coasys/flux-api";
-import semver from "semver";
-import { computed, onMounted, reactive, ref, toRaw, watch } from "vue";
-import { useRoute } from "vue-router";
+} from '@coasys/flux-api';
+import semver from 'semver';
+import { computed, onMounted, reactive, ref, toRaw, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const modalStore = useModalStore();
@@ -111,11 +111,11 @@ const {
   getChannelsWithConversations,
 } = useCommunityService();
 
-const tab = ref<"official" | "community">("official");
+const tab = ref<'official' | 'community'>('official');
 const isLoading = ref(false);
 const packages = ref<FluxApp[]>([]);
-const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
-const name = ref("");
+const loadedPlugins = reactive<Record<string, 'loaded' | 'loading' | undefined | null>>({});
+const name = ref('');
 const selectedPlugins = ref<App[]>([]);
 const isSaving = ref(false);
 
@@ -127,12 +127,12 @@ const officialApps = computed(() =>
   packages.value.filter(
     // TODO: WebRTC & Synergy filtered out for now, remove plugins from codebase when fully replaced in main app?
     (p) =>
-      p.pkg.startsWith("@coasys/") && !["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(p.pkg)
-  )
+      p.pkg.startsWith('@coasys/') && !['@coasys/flux-webrtc-view', '@coasys/flux-synergy-demo-view'].includes(p.pkg),
+  ),
 );
-const communityApps = computed((): FluxApp[] => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
+const communityApps = computed((): FluxApp[] => packages.value.filter((p) => !p.pkg.startsWith('@coasys/')));
 const filteredPackages = computed((): FluxApp[] =>
-  tab.value === "official" ? officialApps.value : communityApps.value
+  tab.value === 'official' ? officialApps.value : communityApps.value,
 );
 
 const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelId.value } } });
@@ -182,7 +182,7 @@ async function updateChannel() {
     if (isConversation.value) {
       // Update the assosiated conversation name
       const conversationData = recentConversations.value.find(
-        (c) => c.channel.baseExpression === channel.value.baseExpression
+        (c) => c.channel.baseExpression === channel.value.baseExpression,
       );
       const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
       if (!conversationId) return;
@@ -210,7 +210,7 @@ watch(
   (newApps) => {
     if (newApps) selectedPlugins.value = newApps;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 watch(
@@ -220,16 +220,16 @@ watch(
       if (newChannel.isConversation) {
         // Get the conversation name for the channel
         const conversationData = recentConversations.value.find(
-          (c) => c.channel.baseExpression === newChannel.baseExpression
+          (c) => c.channel.baseExpression === newChannel.baseExpression,
         );
-        name.value = conversationData?.conversation?.conversationName || "";
+        name.value = conversationData?.conversation?.conversationName || '';
       } else {
         // Otherwise just use the channel name
         name.value = newChannel.name;
       }
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 watch(
@@ -238,20 +238,20 @@ watch(
     newApps?.forEach(async (app) => {
       const wcName = await generateWCName(app.pkg);
       if (customElements.get(wcName)) {
-        loadedPlugins[app.pkg] = "loaded";
+        loadedPlugins[app.pkg] = 'loaded';
       } else {
-        loadedPlugins[app.pkg] = "loading";
+        loadedPlugins[app.pkg] = 'loading';
 
         const module = await fetchFluxApp(app.pkg);
         if (module) {
           customElements.define(wcName, module.default);
         }
 
-        loadedPlugins[app.pkg] = "loaded";
+        loadedPlugins[app.pkg] = 'loaded';
       }
     });
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 onMounted(async () => {
@@ -264,8 +264,8 @@ onMounted(async () => {
 
     const filtered = res.filter((pkg) => {
       try {
-        const version = semver.coerce(pkg?.ad4mVersion || "0.0.0");
-        return version ? semver.gte(version, "0.8.1") : false;
+        const version = semver.coerce(pkg?.ad4mVersion || '0.0.0');
+        return version ? semver.gte(version, '0.8.1') : false;
       } catch (error) {
         return false;
       }
@@ -273,7 +273,7 @@ onMounted(async () => {
 
     packages.value = filtered;
   } catch (error) {
-    console.info("Flux is offline, using fallback apps");
+    console.info('Flux is offline, using fallback apps');
     const offlineApps = await getOfflineFluxApps();
     packages.value = offlineApps;
     isLoading.value = false;

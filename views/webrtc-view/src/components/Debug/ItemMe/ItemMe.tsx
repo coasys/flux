@@ -1,8 +1,8 @@
-import { Profile } from "@coasys/flux-types";
-import { WebRTC } from "@coasys/flux-react-web";
-import { format } from "date-fns";
+import { Profile } from '@coasys/flux-types';
+import { WebRTC } from '@coasys/flux-react-web';
+import { format } from 'date-fns';
 
-import styles from "./ItemMe.module.css";
+import styles from './ItemMe.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -10,9 +10,7 @@ type Props = {
 };
 
 export default function ItemMe({ profile, webRTC }: Props) {
-  const sortedEvents = webRTC?.localEventLog?.sort((a, b) =>
-    b.timeStamp.localeCompare(a.timeStamp)
-  );
+  const sortedEvents = webRTC?.localEventLog?.sort((a, b) => b.timeStamp.localeCompare(a.timeStamp));
 
   return (
     <div className={styles.item}>
@@ -37,10 +35,7 @@ export default function ItemMe({ profile, webRTC }: Props) {
               <j-text variant="footnote">{e.type}</j-text>
               <j-text variant="footnote">{e.value}</j-text>
             </div>
-            <j-text variant="footnote">{`${format(
-              new Date(e.timeStamp),
-              "HH:mm:ss"
-            )}`}</j-text>
+            <j-text variant="footnote">{`${format(new Date(e.timeStamp), 'HH:mm:ss')}`}</j-text>
           </li>
         ))}
       </ul>

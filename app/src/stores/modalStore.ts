@@ -1,9 +1,9 @@
-import { Channel } from "@coasys/flux-api";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { Channel } from '@coasys/flux-api';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 export const useModalStore = defineStore(
-  "modalStore",
+  'modalStore',
   () => {
     const showDisclaimer = ref(true);
     const showCreateCommunity = ref(false);
@@ -71,5 +71,5 @@ export const useModalStore = defineStore(
       closeAllModals,
     };
   },
-  { persist: { omit: ["createChannelParent"] } }
+  { persist: { omit: ['createChannelParent'] } },
 );

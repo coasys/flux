@@ -6,7 +6,7 @@
   cursor: none;
 }
 
-.map[data-context-menu-open="true"] {
+.map[data-context-menu-open='true'] {
   cursor: initial;
 }
 
@@ -15,7 +15,7 @@
   pointer-events: none;
 }
 
-.user[data-me="false"] {
+.user[data-me='false'] {
   transition: all 0.1s linear;
 }
 
@@ -27,25 +27,25 @@
   pointer-events: none;
 }
 
-.item[data-item="tree"] {
+.item[data-item='tree'] {
   bottom: 10%;
   right: 10%;
   height: 300px;
   width: 300px;
 }
 
-.item[data-item="barrel"] {
+.item[data-item='barrel'] {
   bottom: 20%;
   left: 10%;
 }
 
-.item[data-item="chair"] {
+.item[data-item='chair'] {
   bottom: 10%;
   left: 40%;
   z-index: -1;
 }
 
-.item[data-item="rat"] {
+.item[data-item='rat'] {
   bottom: 40%;
   right: 5%;
 }
