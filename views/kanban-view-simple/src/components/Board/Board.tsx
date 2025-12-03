@@ -33,19 +33,35 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   const { entries: tasks } = useModel({ perspective, model: Task, query: { source: channelId } });
 
   async function initialiseBoard() {
+    await Promise.all([
+      perspective.ensureSDNASubjectClass(TaskBoard),
+      perspective.ensureSDNASubjectClass(TaskColumn),
+      perspective.ensureSDNASubjectClass(Task),
+    ]);
+
     const board = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
     if (board) setBoard(board);
     else {
       // Create the default columns
-      const defaultColumns = await Promise.all(
-        ['todo', 'doing', 'done'].map(async (name) => {
-          const column = new TaskColumn(perspective, undefined, channelId);
-          column.columnName = name;
-          column.orderedTaskIds = JSON.stringify([]);
-          await column.save();
-          return column;
-        }),
-      );
+      // const defaultColumns = await Promise.all(
+      //   ['todo', 'doing', 'done'].map(async (name) => {
+      //     const column = new TaskColumn(perspective, undefined, channelId);
+      //     column.columnName = name;
+      //     column.orderedTaskIds = JSON.stringify([]);
+      //     await column.save();
+      //     return column;
+      //   }),
+      // );
+
+      // Create the default columns sequentially (temp fix because concurrent saves sometimes fail with surreal DB - awaiting next ad4m release)
+      const defaultColumns = [];
+      for (const name of ['todo', 'doing', 'done']) {
+        const column = new TaskColumn(perspective, undefined, channelId);
+        column.columnName = name;
+        column.orderedTaskIds = JSON.stringify([]);
+        await column.save();
+        defaultColumns.push(column);
+      }
 
       // Create the board with the ordered column ids
       const newBoard = new TaskBoard(perspective, undefined, channelId);
