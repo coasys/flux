@@ -43,32 +43,25 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     if (board) setBoard(board);
     else {
       // Create the default columns
-      // const defaultColumns = await Promise.all(
-      //   ['todo', 'doing', 'done'].map(async (name) => {
-      //     const column = new TaskColumn(perspective, undefined, channelId);
-      //     column.columnName = name;
-      //     column.orderedTaskIds = JSON.stringify([]);
-      //     await column.save();
-      //     return column;
-      //   }),
-      // );
-
-      // Create the default columns sequentially (temp fix because concurrent saves sometimes fail with surreal DB - awaiting next ad4m release)
-      const defaultColumns = [];
-      for (const name of ['todo', 'doing', 'done']) {
-        const column = new TaskColumn(perspective, undefined, channelId);
-        column.columnName = name;
-        column.orderedTaskIds = JSON.stringify([]);
-        await column.save();
-        defaultColumns.push(column);
-      }
+      const batchId = await perspective.createBatch();
+      const defaultColumns = await Promise.all(
+        ['todo', 'doing', 'done'].map(async (name) => {
+          const column = new TaskColumn(perspective, undefined, channelId);
+          column.columnName = name;
+          column.orderedTaskIds = JSON.stringify([]);
+          await column.save(batchId);
+          return column;
+        }),
+      );
 
       // Create the board with the ordered column ids
       const newBoard = new TaskBoard(perspective, undefined, channelId);
       newBoard.boardName = 'Kanban Board';
       newBoard.orderedColumnIds = JSON.stringify(defaultColumns.map((col) => col.baseExpression));
-      await newBoard.save();
+      await newBoard.save(batchId);
 
+      // Commit the batch and update the board state
+      await perspective.commitBatch(batchId);
       setBoard(newBoard);
     }
   }
