@@ -175,7 +175,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     try {
       membersLoading.value = true;
       const others = (await neighbourhood?.otherAgents()) || [];
-      const allMembersDids = [...others, me.value.did];
+      const allMembersDids = [...new Set([...others, me.value.did])];
       // Pre-fill members with partial profiles to speed up display
       members.value = allMembersDids.map((did) => ({ did, profileThumbnailPicture: undefined }));
       // Fetch full profiles with images
