@@ -3,7 +3,7 @@ import { useModel } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useMemo } from 'preact/hooks';
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Card from '../Card';
 import CardDetails from '../CardDetails';
@@ -38,7 +38,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
-    const profiles = await Promise.all([me.did, ...others].map(getProfile));
+    const profiles = await Promise.all([...new Set([...others, me.did])].map(getProfile));
     setAgentProfiles(profiles);
   }
 
