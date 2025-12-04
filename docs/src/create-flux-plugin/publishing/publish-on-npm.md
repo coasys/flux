@@ -9,10 +9,10 @@ This example shows how to turn a preact app into a web component using the bundl
 ```ts
 // main.ts
 
-import { toCustomElement } from "@coasys/flux-react-web";
-import App from "./App";
+import { toCustomElement } from '@coasys/flux-react-web';
+import App from './App';
 
-const CustomElement = toCustomElement(App, ["perspective", "source"], {
+const CustomElement = toCustomElement(App, ['perspective', 'source'], {
   shadow: false,
 });
 

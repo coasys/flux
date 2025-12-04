@@ -1,10 +1,10 @@
-import { useState, useEffect } from "preact/hooks";
-import { Peer } from "../../../types";
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { format, formatDistanceStrict } from "date-fns";
+import { useState, useEffect } from 'preact/hooks';
+import { Peer } from '../../../types';
+import { Profile } from '@coasys/flux-types';
+import { getProfile } from '@coasys/flux-api';
+import { format, formatDistanceStrict } from 'date-fns';
 
-import styles from "./Item.module.css";
+import styles from './Item.module.css';
 
 type Props = {
   peer: Peer;
@@ -35,18 +35,14 @@ export default function Item({ peer, index }: Props) {
     }
   }, [profile, peer.did]);
 
-  const sortedEvents = peer.connection.eventLog.sort((a, b) =>
-    b.timeStamp.localeCompare(a.timeStamp)
-  );
-  const heartBeats = sortedEvents.filter((e) => e.type === "heartbeat");
-  const lastHeartBeat = heartBeats.sort((a, b) =>
-    b.timeStamp.localeCompare(a.timeStamp)
-  )[0]?.timeStamp;
+  const sortedEvents = peer.connection.eventLog.sort((a, b) => b.timeStamp.localeCompare(a.timeStamp));
+  const heartBeats = sortedEvents.filter((e) => e.type === 'heartbeat');
+  const lastHeartBeat = heartBeats.sort((a, b) => b.timeStamp.localeCompare(a.timeStamp))[0]?.timeStamp;
 
   return (
     <div className={styles.item}>
       <j-text variant="heading">
-        Connection #{index} ({profile?.username || peer.did || "Unknown user"})
+        Connection #{index} ({profile?.username || peer.did || 'Unknown user'})
       </j-text>
       <j-text variant="footnote">{peer.did}</j-text>
 
@@ -62,14 +58,7 @@ export default function Item({ peer, index }: Props) {
           <j-text variant="label" nomargin>
             Heartbeat received:
           </j-text>
-          <span>
-            {lastHeartBeat
-              ? `${formatDistanceStrict(
-                  new Date(),
-                  new Date(lastHeartBeat)
-                )} ago`
-              : "never"}
-          </span>
+          <span>{lastHeartBeat ? `${formatDistanceStrict(new Date(), new Date(lastHeartBeat))} ago` : 'never'}</span>
         </div>
       </div>
 
@@ -84,10 +73,7 @@ export default function Item({ peer, index }: Props) {
               <j-text variant="footnote">{e.type}</j-text>
               <j-text variant="footnote">{e.value}</j-text>
             </div>
-            <j-text variant="footnote">{`${format(
-              new Date(e.timeStamp),
-              "HH:mm:ss"
-            )}`}</j-text>
+            <j-text variant="footnote">{`${format(new Date(e.timeStamp), 'HH:mm:ss')}`}</j-text>
           </li>
         ))}
       </ul>

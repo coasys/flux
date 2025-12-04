@@ -1,10 +1,10 @@
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import { useContext, useState } from "preact/hooks";
-import { useEffect } from "react";
-import { PostOption, postOptions } from "../../constants/options";
-import UIContext from "../../context/UIContext";
-import styles from "./index.module.css";
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import { useContext, useState } from 'preact/hooks';
+import { useEffect } from 'react';
+import { PostOption, postOptions } from '../../constants/options';
+import UIContext from '../../context/UIContext';
+import styles from './index.module.css';
 
 type Props = { agent: AgentClient; getProfile: (did: string) => Promise<Profile> };
 
@@ -31,7 +31,7 @@ export default function Header({ agent, getProfile }: Props) {
         <a href={myProfile?.did}>
           <j-avatar hash={myProfile?.did} src={myProfile?.profileThumbnailPicture || null} size="lg" />
         </a>
-        <j-flex a="center" gap="200" style={{ width: "100%" }}>
+        <j-flex a="center" gap="200" style={{ width: '100%' }}>
           <j-input onFocus={() => handlePostClick(PostOption.Text)} full size="lg" placeholder="Create a post" />
           <j-flex a="center" gap="200">
             {postOptions

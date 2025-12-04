@@ -68,12 +68,12 @@
 </template>
 
 <script setup lang="ts">
-import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
-import { ChevronDownIcon, ChevronUpIcon } from "@/components/icons";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { Channel } from "@coasys/flux-api";
-import { GroupingOption, MatchIndexes, SynergyGroup, SynergyMatch } from "@coasys/flux-utils";
-import { computed, onMounted, ref } from "vue";
+import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { Channel } from '@coasys/flux-api';
+import { GroupingOption, MatchIndexes, SynergyGroup, SynergyMatch } from '@coasys/flux-utils';
+import { computed, onMounted, ref } from 'vue';
 
 interface Props {
   match: SynergyMatch;
@@ -111,7 +111,7 @@ const visibleConversations = computed(() =>
       }
     }
     return true;
-  })
+  }),
 );
 
 async function getData() {
@@ -133,7 +133,7 @@ async function getData() {
 
     conversations.value = newConversations;
   } catch (e) {
-    console.error("Failed to load conversations", e);
+    console.error('Failed to load conversations', e);
   }
 }
 

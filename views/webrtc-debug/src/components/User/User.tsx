@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
-import characters from "../../sprites/characters";
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { Profile } from '@coasys/flux-types';
+import { getProfile } from '@coasys/flux-api';
+import { WebRTC } from '@coasys/flux-react-web';
+import characters from '../../sprites/characters';
 
-import Sprite from "../Sprite/Sprite";
+import Sprite from '../Sprite/Sprite';
 
-import styles from "./User.module.css";
+import styles from './User.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -16,13 +16,7 @@ type Props = {
   isLocalUser?: boolean;
 };
 
-export default function User({
-  webRTC,
-  spriteIndex,
-  userId,
-  isDrawing,
-  isLocalUser,
-}: Props) {
+export default function User({ webRTC, spriteIndex, userId, isDrawing, isLocalUser }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
 
@@ -50,7 +44,7 @@ export default function User({
     }
 
     if (videoRef.current && !isLocalUser) {
-      peer.connection.peer.on("stream", (stream) => {
+      peer.connection.peer.on('stream', (stream) => {
         videoRef.current.srcObject = stream;
       });
     }
@@ -60,7 +54,7 @@ export default function User({
     <div className={styles.wrapper} data-drawing={isDrawing}>
       <div className={styles.header}>
         <div className={styles.username}>
-          <span>{profile?.username || "Unknown user"}</span>
+          <span>{profile?.username || 'Unknown user'}</span>
         </div>
       </div>
 
@@ -70,30 +64,13 @@ export default function User({
         <div className={styles.pencil}>
           <Sprite
             hash={
-              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadbbbbbbaaaebccccccaaaadbbbbbbaaaaaaaaaaaaaaaaaaaaaaaa"
+              'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadbbbbbbaaaebccccccaaaadbbbbbbaaaaaaaaaaaaaaaaaaaaaaaa'
             }
-            palette={[
-              "fff0",
-              "fcd473",
-              "F2994A",
-              "FCE288",
-              "000",
-              "b4a4a3",
-              "fff",
-              "f0d37a",
-              "fcd684",
-              "fc9467",
-            ]}
+            palette={['fff0', 'fcd473', 'F2994A', 'FCE288', '000', 'b4a4a3', 'fff', 'f0d37a', 'fcd684', 'fc9467']}
           />
         </div>
 
-        <video
-          ref={videoRef}
-          className={styles.video}
-          id={`user-video-${userId}`}
-          autoPlay
-          playsInline
-        ></video>
+        <video ref={videoRef} className={styles.video} id={`user-video-${userId}`} autoPlay playsInline></video>
       </div>
     </div>
   );

@@ -2,22 +2,24 @@
   "name": "@coasys/flux-webrtc",
   "version": "0.11.0",
   "description": "",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "main": "./src/index.ts",
   "module": "./src/index.ts",
-  "type": "module",
   "files": [
     "dist",
     "src"
   ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
-  },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@coasys/ad4m": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
     "simple-peer": "^9.11.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

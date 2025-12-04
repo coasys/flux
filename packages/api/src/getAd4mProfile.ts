@@ -1,12 +1,8 @@
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { profile } from "@coasys/flux-constants";
-import { mapLiteralLinks } from "@coasys/flux-utils";
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { profile } from '@coasys/flux-constants';
+import { mapLiteralLinks } from '@coasys/flux-utils';
 
-const {
-  AD4M_PREDICATE_USERNAME,
-  AD4M_PREDICATE_FIRSTNAME,
-  AD4M_PREDICATE_LASTNAME,
-} = profile;
+const { AD4M_PREDICATE_USERNAME, AD4M_PREDICATE_FIRSTNAME, AD4M_PREDICATE_LASTNAME } = profile;
 
 type Ad4mProfile = {
   username: string;

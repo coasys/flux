@@ -23,16 +23,16 @@
 </template>
 
 <script setup lang="ts">
-import { useWebrtcStore } from "@/stores";
-import { AgentStatus } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { useWebrtcStore } from '@/stores';
+import { AgentStatus } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 const webrtcStore = useWebrtcStore();
 const { myAgentStatus } = storeToRefs(webrtcStore);
 
 const showAgentStatusMenu = ref(false);
-const statusStates: AgentStatus[] = ["active", "asleep", "busy", "invisible"];
+const statusStates: AgentStatus[] = ['active', 'asleep', 'busy', 'invisible'];
 
 function setAgentStatus(status: AgentStatus) {
   myAgentStatus.value = status;

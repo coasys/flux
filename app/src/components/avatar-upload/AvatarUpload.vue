@@ -38,11 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import "vue-advanced-cropper";
-import { Cropper } from "vue-advanced-cropper";
-import "vue-advanced-cropper/dist/style.css";
-import "vue-advanced-cropper/dist/theme.bubble.css";
+import { ref } from 'vue';
+import 'vue-advanced-cropper';
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
+import 'vue-advanced-cropper/dist/theme.bubble.css';
 
 interface Props {
   value?: string;
@@ -52,7 +52,7 @@ interface Props {
   icon?: string;
 }
 
-withDefaults(defineProps<Props>(), { size: "7rem", icon: "person-fill" });
+withDefaults(defineProps<Props>(), { size: '7rem', icon: 'person-fill' });
 
 const emit = defineEmits<{ change: [value: string | null] }>();
 
@@ -83,13 +83,13 @@ function removeImage(e: Event) {
   e.preventDefault();
   e.stopPropagation();
 
-  if (fileInput.value) fileInput.value.value = "";
-  emit("change", null);
+  if (fileInput.value) fileInput.value.value = '';
+  emit('change', null);
 }
 
 function clearImage() {
   if (fileInput.value) {
-    fileInput.value.value = "";
+    fileInput.value.value = '';
   }
   tempProfileImage.value = null;
 }
@@ -100,7 +100,7 @@ function selectImage() {
   const result = cropper.value.getResult();
   const data = result.canvas.toDataURL();
   tempProfileImage.value = null;
-  emit("change", data);
+  emit('change', data);
 }
 </script>
 

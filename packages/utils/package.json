@@ -2,17 +2,19 @@
   "name": "@coasys/flux-utils",
   "version": "0.11.0",
   "description": "",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "main": "./src/index.ts",
   "module": "./src/index.ts",
-  "type": "module",
   "files": [
     "dist",
     "src"
   ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
-  },
+  "keywords": [],
   "dependencies": {
     "@coasys/flux-constants": "0.11.0",
     "@coasys/flux-types": "0.11.0",
@@ -21,10 +23,10 @@
     "openai": "^4.55.5"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.11.0",
-    "@coasys/ad4m-connect": "0.11.0"
+    "@coasys/ad4m": "0.11.1",
+    "@coasys/ad4m-connect": "0.11.1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "publishConfig": {
+    "access": "public"
+  }
 }

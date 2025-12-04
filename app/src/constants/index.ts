@@ -1,47 +1,47 @@
-import { ChannelView } from "@coasys/flux-types";
+import { ChannelView } from '@coasys/flux-types';
 
 export const viewOptions = [
   {
-    title: "Chat",
-    description: "Real time message with your community members",
-    icon: "chat",
+    title: 'Chat',
+    description: 'Real time message with your community members',
+    icon: 'chat',
     type: ChannelView.Chat,
-    pkg: "@coasys/flux-chat-view",
-    component: "chat-view",
+    pkg: '@coasys/flux-chat-view',
+    component: 'chat-view',
   },
   {
-    title: "Posts",
-    description: "A feed of posts that users can publish",
-    icon: "card-heading",
+    title: 'Posts',
+    description: 'A feed of posts that users can publish',
+    icon: 'card-heading',
     type: ChannelView.Post,
-    pkg: "@coasys/flux-post-view",
-    component: "post-view",
+    pkg: '@coasys/flux-post-view',
+    component: 'post-view',
   },
   {
-    title: "Graph",
+    title: 'Graph',
     description: "A graph view of the channel's data",
-    icon: "share",
+    icon: 'share',
     type: ChannelView.Graph,
-    pkg: "@coasys/flux-graph-view",
-    component: "graph-view",
+    pkg: '@coasys/flux-graph-view',
+    component: 'graph-view',
   },
   {
-    title: "Voice",
-    description: "Audio/Video channel",
-    icon: "mic",
+    title: 'Voice',
+    description: 'Audio/Video channel',
+    icon: 'mic',
     type: ChannelView.Voice,
-    pkg: "@coasys/flux-webrtc-view",
-    component: "webrtc-view",
+    pkg: '@coasys/flux-webrtc-view',
+    component: 'webrtc-view',
   },
   {
-    title: "Debug",
-    description: "WebRTC debugger",
-    icon: "bug",
+    title: 'Debug',
+    description: 'WebRTC debugger',
+    icon: 'bug',
     type: ChannelView.Debug,
-    pkg: "@fluxapp/webrtc-debug-view",
-    component: "webrtc-debug-view",
+    pkg: '@fluxapp/webrtc-debug-view',
+    component: 'webrtc-debug-view',
   },
 ];
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =
-  "neighbourhood://QmzSYwdiQ141BcdsQYuLNDciXHN8vwoX85YJRsDSDDmTnoGYGXu";
+  "neighbourhood://QmzSYwdotF7SDksQTrgno4Tb7mzShg1PAx9uwkFdC1qCmDnKfyf";

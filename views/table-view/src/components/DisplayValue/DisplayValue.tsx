@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { isValidDate, isValidUrl } from "../../utils";
-import { Literal } from "@coasys/ad4m";
-import styles from "./DisplayValue.module.css";
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { isValidDate, isValidUrl } from '../../utils';
+import { Literal } from '@coasys/ad4m';
+import styles from './DisplayValue.module.css';
 
 type Props = {
   canEdit: boolean;
@@ -11,13 +11,7 @@ type Props = {
   onUpdate?: (value: string) => void;
 };
 
-export default function DisplayValue({
-  value,
-  options,
-  canEdit,
-  onUpdate,
-  onUrlClick = () => {},
-}: Props) {
+export default function DisplayValue({ value, options, canEdit, onUpdate, onUrlClick = () => {} }: Props) {
   const inputRef = useRef();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -28,19 +22,19 @@ export default function DisplayValue({
   }, [isEditing]);
 
   function onKeyDown(e) {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.stopPropagation();
       onUpdate(e.target.value);
       setIsEditing(false);
     }
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       e.stopPropagation();
       setIsEditing(false);
     }
   }
 
   function onBlur(e) {
-    if (e.key !== "Escape") {
+    if (e.key !== 'Escape') {
       onUpdate(e.target.value);
       setIsEditing(false);
     }
@@ -67,11 +61,7 @@ export default function DisplayValue({
 
   if (options) {
     return (
-      <select
-        className={styles.select}
-        value={value}
-        onChange={(e) => onUpdate(e.target.value)}
-      >
+      <select className={styles.select} value={value} onChange={(e) => onUpdate(e.target.value)}>
         {options.map((option) => (
           <option value={option.value}>{option.label}</option>
         ))}
@@ -94,8 +84,8 @@ export default function DisplayValue({
     );
   }
 
-  if (typeof value === "string") {
-    if (value.startsWith("did:key")) {
+  if (typeof value === 'string') {
+    if (value.startsWith('did:key')) {
       return (
         <div>
           <j-avatar size="xs" hash={value}></j-avatar>
@@ -103,13 +93,10 @@ export default function DisplayValue({
       );
     }
 
-    if (value.length > 1000)
-      return (
-        <img className={styles.img} src={`data:image/png;base64,${value}`} />
-      );
+    if (value.length > 1000) return <img className={styles.img} src={`data:image/png;base64,${value}`} />;
 
     if (isValidUrl(value)) {
-      if (value.startsWith("literal://")) {
+      if (value.startsWith('literal://')) {
         return (
           <a
             className={styles.entryUrl}
@@ -142,23 +129,15 @@ export default function DisplayValue({
       <j-flex gap="200" a="center">
         <div onDoubleClick={onStartEdit}>{value}</div>
         {onUpdate && (
-          <j-button
-            onClick={onStartEdit}
-            square
-            circle
-            size="sm"
-            variant="ghost"
-          >
-            {canEdit && (
-              <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>
-            )}
+          <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
+            {canEdit && <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>}
           </j-button>
         )}
       </j-flex>
     );
   }
 
-  if (value?.constructor?.name === "Object") {
+  if (value?.constructor?.name === 'Object') {
     return <ShowObjectInfo value={value} />;
   }
 
@@ -178,16 +157,8 @@ export default function DisplayValue({
       <j-flex gap="500" a="center">
         <div onDoubleClick={onStartEdit}>{value}</div>
         {onUpdate && (
-          <j-button
-            onClick={onStartEdit}
-            square
-            circle
-            size="sm"
-            variant="ghost"
-          >
-            {canEdit && (
-              <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>
-            )}
+          <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
+            {canEdit && <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>}
           </j-button>
         )}
       </j-flex>
@@ -213,11 +184,7 @@ function ShowObjectInfo({ value }) {
         Show
       </j-button>
       {open && (
-        <j-modal
-          open={open}
-          onClick={(e) => e.stopImmediatePropagation()}
-          onToggle={(e) => setOpen(e.target.open)}
-        >
+        <j-modal open={open} onClick={(e) => e.stopImmediatePropagation()} onToggle={(e) => setOpen(e.target.open)}>
           <j-box p="500">
             <j-flex p="500" direction="column" gap="400">
               {properties.map(([key, value]) => (

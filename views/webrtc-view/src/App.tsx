@@ -1,8 +1,8 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import Channel from "./components/Channel";
-import { UiProvider } from "./context/UiContext";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import Channel from './components/Channel';
+import { UiProvider } from './context/UiContext';
 
 type Props = {
   source: string;

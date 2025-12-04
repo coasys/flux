@@ -1,3 +1,3 @@
-import CommentSection from "./CommentSection";
+import CommentSection from './CommentSection';
 
 export default CommentSection;

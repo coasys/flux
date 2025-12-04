@@ -83,7 +83,7 @@
                       :variant="isSelected(app) && loadedPlugins[app.pkg] === 'loaded' ? '' : 'primary'"
                       @click="() => toggleView(app)"
                     >
-                      {{ isSelected(app) ? "Remove" : "Add" }}
+                      {{ isSelected(app) ? 'Remove' : 'Add' }}
                     </j-button>
                   </div>
                 </j-flex>
@@ -112,15 +112,15 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useRouteParams } from "@/composables/useRouteParams";
-import { useModalStore } from "@/stores";
-import fetchFluxApp from "@/utils/fetchFluxApp";
-import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from "@coasys/flux-api";
-import { storeToRefs } from "pinia";
-import semver from "semver";
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useRouteParams } from '@/composables/useRouteParams';
+import { useModalStore } from '@/stores';
+import fetchFluxApp from '@/utils/fetchFluxApp';
+import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
+import { storeToRefs } from 'pinia';
+import semver from 'semver';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const modalStore = useModalStore();
@@ -130,13 +130,13 @@ const { createChannelParent } = storeToRefs(modalStore);
 const { perspective } = useCommunityService();
 const { communityId } = useRouteParams();
 
-const tab = ref<"official" | "community">("official");
+const tab = ref<'official' | 'community'>('official');
 const isLoading = ref(false);
 const packages = ref<FluxApp[]>([]);
 const selectedViews = ref<string[]>([]);
-const loadedPlugins = reactive<Record<string, "loaded" | "loading" | undefined | null>>({});
-const channelName = ref("");
-const channelDescription = ref("");
+const loadedPlugins = reactive<Record<string, 'loaded' | 'loading' | undefined | null>>({});
+const channelName = ref('');
+const channelDescription = ref('');
 const isCreatingChannel = ref(false);
 
 const canSubmit = computed(() => channelName.value?.length);
@@ -145,11 +145,11 @@ const officialApps = computed(() =>
   packages.value.filter(
     // TODO: WebRTC & Synergy filtered out for now, remove plugins from codebase when fully replaced in main app?
     (p) =>
-      p.pkg.startsWith("@coasys/") && !["@coasys/flux-webrtc-view", "@coasys/flux-synergy-demo-view"].includes(p.pkg)
-  )
+      p.pkg.startsWith('@coasys/') && !['@coasys/flux-webrtc-view', '@coasys/flux-synergy-demo-view'].includes(p.pkg),
+  ),
 );
-const communityApps = computed(() => packages.value.filter((p) => !p.pkg.startsWith("@coasys/")));
-const filteredPackages = computed(() => (tab.value === "official" ? officialApps.value : communityApps.value));
+const communityApps = computed(() => packages.value.filter((p) => !p.pkg.startsWith('@coasys/')));
+const filteredPackages = computed(() => (tab.value === 'official' ? officialApps.value : communityApps.value));
 
 function isSelected(pkg: FluxApp) {
   return selectedViews.value.some((view) => view === pkg.pkg);
@@ -167,7 +167,7 @@ async function createChannel() {
 
   try {
     if (!perspective) {
-      throw new Error("Cannot create a channel because perspective is undefined.");
+      throw new Error('Cannot create a channel because perspective is undefined.');
     }
 
     const channel = new Channel(perspective, undefined, createChannelParent.value?.baseExpression || undefined);
@@ -185,14 +185,14 @@ async function createChannel() {
         appInstance.icon = app.icon;
         appInstance.pkg = app.pkg;
         await appInstance.save();
-      })
+      }),
     );
 
-    channelName.value = "";
+    channelName.value = '';
 
     if (!createChannelParent.value) {
       router.push({
-        name: "channel",
+        name: 'channel',
         params: {
           communityId: communityId.value,
           channelId: channel.baseExpression,
@@ -212,16 +212,16 @@ watch(
   async (apps: FluxApp[]) => {
     apps?.forEach(async (app) => {
       const wcName = await generateWCName(app.pkg);
-      if (customElements.get(wcName)) loadedPlugins[app.pkg] = "loaded";
+      if (customElements.get(wcName)) loadedPlugins[app.pkg] = 'loaded';
       else {
-        loadedPlugins[app.pkg] = "loading";
+        loadedPlugins[app.pkg] = 'loading';
         const module = await fetchFluxApp(app.pkg);
         if (module) customElements.define(wcName, module.default);
-        loadedPlugins[app.pkg] = "loaded";
+        loadedPlugins[app.pkg] = 'loaded';
       }
     });
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 // Initialize data on mount
@@ -230,12 +230,12 @@ onMounted(async () => {
 
   // Fetch apps from npm, use local apps if request fails
   try {
-    const res = await getAllFluxApps();
+    const allApps = await getAllFluxApps();
     isLoading.value = false;
 
-    const filtered = res.filter((pkg) => {
+    const filtered = allApps.filter((pkg) => {
       try {
-        return semver.gte(semver.coerce(pkg?.ad4mVersion || "0.0.0") || "0.0.0", "0.8.1");
+        return semver.gte(semver.coerce(pkg?.ad4mVersion || '0.0.0') || '0.0.0', '0.8.1');
       } catch (error) {
         return false;
       }
@@ -243,7 +243,7 @@ onMounted(async () => {
 
     packages.value = filtered;
   } catch (error) {
-    console.info("Flux is offline, using fallback apps");
+    console.info('Flux is offline, using fallback apps');
     const offlineApps = await getOfflineFluxApps();
     packages.value = offlineApps;
     isLoading.value = false;

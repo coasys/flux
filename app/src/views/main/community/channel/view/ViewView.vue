@@ -37,17 +37,17 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import Conversation from "@/containers/Conversation.vue";
-import Conversations from "@/containers/Conversations.vue";
-import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from "@/stores";
-import fetchFluxApp from "@/utils/fetchFluxApp";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Channel, generateWCName, joinCommunity } from "@coasys/flux-api";
-import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import Conversation from '@/containers/Conversation.vue';
+import Conversations from '@/containers/Conversations.vue';
+import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from '@/stores';
+import fetchFluxApp from '@/utils/fetchFluxApp';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Channel, generateWCName, joinCommunity } from '@coasys/flux-api';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-defineOptions({ name: "ViewView" });
+defineOptions({ name: 'ViewView' });
 interface Props {
   communityId: string;
   channelId: string;
@@ -68,23 +68,23 @@ const aiStore = useAiStore();
 const { perspective, signallingService } = useCommunityService();
 
 const loading = ref(true);
-const wcName = ref<string>("");
+const wcName = ref<string>('');
 const webrtcModalOpen = ref(false);
-const activeProfile = ref<string>("");
+const activeProfile = ref<string>('');
 const showProfile = ref(false);
 const isJoiningCommunity = ref(false);
 
 // Todo: look into this
 async function onViewClick(e: any) {
-  const parentLink = e.target.closest("a");
+  const parentLink = e.target.closest('a');
   if (parentLink) {
     const url = parentLink.href;
-    if (!url.startsWith("http")) e.preventDefault();
-    if (url.startsWith("neighbourhood://")) onNeighbourhoodClick(url);
-    if (url.startsWith("did:")) onAgentClick(url);
-    if (url.startsWith("literal://")) {
+    if (!url.startsWith('http')) e.preventDefault();
+    if (url.startsWith('neighbourhood://')) onNeighbourhoodClick(url);
+    if (url.startsWith('did:')) onAgentClick(url);
+    if (url.startsWith('literal://')) {
       const isChannel = await perspective.isSubjectInstance(url, Channel);
-      if (isChannel) router.push({ name: "channel", params: { communityId, channelId: url } });
+      if (isChannel) router.push({ name: 'channel', params: { communityId, channelId: url } });
     }
   }
 }
@@ -98,13 +98,13 @@ async function onNeighbourhoodClick(url: any) {
   const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
 
   if (!neighbourhood) joinCommunityHandler(url);
-  else router.push({ name: "community", params: { communityId: neighbourhood.uuid } });
+  else router.push({ name: 'community', params: { communityId: neighbourhood.uuid } });
 }
 
 function joinCommunityHandler(url: string) {
   isJoiningCommunity.value = true;
   joinCommunity({ joiningLink: url })
-    .then((community) => router.push({ name: "community", params: { communityId: community.uuid } }))
+    .then((community) => router.push({ name: 'community', params: { communityId: community.uuid } }))
     .finally(() => (isJoiningCommunity.value = false));
 }
 
@@ -122,14 +122,14 @@ function onHideNotificationIndicator({ detail }: any) {
 }
 
 function toggleProfile(open: boolean, did?: any): void {
-  if (!open) activeProfile.value = "";
+  if (!open) activeProfile.value = '';
   else activeProfile.value = did;
   showProfile.value = open;
 }
 
 onMounted(async () => {
   // Skip web component generation if mounting the conversation view
-  if (!["conversation", "sub-channels", "conversations"].includes(viewId as string)) {
+  if (!['conversation', 'sub-channels', 'conversations'].includes(viewId as string)) {
     const generatedName = await generateWCName(viewId as string);
 
     if (!customElements.get(generatedName)) {

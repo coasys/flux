@@ -1,42 +1,42 @@
-import { CommunityService } from "@/composables/useCommunityService";
-import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from "@/stores";
-import { AIModelLoadingStatus, AITask } from "@coasys/ad4m";
-import { Model } from "@coasys/ad4m/lib/src/ai/AIResolver";
-import { Channel } from "@coasys/flux-api";
-import { ProcessingState, SignallingService } from "@coasys/flux-types";
-import { SynergyItem } from "@coasys/flux-utils";
-import { defineStore, storeToRefs } from "pinia";
-import { computed, onUnmounted, ref, toRaw, unref, watch } from "vue";
+import { CommunityService } from '@/composables/useCommunityService';
+import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from '@/stores';
+import { AIModelLoadingStatus, AITask } from '@coasys/ad4m';
+import { Model } from '@coasys/ad4m/lib/src/ai/AIResolver';
+import { Channel } from '@coasys/flux-api';
+import { ProcessingState, SignallingService } from '@coasys/flux-types';
+import { SynergyItem } from '@coasys/flux-utils';
+import { defineStore, storeToRefs } from 'pinia';
+import { computed, onUnmounted, ref, toRaw, unref, watch } from 'vue';
 
 export const transcriptionModels = [
-  "Tiny", // The tiny model.
-  "QuantizedTiny", // The tiny model quantized to run faster.
-  "TinyEn", // The tiny model with only English support.
-  "QuantizedTinyEn", // The tiny model with only English support quantized to run faster.
-  "Base", // The base model.
-  "BaseEn", // The base model with only English support.
-  "Small", // The small model.
-  "SmallEn", // The small model with only English support.
-  "Medium", // The medium model.
-  "MediumEn", // The medium model with only English support.
-  "QuantizedDistilMediumEn", // The medium model with only English support quantized to run faster.
-  "Large", // The large model.
-  "LargeV2", // The large model v2.
-  "DistilMediumEn", // The distil-medium english model.
-  "DistilLargeV2", // The distil-large model.
-  "DistilLargeV3", // The distil-large-v3 model.
-  "QuantizedDistilLargeV3", // The quantized distil-large-v3 model.
+  'Tiny', // The tiny model.
+  'QuantizedTiny', // The tiny model quantized to run faster.
+  'TinyEn', // The tiny model with only English support.
+  'QuantizedTinyEn', // The tiny model with only English support quantized to run faster.
+  'Base', // The base model.
+  'BaseEn', // The base model with only English support.
+  'Small', // The small model.
+  'SmallEn', // The small model with only English support.
+  'Medium', // The medium model.
+  'MediumEn', // The medium model with only English support.
+  'QuantizedDistilMediumEn', // The medium model with only English support quantized to run faster.
+  'Large', // The large model.
+  'LargeV2', // The large model v2.
+  'DistilMediumEn', // The distil-medium english model.
+  'DistilLargeV2', // The distil-large model.
+  'DistilLargeV3', // The distil-large-v3 model.
+  'QuantizedDistilLargeV3', // The quantized distil-large-v3 model.
 ];
 
 export const llmProcessingSteps = [
-  "Getting conversation",
-  "Processing items",
-  "LLM Group Detection",
-  "LLM Topic Generation",
-  "LLM Conversation Updates",
-  "Generating New Groupings",
-  "Generating Vector Embeddings",
-  "Processing complete. Committing batch!",
+  'Getting conversation',
+  'Processing items',
+  'LLM Group Detection',
+  'LLM Topic Generation',
+  'LLM Conversation Updates',
+  'Generating New Groupings',
+  'Generating Vector Embeddings',
+  'Processing complete. Committing batch!',
 ];
 
 export const MIN_ITEMS_TO_PROCESS = 5;
@@ -46,7 +46,7 @@ export const PROCESSING_ITEMS_DELAY = 3;
 export type ProcessingQueueItem = { communityId: string; channel: Partial<Channel> };
 
 export const useAiStore = defineStore(
-  "aiStore",
+  'aiStore',
   () => {
     const appStore = useAppStore();
     const routeMemoryStore = useRouteMemoryStore();
@@ -66,12 +66,12 @@ export const useAiStore = defineStore(
     const whisperLoadingStatus = ref<AIModelLoadingStatus | null>(null);
     const whisperTinyLoadingStatus = ref<AIModelLoadingStatus | null>(null);
     const transcriptionEnabled = ref(true);
-    const transcriptionModel = ref("Base");
+    const transcriptionModel = ref('Base');
     const transcriptionPreviewTimeout = ref(0.4);
     const transcriptionMessageTimeout = ref(3);
     const transcriptionMaxChars = ref(1000);
 
-    const aiEnabled = computed(() => Boolean(defaultLLM.value && llmLoadingStatus.value?.status === "Ready"));
+    const aiEnabled = computed(() => Boolean(defaultLLM.value && llmLoadingStatus.value?.status === 'Ready'));
 
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
@@ -101,21 +101,21 @@ export const useAiStore = defineStore(
       try {
         allModels.value = await ad4mClient.value.ai.getModels();
         allTasks.value = await ad4mClient.value.ai.tasks();
-        defaultLLM.value = await ad4mClient.value.ai.getDefaultModel("LLM");
+        defaultLLM.value = await ad4mClient.value.ai.getDefaultModel('LLM');
 
         // Get model statuses
-        const llm = allModels.value.find((model) => model.modelType === "LLM");
+        const llm = allModels.value.find((model) => model.modelType === 'LLM');
         if (llm) llmLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(llm.id);
 
-        const whisper = allModels.value.find((model) => model.name === "Whisper");
+        const whisper = allModels.value.find((model) => model.name === 'Whisper');
         if (whisper) whisperLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisper.id);
 
-        const whisperTiny = allModels.value.find((model) => model.name === "Whisper tiny quantized");
+        const whisperTiny = allModels.value.find((model) => model.name === 'Whisper tiny quantized');
         if (whisperTiny) whisperTinyLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisperTiny.id);
 
         loadingAIData.value = false;
       } catch (error) {
-        console.error("Failed to load AI data:", error);
+        console.error('Failed to load AI data:', error);
         loadingAIData.value = false;
       }
     }
@@ -123,7 +123,7 @@ export const useAiStore = defineStore(
     function checkItemsForResponsibility(
       signallingService: SignallingService,
       items: SynergyItem[],
-      increment = 0
+      increment = 0,
     ): boolean {
       // Find the nth item
       const nthItem = items[increment];
@@ -164,7 +164,7 @@ export const useAiStore = defineStore(
           const unprocessedItems = await toRaw(conversationData.channel).unprocessedItems!();
           const shouldProcess = await checkIfWeShouldProcessTask(unprocessedItems, communityService.signallingService);
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
-        })
+        }),
       );
 
       addTasksToProcessingQueue(tasks.filter((task) => task !== null));
@@ -177,8 +177,8 @@ export const useAiStore = defineStore(
           !processingQueue.value.some(
             (t) =>
               t.communityId === task.communityId &&
-              toRaw(t.channel).baseExpression === toRaw(task.channel).baseExpression
-          )
+              toRaw(t.channel).baseExpression === toRaw(task.channel).baseExpression,
+          ),
       );
 
       processingQueue.value.push(...filteredTasks);
@@ -192,7 +192,7 @@ export const useAiStore = defineStore(
       // Mark processing true to prevent concurrent processing
       processing.value = true;
 
-      console.log("🤖 LLM processing started");
+      console.log('🤖 LLM processing started');
 
       let communityService: CommunityService | undefined = undefined;
 
@@ -222,7 +222,7 @@ export const useAiStore = defineStore(
         const parentChannel = communityService?.getParentChannel(rawChannel.baseExpression!);
 
         if (!communityService || !conversation) {
-          console.error("Missing community service or conversation");
+          console.error('Missing community service or conversation');
           processingQueue.value.shift();
           return;
         }
@@ -259,9 +259,9 @@ export const useAiStore = defineStore(
         // Remove the processed task from the queue
         processingQueue.value.shift();
 
-        console.log("🤖 LLM processing completed", processingQueue.value);
+        console.log('🤖 LLM processing completed', processingQueue.value);
       } catch (error) {
-        console.error("🤖 LLM processing failed:", error);
+        console.error('🤖 LLM processing failed:', error);
         // Remove the failed task from the queue to prevent getting stuck
         processingQueue.value.shift();
       } finally {
@@ -291,10 +291,10 @@ export const useAiStore = defineStore(
         if (!id) return;
         const status = await ad4mClient.value.ai.modelLoadingStatus(id);
         llmLoadingStatus.value = status;
-        if (status?.status?.toLowerCase() === "ready") stopLlmStatusPolling();
+        if (status?.status?.toLowerCase() === 'ready') stopLlmStatusPolling();
       } catch (err) {
         // Keep UI stable; log and continue polling on next tick
-        console.warn("LLM status poll failed:", err);
+        console.warn('LLM status poll failed:', err);
       }
     }
 
@@ -326,7 +326,7 @@ export const useAiStore = defineStore(
       (newClient) => {
         if (newClient) loadAIData();
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     // Watch for route changes & reload AI data when navigating to a new conversation
@@ -337,9 +337,9 @@ export const useAiStore = defineStore(
           newRoute.communityId !== oldRoute?.communityId ||
           newRoute.channelId !== oldRoute?.channelId ||
           newRoute.viewId !== oldRoute?.viewId;
-        if (isNewRoute && newRoute.viewId === "conversation") loadAIData();
+        if (isNewRoute && newRoute.viewId === 'conversation') loadAIData();
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     return {
@@ -369,5 +369,5 @@ export const useAiStore = defineStore(
       checkIfWeShouldProcessTask,
     };
   },
-  { persist: { omit: ["processingQueue", "processingState"] } }
+  { persist: { omit: ['processingQueue', 'processingState'] } },
 );

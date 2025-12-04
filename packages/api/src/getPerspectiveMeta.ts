@@ -1,5 +1,5 @@
-import { findLink, getMetaFromLinks, keyedLanguages } from "@coasys/flux-utils";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { findLink, getMetaFromLinks, keyedLanguages } from '@coasys/flux-utils';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 export default async function getPerspectiveMeta(uuid: string) {
   const client = await getAd4mClient();
@@ -7,7 +7,7 @@ export default async function getPerspectiveMeta(uuid: string) {
   const perspective = await client.perspective.byUUID(uuid);
 
   if (!perspective || !perspective.neighbourhood) {
-    throw new Error("Could not load meta data from perspective");
+    throw new Error('Could not load meta data from perspective');
   }
 
   const neighbourhood = perspective.neighbourhood.data;
@@ -20,7 +20,7 @@ export default async function getPerspectiveMeta(uuid: string) {
     name: links.find(findLink.name).data.target,
     description: links.find(findLink.description)?.data?.target,
     languages: keyedLanguages(langs),
-    url: perspective?.sharedUrl || "",
+    url: perspective?.sharedUrl || '',
     dateCreated: links.find(findLink.dateCreated).data.target,
     sourceUrl: perspective?.sharedUrl,
   };

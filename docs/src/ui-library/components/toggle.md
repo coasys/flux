@@ -15,8 +15,8 @@ Toggle component is used to enable users to switch between two states.
 ```html [html]
 <j-toggle>Checked</j-toggle>
 <script>
-  const toggle = document.querySelector("j-toggle");
-  toggle.addEventListener("change", (e) => {
+  const toggle = document.querySelector('j-toggle');
+  toggle.addEventListener('change', (e) => {
     console.log(e.target.checked);
   });
 </script>
@@ -26,25 +26,17 @@ Toggle component is used to enable users to switch between two states.
 export default function Toggle() {
   const [checked, setChecked] = useState(false);
 
-  return (
-    <j-toggle
-      checked={checked}
-      onChange={(e) => setChecked(e.target.checked)}
-    ></j-toggle>
-  );
+  return <j-toggle checked={checked} onChange={(e) => setChecked(e.target.checked)}></j-toggle>;
 }
 ```
 
 ```vue [vue]
 <template>
-  <j-toggle
-    :checked="checked"
-    @change="(e) => (checked = e.target.checked)"
-  ></j-toggle>
+  <j-toggle :checked="checked" @change="(e) => (checked = e.target.checked)"></j-toggle>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 const checked = ref(false);
 </script>
 ```
@@ -114,8 +106,8 @@ Use the value property to set the value of the toggle. This value will be used w
 The change event is fired when the toggle is clicked and its state changes. You can add an event listener to the toggle element to handle this event, like so:
 
 ```js
-const toggle = document.querySelector("j-toggle");
-toggle.addEventListener("change", () => {
+const toggle = document.querySelector('j-toggle');
+toggle.addEventListener('change', () => {
   // Do something when the toggle state changes
 });
 ```

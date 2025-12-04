@@ -101,8 +101,8 @@ Use the `open` property to specify the wether the popover is shown or not.
 The toggle event is fired when the popover is toggled. You can add an event listener to the popover element to handle this event, like so:
 
 ```js
-const popover = document.querySelector("j-popover");
-popover.addEventListener("toggle", () => {
+const popover = document.querySelector('j-popover');
+popover.addEventListener('toggle', () => {
   // Do something when the popover is displayed
 });
 ```

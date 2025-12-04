@@ -1,20 +1,22 @@
 {
   "name": "@coasys/create-flux-plugin",
   "version": "0.11.0",
-  "main": "index.js",
+  "description": "",
+  "author": "",
+  "license": "ISC",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-package": "npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
     "create-flux-app": "index.js"
   },
+  "main": "index.js",
+  "keywords": [],
   "dependencies": {
     "prompts": "^2.4.2"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  "publishConfig": {
+    "access": "public"
+  }
 }

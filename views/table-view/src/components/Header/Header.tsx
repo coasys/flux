@@ -1,8 +1,8 @@
-import { useState, useEffect } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@coasys/ad4m";
-import { getEntry } from "../../utils";
-import DisplayValue from "../DisplayValue";
-import styles from "./Header.module.css";
+import { useState, useEffect } from 'preact/hooks';
+import { PerspectiveProxy, Literal } from '@coasys/ad4m';
+import { getEntry } from '../../utils';
+import DisplayValue from '../DisplayValue';
+import styles from './Header.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -10,11 +10,7 @@ type Props = {
   onUrlClick?: Function;
 };
 
-export default function Header({
-  perspective,
-  source,
-  onUrlClick = () => {},
-}: Props) {
+export default function Header({ perspective, source, onUrlClick = () => {} }: Props) {
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
   const [proxy, setProxy] = useState();
@@ -25,9 +21,7 @@ export default function Header({
   }, [source, perspective.uuid]);
 
   async function fetchSourceClasses(source) {
-    const classResults = await perspective.infer(
-      `subject_class(ClassName, C), instance(C, "${source}").`
-    );
+    const classResults = await perspective.infer(`subject_class(ClassName, C), instance(C, "${source}").`);
 
     if (classResults?.length > 0) {
       setClasses(classResults.map((c) => c.ClassName));
@@ -53,15 +47,10 @@ export default function Header({
   }
 
   if (entry) {
-    const properties = Object.entries(entry).filter(
-      ([key, value]) => !(key === "id" || key === "type")
-    );
+    const properties = Object.entries(entry).filter(([key, value]) => !(key === 'id' || key === 'type'));
 
     const defaultName =
-      entry?.name ||
-      entry?.title ||
-      (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
-      source;
+      entry?.name || entry?.title || (source?.startsWith('literal://') && Literal.fromUrl(source).get()) || source;
 
     return (
       <j-box pt="500">
@@ -76,12 +65,7 @@ export default function Header({
               {defaultName}
             </j-text>
           </div>
-          <j-button
-            square
-            size="sm"
-            variant="ghost"
-            onclick={() => onUrlClick(entry.id, false)}
-          >
+          <j-button square size="sm" variant="ghost" onclick={() => onUrlClick(entry.id, false)}>
             <j-icon color="white" size="xs" name="arrows-angle-expand"></j-icon>
           </j-button>
         </j-flex>

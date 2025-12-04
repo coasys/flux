@@ -24,12 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Profile } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useAppStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Profile } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 // TODO: need to hook this up
 
@@ -40,24 +40,24 @@ const appStore = useAppStore();
 
 const { me } = storeToRefs(appStore);
 
-const activeProfile = ref("");
+const activeProfile = ref('');
 const showProfile = ref(false);
 const profile = ref<Profile>();
 
 function toggleProfile(open: boolean, did?: string): void {
   if (!open) {
-    activeProfile.value = "";
+    activeProfile.value = '';
     profile.value = undefined;
   } else {
-    activeProfile.value = did || "";
+    activeProfile.value = did || '';
   }
   showProfile.value = open;
 }
 
 async function handleProfileClick(did: string) {
   activeProfile.value = did;
-  if (did === me.value.did) router.push({ name: "home", params: { did } });
-  else router.push({ name: "profile", params: { did, communityId: route.params.communityId } });
+  if (did === me.value.did) router.push({ name: 'home', params: { did } });
+  else router.push({ name: 'profile', params: { did, communityId: route.params.communityId } });
 }
 
 // Watch for DID changes and load profile
@@ -66,7 +66,7 @@ watch(
   async (newDid, oldDid) => {
     if (newDid !== oldDid && newDid) profile.value = await getCachedAgentProfile(newDid);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

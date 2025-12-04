@@ -67,14 +67,14 @@
 </template>
 
 <script setup lang="ts">
-import TimelineBlock from "@/components/conversation/timeline/TimelineBlock.vue";
-import { ChevronDownIcon } from "@/components/icons";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useModel } from "@coasys/ad4m-vue-hooks";
-import { Channel, Conversation } from "@coasys/flux-api";
-import { SynergyGroup } from "@coasys/flux-utils";
-import { ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
+import { ChevronDownIcon } from '@/components/icons';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useModel } from '@coasys/ad4m-vue-hooks';
+import { Channel, Conversation } from '@coasys/flux-api';
+import { SynergyGroup } from '@coasys/flux-utils';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 interface Props {
   parentChannel: Channel;
@@ -97,8 +97,8 @@ const numberOfConversationsDisplayed = ref(5);
 
 function navigateToConversation(channelId: string) {
   router.push({
-    name: "view",
-    params: { communityId: route.params.communityId, channelId, viewId: "conversation" },
+    name: 'view',
+    params: { communityId: route.params.communityId, channelId, viewId: 'conversation' },
   });
 }
 
@@ -118,16 +118,16 @@ watch(
               timestamp: conversation.timestamp,
               channelId: channel.baseExpression,
             };
-          })
+          }),
         )
       ).filter(Boolean) as (SynergyGroup & { channelId: string })[];
 
       conversations.value = newConversations;
     } catch (error) {
-      console.error("Failed to load conversations:", error);
+      console.error('Failed to load conversations:', error);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

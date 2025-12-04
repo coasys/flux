@@ -1,2 +1,2 @@
-import Timestamp from "./Timestamp";
+import Timestamp from './Timestamp';
 export default Timestamp;

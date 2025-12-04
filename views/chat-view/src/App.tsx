@@ -1,8 +1,8 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import styles from "./App.module.css";
-import ChatView from "./components/ChatView/ChatView";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import styles from './App.module.css';
+import ChatView from './components/ChatView/ChatView';
 
 type Props = {
   agent: AgentClient;

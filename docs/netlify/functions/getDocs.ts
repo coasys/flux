@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
 function getAllMarkdownFiles(dirPath, fileArr?) {
   const files = fs.readdirSync(dirPath);
@@ -14,13 +14,13 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
 
     if (stat.isDirectory()) {
       fileArr = getAllMarkdownFiles(filePath, fileArr);
-    } else if (path.extname(filePath).toLowerCase() === ".md") {
-      const fileContent = fs.readFileSync(filePath, "utf8");
+    } else if (path.extname(filePath).toLowerCase() === '.md') {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
       //Get the filename
       const parts = filePath.split('/');
       const filename = parts[parts.length - 1];
 
-      fileArr.push("DOCUMENT: " + filename + " " + fileContent);
+      fileArr.push('DOCUMENT: ' + filename + ' ' + fileContent);
     }
   });
 
@@ -28,15 +28,15 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
 }
 
 const handler: any = async (event, context) => {
-  const allMarkdownFiles = getAllMarkdownFiles("./");
-  const output = allMarkdownFiles.join("");
+  const allMarkdownFiles = getAllMarkdownFiles('./');
+  const output = allMarkdownFiles.join('');
 
   return {
     statusCode: 200,
     body: JSON.stringify(output),
     headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+      'Access-Control-Allow-Origin': '*',
+    },
   };
 };
 

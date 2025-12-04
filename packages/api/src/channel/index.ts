@@ -1,12 +1,12 @@
-import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from "@coasys/ad4m";
-import { community } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import { SynergyGroup, SynergyItem, icons } from "@coasys/flux-utils";
-import App from "../app";
+import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { community } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
+import App from '../app';
 
 const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
 
-@ModelOptions({ name: "Channel" })
+@ModelOptions({ name: 'Channel' })
 export class Channel extends Ad4mModel {
   @Flag({
     through: ENTRY_TYPE,
@@ -17,33 +17,33 @@ export class Channel extends Ad4mModel {
   @Property({
     through: CHANNEL_NAME,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   name: string;
 
   @Optional({
     through: CHANNEL_DESCRIPTION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   description: string;
 
   @Optional({
     through: CHANNEL_IS_CONVERSATION,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   isConversation: boolean;
 
   @Optional({
     through: CHANNEL_IS_PINNED,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   isPinned: boolean;
 
   @Collection({
-    through: "ad4m://has_child",
+    through: 'ad4m://has_child',
     where: { isInstance: App },
   })
   views: string[] = [];
@@ -139,11 +139,11 @@ export class Channel extends Ad4mModel {
           timestamp: new Date(item.timestamp).toISOString(),
           text,
           type,
-          icon: icons[type] ? icons[type] : "question",
+          icon: icons[type] ? icons[type] : 'question',
         };
       });
     } catch (error) {
-      console.error("Error getting channel items:", error);
+      console.error('Error getting channel items:', error);
       return [];
     }
   }
@@ -189,11 +189,9 @@ export class Channel extends Ad4mModel {
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
       const countValue = surrealResult[0]?.count;
-      return typeof countValue === 'object' && countValue?.Int !== undefined
-        ? countValue.Int
-        : (countValue ?? 0);
+      return typeof countValue === 'object' && countValue?.Int !== undefined ? countValue.Int : (countValue ?? 0);
     } catch (error) {
-      console.error("Error getting total item count:", error);
+      console.error('Error getting total item count:', error);
       return 0;
     }
   }
@@ -243,7 +241,7 @@ export class Channel extends Ad4mModel {
       // Deduplicate authors
       return [...new Set(surrealResult || [])];
     } catch (error) {
-      console.error("Error getting channel authors:", error);
+      console.error('Error getting channel authors:', error);
       return [];
     }
   }
@@ -256,14 +254,14 @@ export class Channel extends Ad4mModel {
       //     % 1. Identify all conversations in the channel
       //     subject_class("Conversation", CC),
       //     instance(CC, Conversation),
-          
+
       //     % 2. Get timestamp from link
       //     link("${this.baseExpression}", "ad4m://has_child", Conversation, Timestamp, _),
-    
+
       //     % 3. Retrieve conversation properties
       //     property_getter(CC, Conversation, "conversationName", ConversationName),
       //     property_getter(CC, Conversation, "summary", Summary),
-    
+
       //     % 4. Build a single structure for each conversation
       //     ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
       //   ), Conversations).
@@ -292,7 +290,7 @@ export class Channel extends Ad4mModel {
         timestamp: new Date(conv.timestamp).toISOString(),
       }));
     } catch (error) {
-      console.error("Error getting channel conversations:", error);
+      console.error('Error getting channel conversations:', error);
       return [];
     }
   }

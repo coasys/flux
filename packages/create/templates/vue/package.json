@@ -1,19 +1,16 @@
 {
   "name": "my-first-vue-flux-plugin",
-  "version": "0.0.1",
-  "fluxplugin": {
-    "name": "Todos",
-    "description": "Work on a collaborative todo list",
-    "icon": "list-check"
-  },
-  "keywords": [
-    "flux-plugin",
-    "ad4m-view"
-  ],
+  "version": "0.11.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "main": "./dist/main.umd.cjs",
   "module": "./dist/main.js",
   "exports": {
@@ -22,18 +19,16 @@
       "require": "./dist/main.umd.cjs"
     }
   },
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
   "dependencies": {
-    "@coasys/ad4m": "0.11.0",
-    "@coasys/ad4m-vue-hooks": "0.11.0",
+    "@coasys/ad4m": "0.11.1",
+    "@coasys/ad4m-vue-hooks": "0.11.1",
     "@coasys/flux-api": "0.11.0",
     "vue": "^3.5.12"
   },
@@ -44,5 +39,10 @@
     "@vitejs/plugin-vue": "^5.1.4",
     "vite": "^5.4.10",
     "vite-plugin-css-injected-by-js": "^3.5.2"
+  },
+  "fluxplugin": {
+    "name": "Todos",
+    "description": "Work on a collaborative todo list",
+    "icon": "list-check"
   }
 }

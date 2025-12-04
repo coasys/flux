@@ -1,7 +1,7 @@
-import { useAiStore, useAppStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from "@coasys/ad4m";
-import { useModel } from "@coasys/ad4m-vue-hooks";
+import { useAiStore, useAppStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
+import { useModel } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
@@ -13,13 +13,12 @@ import {
   Message,
   SemanticRelationship,
   Topic,
-} from "@coasys/flux-api";
-import { AgentData, Profile, SignallingService } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { HEARTBEAT_INTERVAL, useSignallingService } from "./useSignallingService";
-import { fetchImageData } from "@/utils/helperFunctions";
+} from '@coasys/flux-api';
+import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { HEARTBEAT_INTERVAL, useSignallingService } from './useSignallingService';
 
 export interface ChannelData {
   channel: Partial<Channel>;
@@ -67,13 +66,13 @@ export interface CommunityService {
   moveConversation: (
     conversationChannelId: string,
     newSpaceChannelId: string,
-    conversationName?: string
+    conversationName?: string,
   ) => Promise<void>;
   getParentChannel: (channelId: string) => Partial<Channel> | undefined;
   getConversation: (channelId: string) => Partial<Conversation> | undefined;
 }
 
-const DEFAULT_CHAT_APP_PKG = "@coasys/flux-chat-view";
+const DEFAULT_CHAT_APP_PKG = '@coasys/flux-chat-view';
 
 export async function createCommunityService(): Promise<CommunityService> {
   const route = useRoute();
@@ -85,7 +84,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   // Get the perspective and neighbourhood proxies
   const perspective = (await appStore.ad4mClient.perspective.byUUID(
-    route.params.communityId as string
+    route.params.communityId as string,
   )) as PerspectiveProxy;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
@@ -161,7 +160,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       .filter((channel) => channel.isPinned)
       .map((channel) => `${channel.baseExpression}:${channel.name}`)
       .sort()
-      .join(",")
+      .join(','),
   );
 
   const conversationChannelsSignature = computed(() =>
@@ -169,7 +168,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       .filter((channel) => channel.isConversation)
       .map((channel) => `${channel.baseExpression}:${channel.name}`)
       .sort()
-      .join(",")
+      .join(','),
   );
 
   async function getMembers() {
@@ -183,7 +182,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
       membersLoading.value = false;
     } catch (error) {
-      console.error("Error loading community members:", error);
+      console.error('Error loading community members:', error);
       membersLoading.value = false;
     }
   }
@@ -201,10 +200,10 @@ export async function createCommunityService(): Promise<CommunityService> {
           const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
           const allAuthors = await toRaw(channel).allAuthors();
           return { conversation, channel, allAuthors };
-        })
+        }),
       );
     } catch (error) {
-      console.error("Error loading pinned conversations:", error);
+      console.error('Error loading pinned conversations:', error);
       pinnedConversations.value = [];
     } finally {
       pinnedConversationsLoading.value = false;
@@ -232,10 +231,10 @@ export async function createCommunityService(): Promise<CommunityService> {
           const allAuthors = await channelRaw.allAuthors();
           if (unprocessedItems.length) {
             const lastUnprocessedItem = unprocessedItems.sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
             )[0];
             lastActivity = lastUnprocessedItem.timestamp;
-          } else if (conversation.summary === "Content will appear when the first items have been processed...") {
+          } else if (conversation.summary === 'Content will appear when the first items have been processed...') {
             // If the conversation is an empty placeholder use the conversations timestamp
             lastActivity = conversation.timestamp;
           } else {
@@ -250,7 +249,7 @@ export async function createCommunityService(): Promise<CommunityService> {
               else {
                 // Finally, use the timestamp of the last item in the last subgroup
                 const lastItem = items.sort(
-                  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
                 )[0];
                 lastActivity = lastItem.timestamp;
               }
@@ -258,7 +257,7 @@ export async function createCommunityService(): Promise<CommunityService> {
           }
 
           return { conversation, channel, lastActivity, allAuthors };
-        })
+        }),
       );
 
       // Sort conversations by last activity timestamp
@@ -268,7 +267,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       recentConversations.value = conversationsSortedByLastActivity;
     } catch (error) {
-      console.error("Error loading recent conversations:", error);
+      console.error('Error loading recent conversations:', error);
       recentConversations.value = [];
     } finally {
       recentConversationsLoading.value = false;
@@ -305,14 +304,14 @@ export async function createCommunityService(): Promise<CommunityService> {
                 conversation,
                 allAuthors,
               };
-            })
+            }),
           );
 
           return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
-        })
+        }),
       );
     } catch (error) {
-      console.error("Error loading channels with conversations:", error);
+      console.error('Error loading channels with conversations:', error);
       channelsWithConversations.value = [];
     } finally {
       channelsWithConversationsLoading.value = false;
@@ -325,16 +324,16 @@ export async function createCommunityService(): Promise<CommunityService> {
     try {
       // Create the channel
       const channel = new Channel(perspective, undefined, parentChannelId);
-      channel.name = "";
-      channel.description = "";
+      channel.name = '';
+      channel.description = '';
       channel.isConversation = true;
       channel.isPinned = false;
       await channel.save();
 
       // Create the first placeholder conversation
       const conversation = new Conversation(perspective, undefined, channel.baseExpression);
-      conversation.conversationName = "New conversation";
-      conversation.summary = "Content will appear when the first items have been processed...";
+      conversation.conversationName = 'New conversation';
+      conversation.summary = 'Content will appear when the first items have been processed...';
       await conversation.save();
 
       // Attach the chat app
@@ -356,10 +355,10 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
-      router.push({ name: "view", params: { communityId, channelId: channel.baseExpression, viewId: "conversation" } });
+      router.push({ name: 'view', params: { communityId, channelId: channel.baseExpression, viewId: 'conversation' } });
     } catch (error) {
-      console.error("Failed to create new conversation:", error);
-      appStore.showDangerToast({ message: "Failed to create conversation" });
+      console.error('Failed to create new conversation:', error);
+      appStore.showDangerToast({ message: 'Failed to create conversation' });
       throw error;
     } finally {
       newConversationLoading.value = false;
@@ -371,12 +370,12 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       console.log(
-        `➡️ Moving conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`
+        `➡️ Moving conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
       );
 
       // Get the link from the conversation channel to its current parent
       const existingLinks = await perspective.get(
-        new LinkQuery({ predicate: "ad4m://has_child", target: conversationChannelId })
+        new LinkQuery({ predicate: 'ad4m://has_child', target: conversationChannelId }),
       );
       const link = existingLinks[0];
       if (!link) {
@@ -393,14 +392,14 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Update the link to point to the new parent channel
       await perspective.update(link, {
         source: newSpaceChannelId,
-        predicate: "ad4m://has_child",
+        predicate: 'ad4m://has_child',
         target: conversationChannelId,
       });
 
       // Display success message
       appStore.showSuccessToast({
         message:
-          newSpaceChannelId === "ad4m://self"
+          newSpaceChannelId === 'ad4m://self'
             ? `Successfully removed conversation "${conversationName || conversationChannelId}" from channel`
             : `Successfully moved conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
       });
@@ -408,11 +407,11 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Refresh the channels list
       getChannelsWithConversations();
     } catch (error) {
-      console.error("Failed to move conversation:", error);
+      console.error('Failed to move conversation:', error);
       // Display error message
       appStore.showDangerToast({
         message:
-          newSpaceChannelId === "ad4m://self"
+          newSpaceChannelId === 'ad4m://self'
             ? `Failed to remove conversation "${conversationName || conversationChannelId}" from channel`
             : `Failed to move conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
       });
@@ -424,7 +423,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   function getParentChannel(channelId: string): Partial<Channel> | undefined {
     const parentChannelData = channelsWithConversations.value.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelId)
+      c.children?.some((child) => child.channel.baseExpression === channelId),
     );
     return parentChannelData ? parentChannelData.channel : undefined;
   }
@@ -459,20 +458,6 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   });
 
-  // Fetch and update community images from image URIs
-  watch(community, async (newCommunity) => {
-    if (!newCommunity) return;
-    // Store image URIs
-    const imageUri = newCommunity.image as string;
-    const thumbnailUri = newCommunity.thumbnail as string;
-    // Clear existing images to avoid displaying broken images during fetch
-    newCommunity.image = "";
-    newCommunity.thumbnail = "";
-    // Fetch and update images
-    newCommunity.image = await fetchImageData(perspective, imageUri);
-    newCommunity.thumbnail = await fetchImageData(perspective, thumbnailUri);
-  }, { immediate: true });
-
   return {
     perspective,
     neighbourhood,
@@ -505,11 +490,11 @@ export async function createCommunityService(): Promise<CommunityService> {
   };
 }
 
-export const CommunityServiceKey: InjectionKey<Awaited<CommunityService>> = Symbol("FluxCommunityService");
+export const CommunityServiceKey: InjectionKey<Awaited<CommunityService>> = Symbol('FluxCommunityService');
 
 export function useCommunityService() {
   const service = inject(CommunityServiceKey);
   if (!service)
-    throw new Error("Unable to inject service. Make sure your component is a child of the CommunityView component.");
+    throw new Error('Unable to inject service. Make sure your component is a child of the CommunityView component.');
   return service;
 }

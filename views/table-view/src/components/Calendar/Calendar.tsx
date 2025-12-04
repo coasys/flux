@@ -1,6 +1,6 @@
-import styles from "./Calendar.module.css";
-import DisplayValue from "../DisplayValue";
-import { useMemo, useState } from "preact/hooks";
+import styles from './Calendar.module.css';
+import DisplayValue from '../DisplayValue';
+import { useMemo, useState } from 'preact/hooks';
 
 type Props = {
   entries: any[];
@@ -16,8 +16,8 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
   }, [month, year]);
 
   const monthName = useMemo(() => {
-    return new Date(year, month + 1, 0).toLocaleString("default", {
-      month: "long",
+    return new Date(year, month + 1, 0).toLocaleString('default', {
+      month: 'long',
     });
   }, [month, year]);
 
@@ -32,20 +32,10 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
       <j-box pb="500">
         <j-flex a="center" j="between" gap="200">
           <j-flex gap="200" a="center">
-            <j-button
-              onClick={() => setMonth((month - 1) % 12)}
-              size="sm"
-              variant="ghost"
-              square
-            >
+            <j-button onClick={() => setMonth((month - 1) % 12)} size="sm" variant="ghost" square>
               <j-icon size="sm" name="chevron-left"></j-icon>
             </j-button>
-            <j-button
-              onClick={() => setMonth((month + 1) % 12)}
-              size="sm"
-              square
-              variant="ghost"
-            >
+            <j-button onClick={() => setMonth((month + 1) % 12)} size="sm" square variant="ghost">
               <j-icon size="sm" name="chevron-right"></j-icon>
             </j-button>
             <j-text nomargin size="600" weight="600" color="ui-500">
@@ -57,7 +47,7 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
             <j-text variant="label" nomargin>
               Sort by
             </j-text>
-            <select value={"createdAt"} className={styles.select}>
+            <select value={'createdAt'} className={styles.select}>
               <option disabled selected>
                 Select property
               </option>
@@ -72,7 +62,7 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
             (e) =>
               new Date(e.timestamp).getDate() === i + 1 &&
               new Date(e.timestamp).getMonth() === month &&
-              new Date(e.timestamp).getFullYear() === year
+              new Date(e.timestamp).getFullYear() === year,
           );
 
           return (
@@ -81,10 +71,7 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
               <j-flex direction="column" gap="200">
                 {entriesInDay.map((entry) => {
                   return (
-                    <div
-                      onClick={() => onEntryClick(entry.id)}
-                      className={styles.entry}
-                    >
+                    <div onClick={() => onEntryClick(entry.id)} className={styles.entry}>
                       {entry.title || entry.name || entry.id}
                     </div>
                   );

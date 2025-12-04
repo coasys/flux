@@ -6,5 +6,5 @@
 //   }
 // }
 
-declare module "howler";
-declare module "*.wav";
+declare module 'howler';
+declare module '*.wav';
