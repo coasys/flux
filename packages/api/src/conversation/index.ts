@@ -254,12 +254,14 @@ export default class Conversation extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS baseExpression,
+          timestamp,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
         FROM link
         WHERE in.uri = '${this.baseExpression}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+        ORDER BY timestamp ASC
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
