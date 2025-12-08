@@ -163,7 +163,11 @@ export default function TaskSettings({
           {/* Name */}
           <j-flex a="center" gap="400">
             <j-text nomargin>Name</j-text>
-            <j-input value={taskName} onInput={(e) => setTaskName((e.target as HTMLTextAreaElement).value)} />
+            <j-input
+              className={styles.nameInput}
+              value={taskName}
+              onInput={(e) => setTaskName((e.target as HTMLTextAreaElement).value)}
+            />
           </j-flex>
 
           {/* Status */}

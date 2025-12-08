@@ -69,7 +69,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
-    const agentDids = [me.did, ...others];
+    const agentDids = [...new Set([...others, me.did])];
     // Set minimal profiles while loading full ones
     setAgentProfiles(agentDids.map((did) => ({ did }) as Profile));
     const profiles = await Promise.all(agentDids.map(getProfile));

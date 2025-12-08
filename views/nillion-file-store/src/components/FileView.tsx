@@ -142,7 +142,7 @@ export function FileView({ perspective, source, agent }: Props) {
         if (neighbourhood) {
           const others = await neighbourhood?.otherAgents();
           console.log('Got others:', others);
-          setOtherAgents([...others, me.did]);
+          setOtherAgents([...new Set([...others, me.did])]);
         }
       }
     };

@@ -331,7 +331,7 @@ export default class MyElement extends LitElement {
       const me = await this.agent.me();
       const neighbourhood = this.perspective.getNeighbourhoodProxy();
       const othersDids = await neighbourhood.otherAgents();
-      const profilePromises = [...othersDids, me.did].map(async (did) => getProfile(did));
+      const profilePromises = [...new Set([...othersDids, me.did])].map(async (did) => getProfile(did));
       const newProfiles = await Promise.all(profilePromises);
       this.members = newProfiles;
     }
