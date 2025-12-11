@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { getCache, setCache, subscribe, unsubscribe } from "./cache";
-import { Agent, AgentStatus } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { mapLiteralLinks } from "@coasys/flux-utils";
-import { profile as profileConstants } from "@coasys/flux-constants";
-import { Profile } from "@coasys/flux-types";
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { getCache, setCache, subscribe, unsubscribe } from './cache';
+import { Agent, AgentStatus } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { mapLiteralLinks } from '@coasys/flux-utils';
+import { profile as profileConstants } from '@coasys/flux-constants';
+import { Profile } from '@coasys/flux-types';
 
 const {
   FLUX_PROFILE,
@@ -40,10 +40,7 @@ export function useMe(agent: AgentClient | undefined): MyInfo {
   const cacheKey = `agents/me`;
 
   // Mutate shared/cached data for all subscribers
-  const mutate = useCallback(
-    (data: MeData | null) => setCache(cacheKey, data),
-    [cacheKey]
-  );
+  const mutate = useCallback((data: MeData | null) => setCache(cacheKey, data), [cacheKey]);
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
@@ -98,10 +95,7 @@ export function useMe(agent: AgentClient | undefined): MyInfo {
 
   if (perspective) {
     profile = mapLiteralLinks(
-      perspective.links.filter(
-        (e) =>
-          e.data.source === FLUX_PROFILE || e.data.source === data?.agent?.did
-      ),
+      perspective.links.filter((e) => e.data.source === FLUX_PROFILE || e.data.source === data?.agent?.did),
       {
         username: HAS_USERNAME,
         bio: HAS_BIO,
@@ -111,7 +105,7 @@ export function useMe(agent: AgentClient | undefined): MyInfo {
         profilePicture: HAS_PROFILE_IMAGE,
         profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
         profileBackground: HAS_BG_IMAGE,
-      }
+      },
     ) as Profile;
   }
 

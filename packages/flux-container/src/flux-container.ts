@@ -1,21 +1,21 @@
-import { LitElement, html, customElement, state, css } from "lit-element";
-import { map } from "lit/directives/map.js";
+import { LitElement, html, customElement, state, css } from 'lit-element';
+import { map } from 'lit/directives/map.js';
 
-if (!customElements.get("j-button")) {
-  import("@coasys/flux-ui");
-  import("@coasys/flux-ui/dist/main.css");
-  import("@coasys/flux-ui/dist/themes/dark.css");
+if (!customElements.get('j-button')) {
+  import('@coasys/flux-ui');
+  import('@coasys/flux-ui/dist/main.css');
+  import('@coasys/flux-ui/dist/themes/dark.css');
 }
 
-import Ad4mConnectUI from "@coasys/ad4m-connect";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
-import { createCommunity, joinCommunity } from "@coasys/flux-api";
-import { Channel, Community } from "@coasys/flux-api";
-import { SubjectRepository } from "@coasys/flux-api";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import Ad4mConnectUI from '@coasys/ad4m-connect';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
+import { createCommunity, joinCommunity } from '@coasys/flux-api';
+import { Channel, Community } from '@coasys/flux-api';
+import { SubjectRepository } from '@coasys/flux-api';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
-@customElement("flux-container")
+@customElement('flux-container')
 export class MyElement extends LitElement {
   static styles = css`
     :host {
@@ -77,13 +77,13 @@ export class MyElement extends LitElement {
   perspectives: PerspectiveProxy[] = [];
 
   @state()
-  perspectiveUuid = "";
+  perspectiveUuid = '';
 
   @state()
   isLoading = false;
 
   @state()
-  title = "";
+  title = '';
 
   @state()
   isCreatingCommunity = false;
@@ -95,10 +95,10 @@ export class MyElement extends LitElement {
   isJoiningCommunity = false;
 
   @state()
-  source = "";
+  source = '';
 
   @state()
-  theme = "";
+  theme = '';
 
   @state()
   showCreate = false;
@@ -118,9 +118,9 @@ export class MyElement extends LitElement {
   constructor() {
     super();
 
-    this.perspectiveUuid = localStorage.getItem("perspectiveUuid") || "";
-    this.source = localStorage.getItem("source") || "ad4m://self";
-    this.theme = localStorage.getItem("theme") || "dark";
+    this.perspectiveUuid = localStorage.getItem('perspectiveUuid') || '';
+    this.source = localStorage.getItem('source') || 'ad4m://self';
+    this.theme = localStorage.getItem('theme') || 'dark';
     this.community = null;
     this.channels = [];
     this.perspectives = [];
@@ -141,22 +141,22 @@ export class MyElement extends LitElement {
   }
 
   get titleIsNeighbourhoodLink() {
-    return this.title.startsWith("neighbourhood://");
+    return this.title.startsWith('neighbourhood://');
   }
 
   connectedCallback() {
     super.connectedCallback();
 
     const ui = Ad4mConnectUI({
-      appName: "Flux App",
-      appDesc: "A flux app",
-      appDomain: "app.flux.io",
-      capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+      appName: 'Flux App',
+      appDesc: 'A flux app',
+      appDomain: 'app.flux.io',
+      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
     });
 
     ui.connect();
-    ui.addEventListener("authstatechange", async () => {
-      if (ui.authState === "authenticated") {
+    ui.addEventListener('authstatechange', async () => {
+      if (ui.authState === 'authenticated') {
         const client: Ad4mClient = await getAd4mClient();
         this.client = client;
 
@@ -170,9 +170,7 @@ export class MyElement extends LitElement {
 
         client.perspective.addPerspectiveUpdatedListener(async (handle) => {
           const perspective = await client.perspective.byUUID(handle.uuid);
-          this.perspectives = this.perspectives.map((p) =>
-            p.uuid === perspective.uuid ? perspective : p
-          );
+          this.perspectives = this.perspectives.map((p) => (p.uuid === perspective.uuid ? perspective : p));
         });
 
         client.perspective.addPerspectiveRemovedListener((uuid: string) => {
@@ -188,7 +186,7 @@ export class MyElement extends LitElement {
   }
 
   async setPerspective(uuid: string) {
-    console.log("setting perspective");
+    console.log('setting perspective');
 
     const perspective = this.perspectives.find((p) => p.uuid === uuid);
 
@@ -198,11 +196,8 @@ export class MyElement extends LitElement {
 
     if (!this.listeners[perspective.uuid]) {
       this.listeners[perspective.uuid] = true;
-      perspective.addListener("link-added", async (link) => {
-        const isChannel = await perspective.isSubjectInstance(
-          link.data.source,
-          Channel.prototype.className
-        );
+      perspective.addListener('link-added', async (link) => {
+        const isChannel = await perspective.isSubjectInstance(link.data.source, Channel.prototype.className);
         if (isChannel) {
           this.channels = await new SubjectRepository(Channel, {
             perspective,
@@ -212,7 +207,7 @@ export class MyElement extends LitElement {
       });
     }
 
-    localStorage.setItem("perspectiveUuid", uuid);
+    localStorage.setItem('perspectiveUuid', uuid);
     this.perspectiveUuid = uuid;
 
     try {
@@ -224,9 +219,9 @@ export class MyElement extends LitElement {
 
       this.channels = channels;
 
-      this.source = channels[0]?.id || "";
+      this.source = channels[0]?.id || '';
 
-      console.log("setting perspective");
+      console.log('setting perspective');
 
       // @ts-ignore
       this.appElement.perspective = perspective;
@@ -234,13 +229,13 @@ export class MyElement extends LitElement {
       // @ts-ignore
       if (!this.appElement.agent) {
         // @ts-ignore
-        console.log("setting agent", this.appElement);
+        console.log('setting agent', this.appElement);
         this.appElement.agent = this.client.agent;
       }
 
-      console.log("setting source");
+      console.log('setting source');
 
-      this.appElement.setAttribute("source", this.source);
+      this.appElement.setAttribute('source', this.source);
     } catch (e) {
       console.log(e);
     } finally {
@@ -250,21 +245,21 @@ export class MyElement extends LitElement {
 
   setChannel(source: string) {
     this.source = source;
-    this.appElement.setAttribute("source", source);
+    this.appElement.setAttribute('source', source);
     this.requestUpdate();
   }
 
   setTheme(value: string) {
     this.theme = value;
     document.documentElement.className = value;
-    localStorage.setItem("theme", value);
+    localStorage.setItem('theme', value);
   }
 
   async onCreateCommunity() {
     this.isCreatingCommunity = true;
     try {
       await createCommunity({ name: this.title });
-      this.title = "";
+      this.title = '';
       this.showCreate = false;
     } catch (e) {
       console.log(e);
@@ -278,10 +273,10 @@ export class MyElement extends LitElement {
     try {
       const model = new SubjectRepository(Channel, {
         perspective: this.perspective,
-        source: "ad4m://self",
+        source: 'ad4m://self',
       });
       await model.create({ name: this.title });
-      this.title = "";
+      this.title = '';
       this.showCreateChannel = false;
     } catch (e) {
       console.log(e);
@@ -294,7 +289,7 @@ export class MyElement extends LitElement {
     this.isJoiningCommunity = true;
     try {
       await joinCommunity({ joiningLink: this.title });
-      this.title = "";
+      this.title = '';
       this.showCreate = false;
     } catch (e) {
       console.log(e);
@@ -323,15 +318,10 @@ export class MyElement extends LitElement {
                         >
                           ${p.name}
                         </j-avatar>
-                      </j-tooltip>`
+                      </j-tooltip>`,
                   )
                 : ``}
-              <j-button
-                @click=${() => (this.showCreate = true)}
-                circle
-                square
-                variant="secondary"
-              >
+              <j-button @click=${() => (this.showCreate = true)} circle square variant="secondary">
                 <j-icon name="plus"></j-icon>
               </j-button>
             </j-flex>
@@ -340,16 +330,10 @@ export class MyElement extends LitElement {
                 <j-icon name="magic"></j-icon>
               </j-button>
               <j-menu slot="content">
-                <j-menu-item
-                  ?selected=${this.theme === "light"}
-                  @click=${() => this.setTheme("light")}
-                >
+                <j-menu-item ?selected=${this.theme === 'light'} @click=${() => this.setTheme('light')}>
                   Light
                 </j-menu-item>
-                <j-menu-item
-                  ?selected=${this.theme === "dark"}
-                  @click=${() => this.setTheme("dark")}
-                >
+                <j-menu-item ?selected=${this.theme === 'dark'} @click=${() => this.setTheme('dark')}>
                   Dark
                 </j-menu-item>
               </j-menu>
@@ -359,21 +343,12 @@ export class MyElement extends LitElement {
           ${this.perspective
             ? html` <div class="channels">
                 <j-box px="500" pt="800"
-                  ><j-text
-                    size="300"
-                    weight="800"
-                    uppercase
-                    color="primary-500"
-                  >
-                    Channels
-                  </j-text>
+                  ><j-text size="300" weight="800" uppercase color="primary-500"> Channels </j-text>
                 </j-box>
                 ${this.perspective?.uuid
                   ? html`<div>
                       ${this.channels.map((c) => {
-                        return html`<j-menu-item
-                          ?selected=${c.id === this.source}
-                          @click=${() => this.setChannel(c.id)}
+                        return html`<j-menu-item ?selected=${c.id === this.source} @click=${() => this.setChannel(c.id)}
                           >${c.name}</j-menu-item
                         >`;
                       })}
@@ -384,7 +359,7 @@ export class MyElement extends LitElement {
                   <j-icon slot="end" name="plus" size="xs"></j-icon>
                 </j-menu-item>
               </div>`
-            : ""}
+            : ''}
         </aside>
         <div class="content" part="content">
           ${this.isLoading
@@ -402,10 +377,7 @@ export class MyElement extends LitElement {
                 </j-box>`}
         </div>
       </div>
-      <j-modal
-        ?open=${this.showCreate}
-        @toggle=${(e) => (this.showCreate = e.target.open)}
-      >
+      <j-modal ?open=${this.showCreate} @toggle=${(e) => (this.showCreate = e.target.open)}>
         <j-box px="800" py="600">
           <j-box pb="800">
             <j-text nomargin variant="heading">Create or join community</j-text>
@@ -444,10 +416,7 @@ export class MyElement extends LitElement {
           </j-flex>
         </j-box>
       </j-modal>
-      <j-modal
-        ?open=${this.showCreateChannel}
-        @toggle=${(e) => (this.showCreateChannel = e.target.open)}
-      >
+      <j-modal ?open=${this.showCreateChannel} @toggle=${(e) => (this.showCreateChannel = e.target.open)}>
         <j-box px="800" py="600">
           <j-box pb="800">
             <j-text nomargin variant="heading">Create a channel</j-text>
@@ -481,6 +450,6 @@ export class MyElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "flux-container": MyElement;
+    'flux-container': MyElement;
   }
 }

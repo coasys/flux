@@ -1,3 +1,3 @@
-import PercentageRing from "./PercentageRing";
+import PercentageRing from './PercentageRing';
 
 export default PercentageRing;

@@ -1,10 +1,10 @@
-import { defineStore, storeToRefs } from "pinia";
-import { computed, ref } from "vue";
-import { useMediaDevicesStore } from "./mediaDevicesStore";
-import { VideoLayoutOption, WindowState } from "./types";
+import { defineStore, storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import { useMediaDevicesStore } from './mediaDevicesStore';
+import { VideoLayoutOption, WindowState } from './types';
 
 export const useUiStore = defineStore(
-  "uiStore",
+  'uiStore',
   () => {
     const mediaDevicesStore = useMediaDevicesStore();
     const { stream } = storeToRefs(mediaDevicesStore);
@@ -19,15 +19,15 @@ export const useUiStore = defineStore(
     const callWindowWidth = ref(0);
     const callWidgetsHeight = ref(0);
     const selectedVideoLayout = ref<VideoLayoutOption>({
-      label: "16/9 aspect ratio",
-      class: "16-by-9",
-      icon: "aspect-ratio",
+      label: '16/9 aspect ratio',
+      class: '16-by-9',
+      icon: 'aspect-ratio',
     });
-    const focusedVideoId = ref("");
+    const focusedVideoId = ref('');
     const showGlobalLoading = ref(false);
-    const globalError = ref({ show: false, message: "" });
-    const windowState = ref<WindowState>("visible");
-    const windowWidth = ref(typeof window !== "undefined" ? window.innerWidth : 1024);
+    const globalError = ref({ show: false, message: '' });
+    const windowState = ref<WindowState>('visible');
+    const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
     const isMobile = computed(() => windowWidth.value < 800);
 
@@ -38,14 +38,14 @@ export const useUiStore = defineStore(
 
     function toggleAppSidebar(): void {
       // Prevent width transition when toggling the app sidebar
-      const mainAppLayout = document.getElementById("app-layout-main");
-      if (mainAppLayout) mainAppLayout.style.transition = "none";
+      const mainAppLayout = document.getElementById('app-layout-main');
+      if (mainAppLayout) mainAppLayout.style.transition = 'none';
 
       // Toggle the app sidebar visibility
       showAppSidebar.value = !showAppSidebar.value;
 
       // Reset the transition after toggling
-      if (mainAppLayout) setTimeout(() => (mainAppLayout.style.transition = "width 0.5s ease-in-out"), 200);
+      if (mainAppLayout) setTimeout(() => (mainAppLayout.style.transition = 'width 0.5s ease-in-out'), 200);
     }
 
     function setAppSidebarOpen(open: boolean): void {
@@ -110,7 +110,7 @@ export const useUiStore = defineStore(
     }
 
     function updateWindowWidth(): void {
-      if (typeof window !== "undefined") {
+      if (typeof window !== 'undefined') {
         windowWidth.value = window.innerWidth;
       }
     }
@@ -159,14 +159,14 @@ export const useUiStore = defineStore(
   {
     persist: {
       omit: [
-        "showAppSidebar",
-        "callWindowOpen",
-        "callWindowWidth",
-        "callWindowFullscreen",
-        "selectedVideoLayout",
-        "focusedVideoId",
-        "callWidgetsHeight",
+        'showAppSidebar',
+        'callWindowOpen',
+        'callWindowWidth',
+        'callWindowFullscreen',
+        'selectedVideoLayout',
+        'focusedVideoId',
+        'callWidgetsHeight',
       ],
     },
-  }
+  },
 );

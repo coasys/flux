@@ -1,8 +1,8 @@
-import { html, css, LitElement } from "lit";
-import { unsafeSVG } from "lit/directives/unsafe-svg.js";
-import { toSvg } from "jdenticon";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+import { toSvg } from 'jdenticon';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -19,36 +19,36 @@ const styles = css`
   :host([selected]) {
     --j-avatar-box-shadow: 0px 0px 0px 2px var(--j-color-primary-500);
   }
-  :host([online]) [part="base"]:before {
+  :host([online]) [part='base']:before {
     position: absolute;
     right: 0;
     bottom: 0;
-    content: "";
+    content: '';
     display: block;
     width: 25%;
     height: 25%;
     border-radius: 50%;
     background: var(--j-color-primary-500);
   }
-  :host([size="xxs"]) {
+  :host([size='xxs']) {
     --j-avatar-size: var(--j-size-xxs);
   }
-  :host([size="xs"]) {
+  :host([size='xs']) {
     --j-avatar-size: var(--j-size-xs);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-avatar-size: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-avatar-size: var(--j-size-lg);
   }
-  :host([size="xl"]) {
+  :host([size='xl']) {
     --j-avatar-size: var(--j-size-xl);
   }
-  :host([size="xxl"]) {
+  :host([size='xxl']) {
     --j-avatar-size: var(--j-size-xxl);
   }
-  [part="base"] {
+  [part='base'] {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -69,23 +69,23 @@ const styles = css`
     height: calc(var(--j-avatar-size) - 30%);
   }
 
-  [part="icon"] {
+  [part='icon'] {
     --j-icon-size: calc(var(--j-avatar-size) * 0.6);
   }
 
-  [part="img"] {
+  [part='img'] {
     width: 100%;
     height: 100%;
     border-radius: 50%;
   }
 
-  [part="initials"] {
+  [part='initials'] {
     font-weight: 600;
     text-transform: uppercase;
   }
 `;
 
-@customElement("j-avatar")
+@customElement('j-avatar')
 export default class Component extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -129,7 +129,7 @@ export default class Component extends LitElement {
    * @type {String}
    * @attr
    */
-  @property({ type: String }) icon = "";
+  @property({ type: String }) icon = '';
 
   /**
    * Sizes
@@ -139,7 +139,7 @@ export default class Component extends LitElement {
   @property({ type: String, reflect: true }) size = null;
 
   firstUpdated() {
-    const canvas = this.shadowRoot.querySelector("#identicon");
+    const canvas = this.shadowRoot.querySelector('#identicon');
     const opts = {
       hash: this.hash,
       size: 100,
@@ -157,9 +157,7 @@ export default class Component extends LitElement {
     }
 
     if (this.hash) {
-      return html`
-        <button part="base">${unsafeSVG(toSvg(this.hash || "", 100))}</button>
-      `;
+      return html` <button part="base">${unsafeSVG(toSvg(this.hash || '', 100))}</button> `;
     }
 
     if (this.initials) {

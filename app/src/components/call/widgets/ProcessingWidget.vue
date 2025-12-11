@@ -4,11 +4,11 @@
       <j-icon name="robot" size="lg" color="ui-700" />
       <j-text nomargin>
         {{ processingState.itemIds?.length || 0 }} items being processed
-        {{ defaultLLM?.local ? "locally" : "remotely" }}
+        {{ defaultLLM?.local ? 'locally' : 'remotely' }}
         {{
           processingQueue.length > 1
-            ? `(${processingQueue.length - 1} task${processingQueue.length === 2 ? "" : "s"} queued)`
-            : ""
+            ? `(${processingQueue.length - 1} task${processingQueue.length === 2 ? '' : 's'} queued)`
+            : ''
         }}
       </j-text>
       <j-spinner size="xs" />
@@ -25,9 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import ProgressBar from "@/components/progress-bar/ProgressBar.vue";
-import { llmProcessingSteps, useAiStore } from "@/stores";
-import { storeToRefs } from "pinia";
+import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
+import { llmProcessingSteps, useAiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
 
 const aiStore = useAiStore();
 const { processingState, defaultLLM, processingQueue } = storeToRefs(aiStore);

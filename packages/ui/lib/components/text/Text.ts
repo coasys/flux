@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -38,7 +38,7 @@ const styles = css`
     --j-text-transform: uppercase;
   }
 
-  :host([variant="heading"]) {
+  :host([variant='heading']) {
     --j-text-color: var(--j-color-black);
     --j-text-font-size: var(--j-font-size-700);
     --j-text-weight: 600;
@@ -47,7 +47,7 @@ const styles = css`
     --j-text-letter-spacing: var(--j-text-heading-letter-spacing);
   }
 
-  :host([variant="heading-sm"]) {
+  :host([variant='heading-sm']) {
     --j-text-color: var(--j-color-black);
     --j-text-font-size: var(--j-font-size-600);
     --j-text-weight: 600;
@@ -56,7 +56,7 @@ const styles = css`
     --j-text-letter-spacing: var(--j-text-heading-letter-spacing);
   }
 
-  :host([variant="heading-lg"]) {
+  :host([variant='heading-lg']) {
     --j-text-color: var(--j-color-black);
     --j-text-font-size: var(--j-font-size-800);
     --j-text-weight: 600;
@@ -66,7 +66,7 @@ const styles = css`
     --j-text-letter-spacing: var(--j-text-heading-letter-spacing);
   }
 
-  :host([variant="subheading"]) {
+  :host([variant='subheading']) {
     --j-text-color: var(--j-color-black);
     --j-text-font-size: var(--j-font-size-700);
     --j-text-weight: 400;
@@ -75,28 +75,28 @@ const styles = css`
     --j-text-letter-spacing: var(--j-text-heading-letter-spacing);
   }
 
-  :host([variant="ingress"]) {
+  :host([variant='ingress']) {
     --j-text-color: var(--j-color-ui-700);
     --j-text-font-size: var(--j-font-size-600);
     --j-text-weight: 400;
     --j-text-margin-bottom: var(--j-space-500);
   }
 
-  :host([variant="body"]) {
+  :host([variant='body']) {
     --j-text-color: var(--j-color-ui-600);
     --j-text-font-size: var(--j-font-size-500);
     --j-text-weight: 400;
     --j-text-margin-bottom: var(--j-space-400);
   }
 
-  :host([variant="footnote"]) {
+  :host([variant='footnote']) {
     --j-text-color: var(--j-color-ui-600);
     --j-text-font-size: var(--j-font-size-400);
     --j-text-weight: 400;
     --j-text-margin-bottom: var(--j-space-300);
   }
 
-  :host([variant="label"]) {
+  :host([variant='label']) {
     --j-text-display: block;
     --j-text-color: var(--j-color-ui-500);
     --j-text-font-size: var(--j-font-size-500);
@@ -109,7 +109,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-text")
+@customElement('j-text')
 export default class Text extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -125,7 +125,7 @@ export default class Text extends LitElement {
    * @type {""|"heading-lg"|"heading"|"heading-sm"|"subheading"|"ingress"|"body"|"label"|"footnote"}
    * @attr
    */
-  @property({ type: String, reflect: true }) variant = "body";
+  @property({ type: String, reflect: true }) variant = 'body';
 
   /**
    * Tag to render
@@ -170,31 +170,25 @@ export default class Text extends LitElement {
   @property({ type: String, reflect: true }) weight = null;
 
   shouldUpdate(changedProperties) {
-    if (changedProperties.has("size")) {
+    if (changedProperties.has('size')) {
       if (this.size) {
-        this.style.setProperty(
-          "--j-text-font-size",
-          `var(--j-font-size-${this.size})`
-        );
+        this.style.setProperty('--j-text-font-size', `var(--j-font-size-${this.size})`);
       } else {
-        this.style.removeProperty("--j-text-font-size");
+        this.style.removeProperty('--j-text-font-size');
       }
     }
-    if (changedProperties.has("weight")) {
+    if (changedProperties.has('weight')) {
       if (this.weight) {
-        this.style.setProperty("--j-text-weight", this.weight);
+        this.style.setProperty('--j-text-weight', this.weight);
       } else {
-        this.style.removeProperty("--j-text-weight");
+        this.style.removeProperty('--j-text-weight');
       }
     }
-    if (changedProperties.has("color")) {
+    if (changedProperties.has('color')) {
       if (this.color) {
-        this.style.setProperty(
-          "--j-text-color",
-          `var(--j-color-${this.color})`
-        );
+        this.style.setProperty('--j-text-color', `var(--j-color-${this.color})`);
       } else {
-        this.style.removeProperty("--j-text-color");
+        this.style.removeProperty('--j-text-color');
       }
     }
 
@@ -203,31 +197,31 @@ export default class Text extends LitElement {
 
   render() {
     switch (this.tag) {
-      case "h1":
+      case 'h1':
         return html`<h1 part="base"><slot></slot></h1>`;
-      case "h2":
+      case 'h2':
         return html`<h2 part="base"><slot></slot></h2>`;
-      case "h3":
+      case 'h3':
         return html`<h3 part="base"><slot></slot></h3>`;
-      case "h4":
+      case 'h4':
         return html`<h4 part="base"><slot></slot></h4>`;
-      case "h5":
+      case 'h5':
         return html`<h5 part="base"><slot></slot></h5>`;
-      case "h6":
+      case 'h6':
         return html`<h6 part="base"><slot></slot></h6>`;
-      case "p":
+      case 'p':
         return html`<p part="base"><slot></slot></p>`;
-      case "small":
+      case 'small':
         return html`<small part="base"><slot></slot></small>`;
-      case "b":
+      case 'b':
         return html`<b part="base"><slot></slot></b>`;
-      case "i":
+      case 'i':
         return html`<i part="base"><slot></slot></i>`;
-      case "span":
+      case 'span':
         return html`<span part="base"><slot></slot></span>`;
-      case "label":
+      case 'label':
         return html`<label part="base"><slot></slot></label>`;
-      case "div":
+      case 'div':
         return html`<div part="base"><slot></slot></div>`;
       default:
         return html`<div part="base"><slot></slot></div>`;

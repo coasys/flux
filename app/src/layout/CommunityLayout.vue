@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { useUiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 const uiStore = useUiStore();
 const { showCommunitySidebar, communitySidebarWidth, callWidgetsHeight } = storeToRefs(uiStore);
@@ -36,8 +36,8 @@ function startResize(e: any) {
   startWidth.value = sidebar.value.getBoundingClientRect().width;
   isDragging.value = true;
   startX.value = e.clientX;
-  document.addEventListener("mousemove", doResize, false);
-  document.addEventListener("mouseup", stopResize, false);
+  document.addEventListener('mousemove', doResize, false);
+  document.addEventListener('mouseup', stopResize, false);
 }
 
 function doResize(e: any) {
@@ -46,8 +46,8 @@ function doResize(e: any) {
 
 function stopResize() {
   isDragging.value = false;
-  document.removeEventListener("mousemove", doResize);
-  document.addEventListener("mouseup", stopResize, false);
+  document.removeEventListener('mousemove', doResize);
+  document.addEventListener('mouseup', stopResize, false);
 }
 </script>
 

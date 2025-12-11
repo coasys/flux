@@ -1,6 +1,6 @@
-import { useContext } from "preact/hooks";
-import UIContext from "../../context/UIContext";
-import CreatePost from "../CreatePost";
+import { useContext } from 'preact/hooks';
+import UIContext from '../../context/UIContext';
+import CreatePost from '../CreatePost';
 
 export default function Overlay({ perspective, agent, source }) {
   const { state: uiState, methods: UIMethods } = useContext(UIContext);
@@ -10,11 +10,7 @@ export default function Overlay({ perspective, agent, source }) {
   };
 
   return (
-    <j-modal
-      size="fullscreen"
-      open={uiState.showOverlay}
-      onToggle={(e) => UIMethods.toggleOverlay(e.target.open)}
-    >
+    <j-modal size="fullscreen" open={uiState.showOverlay} onToggle={(e) => UIMethods.toggleOverlay(e.target.open)}>
       {uiState.showOverlay && (
         <CreatePost
           agent={agent}

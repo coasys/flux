@@ -8,7 +8,7 @@
     <j-box p="800">
       <j-flex gap="500" direction="column">
         <j-text nomargin variant="heading-sm">
-          Members {{ filteredMembers.length ? `(${filteredMembers.length})` : "" }}
+          Members {{ filteredMembers.length ? `(${filteredMembers.length})` : '' }}
         </j-text>
 
         <j-input
@@ -35,7 +35,7 @@
           >
             <j-avatar size="xl" :did="member.did" :hash="member.did" :src="member.profileThumbnailPicture" />
             <j-text color="black" nomargin variant="body">
-              {{ member.username || "Loading profile..." }}
+              {{ member.username || 'Loading profile...' }}
             </j-text>
           </j-flex>
         </j-flex>
@@ -52,14 +52,14 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useRouteParams } from "@/composables/useRouteParams";
-import { useAppStore, useModalStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useRouteParams } from '@/composables/useRouteParams';
+import { useAppStore, useModalStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const emit = defineEmits(["close", "submit"]);
+const emit = defineEmits(['close', 'submit']);
 const router = useRouter();
 const appStore = useAppStore();
 const modalStore = useModalStore();
@@ -68,7 +68,7 @@ const { me } = storeToRefs(appStore);
 const { members, getMembers } = useCommunityService();
 const { communityId } = useRouteParams();
 
-const searchInput = ref("");
+const searchInput = ref('');
 
 const filteredMembers = computed(() => {
   if (!searchInput.value) return members.value;
@@ -82,8 +82,8 @@ const filteredMembers = computed(() => {
 });
 
 async function profileClick(did: string) {
-  if (did === me.value.did) router.push({ name: "home", params: { did } });
-  else router.push({ name: "profile", params: { did, communityId: communityId.value } });
+  if (did === me.value.did) router.push({ name: 'home', params: { did } });
+  else router.push({ name: 'profile', params: { did, communityId: communityId.value } });
   modalStore.showCommunityMembers = false;
 }
 

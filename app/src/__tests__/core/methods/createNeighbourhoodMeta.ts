@@ -1,9 +1,9 @@
-import createCommunityPerspective from "../../fixtures/createCommunityPerspective.json";
-import getPerspectiveSnapshotFixture from "../../fixtures/getPerspectiveSnapshot.json";
-import createNeighbourhoodMetaFixture from "../../fixtures/createNeighbourhoodMeta.json";
-import addChannelCreateLink from "../../fixtures/addChannelCreateLink.json";
-import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
-import { ad4mClient } from "@/app";
+import createCommunityPerspective from '../../fixtures/createCommunityPerspective.json';
+import getPerspectiveSnapshotFixture from '../../fixtures/getPerspectiveSnapshot.json';
+import createNeighbourhoodMetaFixture from '../../fixtures/createNeighbourhoodMeta.json';
+import addChannelCreateLink from '../../fixtures/addChannelCreateLink.json';
+import { createNeighbourhoodMeta } from '@/core/methods/createNeighbourhoodMeta';
+import { ad4mClient } from '@/app';
 
 const removeEmpty = (obj: any) => {
   const newObj: { [x: string]: any } = {};
@@ -14,125 +14,109 @@ const removeEmpty = (obj: any) => {
   return newObj;
 };
 
-describe("Create Neighbourhood Meta", () => {
+describe('Create Neighbourhood Meta', () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "add")
+      .spyOn(ad4mClient.perspective, 'add')
       // @ts-ignore
       .mockResolvedValue(createCommunityPerspective);
 
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "snapshotByUUID")
+      .spyOn(ad4mClient.perspective, 'snapshotByUUID')
       // @ts-ignore
       .mockResolvedValue(getPerspectiveSnapshotFixture);
 
     // @ts-ignore
-    jest
-      .spyOn(ad4mClient.perspective, "addLink")
-      .mockImplementation(async (perspective, link) => {
-        return {
-          ...addChannelCreateLink,
-          hash: () => 12345
-        };
-      });
+    jest.spyOn(ad4mClient.perspective, 'addLink').mockImplementation(async (perspective, link) => {
+      return {
+        ...addChannelCreateLink,
+        hash: () => 12345,
+      };
+    });
 
     // @ts-ignore
-    jest
-      .spyOn(ad4mClient.perspective, "remove")
-      .mockImplementation(async () => {
-        return {
-          perspectiveRemove: true,
-        };
-      });
+    jest.spyOn(ad4mClient.perspective, 'remove').mockImplementation(async () => {
+      return {
+        perspectiveRemove: true,
+      };
+    });
   });
 
-  test("Create Neighbourhood Meta - Success", async () => {
+  test('Create Neighbourhood Meta - Success', async () => {
     const links = await createNeighbourhoodMeta(
-      "test",
-      "desc",
-      "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+      'test',
+      'desc',
+      'did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW',
       [
         {
-          languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
+          languageAddress: 'QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq',
           expressionType: 0,
         },
         {
-          languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
+          languageAddress: 'QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi',
           expressionType: 1,
         },
         {
-          languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
+          languageAddress: 'QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP',
           expressionType: 2,
         },
-      ]
+      ],
     );
 
-    expect(Object.values(removeEmpty(links))).toStrictEqual(
-      createNeighbourhoodMetaFixture
-    );
+    expect(Object.values(removeEmpty(links))).toStrictEqual(createNeighbourhoodMetaFixture);
   });
 
-  test("Create Neighbourhood Meta with empty description - Success", async () => {
+  test('Create Neighbourhood Meta with empty description - Success', async () => {
     const links = await createNeighbourhoodMeta(
-      "test",
-      "",
-      "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+      'test',
+      '',
+      'did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW',
       [
         {
-          languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
+          languageAddress: 'QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq',
           expressionType: 0,
         },
         {
-          languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
+          languageAddress: 'QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi',
           expressionType: 1,
         },
         {
-          languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
+          languageAddress: 'QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP',
           expressionType: 2,
         },
-      ]
+      ],
     );
 
-    expect(Object.values(removeEmpty(links))).toStrictEqual(
-      createNeighbourhoodMetaFixture
-    );
+    expect(Object.values(removeEmpty(links))).toStrictEqual(createNeighbourhoodMetaFixture);
   });
 
-  test("Create Neighbourhood Meta - Failure", async () => {
+  test('Create Neighbourhood Meta - Failure', async () => {
     // @ts-ignore
     jest
-      .spyOn(ad4mClient.perspective, "add")
+      .spyOn(ad4mClient.perspective, 'add')
       // @ts-ignore
-      .mockRejectedValue(Error("Error while adding new perspective"));
+      .mockRejectedValue(Error('Error while adding new perspective'));
 
     try {
-      await createNeighbourhoodMeta(
-        "test",
-        "",
-        "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
-        [
-          {
-            languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
-            expressionType: 0,
-          },
-          {
-            languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
-            expressionType: 1,
-          },
-          {
-            languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
-            expressionType: 2,
-          },
-        ]
-      );
+      await createNeighbourhoodMeta('test', '', 'did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW', [
+        {
+          languageAddress: 'QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq',
+          expressionType: 0,
+        },
+        {
+          languageAddress: 'QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi',
+          expressionType: 1,
+        },
+        {
+          languageAddress: 'QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP',
+          expressionType: 2,
+        },
+      ]);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect(error).toHaveProperty(
-        "message",
-        "Error while adding new perspective"
-      );
+      expect(error).toHaveProperty('message', 'Error while adding new perspective');
     }
   });
 });

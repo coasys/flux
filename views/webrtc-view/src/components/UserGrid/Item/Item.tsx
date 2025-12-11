@@ -1,9 +1,9 @@
-import { WebRTC } from "@coasys/flux-react-web";
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Reaction } from "../../../types";
+import { WebRTC } from '@coasys/flux-react-web';
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { Reaction } from '../../../types';
 
-import styles from "./Item.module.css";
+import styles from './Item.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -47,7 +47,7 @@ export default function Item({
   useEffect(() => {
     if (isMe) return;
 
-    peer?.connection?.peer?.on("connect", () => {
+    peer?.connection?.peer?.on('connect', () => {
       setIsConnecting(false);
     });
   }, [peer]);
@@ -60,7 +60,7 @@ export default function Item({
     }
 
     if (videoRef.current && !isMe) {
-      peer.connection.peer.on("stream", (stream) => {
+      peer.connection.peer.on('stream', (stream) => {
         videoRef.current.srcObject = stream;
       });
     }
@@ -81,7 +81,7 @@ export default function Item({
       <div className={styles.details} onClick={onToggleFocus}>
         <div className={styles.avatar}>
           <j-avatar
-            initials={profile?.username?.charAt(0) || "?"}
+            initials={profile?.username?.charAt(0) || '?'}
             size="xl"
             src={profile?.profileThumbnailPicture || null}
             hash={userId}
@@ -90,7 +90,7 @@ export default function Item({
       </div>
 
       <div className={styles.username}>
-        <span>{profile?.username || "Unknown user"}</span>
+        <span>{profile?.username || 'Unknown user'}</span>
       </div>
 
       <div className={styles.loading}>
@@ -113,7 +113,7 @@ export default function Item({
       <>
         {reaction && (
           <div className={styles.reaction}>
-            <div className={styles["reaction-inner"]}>
+            <div className={styles['reaction-inner']}>
               <span>{reaction.reaction}</span>
             </div>
           </div>

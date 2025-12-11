@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import SidebarCommunities from "./SidebarCommunities.vue";
+import SidebarCommunities from './SidebarCommunities.vue';
 // import SidebarFooter from "./SidebarFooter.vue";
 </script>
 

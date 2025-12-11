@@ -1,6 +1,6 @@
-import { RouteParams } from "@coasys/flux-types";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { RouteParams } from '@coasys/flux-types';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 interface CommunityRouteMemory {
   path: string;
@@ -9,7 +9,7 @@ interface CommunityRouteMemory {
 }
 
 export const useRouteMemoryStore = defineStore(
-  "routeMemoryStore",
+  'routeMemoryStore',
   () => {
     const currentRoute = ref<RouteParams>({});
     const lastCommunityRoutes = ref<Record<string, CommunityRouteMemory>>({});
@@ -48,5 +48,5 @@ export const useRouteMemoryStore = defineStore(
       getLastChannelView,
     };
   },
-  { persist: false }
+  { persist: false },
 );

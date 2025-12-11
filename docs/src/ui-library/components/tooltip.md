@@ -69,8 +69,8 @@ Use the `placement` property to set the position of the tooltip relative to the 
 The `toggle` event is fired when the visibility state of the tooltip changes. You can add an event listener to the tooltip element to handle this event, like so:```
 
 ```js
-const tooltip = document.querySelector("j-tooltip");
-tooltip.addEventListener("toggle", () => {
+const tooltip = document.querySelector('j-tooltip');
+tooltip.addEventListener('toggle', () => {
   // Do something when the tooltip visibility state changes
 });
 ```

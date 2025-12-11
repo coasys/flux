@@ -43,10 +43,10 @@
 </template>
 
 <script setup lang="ts">
-import RecordingIcon from "@/components/icons/RecordingIcon.vue";
-import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
+import RecordingIcon from '@/components/icons/RecordingIcon.vue';
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -69,7 +69,7 @@ function isPresent(uuid: string) {
 }
 
 function getAvatarClasses(uuid: string) {
-  return { "avatar-wrapper": true, "in-call": isInCall(uuid), present: isPresent(uuid) };
+  return { 'avatar-wrapper': true, 'in-call': isInCall(uuid), present: isPresent(uuid) };
 }
 
 function communityIsActive(communityId: string) {
@@ -97,7 +97,7 @@ function handleCommunityClick(communityId: string) {
     uiStore.setCommunitySidebarOpen(true);
     // Navigate back to the last route if saved
     const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
-    router.push(lastRoute ? lastRoute.path : { name: "community", params: { communityId } });
+    router.push(lastRoute ? lastRoute.path : { name: 'community', params: { communityId } });
   }
 }
 </script>

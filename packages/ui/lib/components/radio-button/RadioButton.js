@@ -1,5 +1,5 @@
-import { html, css, LitElement } from "lit";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -19,11 +19,11 @@ const styles = css`
   :host([checked]) {
     --j-radio-button-indicator-color: var(--j-color-primary-500);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-radio-button-size: 10px;
     --j-radio-button-font-size: var(--j-font-size-400);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-radio-button-size: 20px;
     --j-radio-button-font-size: var(--j-font-size-600);
   }
@@ -55,7 +55,7 @@ const styles = css`
   input:checked ~ i:after {
     position: absolute;
     display: block;
-    content: "";
+    content: '';
     width: calc(var(--j-radio-button-size) / 2);
     height: calc(var(--j-radio-button-size) / 2);
     background: var(--j-radio-button-indicator-color);
@@ -111,7 +111,7 @@ class RadioButton extends LitElement {
   }
 
   get formElement() {
-    return this.shadowRoot.querySelector("input");
+    return this.shadowRoot.querySelector('input');
   }
 
   get checked() {
@@ -131,9 +131,7 @@ class RadioButton extends LitElement {
       this.formElement.checked = checked;
     }
 
-    checked
-      ? this.setAttribute("checked", "")
-      : this.removeAttribute("checked");
+    checked ? this.setAttribute('checked', '') : this.removeAttribute('checked');
 
     this._checked = checked;
 
@@ -165,7 +163,7 @@ class RadioButton extends LitElement {
   _handleChange(e) {
     e.stopPropagation();
     this.checked = e.target.checked;
-    this.dispatchEvent(new CustomEvent("change", e));
+    this.dispatchEvent(new CustomEvent('change', e));
   }
 
   _handleKeyPress(e) {
@@ -198,6 +196,6 @@ class RadioButton extends LitElement {
   }
 }
 
-customElements.define("j-radio-button", RadioButton);
+customElements.define('j-radio-button', RadioButton);
 
 export default RadioButton;

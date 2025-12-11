@@ -1,6 +1,6 @@
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import CommentSection from "./Components/CommentSection";
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import CommentSection from './Components/CommentSection';
 
 export default function App({
   perspective,
@@ -15,7 +15,5 @@ export default function App({
     return null;
   }
 
-  return (
-    <CommentSection agent={agent} perspective={perspective} source={source} />
-  );
+  return <CommentSection agent={agent} perspective={perspective} source={source} />;
 }

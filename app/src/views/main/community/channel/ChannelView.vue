@@ -20,15 +20,15 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useUiStore } from "@/stores";
-import Header from "@/views/main/community/channel/Header.vue";
-import Modals from "@/views/main/community/channel/modals/Modals.vue";
-import { storeToRefs } from "pinia";
-import { computed, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useUiStore } from '@/stores';
+import Header from '@/views/main/community/channel/Header.vue';
+import Modals from '@/views/main/community/channel/modals/Modals.vue';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-defineOptions({ name: "ChannelView" });
+defineOptions({ name: 'ChannelView' });
 const { communityId, channelId, viewId } = defineProps({
   communityId: { type: String },
   channelId: { type: String },
@@ -46,8 +46,8 @@ const channel = computed(() => allChannels.value.find((c) => c.baseExpression ==
 
 onMounted(() => {
   // Navigate to the conversation or conversations view if no viewId present when entering channel
-  const newViewId = `conversation${channel.value?.isConversation ? "" : "s"}`;
-  if (!viewId) router.push({ name: "view", params: { viewId: newViewId } });
+  const newViewId = `conversation${channel.value?.isConversation ? '' : 's'}`;
+  if (!viewId) router.push({ name: 'view', params: { viewId: newViewId } });
 });
 </script>
 

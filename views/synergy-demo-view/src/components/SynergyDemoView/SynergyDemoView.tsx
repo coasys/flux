@@ -1,12 +1,12 @@
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from "@coasys/flux-api";
-import { Profile, SignallingService } from "@coasys/flux-types";
-import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from "@coasys/flux-utils";
-import { cos_sim } from "@xenova/transformers";
-import { useEffect, useState } from "preact/hooks";
-import MatchColumn from "../MatchColumn";
-import TimelineColumn from "../TimelineColumn";
-import styles from "./SynergyDemoView.module.scss";
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, Topic } from '@coasys/flux-api';
+import { Profile, SignallingService } from '@coasys/flux-types';
+import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from '@coasys/flux-utils';
+import { cos_sim } from '@xenova/transformers';
+import { useEffect, useState } from 'preact/hooks';
+import MatchColumn from '../MatchColumn';
+import TimelineColumn from '../TimelineColumn';
+import styles from './SynergyDemoView.module.scss';
 
 type Props = {
   perspective: any;
@@ -29,12 +29,12 @@ export default function SynergyDemoView({
 }: Props) {
   const [matches, setMatches] = useState<SynergyMatch[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<SynergyTopic | null>(null);
-  const [searchItemId, setSearchItemId] = useState("");
+  const [searchItemId, setSearchItemId] = useState('');
   const [searching, setSearching] = useState(false);
-  const [searchType, setSearchType] = useState<SearchType>("");
+  const [searchType, setSearchType] = useState<SearchType>('');
   const [filterSettings, setFilterSettings] = useState<FilterSettings>({
-    grouping: "Conversations",
-    itemType: "All Types",
+    grouping: 'Conversations',
+    itemType: 'All Types',
     includeChannel: false,
   });
   const [showMatchColumn, setShowMatchColumn] = useState(false);
@@ -49,10 +49,10 @@ export default function SynergyDemoView({
     const sourceEmbedding = await semanticRelationship.itemEmbedding(itemId);
     let allEmbeddings = [];
     const { grouping, itemType } = filterSettings;
-    if (grouping === "Conversations") allEmbeddings = await semanticRelationship.allConversationEmbeddings();
-    if (grouping === "Subgroups") allEmbeddings = await semanticRelationship.allSubgroupEmbeddings();
-    if (grouping === "Items") {
-      if (itemType === "All Types") allEmbeddings = await semanticRelationship.allItemEmbeddings();
+    if (grouping === 'Conversations') allEmbeddings = await semanticRelationship.allConversationEmbeddings();
+    if (grouping === 'Subgroups') allEmbeddings = await semanticRelationship.allSubgroupEmbeddings();
+    if (grouping === 'Items') {
+      if (itemType === 'All Types') allEmbeddings = await semanticRelationship.allItemEmbeddings();
       else allEmbeddings = await semanticRelationship.allItemEmbeddingsByType(itemType);
     }
     const matches = await Promise.all(
@@ -65,7 +65,7 @@ export default function SynergyDemoView({
         // Generate a similarity score for the embedding
         const score = await cos_sim(sourceEmbedding, embedding);
         return { baseExpression, channelId, channelName, type, score };
-      })
+      }),
     );
     return matches.filter((item) => item && item.score > 0.2);
   }
@@ -74,12 +74,12 @@ export default function SynergyDemoView({
     const { grouping } = filterSettings;
     // Todo: remove option for "Items" grouping so this isn't necissary
     // If the grouping is "Items", we need to change it to "Conversations" as topics no longer have topic tags
-    let currentGrouping = grouping === "Items" ? "Conversations" : grouping;
-    if (grouping === "Items") setFilterSettings((prev) => ({ ...prev, grouping: "Conversations" }));
+    let currentGrouping = grouping === 'Items' ? 'Conversations' : grouping;
+    if (grouping === 'Items') setFilterSettings((prev) => ({ ...prev, grouping: 'Conversations' }));
     // Find matches
     const topic = new Topic(perspective, topicId);
     const matches =
-      currentGrouping === "Conversations" ? await topic.linkedConversations() : await topic.linkedSubgroups();
+      currentGrouping === 'Conversations' ? await topic.linkedConversations() : await topic.linkedSubgroups();
     // Filter out results that don't match the search filters
     const filteredMatches = matches.map((relationship) => {
       const { baseExpression, type, channelId, channelName, relevance } = relationship;
@@ -98,20 +98,20 @@ export default function SynergyDemoView({
     setShowMatchColumn(true);
     setSearchType(type);
     setSearchItemId(itemId);
-    setSelectedTopic(type === "topic" ? topic : null);
+    setSelectedTopic(type === 'topic' ? topic : null);
     const newMatches =
-      type === "topic" ? await findTopicMatches(itemId, topic.baseExpression) : await findEmbeddingMatches(itemId);
+      type === 'topic' ? await findTopicMatches(itemId, topic.baseExpression) : await findEmbeddingMatches(itemId);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);
   }
 
   function matchText(): string {
-    if (!searchType) return "";
-    if (searching) return "Searching for matches...";
+    if (!searchType) return '';
+    if (searching) return 'Searching for matches...';
     if (matches.length === 0)
-      return `No ${searchType} matches ${searchType === "topic" ? `for #${selectedTopic.name}` : ""}`;
-    return `${matches.length} match${matches.length > 1 ? "es" : ""} ${searchType === "topic" ? `for #${selectedTopic.name}` : ""}`;
+      return `No ${searchType} matches ${searchType === 'topic' ? `for #${selectedTopic.name}` : ''}`;
+    return `${matches.length} match${matches.length > 1 ? 'es' : ''} ${searchType === 'topic' ? `for #${selectedTopic.name}` : ''}`;
   }
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function SynergyDemoView({
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;
-    const handleCallHealthUpdate = (event: CustomEvent) => setSignalsHealthy(event.detail === "healthy");
+    const handleCallHealthUpdate = (event: CustomEvent) => setSignalsHealthy(event.detail === 'healthy');
     window.addEventListener(eventName, handleCallHealthUpdate);
     return () => window.removeEventListener(eventName, handleCallHealthUpdate);
   }, []);
@@ -149,17 +149,17 @@ export default function SynergyDemoView({
             <j-icon name="robot" color="ui-500" />
             <j-text nomargin>LLM processing:</j-text>
             <j-text nomargin weight="800">
-              {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "Localy" : "Remotely") : "Disabled"}
+              {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? 'Localy' : 'Remotely') : 'Disabled'}
             </j-text>
             <j-icon
-              name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "house-fill" : "broadcast-pin") : "x-lg"}
+              name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? 'house-fill' : 'broadcast-pin') : 'x-lg'}
               color="ui-500"
             />
             <j-icon
               name="info-circle"
               color="ui-500"
               onClick={() => setShowLLMInfoModal(true)}
-              style={{ marginLeft: 20, cursor: "pointer" }}
+              style={{ marginLeft: 20, cursor: 'pointer' }}
             />
           </j-flex>
         )}
@@ -176,7 +176,7 @@ export default function SynergyDemoView({
                   </j-text>
                   <j-icon
                     name="arrow-repeat"
-                    color={aiDataLoading ? "ui-300" : "ui-500"}
+                    color={aiDataLoading ? 'ui-300' : 'ui-500'}
                     onClick={() => {
                       if (aiDataLoading) return;
                       setAiDataLoading(true);
@@ -187,7 +187,7 @@ export default function SynergyDemoView({
                         setAiDataLoading(false);
                       }, 1000);
                     }}
-                    style={{ cursor: aiDataLoading ? "auto" : "pointer" }}
+                    style={{ cursor: aiDataLoading ? 'auto' : 'pointer' }}
                   />
                 </j-flex>
 
@@ -201,10 +201,10 @@ export default function SynergyDemoView({
                   <j-flex a="center" gap="300">
                     <j-text nomargin>LLM processing:</j-text>
                     <j-text nomargin weight="800">
-                      {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "Localy" : "Remotely") : "Disabled"}
+                      {aiStore.defaultLLM ? (aiStore.defaultLLM.local ? 'Localy' : 'Remotely') : 'Disabled'}
                     </j-text>
                     <j-icon
-                      name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? "house-fill" : "broadcast-pin") : "x-lg"}
+                      name={aiStore.defaultLLM ? (aiStore.defaultLLM.local ? 'house-fill' : 'broadcast-pin') : 'x-lg'}
                       color="ui-500"
                     />
                   </j-flex>
@@ -268,7 +268,7 @@ export default function SynergyDemoView({
                           <j-text weight="800" nomargin>
                             API Key:
                           </j-text>
-                          <j-text nomargin style={{ overflow: "hidden", maxWidth: 600, wordBreak: "break-all" }}>
+                          <j-text nomargin style={{ overflow: 'hidden', maxWidth: 600, wordBreak: 'break-all' }}>
                             {aiStore.defaultLLM.api.apiKey}
                           </j-text>
                         </j-flex>
@@ -305,16 +305,16 @@ export default function SynergyDemoView({
       <j-flex className={styles.content}>
         <div
           style={{
-            width: showMatchColumn ? "50%" : "100%",
+            width: showMatchColumn ? '50%' : '100%',
             maxWidth: 1200,
-            transition: "width 0.5s ease-in-out",
+            transition: 'width 0.5s ease-in-out',
           }}
         >
           <TimelineColumn
             agent={agent}
             perspective={perspective}
             channelId={source}
-            selectedTopicId={selectedTopic?.baseExpression || ""}
+            selectedTopicId={selectedTopic?.baseExpression || ''}
             signallingService={signallingService}
             signalsHealthy={signalsHealthy}
             appStore={appStore}
@@ -325,10 +325,10 @@ export default function SynergyDemoView({
         </div>
         <div
           style={{
-            width: showMatchColumn ? "50%" : "0%",
-            opacity: showMatchColumn ? "1" : "0",
-            pointerEvents: showMatchColumn ? "all" : "none",
-            transition: "all 0.5s ease-in-out",
+            width: showMatchColumn ? '50%' : '0%',
+            opacity: showMatchColumn ? '1' : '0',
+            pointerEvents: showMatchColumn ? 'all' : 'none',
+            transition: 'all 0.5s ease-in-out',
             maxWidth: 1200,
             marginLeft: 40,
           }}
@@ -337,7 +337,7 @@ export default function SynergyDemoView({
             perspective={perspective}
             agent={agent}
             matches={matches}
-            selectedTopicId={selectedTopic?.baseExpression || ""}
+            selectedTopicId={selectedTopic?.baseExpression || ''}
             searchType={searchType}
             filterSettings={filterSettings}
             setFilterSettings={setFilterSettings}

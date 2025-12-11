@@ -17,13 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores";
-import { onMounted, ref, watch } from "vue";
+import { useAppStore } from '@/stores';
+import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({ address: { type: String, required: true } });
 const { ad4mClient } = useAppStore();
 
-const EAS_LANG = "QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E";
+const EAS_LANG = 'QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E';
 const attestations = ref<any>([]);
 
 async function getAttestations() {
@@ -31,7 +31,7 @@ async function getAttestations() {
 
   await ad4mClient.languages.byAddress(EAS_LANG);
   const expression = await ad4mClient.expression.get(`${EAS_LANG}://${props.address}`);
-  const fetchedAttestations = JSON.parse(expression?.data || "[]");
+  const fetchedAttestations = JSON.parse(expression?.data || '[]');
   const json = fetchedAttestations.map((a: any) => JSON.parse(a.decodedDataJson));
   attestations.value = json;
 }
@@ -42,7 +42,7 @@ onMounted(() => getAttestations());
 watch(
   () => props.address,
   () => getAttestations(),
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 

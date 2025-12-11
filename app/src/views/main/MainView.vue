@@ -19,21 +19,21 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from "@/ad4mConnect";
-import CallContainer from "@/containers/CallContainer.vue";
-import AppLayout from "@/layout/AppLayout.vue";
-import { useAppStore } from "@/stores";
-import Modals from "@/views/main/modals/Modals.vue";
-import Sidebar from "@/views/main/sidebar/Sidebar.vue";
-import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
-import { usePerspectives } from "@coasys/ad4m-vue-hooks";
-import { ensureLLMTasks } from "@coasys/flux-api/src/conversation/LLMutils";
-import { EntryType } from "@coasys/flux-types";
-import semver from "semver";
-import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
-import { dependencies } from "../../../package.json";
-import { registerNotification } from "../../utils/registerMobileNotifications";
+import { ad4mConnect } from '@/ad4mConnect';
+import CallContainer from '@/containers/CallContainer.vue';
+import AppLayout from '@/layout/AppLayout.vue';
+import { useAppStore } from '@/stores';
+import Modals from '@/views/main/modals/Modals.vue';
+import Sidebar from '@/views/main/sidebar/Sidebar.vue';
+import { LinkExpression, Literal, PerspectiveProxy } from '@coasys/ad4m';
+import { usePerspectives } from '@coasys/ad4m-vue-hooks';
+import { ensureLLMTasks } from '@coasys/flux-api/src/conversation/LLMutils';
+import { EntryType } from '@coasys/flux-types';
+import semver from 'semver';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { dependencies } from '../../../package.json';
+import { registerNotification } from '../../utils/registerMobileNotifications';
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -62,7 +62,7 @@ function gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
 async function initializeApp() {
   // Add notification callback
   await appStore.ad4mClient.runtime.addNotificationTriggeredCallback((notification: any) => {
-    console.log("notification", notification);
+    console.log('notification', notification);
     return null;
   });
 
@@ -73,10 +73,10 @@ async function initializeApp() {
   ensureLLMTasks(appStore.ad4mClient.ai);
 
   // Reload page if auth state changes
-  ad4mConnect.addEventListener("authstatechange", async () => {
+  ad4mConnect.addEventListener('authstatechange', async () => {
     let oldState = oldAuthState.value;
     oldAuthState.value = ad4mConnect.authState;
-    if (ad4mConnect.authState === "authenticated" && oldState !== "authenticated") {
+    if (ad4mConnect.authState === 'authenticated' && oldState !== 'authenticated') {
       window.location.reload();
     }
   });
@@ -88,7 +88,7 @@ async function initializeApp() {
 
   // Todo: Version checking for ad4m / flux compatibility
   const { ad4mExecutorVersion } = await appStore.ad4mClient.runtime.info();
-  const isIncompatible = semver.gt(dependencies["@coasys/ad4m"], ad4mExecutorVersion);
+  const isIncompatible = semver.gt(dependencies['@coasys/ad4m'], ad4mExecutorVersion);
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }

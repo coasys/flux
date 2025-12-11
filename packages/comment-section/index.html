@@ -29,7 +29,7 @@
       }
       flux-editor.chat {
         --body-min-height: auto;
-        --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+        --grid-template-areas: 'toolbar toolbar toolbar' 'body body footer';
       }
       flux-editor.chat::part(toolbar) {
         display: none;
@@ -50,10 +50,10 @@
     </flux-container>
 
     <script type="module">
-      import "@coasys/flux-container";
-      import CommentSection from "./src/main.ts";
+      import '@coasys/flux-container';
+      import CommentSection from './src/main.ts';
 
-      customElements.define("comment-section", CommentSection);
+      customElements.define('comment-section', CommentSection);
     </script>
   </body>
 </html>

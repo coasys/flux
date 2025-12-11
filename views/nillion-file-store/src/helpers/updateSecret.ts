@@ -1,5 +1,5 @@
-import getConfig from "../config";
-import * as nillion from "@nillion/client-web";
+import getConfig from '../config';
+import * as nillion from '@nillion/client-web';
 
 interface UpdateSecret {
   nillionClient: nillion.NillionClient;
@@ -30,6 +30,6 @@ export async function updateSecret({
     return storeId;
   } catch (error) {
     console.log(error);
-    return "error";
+    return 'error';
   }
 }

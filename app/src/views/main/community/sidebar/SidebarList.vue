@@ -32,18 +32,18 @@
       >
         <ChevronUpIcon v-if="isExpanded" />
         <ChevronDownIcon v-else />
-        {{ isExpanded ? "Show less" : `Show ${hiddenCount} more` }}
+        {{ isExpanded ? 'Show less' : `Show ${hiddenCount} more` }}
       </button>
     </j-flex>
   </j-box>
 </template>
 
 <script setup lang="ts">
-import { ChevronDownIcon, ChevronUpIcon } from "@/components/icons";
-import { ChannelData } from "@/composables/useCommunityService";
-import { useModalStore } from "@/stores";
-import SidebarItem from "@/views/main/community/sidebar/SidebarItem.vue";
-import { computed, ref } from "vue";
+import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
+import { ChannelData } from '@/composables/useCommunityService';
+import { useModalStore } from '@/stores';
+import SidebarItem from '@/views/main/community/sidebar/SidebarItem.vue';
+import { computed, ref } from 'vue';
 
 type Props = { title: string; icon: string; loading: boolean; items: ChannelData[]; limitTo?: number };
 const { title, icon, loading, items, limitTo } = defineProps<Props>();

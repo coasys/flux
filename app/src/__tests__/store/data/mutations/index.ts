@@ -1,14 +1,14 @@
-import community from "../../../fixtures/community.json";
-import createCommunity from "../../../fixtures/createCommunity.json";
-import channel from "../../../fixtures/channel.json";
-import channel1 from "../../../fixtures/channel1.json";
-import createChannel from "../../../fixtures/createChannel.json";
-import messageLink from "../../../fixtures/messageLink.json";
-import messageExpression from "../../../fixtures/messageExpression.json";
-import { useDataStore } from "@/store/data";
-import { Pinia, createPinia, setActivePinia } from "pinia";
+import community from '../../../fixtures/community.json';
+import createCommunity from '../../../fixtures/createCommunity.json';
+import channel from '../../../fixtures/channel.json';
+import channel1 from '../../../fixtures/channel1.json';
+import createChannel from '../../../fixtures/createChannel.json';
+import messageLink from '../../../fixtures/messageLink.json';
+import messageExpression from '../../../fixtures/messageExpression.json';
+import { useDataStore } from '@/store/data';
+import { Pinia, createPinia, setActivePinia } from 'pinia';
 
-describe("Data Mutations", () => {
+describe('Data Mutations', () => {
   let store: Pinia;
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe("Data Mutations", () => {
     setActivePinia(store);
   });
 
-  test("Add Community", () => {
+  test('Add Community', () => {
     const dataStore = useDataStore();
     expect(Object.values(dataStore.communities).length).toBe(0);
 
@@ -25,52 +25,44 @@ describe("Data Mutations", () => {
 
     expect(Object.values(dataStore.communities).length).toBe(1);
 
-    expect(
-      (Object.values(dataStore.neighbourhoods)[0] as any).perspective.uuid
-    ).toBe(community.neighbourhood.uuid);
+    expect((Object.values(dataStore.neighbourhoods)[0] as any).perspective.uuid).toBe(community.neighbourhood.uuid);
   });
 
-  test("Check duplicate community if one exists already", async () => {
+  test('Check duplicate community if one exists already', async () => {
     const dataStore = useDataStore();
     expect(Object.values(dataStore.communities).length).toBe(0);
 
     // @ts-ignore
     dataStore.addCommunity(community);
 
-    expect(Object.keys(dataStore.communities)).toStrictEqual([
-      community.neighbourhood.uuid,
-    ]);
+    expect(Object.keys(dataStore.communities)).toStrictEqual([community.neighbourhood.uuid]);
 
     // @ts-ignore
     dataStore.addCommunity(community);
 
-    expect(Object.keys(dataStore.communities)).toStrictEqual([
-      community.neighbourhood.uuid,
-    ]);
+    expect(Object.keys(dataStore.communities)).toStrictEqual([community.neighbourhood.uuid]);
   });
 
-  test("Set current channel Id", () => {
+  test('Set current channel Id', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(
-      dataStore.communities[community.state.perspectiveUuid].currentChannelId
-    ).toBeNull();
+    expect(dataStore.communities[community.state.perspectiveUuid].currentChannelId).toBeNull();
 
     dataStore.setCurrentChannelId({
       communityId: community.state.perspectiveUuid,
       channelId: createChannel.sourcePerspective,
     });
 
-    expect(
-      dataStore.communities[community.state.perspectiveUuid].currentChannelId
-    ).toBe(createChannel.sourcePerspective);
+    expect(dataStore.communities[community.state.perspectiveUuid].currentChannelId).toBe(
+      createChannel.sourcePerspective,
+    );
   });
 
-  test("Remove community", () => {
+  test('Remove community', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
@@ -86,7 +78,7 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.neighbourhoods).length).toBe(0);
   });
 
-  test("Set Channel Notification State", () => {
+  test('Set Channel Notification State', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
@@ -99,24 +91,20 @@ describe("Data Mutations", () => {
       channelId: createChannel.id,
     });
 
-    expect(
-      dataStore.channels[createChannel.id].notifications.mute
-    ).toBeTruthy();
+    expect(dataStore.channels[createChannel.id].notifications.mute).toBeTruthy();
   });
 
-  test("Set community Theme", () => {
+  test('Set community Theme', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(
-      dataStore.communities[community.state.perspectiveUuid].theme
-    ).toStrictEqual({
-      fontSize: "md",
-      fontFamily: "Poppins",
-      name: "light",
+    expect(dataStore.communities[community.state.perspectiveUuid].theme).toStrictEqual({
+      fontSize: 'md',
+      fontFamily: 'Poppins',
+      name: 'light',
       hue: 270,
       saturation: 60,
     });
@@ -125,66 +113,50 @@ describe("Data Mutations", () => {
       communityId: community.state.perspectiveUuid,
       // @ts-ignore
       theme: {
-        fontSize: "lg",
+        fontSize: 'lg',
         saturation: 80,
       },
     });
 
-    expect(
-      dataStore.communities[community.state.perspectiveUuid].theme
-    ).toStrictEqual({
-      fontSize: "lg",
-      fontFamily: "Poppins",
-      name: "light",
+    expect(dataStore.communities[community.state.perspectiveUuid].theme).toStrictEqual({
+      fontSize: 'lg',
+      fontFamily: 'Poppins',
+      name: 'light',
       hue: 270,
       saturation: 80,
     });
   });
 
-  test("Update Community Metadata", () => {
+  test('Update Community Metadata', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
-      "test"
-    );
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].description
-    ).toBe("");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .groupExpressionRef
-    ).toBe(
-      "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9ee"
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe('test');
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].description).toBe('');
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].groupExpressionRef).toBe(
+      'QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9ee',
     );
 
     // @ts-ignore
     dataStore.updateCommunityMetadata({
       communityId: community.state.perspectiveUuid,
-      name: "test1",
-      description: "test",
+      name: 'test1',
+      description: 'test',
       groupExpressionRef:
-        "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1",
+        'QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1',
     });
 
-    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
-      "test1"
-    );
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].description
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .groupExpressionRef
-    ).toBe(
-      "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1"
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe('test1');
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].description).toBe('test');
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].groupExpressionRef).toBe(
+      'QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1',
     );
   });
 
-  test("Set channel scrollTop", () => {
+  test('Set channel scrollTop', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(community);
@@ -201,7 +173,7 @@ describe("Data Mutations", () => {
     expect(dataStore.channels[createChannel.id].scrollTop).toBe(100);
   });
 
-  test("Add channel", () => {
+  test('Add channel', () => {
     const dataStore = useDataStore();
     expect(Object.values(dataStore.communities).length).toBe(0);
 
@@ -210,10 +182,7 @@ describe("Data Mutations", () => {
 
     expect(Object.values(dataStore.communities).length).toBe(1);
 
-    expect(
-      dataStore.neighbourhoods[community.neighbourhood.uuid].linkedPerspectives
-        .length
-    ).toBe(1);
+    expect(dataStore.neighbourhoods[community.neighbourhood.uuid].linkedPerspectives.length).toBe(1);
 
     dataStore.addChannel({
       communityId: community.neighbourhood.uuid,
@@ -222,7 +191,7 @@ describe("Data Mutations", () => {
     });
   });
 
-  test("Add channel to without adding an entry in community neighbourhood", () => {
+  test('Add channel to without adding an entry in community neighbourhood', () => {
     const dataStore = useDataStore();
     expect(Object.values(dataStore.neighbourhoods).length).toBe(0);
 
@@ -236,7 +205,7 @@ describe("Data Mutations", () => {
     expect(Object.keys(dataStore.channels)).toStrictEqual([createChannel.id]);
   });
 
-  test("Set has new messages", () => {
+  test('Set has new messages', () => {
     const dataStore = useDataStore();
     // @ts-ignore
     dataStore.addCommunity(createCommunity);

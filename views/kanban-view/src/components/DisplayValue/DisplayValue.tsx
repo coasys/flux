@@ -1,8 +1,8 @@
-import { Literal } from "@coasys/ad4m";
-import { getProfile } from "@coasys/flux-api";
-import type { Profile } from "@coasys/flux-types";
-import { useEffect, useRef, useState } from "preact/hooks";
-import styles from "./DisplayValue.module.css";
+import { Literal } from '@coasys/ad4m';
+import { getProfile } from '@coasys/flux-api';
+import type { Profile } from '@coasys/flux-types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import styles from './DisplayValue.module.css';
 
 export function isValidUrl(string) {
   try {
@@ -34,13 +34,13 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
   }, [value]);
 
   function onKeyDown(e) {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       setIsEditing(false);
       onUpdate(e.target.value);
       setLocalValue(e.target.value);
     }
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       e.stopPropagation();
       setIsEditing(false);
       setLocalValue(value);
@@ -97,14 +97,14 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
     );
   }
 
-  if (typeof localValue === "string") {
-    if (localValue.startsWith("did:key")) {
+  if (typeof localValue === 'string') {
+    if (localValue.startsWith('did:key')) {
       return <Profile did={localValue} />;
     }
 
     if (localValue.length > 1000) return <img className={styles.img} src={`data:image/png;base64,${localValue}`} />;
     if (isValidUrl(localValue)) {
-      if (localValue.startsWith("literal://")) {
+      if (localValue.startsWith('literal://')) {
         return (
           <a
             className={styles.entryUrl}
@@ -142,7 +142,7 @@ export default function DisplayValue({ value, options, onUpdate, onUrlClick = ()
     );
   }
 
-  if (localValue?.constructor?.name === "Object") {
+  if (localValue?.constructor?.name === 'Object') {
     return <ShowObjectInfo value={localValue} />;
   }
 

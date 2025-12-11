@@ -44,7 +44,7 @@
 
     <j-flex class="footer" j="between" a="end">
       <span class="username">
-        {{ profile?.username || "Unknown user" }}
+        {{ profile?.username || 'Unknown user' }}
       </span>
 
       <div class="settings" v-if="!inCall">
@@ -71,24 +71,24 @@
 </template>
 
 <script setup lang="ts">
-import { CallEmoji, MediaState, useModalStore, useUiStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Profile } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRefs, watch } from "vue";
+import { CallEmoji, MediaState, useModalStore, useUiStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Profile } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { computed, nextTick, onBeforeUnmount, onMounted, PropType, ref, toRefs, watch } from 'vue';
 
-export type MediaPlayerWarning = "" | "mic-disabled" | "camera-disabled";
+export type MediaPlayerWarning = '' | 'mic-disabled' | 'camera-disabled';
 
 const props = defineProps({
-  did: { type: String, default: "" },
+  did: { type: String, default: '' },
   isMe: { type: Boolean, default: false },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
   streamReady: { type: Boolean, default: false },
-  audioState: { type: String as PropType<MediaState>, default: "on" },
-  videoState: { type: String as PropType<MediaState>, default: "off" },
-  screenShareState: { type: String as PropType<MediaState>, default: "off" },
-  warning: { type: String as PropType<MediaPlayerWarning>, default: "" },
+  audioState: { type: String as PropType<MediaState>, default: 'on' },
+  videoState: { type: String as PropType<MediaState>, default: 'off' },
+  screenShareState: { type: String as PropType<MediaState>, default: 'off' },
+  warning: { type: String as PropType<MediaPlayerWarning>, default: '' },
   emojis: { type: Array as PropType<CallEmoji[]>, default: [] },
   onClick: { type: Function as PropType<(event: MouseEvent) => void>, default: () => {} },
 });
@@ -102,13 +102,13 @@ const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 const profile = ref<Profile>();
 const videoElement = ref<HTMLVideoElement>();
 
-const showVideo = computed(() => !!stream.value && (props.videoState === "on" || props.screenShareState === "on"));
-const flipVideo = computed(() => props.isMe && props.screenShareState !== "on");
+const showVideo = computed(() => !!stream.value && (props.videoState === 'on' || props.screenShareState === 'on'));
+const flipVideo = computed(() => props.isMe && props.screenShareState !== 'on');
 const loadingMessage = computed(() => {
-  if (!props.streamReady) return "Loading...";
-  if (props.videoState === "loading") return "Video loading...";
-  else if (props.screenShareState === "loading") return "Screenshare loading...";
-  return "";
+  if (!props.streamReady) return 'Loading...';
+  if (props.videoState === 'loading') return 'Video loading...';
+  else if (props.screenShareState === 'loading') return 'Screenshare loading...';
+  return '';
 });
 
 // Watch for stream changes and properly attach them to the video element
@@ -135,10 +135,10 @@ watch(
         await videoElement.value.play();
       }
     } catch (error) {
-      console.warn("Error setting video stream:", error);
+      console.warn('Error setting video stream:', error);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Ensure proper cleanup

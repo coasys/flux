@@ -1,4 +1,4 @@
-import styles from "./Sprite.module.css";
+import styles from './Sprite.module.css';
 
 const getHashArray = (hash: string, colors: string[]): string[] => {
   const results = [];
@@ -23,11 +23,7 @@ export default function Sprite({ hash, palette }: Props) {
     <div className={styles.canvas}>
       <figure className={styles.frame}>
         {hashArray.map((hex, index) => (
-          <div
-            className={styles.pixel}
-            key={index}
-            style={{ background: `#${hex}` }}
-          ></div>
+          <div className={styles.pixel} key={index} style={{ background: `#${hex}` }}></div>
         ))}
       </figure>
     </div>

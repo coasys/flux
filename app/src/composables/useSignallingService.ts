@@ -1,15 +1,15 @@
-import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from "@/stores";
-import { getCachedAgentProfile } from "@/utils/userProfileCache";
-import { Link, NeighbourhoodProxy, PerspectiveExpression } from "@coasys/ad4m";
-import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { Link, NeighbourhoodProxy, PerspectiveExpression } from '@coasys/ad4m';
+import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { computed, ref, watch } from 'vue';
 
 export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
 const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
 const MAX_AGE = 60000; // 60 seconds before "offline"
-const NEW_STATE = "agent/new-state";
+const NEW_STATE = 'agent/new-state';
 
 export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const appStore = useAppStore();
@@ -188,7 +188,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   }
 
   function sendSignal(link: Link): void {
-    neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error("Error sending signal:", error));
+    neighbourhood.sendBroadcastU({ links: [link] }).catch((error) => console.error('Error sending signal:', error));
   }
 
   function onSignal(signal: PerspectiveExpression): void {
@@ -200,17 +200,17 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
 
     if (predicate === NEW_STATE && link.author !== me.value.did) {
       // If this is their first broadcast, immediately broadcast my state so they dont have to wait for my next heartbeat
-      if (target === "first-broadcast") broadcastState();
+      if (target === 'first-broadcast') broadcastState();
 
       try {
         // Try to parse the agent's state and add it to the store
         const agentState = JSON.parse(source);
-        if (typeof agentState === "object" && agentState !== null) {
+        if (typeof agentState === 'object' && agentState !== null) {
           agents.value[author] = { ...agents.value[author], ...agentState, lastUpdate: Date.now() };
         }
       } catch (error) {
-        console.error("Error parsing agent state:", error);
-        agents.value[author] = { ...agents.value[author], status: "unknown", lastUpdate: Date.now() };
+        console.error('Error parsing agent state:', error);
+        agents.value[author] = { ...agents.value[author], status: 'unknown', lastUpdate: Date.now() };
       }
     }
 
@@ -218,14 +218,14 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     signalHandlers.value.forEach((handler) => handler(signal));
   }
 
-  function broadcastState(target: string = ""): void {
+  function broadcastState(target: string = ''): void {
     if (!signalling.value) return;
 
     // Broadcast my state to the neighbourhood
     const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
     neighbourhood
       .sendBroadcastU({ links: [newState] })
-      .catch((error) => console.error("Error sending broadcast:", error));
+      .catch((error) => console.error('Error sending broadcast:', error));
   }
 
   // TODO: better distinguish between manually set agent status and signalling health
@@ -240,13 +240,13 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
       const timeSinceLastUpdate = now - agent.lastUpdate;
 
       // Only evaluate if needed - don't change active to active
-      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD && agent.status === "active") return;
+      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD && agent.status === 'active') return;
 
       // Determine status based on time since last update
       let newStatus: AgentStatus;
-      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD) newStatus = "active";
-      else if (timeSinceLastUpdate < MAX_AGE) newStatus = "asleep";
-      else newStatus = "offline";
+      if (timeSinceLastUpdate <= ASLEEP_THRESHOLD) newStatus = 'active';
+      else if (timeSinceLastUpdate < MAX_AGE) newStatus = 'asleep';
+      else newStatus = 'offline';
 
       // Only update if status changed
       if (newStatus !== agent.status) agents.value[did] = { ...agent, status: newStatus };
@@ -288,7 +288,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     neighbourhood.addSignalHandler(onSignal);
 
     // Send first broadcast
-    broadcastState("first-broadcast");
+    broadcastState('first-broadcast');
 
     // Schedule first heartbeat
     scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
@@ -331,7 +331,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInChannel(channelId?: string) {
     return computed<AgentData[]>(() => {
       return agentsWithProfiles.value.filter(
-        (agent) => !["offline", "invisible"].includes(agent.status) && agent.currentRoute?.channelId === channelId
+        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.currentRoute?.channelId === channelId,
       );
     });
   }
@@ -339,8 +339,8 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInCall(channelId?: string) {
     return computed<AgentData[]>(() =>
       agentsWithProfiles.value.filter(
-        (agent) => !["offline", "invisible"].includes(agent.status) && agent.callRoute?.channelId === channelId
-      )
+        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.callRoute?.channelId === channelId,
+      ),
     );
   }
 
@@ -353,19 +353,19 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
         agentEntries.map(async ([did, agent]) => ({
           ...agent,
           ...(await getCachedAgentProfile(did)),
-        }))
+        })),
       );
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: true },
   );
 
   // Watch for state changes in the stores & broadcast updates to peers
-  watch(currentRoute, (newCurrentRoute) => updateMyState("currentRoute", newCurrentRoute));
-  watch(callRoute, (newCallRoute) => updateMyState("callRoute", newCallRoute));
-  watch(inCall, (newInCallState) => updateMyState("inCall", newInCallState));
-  watch(myAgentStatus, (newStatus) => updateMyState("status", newStatus));
-  watch(aiEnabled, (newAiEnabledState) => updateMyState("aiEnabled", newAiEnabledState));
-  watch(mediaSettings, (newMediaSettings) => updateMyState("mediaSettings", newMediaSettings));
+  watch(currentRoute, (newCurrentRoute) => updateMyState('currentRoute', newCurrentRoute));
+  watch(callRoute, (newCallRoute) => updateMyState('callRoute', newCallRoute));
+  watch(inCall, (newInCallState) => updateMyState('inCall', newInCallState));
+  watch(myAgentStatus, (newStatus) => updateMyState('status', newStatus));
+  watch(aiEnabled, (newAiEnabledState) => updateMyState('aiEnabled', newAiEnabledState));
+  watch(mediaSettings, (newMediaSettings) => updateMyState('mediaSettings', newMediaSettings));
 
   return {
     signalling,

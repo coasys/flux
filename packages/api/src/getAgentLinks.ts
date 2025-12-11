@@ -1,9 +1,7 @@
-import { LinkExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { LinkExpression } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
-export default async function getAgentLinks(
-  did: string
-): Promise<LinkExpression[]> {
+export default async function getAgentLinks(did: string): Promise<LinkExpression[]> {
   const client = await getAd4mClient();
   const me = await client.agent.me();
 
@@ -14,7 +12,7 @@ export default async function getAgentLinks(
     if (me.perspective) {
       links = me.perspective.links;
     } else {
-      throw new Error("Could not find public perspective for agent self");
+      throw new Error('Could not find public perspective for agent self');
     }
   } else {
     // @ts-ignore

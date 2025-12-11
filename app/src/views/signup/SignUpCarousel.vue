@@ -60,38 +60,38 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from "@/ad4mConnect";
-import { ChromeIcon, FluxLogoIcon } from "@/components/icons";
-import { onMounted, ref } from "vue";
-import Orb from "./Orb.vue";
+import { ad4mConnect } from '@/ad4mConnect';
+import { ChromeIcon, FluxLogoIcon } from '@/components/icons';
+import { onMounted, ref } from 'vue';
+import Orb from './Orb.vue';
 
 const deferredPrompt = ref<any>(null);
 const isAtEnd = ref(false);
 const isAtStart = ref(true);
 
 function scrollToNext() {
-  const container = document.querySelector(".slider");
+  const container = document.querySelector('.slider');
 
   if (container) {
     container.scroll({
       left: container.scrollLeft + container.clientWidth,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
   }
 }
 
 function scrollToPrevious() {
-  const container = document.querySelector(".slider");
+  const container = document.querySelector('.slider');
   if (container) {
     container.scroll({
       left: container.scrollLeft - container.clientWidth,
-      behavior: "smooth",
+      behavior: 'smooth',
     });
   }
 }
 
 function handleScroll() {
-  const container = document.querySelector(".slider");
+  const container = document.querySelector('.slider');
   if (!container) return;
 
   if (container.scrollLeft + container.clientWidth >= container.scrollWidth) {
@@ -117,16 +117,16 @@ async function downloadPWA() {
     // The deferredPrompt can only be used once.
     deferredPrompt.value = null;
     // Act on the user's choice
-    if (outcome === "accepted") {
-      console.log("User accepted the install prompt.");
-    } else if (outcome === "dismissed") {
-      console.log("User dismissed the install prompt");
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt.');
+    } else if (outcome === 'dismissed') {
+      console.log('User dismissed the install prompt');
     }
   }
 }
 
 onMounted(() => {
-  window.addEventListener("beforeinstallprompt", (e) => {
+  window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt.value = e;
   });

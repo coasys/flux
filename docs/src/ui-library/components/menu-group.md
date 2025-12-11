@@ -28,9 +28,9 @@ Menu Group component is used to group a set of menu items in a dropdown or popup
 </j-menu>
 
 <script>
-  const group = document.querySelector("j-menu-group");
-  group.addEventListener("toggle", (e) => {
-    console.log("group is toggled: ", e.currentTarget.open);
+  const group = document.querySelector('j-menu-group');
+  group.addEventListener('toggle', (e) => {
+    console.log('group is toggled: ', e.currentTarget.open);
   });
 </script>
 ```
@@ -41,12 +41,7 @@ export default function Checkbox() {
 
   return (
     <j-menu>
-      <j-menu-group
-        open={open}
-        onToggle={(e) => setOpen(e.currentTarget.open)}
-        collapsible
-        title="Menu Group Title"
-      >
+      <j-menu-group open={open} onToggle={(e) => setOpen(e.currentTarget.open)} collapsible title="Menu Group Title">
         <j-menu-item>Menu Item 1</j-menu-item>
         <j-menu-item>Menu Item 2</j-menu-item>
         <j-menu-item>Menu Item 3</j-menu-item>
@@ -59,12 +54,7 @@ export default function Checkbox() {
 ```vue [vue]
 <template>
   <j-menu>
-    <j-menu-group
-      :open="open"
-      @oggle="(e) => (open = e.currentTarget.open)"
-      collapsible
-      title="Menu Group Title"
-    >
+    <j-menu-group :open="open" @oggle="(e) => (open = e.currentTarget.open)" collapsible title="Menu Group Title">
       <j-menu-item>Menu Item 1</j-menu-item>
       <j-menu-item>Menu Item 2</j-menu-item>
       <j-menu-item>Menu Item 3</j-menu-item>
@@ -73,7 +63,7 @@ export default function Checkbox() {
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 const open = ref(false);
 </script>
 ```
@@ -167,8 +157,8 @@ is set to true, the menu group will be open by default. You will also need to us
 The toggle event is fired when the menu group is collapsed or expanded. You can add an event listener to the menu group element to handle this event, like so:
 
 ```js
-const menuGroup = document.querySelector("j-menu-group");
-menuGroup.addEventListener("toggle", (event) => {
+const menuGroup = document.querySelector('j-menu-group');
+menuGroup.addEventListener('toggle', (event) => {
   // Do something when the menu group is toggled
 });
 ```

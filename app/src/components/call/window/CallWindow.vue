@@ -23,7 +23,7 @@
           <j-flex v-if="agentsInCall.length" a="center" gap="100" style="margin-left: -6px">
             <AvatarGroup :users="agentsInCall" size="xs" />
             <j-text size="400" nomargin color="ui-500">{{
-              `${agentsInCall.length} agent${agentsInCall.length > 1 ? "s" : ""} in the call`
+              `${agentsInCall.length} agent${agentsInCall.length > 1 ? 's' : ''} in the call`
             }}</j-text>
           </j-flex>
         </j-flex>
@@ -65,15 +65,15 @@
 </template>
 
 <script setup lang="ts">
-import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { useUiStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
-import { useCallResize } from "../composables/useCallResize";
-import JoinCallControls from "../controls/JoinCallControls.vue";
-import MainCallControls from "../controls/MainCallControls.vue";
-import CallResizeHandle from "./CallResizeHandle.vue";
-import VideoGrid from "./VideoGrid.vue";
+import AvatarGroup from '@/components/avatar-group/AvatarGroup.vue';
+import { useUiStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+import { useCallResize } from '../composables/useCallResize';
+import JoinCallControls from '../controls/JoinCallControls.vue';
+import MainCallControls from '../controls/MainCallControls.vue';
+import CallResizeHandle from './CallResizeHandle.vue';
+import VideoGrid from './VideoGrid.vue';
 
 defineProps<{
   callRouteData: {

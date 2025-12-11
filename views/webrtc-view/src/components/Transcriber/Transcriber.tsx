@@ -1,11 +1,11 @@
-import { Message } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
-import { detectBrowser } from "@coasys/flux-utils";
-import { useEffect, useRef, useState } from "preact/hooks";
-import { v4 as uuidv4 } from "uuid";
-import RecordingIcon from "../RecordingIcon/RecordingIcon.jsx";
-import styles from "./Transcriber.module.scss";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Message } from '@coasys/flux-api';
+import { WebRTC } from '@coasys/flux-react-web';
+import { detectBrowser } from '@coasys/flux-utils';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { v4 as uuidv4 } from 'uuid';
+import RecordingIcon from '../RecordingIcon/RecordingIcon.jsx';
+import styles from './Transcriber.module.scss';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 type Props = { source: string; perspective: any; webRTC: WebRTC };
 
@@ -26,17 +26,17 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const timeout = useRef(null);
   const streamId = useRef(null);
   const fastStreamId = useRef(null);
-  const transcriptId = useRef("");
+  const transcriptId = useRef('');
   const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
-  const [previewText, setPreviewText] = useState("");
+  const [previewText, setPreviewText] = useState('');
 
   function renderVolume() {
     if (listening.current) {
       analyser.current.getByteTimeDomainData(dataArray.current);
       const maxValue = Math.max(...dataArray.current);
       const percentage = ((maxValue - 128) / 128) * 100;
-      const volume = document.getElementById("volume");
+      const volume = document.getElementById('volume');
       if (volume) volume.style.width = `${percentage < 3 ? 0 : percentage}%`;
       requestAnimationFrame(renderVolume);
     }
@@ -44,15 +44,15 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
 
   async function saveMessage() {
     // fetch latest text & mark message as saving
-    let text = "";
-    setPreviewText("");
+    let text = '';
+    setPreviewText('');
     setTranscripts((ts) => {
       const newTranscripts = [...ts];
       const match = newTranscripts.find((t) => t.id === transcriptId.current);
       if (match) {
         text = match.text;
-        if(text) match.state = "saved";
-        else match.state = "aborted";
+        if (text) match.state = 'saved';
+        else match.state = 'aborted';
       }
       return newTranscripts;
     });
@@ -62,7 +62,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     // trigger outro transitions
     const transcriptCard = document.getElementById(`transcript-${previousId}`);
 
-    if (text) {  
+    if (text) {
       if (transcriptCard) {
         transcriptCard.classList.add(styles.slideLeft);
         setTimeout(() => {
@@ -90,7 +90,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   }
 
   function addCurrentTranscript(text?: string) {
-    if (!text) text = "";
+    if (!text) text = '';
     setTranscripts((ts) => {
       const newTranscripts = [...ts];
       // search for existing transcript
@@ -98,11 +98,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       // if match found, update text
       if (match) {
         match.text = match.text + text;
-      }
-      else {
+      } else {
         // otherwise initialise new transcript
         transcriptId.current = uuidv4();
-        newTranscripts.push({ id: transcriptId.current, timestamp: new Date(), state: "transcribing", text });
+        newTranscripts.push({ id: transcriptId.current, timestamp: new Date(), state: 'transcribing', text });
       }
       return newTranscripts;
     });
@@ -118,14 +117,14 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   // function fires every time a new chunk of text is sent back from the AI service
   async function handleTranscriptionText(text: string) {
     // Clear preview text when we get final text
-    setPreviewText("");
+    setPreviewText('');
     addCurrentTranscript(text);
     resetSaveTimeout();
   }
 
   async function handleTranscriptionPreview(text: string) {
     addCurrentTranscript();
-    setPreviewText(prevText => prevText + text);
+    setPreviewText((prevText) => prevText + text);
     resetSaveTimeout();
   }
 
@@ -152,12 +151,12 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
       historyIndex = (historyIndex + 1) % volumeHistorySamplesPerSecond;
     }, volumeCheckIntervalDuration);
 
-    let transcript = "";
-    let interimTranscript = "";
-    let accumulatedText = "";
+    let transcript = '';
+    let interimTranscript = '';
+    let accumulatedText = '';
     recognition.current.onresult = (event) => {
-      let interim = "";
-      let final = "";
+      let interim = '';
+      let final = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
@@ -201,9 +200,9 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
         timeout.current = setTimeout(async () => {
           if (accumulatedText.length > 0) {
             await saveMessage();
-            accumulatedText = "";
-            transcript = "";
-            interimTranscript = "";
+            accumulatedText = '';
+            transcript = '';
+            interimTranscript = '';
             transcriptId.current = null;
           }
         }, silenceTimeout * 1000);
@@ -211,7 +210,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     };
 
     recognition.current.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
+      console.error('Speech recognition error:', event.error);
     };
 
     recognition.current.onend = () => {
@@ -225,20 +224,24 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   async function startLocalTransciption(stream: MediaStream) {
     // set up audio context & worklet node
     const client = await getAd4mClient();
-  
-    const moreDemaningParams = { startThreshold: 0.8 }
-    streamId.current = await client.ai.openTranscriptionStream("Whisper", handleTranscriptionText, moreDemaningParams);
+
+    const moreDemaningParams = { startThreshold: 0.8 };
+    streamId.current = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
     const wordByWordParams = {
-      startThreshold: 0.5,       // Lower threshold to detect softer speech
-      startWindow: 80,           // Quick start detection
-      endThreshold: 0.10,        // Lower threshold to detect end of words
-      endWindow: 50,             // Short pause between words (100ms)
-      timeBeforeSpeech: 20       // Include minimal context before speech
+      startThreshold: 0.5, // Lower threshold to detect softer speech
+      startWindow: 80, // Quick start detection
+      endThreshold: 0.1, // Lower threshold to detect end of words
+      endWindow: 50, // Short pause between words (100ms)
+      timeBeforeSpeech: 20, // Include minimal context before speech
     };
-    fastStreamId.current = await client.ai.openTranscriptionStream("whisper_tiny_quantized", handleTranscriptionPreview, wordByWordParams);
-    await audioContext.current.audioWorklet.addModule("/audio-processor.js");
+    fastStreamId.current = await client.ai.openTranscriptionStream(
+      'whisper_tiny_quantized',
+      handleTranscriptionPreview,
+      wordByWordParams,
+    );
+    await audioContext.current.audioWorklet.addModule('/audio-processor.js');
     const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
-    const workletNode = new AudioWorkletNode(audioContext.current, "audio-processor");
+    const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
@@ -273,11 +276,11 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     listening.current = false;
     // Stop and cleanup all media tracks
     if (sourceNode.current?.mediaStream) {
-      sourceNode.current.mediaStream.getTracks().forEach(track => {
+      sourceNode.current.mediaStream.getTracks().forEach((track) => {
         track.stop();
       });
     }
-    
+
     sourceNode.current?.disconnect();
     audioContext.current?.close();
     recognition.current?.stop();
@@ -316,7 +319,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           <j-text nomargin uppercase size="400" weight="800" color="primary-500">
             Transcriber
           </j-text>
-          {browser === "chrome" ? (
+          {browser === 'chrome' ? (
             <j-checkbox
               checked={useRemoteService}
               onChange={() => {
@@ -349,14 +352,12 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           </j-text>
         </j-flex>
       )}
-      
+
       {(transcripts.length || previewText) && (
         <j-box mt="600">
           <j-flex direction="column" gap="400">
             {!transcripts.length && previewText && (
-              <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
-                {previewText}
-              </span>
+              <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>{previewText}</span>
             )}
             {transcripts.map((transcript) => (
               <div key={transcript.id} id={`transcript-${transcript.id}`} className={styles.transcript}>
@@ -366,12 +367,10 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                     {transcript.text}
                     {/* Show preview text in italics and grey if this is the current transcript */}
                     {previewText && (
-                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>
-                        {previewText}
-                      </span>
+                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-300)' }}>{previewText}</span>
                     )}
                   </j-text>
-                  {transcript.state === "transcribing" && (
+                  {transcript.state === 'transcribing' && (
                     <j-flex gap="400" a="center">
                       {/* @ts-ignore */}
                       <j-spinner size="xs" />
@@ -382,7 +381,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                       </j-text>
                     </j-flex>
                   )}
-                  {transcript.state === "saved" && (
+                  {transcript.state === 'saved' && (
                     <j-flex gap="400" a="center">
                       <j-icon name="check-circle" color="success-600" />
                       <j-text nomargin size="600" color="success-600">
@@ -390,13 +389,13 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
                       </j-text>
                     </j-flex>
                   )}
-                  {transcript.state === "aborted" && (
+                  {transcript.state === 'aborted' && (
                     <j-flex gap="400" a="center">
                       <j-icon name="x-circle" color="danger-600" />
                       <j-text nomargin size="600" color="danger-600">
-                          Aborted
-                        </j-text>
-                      </j-flex>
+                        Aborted
+                      </j-text>
+                    </j-flex>
                   )}
                 </j-flex>
               </div>
@@ -404,7 +403,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
           </j-flex>
         </j-box>
       )}
-      
     </div>
   );
 }

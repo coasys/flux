@@ -56,13 +56,11 @@ export default function Toggle() {
 <template>
   <j-button @click="open = true">Show Toast</j-button>
 
-  <j-toast :open="open" @toggle="(e) => (open = e.target.open)">
-    Your changes have been saved.
-  </j-toast>
+  <j-toast :open="open" @toggle="(e) => (open = e.target.open)"> Your changes have been saved. </j-toast>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 const open = ref(false);
 </script>
 ```
@@ -106,8 +104,8 @@ The `j-toast` component supports a default slot for displaying the message conte
 The `toggle` event is fired when the toast component is shown or hidden. You can add an event listener to the `j-toast` element to handle this event, like so:
 
 ```js
-const toast = document.querySelector("j-toast");
-toast.addEventListener("toggle", (event) => {
+const toast = document.querySelector('j-toast');
+toast.addEventListener('toggle', (event) => {
   // Do something when the toast is shown or hidden
 });
 ```

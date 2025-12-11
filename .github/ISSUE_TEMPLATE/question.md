@@ -5,7 +5,4 @@ about: Use this template if you have question regarding the app and thing relate
 title: ''
 labels: ''
 assignees: ''
-
 ---
-
-

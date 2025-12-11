@@ -1,6 +1,6 @@
-import { useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref, type Ref } from "vue";
+import { useUiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref, type Ref } from 'vue';
 
 export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection: Ref<HTMLElement | null>) {
   const uiStore = useUiStore();
@@ -18,13 +18,13 @@ export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection:
     startX.value = e.clientX;
 
     // Prevent text selection & width transitions during drag
-    const mainAppLayout = document.getElementById("app-layout-main");
-    if (mainAppLayout) mainAppLayout.style.transition = "none";
-    callWindow.value.style.transition = "none";
-    document.body.classList.add("text-selection-disabled");
+    const mainAppLayout = document.getElementById('app-layout-main');
+    if (mainAppLayout) mainAppLayout.style.transition = 'none';
+    callWindow.value.style.transition = 'none';
+    document.body.classList.add('text-selection-disabled');
 
-    document.addEventListener("mousemove", doResize, false);
-    document.addEventListener("mouseup", stopResize, false);
+    document.addEventListener('mousemove', doResize, false);
+    document.addEventListener('mouseup', stopResize, false);
   }
 
   function doResize(e: MouseEvent) {
@@ -39,8 +39,8 @@ export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection:
 
   function stopResize() {
     // Remove event listeners
-    document.removeEventListener("mousemove", doResize);
-    document.removeEventListener("mouseup", stopResize);
+    document.removeEventListener('mousemove', doResize);
+    document.removeEventListener('mouseup', stopResize);
 
     if (!callWindow.value) return;
 
@@ -52,10 +52,10 @@ export function useCallResize(callWindow: Ref<HTMLElement | null>, rightSection:
     uiStore.setCallWindowFullscreen(isFullscreen);
 
     // Reset the transition styles and remove the global resizing class
-    const mainAppLayout = document.getElementById("app-layout-main");
-    if (mainAppLayout) mainAppLayout.style.transition = "width 0.5s ease-in-out";
-    callWindow.value.style.transition = "all 0.5s ease-in-out";
-    document.body.classList.remove("text-selection-disabled");
+    const mainAppLayout = document.getElementById('app-layout-main');
+    if (mainAppLayout) mainAppLayout.style.transition = 'width 0.5s ease-in-out';
+    callWindow.value.style.transition = 'all 0.5s ease-in-out';
+    document.body.classList.remove('text-selection-disabled');
   }
 
   return {

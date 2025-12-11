@@ -1,9 +1,9 @@
-import { Ad4mModel, PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@coasys/flux-types";
-import { useMemo, useState } from "preact/hooks";
-import Entry from "../Entry";
-import styles from "./CardDetails.module.css";
+import { Ad4mModel, PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Profile } from '@coasys/flux-types';
+import { useMemo, useState } from 'preact/hooks';
+import Entry from '../Entry';
+import styles from './CardDetails.module.css';
 
 type Props = {
   task: Ad4mModel & { assignees: string[]; name: string; title: string };
@@ -35,7 +35,7 @@ export default function CardDetails({
       task.delete();
       onDeleted();
     } catch (error) {
-      console.log("Error deleting task", error);
+      console.log('Error deleting task', error);
     }
   }
 

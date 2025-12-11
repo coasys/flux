@@ -1,18 +1,18 @@
-import { Agent, PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { useWebRTC, WebRTC } from "@coasys/flux-react-web";
-import { Profile } from "@coasys/flux-types";
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import UiContext from "../../context/UiContext";
-import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-import Debug from "../Debug";
-import Footer from "../Footer";
-import JoinScreen from "../JoinScreen";
-import Notifications from "../Notifications";
-import Overlay from "../Overlay/Overlay";
-import Transcriber from "../Transcriber";
-import UserGrid from "../UserGrid";
-import styles from "./Channel.module.scss";
+import { Agent, PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { useWebRTC, WebRTC } from '@coasys/flux-react-web';
+import { Profile } from '@coasys/flux-types';
+import { useContext, useEffect, useRef, useState } from 'preact/hooks';
+import UiContext from '../../context/UiContext';
+import useIntersectionObserver from '../../hooks/useIntersectionObserver';
+import Debug from '../Debug';
+import Footer from '../Footer';
+import JoinScreen from '../JoinScreen';
+import Notifications from '../Notifications';
+import Overlay from '../Overlay/Overlay';
+import Transcriber from '../Transcriber';
+import UserGrid from '../UserGrid';
+import styles from './Channel.module.scss';
 
 type Props = {
   source: string;
@@ -68,7 +68,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
 
   function toggleFullscreen() {
     setFullscreen(!fullscreen);
-    uiStore.toggleCallFullscreen()
+    uiStore.toggleCallFullscreen();
   }
 
   useEffect(() => {

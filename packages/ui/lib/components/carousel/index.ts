@@ -1,2 +1,2 @@
-import Component from "./Carousel";
+import Component from './Carousel';
 export default Component;

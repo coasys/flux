@@ -1,6 +1,6 @@
-import { LitElement, html, css } from "lit";
-import { ifDefined } from "lit-html/directives/if-defined.js";
-import sharedStyles from "../../shared/styles";
+import { LitElement, html, css } from 'lit';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -8,13 +8,13 @@ const styles = css`
     --j-input-height: var(--j-size-md);
     --j-input-padding: var(--j-space-400);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-input-height: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-input-height: var(--j-size-lg);
   }
-  :host([size="xl"]) {
+  :host([size='xl']) {
     --j-input-height: var(--j-size-xl);
     --j-input-padding: var(--j-space-500);
   }
@@ -22,11 +22,11 @@ const styles = css`
     display: block;
     width: 100%;
   }
-  [part="base"] {
+  [part='base'] {
     display: block;
     position: relative;
   }
-  [part="input-wrapper"] {
+  [part='input-wrapper'] {
     display: flex;
     align-items: center;
     position: relative;
@@ -40,13 +40,13 @@ const styles = css`
     min-width: 200px;
     padding: 0px;
   }
-  [part="input-wrapper"]:hover {
+  [part='input-wrapper']:hover {
     border: 1px solid var(--j-border-color-strong);
   }
-  [part="input-wrapper"]:focus-within {
+  [part='input-wrapper']:focus-within {
     border: 1px solid var(--j-color-focus);
   }
-  [part="input-field"] {
+  [part='input-field'] {
     border: 0;
     flex: 1;
     background: none;
@@ -58,23 +58,23 @@ const styles = css`
     width: 100%;
     padding: 0px var(--j-input-padding);
   }
-  [part="input-field"]::placeholder {
+  [part='input-field']::placeholder {
     color: var(--j-color-ui-400);
   }
-  [part="help-text"],
-  [part="error-text"] {
+  [part='help-text'],
+  [part='error-text'] {
     left: 0;
     bottom: -20px;
     position: absolute;
     font-size: var(--j-font-size-300);
   }
-  [part="error-text"] {
+  [part='error-text'] {
     color: var(--j-color-danger-500);
   }
-  [part="start"]::slotted(*) {
+  [part='start']::slotted(*) {
     padding-left: var(--j-space-400);
   }
-  [part="end"]::slotted(*) {
+  [part='end']::slotted(*) {
     padding-right: var(--j-space-400);
   }
 `;
@@ -105,7 +105,7 @@ class Input extends LitElement {
     this.error = false;
     this.required = false;
     this.readonly = false;
-    this.type = "text";
+    this.type = 'text';
     this.focus = this.focus.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
@@ -114,8 +114,8 @@ class Input extends LitElement {
 
   static get properties() {
     return {
-      errorText: { type: String, attribute: "errortext" },
-      helpText: { type: String, attribute: "helptext" },
+      errorText: { type: String, attribute: 'errortext' },
+      helpText: { type: String, attribute: 'helptext' },
       size: { type: String, reflect: true },
       placeholder: { type: String },
       label: { type: String },
@@ -155,7 +155,7 @@ class Input extends LitElement {
     // Set the value to the target value
     // this will then become the e.target.value of the custom event
     this.value = e.target.value;
-    this.dispatchEvent(new CustomEvent("input", e));
+    this.dispatchEvent(new CustomEvent('input', e));
   }
 
   onChange(e) {
@@ -165,29 +165,27 @@ class Input extends LitElement {
     // this will then become the e.target.value of the custom event
     this.value = e.target.value;
 
-    this.dispatchEvent(new CustomEvent("change", e));
+    this.dispatchEvent(new CustomEvent('change', e));
   }
 
   select() {
-    this.renderRoot.querySelector("input").select();
+    this.renderRoot.querySelector('input').select();
   }
 
   focus() {
-    this.renderRoot.querySelector("input").focus();
+    this.renderRoot.querySelector('input').focus();
   }
 
   onFocus(e) {
     e.stopPropagation();
     this.value = e.target.value;
-    this.dispatchEvent(new CustomEvent("change", e));
+    this.dispatchEvent(new CustomEvent('change', e));
   }
 
   validate() {
-    const valid = this.renderRoot.querySelector("input").checkValidity();
+    const valid = this.renderRoot.querySelector('input').checkValidity();
 
-    const message =
-      this.errorText ||
-      this.renderRoot.querySelector("input").validationMessage;
+    const message = this.errorText || this.renderRoot.querySelector('input').validationMessage;
 
     if (!valid) {
       this.error = true;
@@ -196,7 +194,7 @@ class Input extends LitElement {
       this.error = false;
     }
 
-    this.dispatchEvent(new CustomEvent("validate"));
+    this.dispatchEvent(new CustomEvent('validate'));
 
     return valid;
   }
@@ -208,18 +206,13 @@ class Input extends LitElement {
       this.validate();
     }
 
-    this.dispatchEvent(new CustomEvent("blur", e));
+    this.dispatchEvent(new CustomEvent('blur', e));
   }
 
   render() {
     return html`
       <div part="base">
-        ${this.label &&
-        html`
-          <j-text tag="label" variant="label" part="label"
-            >${this.label}
-          </j-text>
-        `}
+        ${this.label && html` <j-text tag="label" variant="label" part="label">${this.label} </j-text> `}
         <div part="input-wrapper">
           <slot part="start" name="start"></slot>
           <input
@@ -252,13 +245,13 @@ class Input extends LitElement {
             ? html`<div part="error-text">${this.errorText}</div>`
             : null
           : this.helpText
-          ? html`<div part="help-text">${this.helpText}</div>`
-          : null}
+            ? html`<div part="help-text">${this.helpText}</div>`
+            : null}
       </div>
     `;
   }
 }
 
-customElements.define("j-input", Input);
+customElements.define('j-input', Input);
 
 export default Input;

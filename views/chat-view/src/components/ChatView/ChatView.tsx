@@ -1,11 +1,11 @@
-import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Message } from "@coasys/flux-api";
-import { community } from "@coasys/flux-constants";
-import { EntryType, Profile } from "@coasys/flux-types";
-import { useEffect, useRef, useState } from "preact/hooks";
-import MessageList from "../MessageList/MessageList";
-import styles from "./ChatView.module.css";
+import { LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Message } from '@coasys/flux-api';
+import { community } from '@coasys/flux-constants';
+import { EntryType, Profile } from '@coasys/flux-types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import MessageList from '../MessageList/MessageList';
+import styles from './ChatView.module.css';
 
 const { REPLY_TO, REACTION } = community;
 
@@ -64,7 +64,7 @@ export default function ChatView({ agent, perspective, source, threaded, element
   }
 
   function onKeydown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
     }
@@ -91,8 +91,8 @@ export default function ChatView({ agent, perspective, source, threaded, element
       el.perspective = perspective;
       el.agent = agent;
       el.getProfile = getProfile;
-      el.setAttribute("source", message.baseExpression);
-      el.setAttribute("threaded", "true");
+      el.setAttribute('source', message.baseExpression);
+      el.setAttribute('threaded', 'true');
     }
   }
 
@@ -110,7 +110,7 @@ export default function ChatView({ agent, perspective, source, threaded, element
           source: pickerInfo.id,
           predicate: REACTION,
           target: emojiExpression,
-        })
+        }),
       );
 
       const myReactions = reactions.filter((l) => l.author === me.did);
@@ -172,7 +172,7 @@ export default function ChatView({ agent, perspective, source, threaded, element
           onclickoutside={() => setPickerInfo(null)}
           onChange={onEmojiClick}
           style={{
-            position: "fixed",
+            position: 'fixed',
             zIndex: 9999,
             ...getEmojiPickerPosition(pickerInfo.x, pickerInfo.y),
           }}

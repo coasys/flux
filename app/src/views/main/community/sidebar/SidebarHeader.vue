@@ -44,7 +44,7 @@
       <j-avatar size="xl" :initials="`${community?.name}`.charAt(0).toUpperCase()" :src="community?.image || null" />
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
-          {{ community?.name || "No name" }}
+          {{ community?.name || 'No name' }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{ communityDescription() }}
@@ -68,11 +68,11 @@
 </template>
 
 <script setup lang="ts">
-import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
-import { useCommunityService } from "@/composables/useCommunityService";
-import { useModalStore, useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import LoadingBar from '@/components/loading-bar/LoadingBar.vue';
+import { useCommunityService } from '@/composables/useCommunityService';
+import { useModalStore, useUiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 const uiStore = useUiStore();
 const modalsStore = useModalStore();
@@ -83,11 +83,11 @@ const { isSynced, isAuthor, community } = useCommunityService();
 const showCommunityMenu = ref(false);
 
 function communityDescription() {
-  if (!community.value) return "";
-  if (!isSynced.value) return "Syncing community...";
+  if (!community.value) return '';
+  if (!isSynced.value) return 'Syncing community...';
   const { description } = community.value;
   // Temp bug fix for undefined model properties being an empty array
-  if (Array.isArray(description) || !description) return "No description";
+  if (Array.isArray(description) || !description) return 'No description';
   return description;
 }
 

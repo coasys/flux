@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore, useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
+import { useUiStore, useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
@@ -29,7 +29,7 @@ const { callWindowOpen } = storeToRefs(uiStore);
 const { inCall } = storeToRefs(webrtcStore);
 
 function goToSettings() {
-  router.push({ name: "settings" });
+  router.push({ name: 'settings' });
 }
 
 function toggleCallWindow() {

@@ -56,7 +56,7 @@ body:has(*:last-child:empty) *:first-child {
   display: none;
 }
 
-.body a:not([href^="http"]) {
+.body a:not([href^='http']) {
   text-decoration: none;
   background: var(--j-color-primary-100);
   color: var(--j-color-primary-500);

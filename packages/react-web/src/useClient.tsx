@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react";
-import { getCache, setCache, subscribe, unsubscribe } from "./cache";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { Ad4mClient } from "@coasys/ad4m";
+import { useState, useCallback, useEffect } from 'react';
+import { getCache, setCache, subscribe, unsubscribe } from './cache';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient } from '@coasys/ad4m';
 
 export function useClient() {
   const forceUpdate = useForceUpdate();
@@ -11,14 +11,11 @@ export function useClient() {
   const cacheKey = `client`;
 
   // Mutate shared/cached data for all subscribers
-  const mutate = useCallback(
-    (client: Ad4mClient | undefined) => setCache(cacheKey, client),
-    [cacheKey]
-  );
+  const mutate = useCallback((client: Ad4mClient | undefined) => setCache(cacheKey, client), [cacheKey]);
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    console.log("🪝 useClient - running getAd4mClient");
+    console.log('🪝 useClient - running getAd4mClient');
     getAd4mClient()
       .then((client) => {
         setError(undefined);

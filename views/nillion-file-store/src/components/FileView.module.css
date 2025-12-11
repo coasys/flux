@@ -15,7 +15,7 @@
   border: 1px solid var(--j-color-ui-700);
 }
 
-.fileupload input[type="file"] {
+.fileupload input[type='file'] {
   display: none;
 }
 

@@ -76,9 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import Match from "@/components/conversation/match/Match.vue";
-import { ChevronDownIcon } from "@/components/icons";
-import { closeMenu } from "@/utils/helperFunctions";
+import Match from '@/components/conversation/match/Match.vue';
+import { ChevronDownIcon } from '@/components/icons';
+import { closeMenu } from '@/utils/helperFunctions';
 import {
   FilterSettings,
   GroupingOption,
@@ -86,8 +86,8 @@ import {
   itemTypeOptions,
   SearchType,
   SynergyMatch,
-} from "@coasys/flux-utils";
-import { computed, ref, watch } from "vue";
+} from '@coasys/flux-utils';
+import { computed, ref, watch } from 'vue';
 
 interface Props {
   matches: SynergyMatch[];
@@ -104,7 +104,7 @@ const props = defineProps<Props>();
 const numberOfMatchesDisplayed = ref(5);
 
 const filteredGroupingOptions = computed((): GroupingOption[] =>
-  props.searchType === "topic" ? (["Conversations", "Subgroups"] as GroupingOption[]) : [...groupingOptions]
+  props.searchType === 'topic' ? (['Conversations', 'Subgroups'] as GroupingOption[]) : [...groupingOptions],
 );
 
 const visibleMatches = computed(() => props.matches.slice(0, numberOfMatchesDisplayed.value));
@@ -113,7 +113,7 @@ watch(
   () => props.matches,
   () => {
     numberOfMatchesDisplayed.value = 5;
-  }
+  },
 );
 </script>
 

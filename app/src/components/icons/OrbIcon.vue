@@ -8,14 +8,7 @@
       fill-opacity="0.6"
     />
     <defs>
-      <linearGradient
-        id="paint0_linear"
-        x1="0"
-        y1="0"
-        x2="340.094"
-        y2="80.9644"
-        gradientUnits="userSpaceOnUse"
-      >
+      <linearGradient id="paint0_linear" x1="0" y1="0" x2="340.094" y2="80.9644" gradientUnits="userSpaceOnUse">
         <stop offset="0.376642" stop-color="#D3CFFF" />
         <stop offset="1" stop-color="#E4FFD6" />
       </linearGradient>

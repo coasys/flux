@@ -1,7 +1,7 @@
-import { LitElement, html, css } from "lit";
-import { state, customElement, property } from "lit/decorators.js";
-import { ifDefined } from "lit-html/directives/if-defined.js";
-import sharedStyles from "../../shared/styles";
+import { LitElement, html, css } from 'lit';
+import { state, customElement, property } from 'lit/decorators.js';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -15,13 +15,13 @@ const styles = css`
     --j-tab-item-height: var(--j-size-md);
     --j-tab-item-font-size: var(--j-font-size-500);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-tab-item-height: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-tab-item-height: var(--j-size-lg);
   }
-  [part="base"] {
+  [part='base'] {
     display: flex;
     align-items: center;
     gap: var(--j-space-400);
@@ -44,19 +44,19 @@ const styles = css`
     background: var(--j-tab-item-background);
     padding: var(--j-tab-item-padding);
   }
-  [part="content"] {
+  [part='content'] {
     flex: 1;
   }
-  :host([disabled]) [part="base"] {
+  :host([disabled]) [part='base'] {
     cursor: not-allowed;
     opacity: 0.6;
   }
-  :host([disabled][checked]) [part="base"] {
+  :host([disabled][checked]) [part='base'] {
     opacity: 1;
   }
 `;
 
-@customElement("j-tab-item")
+@customElement('j-tab-item')
 class TabItem extends LitElement {
   /**
    * Checked
@@ -81,31 +81,21 @@ class TabItem extends LitElement {
   _value = null;
 
   get label() {
-    return (
-      this._label ||
-      this.getAttribute("label") ||
-      this.innerText ||
-      this.innerHTML
-    );
+    return this._label || this.getAttribute('label') || this.innerText || this.innerHTML;
   }
 
   set label(val) {
     this._label = val;
-    this.setAttribute("label", val);
+    this.setAttribute('label', val);
   }
 
   get value() {
-    return (
-      this._value ||
-      this.getAttribute("value") ||
-      this.innerText ||
-      this.innerHTML
-    );
+    return this._value || this.getAttribute('value') || this.innerText || this.innerHTML;
   }
 
   set value(val) {
     this._value = val;
-    this.setAttribute("value", val);
+    this.setAttribute('value', val);
   }
 
   static get styles() {
@@ -115,7 +105,7 @@ class TabItem extends LitElement {
   _handleChange(e) {
     e.stopPropagation();
     this.checked = true;
-    this.dispatchEvent(new CustomEvent("tab-selected", { bubbles: true }));
+    this.dispatchEvent(new CustomEvent('tab-selected', { bubbles: true }));
   }
 
   render() {

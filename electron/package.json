@@ -1,8 +1,9 @@
 {
   "name": "flux-electron",
-  "version": "1.0.0",
+  "version": "0.11.0",
   "description": "",
-  "main": "index.js",
+  "author": "",
+  "license": "ISC",
   "scripts": {
     "start": "electron-forge start",
     "make": "electron-forge make",
@@ -12,20 +13,6 @@
     "package-x64": "electron-forge package --arch=x64",
     "build-electron": "VITE_BASE='./' yarn workspace flux build",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@electron-forge/cli": "^6.1.1",
-    "@electron-forge/maker-deb": "^6.1.1",
-    "@electron-forge/maker-dmg": "^6.2.1",
-    "@electron-forge/maker-rpm": "^6.1.1",
-    "@electron-forge/maker-squirrel": "^6.1.1",
-    "@electron-forge/maker-zip": "^6.1.1",
-    "electron": "^25.1.0"
-  },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
     "forge": {
@@ -60,5 +47,18 @@
         }
       ]
     }
+  },
+  "main": "index.js",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-dmg": "^6.2.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
+    "electron": "^25.1.0"
   }
 }

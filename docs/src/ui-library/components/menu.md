@@ -81,8 +81,8 @@ Use the value property to set the value of the menu item. This value will be use
 The click event is fired when the menu item is clicked. You can add an event listener to the menu item element to handle this event, like so:
 
 ```js
-const menuItem = document.querySelector("j-menu-item");
-menuItem.addEventListener("click", () => {
+const menuItem = document.querySelector('j-menu-item');
+menuItem.addEventListener('click', () => {
   // Do something when the menu item is clicked
 });
 ```

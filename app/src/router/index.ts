@@ -1,47 +1,47 @@
-import { ad4mConnect } from "@/ad4mConnect";
-import { useAppStore, useRouteMemoryStore } from "@/stores";
-import { RouteParams } from "@coasys/flux-types";
-import { storeToRefs } from "pinia";
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import { ad4mConnect } from '@/ad4mConnect';
+import { useAppStore, useRouteMemoryStore } from '@/stores';
+import { RouteParams } from '@coasys/flux-types';
+import { storeToRefs } from 'pinia';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/signup",
-    name: "signup",
+    path: '/signup',
+    name: 'signup',
     component: () => import(`@/views/signup/SignUp.vue`),
   },
   {
-    path: "/update-ad4m",
-    name: "update-ad4m",
+    path: '/update-ad4m',
+    name: 'update-ad4m',
     component: () => import(`@/views/update/UpdateAd4m.vue`),
   },
   {
-    path: "/",
-    name: "main",
+    path: '/',
+    name: 'main',
     component: () => import(`@/views/main/MainView.vue`),
-    redirect: { name: "home" },
+    redirect: { name: 'home' },
     children: [
       {
-        path: "home",
-        name: "home",
+        path: 'home',
+        name: 'home',
         component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
-        path: "communities/:communityId",
+        path: 'communities/:communityId',
         props: true,
-        name: "community",
+        name: 'community',
         component: () => import(`@/views/main/community/CommunityView.vue`),
         children: [
           {
-            path: ":channelId",
+            path: ':channelId',
             props: true,
-            name: "channel",
+            name: 'channel',
             component: () => import(`@/views/main/community/channel/ChannelView.vue`),
             children: [
               {
-                path: ":viewId",
+                path: ':viewId',
                 props: true,
-                name: "view",
+                name: 'view',
                 component: () => import(`@/views/main/community/channel/view/ViewView.vue`),
               },
             ],
@@ -49,14 +49,14 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
-        path: "profile/:did",
+        path: 'profile/:did',
         props: true,
-        name: "profile",
+        name: 'profile',
         component: () => import(`@/views/main/profile/ProfileView.vue`),
       },
       {
-        path: "settings",
-        name: "settings",
+        path: 'settings',
+        name: 'settings',
         component: () => import(`@/containers/Settings.vue`),
       },
     ],
@@ -74,21 +74,21 @@ router.beforeEach(async (to, from, next) => {
       const { me } = storeToRefs(appStore);
 
       // Handle authenticated routes
-      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith("flux://"));
-      const isOnSignupOrMain = to.name === "signup" || to.name === "main";
+      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith('flux://'));
+      const isOnSignupOrMain = to.name === 'signup' || to.name === 'main';
       if (fluxAccountCreated && isOnSignupOrMain) {
         await appStore.refreshMyProfile();
-        next("/home");
-      } else if (!fluxAccountCreated && !isOnSignupOrMain) next("/signup");
+        next('/home');
+      } else if (!fluxAccountCreated && !isOnSignupOrMain) next('/signup');
       else next();
     } else {
       // If not logged in, redirect to signup
-      if (to.name !== "signup") next("/signup");
+      if (to.name !== 'signup') next('/signup');
       next();
     }
   } catch (e) {
-    console.log("Error in route", e);
-    if (to.name !== "signup") next("/signup");
+    console.log('Error in route', e);
+    if (to.name !== 'signup') next('/signup');
     else next();
   }
 });

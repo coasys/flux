@@ -1,7 +1,7 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
-import { generateStylesheet, generateVariable } from "../../utils/stylesheets";
+import { html, css, LitElement, adoptStyles } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
+import { generateStylesheet, generateVariable } from '../../utils/stylesheets';
 
 const styles = css`
   :host {
@@ -17,21 +17,21 @@ const styles = css`
     display: block;
     font-size: var(--j-icon-size);
   }
-  :host([size="xs"]) i {
+  :host([size='xs']) i {
     --j-icon-size: 16px;
   }
-  :host([size="sm"]) i {
+  :host([size='sm']) i {
     --j-icon-size: 18px;
   }
-  :host([size="lg"]) i {
+  :host([size='lg']) i {
     --j-icon-size: 32px;
   }
-  :host([size="xl"]) i {
+  :host([size='xl']) i {
     --j-icon-size: 48px;
   }
 `;
 
-@customElement("j-icon")
+@customElement('j-icon')
 export default class Icon extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -60,11 +60,11 @@ export default class Icon extends LitElement {
   color = null;
 
   @state()
-  svg = "";
+  svg = '';
 
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
+    this.attachShadow({ mode: 'open' });
     this.shadowRoot.innerHTML = `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">`;
   }
 
@@ -72,8 +72,8 @@ export default class Icon extends LitElement {
     const styleSheets = [styles, sharedStyles];
 
     if (this.color) {
-      const variable = generateVariable("j-color", this.color, "currentColor");
-      styleSheets.push(generateStylesheet("--j-icon-color", variable));
+      const variable = generateVariable('j-color', this.color, 'currentColor');
+      styleSheets.push(generateStylesheet('--j-icon-color', variable));
     }
 
     // @ts-ignore
@@ -83,10 +83,6 @@ export default class Icon extends LitElement {
   }
 
   render() {
-    return html`<i
-      class="bi-${this.name}"
-      role="img"
-      aria-label="${this.name}"
-    ></i>`;
+    return html`<i class="bi-${this.name}" role="img" aria-label="${this.name}"></i>`;
   }
 }

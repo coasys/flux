@@ -1,7 +1,7 @@
-import { useState, useEffect } from "preact/hooks";
-import styles from "./Table.module.css";
-import DisplayValue from "../DisplayValue";
-import { LinkQuery, PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { useState, useEffect } from 'preact/hooks';
+import styles from './Table.module.css';
+import DisplayValue from '../DisplayValue';
+import { LinkQuery, PerspectiveProxy, Agent } from '@coasys/ad4m';
 
 type Props = {
   me: null | Agent;
@@ -25,18 +25,13 @@ export default function Table({
 
   useEffect(() => {
     perspective
-      .infer(
-        `subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Label).`
-      )
+      .infer(`subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Label).`)
       .then((res) => {
         if (res?.length) {
           const options = res.reduce((acc, option) => {
             return {
               ...acc,
-              [option.Property]: [
-                ...(acc[option.Property] || []),
-                { label: option.Label, value: option.Value },
-              ],
+              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
             };
           }, {});
           setNamedOptions(options);
@@ -45,7 +40,7 @@ export default function Table({
   }, [subjectClass]);
 
   const headers = Object.keys(entries[0]).filter((key, index) => {
-    return !(key === "id" || key === "author" || key === "timestamp");
+    return !(key === 'id' || key === 'author' || key === 'timestamp');
   });
 
   async function onUpdate(id, propName, value) {
@@ -100,34 +95,12 @@ export default function Table({
               <tr key={index}>
                 <td>
                   <j-flex gap="100">
-                    <input
-                      onChange={onToggleSelect}
-                      name="select"
-                      value={entry.id}
-                      type="checkbox"
-                    />
-                    <j-button
-                      onclick={() => onUrlClick(entry.id)}
-                      circle
-                      variant="ghost"
-                      square
-                      size="xs"
-                    >
-                      <j-icon
-                        style="--j-icon-size: 0.7rem"
-                        name="arrows-angle-expand"
-                      ></j-icon>
+                    <input onChange={onToggleSelect} name="select" value={entry.id} type="checkbox" />
+                    <j-button onclick={() => onUrlClick(entry.id)} circle variant="ghost" square size="xs">
+                      <j-icon style="--j-icon-size: 0.7rem" name="arrows-angle-expand"></j-icon>
                     </j-button>
-                    <j-button
-                      onclick={() => onEntryClick(entry.id)}
-                      variant="ghost"
-                      size="xs"
-                    >
-                      <j-icon
-                        color="primary-400"
-                        style="--j-icon-size: 1.2rem"
-                        name="arrow-right-circle-fill"
-                      ></j-icon>
+                    <j-button onclick={() => onEntryClick(entry.id)} variant="ghost" size="xs">
+                      <j-icon color="primary-400" style="--j-icon-size: 1.2rem" name="arrow-right-circle-fill"></j-icon>
                     </j-button>
                   </j-flex>
                 </td>
@@ -145,39 +118,18 @@ export default function Table({
                             value={value}
                           />
                         </div>
-                        <j-menu
-                          onClick={(e) => e.stopPropagation()}
-                          slot="content"
-                        >
+                        <j-menu onClick={(e) => e.stopPropagation()} slot="content">
                           {selectedEntries.length ? (
                             <j-menu-item onClick={onDeleteSelected}>
-                              <j-icon
-                                name="trash"
-                                size="xs"
-                                slot="start"
-                              ></j-icon>
-                              <j-text
-                                color="danger-500"
-                                size="400"
-                                weight="500"
-                                nomargin
-                              >
+                              <j-icon name="trash" size="xs" slot="start"></j-icon>
+                              <j-text color="danger-500" size="400" weight="500" nomargin>
                                 Delete selected entries
                               </j-text>
                             </j-menu-item>
                           ) : (
                             <j-menu-item onClick={() => onDelete(entry.id)}>
-                              <j-icon
-                                name="trash"
-                                size="xs"
-                                slot="start"
-                              ></j-icon>
-                              <j-text
-                                color="danger-500"
-                                size="400"
-                                weight="500"
-                                nomargin
-                              >
+                              <j-icon name="trash" size="xs" slot="start"></j-icon>
+                              <j-text color="danger-500" size="400" weight="500" nomargin>
                                 Delete entry
                               </j-text>
                             </j-menu-item>

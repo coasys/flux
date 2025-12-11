@@ -19,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { viewOptions } from "@/constants";
-import { ChannelView } from "@coasys/flux-types";
-import { ref, watch } from "vue";
+import { viewOptions } from '@/constants';
+import { ChannelView } from '@coasys/flux-types';
+import { ref, watch } from 'vue';
 
 interface Props {
   views?: ChannelView[];
@@ -36,10 +36,10 @@ watch(
   (val) => {
     if (val) proxySel.value = val;
   },
-  { immediate: true }
+  { immediate: true },
 );
 
-watch(proxySel, (val) => emit("change", val));
+watch(proxySel, (val) => emit('change', val));
 </script>
 
 <style scoped>

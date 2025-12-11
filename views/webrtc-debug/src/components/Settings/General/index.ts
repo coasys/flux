@@ -1,3 +1,3 @@
-import General from "./General";
+import General from './General';
 
 export default General;

@@ -10,7 +10,7 @@ export function scrollHandler(
     onScroll = (e: any) => null,
     onScrollStop = (e: any) => null,
     removeListenerAfterStop = false,
-  }: ScrollHandlerOptions
+  }: ScrollHandlerOptions,
 ) {
   let _timer = null;
 
@@ -22,12 +22,12 @@ export function scrollHandler(
     _timer = setTimeout(() => {
       onScrollStop(e);
       if (removeListenerAfterStop) {
-        scrollContainer.removeEventListener("scroll", handleScroll);
+        scrollContainer.removeEventListener('scroll', handleScroll);
       }
     }, 150);
   }
 
-  scrollContainer.addEventListener("scroll", handleScroll);
+  scrollContainer.addEventListener('scroll', handleScroll);
 }
 
 export function scrollTo(scrollContainer, index, callback) {
@@ -38,6 +38,6 @@ export function scrollTo(scrollContainer, index, callback) {
 
   scrollContainer.scrollTo({
     left: scrollContainer.clientWidth * index,
-    behavior: "smooth",
+    behavior: 'smooth',
   });
 }

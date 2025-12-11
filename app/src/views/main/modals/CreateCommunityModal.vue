@@ -178,15 +178,15 @@
 </template>
 
 <script setup lang="ts">
-import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { HourglassIcon } from "@/components/icons";
-import { useAppStore, useModalStore } from "@/stores";
-import { isValid } from "@/utils/validation";
-import { PerspectiveProxy } from "@coasys/ad4m";
-import { createCommunity, joinCommunity } from "@coasys/flux-api";
-import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, toRaw } from "vue";
-import { useRouter } from "vue-router";
+import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
+import { HourglassIcon } from '@/components/icons';
+import { useAppStore, useModalStore } from '@/stores';
+import { isValid } from '@/utils/validation';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { createCommunity, joinCommunity } from '@coasys/flux-api';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted, ref, toRaw } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -194,10 +194,10 @@ const modalStore = useModalStore();
 
 const { ad4mClient, hasJoinedTestingCommunity, myPerspectives, myCommunities } = storeToRefs(appStore);
 
-const tabView = ref("");
-const joiningLink = ref("");
-const newCommunityName = ref("");
-const newCommunityDesc = ref("");
+const tabView = ref('');
+const joiningLink = ref('');
+const newCommunityName = ref('');
+const newCommunityDesc = ref('');
 const newProfileImage = ref<string | undefined>(undefined);
 const isJoiningCommunity = ref(false);
 const isCreatingCommunity = ref(false);
@@ -220,17 +220,17 @@ const canJoin = computed((): boolean => {
           const regex = /neighbourhood:\/\/[^\s]*/;
           return !regex.test(val);
         },
-        message: "This is not a valid neighbourhood link",
+        message: 'This is not a valid neighbourhood link',
       },
     ],
-    joiningLink.value
+    joiningLink.value,
   );
 });
 
 const canSubmit = computed((): boolean => {
   return isValid(
-    [{ check: (val: string) => (val ? false : true), message: "This field is required" }],
-    newCommunityName.value
+    [{ check: (val: string) => (val ? false : true), message: 'This field is required' }],
+    newCommunityName.value,
   );
 });
 
@@ -239,10 +239,10 @@ function closeModal() {
 
   // Reset state after modal close animation
   setTimeout(() => {
-    tabView.value = "";
-    joiningLink.value = "";
-    newCommunityName.value = "";
-    newCommunityDesc.value = "";
+    tabView.value = '';
+    joiningLink.value = '';
+    newCommunityName.value = '';
+    newCommunityDesc.value = '';
     newProfileImage.value = undefined;
     isJoiningCommunity.value = false;
     isCreatingCommunity.value = false;
@@ -256,11 +256,11 @@ function toggleModal(open: boolean) {
 
 function cleanInviteLink(text: string) {
   const regex = /neighbourhood:\/\/[^\s]*/;
-  const neighbourhoodUrlMatch = text.match(regex) || [""];
+  const neighbourhoodUrlMatch = text.match(regex) || [''];
   const match = neighbourhoodUrlMatch[0];
   joiningLink.value = match;
   if (text && !match) {
-    appStore.showDangerToast({ message: "We were not able to parse this invite link" });
+    appStore.showDangerToast({ message: 'We were not able to parse this invite link' });
   }
 }
 
@@ -273,17 +273,17 @@ async function joinCommunityMethod() {
     const existingPerspective = toRaw(myPerspectives.value).find((p) => p.sharedUrl === neighbourhoodUrl);
 
     if (existingPerspective) {
-      appStore.showDangerToast({ message: "You are already a member of this community" });
+      appStore.showDangerToast({ message: 'You are already a member of this community' });
       closeModal();
       return;
     }
 
     const community = await joinCommunity({ joiningLink: neighbourhoodUrl });
-    router.push({ name: "community", params: { communityId: community.uuid } });
+    router.push({ name: 'community', params: { communityId: community.uuid } });
     closeModal();
   } catch (error) {
-    console.error("Error joining community:", error);
-    appStore.showDangerToast({ message: "Failed to join community. Please try again." });
+    console.error('Error joining community:', error);
+    appStore.showDangerToast({ message: 'Failed to join community. Please try again.' });
   } finally {
     isJoiningCommunity.value = false;
   }
@@ -301,11 +301,11 @@ async function createCommunityMethod() {
     });
     // Refresh communities and navigate to the new one
     await appStore.getMyCommunities();
-    router.push({ name: "community", params: { communityId: community.uuid } });
+    router.push({ name: 'community', params: { communityId: community.uuid } });
     closeModal();
   } catch (error) {
-    console.error("Error creating community:", error);
-    appStore.showDangerToast({ message: "Failed to create community." });
+    console.error('Error creating community:', error);
+    appStore.showDangerToast({ message: 'Failed to create community.' });
   } finally {
     isCreatingCommunity.value = false;
   }
@@ -321,11 +321,11 @@ async function createCommunityFromPerspective(perspective: any) {
       image: newProfileImage.value,
       perspectiveUuid: perspective.uuid,
     });
-    router.push({ name: "community", params: { communityId: community.uuid } });
+    router.push({ name: 'community', params: { communityId: community.uuid } });
     closeModal();
   } catch (error) {
-    console.error("Error creating community from perspective:", error);
-    appStore.showDangerToast({ message: "Failed to create community from perspective." });
+    console.error('Error creating community from perspective:', error);
+    appStore.showDangerToast({ message: 'Failed to create community from perspective.' });
   } finally {
     isCreatingCommunity.value = false;
   }
@@ -333,11 +333,11 @@ async function createCommunityFromPerspective(perspective: any) {
 
 async function joinTestingCommunity() {
   try {
-    tabView.value = "Test";
+    tabView.value = 'Test';
     await appStore.joinTestingCommunity();
   } catch (e) {
-    console.log("Error joining testing community:", e);
-    appStore.showDangerToast({ message: "Failed to join testing community." });
+    console.log('Error joining testing community:', e);
+    appStore.showDangerToast({ message: 'Failed to join testing community.' });
   } finally {
     closeModal();
   }
@@ -350,7 +350,7 @@ onMounted(async () => {
     if (!linkLangs?.length) {
       langMeta.value = [];
       selectedLang.value = null;
-      appStore.setToast({ variant: "error", message: "No link languages available.", open: true });
+      appStore.setToast({ variant: 'error', message: 'No link languages available.', open: true });
       return;
     }
     const langExpression = await ad4mClient.value.expression.getMany(linkLangs.map((l: string) => `lang://${l}`));
@@ -358,10 +358,10 @@ onMounted(async () => {
     langMeta.value = langMetaData;
     selectedLang.value = langMetaData[0]?.address ?? null;
   } catch (error) {
-    console.error("Error loading link languages:", error);
+    console.error('Error loading link languages:', error);
     langMeta.value = [];
     selectedLang.value = null;
-    appStore.showDangerToast({ message: "Failed to load link languages." });
+    appStore.showDangerToast({ message: 'Failed to load link languages.' });
   }
 });
 </script>
@@ -394,7 +394,7 @@ onMounted(async () => {
       border: 1px solid var(--j-color-primary-500);
     }
 
-    &[variant="secondary"] {
+    &[variant='secondary'] {
       background: var(--j-color-primary-100);
       border: 1px solid var(--j-color-primary-300);
 

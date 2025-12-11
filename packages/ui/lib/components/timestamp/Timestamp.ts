@@ -1,8 +1,8 @@
-import { html, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
-@customElement("j-timestamp")
+@customElement('j-timestamp')
 export default class Component extends LitElement {
   static styles = [sharedStyles];
 
@@ -11,14 +11,14 @@ export default class Component extends LitElement {
    * @type {String}
    * @attr
    */
-  @property({ type: String, reflect: true }) value = "01/01/1970";
+  @property({ type: String, reflect: true }) value = '01/01/1970';
 
   /**
    * Locales
    * @type {String}
    * @attr
    */
-  @property({ type: String, reflect: true }) locales = "en";
+  @property({ type: String, reflect: true }) locales = 'en';
 
   /**
    * Relative
@@ -159,14 +159,12 @@ export default class Component extends LitElement {
   get formattedTime() {
     if (this.relative) {
       const rtf = new Intl.RelativeTimeFormat(this.locales, {
-        numeric: "auto",
-        style: "long",
+        numeric: 'auto',
+        style: 'long',
       });
       return getRelativeTime(new Date(this.value), new Date(), rtf);
     } else {
-      return new Intl.DateTimeFormat(this.locales, this.options).format(
-        new Date(this.value)
-      );
+      return new Intl.DateTimeFormat(this.locales, this.options).format(new Date(this.value));
     }
   }
 
@@ -190,7 +188,7 @@ export function getRelativeTime(d1, d2 = new Date(), rtf) {
 
   // "Math.abs" accounts for both "past" & "future" scenarios
   for (var u in units) {
-    if (Math.abs(elapsed) > units[u] || u == "second") {
+    if (Math.abs(elapsed) > units[u] || u == 'second') {
       return rtf.format(Math.round(elapsed / units[u]), u);
     }
   }

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "@coasys/flux-react-web";
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { Peer } from '@coasys/flux-react-web';
 
 interface CanvasProps {
   peers: Peer[];
@@ -18,9 +18,7 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
   const [peerPositions, setPeerPositions] = useState<{
     [key: string]: { x: number; y: number };
   }>({});
-  const [mousePosition, setMousePosition] = useState<Coordinate | undefined>(
-    undefined
-  );
+  const [mousePosition, setMousePosition] = useState<Coordinate | undefined>(undefined);
 
   const startPaint = useCallback((event: MouseEvent) => {
     const coordinates = getCoordinates(event);
@@ -35,9 +33,9 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
       return;
     }
     const canvas: HTMLCanvasElement = canvasRef.current;
-    canvas.addEventListener("mousedown", startPaint);
+    canvas.addEventListener('mousedown', startPaint);
     return () => {
-      canvas.removeEventListener("mousedown", startPaint);
+      canvas.removeEventListener('mousedown', startPaint);
     };
   }, [startPaint]);
 
@@ -58,7 +56,7 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
               x: (peer.state?.x / 100) * width - 34,
               y: (peer.state?.y / 100) * height + 180,
             },
-            peerPositions[peer.did]
+            peerPositions[peer.did],
           );
         }
         // Update position
@@ -88,7 +86,7 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
         }
       }
     },
-    [isPainting, mousePosition]
+    [isPainting, mousePosition],
   );
 
   useEffect(() => {
@@ -96,9 +94,9 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
       return;
     }
     const canvas: HTMLCanvasElement = canvasRef.current;
-    canvas.addEventListener("mousemove", paint);
+    canvas.addEventListener('mousemove', paint);
     return () => {
-      canvas.removeEventListener("mousemove", paint);
+      canvas.removeEventListener('mousemove', paint);
     };
   }, [paint]);
 
@@ -112,11 +110,11 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
       return;
     }
     const canvas: HTMLCanvasElement = canvasRef.current;
-    canvas.addEventListener("mouseup", exitPaint);
-    canvas.addEventListener("mouseleave", exitPaint);
+    canvas.addEventListener('mouseup', exitPaint);
+    canvas.addEventListener('mouseleave', exitPaint);
     return () => {
-      canvas.removeEventListener("mouseup", exitPaint);
-      canvas.removeEventListener("mouseleave", exitPaint);
+      canvas.removeEventListener('mouseup', exitPaint);
+      canvas.removeEventListener('mouseleave', exitPaint);
     };
   }, [exitPaint]);
 
@@ -132,18 +130,15 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
     };
   };
 
-  const drawLine = (
-    originalMousePosition: Coordinate,
-    newMousePosition: Coordinate
-  ) => {
+  const drawLine = (originalMousePosition: Coordinate, newMousePosition: Coordinate) => {
     if (!canvasRef.current) {
       return;
     }
     const canvas: HTMLCanvasElement = canvasRef.current;
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
     if (context) {
-      context.strokeStyle = "black";
-      context.lineJoin = "round";
+      context.strokeStyle = 'black';
+      context.lineJoin = 'round';
       context.lineWidth = 5;
 
       context.beginPath();

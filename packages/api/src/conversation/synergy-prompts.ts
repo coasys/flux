@@ -309,7 +309,7 @@ export const synergyTasks = {
     name: `Flux Grouping Task (v${VERSION})`,
     prompt: synergyGroupingPrompt,
     examples: synergyGroupingExamples,
-    expectedOneOf: ["group", "newGroup"],
+    expectedOneOf: ['group', 'newGroup'],
   } as FluxLLMTask,
   topics: {
     name: `Flux Topics Task (v${VERSION})`,
@@ -321,6 +321,6 @@ export const synergyTasks = {
     name: `Flux Conversation Task (v${VERSION})`,
     prompt: synergyConversationPrompt,
     examples: synergyConversationExamples,
-    expectedOutputs: ["n", "s"],
+    expectedOutputs: ['n', 's'],
   } as FluxLLMTask,
 };

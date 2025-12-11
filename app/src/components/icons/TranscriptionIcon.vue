@@ -31,6 +31,6 @@
 <script setup lang="ts">
 defineProps({
   enabled: { type: Boolean, default: true },
-  color: { type: String, default: "var(--j-color-primary-600)" },
+  color: { type: String, default: 'var(--j-color-primary-600)' },
 });
 </script>

@@ -1,7 +1,7 @@
-import { LinkQuery } from "@coasys/ad4m";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Conversation, ConversationSubgroup } from "@coasys/flux-api";
-import { Profile } from "@coasys/flux-types";
+import { LinkQuery } from '@coasys/ad4m';
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Conversation, ConversationSubgroup } from '@coasys/flux-api';
+import { Profile } from '@coasys/flux-types';
 import {
   BlockType,
   GroupingOption,
@@ -11,12 +11,12 @@ import {
   SynergyItem,
   SynergyMatch,
   SynergyTopic,
-} from "@coasys/flux-utils";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from "../../utils";
-import Avatar from "../Avatar";
-import PercentageRing from "../PercentageRing";
-import styles from "./TimelineBlock.module.scss";
+} from '@coasys/flux-utils';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { ChevronDownSVG, ChevronRightSVG, ChevronUpSVG, CurveSVG } from '../../utils';
+import Avatar from '../Avatar';
+import PercentageRing from '../PercentageRing';
+import styles from './TimelineBlock.module.scss';
 
 type Props = {
   agent: AgentClient;
@@ -69,10 +69,10 @@ export default function TimelineBlock({
   const [collapseBefore, setCollapseBefore] = useState(true);
   const [collapseAfter, setCollapseAfter] = useState(true);
   const firstLoad = useRef(true);
-  const matchIndex = match ? (blockType === "conversation" ? matchIndexes.subgroup : matchIndexes.item) : null;
+  const matchIndex = match ? (blockType === 'conversation' ? matchIndexes.subgroup : matchIndexes.item) : null;
   const onMatchTree = match
-    ? (blockType === "conversation" && index === matchIndexes.conversation) ||
-      (blockType === "subgroup" && parentIndex === matchIndexes.conversation && index === matchIndexes.subgroup)
+    ? (blockType === 'conversation' && index === matchIndexes.conversation) ||
+      (blockType === 'subgroup' && parentIndex === matchIndexes.conversation && index === matchIndexes.subgroup)
     : false;
 
   const visibleChildren = useMemo(
@@ -82,8 +82,8 @@ export default function TimelineBlock({
         child.index = i;
         if (onMatchTree) {
           // skip if below match
-          if (zoom === "Conversations") return true;
-          if (zoom === "Subgroups" && blockType === "subgroup") return true;
+          if (zoom === 'Conversations') return true;
+          if (zoom === 'Subgroups' && blockType === 'subgroup') return true;
           // skip if collapsed
           if (collapseBefore && collapseAfter) return i === matchIndex;
           else if (collapseBefore) return i >= matchIndex;
@@ -91,7 +91,7 @@ export default function TimelineBlock({
         }
         return true;
       }),
-    [children, collapseBefore, collapseAfter, matchIndex, onMatchTree, zoom, blockType, index]
+    [children, collapseBefore, collapseAfter, matchIndex, onMatchTree, zoom, blockType, index],
   );
 
   async function getConversationStats() {
@@ -136,16 +136,16 @@ export default function TimelineBlock({
 
   async function removeDuplicateItems(itemIds: string[]) {
     // used to remove duplicate items from the subgroup if added multiple times due to network errors
-    console.log("Removing duplicate items from subgroup", itemIds);
+    console.log('Removing duplicate items from subgroup', itemIds);
     const duplicateLinks = await Promise.all(
       itemIds.map(async (itemId) => {
         // grab all links connecting the item to the subgroup
         const links = await perspective.get(
-          new LinkQuery({ source: baseExpression, predicate: "ad4m://has_child", target: itemId })
+          new LinkQuery({ source: baseExpression, predicate: 'ad4m://has_child', target: itemId }),
         );
         // remove all except the first link
         return links.slice(1);
-      })
+      }),
     );
     await perspective.removeLinks(duplicateLinks.flat());
   }
@@ -176,8 +176,8 @@ export default function TimelineBlock({
   function onGroupClick() {
     if (!match) setSelectedItemId(selected ? null : baseExpression);
     if (!selected) {
-      if (blockType === "conversation") getConversationTopics();
-      if (blockType === "subgroup") getSubgroupTopics();
+      if (blockType === 'conversation') getConversationTopics();
+      if (blockType === 'subgroup') getSubgroupTopics();
     }
   }
 
@@ -185,8 +185,8 @@ export default function TimelineBlock({
   useEffect(() => {
     if (firstLoad.current || lastChild) {
       firstLoad.current = false;
-      if (blockType === "conversation") getConversationStats();
-      if (blockType === "subgroup") getSubgroupStats();
+      if (blockType === 'conversation') getConversationStats();
+      if (blockType === 'subgroup') getSubgroupStats();
     }
   }, [refreshTrigger]);
 
@@ -194,8 +194,8 @@ export default function TimelineBlock({
   useEffect(() => {
     // false on first load. updated when zoom useEffect below fires and later when children are expanded by user
     if (showChildren) {
-      if (blockType === "conversation") getSubgroups();
-      if (blockType === "subgroup") getItems();
+      if (blockType === 'conversation') getSubgroups();
+      if (blockType === 'subgroup') getItems();
       // deselects block when clicked on if not a match and not the currently selected item
       if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
     }
@@ -205,8 +205,8 @@ export default function TimelineBlock({
   useEffect(() => {
     // if a match and loading has finished at the level above, stop further expansion
     if (!match || loading) {
-      if (zoom === "Conversations") setShowChildren(false);
-      else if (zoom === "Subgroups") setShowChildren(blockType === "conversation");
+      if (zoom === 'Conversations') setShowChildren(false);
+      else if (zoom === 'Subgroups') setShowChildren(blockType === 'conversation');
       else setShowChildren(true);
     }
   }, [zoom]);
@@ -217,8 +217,8 @@ export default function TimelineBlock({
     const isMatch = match?.baseExpression === baseExpression;
     setSelected(isSelected || isMatch);
     if (isMatch) {
-      if (blockType === "conversation") getConversationTopics();
-      if (blockType === "subgroup") getSubgroupTopics();
+      if (blockType === 'conversation') getConversationTopics();
+      if (blockType === 'subgroup') getSubgroupTopics();
     }
   }, [selectedItemId]);
 
@@ -229,7 +229,7 @@ export default function TimelineBlock({
       const timeline = document.getElementById(`timeline-${timelineIndex}`);
       timeline.scrollBy({
         top: item?.getBoundingClientRect().top - 550,
-        behavior: "smooth",
+        behavior: 'smooth',
       });
     }
   }, [selectedItemId]);
@@ -237,18 +237,18 @@ export default function TimelineBlock({
   return (
     <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles[blockType]}`}>
       {!match && <button className={styles.groupButton} onClick={onGroupClick} />}
-      {blockType === "conversation" && <j-timestamp value={timestamp} relative className={styles.timestamp} />}
-      {blockType === "subgroup" && (
+      {blockType === 'conversation' && <j-timestamp value={timestamp} relative className={styles.timestamp} />}
+      {blockType === 'subgroup' && (
         <span className={styles.timestamp}>
           {((new Date(end).getTime() - new Date(start).getTime()) / 1000 / 60).toFixed(1)} mins
         </span>
       )}
-      {blockType === "item" && <j-timestamp value={timestamp} timeStyle="short" className={styles.timestamp} />}
+      {blockType === 'item' && <j-timestamp value={timestamp} timeStyle="short" className={styles.timestamp} />}
       <div className={styles.position}>
         {!showChildren && <div className={`${styles.node} ${selected && styles.selected}`} />}
         <div className={styles.line} />
       </div>
-      {["conversation", "subgroup"].includes(blockType) && (
+      {['conversation', 'subgroup'].includes(blockType) && (
         <j-flex direction="column" gap="300" className={styles.content}>
           <j-flex direction="column" gap="300" className={`${styles.card} ${selected && styles.selected}`}>
             <j-flex a="center" gap="400">
@@ -276,15 +276,15 @@ export default function TimelineBlock({
                 {topics.map((topic) => (
                   <button
                     className={`${styles.tag} ${selectedTopicId === topic.baseExpression && styles.focus}`}
-                    onClick={() => search("topic", baseExpression, topic)}
+                    onClick={() => search('topic', baseExpression, topic)}
                     disabled={!!match}
-                    style={{ cursor: !!match ? "default" : "pointer" }}
+                    style={{ cursor: !!match ? 'default' : 'pointer' }}
                   >
                     #{topic.name}
                   </button>
                 ))}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", baseExpression)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', baseExpression)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>
@@ -317,7 +317,7 @@ export default function TimelineBlock({
                   key={child.baseExpression}
                   agent={agent}
                   perspective={perspective}
-                  blockType={blockType === "conversation" ? "subgroup" : "item"}
+                  blockType={blockType === 'conversation' ? 'subgroup' : 'item'}
                   lastChild={index === visibleChildren.length - 1}
                   data={child}
                   timelineIndex={timelineIndex}
@@ -339,7 +339,7 @@ export default function TimelineBlock({
                 <CurveSVG />
               </div>
               {onMatchTree && collapseAfter && matchIndex < children.length - 1 && (
-                <div className={styles.expandButtonWrapper} style={{ marginTop: blockType === "subgroup" ? -8 : -20 }}>
+                <div className={styles.expandButtonWrapper} style={{ marginTop: blockType === 'subgroup' ? -8 : -20 }}>
                   <div className={styles.expandButton}>
                     <j-button onClick={() => setCollapseAfter(false)}>
                       See more
@@ -354,7 +354,7 @@ export default function TimelineBlock({
           )}
         </j-flex>
       )}
-      {blockType === "item" && (
+      {blockType === 'item' && (
         <j-flex gap="400" a="center" className={`${styles.itemCard} ${selected && styles.selected}`}>
           {match && match.baseExpression === baseExpression && (
             <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
@@ -385,7 +385,7 @@ export default function TimelineBlock({
                   </button>
                 ))} */}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search("vector", baseExpression)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', baseExpression)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>

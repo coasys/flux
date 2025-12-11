@@ -13,24 +13,8 @@
         id="glass"
         fill="var(--j-color-ui-100)"
       ></path>
-      <rect
-        id="top-plate"
-        fill="var(--j-color-ui-100)"
-        x="0"
-        y="0"
-        width="74"
-        height="8"
-        rx="2"
-      ></rect>
-      <rect
-        id="bottom-plate"
-        fill="var(--j-color-ui-100)"
-        x="0"
-        y="80"
-        width="74"
-        height="8"
-        rx="2"
-      ></rect>
+      <rect id="top-plate" fill="var(--j-color-ui-100)" x="0" y="0" width="74" height="8" rx="2"></rect>
+      <rect id="bottom-plate" fill="var(--j-color-ui-100)" x="0" y="80" width="74" height="8" rx="2"></rect>
 
       <g id="top-sand" transform="translate(18, 21)">
         <clipPath id="top-clip-path" fill="white">

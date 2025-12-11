@@ -1,7 +1,7 @@
-import { WebRTC } from "@coasys/flux-react-web";
-import { Profile } from "@coasys/flux-types";
-import { useEffect, useRef } from "preact/hooks";
-import styles from "./JoinScreen.module.scss";
+import { WebRTC } from '@coasys/flux-react-web';
+import { Profile } from '@coasys/flux-types';
+import { useEffect, useRef } from 'preact/hooks';
+import styles from './JoinScreen.module.scss';
 
 type Props = {
   webRTC: WebRTC;
@@ -38,7 +38,7 @@ export default function JoinScreen({
 
       <j-text variant="body">Your microphone will be enabled.</j-text>
 
-      <j-box pt="200" style={{ width: "100%" }}>
+      <j-box pt="200" style={{ width: '100%' }}>
         <div className={styles.preview} data-camera-enabled={!!webRTC.localState.settings.video} data-mirrored={true}>
           <video ref={videoRef} className={styles.video} autoPlay playsInline />
 
@@ -47,7 +47,7 @@ export default function JoinScreen({
               <>
                 {profile && (
                   <j-avatar
-                    initials={profile?.username?.charAt(0) || "?"}
+                    initials={profile?.username?.charAt(0) || '?'}
                     size="xl"
                     src={profile?.profileThumbnailPicture || null}
                     hash={did}
@@ -58,7 +58,7 @@ export default function JoinScreen({
           </div>
 
           <div className={styles.username}>
-            <span>{profile?.username || "Unknown user"}</span>
+            <span>{profile?.username || 'Unknown user'}</span>
           </div>
 
           <div className={styles.loading}>
@@ -73,9 +73,9 @@ export default function JoinScreen({
                   <j-icon name="gear" />
                 </j-button>
               </j-tooltip>
-              <j-tooltip placement="top" title={fullscreen ? "Shrink screen" : "Full screen"}>
+              <j-tooltip placement="top" title={fullscreen ? 'Shrink screen' : 'Full screen'}>
                 <j-button onClick={toggleFullscreen} square circle size="lg">
-                  <j-icon name={`arrows-angle-${fullscreen ? "contract" : "expand"}`} />
+                  <j-icon name={`arrows-angle-${fullscreen ? 'contract' : 'expand'}`} />
                 </j-button>
               </j-tooltip>
             </j-flex>
@@ -87,7 +87,7 @@ export default function JoinScreen({
         <j-toggle
           checked={webRTC.localState.settings.video ? true : false}
           disabled={
-            webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== "videoinput")
+            webRTC.isLoading || !webRTC.audioPermissionGranted || webRTC.devices.every((d) => d.kind !== 'videoinput')
           }
           onChange={webrtcStore.toggleVideo}
         >

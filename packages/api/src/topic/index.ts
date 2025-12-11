@@ -1,5 +1,5 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal } from "@coasys/ad4m";
-import { SynergyMatch } from "@coasys/flux-utils";
+import { ModelOptions, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
+import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
   baseExpression: string;
@@ -7,21 +7,21 @@ export class TopicWithRelevance {
   relevance: number;
 }
 
-@ModelOptions({ name: "Topic" })
+@ModelOptions({ name: 'Topic' })
 export default class Topic extends Ad4mModel {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://has_topic",
+    through: 'flux://entry_type',
+    value: 'flux://has_topic',
   })
   type: string;
 
   @Property({
-    through: "flux://topic",
+    through: 'flux://topic',
     writable: true,
   })
   topic: string;
 
-  private matchQuery(type: "Conversation" | "Subgroup"): string {
+  private matchQuery(type: 'Conversation' | 'Subgroup'): string {
     // same prolog query used to find linked conversation & subgroups
     return `
       findall([${type}, Relevance, Channel, ChannelName], (
@@ -52,7 +52,7 @@ export default class Topic extends Ad4mModel {
 
   async linkedConversations(): Promise<SynergyMatch[]> {
     try {
-      const result = await this.perspective.infer(this.matchQuery("Conversation"));
+      const result = await this.perspective.infer(this.matchQuery('Conversation'));
       // remove duplicates
       const rows = result[0]?.Matches || [];
       const dedupMap: Record<string, any> = {};
@@ -61,7 +61,7 @@ export default class Topic extends Ad4mModel {
           // convert prolog response to JS
           dedupMap[baseExpression] = {
             baseExpression,
-            type: "Conversation",
+            type: 'Conversation',
             relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
             channelId,
             channelName: Literal.fromUrl(channelName).get().data,
@@ -70,24 +70,24 @@ export default class Topic extends Ad4mModel {
       }
       return Object.values(dedupMap);
     } catch (error) {
-      console.error("Error getting linked conversations:", error);
+      console.error('Error getting linked conversations:', error);
       return [];
     }
   }
 
   async linkedSubgroups(): Promise<SynergyMatch[]> {
     try {
-      const result = await this.perspective.infer(this.matchQuery("Subgroup"));
+      const result = await this.perspective.infer(this.matchQuery('Subgroup'));
       return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
         // convert prolog response to JS
         baseExpression,
-        type: "ConversationSubgroup",
+        type: 'ConversationSubgroup',
         relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
         channelId,
         channelName: Literal.fromUrl(channelName).get().data,
       }));
     } catch (error) {
-      console.error("Error getting linked subgroups:", error);
+      console.error('Error getting linked subgroups:', error);
       return [];
     }
   }

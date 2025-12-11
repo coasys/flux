@@ -1,4 +1,4 @@
-import { Link, PerspectiveExpression } from "@coasys/ad4m";
+import { Link, PerspectiveExpression } from '@coasys/ad4m';
 
 // Ref types for reactive Vue.js properties
 export type Ref<T> = { value: T };
@@ -99,20 +99,20 @@ export interface Profiles {
 }
 
 export enum ChannelView {
-  Chat = "flux://has_chat_view",
-  Post = "flux://has_post_view",
-  Graph = "flux://has_graph_view",
-  Voice = "flux://has_voice_view",
-  Debug = "flux://has_debug_view",
+  Chat = 'flux://has_chat_view',
+  Post = 'flux://has_post_view',
+  Graph = 'flux://has_graph_view',
+  Voice = 'flux://has_voice_view',
+  Debug = 'flux://has_debug_view',
 }
 
 export enum EntryType {
-  Community = "flux://has_community",
-  Channel = "flux://has_channel",
-  Message = "flux://has_message",
-  Post = "flux://has_post",
-  Member = "flux://has_member",
-  App = "flux://has_app",
+  Community = 'flux://has_community',
+  Channel = 'flux://has_channel',
+  Message = 'flux://has_message',
+  Post = 'flux://has_post',
+  Member = 'flux://has_member',
+  App = 'flux://has_app',
 }
 
 //This represents an entry itself, which contains the default fields seen below
@@ -207,7 +207,7 @@ export interface WebLink {
   id: string;
 }
 
-export type AgentStatus = "active" | "asleep" | "offline" | "invisible" | "busy" | "unknown";
+export type AgentStatus = 'active' | 'asleep' | 'offline' | 'invisible' | 'busy' | 'unknown';
 
 export interface RouteParams {
   communityId?: string;
@@ -237,7 +237,7 @@ export interface AgentState {
   lastUpdate: number;
 }
 
-export type CallHealth = "healthy" | "warnings" | "connections-lost";
+export type CallHealth = 'healthy' | 'warnings' | 'connections-lost';
 export type AgentData = Profile & AgentState;
 export interface SignallingService {
   signalling: Ref<boolean>;

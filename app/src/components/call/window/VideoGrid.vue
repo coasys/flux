@@ -69,11 +69,11 @@
 </template>
 
 <script setup lang="ts">
-import MediaPlayer from "@/components/media-player/MediaPlayer.vue";
-import { useWebrtcStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
-import { useVideoLayout } from "../composables/useVideoLayout";
+import MediaPlayer from '@/components/media-player/MediaPlayer.vue';
+import { useWebrtcStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+import { useVideoLayout } from '../composables/useVideoLayout';
 
 const webrtcStore = useWebrtcStore();
 const { callEmojis } = storeToRefs(webrtcStore);

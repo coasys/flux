@@ -1,9 +1,9 @@
-import { Me } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
-import { useState } from "preact/hooks";
-import { videoSettings } from "@coasys/flux-constants";
+import { Me } from '@coasys/flux-api';
+import { WebRTC } from '@coasys/flux-react-web';
+import { useState } from 'preact/hooks';
+import { videoSettings } from '@coasys/flux-constants';
 
-import styles from "./Connection.module.css";
+import styles from './Connection.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -11,9 +11,9 @@ type Props = {
 
 export default function Connection({ webRTC }: Props) {
   const [showAddNew, setShowAddNew] = useState(false);
-  const [url, setUrl] = useState("");
-  const [username, setUsername] = useState("");
-  const [credential, setCredential] = useState("");
+  const [url, setUrl] = useState('');
+  const [username, setUsername] = useState('');
+  const [credential, setCredential] = useState('');
 
   async function addServer() {
     const newServer = {
@@ -25,9 +25,9 @@ export default function Connection({ webRTC }: Props) {
     webRTC.onChangeIceServers(newServers);
 
     // reset form
-    setUrl("");
-    setUsername("");
-    setCredential("");
+    setUrl('');
+    setUsername('');
+    setCredential('');
     setShowAddNew(false);
   }
 
@@ -84,9 +84,7 @@ export default function Connection({ webRTC }: Props) {
       {!showAddNew && !webRTC.hasJoined && (
         <j-box pt="500">
           <div className={styles.footer}>
-            <j-button onClick={() => setShowAddNew(!showAddNew)}>
-              Add new server
-            </j-button>
+            <j-button onClick={() => setShowAddNew(!showAddNew)}>Add new server</j-button>
             <j-button variant="ghost" onClick={() => useDefaultServers()}>
               Use default
             </j-button>
@@ -102,11 +100,7 @@ export default function Connection({ webRTC }: Props) {
       {showAddNew && (
         <>
           <div className={styles.form}>
-            <j-input
-              value={url}
-              placeholder="New STUN/TURN server"
-              onchange={(e) => setUrl(e.target.value)}
-            ></j-input>
+            <j-input value={url} placeholder="New STUN/TURN server" onchange={(e) => setUrl(e.target.value)}></j-input>
 
             <j-box pt="400">
               <j-flex a="center" gap="400" direction="row">

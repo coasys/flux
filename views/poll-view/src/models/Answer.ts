@@ -1,19 +1,19 @@
-import { ModelOptions, Flag, Property, Ad4mModel } from "@coasys/ad4m";
+import { ModelOptions, Flag, Property, Ad4mModel } from '@coasys/ad4m';
 
 @ModelOptions({
-  name: "Answer",
+  name: 'Answer',
 })
 export default class Answer extends Ad4mModel {
   @Flag({
-    through: "flux://entry_type",
-    value: "flux://has_answer",
+    through: 'flux://entry_type',
+    value: 'flux://has_answer',
   })
   type: string;
 
   @Property({
-    through: "rdf://text",
+    through: 'rdf://text',
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   text: string;
 }

@@ -15,9 +15,9 @@ Install the package `npm install --save @coasys/flux-comment-section`.
 Define a new web component:
 
 ```js
-import CommentSection from "@coasys/flux-comment-section";
+import CommentSection from '@coasys/flux-comment-section';
 
-customElements.define("comment-section", CommentSection);
+customElements.define('comment-section', CommentSection);
 ```
 
 Use it in HTML like this: `<comment-section/>`:

@@ -30,9 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { useUiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
 
 const uiStore = useUiStore();
 const {
@@ -48,7 +48,7 @@ const touchstartX = ref(0);
 const touchendX = ref(0);
 
 const mainWidth = computed(() => {
-  const sidebarWidth = showAppSidebar.value ? `${appSidebarWidth.value}px` : "0px";
+  const sidebarWidth = showAppSidebar.value ? `${appSidebarWidth.value}px` : '0px';
   return callWindowOpen.value
     ? `calc(100% - ${callWindowWidth.value}px - ${sidebarWidth})`
     : `calc(100% - ${sidebarWidth})`;

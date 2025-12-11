@@ -30,9 +30,9 @@ Modal component is used to display content in a layered window that appears abov
 </j-modal>
 
 <script>
-  const button = document.querySelector("j-button");
-  const modal = document.querySelect("j-modal");
-  button.addEventListener("click", () => {
+  const button = document.querySelector('j-button');
+  const modal = document.querySelect('j-modal');
+  button.addEventListener('click', () => {
     modal.open = true;
   });
 </script>
@@ -45,11 +45,7 @@ export default function Checkbox() {
   return (
     <>
       <j-button onClick={() => setOpen(true)}>Open modal</j-button>
-      <j-modal
-        label="Name"
-        open={open}
-        onToggle={(e) => setOpen(e.target.open)}
-      >
+      <j-modal label="Name" open={open} onToggle={(e) => setOpen(e.target.open)}>
         <j-box p="500">
           <j-text variant="heading-sm">Modal header</j-text>
           <j-text variant="body">Modal content</j-text>
@@ -73,7 +69,7 @@ export default function Checkbox() {
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 const isOpen = ref(false);
 </script>
 ```
@@ -162,9 +158,9 @@ Use the footer slot to provide a custom footer for the modal.
 The toggle event is fired when the modal `open` property is set to either to `false` or `true`;
 
 ```js
-const modal = document.querySelector("j-modal");
-modal.addEventListener("toggle", (event) => {
-  console.log("Modal is open:", event.target.open);
+const modal = document.querySelector('j-modal');
+modal.addEventListener('toggle', (event) => {
+  console.log('Modal is open:', event.target.open);
 });
 ```
 

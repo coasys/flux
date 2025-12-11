@@ -1,13 +1,13 @@
 export function downloadFile(byteArray: Uint8Array, fileName: string) {
   // Create a new Blob object using the byteArray
-  const blob = new Blob([byteArray], { type: "application/octet-stream" }); // Adjust the MIME type as needed
+  const blob = new Blob([byteArray], { type: 'application/octet-stream' }); // Adjust the MIME type as needed
 
   // Create a URL for the blob
   const url = window.URL.createObjectURL(blob);
 
   // Create a temporary anchor (`<a>`) element
-  const a = document.createElement("a");
-  a.style.display = "none";
+  const a = document.createElement('a');
+  a.style.display = 'none';
   a.href = url;
   a.download = fileName; // Set the file name for download
 

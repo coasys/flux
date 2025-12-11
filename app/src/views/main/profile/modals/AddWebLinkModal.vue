@@ -63,19 +63,19 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useModalStore } from "@/stores";
-import { createAgentWebLink } from "@coasys/flux-api";
-import { ref } from "vue";
+import { useAppStore, useModalStore } from '@/stores';
+import { createAgentWebLink } from '@coasys/flux-api';
+import { ref } from 'vue';
 
 defineProps({ step: { type: Number } });
 
 const modalStore = useModalStore();
 const appStore = useAppStore();
 
-const title = ref("");
-const description = ref("");
-const imageUrl = ref("");
-const link = ref("");
+const title = ref('');
+const description = ref('');
+const imageUrl = ref('');
+const link = ref('');
 const loadingMeta = ref(false);
 const isAddingLink = ref(false);
 const isValidLink = ref(false);
@@ -84,11 +84,11 @@ const titleEl = ref<HTMLElement | null>(null);
 async function getMeta() {
   try {
     loadingMeta.value = true;
-    const data = await fetch("https://jsonlink.io/api/extract?url=" + link.value).then((res) => res.json());
+    const data = await fetch('https://jsonlink.io/api/extract?url=' + link.value).then((res) => res.json());
 
-    title.value = data.title || "";
-    description.value = data.description || "";
-    imageUrl.value = data.images[0] || "";
+    title.value = data.title || '';
+    description.value = data.description || '';
+    imageUrl.value = data.images[0] || '';
   } finally {
     loadingMeta.value = false;
     titleEl.value?.focus();
@@ -117,13 +117,13 @@ async function createLink() {
       url: link.value,
     });
 
-    appStore.showSuccessToast({ message: "Link added to agent perspective" });
+    appStore.showSuccessToast({ message: 'Link added to agent perspective' });
 
     // Reset form
-    link.value = "";
-    title.value = "";
-    description.value = "";
-    imageUrl.value = "";
+    link.value = '';
+    title.value = '';
+    description.value = '';
+    imageUrl.value = '';
 
     modalStore.showAddWebLink = false;
   } finally {

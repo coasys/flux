@@ -1,6 +1,6 @@
-import { AgentClient, PerspectiveProxy } from "@coasys/ad4m";
-import * as nillion from "@nillion/client-web";
-import React from "react";
+import { AgentClient, PerspectiveProxy } from '@coasys/ad4m';
+import * as nillion from '@nillion/client-web';
+import React from 'react';
 
 interface NillionConfig {
   private_key_seed: string;
@@ -32,9 +32,4 @@ declare const NillionContext: React.Context<NillionContextType>;
 declare const NillionContextProvider: React.FC<NillionContextProviderProps>;
 declare function useClient(): NillionContextType;
 
-export {
-  NillionContext,
-  NillionContextProvider,
-  useClient,
-  NillionContextProviderProps,
-};
+export { NillionContext, NillionContextProvider, useClient, NillionContextProviderProps };

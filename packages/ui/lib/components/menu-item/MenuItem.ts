@@ -1,6 +1,6 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
+import { html, css, LitElement } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
 
 const styles = css`
   :host {
@@ -26,23 +26,23 @@ const styles = css`
     --j-menu-item-bg: var(--j-color-primary-100);
     --j-menu-item-color: var(--j-color-primary-700);
   }
-  :host([size="sm"]) {
+  :host([size='sm']) {
     --j-menu-item-gap: var(--j-space-300);
     --j-menu-item-font-size: var(--j-font-size-400);
     --j-menu-item-height: var(--j-size-sm);
   }
-  :host([size="lg"]) {
+  :host([size='lg']) {
     --j-menu-item-gap: var(--j-space-400);
     --j-menu-item-height: var(--j-size-lg);
   }
-  :host([size="xl"]) {
+  :host([size='xl']) {
     --j-menu-item-gap: var(--j-space-500);
     --j-menu-item-height: var(--j-size-xl);
   }
-  :host(:last-of-type) [part="base"] {
+  :host(:last-of-type) [part='base'] {
     margin-bottom: 0;
   }
-  [part="base"] {
+  [part='base'] {
     display: flex;
     align-items: center;
     gap: var(--j-menu-item-gap);
@@ -57,7 +57,7 @@ const styles = css`
     font-weight: var(--j-menu-item-font-weight);
     border-left: var(--j-menu-item-border-left);
   }
-  [part="content"] {
+  [part='content'] {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -65,7 +65,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-menu-item")
+@customElement('j-menu-item')
 export default class MenuItem extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -92,21 +92,21 @@ export default class MenuItem extends LitElement {
   _label = null;
 
   get label() {
-    return this._label || this.getAttribute("label") || this.innerText;
+    return this._label || this.getAttribute('label') || this.innerText;
   }
 
   set label(val) {
     this._label = val;
-    this.setAttribute("label", val);
+    this.setAttribute('label', val);
   }
 
   get value() {
-    return this._value || this.getAttribute("value") || this.innerText;
+    return this._value || this.getAttribute('value') || this.innerText;
   }
 
   set value(val) {
     this._value = val;
-    this.setAttribute("value", val);
+    this.setAttribute('value', val);
   }
 
   render() {

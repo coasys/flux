@@ -1,10 +1,10 @@
-import { languages, profile } from "@coasys/flux-constants";
-import { Profile } from "@coasys/flux-types";
-import { blobToDataURL, createLinks, createLiteralLinks, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
+import { languages, profile } from '@coasys/flux-constants';
+import { Profile } from '@coasys/flux-types';
+import { blobToDataURL, createLinks, createLiteralLinks, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
 
-import { LinkExpression } from "@coasys/ad4m";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import getProfile from "./getProfile";
+import { LinkExpression } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import getProfile from './getProfile';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } = profile;
@@ -25,44 +25,44 @@ export default async function updateProfile(payload: Payload): Promise<Profile> 
     const { perspective } = await client.agent.me();
 
     if (!perspective) {
-      const error = "No user perspective found";
+      const error = 'No user perspective found';
       throw new Error(error);
     }
 
-    let profilePictureUrl = "";
-    let profileThumbnailUrl = "";
-    let profileBackgroundUrl = "";
+    let profilePictureUrl = '';
+    let profileThumbnailUrl = '';
+    let profileBackgroundUrl = '';
 
     if (payload.profileBackground) {
       const compressedImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(payload.profileBackground as string), 0.6)
+        await resizeImage(dataURItoBlob(payload.profileBackground as string), 0.6),
       );
 
       profileBackgroundUrl = await client.expression.create(
-        { data_base64: compressedImage, name: "profile-background", file_type: "image/png" },
-        FILE_STORAGE_LANGUAGE
+        { data_base64: compressedImage, name: 'profile-background', file_type: 'image/png' },
+        FILE_STORAGE_LANGUAGE,
       );
     }
 
     if (payload.profilePicture) {
       const compressedImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.6)
+        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.6),
       );
 
       profilePictureUrl = await client.expression.create(
-        { data_base64: compressedImage, name: "profile-picture", file_type: "image/png" },
-        FILE_STORAGE_LANGUAGE
+        { data_base64: compressedImage, name: 'profile-picture', file_type: 'image/png' },
+        FILE_STORAGE_LANGUAGE,
       );
     }
 
     if (payload.profilePicture) {
       const compressedImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.3)
+        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.3),
       );
 
       profileThumbnailUrl = await client.expression.create(
-        { data_base64: compressedImage, name: "profile-thumbnail", file_type: "image/png" },
-        FILE_STORAGE_LANGUAGE
+        { data_base64: compressedImage, name: 'profile-thumbnail', file_type: 'image/png' },
+        FILE_STORAGE_LANGUAGE,
       );
     }
 

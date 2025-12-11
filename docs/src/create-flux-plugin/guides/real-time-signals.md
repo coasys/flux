@@ -8,10 +8,7 @@ Let's first create our own reusable React hook for neighbourhoods:
 
 ```tsx
 function useNeighbourhood(perspective, { onSignal }) {
-  const neighbourhood = useMemo(
-    () => perspective.getNeighbourhoodProxy(),
-    [perspective.uuid]
-  );
+  const neighbourhood = useMemo(() => perspective.getNeighbourhoodProxy(), [perspective.uuid]);
 
   useEffect(() => {
     neighbourhood.addSignalHandler(onSignal);
@@ -27,7 +24,7 @@ function useNeighbourhood(perspective, { onSignal }) {
 To send and recieve a real-time signal in the neighbourhood:
 
 ```tsx [example]
-import useNeighbourhood from "./useNeighbourhood";
+import useNeighbourhood from './useNeighbourhood';
 
 export default function SignalApp({ perspective, source }) {
   const neighbourhood = useNeighbourhood(perspective, {
@@ -50,7 +47,7 @@ export default function SignalApp({ perspective, source }) {
 To send and recieve a real-time signal to a recipient:
 
 ```tsx [example]
-import useNeighbourhood from "./useNeighbourhood";
+import useNeighbourhood from './useNeighbourhood';
 
 export default function SignalApp({ perspective, source }) {
   const neighbourhood = useNeighbourhood(perspective, {
@@ -61,7 +58,7 @@ export default function SignalApp({ perspective, source }) {
 
   function sendSignal() {
     // Send a signal to the network
-    neighbourhood.sendSignalU("recipientDID", { links: [] });
+    neighbourhood.sendSignalU('recipientDID', { links: [] });
   }
 
   return <button onClick={sendSignal}>Send signal to an Agent</button>;

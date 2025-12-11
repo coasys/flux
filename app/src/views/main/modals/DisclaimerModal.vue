@@ -42,9 +42,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useModalStore } from "@/stores";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { useAppStore, useModalStore } from '@/stores';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 
 const appStore = useAppStore();
 const modalStore = useModalStore();
@@ -59,7 +59,7 @@ async function joinTestingCommunity() {
     await appStore.joinTestingCommunity();
     modalStore.showDisclaimer = false;
   } catch (e) {
-    console.log("Error joining testing community:", e);
+    console.log('Error joining testing community:', e);
   } finally {
     isJoining.value = false;
   }

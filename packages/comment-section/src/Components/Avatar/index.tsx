@@ -1,5 +1,5 @@
-import { getImage } from "@coasys/flux-utils";
-import { useEffect, useState } from "preact/hooks";
+import { getImage } from '@coasys/flux-utils';
+import { useEffect, useState } from 'preact/hooks';
 
 type AvatarProps = {
   did: string;
@@ -7,17 +7,10 @@ type AvatarProps = {
   src?: string;
   style?: any;
   onClick?: (event: any) => void;
-  size?: "" | "xxs" | "xs" | "sm" | "lg" | "xl" | "xxl";
+  size?: '' | 'xxs' | 'xs' | 'sm' | 'lg' | 'xl' | 'xxl';
 };
 
-export default function Avatar({
-  did,
-  src,
-  url,
-  style,
-  onClick,
-  size = "",
-}: AvatarProps) {
+export default function Avatar({ did, src, url, style, onClick, size = '' }: AvatarProps) {
   const [loading, setLoading] = useState(false);
   const [img, setImage] = useState(null);
 
@@ -39,7 +32,7 @@ export default function Avatar({
 
   return (
     <j-avatar
-      style={{ ...style, cursor: onClick ? "pointer" : "default" }}
+      style={{ ...style, cursor: onClick ? 'pointer' : 'default' }}
       hash={did}
       src={img || src}
       onClick={(e: any) => onClick && onClick(e)}

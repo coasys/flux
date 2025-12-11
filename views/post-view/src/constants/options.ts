@@ -1,47 +1,47 @@
 export enum DisplayView {
-  Compact = "COMPACT",
-  Grid = "GRID",
-  Card = "CARD",
+  Compact = 'COMPACT',
+  Grid = 'GRID',
+  Card = 'CARD',
 }
 
 export enum PostOption {
-  Text = "TEXT",
-  Image = "IMAGE",
-  Link = "LINK",
+  Text = 'TEXT',
+  Image = 'IMAGE',
+  Link = 'LINK',
 }
 
 export const postOptions = [
   {
-    label: "Text",
+    label: 'Text',
     value: PostOption.Text,
-    icon: "justify-left",
+    icon: 'justify-left',
   },
   {
-    label: "Image",
+    label: 'Image',
     value: PostOption.Image,
-    icon: "card-image",
+    icon: 'card-image',
   },
   {
-    label: "Link",
+    label: 'Link',
     value: PostOption.Link,
-    icon: "link",
+    icon: 'link',
   },
 ];
 
 export const displayOptions = [
   {
-    label: "Compact",
+    label: 'Compact',
     value: DisplayView.Compact,
-    icon: "list",
+    icon: 'list',
   },
   {
-    label: "Grid",
+    label: 'Grid',
     value: DisplayView.Grid,
-    icon: "grid",
+    icon: 'grid',
   },
   {
-    label: "Card",
+    label: 'Card',
     value: DisplayView.Card,
-    icon: "card-heading",
+    icon: 'card-heading',
   },
 ];

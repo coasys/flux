@@ -1,7 +1,7 @@
-import { html, css, LitElement, adoptStyles } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import sharedStyles from "../../shared/styles";
-import { generateStylesheet, generateVariable } from "../../utils/stylesheets";
+import { html, css, LitElement, adoptStyles } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import sharedStyles from '../../shared/styles';
+import { generateStylesheet, generateVariable } from '../../utils/stylesheets';
 
 // TODO: Do we need this type  of generic component?
 
@@ -20,43 +20,43 @@ const styles = css`
   :host([wrap]) {
     --j-flex-wrap: wrap;
   }
-  :host([a="center"]) {
+  :host([a='center']) {
     --j-flex-align-items: center;
   }
-  :host([a="start"]) {
+  :host([a='start']) {
     --j-flex-align-items: start;
   }
-  :host([a="end"]) {
+  :host([a='end']) {
     --j-flex-align-items: end;
   }
-  :host([j="between"]) {
+  :host([j='between']) {
     --j-flex-justify-content: space-between;
   }
-  :host([j="around"]) {
+  :host([j='around']) {
     --j-flex-justify-content: space-around;
   }
-  :host([j="center"]) {
+  :host([j='center']) {
     --j-flex-justify-content: center;
   }
-  :host([j="end"]) {
+  :host([j='end']) {
     --j-flex-justify-content: flex-end;
   }
-  :host([j="start"]) {
+  :host([j='start']) {
     --j-flex-justify-content: flex-start;
   }
-  :host([direction="row"]) {
+  :host([direction='row']) {
     --j-flex-direction: row;
   }
-  :host([direction="row-reverse"]) {
+  :host([direction='row-reverse']) {
     --j-flex-direction: row-reverse;
   }
-  :host([direction="column"]) {
+  :host([direction='column']) {
     --j-flex-direction: column;
   }
-  :host([direction="column-reverse"]) {
+  :host([direction='column-reverse']) {
     --j-flex-direction: column-reverse;
   }
-  [part="base"] {
+  [part='base'] {
     display: var(--j-flex-display);
     gap: var(--j-flex-gap);
     flex-direction: var(--j-flex-direction);
@@ -66,7 +66,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-flex")
+@customElement('j-flex')
 export default class Box extends LitElement {
   static styles = [sharedStyles, styles];
 
@@ -114,8 +114,8 @@ export default class Box extends LitElement {
     const styleSheets = [styles, sharedStyles];
 
     if (this.gap) {
-      const variable = generateVariable("j-space", this.gap);
-      styleSheets.push(generateStylesheet("--j-flex-gap", variable));
+      const variable = generateVariable('j-space', this.gap);
+      styleSheets.push(generateStylesheet('--j-flex-gap', variable));
     }
 
     // @ts-ignore

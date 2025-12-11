@@ -1,11 +1,11 @@
-import { community } from "@coasys/flux-constants";
-import { EntryType } from "@coasys/flux-types";
-import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from "@coasys/ad4m";
+import { community } from '@coasys/flux-constants';
+import { EntryType } from '@coasys/flux-types';
+import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from '@coasys/ad4m';
 
 const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
 
 @ModelOptions({
-  name: "Message",
+  name: 'Message',
 })
 export class Message extends Ad4mModel {
   @Flag({
@@ -17,7 +17,7 @@ export class Message extends Ad4mModel {
   @Property({
     through: BODY,
     writable: true,
-    resolveLanguage: "literal",
+    resolveLanguage: 'literal',
   })
   body: string;
 
@@ -29,7 +29,7 @@ export class Message extends Ad4mModel {
   @Optional({
     getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
   })
-  replyingTo: string | undefined = "";
+  replyingTo: string | undefined = '';
 
   @ReadOnly({
     getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
@@ -38,7 +38,7 @@ export class Message extends Ad4mModel {
   isPopular: boolean = false;
 
   @Collection({
-    through: "ad4m://has_child",
+    through: 'ad4m://has_child',
     where: {
       condition: `subject_class("Message", Class), instance(Class, Target)`,
     },

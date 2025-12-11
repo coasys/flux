@@ -89,8 +89,8 @@
 </template>
 
 <script setup lang="ts">
-import { useThemeStore } from "@/stores";
-import { storeToRefs } from "pinia";
+import { useThemeStore } from '@/stores';
+import { storeToRefs } from 'pinia';
 const themeStore = useThemeStore();
 const { globalTheme } = storeToRefs(themeStore);
 </script>
@@ -114,14 +114,14 @@ const { globalTheme } = storeToRefs(themeStore);
   max-width: 400px;
 }
 
-input[type="range"] {
+input[type='range'] {
   -webkit-appearance: none;
   margin: 0;
   width: 100%;
   background: none;
 }
 
-input[type="range"]::-webkit-slider-runnable-track {
+input[type='range']::-webkit-slider-runnable-track {
   width: 100%;
   height: calc(var(--j-size-sm) / 2);
   background-color: var(--j-color-ui-100);
@@ -129,7 +129,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   border-radius: 3px;
 }
 
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   border: none;
   transition: all 0.5s ease;

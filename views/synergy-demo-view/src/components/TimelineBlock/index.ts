@@ -1,3 +1,3 @@
-import TimelineBlock from "./TimelineBlock";
+import TimelineBlock from './TimelineBlock';
 
 export default TimelineBlock;

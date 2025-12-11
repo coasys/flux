@@ -1,13 +1,13 @@
-import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
-import { Me } from "@coasys/flux-api";
-import useContextMenu from "../../hooks/useContextMenu";
-import { WebRTC } from "@coasys/flux-react-web";
-import items from "../../sprites/items";
-import Canvas from "../Canvas";
-import Sprite from "../Sprite/Sprite";
-import User from "../User/User";
+import { useRef, useEffect, useState, useLayoutEffect } from 'preact/hooks';
+import { Me } from '@coasys/flux-api';
+import useContextMenu from '../../hooks/useContextMenu';
+import { WebRTC } from '@coasys/flux-react-web';
+import items from '../../sprites/items';
+import Canvas from '../Canvas';
+import Sprite from '../Sprite/Sprite';
+import User from '../User/User';
 
-import styles from "./UserGrid.module.css";
+import styles from './UserGrid.module.css';
 
 type Props = {
   webRTC: WebRTC;
@@ -19,15 +19,15 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
 
   useLayoutEffect(() => {
     function updateSize() {
-      const el = document.getElementById("map");
+      const el = document.getElementById('map');
 
       if (el) {
         setCanvasSize([el.clientWidth, el.clientHeight]);
       }
     }
-    window.addEventListener("resize", updateSize);
+    window.addEventListener('resize', updateSize);
     updateSize();
-    return () => window.removeEventListener("resize", updateSize);
+    return () => window.removeEventListener('resize', updateSize);
   }, []);
 
   const handleMouseMove = (event) => {
@@ -98,11 +98,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
       </div>
 
       <div className={styles.canvas}>
-        <Canvas
-          peers={webRTC.connections}
-          width={canvasSize[0]}
-          height={canvasSize[1]}
-        />
+        <Canvas peers={webRTC.connections} width={canvasSize[0]} height={canvasSize[1]} />
       </div>
 
       {peerItems}

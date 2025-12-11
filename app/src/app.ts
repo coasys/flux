@@ -1,22 +1,22 @@
-import { useAppStore } from "@/stores";
-import { getAd4mClientReady } from "@coasys/flux-utils";
-import { createPinia } from "pinia";
-import { createPersistedState } from "pinia-plugin-persistedstate";
-import { createApp, h } from "vue";
-import { version } from "../package.json";
-import "./ad4mConnect";
-import App from "./App.vue";
-import router from "./router";
+import { useAppStore } from '@/stores';
+import { getAd4mClient } from '@coasys/ad4m-connect';
+import { createPinia } from 'pinia';
+import { createPersistedState } from 'pinia-plugin-persistedstate';
+import { createApp, h } from 'vue';
+import { version } from '../package.json';
+import './ad4mConnect';
+import App from './App.vue';
+import router from './router';
 // @ts-ignore
-import { useRegisterSW } from "virtual:pwa-register/vue";
+import { useRegisterSW } from 'virtual:pwa-register/vue';
 
-import "@coasys/flux-ui";
-import "@coasys/flux-ui/dist/main.css";
-import "@coasys/flux-ui/dist/themes/black.css";
-import "@coasys/flux-ui/dist/themes/cyberpunk.css";
-import "@coasys/flux-ui/dist/themes/dark.css";
-import "@coasys/flux-ui/dist/themes/retro.css";
-import "./themes/themes.css";
+import '@coasys/flux-ui';
+import '@coasys/flux-ui/dist/main.css';
+import '@coasys/flux-ui/dist/themes/black.css';
+import '@coasys/flux-ui/dist/themes/cyberpunk.css';
+import '@coasys/flux-ui/dist/themes/dark.css';
+import '@coasys/flux-ui/dist/themes/retro.css';
+import './themes/themes.css';
 
 export const pinia = createPinia();
 
@@ -28,7 +28,7 @@ pinia.use(
       serialize: JSON.stringify,
       deserialize: JSON.parse,
     },
-  })
+  }),
 );
 
 // Create and mount Vue application

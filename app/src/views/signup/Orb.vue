@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import * as THREE from "three";
-import { ref, onMounted } from "vue";
-import perlin from "./perlin.js";
+import * as THREE from 'three';
+import { ref, onMounted } from 'vue';
+import perlin from './perlin.js';
 
 const SIZE = 1000;
 const el = ref(null);
@@ -15,7 +15,7 @@ onMounted(() => {
   // Observation listener
   if (el.value) {
     const options = {
-      rootMargin: "0px",
+      rootMargin: '0px',
       threshold: 0.4,
     };
 
@@ -31,7 +31,7 @@ onMounted(() => {
   }
 
   var renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById("canvas"),
+    canvas: document.getElementById('canvas'),
     antialias: true,
     alpha: true,
   });
@@ -77,11 +77,7 @@ onMounted(() => {
     const positions = sphere.geometry.attributes.position;
     for (var i = 0; i < positions.count; i++) {
       v3.fromBufferAttribute(positions, i).setLength(k);
-      let n = perlin.perlin3(
-        v3.x + time * 0.1,
-        v3.y + time * 0.1,
-        v3.z + time * 0.1
-      );
+      let n = perlin.perlin3(v3.x + time * 0.1, v3.y + time * 0.1, v3.z + time * 0.1);
       v3.setLength(1 + 0.3 * n);
       positions.setXYZ(i, v3.x, v3.y, v3.z);
     }

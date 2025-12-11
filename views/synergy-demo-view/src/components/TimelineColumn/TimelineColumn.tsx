@@ -1,12 +1,12 @@
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
-import { Channel, Conversation } from "@coasys/flux-api";
-import { AgentState, ProcessingState, Profile, SignallingService } from "@coasys/flux-types";
-import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from "@coasys/flux-utils";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { closeMenu } from "../../utils";
-import Avatar from "../Avatar";
-import TimelineBlock from "../TimelineBlock";
-import styles from "./TimelineColumn.module.scss";
+import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Channel, Conversation } from '@coasys/flux-api';
+import { AgentState, ProcessingState, Profile, SignallingService } from '@coasys/flux-types';
+import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { closeMenu } from '../../utils';
+import Avatar from '../Avatar';
+import TimelineBlock from '../TimelineBlock';
+import styles from './TimelineColumn.module.scss';
 
 type Props = {
   agent: AgentClient;
@@ -27,14 +27,14 @@ const PROCESSING_ITEMS_DELAY = 3;
 const LINK_ADDED_TIMEOUT = 2000;
 
 const processingSteps = [
-  "Getting conversation",
-  "Processing items",
-  "LLM Group Detection",
-  "LLM Topic Generation",
-  "LLM Conversation Updates",
-  "Generating New Groupings",
-  "Generating Vector Embeddings",
-  "Processing complete. Commiting batch!",
+  'Getting conversation',
+  'Processing items',
+  'LLM Group Detection',
+  'LLM Topic Generation',
+  'LLM Conversation Updates',
+  'Generating New Groupings',
+  'Generating Vector Embeddings',
+  'Processing complete. Commiting batch!',
 ];
 
 export default function TimelineColumn({
@@ -52,7 +52,7 @@ export default function TimelineColumn({
   const [conversations, setConversations] = useState<SynergyGroup[]>([]);
   const [unprocessedItems, setUnprocessedItems] = useState<SynergyItem[]>([]);
   const [processingState, setProcessingState] = useState<ProcessingState | null>(null);
-  const [selectedItemId, setSelectedItemId] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState('');
   const [zoom, setZoom] = useState<GroupingOption>(groupingOptions[0]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
@@ -67,7 +67,7 @@ export default function TimelineColumn({
     if (creatingNewConversation || processingState) return false;
 
     const lastConversation = conversations[conversations.length - 1];
-    const processingNames = ["Generating conversation...", "New conversation initialized..."];
+    const processingNames = ['Generating conversation...', 'New conversation initialized...'];
 
     return lastConversation && !processingNames.includes(lastConversation.name);
   }, [creatingNewConversation, processingState, conversations]);
@@ -85,8 +85,8 @@ export default function TimelineColumn({
   async function createNewConversation() {
     // Creates a new conversation during the LLM processing phase
     const conversation = new Conversation(perspective, undefined, channelId);
-    conversation.conversationName = "Generating conversation...";
-    conversation.summary = "Content will appear when processing is complete";
+    conversation.conversationName = 'Generating conversation...';
+    conversation.summary = 'Content will appear when processing is complete';
     await conversation.save();
     return conversation;
   }
@@ -96,8 +96,8 @@ export default function TimelineColumn({
     setCreatingNewConversation(true);
 
     const conversation = new Conversation(perspective, undefined, channelId);
-    conversation.conversationName = "New conversation initialized...";
-    conversation.summary = "Content will appear when the first items have been processed";
+    conversation.conversationName = 'New conversation initialized...';
+    conversation.summary = 'Content will appear when the first items have been processed';
     await conversation.save();
   }
 
@@ -138,7 +138,7 @@ export default function TimelineColumn({
       const responsibleForProcessing = checkItemsForResponsibility(items);
       if (responsibleForProcessing) processItems(items);
     } catch (error) {
-      console.error("Error checking/processing items:", error);
+      console.error('Error checking/processing items:', error);
     } finally {
       processingCheck.current = false;
     }
@@ -154,7 +154,7 @@ export default function TimelineColumn({
   async function processItems(items: SynergyItem[]) {
     processing.current = true;
 
-    console.log("🤖 LLM processing started");
+    console.log('🤖 LLM processing started');
 
     try {
       const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, items.length - PROCESSING_ITEMS_DELAY);
@@ -175,7 +175,7 @@ export default function TimelineColumn({
           const [previousBatch, newBatch] = itemsToProcess.reduce(
             ([prev, next], item) =>
               item.timestamp < currentConversation.timestamp ? [[...prev, item], next] : [prev, [...next, item]],
-            [[], []] as [SynergyItem[], SynergyItem[]]
+            [[], []] as [SynergyItem[], SynergyItem[]],
           );
 
           if (previousBatch.length) await processBatch(previousBatch, lastConversation.baseExpression);
@@ -183,7 +183,7 @@ export default function TimelineColumn({
         }
       }
     } catch (e) {
-      console.log("Error processing items into conversation:", e);
+      console.log('Error processing items into conversation:', e);
     } finally {
       processing.current = false;
       signallingService.setProcessingState(null);
@@ -235,7 +235,7 @@ export default function TimelineColumn({
     // Search for any processing agents in the channel
     const newAgentsState = event.detail as Record<string, AgentState>;
     const processingAgents = Object.values(newAgentsState).filter(
-      (agent) => agent.processing && agent.processing.channelId === channelId
+      (agent) => agent.processing && agent.processing.channelId === channelId,
     );
 
     // Update the progress bar with the latest processing state
@@ -261,11 +261,11 @@ export default function TimelineColumn({
       window.addEventListener(eventName, handleNewAgentsState);
 
       // Listen for link-added events from the perspective
-      perspective.addListener("link-added", handleLinkAdded);
+      perspective.addListener('link-added', handleLinkAdded);
 
       return () => {
         window.removeEventListener(eventName, handleNewAgentsState);
-        perspective.removeListener("link-added", handleLinkAdded);
+        perspective.removeListener('link-added', handleLinkAdded);
       };
     }
   }, [appStore, signallingService]);
@@ -282,7 +282,7 @@ export default function TimelineColumn({
                   selected={zoom === option}
                   onClick={() => {
                     setZoom(option);
-                    closeMenu("zoom-menu");
+                    closeMenu('zoom-menu');
                   }}
                 >
                   {option}

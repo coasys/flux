@@ -1,25 +1,21 @@
 // @ts-ignore
-import {
-  createParser,
-  ParsedEvent,
-  ReconnectInterval,
-} from "https://esm.sh/eventsource-parser@0.1.0";
-import type { Context } from "https://edge.netlify.com/";
+import { createParser, ParsedEvent, ReconnectInterval } from 'https://esm.sh/eventsource-parser@0.1.0';
+import type { Context } from 'https://edge.netlify.com/';
 
 const handler = async (req: Request, context: Context): Promise<Response> => {
   const data = await req.json();
 
   const stream = await OpenAIStream(
     {
-      subject: "gpt-4",
+      subject: 'gpt-4',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `
       You are FluxGPT, a really good Flux UI front end developer. And you only answer in HTML and CSS`,
         },
         {
-          role: "user",
+          role: 'user',
           content: `
 Given the following sections from the documentation, use the documentation to build UI using custom CSS and the Flux UI library.
 
@@ -68,18 +64,18 @@ Answer:
       stream: true,
       n: 1,
     },
-    data.apiKey
+    data.apiKey,
   );
 
   return new Response(stream, {
     status: 200,
-    headers: { "Content-Type": "text/plain" },
+    headers: { 'Content-Type': 'text/plain' },
   });
 };
 
 export default handler;
 
-export const config = { path: "/buildUI" };
+export const config = { path: '/buildUI' };
 
 async function OpenAIStream(payload, apiKey) {
   const encoder = new TextEncoder();
@@ -87,12 +83,12 @@ async function OpenAIStream(payload, apiKey) {
 
   let counter = 0;
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(payload),
   });
 
@@ -101,10 +97,10 @@ async function OpenAIStream(payload, apiKey) {
       function onParse(event: ParsedEvent | ReconnectInterval) {
         console.log(event);
 
-        if (event.type === "event") {
+        if (event.type === 'event') {
           const data = event.data;
-          if (data === "[DONE]") {
-            console.log("done");
+          if (data === '[DONE]') {
+            console.log('done');
             return;
           }
           try {

@@ -1,5 +1,5 @@
-import getConfig from "../config";
-import * as nillion from "@nillion/client-web";
+import getConfig from '../config';
+import * as nillion from '@nillion/client-web';
 
 interface StoreSecrets {
   nillionClient: nillion.NillionClient;
@@ -25,12 +25,12 @@ export async function storeSecrets({
       getConfig()!.clusterId,
       nillionSecrets,
       permissions,
-      storeSecretsReceipt
+      storeSecretsReceipt,
     );
 
     return store_id;
   } catch (error) {
     console.log(error);
-    return "error";
+    return 'error';
   }
 }

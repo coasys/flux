@@ -1,10 +1,10 @@
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
-import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { PostOption, postOptions } from "../../constants/options";
-import FileUpload from "../FileUpload";
-import PostImagePreview from "../PostImagePreview";
-import styles from "./index.module.css";
-import { Post } from "@coasys/flux-api";
+import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { PostOption, postOptions } from '../../constants/options';
+import FileUpload from '../FileUpload';
+import PostImagePreview from '../PostImagePreview';
+import styles from './index.module.css';
+import { Post } from '@coasys/flux-api';
 
 const initialState = {
   title: null,
@@ -13,15 +13,7 @@ const initialState = {
   image: null,
 };
 
-export default function CreatePost({
-  postId,
-  source,
-  agent,
-  perspective,
-  onPublished,
-  onCancel,
-  initialType,
-}) {
+export default function CreatePost({ postId, source, agent, perspective, onPublished, onCancel, initialType }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
   const [imageReplaced, setImageReplaced] = useState(false);
@@ -53,7 +45,7 @@ export default function CreatePost({
 
   // Fetch post if editing
   useEffect(() => {
-    if (postId) getPost()
+    if (postId) getPost();
   }, [postId]);
 
   // We set dynamic refs based on the input name
@@ -91,7 +83,7 @@ export default function CreatePost({
       post.url = data.url;
       post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
       if (isEditing) await post.update();
-      else await post.save()
+      else await post.save();
 
       onPublished(isEditing ? postId : post?.baseExpression);
     } catch (e) {
@@ -109,10 +101,8 @@ export default function CreatePost({
     if (!files || !files[0]) return;
 
     const FR = new FileReader();
-    FR.addEventListener("load", async function (evt) {
-      const compressedImage = await blobToDataURL(
-        await resizeImage(dataURItoBlob(evt.target.result as string), 0.6)
-      );
+    FR.addEventListener('load', async function (evt) {
+      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(evt.target.result as string), 0.6));
 
       setImageReplaced(isEditing);
 
@@ -120,8 +110,8 @@ export default function CreatePost({
         ...state,
         image: {
           data_base64: compressedImage,
-          name: "form-image",
-          file_type: "image/png",
+          name: 'form-image',
+          file_type: 'image/png',
         },
       });
     });
@@ -143,23 +133,14 @@ export default function CreatePost({
       <j-box px="400" py="600">
         <j-box pb="600">
           <j-text color="black" size="600" weight="600">
-            {isEditing ? "Edit post" : "Create a Post"}
+            {isEditing ? 'Edit post' : 'Create a Post'}
           </j-text>
         </j-box>
         <j-box pt="500" pb="200">
-          <j-tabs
-            full
-            value={entryType}
-            onChange={(e) => setEntryType(e.target.value)}
-          >
+          <j-tabs full value={entryType} onChange={(e) => setEntryType(e.target.value)}>
             {postOptions.map((option) => {
               return (
-                <j-tab-item
-                  variant="button"
-                  size="sm"
-                  value={option.value}
-                  disabled={isEditing}
-                >
+                <j-tab-item variant="button" size="sm" value={option.value} disabled={isEditing}>
                   <j-icon slot="start" size="md" name={option.icon}></j-icon>
                   {option.label}
                 </j-tab-item>
@@ -182,7 +163,7 @@ export default function CreatePost({
             {showUrl && (
               <j-box pb="500">
                 <j-input
-                  ref={(ref) => setInputRef(ref, "url")}
+                  ref={(ref) => setInputRef(ref, 'url')}
                   autovalidate
                   size="xl"
                   name="url"
@@ -230,7 +211,7 @@ export default function CreatePost({
               size="lg"
               variant="primary"
             >
-              {isEditing ? "Update" : "Publish"}
+              {isEditing ? 'Update' : 'Publish'}
             </j-button>
           </j-flex>
         </j-box>

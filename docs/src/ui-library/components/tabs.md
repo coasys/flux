@@ -18,16 +18,16 @@ The `j-tabs` component displays a collection of tabs that can be used to navigat
 </j-tabs>
 
 <script>
-  const tabs = document.querySelector("j-tabs");
-  tabs.addEventListener("change", (e) => {
-    console.log("selected tab is:", e.target.value);
+  const tabs = document.querySelector('j-tabs');
+  tabs.addEventListener('change', (e) => {
+    console.log('selected tab is:', e.target.value);
   });
 </script>
 ```
 
 ```js [preact]
 export default function Tabs() {
-  const [tab, setTab] = useState("tab1");
+  const [tab, setTab] = useState('tab1');
 
   return (
     <j-tabs onChange={(e) => setTab(e.target.value)} value={tab}>
@@ -49,8 +49,8 @@ export default function Tabs() {
 </template>
 
 <script setup>
-import { ref } from "vue";
-const tab = ref("tab1");
+import { ref } from 'vue';
+const tab = ref('tab1');
 </script>
 ```
 
@@ -167,8 +167,8 @@ Use the size property to change the size of the tabs. You can set the value to `
 The change event is fired when the active tab is changed. You can add an event listener to the j-tabs element to handle this event, like so:
 
 ```js
-const tabs = document.querySelector("j-tabs");
-tabs.addEventListener("change", (event) => {
+const tabs = document.querySelector('j-tabs');
+tabs.addEventListener('change', (event) => {
   // Do something when the active tab is changed
 });
 ```

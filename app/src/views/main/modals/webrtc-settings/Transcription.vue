@@ -4,7 +4,7 @@
     <j-flex a="center" gap="400">
       <j-text nomargin>Transcribe audio</j-text>
       <j-toggle :checked="transcriptionEnabled" @change="aiStore.toggleTranscriptionEnabled">
-        {{ transcriptionEnabled ? "ON" : "OFF" }}
+        {{ transcriptionEnabled ? 'ON' : 'OFF' }}
       </j-toggle>
     </j-flex>
     <j-flex a="center" gap="400" wrap>
@@ -56,8 +56,8 @@
 </template>
 
 <script setup lang="ts">
-import { transcriptionModels, useAiStore } from "@/stores";
-import { storeToRefs } from "pinia";
+import { transcriptionModels, useAiStore } from '@/stores';
+import { storeToRefs } from 'pinia';
 
 const aiStore = useAiStore();
 
