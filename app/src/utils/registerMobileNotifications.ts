@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core';
 
 import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } from '@capacitor/push-notifications';
 import { Ad4mClient } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect';
 
 const APP_NAME = 'Flux';
 const DESCRIPTION = 'Mobile push notifications for @-mentions';
@@ -29,8 +28,7 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
   };
 }
 
-export async function registerNotification() {
-  const client: Ad4mClient = await getAd4mClient();
+export async function registerNotification(client: Ad4mClient) {
   const perspctives = await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
 
