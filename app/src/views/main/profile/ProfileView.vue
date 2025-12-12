@@ -141,8 +141,7 @@ const modalStore = useModalStore();
 const themeStore = useThemeStore();
 const uiStore = useUiStore();
 
-const { me, myProfile } = storeToRefs(appStore);
-const { ad4mClient } = appStore;
+const { me, myProfile, ad4mClient } = storeToRefs(appStore);
 
 const profile = ref<Profile | null>(null);
 const currentTab = ref('web3');
@@ -175,60 +174,75 @@ function shortETH(address: string) {
 }
 
 async function getEntanglementProofs() {
-  const agent = await ad4mClient.agent.byDID(did.value);
+  // Guard against null client
+  if (!ad4mClient.value) return;
 
-  if (agent) {
-    // Map to dedupe array
-    const seen = new Set<string>();
-    const proofLinks = agent.perspective?.links
-      ? agent.perspective.links.filter((l) => l.data.predicate === 'ad4m://entanglement_proof')
-      : [];
+  try {
+    const agent = await ad4mClient.value.agent.byDID(did.value);
 
-    const expressions = await Promise.all(proofLinks?.map((link) => ad4mClient.expression.get(link.data.target)));
+    if (agent) {
+      // Map to dedupe array
+      const seen = new Set<string>();
+      const proofLinks = agent.perspective?.links
+        ? agent.perspective.links.filter((l: any) => l.data.predicate === 'ad4m://entanglement_proof')
+        : [];
 
-    const fetchedProofs = expressions.map((e) => JSON.parse(e.data)) as EntanglementProof[];
-
-    const filteredProofs = fetchedProofs.filter((p: EntanglementProof) => {
-      if (seen.has(p.deviceKey)) {
-        return false;
-      } else {
-        seen.add(p.deviceKey);
-        return true;
-      }
-    });
-
-    for (const proof of filteredProofs) {
-      const isVerified = await ad4mClient.runtime.verifyStringSignedByDid(
-        agent.did,
-        proof.did,
-        proof.deviceKey,
-        proof.deviceKeySignedByDid,
+      const expressions = await Promise.all(
+        proofLinks?.map((link: any) => ad4mClient.value!.expression.get(link.data.target)),
       );
-      verifiedProofs.value[proof.deviceKey] = isVerified;
-    }
 
-    proofs.value = filteredProofs;
-    selectedAddress.value = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : '';
+      const fetchedProofs = expressions.map((e: any) => JSON.parse(e.data)) as EntanglementProof[];
+
+      const filteredProofs = fetchedProofs.filter((p: EntanglementProof) => {
+        if (seen.has(p.deviceKey)) {
+          return false;
+        } else {
+          seen.add(p.deviceKey);
+          return true;
+        }
+      });
+
+      for (const proof of filteredProofs) {
+        const isVerified = await ad4mClient.value!.runtime.verifyStringSignedByDid(
+          agent.did,
+          proof.did,
+          proof.deviceKey,
+          proof.deviceKeySignedByDid,
+        );
+        verifiedProofs.value[proof.deviceKey] = isVerified;
+      }
+
+      proofs.value = filteredProofs;
+      selectedAddress.value = filteredProofs.length > 0 ? filteredProofs[0].deviceKey : '';
+    }
+  } catch (error) {
+    console.error('ProfileView: Error fetching entanglement proofs:', error);
   }
 }
 
 async function removeProof(proof: EntanglementProof) {
-  const proofLink =
-    me.value?.perspective?.links.filter((l: any) => {
-      return (
-        l.data.predicate === 'ad4m://entanglement_proof' &&
-        l.data.target.startsWith('literal://') &&
-        Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
-      );
-    }) || [];
+  if (!ad4mClient.value) return;
 
-  if (proofLink.length > 0) {
-    await ad4mClient.agent.mutatePublicPerspective({
-      additions: [],
-      removals: proofLink,
-    });
+  try {
+    const proofLink =
+      me.value?.perspective?.links.filter((l: any) => {
+        return (
+          l.data.predicate === 'ad4m://entanglement_proof' &&
+          l.data.target.startsWith('literal://') &&
+          Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
+        );
+      }) || [];
+
+    if (proofLink.length > 0) {
+      await ad4mClient.value.agent.mutatePublicPerspective({
+        additions: [],
+        removals: proofLink,
+      });
+    }
+    getEntanglementProofs();
+  } catch (error) {
+    console.error('ProfileView: Error removing proof:', error);
   }
-  getEntanglementProofs();
 }
 
 function setEditLinkModal(value: boolean, area: any): void {
@@ -241,8 +255,14 @@ async function deleteWebLink(link: LinkExpression) {
 }
 
 async function getAgentAreas() {
-  const fetchedWebLinks = await getAgentWebLinks(did.value, appStore.ad4mClient);
-  weblinks.value = fetchedWebLinks;
+  if (!ad4mClient.value) return;
+
+  try {
+    const fetchedWebLinks = await getAgentWebLinks(did.value, ad4mClient.value);
+    weblinks.value = fetchedWebLinks;
+  } catch (error) {
+    console.error('ProfileView: Error fetching agent areas:', error);
+  }
 }
 
 onBeforeMount(() => themeStore.changeCurrentTheme('global'));
@@ -267,8 +287,8 @@ watch(showEditLinkModal, (val) => {
 watch(
   () => modalStore.showEditProfile,
   async (val) => {
-    if (!val) {
-      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, appStore.ad4mClient, true);
+    if (!val && ad4mClient.value) {
+      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, ad4mClient.value, true);
       getAgentAreas();
     }
   },
@@ -277,11 +297,21 @@ watch(
 watch(
   did,
   () => {
-    getAgentAreas();
-    getEntanglementProofs();
+    if (ad4mClient.value) {
+      getAgentAreas();
+      getEntanglementProofs();
+    }
   },
   { immediate: true },
 );
+
+// Watch for client to become available
+watch(ad4mClient, (newClient) => {
+  if (newClient && did.value) {
+    getAgentAreas();
+    getEntanglementProofs();
+  }
+});
 
 // Watch for changes to myProfile and update profile state if viewing my profile
 watch(
@@ -296,8 +326,15 @@ watch(
 watch(
   () => route.params.did,
   async (newDid) => {
+    if (!ad4mClient.value) return;
+
     const agentDid = Array.isArray(newDid) ? newDid[0] : newDid || me.value?.did;
-    profile.value = await getCachedAgentProfile(agentDid, appStore.ad4mClient);
+
+    try {
+      profile.value = await getCachedAgentProfile(agentDid, ad4mClient.value);
+    } catch (error) {
+      console.error('ProfileView: Error loading profile:', error);
+    }
   },
   { immediate: true },
 );
