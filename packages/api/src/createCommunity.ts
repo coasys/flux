@@ -1,4 +1,4 @@
-import { Perspective } from '@coasys/ad4m';
+import { Ad4mClient, Perspective } from '@coasys/ad4m';
 // @ts-ignore
 import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 import { Community as FluxCommunity } from '@coasys/flux-types';
@@ -23,6 +23,7 @@ export interface Payload {
   image?: string;
   description?: string;
   perspectiveUuid?: string;
+  client?: Ad4mClient;
 }
 
 export default async function createCommunity({
@@ -31,16 +32,17 @@ export default async function createCommunity({
   description = '',
   image = undefined,
   perspectiveUuid,
+  client,
 }: Payload): Promise<FluxCommunity> {
   try {
-    const client = await getAd4mClient();
-    const agent = await client.agent.me();
+    const ad4mClient = client || await getAd4mClient();
+    const agent = await ad4mClient.agent.me();
     const author = agent.did;
 
     // Get or create the perspective
     const perspective = perspectiveUuid
-      ? await client.perspective.byUUID(perspectiveUuid)
-      : await client.perspective.add(name);
+      ? await ad4mClient.perspective.byUUID(perspectiveUuid)
+      : await ad4mClient.perspective.add(name);
 
     // Add models to the perspectives SDNA
     await Promise.all([
@@ -60,17 +62,17 @@ export default async function createCommunity({
 
     // Create a neighbourhood from the perspective
     const uid = uuidv4();
-    const langs = await client.runtime.knownLinkLanguageTemplates();
+    const langs = await ad4mClient.runtime.knownLinkLanguageTemplates();
     const templateData = JSON.stringify({ uid, name: `${name}-link-language` });
     const templateAddress = linkLangAddress || langs?.[0];
     if (!templateAddress) throw new Error('No link language templates available to publish neighbourhood.');
-    const linkLanguage = await client.languages.applyTemplateAndPublish(templateAddress, templateData);
+    const linkLanguage = await ad4mClient.languages.applyTemplateAndPublish(templateAddress, templateData);
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
     let sharedUrl = perspective.sharedUrl;
 
     if (!sharedUrl) {
-      sharedUrl = await client.neighbourhood.publishFromPerspective(
+      sharedUrl = await ad4mClient.neighbourhood.publishFromPerspective(
         perspective!.uuid,
         linkLanguage.address,
         new Perspective(metaLinks),
@@ -95,13 +97,13 @@ export default async function createCommunity({
     await newCommunity.save();
 
     // Update notifications to include the new community
-    const notifications = await client.runtime.notifications();
+    const notifications = await ad4mClient.runtime.notifications();
     const notification = notifications.find((n) => n.appName === 'Flux');
     if (notification) {
       const notificationId = notification.id;
       notification.granted = undefined;
       notification.id = undefined;
-      await client.runtime.updateNotification(notificationId, {
+      await ad4mClient.runtime.updateNotification(notificationId, {
         ...notification,
         perspectiveIds: [...(notification.perspectiveIds || []), perspective.uuid],
       });

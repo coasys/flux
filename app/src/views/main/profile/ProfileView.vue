@@ -241,7 +241,7 @@ async function deleteWebLink(link: LinkExpression) {
 }
 
 async function getAgentAreas() {
-  const fetchedWebLinks = await getAgentWebLinks(did.value);
+  const fetchedWebLinks = await getAgentWebLinks(did.value, appStore.ad4mClient);
   weblinks.value = fetchedWebLinks;
 }
 
@@ -268,7 +268,7 @@ watch(
   () => modalStore.showEditProfile,
   async (val) => {
     if (!val) {
-      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, true);
+      profile.value = await getCachedAgentProfile((route.params.did as string) || me.value.did, appStore.ad4mClient, true);
       getAgentAreas();
     }
   },
@@ -297,7 +297,7 @@ watch(
   () => route.params.did,
   async (newDid) => {
     const agentDid = Array.isArray(newDid) ? newDid[0] : newDid || me.value?.did;
-    profile.value = await getCachedAgentProfile(agentDid);
+    profile.value = await getCachedAgentProfile(agentDid, appStore.ad4mClient);
   },
   { immediate: true },
 );

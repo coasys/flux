@@ -109,8 +109,9 @@ export const useAppStore = defineStore(
     }
 
     async function refreshMyProfile() {
+      // First fetch the agent info
       me.value = await ad4mClient.value.agent.me();
-      myProfile.value = await getCachedAgentProfile(me.value.did, true);
+      myProfile.value = await getCachedAgentProfile(me.value.did, ad4mClient.value, true);
     }
 
     async function restartHolochain() {

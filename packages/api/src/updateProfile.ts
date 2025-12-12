@@ -2,7 +2,7 @@ import { languages, profile } from '@coasys/flux-constants';
 import { Profile } from '@coasys/flux-types';
 import { blobToDataURL, createLinks, createLiteralLinks, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
 
-import { LinkExpression } from '@coasys/ad4m';
+import { Ad4mClient, LinkExpression } from '@coasys/ad4m';
 import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 import getProfile from './getProfile';
 
@@ -14,13 +14,14 @@ export interface Payload {
   profilePicture?: string;
   bio?: string;
   profileBackground?: string;
+  client?: Ad4mClient;
 }
 
 export default async function updateProfile(payload: Payload): Promise<Profile> {
   try {
-    const client = await getAd4mClient();
+    const client = payload.client || await getAd4mClient();
     const me = await client.agent.me();
-    const oldProfile = await getProfile(me.did);
+    const oldProfile = await getProfile(me.did, client);
     const newProfile = { ...oldProfile, ...payload } as Profile;
     const { perspective } = await client.agent.me();
 

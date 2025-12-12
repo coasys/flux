@@ -21,9 +21,9 @@ export interface Payload {
   perspectiveUuid: string;
 }
 
-export default async function getProfile(did: string): Promise<Profile> {
+export default async function getProfile(did: string, client?: Ad4mClient): Promise<Profile> {
   const cleanedDid = did.replace('did://', '');
-  const client: Ad4mClient = await getAd4mClient();
+  const ad4mClient: Ad4mClient = client || (await getAd4mClient());
 
   let profile: Profile = {
     username: '',
@@ -37,7 +37,7 @@ export default async function getProfile(did: string): Promise<Profile> {
     did: '',
   };
 
-  const agentPerspective = await client.agent.byDID(cleanedDid);
+  const agentPerspective = await ad4mClient.agent.byDID(cleanedDid);
 
   if (agentPerspective) {
     const links = agentPerspective!.perspective!.links;
@@ -64,31 +64,42 @@ export default async function getProfile(did: string): Promise<Profile> {
     );
 
     if (mappedProfile.profilePicture) {
-      const res = await client.expression.get(mappedProfile.profilePicture);
-      if (res) {
-        const { data } = res;
-        const { data_base64, file_type } = JSON.parse(data);
-        mappedProfile.profilePicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
+      try {
+        const res = await ad4mClient.expression.get(mappedProfile.profilePicture);
+        if (res) {
+          const { data } = res;
+          const { data_base64, file_type } = JSON.parse(data);
+          mappedProfile.profilePicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
+        }
+      } catch (error) {
+        console.warn('getProfile: Failed to fetch profile picture:', error);
+        // Keep the IPFS hash as-is if we can't resolve it
       }
     }
 
     if (mappedProfile.profileThumbnailPicture) {
-      const res = await client.expression.get(mappedProfile.profileThumbnailPicture);
-      if (res) {
-        const { data } = res;
-        const { data_base64, file_type } = JSON.parse(data);
-
-        mappedProfile.profileThumbnailPicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
+      try {
+        const res = await ad4mClient.expression.get(mappedProfile.profileThumbnailPicture);
+        if (res) {
+          const { data } = res;
+          const { data_base64, file_type } = JSON.parse(data);
+          mappedProfile.profileThumbnailPicture = data_base64 && `data:${file_type};base64, ${data_base64}`;
+        }
+      } catch (error) {
+        console.warn('getProfile: Failed to fetch profile thumbnail:', error);
       }
     }
 
     if (mappedProfile.profileBackground) {
-      const res = await client.expression.get(mappedProfile.profileBackground);
-      if (res) {
-        const { data } = res;
-        const { data_base64, file_type } = JSON.parse(data);
-
-        mappedProfile.profileBackground = data_base64 && `data:${file_type};base64, ${data_base64}`;
+      try {
+        const res = await ad4mClient.expression.get(mappedProfile.profileBackground);
+        if (res) {
+          const { data } = res;
+          const { data_base64, file_type } = JSON.parse(data);
+          mappedProfile.profileBackground = data_base64 && `data:${file_type};base64, ${data_base64}`;
+        }
+      } catch (error) {
+        console.warn('getProfile: Failed to fetch profile background:', error);
       }
     }
 

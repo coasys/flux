@@ -1,3 +1,4 @@
+import { Ad4mClient } from '@coasys/ad4m';
 import { getProfile } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 
@@ -15,13 +16,13 @@ const defaultProfile: Profile = {
 
 const profileCache: Record<string, Profile> = {};
 
-export async function getCachedAgentProfile(did: string, refresh?: boolean): Promise<Profile> {
+export async function getCachedAgentProfile(did: string, client: Ad4mClient, refresh?: boolean): Promise<Profile> {
   // Return the cached profile if it already exists (skip when refreshing)
   if (!refresh && profileCache[did]) return profileCache[did];
 
   try {
     // Otherwise fetch the profile and store it in the cache
-    const profile = await getProfile(did);
+    const profile = await getProfile(did, client);
     if (profile) {
       const profileWithDid = { ...profile, did };
       profileCache[did] = profileWithDid;

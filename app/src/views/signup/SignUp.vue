@@ -115,7 +115,7 @@ async function autoFillUser() {
 
     showSignup.value = true;
 
-    const ad4mProfile = await getAd4mProfile();
+    const ad4mProfile = await getAd4mProfile(appStore.ad4mClient);
 
     username.value = ad4mProfile.username || '';
     name.value = ad4mProfile.name || '';
@@ -134,6 +134,7 @@ async function createUser() {
     email: email.value,
     username: username.value,
     profilePicture: profilePicture.value,
+    client: appStore.ad4mClient,
   })
     .then(async () => {
       appStore.refreshMyProfile();

@@ -44,7 +44,7 @@ function goToSettings(): void {
 }
 
 onMounted(async () => {
-  profile.value = await getCachedAgentProfile(me.value.did);
+  profile.value = await getCachedAgentProfile(me.value.did, appStore.ad4mClient);
 });
 </script>
 
