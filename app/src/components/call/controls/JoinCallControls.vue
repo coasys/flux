@@ -42,7 +42,8 @@ const videoDisabled = computed(() => {
 });
 
 const audioDisabled = computed(() => {
-  return !stream.value || streamLoading.value || stream.value.getAudioTracks().length === 0;
+  if (!stream.value || streamLoading.value || typeof stream.value.getAudioTracks !== 'function') return true;
+  return stream.value.getAudioTracks().length === 0;
 });
 </script>
 
