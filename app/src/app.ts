@@ -50,20 +50,20 @@ if (appStore.isEmbedded) {
         // Build Ad4m client from config
         const ad4mClient = buildAd4mClientFromConfig(port, token);
         appStore.setAdamClient(ad4mClient);
-        
+
         // Wait for profile to load before mounting
         await appStore.refreshMyProfile();
-        
+
         // Mount the Vue app now that everything is ready
         vueApp.mount('#app');
-        console.log('Flux: Vue app mounted');
       } catch (error) {
         console.error('Flux: Failed to initialize Ad4m client:', error);
       }
     }
   });
-  
-  console.log('Flux: Listener set up, waiting for AD4M_CONFIG from parent');
+
+  // Request AD4M config from parent
+  window.parent.postMessage({ type: 'REQUEST_AD4M_CONFIG' }, '*');
 } else {
   // Running as standalone webapp - use ad4m-connect
   getAd4mConnect();
@@ -73,13 +73,12 @@ if (appStore.isEmbedded) {
     try {
       const ad4mClient = await getAd4mClient();
       appStore.setAdamClient(ad4mClient);
-      
+
       // Wait for profile to load before mounting
       await appStore.refreshMyProfile();
-      
+
       // Mount the Vue app now that everything is ready
       vueApp.mount('#app');
-      console.log('Flux: Vue app mounted');
     } catch (error) {
       console.error('Failed to initialize Ad4m client:', error);
     }
