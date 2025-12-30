@@ -17,6 +17,7 @@ import '@coasys/flux-ui/dist/themes/cyberpunk.css';
 import '@coasys/flux-ui/dist/themes/dark.css';
 import '@coasys/flux-ui/dist/themes/retro.css';
 import './themes/themes.css';
+import { sleep } from '@coasys/flux-utils';
 
 export const pinia = createPinia();
 
@@ -41,7 +42,8 @@ const appStore = useAppStore(pinia);
 
 async function bootstrap() {
   try {
-    const ad4mClient = await getAd4mClientReady();
+    await sleep(1000);
+    const ad4mClient = await getAd4mClient();
     appStore.setAdamClient(ad4mClient);
     appStore.refreshMyProfile();
   } catch (e) {
