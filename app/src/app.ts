@@ -42,7 +42,7 @@ const appStore = useAppStore(pinia);
 
 async function bootstrap() {
   try {
-    await sleep(1000);
+    //await sleep(1000);
     const ad4mClient = await getAd4mClient();
     appStore.setAdamClient(ad4mClient);
     appStore.refreshMyProfile();
