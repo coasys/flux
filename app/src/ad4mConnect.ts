@@ -9,6 +9,7 @@ const ad4mConnect = Ad4mConnectUI({
   capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
   hosting: false,
   mobile: true,
+  multiUser: true,
   backendUrl: 'https://lucksus.ad4m.dev:12001/graphql'
 });
 

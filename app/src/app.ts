@@ -4,7 +4,7 @@ import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
-import './ad4mConnect';
+import { ad4mConnect } from './ad4mConnect';
 import App from './App.vue';
 import router from './router';
 // @ts-ignore
@@ -52,7 +52,25 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+// Wait for authentication before bootstrapping
+if (ad4mConnect.authState === 'authenticated') {
+  // Already authenticated (e.g., has stored token)
+  bootstrap();
+} else {
+  // Wait for authentication
+  vueApp.mount("#app"); // Mount the app immediately so UI is shown
+  ad4mConnect.addEventListener('authstatechange', async () => {
+    if (ad4mConnect.authState === 'authenticated') {
+      try {
+        const ad4mClient = await getAd4mClientReady();
+        appStore.setAdamClient(ad4mClient);
+        appStore.refreshMyProfile();
+      } catch (e) {
+        console.error("Failed to initialize Ad4m client after auth:", e);
+      }
+    }
+  });
+}
 
 // Check for service worker updates every 10 minutes and reload
 const intervalMS = 60 * 10 * 1000;
