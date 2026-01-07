@@ -41,6 +41,7 @@ const vueApp = createApp({ render: () => h(App) })
 const appStore = useAppStore(pinia);
 
 if (appStore.isEmbedded) {
+  console.log('Flux: Running in embedded mode');
   // EMBEDDED MODE: Running in WE launcher
   // Listen for AD4M config from parent window via postMessage
   window.addEventListener('message', async (event) => {
@@ -67,34 +68,30 @@ if (appStore.isEmbedded) {
   window.parent.postMessage({ type: 'REQUEST_AD4M_CONFIG' }, '*');
   
 } else {
+  console.log('Flux: Running in standalone mode');
   // STANDALONE MODE: Running as webapp with ad4m-connect
   // Use multi-user authentication flow
-  getAd4mConnect(); // Initialize the singleton
+  const ad4mConnect = getAd4mConnect();
 
   async function bootstrap() {
     try {
       const ad4mClient = await getAd4mClientReady();
       appStore.setAdamClient(ad4mClient);
-      appStore.refreshMyProfile();
+      await appStore.refreshMyProfile();
     } catch (e) {
       console.error("Failed to initialize Ad4m client:", e);
     }
   }
 
-  // Wait for authentication before bootstrapping
-  if (ad4mConnect.authState === 'authenticated') {
-    // Already authenticated (e.g., has stored token)
-    await bootstrap();
-    vueApp.mount("#app");
-  } else {
-    // Wait for authentication - mount app immediately so UI is shown
-    vueApp.mount("#app");
-    ad4mConnect.addEventListener('authstatechange', async () => {
-      if (ad4mConnect.authState === 'authenticated') {
-        await bootstrap();
-      }
-    });
-  }
+  // Mount app so UI is shown
+  vueApp.mount("#app");
+
+  // Listen for authentication state changes
+  ad4mConnect.addEventListener('authstatechange', async () => {
+    if (ad4mConnect.authState === 'authenticated') {
+      await bootstrap();
+    }
+  });
 
   // Service worker (only in standalone mode)
   const intervalMS = 60 * 10 * 1000;

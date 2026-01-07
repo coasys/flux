@@ -92,6 +92,17 @@ router.beforeEach(async (to, from, next) => {
     } else {
       // Standalone, use ad4mConnect
       const ad4mConnect = getAd4mConnect();
+      
+      // Wait for auto-connection to complete on page refresh (prevents signup screen flash)
+      if (ad4mConnect && (ad4mConnect.connectionState === 'connecting' || ad4mConnect.connectionState === 'not_connected')) {
+        const maxWait = 3000;
+        const startTime = Date.now();
+        while ((ad4mConnect.connectionState === 'connecting' || ad4mConnect.connectionState === 'not_connected') && 
+               (Date.now() - startTime) < maxWait) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+      
       isAuthenticated = ad4mConnect ? await ad4mConnect.isAuthenticated() : false;
     }
 
@@ -102,8 +113,11 @@ router.beforeEach(async (to, from, next) => {
       if (fluxAccountCreated && isOnSignupOrMain) {
         await appStore.refreshMyProfile();
         next('/home');
-      } else if (!fluxAccountCreated && !isOnSignupOrMain) next('/signup');
-      else next();
+      } else if (!fluxAccountCreated && !isOnSignupOrMain) {
+        next('/signup');
+      } else {
+        next();
+      }
     } else {
       // If not logged in, redirect to signup
       if (to.name !== 'signup') {

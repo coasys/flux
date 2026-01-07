@@ -59,7 +59,7 @@ import { FluxLogoIcon } from '@/components/icons';
 import { useAppStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
@@ -121,7 +121,7 @@ async function autoFillUser() {
     name.value = ad4mProfile.name || '';
     familyName.value = ad4mProfile.familyName || '';
   } catch (e) {
-    console.log(e);
+    console.error('SignUp: Error in autoFillUser:', e);
   }
 }
 
@@ -155,12 +155,15 @@ onMounted(() => {
   async function authStateChangeHandler() {
     // Check authentication based on context
     const isAuthenticated = appStore.isEmbedded
-      ? appStore.ad4mClient !== null
+      ? appStore.isClientInitialized()
       : ad4mConnect
         ? ad4mConnect.authState === 'authenticated'
         : false;
 
-    if (isAuthenticated) autoFillUser();
+    // Wait for client to be ready before trying to use it
+    if (isAuthenticated && appStore.isClientInitialized()) {
+      await autoFillUser();
+    }
   }
 
   // Fire the authStateChangeHandler immediately in case the user is already authenticated
@@ -171,6 +174,17 @@ onMounted(() => {
     ad4mConnect.addEventListener('authstatechange', authStateChangeHandler);
     onBeforeUnmount(() => ad4mConnect!.removeEventListener('authstatechange', authStateChangeHandler));
   }
+
+  // Watch for client initialization (reactive approach instead of custom event)
+  const stopWatching = watch(
+    () => appStore.isClientInitialized(),
+    (isInitialized) => {
+      if (isInitialized) {
+        authStateChangeHandler();
+      }
+    }
+  );
+  onBeforeUnmount(stopWatching);
 });
 </script>
 
