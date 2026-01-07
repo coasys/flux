@@ -507,5 +507,9 @@ export const useMediaDevicesStore = defineStore(
       toggleScreenShare,
     };
   },
-  { persist: true },
+  {
+    persist: {
+      omit: ['stream', 'error'],
+    },
+  },
 );

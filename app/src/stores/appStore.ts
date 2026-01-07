@@ -11,6 +11,7 @@ import { computed, ref, shallowRef, toRaw } from 'vue';
 export const useAppStore = defineStore(
   'appStore',
   () => {
+    const isEmbedded = ref(window.self !== window.top); // Determine if running in iframe
     const me = ref<Agent>({ did: '' });
     const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>('not-available');
@@ -83,6 +84,10 @@ export const useAppStore = defineStore(
       }
     }
 
+    function isClientInitialized(): boolean {
+      return ad4mClientRef.value !== null;
+    }
+
     async function getMyCommunities() {
       // Get all my perspectives
       myPerspectives.value = await ad4mClient.value.perspective.all();
@@ -104,8 +109,9 @@ export const useAppStore = defineStore(
     }
 
     async function refreshMyProfile() {
+      // First fetch the agent info
       me.value = await ad4mClient.value.agent.me();
-      myProfile.value = await getCachedAgentProfile(me.value.did, true);
+      myProfile.value = await getCachedAgentProfile(me.value.did, ad4mClient.value, true);
     }
 
     async function restartHolochain() {
@@ -133,9 +139,11 @@ export const useAppStore = defineStore(
       myCommunities,
       hasJoinedTestingCommunity,
       holochainRestarting,
+      isEmbedded,
 
       // Mutations
       setAdamClient,
+      isClientInitialized,
       setToast,
       showSuccessToast,
       showDangerToast,

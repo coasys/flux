@@ -1,10 +1,11 @@
 import { useAppStore } from '@/stores';
+import { buildAd4mClientFromConfig } from '@/utils/ad4mClient';
+import { getAd4mConnect, ad4mConnect } from '@/ad4mConnect';
 import { getAd4mClient } from '@coasys/ad4m-connect';
 import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
-import { ad4mConnect } from './ad4mConnect';
 import App from './App.vue';
 import router from './router';
 // @ts-ignore
@@ -37,45 +38,69 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
-// Initialize Ad4mClient and mount after it's ready
 const appStore = useAppStore(pinia);
 
-async function bootstrap() {
-  try {
-    const ad4mClient = await getAd4mClientReady();
-    appStore.setAdamClient(ad4mClient);
-    appStore.refreshMyProfile();
-  } catch (e) {
-    console.error("Failed to initialize Ad4m client:", e);
-  } finally {
-    vueApp.mount("#app");
-  }
-}
-
-// Wait for authentication before bootstrapping
-if (ad4mConnect.authState === 'authenticated') {
-  // Already authenticated (e.g., has stored token)
-  bootstrap();
-} else {
-  // Wait for authentication
-  vueApp.mount("#app"); // Mount the app immediately so UI is shown
-  ad4mConnect.addEventListener('authstatechange', async () => {
-    if (ad4mConnect.authState === 'authenticated') {
+if (appStore.isEmbedded) {
+  // EMBEDDED MODE: Running in WE launcher
+  // Listen for AD4M config from parent window via postMessage
+  window.addEventListener('message', async (event) => {
+    if (event.data.type === 'AD4M_CONFIG') {
       try {
-        const ad4mClient = await getAd4mClientReady();
+        const { port, token } = event.data;
+
+        // Build Ad4m client from config (no ad4m-connect needed)
+        const ad4mClient = buildAd4mClientFromConfig(port, token);
         appStore.setAdamClient(ad4mClient);
-        appStore.refreshMyProfile();
-      } catch (e) {
-        console.error("Failed to initialize Ad4m client after auth:", e);
+
+        // Wait for profile to load before mounting
+        await appStore.refreshMyProfile();
+
+        // Mount the Vue app now that everything is ready
+        vueApp.mount('#app');
+      } catch (error) {
+        console.error('Flux: Failed to initialize Ad4m client:', error);
       }
     }
   });
-}
 
-// Check for service worker updates every 10 minutes and reload
-const intervalMS = 60 * 10 * 1000;
-const updateServiceWorker = useRegisterSW({
-  onRegistered(r: ServiceWorkerRegistration | undefined) {
-    r && setInterval(() => r.update(), intervalMS);
-  },
-});
+  // Request AD4M config from parent
+  window.parent.postMessage({ type: 'REQUEST_AD4M_CONFIG' }, '*');
+  
+} else {
+  // STANDALONE MODE: Running as webapp with ad4m-connect
+  // Use multi-user authentication flow
+  getAd4mConnect(); // Initialize the singleton
+
+  async function bootstrap() {
+    try {
+      const ad4mClient = await getAd4mClientReady();
+      appStore.setAdamClient(ad4mClient);
+      appStore.refreshMyProfile();
+    } catch (e) {
+      console.error("Failed to initialize Ad4m client:", e);
+    }
+  }
+
+  // Wait for authentication before bootstrapping
+  if (ad4mConnect.authState === 'authenticated') {
+    // Already authenticated (e.g., has stored token)
+    await bootstrap();
+    vueApp.mount("#app");
+  } else {
+    // Wait for authentication - mount app immediately so UI is shown
+    vueApp.mount("#app");
+    ad4mConnect.addEventListener('authstatechange', async () => {
+      if (ad4mConnect.authState === 'authenticated') {
+        await bootstrap();
+      }
+    });
+  }
+
+  // Service worker (only in standalone mode)
+  const intervalMS = 60 * 10 * 1000;
+  useRegisterSW({
+    onRegistered(r: ServiceWorkerRegistration | undefined) {
+      r && setInterval(() => r.update(), intervalMS);
+    },
+  });
+}

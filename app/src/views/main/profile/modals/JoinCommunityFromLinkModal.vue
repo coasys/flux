@@ -36,7 +36,7 @@ const isJoiningCommunity = ref(false);
 async function handleJoinCommunity() {
   isJoiningCommunity.value = true;
   try {
-    await joinCommunity({ joiningLink: (props.joiningLink || '').trim() });
+    await joinCommunity({ joiningLink: (props.joiningLink || '').trim(), client: appStore.ad4mClient });
     modalStore.showJoinCommunity = false;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

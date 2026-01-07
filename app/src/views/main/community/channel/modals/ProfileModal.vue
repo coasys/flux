@@ -64,7 +64,7 @@ async function handleProfileClick(did: string) {
 watch(
   () => activeProfile.value,
   async (newDid, oldDid) => {
-    if (newDid !== oldDid && newDid) profile.value = await getCachedAgentProfile(newDid);
+    if (newDid !== oldDid && newDid) profile.value = await getCachedAgentProfile(newDid, appStore.ad4mClient);
   },
   { immediate: true },
 );

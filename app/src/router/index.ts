@@ -1,4 +1,4 @@
-import { ad4mConnect } from '@/ad4mConnect';
+import { getAd4mConnect } from '@/ad4mConnect';
 import { useAppStore, useRouteMemoryStore } from '@/stores';
 import { RouteParams } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -68,11 +68,34 @@ const router = createRouter({ history: createWebHashHistory(), routes });
 // Handle login routing
 router.beforeEach(async (to, from, next) => {
   try {
-    const isAuthenticated = await ad4mConnect.isAuthenticated();
-    if (isAuthenticated) {
-      const appStore = useAppStore();
-      const { me } = storeToRefs(appStore);
+    const appStore = useAppStore();
+    const { me } = storeToRefs(appStore);
 
+    // In embedded mode, skip all auth checks if client not initialized yet
+    // (parent will send AD4M config via postMessage)
+    if (appStore.isEmbedded && !appStore.isClientInitialized()) {
+      next();
+      return;
+    }
+
+    // Skip auth/signup flow if embedded - parent app handles authentication
+    if (appStore.isEmbedded && to.name === 'signup') {
+      next({ name: 'home' });
+      return;
+    }
+
+    // Check authentication based on context (use store's isEmbedded flag)
+    let isAuthenticated: boolean;
+    if (appStore.isEmbedded) {
+      // In iframe, check if client is initialized
+      isAuthenticated = appStore.isClientInitialized();
+    } else {
+      // Standalone, use ad4mConnect
+      const ad4mConnect = getAd4mConnect();
+      isAuthenticated = ad4mConnect ? await ad4mConnect.isAuthenticated() : false;
+    }
+
+    if (isAuthenticated) {
       // Handle authenticated routes
       const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith('flux://'));
       const isOnSignupOrMain = to.name === 'signup' || to.name === 'main';
@@ -83,13 +106,19 @@ router.beforeEach(async (to, from, next) => {
       else next();
     } else {
       // If not logged in, redirect to signup
-      if (to.name !== 'signup') next('/signup');
-      next();
+      if (to.name !== 'signup') {
+        next('/signup');
+      } else {
+        next();
+      }
     }
   } catch (e) {
     console.log('Error in route', e);
-    if (to.name !== 'signup') next('/signup');
-    else next();
+    if (to.name !== 'signup') {
+      next('/signup');
+    } else {
+      next();
+    }
   }
 });
 

@@ -278,7 +278,7 @@ async function joinCommunityMethod() {
       return;
     }
 
-    const community = await joinCommunity({ joiningLink: neighbourhoodUrl });
+    const community = await joinCommunity({ joiningLink: neighbourhoodUrl, client: appStore.ad4mClient });
     router.push({ name: 'community', params: { communityId: community.uuid } });
     closeModal();
   } catch (error) {
@@ -298,6 +298,7 @@ async function createCommunityMethod() {
       name: newCommunityName.value,
       description: newCommunityDesc.value,
       image: newProfileImage.value,
+      client: appStore.ad4mClient,
     });
     // Refresh communities and navigate to the new one
     await appStore.getMyCommunities();
@@ -320,6 +321,7 @@ async function createCommunityFromPerspective(perspective: any) {
       description: newCommunityDesc.value,
       image: newProfileImage.value,
       perspectiveUuid: perspective.uuid,
+      client: appStore.ad4mClient,
     });
     router.push({ name: 'community', params: { communityId: community.uuid } });
     closeModal();

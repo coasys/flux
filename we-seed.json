@@ -1,0 +1,51 @@
+{
+  "project": {
+    "name": "Flux",
+    "version": "0.11.0",
+    "description": "A social web3 tool kit for communities",
+    "author": "Junto Foundation",
+    "repository": "https://github.com/juntofoundation/flux",
+    "license": "MIT"
+  },
+  "host": {
+    "theme": {
+      "colors": {
+        "primary": "#6366f1",
+        "secondary": "#8b5cf6"
+      }
+    }
+  },
+  "ad4m": {
+    "ai": {
+      "enabled": true
+    },
+    "perspectives": [
+      {
+        "name": "Flux Channels"
+      }
+    ]
+  },
+  "apps": [
+    {
+      "id": "flux",
+      "name": "Flux",
+      "route": "/",
+      "entry": "index.html",
+      "capabilities": ["perspectives", "languages", "agents"],
+      "paths": {
+        "projectRoot": "./app",
+        "dist": "app/dist",
+        "devServer": {
+          "port": 5173,
+          "host": "localhost"
+        }
+      },
+      "commands": {
+        "install": "yarn install",
+        "build": "yarn build",
+        "dev": "yarn dev",
+        "clean": "yarn clean"
+      }
+    }
+  ]
+}

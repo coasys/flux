@@ -352,7 +352,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
       agentsWithProfiles.value = await Promise.all(
         agentEntries.map(async ([did, agent]) => ({
           ...agent,
-          ...(await getCachedAgentProfile(did)),
+          ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
         })),
       );
     },

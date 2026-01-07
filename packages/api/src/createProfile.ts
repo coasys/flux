@@ -23,6 +23,7 @@ export interface Payload {
   profileBackground?: string;
   profilePicture?: string;
   profileThumbnailPicture?: string;
+  client?: Ad4mClient;
 }
 
 export default async ({
@@ -33,11 +34,12 @@ export default async ({
   profileThumbnailPicture,
   profileBackground,
   profilePicture,
+  client,
 }: Payload): Promise<Profile> => {
-  const client: Ad4mClient = await getAd4mClient();
+  const ad4mClient: Ad4mClient = client || await getAd4mClient();
 
   try {
-    await client.languages.byAddress(FILE_STORAGE_LANGUAGE);
+    await ad4mClient.languages.byAddress(FILE_STORAGE_LANGUAGE);
 
     const additions = [] as Link[];
     const removals = [] as LinkExpression[];
@@ -50,7 +52,7 @@ export default async ({
         await resizeImage(dataURItoBlob(profilePicture as string), 0.6),
       );
 
-      profileImage = await client.expression.create(
+      profileImage = await ad4mClient.expression.create(
         {
           data_base64: compressedProfileImage,
           name: 'profile-image',
@@ -63,7 +65,7 @@ export default async ({
         await resizeImage(dataURItoBlob(profilePicture as string), 0.3),
       );
 
-      thumbnailImage = await client.expression.create(
+      thumbnailImage = await ad4mClient.expression.create(
         {
           data_base64: compressedpThumbnailImage,
           name: 'thumbnail-image',
@@ -129,9 +131,9 @@ export default async ({
       );
     }
 
-    const agent = await client.agent.me();
+    const agent = await ad4mClient.agent.me();
 
-    await client.agent.mutatePublicPerspective({
+    await ad4mClient.agent.mutatePublicPerspective({
       additions,
       removals,
     } as LinkMutations);

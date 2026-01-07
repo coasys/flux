@@ -103,7 +103,7 @@ async function onNeighbourhoodClick(url: any) {
 
 function joinCommunityHandler(url: string) {
   isJoiningCommunity.value = true;
-  joinCommunity({ joiningLink: url })
+  joinCommunity({ joiningLink: url, client: appStore.ad4mClient })
     .then((community) => router.push({ name: 'community', params: { communityId: community.uuid } }))
     .finally(() => (isJoiningCommunity.value = false));
 }

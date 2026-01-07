@@ -1,15 +1,15 @@
+import { Ad4mClient, LinkExpression, Literal } from '@coasys/ad4m';
 import { getAd4mClient } from '@coasys/ad4m-connect/utils';
-import { LinkExpression, Literal } from '@coasys/ad4m';
 import { mapLiteralLinks } from '@coasys/flux-utils';
 import { profile } from '@coasys/flux-constants';
 import { WebLink } from '@coasys/flux-types';
 
 const { OG_DESCRIPTION, OG_TITLE, OG_IMAGE, AREA_WEBLINK, OG_LINK } = profile;
 
-export default async function getAgentWebLinks(did: string): Promise<WebLink[]> {
-  const client = await getAd4mClient();
+export default async function getAgentWebLinks(did: string, client?: Ad4mClient): Promise<WebLink[]> {
+  const ad4mClient = client || await getAd4mClient();
 
-  const agent = await client.agent.byDID(did);
+  const agent = await ad4mClient.agent.byDID(did);
 
   if (!agent?.perspective) return [];
 

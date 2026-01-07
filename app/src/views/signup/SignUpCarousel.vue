@@ -44,7 +44,8 @@
         <ChromeIcon />
       </j-button>
     </j-box>
-    <j-box>
+    <!-- Connect button only shown in standalone mode, not when embedded in iframe -->
+    <j-box v-if="!appStore.isEmbedded">
       <j-flex a="center" j="center">
         <j-button
           :size="deferredPrompt ? 'md' : 'xl'"
@@ -60,10 +61,15 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from '@/ad4mConnect';
+import { getAd4mConnect } from '@/ad4mConnect';
 import { ChromeIcon, FluxLogoIcon } from '@/components/icons';
+import { useAppStore } from '@/stores';
 import { onMounted, ref } from 'vue';
 import Orb from './Orb.vue';
+
+const appStore = useAppStore();
+// Only initialize ad4mConnect when not embedded (defensive check - router guard should prevent this)
+const ad4mConnect = appStore.isEmbedded ? null : getAd4mConnect();
 
 const deferredPrompt = ref<any>(null);
 const isAtEnd = ref(false);
@@ -105,7 +111,9 @@ function handleScroll() {
 }
 
 function connect() {
-  ad4mConnect.connect();
+  if (ad4mConnect) {
+    ad4mConnect.connect();
+  }
 }
 
 async function downloadPWA() {

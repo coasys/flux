@@ -5,13 +5,14 @@ import { Ad4mClient } from '@coasys/ad4m';
 
 export interface Payload {
   joiningLink: string;
+  client?: Ad4mClient;
 }
 
-export default async ({ joiningLink }: Payload): Promise<Community> => {
+export default async ({ joiningLink, client }: Payload): Promise<Community> => {
   try {
-    const client: Ad4mClient = await getAd4mClient();
-    const agent = await client.agent.me();
-    const allPerspectives = await client.perspective.all();
+    const ad4mClient: Ad4mClient = client || await getAd4mClient();
+    const agent = await ad4mClient.agent.me();
+    const allPerspectives = await ad4mClient.perspective.all();
 
     const exsistingPerspective = allPerspectives.find((perspective) => {
       perspective.sharedUrl === joiningLink;
@@ -21,13 +22,13 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       throw Error('Neighbourhood already joined!');
     }
 
-    const perspective = await client.neighbourhood.joinFromUrl(joiningLink);
+    const perspective = await ad4mClient.neighbourhood.joinFromUrl(joiningLink);
 
     const neighbourhoodMeta = getMetaFromLinks(perspective.neighbourhood!.data.meta.links);
 
-    await client.perspective.update(perspective.uuid, neighbourhoodMeta.name);
+    await ad4mClient.perspective.update(perspective.uuid, neighbourhoodMeta.name);
 
-    const notifications = await client.runtime.notifications();
+    const notifications = await ad4mClient.runtime.notifications();
 
     const notification = notifications.find((notification) => notification.appName === 'Flux');
 
@@ -35,7 +36,7 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
     delete notification.granted;
     delete notification.id;
 
-    await client.runtime.updateNotification(notificationId, {
+    await ad4mClient.runtime.updateNotification(notificationId, {
       ...notification,
       perspectiveIds: [...notification.perspectiveIds, perspective.uuid],
     });

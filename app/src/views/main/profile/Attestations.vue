@@ -19,31 +19,48 @@
 <script setup lang="ts">
 import { useAppStore } from '@/stores';
 import { onMounted, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({ address: { type: String, required: true } });
-const { ad4mClient } = useAppStore();
+const appStore = useAppStore();
+const { ad4mClient } = storeToRefs(appStore);
 
 const EAS_LANG = 'QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E';
 const attestations = ref<any>([]);
 
 async function getAttestations() {
-  if (!ad4mClient) return;
+  // Guard against null client
+  if (!ad4mClient.value) return;
 
-  await ad4mClient.languages.byAddress(EAS_LANG);
-  const expression = await ad4mClient.expression.get(`${EAS_LANG}://${props.address}`);
-  const fetchedAttestations = JSON.parse(expression?.data || '[]');
-  const json = fetchedAttestations.map((a: any) => JSON.parse(a.decodedDataJson));
-  attestations.value = json;
+  try {
+    await ad4mClient.value.languages.byAddress(EAS_LANG);
+    const expression = await ad4mClient.value.expression.get(`${EAS_LANG}://${props.address}`);
+    const fetchedAttestations = JSON.parse(expression?.data || '[]');
+    const json = fetchedAttestations.map((a: any) => JSON.parse(a.decodedDataJson));
+    attestations.value = json;
+  } catch (error) {
+    console.error('Attestations: Error fetching attestations:', error);
+    // Silently fail - attestations are optional
+  }
 }
 
-onMounted(() => getAttestations());
+// Only call on mount if client is available
+onMounted(() => {
+  if (ad4mClient.value) getAttestations();
+});
 
 // Watch for address changes
 watch(
   () => props.address,
-  () => getAttestations(),
-  { immediate: true },
+  () => {
+    if (ad4mClient.value) getAttestations();
+  },
 );
+
+// Watch for client to become available
+watch(ad4mClient, (newClient) => {
+  if (newClient) getAttestations();
+});
 </script>
 
 <style scoped>
