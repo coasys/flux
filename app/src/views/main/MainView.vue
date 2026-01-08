@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { getAd4mConnect } from '@/ad4mConnect';
 import CallContainer from '@/containers/CallContainer.vue';
 import AppLayout from '@/layout/AppLayout.vue';
 import { useAppStore } from '@/stores';
@@ -39,10 +38,6 @@ const route = useRoute();
 const appStore = useAppStore();
 
 const { onLinkAdded } = usePerspectives(appStore.ad4mClient);
-
-// Only initialize ad4mConnect when not embedded
-const ad4mConnect = appStore.isEmbedded ? null : getAd4mConnect();
-const oldAuthState = ref(appStore.isEmbedded ? null : (ad4mConnect?.authState ?? null));
 
 function gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
   const routeChannelId = route.params.channelId;
@@ -73,17 +68,6 @@ async function initializeApp() {
 
   // Ensure LLM tasks are set up
   ensureLLMTasks(appStore.ad4mClient.ai);
-
-  // Reload page if auth state changes (only for standalone mode)
-  if (!appStore.isEmbedded && ad4mConnect) {
-    ad4mConnect.addEventListener('authstatechange', async () => {
-      let oldState = oldAuthState.value;
-      oldAuthState.value = ad4mConnect!.authState;
-      if (ad4mConnect!.authState === 'authenticated' && oldState !== 'authenticated') {
-        window.location.reload();
-      }
-    });
-  }
 
   // Listen for new messages
   onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {

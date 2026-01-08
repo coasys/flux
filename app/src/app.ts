@@ -1,5 +1,5 @@
 import { useAppStore } from '@/stores';
-import { getAd4mConnect } from '@/ad4mConnect';
+import { getAd4mClient } from '@coasys/ad4m-connect';
 import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
@@ -16,7 +16,7 @@ import '@coasys/flux-ui/dist/themes/cyberpunk.css';
 import '@coasys/flux-ui/dist/themes/dark.css';
 import '@coasys/flux-ui/dist/themes/retro.css';
 import './themes/themes.css';
-import { getAd4mClientReady } from '@coasys/flux-utils';
+
 
 export const pinia = createPinia();
 
@@ -38,37 +38,48 @@ const vueApp = createApp({ render: () => h(App) })
 
 const appStore = useAppStore(pinia);
 
-// Initialize ad4m-connect (handles both embedded and standalone modes)
-const ad4mConnect = getAd4mConnect();
+// Mount the app immediately so UI is responsive
+vueApp.mount("#app");
 
-async function bootstrap() {
+// Initialize Ad4m client in an async IIFE to support older browsers
+(async () => {
   try {
-    console.log('Flux: Initializing Ad4m client');
-    const ad4mClient = await getAd4mClientReady();
+    // Initialize Ad4m client (handles both embedded and standalone modes automatically)
+    const ad4mClient = await getAd4mClient({
+      appName: 'Flux',
+      appDesc: 'A Social Toolkit for the New Internet',
+      appUrl: window.location.origin,
+      appDomain: window.location.origin,
+      appIconPath: window.location.origin + '/icon.png',
+      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
+      hosting: false,
+      mobile: true,
+      multiUser: true,
+      backendUrl: 'https://lucksus.ad4m.dev:12001/graphql'
+    });
+
+    if (!ad4mClient) {
+      throw new Error('Ad4mClient not available');
+    }
+
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
     console.log('Flux: Ad4m client initialized successfully');
-    
-    // Mount app AFTER client is ready
-    vueApp.mount("#app");
-  } catch (e) {
-    console.error("Failed to initialize Ad4m client:", e);
-  }
-}
 
-// Listen for authentication state changes
-ad4mConnect.addEventListener('authstatechange', async () => {
-  if (ad4mConnect.authState === 'authenticated') {
-    await bootstrap();
+    // Navigate to home if user is on landing/signup page
+    const currentRoute = router.currentRoute.value;
+    if (currentRoute.name === 'signup' || currentRoute.path === '/' || currentRoute.path === '') {
+      router.push('/home');
+    }
+  } catch (error) {
+    console.error('Failed to initialize Flux:', error);
   }
-});
+})();
 
-// Service worker (only in standalone mode - ad4m-connect won't interfere in embedded mode)
-if (!appStore.isEmbedded) {
-  const intervalMS = 60 * 10 * 1000;
-  useRegisterSW({
-    onRegistered(r: ServiceWorkerRegistration | undefined) {
-      r && setInterval(() => r.update(), intervalMS);
-    },
-  });
-}
+// // Service worker
+// const intervalMS = 60 * 10 * 1000;
+// useRegisterSW({
+//   onRegistered(r: ServiceWorkerRegistration | undefined) {
+//     r && setInterval(() => r.update(), intervalMS);
+//   },
+// });

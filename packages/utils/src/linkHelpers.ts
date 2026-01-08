@@ -1,5 +1,4 @@
-import { Link, LinkInput } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, Link, LinkInput } from '@coasys/ad4m';
 import { LinkExpression, Literal } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
@@ -54,9 +53,7 @@ export function mapLiteralLinks(links: LinkExpression[] | undefined, map: Proper
   }, {});
 }
 
-export async function createLiteralLinks(source: string, map: PredicateMap) {
-  const client = await getAd4mClient();
-
+export async function createLiteralLinks(client: Ad4mClient, source: string, map: PredicateMap) {
   const targets = Object.keys(map);
 
   const promises = targets
@@ -92,8 +89,7 @@ export async function createLinks(source: string, map: PredicateMap) {
   return links.flat();
 }
 
-export async function createLiteralObject({ parent, children }: { parent: LinkInput; children: PredicateMap }) {
-  const client = await getAd4mClient();
+export async function createLiteralObject(client: Ad4mClient, { parent, children }: { parent: LinkInput; children: PredicateMap }) {
   const expUrl = await client.expression.create(parent.target, 'literal');
 
   const parentLink = new Link({
@@ -102,7 +98,7 @@ export async function createLiteralObject({ parent, children }: { parent: LinkIn
     target: expUrl,
   });
 
-  const childrenLinks = await createLiteralLinks(expUrl, children);
+  const childrenLinks = await createLiteralLinks(client, expUrl, children);
 
   return [parentLink, ...childrenLinks];
 }

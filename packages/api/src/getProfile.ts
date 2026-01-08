@@ -2,7 +2,6 @@ import { profile } from '@coasys/flux-constants';
 import { Profile } from '@coasys/flux-types';
 import { mapLiteralLinks } from '@coasys/flux-utils';
 import { Ad4mClient } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 const {
   HAS_USERNAME,
@@ -21,9 +20,8 @@ export interface Payload {
   perspectiveUuid: string;
 }
 
-export default async function getProfile(did: string, client?: Ad4mClient): Promise<Profile> {
+export default async function getProfile(did: string, client: Ad4mClient): Promise<Profile> {
   const cleanedDid = did.replace('did://', '');
-  const ad4mClient: Ad4mClient = client || (await getAd4mClient());
 
   let profile: Profile = {
     username: '',
@@ -37,7 +35,7 @@ export default async function getProfile(did: string, client?: Ad4mClient): Prom
     did: '',
   };
 
-  const agentPerspective = await ad4mClient.agent.byDID(cleanedDid);
+  const agentPerspective = await client.agent.byDID(cleanedDid);
 
   if (agentPerspective) {
     const links = agentPerspective!.perspective!.links;
@@ -65,7 +63,7 @@ export default async function getProfile(did: string, client?: Ad4mClient): Prom
 
     if (mappedProfile.profilePicture) {
       try {
-        const res = await ad4mClient.expression.get(mappedProfile.profilePicture);
+        const res = await client.expression.get(mappedProfile.profilePicture);
         if (res) {
           const { data } = res;
           const { data_base64, file_type } = JSON.parse(data);
@@ -79,7 +77,7 @@ export default async function getProfile(did: string, client?: Ad4mClient): Prom
 
     if (mappedProfile.profileThumbnailPicture) {
       try {
-        const res = await ad4mClient.expression.get(mappedProfile.profileThumbnailPicture);
+        const res = await client.expression.get(mappedProfile.profileThumbnailPicture);
         if (res) {
           const { data } = res;
           const { data_base64, file_type } = JSON.parse(data);
@@ -92,7 +90,7 @@ export default async function getProfile(did: string, client?: Ad4mClient): Prom
 
     if (mappedProfile.profileBackground) {
       try {
-        const res = await ad4mClient.expression.get(mappedProfile.profileBackground);
+        const res = await client.expression.get(mappedProfile.profileBackground);
         if (res) {
           const { data } = res;
           const { data_base64, file_type } = JSON.parse(data);

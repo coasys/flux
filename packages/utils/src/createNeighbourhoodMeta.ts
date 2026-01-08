@@ -1,14 +1,13 @@
-import { Link, LinkExpression } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, Link, LinkExpression } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 const { CREATOR, DESCRIPTION, NAME, SELF, CREATED_AT } = community;
 
 export async function createNeighbourhoodMeta(
+  client: Ad4mClient,
   name: string,
   description: string,
   author: string,
 ): Promise<LinkExpression[]> {
-  const client = await getAd4mClient();
   //Create the perspective to hold our meta
   const perspective = await client.perspective.add(`${name}-meta`);
 

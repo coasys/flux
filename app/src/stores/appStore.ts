@@ -11,7 +11,6 @@ import { computed, ref, shallowRef, toRaw } from 'vue';
 export const useAppStore = defineStore(
   'appStore',
   () => {
-    const isEmbedded = ref(window.self !== window.top); // Determine if running in iframe
     const me = ref<Agent>({ did: '' });
     const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>('not-available');
@@ -139,7 +138,6 @@ export const useAppStore = defineStore(
       myCommunities,
       hasJoinedTestingCommunity,
       holochainRestarting,
-      isEmbedded,
 
       // Mutations
       setAdamClient,

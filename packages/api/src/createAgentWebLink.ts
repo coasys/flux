@@ -1,5 +1,4 @@
 import { Ad4mClient } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 import { createLiteralObject } from '@coasys/flux-utils';
 import { profile } from '@coasys/flux-constants';
 import { WebLink } from '@coasys/flux-types';
@@ -11,11 +10,11 @@ export default async function createAgentWebLink(payload: {
   url: string;
   description: string;
   imageUrl: string;
-  client?: Ad4mClient;
+  client: Ad4mClient;
 }): Promise<WebLink> {
-  const ad4mClient = payload.client || await getAd4mClient();
+  const client = payload.client;
 
-  const links = await createLiteralObject({
+  const links = await createLiteralObject(client, {
     parent: {
       source: `self`,
       predicate: AREA_WEBLINK,
@@ -29,7 +28,7 @@ export default async function createAgentWebLink(payload: {
     },
   });
 
-  await ad4mClient.agent.mutatePublicPerspective({
+  await client.agent.mutatePublicPerspective({
     additions: links,
     removals: [],
   });

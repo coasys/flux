@@ -53,21 +53,18 @@
 </template>
 
 <script setup lang="ts">
-import { getAd4mConnect } from '@/ad4mConnect';
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
 import { useAppStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
 
 const router = useRouter();
 const appStore = useAppStore();
-// Only initialize ad4mConnect when not embedded (defensive check - router guard should prevent this)
-const ad4mConnect = appStore.isEmbedded ? null : getAd4mConnect();
 
 const showSignup = ref(false);
 const profilePicture = ref();
@@ -151,40 +148,12 @@ async function allowNotifications(value: any) {
   appStore.changeNotificationState(!appStore.notification.globalNotification);
 }
 
-onMounted(() => {
-  async function authStateChangeHandler() {
-    // Check authentication based on context
-    const isAuthenticated = appStore.isEmbedded
-      ? appStore.isClientInitialized()
-      : ad4mConnect
-        ? ad4mConnect.authState === 'authenticated'
-        : false;
-
-    // Wait for client to be ready before trying to use it
-    if (isAuthenticated && appStore.isClientInitialized()) {
-      await autoFillUser();
-    }
+onMounted(async () => {
+  // With the new architecture, client is already initialized when this component mounts
+  // (app.ts awaits authentication before components render)
+  if (appStore.isClientInitialized()) {
+    await autoFillUser();
   }
-
-  // Fire the authStateChangeHandler immediately in case the user is already authenticated
-  authStateChangeHandler();
-
-  // Listen for authentication state changes (only for standalone mode)
-  if (!appStore.isEmbedded && ad4mConnect) {
-    ad4mConnect.addEventListener('authstatechange', authStateChangeHandler);
-    onBeforeUnmount(() => ad4mConnect!.removeEventListener('authstatechange', authStateChangeHandler));
-  }
-
-  // Watch for client initialization (reactive approach instead of custom event)
-  const stopWatching = watch(
-    () => appStore.isClientInitialized(),
-    (isInitialized) => {
-      if (isInitialized) {
-        authStateChangeHandler();
-      }
-    }
-  );
-  onBeforeUnmount(stopWatching);
 });
 </script>
 

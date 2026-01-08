@@ -2,7 +2,6 @@ import { agents, languages, profile } from '@coasys/flux-constants';
 import { resizeImage, dataURItoBlob, blobToDataURL } from '@coasys/flux-utils';
 import { Ad4mClient, Link, LinkExpression, LinkMutations } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const {
@@ -23,10 +22,10 @@ export interface Payload {
   profileBackground?: string;
   profilePicture?: string;
   profileThumbnailPicture?: string;
-  client?: Ad4mClient;
+  client: Ad4mClient;
 }
 
-export default async ({
+export default async function ({
   givenName = '',
   familyName = '',
   email = '',
@@ -35,11 +34,9 @@ export default async ({
   profileBackground,
   profilePicture,
   client,
-}: Payload): Promise<Profile> => {
-  const ad4mClient: Ad4mClient = client || await getAd4mClient();
-
+}: Payload): Promise<Profile> {
   try {
-    await ad4mClient.languages.byAddress(FILE_STORAGE_LANGUAGE);
+    await client.languages.byAddress(FILE_STORAGE_LANGUAGE);
 
     const additions = [] as Link[];
     const removals = [] as LinkExpression[];
@@ -52,7 +49,7 @@ export default async ({
         await resizeImage(dataURItoBlob(profilePicture as string), 0.6),
       );
 
-      profileImage = await ad4mClient.expression.create(
+      profileImage = await client.expression.create(
         {
           data_base64: compressedProfileImage,
           name: 'profile-image',
@@ -65,7 +62,7 @@ export default async ({
         await resizeImage(dataURItoBlob(profilePicture as string), 0.3),
       );
 
-      thumbnailImage = await ad4mClient.expression.create(
+      thumbnailImage = await client.expression.create(
         {
           data_base64: compressedpThumbnailImage,
           name: 'thumbnail-image',
@@ -131,9 +128,9 @@ export default async ({
       );
     }
 
-    const agent = await ad4mClient.agent.me();
+    const agent = await client.agent.me();
 
-    await ad4mClient.agent.mutatePublicPerspective({
+    await client.agent.mutatePublicPerspective({
       additions,
       removals,
     } as LinkMutations);

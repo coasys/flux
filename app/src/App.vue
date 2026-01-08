@@ -113,7 +113,7 @@ body {
   text-rendering: optimizeLegibility;
   color: var(--j-color-ui-800);
   font-family: var(--j-font-family);
-  background-color: var(--j-color-white);
+  /* background-color: var(--j-color-white); */
 }
 
 #app {

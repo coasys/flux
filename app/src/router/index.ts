@@ -1,4 +1,3 @@
-import { getAd4mConnect } from '@/ad4mConnect';
 import { useAppStore, useRouteMemoryStore } from '@/stores';
 import { RouteParams } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -71,40 +70,21 @@ router.beforeEach(async (to, from, next) => {
     const appStore = useAppStore();
     const { me } = storeToRefs(appStore);
 
-    // In embedded mode, skip all auth checks if client not initialized yet
-    // (parent will send AD4M config via postMessage)
-    if (appStore.isEmbedded && !appStore.isClientInitialized()) {
-      next();
-      return;
-    }
-
-    // Skip auth/signup flow if embedded - parent app handles authentication
-    if (appStore.isEmbedded && to.name === 'signup') {
-      next({ name: 'home' });
-      return;
-    }
-
-    // Check authentication based on context (use store's isEmbedded flag)
-    let isAuthenticated: boolean;
-    if (appStore.isEmbedded) {
-      // In iframe, check if client is initialized
-      isAuthenticated = appStore.isClientInitialized();
-    } else {
-      // Standalone, use ad4mConnect
-      const ad4mConnect = getAd4mConnect();
-      
-      // Wait for auto-connection to complete on page refresh (prevents signup screen flash)
-      if (ad4mConnect && (ad4mConnect.connectionState === 'connecting' || ad4mConnect.connectionState === 'not_connected')) {
-        const maxWait = 3000;
-        const startTime = Date.now();
-        while ((ad4mConnect.connectionState === 'connecting' || ad4mConnect.connectionState === 'not_connected') && 
-               (Date.now() - startTime) < maxWait) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
+    // If client not initialized yet, allow navigation (app.ts is still initializing)
+    // This allows signup/landing pages to render while waiting for authentication
+    if (!appStore.isClientInitialized()) {
+      // Only allow navigation to public routes
+      if (to.name === 'signup' || to.meta.public) {
+        next();
+      } else {
+        // Redirect to signup while waiting for client
+        next({ name: 'signup' });
       }
-      
-      isAuthenticated = ad4mConnect ? await ad4mConnect.isAuthenticated() : false;
+      return;
     }
+
+    // Client is initialized - check authentication
+    const isAuthenticated = appStore.isClientInitialized();
 
     if (isAuthenticated) {
       // Handle authenticated routes

@@ -1,15 +1,20 @@
 import { Message } from '@coasys/flux-api';
 import { WebRTC } from '@coasys/flux-react-web';
 import { detectBrowser } from '@coasys/flux-utils';
+import { Ad4mClient } from '@coasys/ad4m';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { v4 as uuidv4 } from 'uuid';
 import RecordingIcon from '../RecordingIcon/RecordingIcon.jsx';
 import styles from './Transcriber.module.scss';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
-type Props = { source: string; perspective: any; webRTC: WebRTC };
+type Props = { 
+  source: string; 
+  perspective: any; 
+  webRTC: WebRTC;
+  client: Ad4mClient;
+};
 
-export default function Transcriber({ source, perspective, webRTC }: Props) {
+export default function Transcriber({ source, perspective, webRTC, client }: Props) {
   const { audio, transcriber } = webRTC.localState.settings;
   const { messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -223,8 +228,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
 
   async function startLocalTransciption(stream: MediaStream) {
     // set up audio context & worklet node
-    const client = await getAd4mClient();
-
     const moreDemaningParams = { startThreshold: 0.8 };
     streamId.current = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
     const wordByWordParams = {
@@ -286,7 +289,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     recognition.current?.stop();
     clearInterval(volumeCheckInterval.current);
     if (streamId.current) {
-      const client = await getAd4mClient();
       await client.ai.closeTranscriptionStream(streamId.current);
       await client.ai.closeTranscriptionStream(fastStreamId.current);
       streamId.current = null;
