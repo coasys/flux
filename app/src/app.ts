@@ -1,5 +1,5 @@
 import { useAppStore } from '@/stores';
-import { getAd4mClient } from '@coasys/ad4m-connect';
+import { getAd4mClient, isEmbedded } from '@coasys/ad4m-connect';
 import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
@@ -76,10 +76,12 @@ vueApp.mount("#app");
   }
 })();
 
-// // Service worker
-// const intervalMS = 60 * 10 * 1000;
-// useRegisterSW({
-//   onRegistered(r: ServiceWorkerRegistration | undefined) {
-//     r && setInterval(() => r.update(), intervalMS);
-//   },
-// });
+// Service worker registration (only in standalone mode)
+if (!isEmbedded()) {
+  const intervalMS = 60 * 10 * 1000;
+  useRegisterSW({
+    onRegistered(r: ServiceWorkerRegistration | undefined) {
+      r && setInterval(() => r.update(), intervalMS);
+    },
+  });
+}
