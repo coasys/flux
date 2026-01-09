@@ -151,7 +151,7 @@ async function allowNotifications(value: any) {
 onMounted(async () => {
   // With the new architecture, client is already initialized when this component mounts
   // (app.ts awaits authentication before components render)
-  if (appStore.isClientInitialized()) {
+  if (appStore.clientReady) {
     await autoFillUser();
   }
 });

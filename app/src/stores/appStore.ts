@@ -29,6 +29,8 @@ export const useAppStore = defineStore(
       return ad4mClientRef.value as Ad4mClient;
     });
 
+    const clientReady = computed(() => ad4mClientRef.value !== null);
+
     const hasJoinedTestingCommunity = computed(() => {
       return !!myPerspectives.value.find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
     });
@@ -83,10 +85,6 @@ export const useAppStore = defineStore(
       }
     }
 
-    function isClientInitialized(): boolean {
-      return ad4mClientRef.value !== null;
-    }
-
     async function getMyCommunities() {
       // Get all my perspectives
       myPerspectives.value = await ad4mClient.value.perspective.all();
@@ -138,10 +136,10 @@ export const useAppStore = defineStore(
       myCommunities,
       hasJoinedTestingCommunity,
       holochainRestarting,
+      clientReady,
 
       // Mutations
       setAdamClient,
-      isClientInitialized,
       setToast,
       showSuccessToast,
       showDangerToast,

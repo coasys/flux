@@ -37,21 +37,28 @@
     </div>
   </div>
 
-  <j-box pt="500" pb="500" style="text-align: center" v-if="deferredPrompt">
+  <j-box pt="500" pb="500" style="text-align: center" v-if="deferredPrompt && !clientReady">
     <j-button size="xl" variant="primary" @click="downloadPWA">
       Install for Chrome
       <ChromeIcon />
     </j-button>
   </j-box>
+
+  <j-flex v-if="clientReady" j="center" a="center" gap="400" style="z-index: 1;">
+    <j-spinner size="sm" />
+    <j-text nomargin size="600">Loading...</j-text>
+  </j-flex>
 </template>
 
 <script setup lang="ts">
 import { ChromeIcon, FluxLogoIcon } from '@/components/icons';
 import { useAppStore } from '@/stores';
 import { onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import Orb from './Orb.vue';
 
 const appStore = useAppStore();
+const { clientReady } = storeToRefs(appStore);
 
 const deferredPrompt = ref<any>(null);
 const isAtEnd = ref(false);

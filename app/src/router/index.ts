@@ -64,55 +64,40 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({ history: createWebHashHistory(), routes });
 
-// Handle login routing
+// Handle authentication and route guarding
 router.beforeEach(async (to, from, next) => {
   try {
     const appStore = useAppStore();
     const { me } = storeToRefs(appStore);
 
-    // If client not initialized yet, allow navigation (app.ts is still initializing)
-    // This allows signup/landing pages to render while waiting for authentication
-    if (!appStore.isClientInitialized()) {
-      // Only allow navigation to public routes
-      if (to.name === 'signup' || to.meta.public) {
-        next();
-      } else {
-        // Redirect to signup while waiting for client
-        next({ name: 'signup' });
-      }
+    // If client not initialized yet, only allow public routes
+    if (!appStore.clientReady) {
+      const isPublicRoute = to.name === 'signup' || to.meta.public;
+      next(isPublicRoute ? undefined : { name: 'signup' });
       return;
     }
 
-    // Client is initialized - check authentication
-    const isAuthenticated = appStore.isClientInitialized();
+    // Check if user has created a Flux account
+    const hasFluxAccount = me.value.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
+    const isOnSignupOrMain = to.name === 'signup' || to.name === 'main';
 
-    if (isAuthenticated) {
-      // Handle authenticated routes
-      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith('flux://'));
-      const isOnSignupOrMain = to.name === 'signup' || to.name === 'main';
-      if (fluxAccountCreated && isOnSignupOrMain) {
-        await appStore.refreshMyProfile();
-        next('/home');
-      } else if (!fluxAccountCreated && !isOnSignupOrMain) {
-        next('/signup');
-      } else {
-        next();
-      }
-    } else {
-      // If not logged in, redirect to signup
-      if (to.name !== 'signup') {
-        next('/signup');
-      } else {
-        next();
-      }
-    }
-  } catch (e) {
-    console.log('Error in route', e);
-    if (to.name !== 'signup') {
+    // User has Flux account but is on signup/main - redirect to home
+    if (hasFluxAccount && isOnSignupOrMain) {
+      await appStore.refreshMyProfile();
+      next('/home');
+    } 
+    // User doesn't have Flux account but trying to access protected routes - redirect to signup
+    else if (!hasFluxAccount && !isOnSignupOrMain) {
       next('/signup');
-    } else {
+    } 
+    // All other cases - allow navigation
+    else {
       next();
     }
+  } catch (e) {
+    console.log('Error in route guard:', e);
+    // On error, redirect to signup unless already there
+    next(to.name === 'signup' ? undefined : '/signup');
   }
 });
 
