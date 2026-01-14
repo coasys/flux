@@ -1266,10 +1266,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.3.tgz#a48438b600dfaee7b0832f0cfcd5583fc21b0b55"
   integrity sha512-nFlgSmtx6Zwaw0tEvZgQsWHBeOfWWB/AvEoCApopLT4mHkBVoSrwkLvy2PjZs5wxCbsmqvQczr3XCyTwaDZVQg==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.11.2-dev-multi-user-email-2":
-  version "0.11.2-dev-multi-user-email-2"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.2-dev-multi-user-email-2.tgz#d9ae8efd82a5053b53c605794a26e0ce4be2889f"
-  integrity sha512-MQZanRSU+laLLqhjJpbUSSJ3QZ2o6ag4R3Jx32uEqNVhhsBKvYaKche3ghJKodSmrYouCKDqZ/GuqTQHj+vfUg==
+"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.11.2-dev-sdna-only-prolog":
+  version "0.11.2-dev-sdna-only-prolog"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.2-dev-sdna-only-prolog.tgz#440d2516c4e8fa78be64d42b1d270f13e442dd67"
+  integrity sha512-BmYClgKsOFsvb/Z0A5Fak9xlfs4y3tP9JuYTjogFGwH0jxejOKX5rO/55FPlMVukHfTjDB0M6TTbdS1o8HHibQ==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1297,10 +1297,10 @@
     "@coasys/ad4m" "workspace:0.11.1"
     "@coasys/hooks-helpers" "*"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev-multi-user-email-2", "@coasys/ad4m@workspace:0.11.1":
-  version "0.11.2-dev-multi-user-email-2"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.11.2-dev-multi-user-email-2.tgz#cb9f56ddfca2c2335f7f761ea2462ef9aef7008a"
-  integrity sha512-KfsWsIDpILZWibcGCq8AvyXVemA/5wgZTYfjpbBQtGy6AEFFIzV1LMjojebEOoZNokb8OEpHyHJBlnSSJpUbTQ==
+"@coasys/ad4m@*", "@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev-sdna-only-prolog", "@coasys/ad4m@workspace:0.11.1":
+  version "0.11.2-dev-sdna-only-prolog"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.11.2-dev-sdna-only-prolog.tgz#46b3857a68310e1d7d32c1c54bccbca28b3c601c"
+  integrity sha512-kpZe6ERUSlYtnCgxvuXbneQ7/hhB6Sn2lWcTdlCk3n2sH5HXmMGk7qmpZ4sF/SzQwUaItrZYV+GPJJuVojsBIg==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
