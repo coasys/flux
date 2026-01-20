@@ -1,6 +1,6 @@
-import { useAppStore } from '@/stores';
+import { useAppStore, useRouteMemoryStore } from '@/stores';
 import { getAd4mClient, isEmbedded } from '@coasys/ad4m-connect';
-import { createPinia } from 'pinia';
+import { createPinia, storeToRefs } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
@@ -37,6 +37,10 @@ const vueApp = createApp({ render: () => h(App) })
   .use(router);
 
 const appStore = useAppStore(pinia);
+const routeMemoryStore = useRouteMemoryStore(pinia);
+
+// Store the last route before mounting the app (otherwise gets overwritten by router)
+const savedRoute = { ...routeMemoryStore.currentRoute };
 
 // Mount the app immediately so UI is responsive
 vueApp.mount("#app");
@@ -62,6 +66,11 @@ vueApp.mount("#app");
 
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
+
+    // Restore last saved route
+    if (savedRoute.viewId) router.push({ name: 'view', params: savedRoute });
+    else if (savedRoute.channelId) router.push({ name: 'channel', params: savedRoute });
+    else if (savedRoute.communityId) router.push({ name: 'community', params: savedRoute });
 
     // Navigate to home if user is on landing/signup page
     const currentRoute = router.currentRoute.value;

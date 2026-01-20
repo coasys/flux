@@ -8,8 +8,7 @@ import Link from '@tiptap/extension-link';
 import { PluginKey } from 'prosemirror-state';
 import { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
 import { Channel, Message, SubjectRepository, getProfile } from '@coasys/flux-api';
-import { PerspectiveProxy } from '@coasys/ad4m';
-import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
 import defaultActions from './defaultActions';
 import { shouldPlaceAbove } from './utils';
@@ -115,7 +114,7 @@ export default class MyElement extends LitElement {
   perspective: PerspectiveProxy | null;
 
   @property({ type: Object })
-  agent: AgentClient | null;
+  client: Ad4mClient | null;
 
   @property({ type: String })
   source: null;
@@ -319,7 +318,7 @@ export default class MyElement extends LitElement {
     console.log('this.channels: ', this.channels);
     const matches = this.channels
       .filter((c) => this.getSafeString(c.name).toLowerCase().startsWith(query.toLowerCase()))
-      .map((channel) => ({ id: channel.id, label: channel.name }))
+      .map((channel) => ({ id: channel.baseExpression, label: channel.name }))
       .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
@@ -327,11 +326,11 @@ export default class MyElement extends LitElement {
   }
 
   async fetchProfiles() {
-    if (this.perspective) {
-      const me = await this.agent.me();
+    if (this.perspective && this.client?.agent) {
+      const me = await this.client.agent.me();
       const neighbourhood = this.perspective.getNeighbourhoodProxy();
       const othersDids = await neighbourhood.otherAgents();
-      const profilePromises = [...new Set([...othersDids, me.did])].map(async (did) => getProfile(did));
+      const profilePromises = [...new Set([...othersDids, me.did])].map(async (did) => getProfile(did, this.client!));
       const newProfiles = await Promise.all(profilePromises);
       this.members = newProfiles;
     }
@@ -343,7 +342,7 @@ export default class MyElement extends LitElement {
 
   async fetchChannels() {
     if (this.perspective) {
-      const model = new SubjectRepository(Channel, {
+      const model = new SubjectRepository(Channel as any, {
         perspective: this.perspective,
         source: 'ad4m://self',
       });
@@ -351,14 +350,14 @@ export default class MyElement extends LitElement {
       model
         .getAllData()
         .then((entries) => {
-          this.channels = entries;
+          this.channels = entries as Channel[];
         })
         .catch((error) => console.log);
     }
   }
 
   async submit() {
-    const repo = new SubjectRepository(Message, {
+    const repo = new SubjectRepository(Message as any, {
       perspective: this.perspective,
       source: this.source,
     });

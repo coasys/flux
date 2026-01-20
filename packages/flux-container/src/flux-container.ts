@@ -233,6 +233,12 @@ export class MyElement extends LitElement {
         this.appElement.agent = this.client.agent;
       }
 
+      // @ts-ignore
+      if (!this.appElement.client) {
+        // @ts-ignore
+        this.appElement.client = this.client;
+      }
+
       console.log('setting source');
 
       this.appElement.setAttribute('source', this.source);

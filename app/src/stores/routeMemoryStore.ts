@@ -48,5 +48,5 @@ export const useRouteMemoryStore = defineStore(
       getLastChannelView,
     };
   },
-  { persist: false },
+  { persist: true },
 );

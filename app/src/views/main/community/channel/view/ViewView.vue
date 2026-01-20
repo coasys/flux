@@ -20,6 +20,7 @@
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
       :source="channelId"
       :agent="appStore.ad4mClient.agent"
+      :client="appStore.ad4mClient"
       :perspective="perspective"
       :getProfile="getCachedAgentProfile"
       :appStore="appStore"
