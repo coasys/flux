@@ -9,7 +9,6 @@ export interface Payload {
 
 export default async ({ joiningLink, client }: Payload): Promise<Community> => {
   try {
-    const client: Ad4mClient = client;
     const agent = await client.agent.me();
     const allPerspectives = await client.perspective.all();
 

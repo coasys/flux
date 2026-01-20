@@ -73,7 +73,8 @@ router.beforeEach(async (to, from, next) => {
     // If client not initialized yet, only allow public routes
     if (!appStore.clientReady) {
       const isPublicRoute = to.name === 'signup' || to.meta.public;
-      next(isPublicRoute ? undefined : { name: 'signup' });
+      if (isPublicRoute) next();
+      else next({ name: 'signup' });
       return;
     }
 
@@ -97,7 +98,8 @@ router.beforeEach(async (to, from, next) => {
   } catch (e) {
     console.log('Error in route guard:', e);
     // On error, redirect to signup unless already there
-    next(to.name === 'signup' ? undefined : '/signup');
+    if (to.name === 'signup') next();
+    else next('/signup');
   }
 });
 

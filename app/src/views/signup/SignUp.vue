@@ -58,7 +58,7 @@ import { FluxLogoIcon } from '@/components/icons';
 import { useAppStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
@@ -134,7 +134,7 @@ async function createUser() {
     client: appStore.ad4mClient,
   })
     .then(async () => {
-      appStore.refreshMyProfile();
+      await appStore.refreshMyProfile();
       router.push({ name: 'home' });
       registerNotification(appStore.ad4mClient);
     })
@@ -148,13 +148,10 @@ async function allowNotifications(value: any) {
   appStore.changeNotificationState(!appStore.notification.globalNotification);
 }
 
-onMounted(async () => {
-  // With the new architecture, client is already initialized when this component mounts
-  // (app.ts awaits authentication before components render)
-  if (appStore.clientReady) {
-    await autoFillUser();
-  }
-});
+// Watch for client ready state to trigger autofill
+watch(() => appStore.clientReady, async (isReady) => {
+  if (isReady) await autoFillUser();
+}, { immediate: true });
 </script>
 
 <style lang="scss" scoped>

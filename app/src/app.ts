@@ -46,16 +46,14 @@ vueApp.mount("#app");
   try {
     // Initialize Ad4m client (handles both embedded and standalone modes automatically)
     const ad4mClient = await getAd4mClient({
-      appName: 'Flux',
-      appDesc: 'A Social Toolkit for the New Internet',
-      appUrl: window.location.origin,
-      appDomain: window.location.origin,
-      appIconPath: window.location.origin + '/icon.png',
+      appInfo: {
+        name: 'Flux',
+        description: 'A Social Toolkit for the New Internet',
+        url: window.location.origin,
+        iconPath: window.location.origin + '/icon.png',
+      },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-      hosting: false,
-      mobile: true,
-      multiUser: true,
-      backendUrl: 'https://lucksus.ad4m.dev:12001/graphql'
+      remoteUrl: 'https://lucksus.ad4m.dev:12001/graphql'
     });
 
     if (!ad4mClient) {
@@ -64,7 +62,6 @@ vueApp.mount("#app");
 
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
-    console.log('Flux: Ad4m client initialized successfully');
 
     // Navigate to home if user is on landing/signup page
     const currentRoute = router.currentRoute.value;

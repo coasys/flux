@@ -78,7 +78,7 @@ export const useAppStore = defineStore(
 
     async function joinTestingCommunity() {
       try {
-        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD });
+        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD, client: ad4mClient.value });
       } catch (e) {
         showDangerToast({ message: e.message });
         throw new Error(e);
