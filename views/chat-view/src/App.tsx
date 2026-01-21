@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function App({ agent, client, perspective, source, threaded, element, getProfile }: Props) {
-  if (!perspective?.uuid || !agent) return <div>"No perspective or agent client"</div>;
+  if (!perspective?.uuid || !agent || !client) return <div>"No perspective or agent client"</div>;
 
   return (
     <div className={styles.appContainer}>

@@ -68,9 +68,12 @@ vueApp.mount("#app");
     await appStore.refreshMyProfile();
 
     // Restore last saved route
-    if (savedRoute.viewId) router.push({ name: 'view', params: savedRoute });
-    else if (savedRoute.channelId) router.push({ name: 'channel', params: savedRoute });
-    else if (savedRoute.communityId) router.push({ name: 'community', params: savedRoute });
+    if (savedRoute.communityId) {
+      if (savedRoute.viewId) await router.push({ name: 'view', params: savedRoute });
+      else if (savedRoute.channelId) await router.push({ name: 'channel', params: savedRoute });
+      else await router.push({ name: 'community', params: savedRoute });
+      return;
+    }
 
     // Navigate to home if user is on landing/signup page
     const currentRoute = router.currentRoute.value;
