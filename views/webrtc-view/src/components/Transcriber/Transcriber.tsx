@@ -37,6 +37,30 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
   const browser = detectBrowser();
   const [previewText, setPreviewText] = useState('');
 
+  // useEffect hooks must come before any early returns
+  useEffect(() => {
+    return () => {
+      if (!client) return;
+      stopListening();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!client) return;
+    if (audio) startListening();
+    else stopListening();
+  }, [audio, client]);
+
+  useEffect(() => {
+    if (!client) return;
+    // skip on first run by checking if audio context is present
+    if (audioContext.current) {
+      // restart listening with new settings
+      stopListening();
+      startListening();
+    }
+  }, [useRemoteService, client]);
+
   // Runtime validation for required client prop (after all hooks)
   if (!client) {
     console.error('Transcriber: required prop "client" is missing');
@@ -306,24 +330,6 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
       fastStreamId.current = null;
     }
   }
-
-  useEffect(() => {
-    return () => stopListening();
-  }, []);
-
-  useEffect(() => {
-    if (audio) startListening();
-    else stopListening();
-  }, [audio]);
-
-  useEffect(() => {
-    // skip on first run by checking if audio context is present
-    if (audioContext.current) {
-      // restart listening with new settings
-      stopListening();
-      startListening();
-    }
-  }, [useRemoteService]);
 
   return (
     <div className={styles.wrapper}>

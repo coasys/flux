@@ -85,12 +85,18 @@ vueApp.mount("#app");
   }
 })();
 
-// Service worker registration (only in standalone mode)
-if (!isEmbedded()) {
-  const intervalMS = 60 * 10 * 1000;
-  useRegisterSW({
-    onRegistered(r: ServiceWorkerRegistration | undefined) {
-      r && setInterval(() => r.update(), intervalMS);
-    },
-  });
+// Service worker registration (call composable unconditionally, but only register in standalone mode)
+const intervalMS = 60 * 10 * 1000;
+const { updateServiceWorker } = useRegisterSW({
+  immediate: false,
+  onRegistered(r: ServiceWorkerRegistration | undefined) {
+    if (r) {
+      setInterval(() => r.update(), intervalMS);
+    }
+  },
+});
+
+// Only trigger registration when not embedded
+if (!isEmbedded() && updateServiceWorker) {
+  updateServiceWorker();
 }
