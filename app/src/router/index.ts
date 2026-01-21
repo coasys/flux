@@ -13,6 +13,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/update-ad4m',
     name: 'update-ad4m',
     component: () => import(`@/views/update/UpdateAd4m.vue`),
+    meta: { public: true },
   },
   {
     path: '/',
@@ -76,6 +77,25 @@ router.beforeEach(async (to, from, next) => {
       if (isPublicRoute) next();
       else next({ name: 'signup' });
       return;
+    }
+
+    // If client ready but profile not loaded yet, only allow signup route
+    if (!me.value.did) {
+      if (to.name === 'signup') next();
+      else next({ name: 'signup' });
+      return;
+    }
+
+    // Ensure perspective is loaded before checking for Flux account
+    if (!me.value.perspective) {
+      try {
+        await appStore.refreshMyProfile();
+      } catch (error) {
+        console.error('Router guard: Failed to refresh profile:', error);
+        if (to.name === 'signup') next();
+        else next({ name: 'signup' });
+        return;
+      }
     }
 
     // Check if user has created a Flux account

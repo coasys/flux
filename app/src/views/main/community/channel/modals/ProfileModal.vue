@@ -64,7 +64,18 @@ async function handleProfileClick(did: string) {
 watch(
   () => activeProfile.value,
   async (newDid, oldDid) => {
-    if (newDid !== oldDid && newDid) profile.value = await getCachedAgentProfile(newDid, appStore.ad4mClient);
+    if (newDid !== oldDid && newDid) {
+      if (!appStore.ad4mClient) {
+        console.warn('ProfileModal: Ad4mClient not initialized yet');
+        return;
+      }
+      
+      try {
+        profile.value = await getCachedAgentProfile(newDid, appStore.ad4mClient);
+      } catch (error) {
+        console.error('ProfileModal: Failed to load profile for', newDid, error);
+      }
+    }
   },
   { immediate: true },
 );

@@ -174,11 +174,12 @@ function shortETH(address: string) {
 }
 
 async function getEntanglementProofs() {
-  // Guard against null client
+  // Guard against null client and capture to local constant
   if (!ad4mClient.value) return;
+  const client = ad4mClient.value;
 
   try {
-    const agent = await ad4mClient.value.agent.byDID(did.value);
+    const agent = await client.agent.byDID(did.value);
 
     if (agent) {
       // Map to dedupe array
@@ -188,10 +189,12 @@ async function getEntanglementProofs() {
         : [];
 
       const expressions = await Promise.all(
-        proofLinks?.map((link: any) => ad4mClient.value!.expression.get(link.data.target)),
+        proofLinks?.map((link: any) => client.expression.get(link.data.target)),
       );
 
-      const fetchedProofs = expressions.map((e: any) => JSON.parse(e.data)) as EntanglementProof[];
+      // Filter out null/undefined expressions
+      const validExpressions = expressions.filter((e) => e && e.data);
+      const fetchedProofs = validExpressions.map((e: any) => JSON.parse(e.data)) as EntanglementProof[];
 
       const filteredProofs = fetchedProofs.filter((p: EntanglementProof) => {
         if (seen.has(p.deviceKey)) {
@@ -203,7 +206,7 @@ async function getEntanglementProofs() {
       });
 
       for (const proof of filteredProofs) {
-        const isVerified = await ad4mClient.value!.runtime.verifyStringSignedByDid(
+        const isVerified = await client.runtime.verifyStringSignedByDid(
           agent.did,
           proof.did,
           proof.deviceKey,

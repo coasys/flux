@@ -36,15 +36,14 @@
         "projectRoot": "./app",
         "dist": "app/dist",
         "devServer": {
-          "port": 5173,
+          "port": 3030,
           "host": "localhost"
         }
       },
       "commands": {
         "install": "yarn install",
         "build": "yarn build",
-        "dev": "yarn dev",
-        "clean": "yarn clean"
+        "dev": "yarn dev"
       }
     }
   ]

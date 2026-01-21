@@ -39,7 +39,7 @@ async function getAttestations() {
     const json = fetchedAttestations.map((a: any) => JSON.parse(a.decodedDataJson));
     attestations.value = json;
   } catch (error) {
-    console.error('Attestations: Error fetching attestations:', error);
+    console.log('Attestations: Error fetching attestations:', error);
     // Silently fail - attestations are optional
   }
 }

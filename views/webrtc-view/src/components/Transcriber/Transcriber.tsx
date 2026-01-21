@@ -15,6 +15,16 @@ type Props = {
 };
 
 export default function Transcriber({ source, perspective, webRTC, client }: Props) {
+  // Runtime validation for required client prop
+  if (!client) {
+    console.error('Transcriber: required prop "client" is missing');
+    return (
+      <div className={styles.transcriber}>
+        <p>Transcriber unavailable: client not initialized</p>
+      </div>
+    );
+  }
+
   const { audio, transcriber } = webRTC.localState.settings;
   const { messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -249,7 +259,7 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
         const audioData = Array.from(event.data);
-        client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData);
+        client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData as any);
       }
     };
     workletNode.connect(audioContext.current.destination);

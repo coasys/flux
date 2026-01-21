@@ -98,7 +98,7 @@ const canSignUp = computed(() => usernameIsValid.value);
 
 async function checkIfHasFluxProfile() {
   const { perspective } = await appStore.ad4mClient.agent.me();
-  const fluxLinksFound = perspective?.links.find((e: any) => e.data.source.startsWith('flux://'));
+  const fluxLinksFound = perspective?.links?.find((e: any) => e.data.source.startsWith('flux://'));
   return fluxLinksFound ? true : false;
 }
 

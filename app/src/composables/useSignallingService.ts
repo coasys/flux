@@ -346,8 +346,10 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
 
   // Watch for changes in the agents map and update agentsWithProfiles
   watch(
-    agents,
-    async (newAgents) => {
+    [agents, () => appStore.ad4mClient],
+    async ([newAgents]) => {
+      if (!appStore.ad4mClient) return;
+      
       const agentEntries = Object.entries(newAgents);
       agentsWithProfiles.value = await Promise.all(
         agentEntries.map(async ([did, agent]) => ({
