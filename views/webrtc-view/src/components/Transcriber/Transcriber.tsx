@@ -15,16 +15,7 @@ type Props = {
 };
 
 export default function Transcriber({ source, perspective, webRTC, client }: Props) {
-  // Runtime validation for required client prop
-  if (!client) {
-    console.error('Transcriber: required prop "client" is missing');
-    return (
-      <div className={styles.transcriber}>
-        <p>Transcriber unavailable: client not initialized</p>
-      </div>
-    );
-  }
-
+  // All hooks must be called unconditionally before any early returns
   const { audio, transcriber } = webRTC.localState.settings;
   const { messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -45,6 +36,16 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
   const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
   const [previewText, setPreviewText] = useState('');
+
+  // Runtime validation for required client prop (after all hooks)
+  if (!client) {
+    console.error('Transcriber: required prop "client" is missing');
+    return (
+      <div className={styles.transcriber}>
+        <p>Transcriber unavailable: client not initialized</p>
+      </div>
+    );
+  }
 
   function renderVolume() {
     if (listening.current) {
