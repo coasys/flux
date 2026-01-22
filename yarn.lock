@@ -1266,10 +1266,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.3.tgz#a48438b600dfaee7b0832f0cfcd5583fc21b0b55"
   integrity sha512-nFlgSmtx6Zwaw0tEvZgQsWHBeOfWWB/AvEoCApopLT4mHkBVoSrwkLvy2PjZs5wxCbsmqvQczr3XCyTwaDZVQg==
 
-"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.11.2-dev.2":
-  version "0.11.2-dev.2"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.2-dev.2.tgz#2224ce20ba56af97c74831b846122ab44dc7718a"
-  integrity sha512-qxcIMhrw4nb4a082WYP75x4ee406Ay5EEt+bkyZoBeZIwg70x9jL9VlLX1q05DyN6k4qBgrbpklTmnfNDYR9bg==
+"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.11.2-dev.3":
+  version "0.11.2-dev.3"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.2-dev.3.tgz#c00ae0edd4bc4753780975cb13ad5e7c326ded55"
+  integrity sha512-8Paeel0MGlCU3vPeh2OvnenjK1A1p6g9LH+5pQy0MeiVSAmudoOUcu+8VI/djejJmgAXUdZRE7ajGN7994nCiw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
