@@ -37,12 +37,12 @@
     </div>
   </div>
 
-  <j-box pt="500" pb="500" style="text-align: center" v-if="deferredPrompt && !clientReady">
+  <!-- <j-box pt="500" pb="500" style="text-align: center" v-if="deferredPrompt && !clientReady">
     <j-button size="xl" variant="primary" @click="downloadPWA">
       Install for Chrome
       <ChromeIcon />
     </j-button>
-  </j-box>
+  </j-box> -->
 
   <j-flex v-if="clientReady" j="center" a="center" gap="400" style="z-index: 1;">
     <j-spinner size="sm" />
