@@ -45,9 +45,10 @@
     ]
   },
   "resolutions": {
-    "@coasys/ad4m": "0.11.2-dev-multi-user-email-2",
-    "@coasys/ad4m-connect": "0.11.2-dev-multi-user-email-2",
-    "@coasys/ad4m-vue-hooks": "0.11.1",
-    "@coasys/ad4m-react-hooks": "0.11.1"
+    "@coasys/ad4m": "0.11.2-dev.2",
+    "@coasys/ad4m-connect": "0.11.2-dev.2",
+    "@coasys/ad4m-vue-hooks": "0.11.2-dev.2",
+    "@coasys/ad4m-react-hooks": "0.11.2-dev.2",
+    "@coasys/hooks-helpers": "0.11.2-dev.2"
   }
 }
