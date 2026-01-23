@@ -143,6 +143,7 @@ export default ({ mode }) => {
       },
     },
     server: {
+      https: false,
       port: 3030,
       proxy: {
         '/nilchain-proxy': {

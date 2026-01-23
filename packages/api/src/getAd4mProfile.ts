@@ -1,4 +1,4 @@
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient } from '@coasys/ad4m';
 import { profile } from '@coasys/flux-constants';
 import { mapLiteralLinks } from '@coasys/flux-utils';
 
@@ -10,9 +10,7 @@ type Ad4mProfile = {
   familyName: string;
 };
 
-export default async function getAd4mProfile(): Promise<Ad4mProfile> {
-  const client = await getAd4mClient();
-
+export default async function getAd4mProfile(client: Ad4mClient): Promise<Ad4mProfile> {
   const me = await client.agent.me();
 
   const profile = mapLiteralLinks(me.perspective!.links, {

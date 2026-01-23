@@ -7,8 +7,7 @@ if (!customElements.get('j-button')) {
   import('@coasys/flux-ui/dist/themes/dark.css');
 }
 
-import Ad4mConnectUI from '@coasys/ad4m-connect';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { getAd4mClient } from '@coasys/ad4m-connect';
 import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
 import { createCommunity, joinCommunity } from '@coasys/flux-api';
 import { Channel, Community } from '@coasys/flux-api';
@@ -147,17 +146,16 @@ export class MyElement extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    const ui = Ad4mConnectUI({
-      appName: 'Flux App',
-      appDesc: 'A flux app',
-      appDomain: 'app.flux.io',
-      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-    });
+    // Initialize Ad4m client with new API
+    (async () => {
+      try {
+        const client: Ad4mClient = await getAd4mClient({
+          appName: 'Flux App',
+          appDesc: 'A flux app',
+          appDomain: 'app.flux.io',
+          capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
+        });
 
-    ui.connect();
-    ui.addEventListener('authstatechange', async () => {
-      if (ui.authState === 'authenticated') {
-        const client: Ad4mClient = await getAd4mClient();
         this.client = client;
 
         const perspectives = await client.perspective.all();
@@ -181,8 +179,10 @@ export class MyElement extends LitElement {
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
         }
+      } catch (error) {
+        console.error('Failed to initialize Ad4m client:', error);
       }
-    });
+    })();
   }
 
   async setPerspective(uuid: string) {
@@ -231,6 +231,12 @@ export class MyElement extends LitElement {
         // @ts-ignore
         console.log('setting agent', this.appElement);
         this.appElement.agent = this.client.agent;
+      }
+
+      // @ts-ignore
+      if (!this.appElement.client) {
+        // @ts-ignore
+        this.appElement.client = this.client;
       }
 
       console.log('setting source');

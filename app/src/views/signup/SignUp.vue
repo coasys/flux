@@ -53,14 +53,12 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from '@/ad4mConnect';
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
 import { useAppStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
-import { getAd4mClient } from '@coasys/ad4m-connect';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
@@ -99,9 +97,8 @@ const {
 const canSignUp = computed(() => usernameIsValid.value);
 
 async function checkIfHasFluxProfile() {
-  const client = await getAd4mClient();
-  const { perspective } = await client.agent.me();
-  const fluxLinksFound = perspective?.links.find((e) => e.data.source.startsWith('flux://'));
+  const { perspective } = await appStore.ad4mClient.agent.me();
+  const fluxLinksFound = perspective?.links?.find((e: any) => e.data.source.startsWith('flux://'));
   return fluxLinksFound ? true : false;
 }
 
@@ -115,13 +112,13 @@ async function autoFillUser() {
 
     showSignup.value = true;
 
-    const ad4mProfile = await getAd4mProfile();
+    const ad4mProfile = await getAd4mProfile(appStore.ad4mClient);
 
     username.value = ad4mProfile.username || '';
     name.value = ad4mProfile.name || '';
     familyName.value = ad4mProfile.familyName || '';
   } catch (e) {
-    console.log(e);
+    console.error('SignUp: Error in autoFillUser:', e);
   }
 }
 
@@ -134,11 +131,12 @@ async function createUser() {
     email: email.value,
     username: username.value,
     profilePicture: profilePicture.value,
+    client: appStore.ad4mClient,
   })
     .then(async () => {
-      appStore.refreshMyProfile();
+      await appStore.refreshMyProfile();
       router.push({ name: 'home' });
-      registerNotification();
+      registerNotification(appStore.ad4mClient);
     })
     .finally(() => {
       isCreatingUser.value = false;
@@ -150,18 +148,10 @@ async function allowNotifications(value: any) {
   appStore.changeNotificationState(!appStore.notification.globalNotification);
 }
 
-onMounted(() => {
-  async function authStateChangeHandler() {
-    if (ad4mConnect.authState === 'authenticated') autoFillUser();
-  }
-
-  // Fire the authStateChangeHandler immediately incase the user is already authenticated
-  authStateChangeHandler();
-
-  // Listen for authentication state changes
-  ad4mConnect.addEventListener('authstatechange', authStateChangeHandler);
-  onBeforeUnmount(() => ad4mConnect.removeEventListener('authstatechange', authStateChangeHandler));
-});
+// Watch for client ready state to trigger autofill
+watch(() => appStore.clientReady, async (isReady) => {
+  if (isReady) await autoFillUser();
+}, { immediate: true });
 </script>
 
 <style lang="scss" scoped>

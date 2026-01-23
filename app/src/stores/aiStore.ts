@@ -254,7 +254,7 @@ export const useAiStore = defineStore(
         });
 
         // Run the LLM processing
-        await toRaw(conversation).processNewExpressions!(itemsToProcess, setProcessingState);
+        await toRaw(conversation).processNewExpressions!(itemsToProcess, setProcessingState, ad4mClient.value);
 
         // Remove the processed task from the queue
         processingQueue.value.shift();

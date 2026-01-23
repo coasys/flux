@@ -2,7 +2,6 @@ import { agents, languages, profile } from '@coasys/flux-constants';
 import { resizeImage, dataURItoBlob, blobToDataURL } from '@coasys/flux-utils';
 import { Ad4mClient, Link, LinkExpression, LinkMutations } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const {
@@ -23,9 +22,10 @@ export interface Payload {
   profileBackground?: string;
   profilePicture?: string;
   profileThumbnailPicture?: string;
+  client: Ad4mClient;
 }
 
-export default async ({
+export default async function ({
   givenName = '',
   familyName = '',
   email = '',
@@ -33,9 +33,8 @@ export default async ({
   profileThumbnailPicture,
   profileBackground,
   profilePicture,
-}: Payload): Promise<Profile> => {
-  const client: Ad4mClient = await getAd4mClient();
-
+  client,
+}: Payload): Promise<Profile> {
   try {
     await client.languages.byAddress(FILE_STORAGE_LANGUAGE);
 

@@ -279,7 +279,7 @@ export const useWebrtcStore = defineStore(
 
           // Clean up the peer connection
           cleanupPeerConnection(did);
-          const peerProfile = await getCachedAgentProfile(did);
+          const peerProfile = await getCachedAgentProfile(did, appStore.ad4mClient);
           appStore.showDangerToast({ message: `👤 ${peerProfile.username || did} has left the call` });
         }
       });
@@ -657,7 +657,7 @@ export const useWebrtcStore = defineStore(
         );
         // Merge the agent states with their profiles
         agentsInCall.value = await Promise.all(
-          agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) })),
+          agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did, appStore.ad4mClient)) })),
         );
       },
       { deep: true },

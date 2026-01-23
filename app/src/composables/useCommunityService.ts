@@ -179,7 +179,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Pre-fill members with partial profiles to speed up display
       members.value = allMembersDids.map((did) => ({ did, profileThumbnailPicture: undefined }));
       // Fetch full profiles with images
-      members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
+      members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did, appStore.ad4mClient)));
       membersLoading.value = false;
     } catch (error) {
       console.error('Error loading community members:', error);

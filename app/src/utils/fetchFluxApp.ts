@@ -38,6 +38,7 @@ const fetchFluxApp = async function (packageName: string) {
         module = await import('@coasys/flux-kanban-view');
       }
       if (packageName === '@coasys/flux-kanban-view-simple') {
+        // @ts-expect-error - Workspace symlink resolution issue
         module = await import('@coasys/flux-kanban-view-simple');
       }
       if (packageName === '@coasys/nillion-file-store') {

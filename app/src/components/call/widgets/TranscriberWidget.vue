@@ -207,9 +207,8 @@
 
 <script setup lang="ts">
 import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
-import { useAiStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
+import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect';
 import { Message } from '@coasys/flux-api';
 import { detectBrowser } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
@@ -219,6 +218,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 const mediaDevicesStore = useMediaDevicesStore();
 const aiStore = useAiStore();
 const webrtcStore = useWebrtcStore();
+const appStore = useAppStore();
 
 const { mediaSettings, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
 const {
@@ -267,8 +267,7 @@ function renderVolume() {
 async function saveMessage() {
   if (!callRoute.value.communityId || !callRoute.value.channelId) return;
 
-  const client = await getAd4mClient();
-  const perspective = (await client.perspective.byUUID(callRoute.value.communityId)) as PerspectiveProxy;
+  const perspective = (await appStore.ad4mClient.perspective.byUUID(callRoute.value.communityId)) as PerspectiveProxy;
   if (!perspective) return;
 
   // Fetch latest text & mark message as saving
@@ -464,10 +463,12 @@ function startRemoteTranscription() {
 
 async function startLocalTransciption(stream: MediaStream) {
   // Set up audio context & worklet node
-  const client = await getAd4mClient();
-
   const moreDemaningParams = { startThreshold: 0.8 };
-  streamId.value = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
+  streamId.value = await appStore.ad4mClient.ai.openTranscriptionStream(
+    'Whisper',
+    handleTranscriptionText,
+    moreDemaningParams,
+  );
 
   const wordByWordParams = {
     startThreshold: 0.5, // Lower threshold to detect softer speech
@@ -477,7 +478,7 @@ async function startLocalTransciption(stream: MediaStream) {
     timeBeforeSpeech: 20, // Include minimal context before speech
   };
 
-  fastStreamId.value = await client.ai.openTranscriptionStream(
+  fastStreamId.value = await appStore.ad4mClient.ai.openTranscriptionStream(
     'whisper_tiny_quantized',
     handleTranscriptionPreview,
     wordByWordParams,
@@ -492,8 +493,7 @@ async function startLocalTransciption(stream: MediaStream) {
     workletNode.port.onmessage = async (event) => {
       if (listening.value) {
         const audioData = Array.from(event.data);
-        const client = await getAd4mClient();
-        client.ai.feedTranscriptionStream(
+        appStore.ad4mClient.ai.feedTranscriptionStream(
           [fastStreamId.value, streamId.value].filter(Boolean) as string[],
           audioData as any,
         );
@@ -558,14 +558,12 @@ async function stopListening() {
   }
 
   if (streamId.value) {
-    const client = await getAd4mClient();
-    await client.ai.closeTranscriptionStream(streamId.value);
+    await appStore.ad4mClient.ai.closeTranscriptionStream(streamId.value);
     streamId.value = null;
   }
 
   if (fastStreamId.value) {
-    const client = await getAd4mClient();
-    await client.ai.closeTranscriptionStream(fastStreamId.value);
+    await appStore.ad4mClient.ai.closeTranscriptionStream(fastStreamId.value);
     fastStreamId.value = null;
   }
 }

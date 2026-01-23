@@ -1,8 +1,6 @@
-import { LinkExpression } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, LinkExpression } from '@coasys/ad4m';
 
-export default async function getAgentLinks(did: string): Promise<LinkExpression[]> {
-  const client = await getAd4mClient();
+export default async function getAgentLinks(client: Ad4mClient, did: string): Promise<LinkExpression[]> {
   const me = await client.agent.me();
 
   let links: LinkExpression[] = [];

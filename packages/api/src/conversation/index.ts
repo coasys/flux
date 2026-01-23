@@ -1,4 +1,4 @@
-import { Ad4mModel, Flag, Link, Literal, ModelOptions, Optional } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, Link, Literal, ModelOptions, Optional } from '@coasys/ad4m';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
@@ -302,6 +302,7 @@ export default class Conversation extends Ad4mModel {
   private async detectNewGroup(
     currentSubgroup: ConversationSubgroup | null,
     unprocessedItems: SynergyItem[],
+    client: Ad4mClient,
   ): Promise<{
     group: { n: string; s: string };
     newGroup?: { n: string; s: string; firstItemId: string };
@@ -311,7 +312,7 @@ export default class Conversation extends Ad4mModel {
     const unprocessedItemsWithProfile: (SynergyItem & Profile)[] = await Promise.all(
       unprocessedItems.map(async (item) => ({
         ...item,
-        ...(await getProfile(item.author)),
+        ...(await getProfile(item.author, client)),
       })),
     );
 
@@ -406,6 +407,7 @@ export default class Conversation extends Ad4mModel {
   async processNewExpressions(
     unprocessedItems: SynergyItem[],
     updateProcessingState: (newState: Partial<ProcessingState> | null) => void,
+    client: Ad4mClient,
   ) {
     const showLogs = false; // Set to true to enable detailed logging
     const duration = (start, end) => `${((end - start) / 1000).toFixed(1)} secs`;
@@ -427,7 +429,7 @@ export default class Conversation extends Ad4mModel {
 
     updateProcessingState({ step: 3 });
     // Have LLM sort new messages into old group or detect subject change
-    let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
+    let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems, client);
 
     // Handle case where group is present but properties are not set
     if (detectResult.group && !(detectResult.group.n?.length > 0) && !(detectResult.group.s?.length > 0)) {
