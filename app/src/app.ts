@@ -57,7 +57,7 @@ vueApp.mount("#app");
         iconPath: window.location.origin + '/icon.png',
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-      remoteUrl: 'https://lucksus.ad4m.dev:12001/graphql'
+      multiUser: true,
     });
 
     if (!ad4mClient) {
