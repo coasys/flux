@@ -80,7 +80,7 @@ import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import { App, Channel } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import { computed, onActivated, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'Header' });
@@ -129,6 +129,17 @@ async function togglePinned() {
     appStore.showDangerToast({ message: 'Failed to update pinned state' });
   }
 }
+
+// Automatically open call window if there are agents in call but window is closed
+function checkAndOpenCallWindow() {
+  if (agentsInCall.value.length > 0 && !inCall.value && !callWindowOpen.value) {
+    uiStore.setCallWindowOpen(true);
+  }
+}
+
+// Check on mount and activation (switching back to this view)
+onMounted(checkAndOpenCallWindow);
+onActivated(checkAndOpenCallWindow);
 </script>
 
 <style scoped lang="scss">
