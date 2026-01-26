@@ -19,6 +19,10 @@
           {{ channel.isConversation ? conversation?.conversationName || '' : channel.name }}
         </j-text>
       </j-flex>
+
+      <button class="header-button highlighted" @click="editChannelName">
+        <j-icon name="pencil-square" size="sm" />
+      </button>
     </div>
 
     <div class="header-buttons" :style="{ height: `${headerHeight}px` }">
@@ -46,10 +50,6 @@
         <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
         {{ channel.isPinned ? 'Pinned' : 'Pin' }}
       </button>
-      <!-- <button v-else class="header-button highlighted" @click="goToEditChannel">
-        <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
-        Edit channel
-      </button> -->
     </div>
 
     <div class="header-views" :style="{ height: `${headerHeight}px` }">
@@ -62,8 +62,8 @@
         <span>{{ view.name }}</span>
       </label>
 
-      <j-tooltip placement="auto" title="Manage views">
-        <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
+      <j-tooltip placement="auto" title="Manage plugins">
+        <j-button v-if="sameAgent" @click="manageChannelPlugins" size="sm" variant="ghost">
           <j-icon size="md" name="plus" />
         </j-button>
       </j-tooltip>
@@ -109,8 +109,12 @@ const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId
 
 const { entries: views } = useModel({ perspective, model: App, query: { source: channelId.value } });
 
-function goToEditChannel() {
-  modalStore.showEditChannel = true;
+function manageChannelPlugins() {
+  modalStore.showManageChannelPluginsModal = true;
+}
+
+function editChannelName() {
+  modalStore.showEditChannelNameModal = true;
 }
 
 function changeCurrentView(viewId: string) {

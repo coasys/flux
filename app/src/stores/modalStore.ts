@@ -10,7 +10,8 @@ export const useModalStore = defineStore(
     const showEditCommunity = ref(false);
     const showCommunityMembers = ref(false);
     const showCreateChannel = ref(false);
-    const showEditChannel = ref(false);
+    const showManageChannelPluginsModal = ref(false);
+    const showEditChannelNameModal = ref(false);
     const showEditProfile = ref(false);
     const showSettings = ref(false);
     const showCommunitySettings = ref(false);
@@ -37,7 +38,8 @@ export const useModalStore = defineStore(
       showEditCommunity.value = false;
       showCommunityMembers.value = false;
       showCreateChannel.value = false;
-      showEditChannel.value = false;
+      showManageChannelPluginsModal.value = false;
+      showEditChannelNameModal.value = false;
       showEditProfile.value = false;
       showSettings.value = false;
       showCommunitySettings.value = false;
@@ -55,7 +57,8 @@ export const useModalStore = defineStore(
       showEditCommunity,
       showCommunityMembers,
       showCreateChannel,
-      showEditChannel,
+      showManageChannelPluginsModal,
+      showEditChannelNameModal,
       showEditProfile,
       showSettings,
       showCommunitySettings,
