@@ -57,7 +57,7 @@
 
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 5px">
           <button
-            v-for="topic in topics"
+            v-for="topic in visibleTopics"
             :key="topic.baseExpression"
             :class="['tag', { focus: selectedTopicId === topic.baseExpression }]"
             @click="search!('topic', data.baseExpression, topic)"
@@ -65,6 +65,10 @@
             :style="{ cursor: !!match ? 'default' : 'pointer' }"
           >
             #{{ topic.name }}
+          </button>
+
+          <button v-if="topics.length > 6" :class="['tag', 'show-more']" @click="showAllTopics = !showAllTopics">
+            {{ showAllTopics ? 'Show less topics' : `Show ${topics.length - 6} more topics` }}
           </button>
 
           <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
@@ -214,6 +218,15 @@ const selected = ref(false);
 const collapseBefore = ref(true);
 const collapseAfter = ref(true);
 const firstLoad = ref(true);
+const showAllTopics = ref(false);
+
+const visibleTopics = computed(() => {
+  const maxVisible = 6;
+  if (showAllTopics.value || topics.value.length <= maxVisible) {
+    return topics.value;
+  }
+  return topics.value.slice(0, maxVisible);
+});
 
 const matchIndex = computed(() =>
   props.match
@@ -688,6 +701,16 @@ watch(
       &:hover {
         border: 1px solid var(--j-color-success-700);
         color: var(--j-color-success-700);
+      }
+    }
+
+    &.show-more {
+      border: 1px solid var(--j-color-ui-600);
+      color: var(--j-color-ui-600);
+
+      &:hover {
+        border: 1px solid var(--j-color-ui-800);
+        color: var(--j-color-ui-800);
       }
     }
   }
