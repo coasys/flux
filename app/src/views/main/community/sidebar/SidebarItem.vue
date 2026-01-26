@@ -31,9 +31,9 @@
       </div>
 
       <div v-if="item.lastActivity" class="last-activity">
-        <j-text nomargin size="300">•</j-text>
-        <j-text nomargin size="300">
-          <j-timestamp :value="item.lastActivity" relative class="timestamp" />
+        <!-- <j-text nomargin size="300" color="ui-400">•</j-text> -->
+        <j-text nomargin size="300" color="ui-400">
+          <j-timestamp :value="item.lastActivity" class="timestamp" dateStyle="short" timeStyle="short" />
         </j-text>
       </div>
 
