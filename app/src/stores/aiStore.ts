@@ -192,8 +192,6 @@ export const useAiStore = defineStore(
       // Mark processing true to prevent concurrent processing
       processing.value = true;
 
-      console.log('🤖 LLM processing started');
-
       let communityService: CommunityService | undefined = undefined;
 
       try {
@@ -231,6 +229,17 @@ export const useAiStore = defineStore(
         const unprocessedItems = await rawChannel.unprocessedItems!();
         const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY);
         const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
+
+        // Skip if no items to process (can happen if task was queued but items were processed by another agent)
+        if (itemsToProcess.length === 0) {
+          console.log('🤖 No items to process, removing task from queue');
+          processingQueue.value.shift();
+          processing.value = false;
+          setTimeout(() => processesNextTask(), 0);
+          return;
+        }
+
+        console.log('🤖 LLM processing started');
 
         // Create setProcessingState function to update processing state at each step
         function setProcessingState(newState: Partial<ProcessingState> | null) {
