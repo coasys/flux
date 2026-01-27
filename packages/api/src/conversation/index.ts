@@ -1,4 +1,4 @@
-import { Ad4mModel, Ad4mClient, Flag, Link, Literal, ModelOptions, Optional } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, Link, Literal, ModelOptions, Optional, Collection } from '@coasys/ad4m';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
@@ -6,120 +6,38 @@ import ConversationSubgroup from '../conversation-subgroup';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
 
-@ModelOptions({
-  name: 'Conversation',
-})
+@ModelOptions({ name: 'Conversation' })
 export default class Conversation extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://conversation',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://conversation' })
   type: string;
 
-  @Optional({
-    through: 'flux://has_name',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Optional({ through: 'flux://has_name', writable: true, resolveLanguage: 'literal' })
   conversationName: string;
 
-  @Optional({
-    through: 'flux://has_summary',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
   summary: string;
+
+  @Collection({ through: 'flux://has_participant' })
+  participants: string[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
     // find the total subgroup count and the dids of participants in the conversation
     try {
-      // const prologQuery = `
-      //   findall([SubgroupCount, SortedAuthors], (
-      //     % 1. Gather all subgroups and find the count
-      //     findall(Subgroup, (
-      //       subject_class("ConversationSubgroup", CS),
-      //       instance(CS, Subgroup),
-      //       triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
-      //     ), SubgroupList),
-      //     length(SubgroupList, SubgroupCount),
-      //
-      //     % 2. Gather and deduplicate authors
-      //     findall(Author, (
-      //       member(S, SubgroupList),
-      //       triple(S, "ad4m://has_child", Item),
-      //       link(_, "ad4m://has_child", Item, _, Author)
-      //     ), AuthorList),
-      //     sort(AuthorList, SortedAuthors)
-      //   ), [Stats]).
-      // `;
-
-      const countQuery = `
-        SELECT count() AS count
-        FROM link
-        WHERE in.uri = '${this.baseExpression}'
-          AND predicate = 'ad4m://has_child'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
-      `;
-
+      // Count subgroups by getting all matching URIs and counting them
       const subgroupsQuery = `
-        SELECT out.uri AS subgroupUri
+        SELECT VALUE out.uri
         FROM link
         WHERE in.uri = '${this.baseExpression}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
 
-      // Execute both queries in parallel
-      const [countResult, subgroupsResult] = await Promise.all([
-        this.perspective.querySurrealDB(countQuery),
-        this.perspective.querySurrealDB(subgroupsQuery),
-      ]);
+      const subgroupsResult = await this.perspective.querySurrealDB(subgroupsQuery);
+      const totalSubgroups = subgroupsResult?.length || 0;
 
-      // Extract total subgroup count
-      let totalSubgroups = 0;
-      for (const result of countResult || []) {
-        const countValue = result?.count;
-        const count =
-          typeof countValue === 'object' && countValue?.Int !== undefined ? countValue.Int : (countValue ?? 0);
-        totalSubgroups += count;
-      }
-
-      // Extract subgroup URIs
-      const subgroupUris = (subgroupsResult || []).map((r: any) => r.subgroupUri);
-
-      // Get participants from all items in all subgroups
-      let participants: string[] = [];
-      if (subgroupUris.length > 0) {
-        // For each subgroup, get all items and their authors
-        const itemsResults = await Promise.all(
-          subgroupUris.map(async (subgroupUri: string) => {
-            const itemsQuery = `
-              SELECT author
-              FROM link
-              WHERE in.uri = '${subgroupUri}'
-                AND predicate = 'ad4m://has_child'
-                AND (
-                  out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-                )
-                AND author IS NOT NONE
-            `;
-            return await this.perspective.querySurrealDB(itemsQuery);
-          }),
-        );
-        // Flatten and deduplicate
-        participants = [
-          ...new Set(
-            itemsResults
-              .flat()
-              .map((r: any) => r.author)
-              .filter(Boolean),
-          ),
-        ];
-      }
-
-      return { totalSubgroups, participants };
+      // Use maintained participants Collection instead of expensive queries
+      await this.get();
+      return { totalSubgroups, participants: this.participants };
     } catch (error) {
       console.error('Error getting conversation stats:', error);
       return { totalSubgroups: 0, participants: [] };
@@ -463,15 +381,21 @@ export default class Conversation extends Ad4mModel {
     const newLinks: Link[] = [];
     const currentNewMessages: string[] = [];
     const newGroupMessages: string[] = [];
+    const currentSubgroupNewParticipants = new Set<string>();
+    const newSubgroupParticipants = new Set<string>();
+    const allNewParticipants = new Set<string>();
     for (const [itemIndex, item] of unprocessedItems.entries()) {
       let itemsSubgroup;
       if ((detectResult.newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) || !currentSubgroup) {
         itemsSubgroup = newSubgroupEntity;
         newGroupMessages.push(item.text);
+        if (item.author) newSubgroupParticipants.add(item.author);
       } else {
         itemsSubgroup = currentSubgroup;
         currentNewMessages.push(item.text);
+        if (item.author) currentSubgroupNewParticipants.add(item.author);
       }
+      if (item.author) allNewParticipants.add(item.author);
       newLinks.push({
         source: itemsSubgroup.baseExpression,
         predicate: 'ad4m://has_child',
@@ -527,6 +451,18 @@ export default class Conversation extends Ad4mModel {
     updateProcessingState({ step: 6 });
     this.conversationName = newConversationInfo.n;
     this.summary = newConversationInfo.s;
+    // Update conversation participants - don't update in-memory array, let it reload from links
+    const conversationNewParticipants = Array.from(allNewParticipants).filter(
+      (author) => !this.participants.includes(author),
+    );
+    if (conversationNewParticipants.length > 0) {
+      const participantLinks = conversationNewParticipants.map((author) => ({
+        source: this.baseExpression,
+        predicate: 'flux://has_participant',
+        target: author,
+      }));
+      await this.perspective.addLinks(participantLinks, 'shared', batchId);
+    }
     await this.update(batchId);
     const end1 = new Date().getTime();
     if (showLogs) console.log('Conversation info updated: ', duration(start1, end1));
@@ -535,9 +471,31 @@ export default class Conversation extends Ad4mModel {
     if (currentSubgroup) {
       if (showLogs) console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
+      // Update current subgroup participants
+      const subgroupNewParticipants = Array.from(currentSubgroupNewParticipants).filter(
+        (author) => !currentSubgroup.participants.includes(author),
+      );
+      if (subgroupNewParticipants.length > 0) {
+        const participantLinks = subgroupNewParticipants.map((author) => ({
+          source: currentSubgroup.baseExpression,
+          predicate: 'flux://has_participant',
+          target: author,
+        }));
+        await this.perspective.addLinks(participantLinks, 'shared', batchId);
+      }
       await currentSubgroup.update(batchId);
       const end2 = new Date().getTime();
       if (showLogs) console.log('Current subgroup info updated: ', duration(start2, end2));
+    }
+
+    // Set new subgroup participants
+    if (newSubgroupEntity) {
+      const participantLinks = Array.from(newSubgroupParticipants).map((author) => ({
+        source: newSubgroupEntity.baseExpression,
+        predicate: 'flux://has_participant',
+        target: author,
+      }));
+      await this.perspective.addLinks(participantLinks, 'shared', batchId);
     }
 
     updateProcessingState({ step: 7 });

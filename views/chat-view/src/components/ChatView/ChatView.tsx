@@ -51,11 +51,11 @@ export default function ChatView({ agent, client, perspective, source, threaded,
             predicate: REPLY_TO,
             target: message.baseExpression,
           },
-          {
-            source: replyMessage.baseExpression,
-            predicate: EntryType.Message,
-            target: message.baseExpression,
-          },
+          // {
+          //   source: replyMessage.baseExpression,
+          //   predicate: EntryType.Message,
+          //   target: message.baseExpression,
+          // },
         ]);
       }
       setReplyMessage(null);

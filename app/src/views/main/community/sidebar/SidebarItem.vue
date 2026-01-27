@@ -106,10 +106,10 @@ function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agents
 
 function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
   if (!expanded && item.children?.length) {
-    const childAuthors = item.children.flatMap((child) => child.allAuthors || []);
-    return [...new Set([...(item.allAuthors || []), ...childAuthors])];
+    const childAuthors = item.children.flatMap((child) => child.channel.participants || []);
+    return [...new Set([...(item.channel.participants || []), ...childAuthors])];
   }
-  return item.allAuthors || [];
+  return item.channel.participants || [];
 }
 
 function navigateToChannel() {

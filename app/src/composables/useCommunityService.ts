@@ -29,7 +29,6 @@ export interface ChannelData {
   lastActivity?: string;
   agentsInChannel?: AgentData[];
   agentsInCall?: AgentData[];
-  allAuthors?: string[];
 }
 
 export interface ChannelDataWithAgents extends ChannelData {
@@ -198,8 +197,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       pinnedConversations.value = await Promise.all(
         pinnedChannels.value.map(async (channel: Channel) => {
           const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-          const allAuthors = await toRaw(channel).allAuthors();
-          return { conversation, channel, allAuthors };
+          return { conversation, channel };
         }),
       );
     } catch (error) {
@@ -228,7 +226,6 @@ export async function createCommunityService(): Promise<CommunityService> {
           let lastActivity: string | null = null;
           const channelRaw = toRaw(channel);
           const unprocessedItems = await channelRaw.unprocessedItems();
-          const allAuthors = await channelRaw.allAuthors();
           if (unprocessedItems.length) {
             const lastUnprocessedItem = unprocessedItems.sort(
               (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -256,7 +253,7 @@ export async function createCommunityService(): Promise<CommunityService> {
             }
           }
 
-          return { conversation, channel, lastActivity, allAuthors };
+          return { conversation, channel, lastActivity };
         }),
       );
 
@@ -296,18 +293,15 @@ export async function createCommunityService(): Promise<CommunityService> {
               const conversation = (
                 await Conversation.findAll(perspective, { source: childChannel.baseExpression })
               )[0];
-              const allAuthors = await toRaw(childChannel).allAuthors();
               // TODO: investigate and remove explicit baseExpression from channel if possible
-              // return { channel: childChannel, conversation, allAuthors };
               return {
                 channel: { ...childChannel, baseExpression: childChannel.baseExpression },
                 conversation,
-                allAuthors,
               };
             }),
           );
 
-          return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
+          return { channel, children: conversations };
         }),
       );
     } catch (error) {
@@ -433,12 +427,31 @@ export async function createCommunityService(): Promise<CommunityService> {
     return conversationData ? conversationData.conversation : undefined;
   }
 
+  // Track channel participants automatically
+  function handleParticipantTracking(link: any) {
+    if (link.data.predicate !== 'ad4m://has_child') return null;
+    if (!link.author) return null;
+
+    const channelId = link.data.source;
+    const channel = allChannels.value.find((c) => c.baseExpression === channelId);
+    if (!channel) return null;
+    if (channel.participants.includes(link.author)) return null;
+
+    // Add participant link
+    perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }]);
+
+    return null;
+  }
+
   // Initialize sync state listener
   perspective.addSyncStateChangeListener((state: PerspectiveState) => {
     // @ts-ignore
     isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
     return null;
   });
+
+  // Initialize participant tracking
+  perspective.addListener('link-added', handleParticipantTracking);
 
   getMembers();
 
