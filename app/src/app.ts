@@ -58,6 +58,7 @@ vueApp.mount("#app");
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
       multiUser: true,
+      remoteUrl: 'https://lucksus.ad4m.dev:12001/graphql',
     });
 
     if (!ad4mClient) {
