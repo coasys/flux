@@ -126,6 +126,7 @@ async function togglePinned() {
 
   try {
     const channelModel = new Channel(perspective, channel.value.baseExpression);
+    await channelModel.get();
     channelModel.isPinned = !channel.value.isPinned;
     await channelModel.update();
   } catch (error) {
