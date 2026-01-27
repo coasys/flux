@@ -20,6 +20,7 @@
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
       :source="channelId"
       :agent="appStore.ad4mClient.agent"
+      :client="appStore.ad4mClient"
       :perspective="perspective"
       :getProfile="getCachedAgentProfile"
       :appStore="appStore"
@@ -103,7 +104,7 @@ async function onNeighbourhoodClick(url: any) {
 
 function joinCommunityHandler(url: string) {
   isJoiningCommunity.value = true;
-  joinCommunity({ joiningLink: url })
+  joinCommunity({ joiningLink: url, client: appStore.ad4mClient })
     .then((community) => router.push({ name: 'community', params: { communityId: community.uuid } }))
     .finally(() => (isJoiningCommunity.value = false));
 }

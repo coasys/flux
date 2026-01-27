@@ -115,6 +115,7 @@ async function createLink() {
       description: description.value,
       imageUrl: imageUrl.value,
       url: link.value,
+      client: appStore.ad4mClient,
     });
 
     appStore.showSuccessToast({ message: 'Link added to agent perspective' });

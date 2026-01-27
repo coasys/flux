@@ -1,4 +1,4 @@
-import { LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { LinkQuery, PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Message } from '@coasys/flux-api';
 import { community } from '@coasys/flux-constants';
@@ -11,6 +11,7 @@ const { REPLY_TO, REACTION } = community;
 
 type Props = {
   agent: AgentClient;
+  client: Ad4mClient;
   perspective: PerspectiveProxy;
   source: string;
   threaded?: boolean;
@@ -18,7 +19,7 @@ type Props = {
   getProfile: (did: string) => Promise<any>;
 };
 
-export default function ChatView({ agent, perspective, source, threaded, element, getProfile }: Props) {
+export default function ChatView({ agent, client, perspective, source, threaded, element, getProfile }: Props) {
   const [showToolbar, setShowToolbar] = useState(false);
   const [pickerInfo, setPickerInfo] = useState<{
     x: number;
@@ -90,6 +91,7 @@ export default function ChatView({ agent, perspective, source, threaded, element
       el.className = styles.webComponent;
       el.perspective = perspective;
       el.agent = agent;
+      el.client = client;
       el.getProfile = getProfile;
       el.setAttribute('source', message.baseExpression);
       el.setAttribute('threaded', 'true');
@@ -212,7 +214,7 @@ export default function ChatView({ agent, perspective, source, threaded, element
             className={styles.editor}
             aria-expanded={showToolbar}
             perspective={perspective}
-            agent={agent}
+            client={client}
             source={source}
           >
             <footer slot="footer">

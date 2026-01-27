@@ -1,4 +1,4 @@
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient } from '@coasys/ad4m';
 import { createLiteralObject } from '@coasys/flux-utils';
 import { profile } from '@coasys/flux-constants';
 import { WebLink } from '@coasys/flux-types';
@@ -10,10 +10,11 @@ export default async function createAgentWebLink(payload: {
   url: string;
   description: string;
   imageUrl: string;
+  client: Ad4mClient;
 }): Promise<WebLink> {
-  const client = await getAd4mClient();
+  const client = payload.client;
 
-  const links = await createLiteralObject({
+  const links = await createLiteralObject(client, {
     parent: {
       source: `self`,
       predicate: AREA_WEBLINK,

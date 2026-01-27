@@ -1,10 +1,9 @@
-import { useAppStore } from '@/stores';
-import { getAd4mClient } from '@coasys/ad4m-connect';
-import { createPinia } from 'pinia';
+import { useAppStore, useRouteMemoryStore } from '@/stores';
+import { getAd4mClient, isEmbedded } from '@coasys/ad4m-connect';
+import { createPinia, storeToRefs } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
-import { ad4mConnect } from './ad4mConnect';
 import App from './App.vue';
 import router from './router';
 // @ts-ignore
@@ -17,7 +16,7 @@ import '@coasys/flux-ui/dist/themes/cyberpunk.css';
 import '@coasys/flux-ui/dist/themes/dark.css';
 import '@coasys/flux-ui/dist/themes/retro.css';
 import './themes/themes.css';
-import { getAd4mClientReady } from '@coasys/flux-utils';
+
 
 export const pinia = createPinia();
 
@@ -37,45 +36,64 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
-// Initialize Ad4mClient and mount after it's ready
 const appStore = useAppStore(pinia);
+const routeMemoryStore = useRouteMemoryStore(pinia);
 
-async function bootstrap() {
+// Store the last route before mounting the app (otherwise gets overwritten by router)
+const savedRoute = { ...routeMemoryStore.currentRoute };
+
+// Mount the app immediately so UI is responsive
+vueApp.mount("#app");
+
+// Initialize Ad4m client in an async IIFE to support older browsers
+(async () => {
   try {
-    const ad4mClient = await getAd4mClientReady();
-    appStore.setAdamClient(ad4mClient);
-    appStore.refreshMyProfile();
-  } catch (e) {
-    console.error("Failed to initialize Ad4m client:", e);
-  } finally {
-    vueApp.mount("#app");
-  }
-}
+    // Initialize Ad4m client (handles both embedded and standalone modes automatically)
+    const ad4mClient = await getAd4mClient({
+      appInfo: {
+        name: 'Flux',
+        description: 'A Social Toolkit for the New Internet',
+        url: window.location.origin,
+        iconPath: window.location.origin + '/icon.png',
+      },
+      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
+      multiUser: true,
+    });
 
-// Wait for authentication before bootstrapping
-if (ad4mConnect.authState === 'authenticated') {
-  // Already authenticated (e.g., has stored token)
-  bootstrap();
-} else {
-  // Wait for authentication
-  vueApp.mount("#app"); // Mount the app immediately so UI is shown
-  ad4mConnect.addEventListener('authstatechange', async () => {
-    if (ad4mConnect.authState === 'authenticated') {
-      try {
-        const ad4mClient = await getAd4mClientReady();
-        appStore.setAdamClient(ad4mClient);
-        appStore.refreshMyProfile();
-      } catch (e) {
-        console.error("Failed to initialize Ad4m client after auth:", e);
-      }
+    if (!ad4mClient) {
+      throw new Error('Ad4mClient not available');
     }
+
+    appStore.setAdamClient(ad4mClient);
+    await appStore.refreshMyProfile();
+
+    // Restore last saved route
+    if (savedRoute.communityId) {
+      if (savedRoute.viewId) await router.push({ name: 'view', params: savedRoute });
+      else if (savedRoute.channelId) await router.push({ name: 'channel', params: savedRoute });
+      else await router.push({ name: 'community', params: savedRoute });
+      return;
+    }
+
+    // Navigate to home if user is on landing/signup page
+    const currentRoute = router.currentRoute.value;
+    if (currentRoute.name === 'signup' || currentRoute.path === '/' || currentRoute.path === '') {
+      router.push('/home');
+    }
+  } catch (error) {
+    console.error('Failed to initialize Flux:', error);
+  }
+})();
+
+// Service worker registration - only register when running in standalone mode
+if (!isEmbedded()) {
+  const intervalMS = 60 * 10 * 1000;
+  useRegisterSW({
+    immediate: true,
+    onRegistered(r: ServiceWorkerRegistration | undefined) {
+      if (r) {
+        setInterval(() => r.update(), intervalMS);
+      }
+    },
   });
 }
-
-// Check for service worker updates every 10 minutes and reload
-const intervalMS = 60 * 10 * 1000;
-const updateServiceWorker = useRegisterSW({
-  onRegistered(r: ServiceWorkerRegistration | undefined) {
-    r && setInterval(() => r.update(), intervalMS);
-  },
-});

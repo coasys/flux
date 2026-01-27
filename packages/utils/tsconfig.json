@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json"],
   "compilerOptions": {
     "resolveJsonModule": true
   }

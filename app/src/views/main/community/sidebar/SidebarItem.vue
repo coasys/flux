@@ -68,10 +68,10 @@
 <script setup lang="ts">
 import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from '@/components/icons';
 import { ChannelData, useCommunityService } from '@/composables/useCommunityService';
-import { useRouteMemoryStore, useUiStore } from '@/stores';
+import { useAppStore, useRouteMemoryStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { AgentData, Profile } from '@coasys/flux-types';
-import { computed, defineOptions, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 defineOptions({ name: 'SidebarItem' });
@@ -81,6 +81,7 @@ const { item } = defineProps<Props>();
 
 const route = useRoute();
 const router = useRouter();
+const appStore = useAppStore();
 const uiStore = useUiStore();
 const routeMemoryStore = useRouteMemoryStore();
 const { moveConversation, moveConversationLoading } = useCommunityService();
@@ -195,7 +196,7 @@ watch(
       aggregateAllAuthors(expanded.value, item)
         .filter((did) => !activeDids.has(did))
         .map(async (did) => {
-          const profile = (await getCachedAgentProfile(did)) || {};
+          const profile = (await getCachedAgentProfile(did, appStore.ad4mClient)) || {};
           return { ...profile, did, status: 'inactive' };
         }),
     );

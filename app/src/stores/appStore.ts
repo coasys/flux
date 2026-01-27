@@ -29,6 +29,8 @@ export const useAppStore = defineStore(
       return ad4mClientRef.value as Ad4mClient;
     });
 
+    const clientReady = computed(() => ad4mClientRef.value !== null);
+
     const hasJoinedTestingCommunity = computed(() => {
       return !!myPerspectives.value.find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
     });
@@ -76,7 +78,7 @@ export const useAppStore = defineStore(
 
     async function joinTestingCommunity() {
       try {
-        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD });
+        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD, client: ad4mClient.value });
       } catch (e) {
         showDangerToast({ message: e.message });
         throw new Error(e);
@@ -104,8 +106,9 @@ export const useAppStore = defineStore(
     }
 
     async function refreshMyProfile() {
+      // First fetch the agent info
       me.value = await ad4mClient.value.agent.me();
-      myProfile.value = await getCachedAgentProfile(me.value.did, true);
+      myProfile.value = await getCachedAgentProfile(me.value.did, ad4mClient.value, true);
     }
 
     async function restartHolochain() {
@@ -133,6 +136,7 @@ export const useAppStore = defineStore(
       myCommunities,
       hasJoinedTestingCommunity,
       holochainRestarting,
+      clientReady,
 
       // Mutations
       setAdamClient,

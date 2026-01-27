@@ -1,6 +1,5 @@
-import { Perspective } from '@coasys/ad4m';
+import { Ad4mClient, Perspective } from '@coasys/ad4m';
 // @ts-ignore
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 import { Community as FluxCommunity } from '@coasys/flux-types';
 import { blobToDataURL, createNeighbourhoodMeta, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,7 @@ export interface Payload {
   image?: string;
   description?: string;
   perspectiveUuid?: string;
+  client: Ad4mClient;
 }
 
 export default async function createCommunity({
@@ -31,9 +31,9 @@ export default async function createCommunity({
   description = '',
   image = undefined,
   perspectiveUuid,
+  client,
 }: Payload): Promise<FluxCommunity> {
   try {
-    const client = await getAd4mClient();
     const agent = await client.agent.me();
     const author = agent.did;
 
@@ -65,7 +65,7 @@ export default async function createCommunity({
     const templateAddress = linkLangAddress || langs?.[0];
     if (!templateAddress) throw new Error('No link language templates available to publish neighbourhood.');
     const linkLanguage = await client.languages.applyTemplateAndPublish(templateAddress, templateData);
-    const metaLinks = await createNeighbourhoodMeta(name, description, author);
+    const metaLinks = await createNeighbourhoodMeta(client, name, description, author);
 
     let sharedUrl = perspective.sharedUrl;
 

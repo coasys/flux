@@ -1,13 +1,10 @@
-import { LinkExpression, LanguageMeta } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, LinkExpression, LanguageMeta } from '@coasys/ad4m';
 
 export const SHORT_FORM_EXPRESSION = 'shortform-expression';
 
 export const GROUP_EXPRESSION = 'group-expression';
 
-export async function getLanguageMeta(link: LinkExpression) {
-  const client = await getAd4mClient();
-
+export async function getLanguageMeta(client: Ad4mClient, link: LinkExpression) {
   return client.languages.meta(link.data.target);
 }
 

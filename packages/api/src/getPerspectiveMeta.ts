@@ -1,9 +1,7 @@
+import { Ad4mClient } from '@coasys/ad4m';
 import { findLink, getMetaFromLinks, keyedLanguages } from '@coasys/flux-utils';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
-export default async function getPerspectiveMeta(uuid: string) {
-  const client = await getAd4mClient();
-
+export default async function getPerspectiveMeta(client: Ad4mClient, uuid: string) {
   const perspective = await client.perspective.byUUID(uuid);
 
   if (!perspective || !perspective.neighbourhood) {

@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { CallEmoji, MediaState, useModalStore, useUiStore } from '@/stores';
+import { CallEmoji, MediaState, useAppStore, useModalStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Profile } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -94,6 +94,7 @@ const props = defineProps({
 });
 const { did, stream } = toRefs(props);
 
+const appStore = useAppStore();
 const uiStore = useUiStore();
 const modalStore = useModalStore();
 
@@ -161,7 +162,7 @@ onMounted(async () => {
     }
   }
   // Get user profile
-  profile.value = await getCachedAgentProfile(did.value);
+  profile.value = await getCachedAgentProfile(did.value, appStore.ad4mClient);
 });
 </script>
 
