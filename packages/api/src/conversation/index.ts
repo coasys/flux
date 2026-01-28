@@ -303,6 +303,9 @@ export default class Conversation extends Ad4mModel {
       this.perspective.ai,
     );
 
+    // Filter out topics with empty/null/undefined names to prevent Literal conversion errors
+    currentNewTopics = currentNewTopics.filter((topic) => topic.n && topic.n.trim() !== '');
+
     const topicMatches = await Topic.findAll(this.perspective, {
       where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl()) },
     });
