@@ -4,12 +4,13 @@
 
 <script setup lang="ts">
 import * as THREE from 'three';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import perlin from './perlin.js';
 
 const SIZE = 1000;
-const el = ref(null);
+const el = ref<HTMLCanvasElement | null>(null);
 const isActive = ref(true);
+let animationFrameId: number | null = null;
 
 onMounted(() => {
   // Observation listener
@@ -30,8 +31,10 @@ onMounted(() => {
     observer.observe(el.value);
   }
 
+  if (!el.value) return;
+
   var renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById('canvas'),
+    canvas: el.value,
     antialias: true,
     alpha: true,
   });
@@ -92,10 +95,16 @@ onMounted(() => {
 
     /* render scene and camera */
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
   }
 
-  requestAnimationFrame(animate);
+  animationFrameId = requestAnimationFrame(animate);
+});
+
+onUnmounted(() => {
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId);
+  }
 });
 </script>
 
