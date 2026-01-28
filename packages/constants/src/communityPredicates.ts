@@ -46,7 +46,7 @@ export const CARD_HIDDEN = 'flux://is_card_hidden';
 
 export const OMIT = 'flux://null';
 
-export const REPLY_TO = 'flux://has_reply';
+export const HAS_REPLY = 'flux://has_reply';
 
 export const REACTION = 'flux://has_reaction';
 

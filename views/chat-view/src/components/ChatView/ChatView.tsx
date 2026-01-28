@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import MessageList from '../MessageList/MessageList';
 import styles from './ChatView.module.css';
 
-const { REPLY_TO, REACTION } = community;
+const { HAS_REPLY, REACTION } = community;
 
 type Props = {
   agent: AgentClient;
@@ -48,7 +48,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
         perspective.addLinks([
           {
             source: replyMessage.baseExpression,
-            predicate: REPLY_TO,
+            predicate: HAS_REPLY,
             target: message.baseExpression,
           },
           // {
