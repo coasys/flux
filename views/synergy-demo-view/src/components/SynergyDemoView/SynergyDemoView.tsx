@@ -3,6 +3,7 @@ import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, To
 import { Profile, SignallingService } from '@coasys/flux-types';
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from '@coasys/flux-utils';
 import { cos_sim } from '@xenova/transformers';
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import MatchColumn from '../MatchColumn';
 import TimelineColumn from '../TimelineColumn';
@@ -114,13 +115,17 @@ export default function SynergyDemoView({
     return `${matches.length} match${matches.length > 1 ? 'es' : ''} ${searchType === 'topic' ? `for #${selectedTopic.name}` : ''}`;
   }
 
+  async function ensureSDNA() {
+    await perspective.ensureSDNASubjectClass(Conversation);
+    await perspective.ensureSDNASubjectClass(ConversationSubgroup);
+    await perspective.ensureSDNASubjectClass(Topic);
+    await perspective.ensureSDNASubjectClass(Embedding);
+    await perspective.ensureSDNASubjectClass(SemanticRelationship);
+  }
+
   useEffect(() => {
-    // Ensure SDNA classes
-    perspective.ensureSDNASubjectClass(Conversation);
-    perspective.ensureSDNASubjectClass(ConversationSubgroup);
-    perspective.ensureSDNASubjectClass(Topic);
-    perspective.ensureSDNASubjectClass(Embedding);
-    perspective.ensureSDNASubjectClass(SemanticRelationship);
+    // Ensure SDNA classes are loaded into the perspective
+    ensureSDNA();
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;

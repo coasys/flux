@@ -43,20 +43,18 @@ export default async function createCommunity({
       : await client.perspective.add(name);
 
     // Add models to the perspectives SDNA
-    await Promise.all([
-      perspective.ensureSDNASubjectClass(Community),
-      perspective.ensureSDNASubjectClass(Channel),
-      perspective.ensureSDNASubjectClass(App),
-      perspective.ensureSDNASubjectClass(Conversation),
-      perspective.ensureSDNASubjectClass(ConversationSubgroup),
-      perspective.ensureSDNASubjectClass(Topic),
-      perspective.ensureSDNASubjectClass(Embedding),
-      perspective.ensureSDNASubjectClass(SemanticRelationship),
-      perspective.ensureSDNASubjectClass(Message),
-      perspective.ensureSDNASubjectClass(TaskBoard),
-      perspective.ensureSDNASubjectClass(TaskColumn),
-      perspective.ensureSDNASubjectClass(Task),
-    ]);
+    await perspective.ensureSDNASubjectClass(Community)
+    await perspective.ensureSDNASubjectClass(Channel)
+    await perspective.ensureSDNASubjectClass(App)
+    await perspective.ensureSDNASubjectClass(Conversation)
+    await perspective.ensureSDNASubjectClass(ConversationSubgroup)
+    await perspective.ensureSDNASubjectClass(Topic)
+    await perspective.ensureSDNASubjectClass(Embedding)
+    await perspective.ensureSDNASubjectClass(SemanticRelationship)
+    await perspective.ensureSDNASubjectClass(Message)
+    await perspective.ensureSDNASubjectClass(TaskBoard)
+    await perspective.ensureSDNASubjectClass(TaskColumn)
+    await perspective.ensureSDNASubjectClass(Task)
 
     // Create a neighbourhood from the perspective
     const uid = uuidv4();

@@ -27,11 +27,9 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
 
   async function ensureSDNAClasses() {
     // Ensure all SDNA classes are loaded into the perspective
-    await Promise.all([
-      perspective.ensureSDNASubjectClass(Poll),
-      perspective.ensureSDNASubjectClass(Answer),
-      perspective.ensureSDNASubjectClass(Vote),
-    ]);
+    await perspective.ensureSDNASubjectClass(Poll);
+    await perspective.ensureSDNASubjectClass(Answer);
+    await perspective.ensureSDNASubjectClass(Vote);
   }
 
   async function getMyDid() {

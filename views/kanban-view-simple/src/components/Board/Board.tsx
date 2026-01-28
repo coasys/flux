@@ -33,11 +33,9 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   const { entries: tasks } = useModel({ perspective, model: Task, query: { source: channelId } });
 
   async function initialiseBoard() {
-    await Promise.all([
-      perspective.ensureSDNASubjectClass(TaskBoard),
-      perspective.ensureSDNASubjectClass(TaskColumn),
-      perspective.ensureSDNASubjectClass(Task),
-    ]);
+    await perspective.ensureSDNASubjectClass(TaskBoard);
+    await perspective.ensureSDNASubjectClass(TaskColumn);
+    await perspective.ensureSDNASubjectClass(Task);
 
     const board = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
     if (board) setBoard(board);
