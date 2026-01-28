@@ -188,17 +188,19 @@ export default class Conversation extends Ad4mModel {
       return await Promise.all(
         (surrealResult || []).map(async (subgroup: any) => {
           // Query to get timestamps for items in this subgroup
-          // Using graph traversal from subgroup children that are also channel children
+          // Get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
-            SELECT VALUE timestamp
+            SELECT
+              out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp AS channelTimestamp
             FROM link
             WHERE in.uri = '${subgroup.baseExpression}'
               AND predicate = 'ad4m://has_child'
-              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_channel'][0] IS NOT NONE
-            ORDER BY timestamp ASC
+              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0] IS NOT NONE
+            ORDER BY channelTimestamp ASC
           `;
 
-          const timestamps = await this.perspective.querySurrealDB(timestampQuery);
+          const timestampResults = await this.perspective.querySurrealDB(timestampQuery);
+          const timestamps = (timestampResults || []).map((r: any) => r.channelTimestamp);
           const start = timestamps.length > 0 ? new Date(timestamps[0]).getTime() : 0;
           const end = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]).getTime() : 0;
 
