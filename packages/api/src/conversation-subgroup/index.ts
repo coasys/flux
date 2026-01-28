@@ -142,7 +142,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS baseExpression,
-          timestamp,
+          out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp AS channelTimestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
           fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
@@ -156,15 +156,10 @@ export default class ConversationSubgroup extends Ad4mModel {
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
           )
-        ORDER BY timestamp ASC
+        ORDER BY channelTimestamp ASC
       `;
 
-      // console.log('*** ConversationSubgroup.itemsData() surrealQuery:', surrealQuery);
-
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
-
-      // console.log('*** ConversationSubgroup.itemsData() surrealResult:', JSON.stringify(surrealResult, null, 2));
-      // console.log('*** ConversationSubgroup.itemsData() count:', surrealResult?.length);
 
       return (surrealResult || []).map((item: any) => {
         let text = '';
@@ -184,7 +179,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         return {
           baseExpression: item.baseExpression,
           type,
-          timestamp: new Date(item.timestamp).toISOString(),
+          timestamp: new Date(item.channelTimestamp).toISOString(),
           author: item.author,
           text,
           icon: icons[type] || 'question',
