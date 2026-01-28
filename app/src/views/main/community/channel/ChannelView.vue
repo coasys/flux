@@ -10,7 +10,7 @@
           :key="`${channelId}-${route.params.viewId}`"
           :is="Component"
           :channel="channel"
-          :style="{ paddingBottom: isMobile ? `calc(${callWidgetsHeight + 20}px)` : '0' }"
+          :style="{ paddingBottom: isMobile ? '40px' : '0' }"
         />
       </KeepAlive>
     </RouterView>

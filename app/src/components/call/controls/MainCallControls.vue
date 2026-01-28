@@ -6,9 +6,9 @@
         @click="mediaDeviceStore.toggleAudio"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
       >
-        <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" />
+        <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
@@ -18,10 +18,10 @@
         @click="mediaDeviceStore.toggleVideo"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
         :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
       >
-        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" />
+        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
@@ -31,10 +31,10 @@
         @click="mediaDeviceStore.toggleScreenShare"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
         :disabled="!inCall"
       >
-        <j-icon name="display" />
+        <j-icon name="display" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
@@ -45,7 +45,7 @@
         @click="aiStore.toggleTranscriptionEnabled"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
       >
         <TranscriptionIcon :enabled="transcriptionEnabled" />
       </j-button>
@@ -53,8 +53,8 @@
 
     <j-popover ref="emojiPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Send reaction">
-        <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
-          <j-icon name="emoji-neutral" />
+        <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
+          <j-icon name="emoji-neutral" :size="isMobile ? 'sm' : 'md'" />
         </j-button>
       </j-tooltip>
       <div slot="content">
@@ -63,15 +63,15 @@
     </j-popover>
 
     <j-tooltip v-if="!isMobile" placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
-      <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
-        <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
+      <j-button @click="uiStore.toggleCallWindowFullscreen" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
     <j-popover ref="videoLayoutPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Video layout options">
-        <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
-          <j-icon name="grid" />
+        <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
+          <j-icon name="grid" :size="isMobile ? 'sm' : 'md'" />
         </j-button>
       </j-tooltip>
       <j-menu slot="content">
@@ -90,14 +90,14 @@
     </j-popover>
 
     <j-tooltip placement="top" title="Call settings">
-      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle size="lg">
-        <j-icon name="gear" />
+      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
     <j-tooltip placement="top" title="Leave call">
-      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
-        <j-icon name="telephone-x" />
+      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle :size="isMobile ? 'md' : 'lg'" :disabled="!inCall">
+        <j-icon name="telephone-x" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
   </div>

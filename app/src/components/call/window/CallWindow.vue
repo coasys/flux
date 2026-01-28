@@ -1,11 +1,16 @@
 <template>
-  <div ref="rightSection" class="call-window-panel">
+  <div 
+    ref="rightSection" 
+    class="call-window-panel"
+    :style="{ overflowY: isMobile ? 'scroll' : 'hidden', backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }"
+  >
     <div
       ref="callWindow"
       :class="['call-window', { open: callWindowOpen }]"
       :style="{
         width: isMobile ? '100%' : `${callWindowOpen ? callWindowWidth : 0}px`,
         pointerEvents: callWindowOpen ? 'auto' : 'none',
+        justifyContent: isMobile ? 'flex-start' : 'space-between',
       }"
       :aria-hidden="!callWindowOpen"
     >
@@ -34,7 +39,7 @@
       </div>
 
       <!-- Content -->
-      <div class="call-window-content">
+      <div class="call-window-content" :style="{ height: isMobile ? 'auto' : 'calc(100% - 150px)' }">
         <!-- Join prompt -->
         <j-box v-if="!inCall" mb="500">
           <j-flex direction="column" a="center" gap="300">
@@ -106,14 +111,12 @@ function closeCallWindow() {
   position: relative;
   display: flex;
   justify-content: flex-end;
-  overflow: hidden;
 
   .call-window {
     position: relative;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     height: 100%;
     background-color: #1c1a1f;
     transition: all 0.5s ease-in-out;
@@ -150,7 +153,6 @@ function closeCallWindow() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: calc(100% - 150px);
       gap: var(--j-space-500);
     }
 
