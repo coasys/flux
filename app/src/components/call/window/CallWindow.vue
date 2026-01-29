@@ -51,6 +51,11 @@
         <VideoGrid />
         <JoinCallControls v-if="!inCall" />
         <MainCallControls v-if="inCall" />
+
+        <j-button @click="copyCallLink" size="lg">
+          <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em', margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0' }" />
+          Copy Call Invite Link
+        </j-button>
       </div>
 
       <!-- Footer -->
@@ -71,9 +76,11 @@
 
 <script setup lang="ts">
 import AvatarGroup from '@/components/avatar-group/AvatarGroup.vue';
-import { useUiStore, useWebrtcStore } from '@/stores';
+import { useAppStore, useCommunityServiceStore, useUiStore, useWebrtcStore } from '@/stores';
+import { generateCallInviteUrl } from '@/utils/callInviteUrl';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { useCallResize } from '../composables/useCallResize';
 import JoinCallControls from '../controls/JoinCallControls.vue';
 import MainCallControls from '../controls/MainCallControls.vue';
@@ -88,19 +95,58 @@ defineProps<{
   };
 }>();
 
+const appStore = useAppStore();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
+const communityServiceStore = useCommunityServiceStore();
+const route = useRoute();
 
 const { callWindowWidth, callWindowOpen, isMobile } = storeToRefs(uiStore);
-const { agentsInCall, inCall } = storeToRefs(webrtcStore);
+const { agentsInCall, inCall, callRoute } = storeToRefs(webrtcStore);
 
 const rightSection = ref<HTMLElement | null>(null);
 const callWindow = ref<HTMLElement | null>(null);
+const hasCopiedLink = ref(false);
 
 const { startResize } = useCallResize(callWindow, rightSection);
 
 function closeCallWindow() {
   uiStore.setCallWindowOpen(false);
+}
+
+async function copyCallLink() {
+  try {
+    // Get route params from current route instead of callRoute (which is only set when joined)
+    const communityId = route.params.communityId as string;
+    const channelId = route.params.channelId as string;
+    
+    if (!communityId || !channelId) {
+      appStore.showDangerToast({ message: 'Cannot generate call link - missing route information' });
+      return;
+    }
+
+    // Get the neighbourhood URL for this community
+    const communityService = communityServiceStore.getCommunityService(communityId);
+    const neighbourhoodUrl = communityService?.perspective.sharedUrl;
+
+    if (!neighbourhoodUrl) {
+      appStore.showDangerToast({ message: 'Cannot generate call link - community not found' });
+      return;
+    }
+
+    const callUrl = generateCallInviteUrl(neighbourhoodUrl, channelId);
+    await navigator.clipboard.writeText(callUrl);
+    
+    hasCopiedLink.value = true;
+    appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+    
+    setTimeout(() => {
+      hasCopiedLink.value = false;
+    }, 3000);
+  } catch (error) {
+    console.error('Failed to copy call link:', error);
+    appStore.showDangerToast({ message: 'Failed to copy call link. Please try again.' });
+  }
 }
 </script>
 
@@ -145,6 +191,11 @@ function closeCallWindow() {
         justify-content: center;
         align-items: center;
         z-index: 5;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: var(--j-color-ui-300);
+        }
       }
     }
 

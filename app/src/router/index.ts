@@ -16,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
     meta: { public: true },
   },
   {
+    path: '/join-call',
+    name: 'join-call',
+    component: () => import(`@/views/JoinCallView.vue`),
+  },
+  {
     path: '/',
     name: 'main',
     component: () => import(`@/views/main/MainView.vue`),
