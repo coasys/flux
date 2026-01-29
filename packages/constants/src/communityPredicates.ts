@@ -60,6 +60,8 @@ export const URL = 'flux://url';
 
 export const IMAGE = 'flux://image';
 
+export const TRANSCRIPT_STARTED_AT = 'flux://transcript_started_at';
+
 export const THUMBNAIL = 'flux://thumbnail';
 
 export const START_DATE = 'flux://start_date';

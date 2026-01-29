@@ -2,7 +2,7 @@ import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from '@coasys/ad4m';
 
-const { BODY, HAS_REPLY, ENTRY_TYPE, REACTION } = community;
+const { BODY, HAS_REPLY, ENTRY_TYPE, REACTION, TRANSCRIPT_STARTED_AT } = community;
 
 @ModelOptions({
   name: 'Message',
@@ -20,6 +20,13 @@ export class Message extends Ad4mModel {
     resolveLanguage: 'literal',
   })
   body: string;
+
+  @Optional({
+    through: TRANSCRIPT_STARTED_AT,
+    writable: true,
+    resolveLanguage: 'literal',
+  })
+  transcriptStartedAt?: string;
 
   @Collection({
     through: REACTION,

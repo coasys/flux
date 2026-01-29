@@ -191,7 +191,7 @@ export default class Conversation extends Ad4mModel {
           // Get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
             SELECT
-              out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp AS channelTimestamp
+              (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp
             FROM link
             WHERE in.uri = '${subgroup.baseExpression}'
               AND predicate = 'ad4m://has_child'
