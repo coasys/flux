@@ -39,7 +39,7 @@
       </div>
 
       <!-- Content -->
-      <div class="call-window-content" :style="{ height: isMobile ? 'auto' : 'calc(100% - 150px)' }">
+      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 55 : 150}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
         <!-- Join prompt -->
         <j-box v-if="!inCall" mb="500">
           <j-flex direction="column" a="center" gap="300">
@@ -153,7 +153,6 @@ function closeCallWindow() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: var(--j-space-500);
     }
 
     .call-window-footer {

@@ -255,7 +255,7 @@ const modelsReady = computed(
 
 function renderVolume() {
   if (listening.value && analyser.value && dataArray.value) {
-    analyser.value.getByteTimeDomainData(dataArray.value);
+    analyser.value.getByteTimeDomainData(dataArray.value as any);
     const maxValue = Math.max(...dataArray.value);
     const percentage = ((maxValue - 128) / 128) * 100;
     const volume = document.getElementById('volume');
@@ -392,7 +392,7 @@ function startRemoteTranscription() {
   // Only detect speech when volume is above threshold
   volumeCheckInterval.value = setInterval(() => {
     if (analyser.value && dataArray.value) {
-      analyser.value.getByteTimeDomainData(dataArray.value);
+      analyser.value.getByteTimeDomainData(dataArray.value as any);
       const maxValue = Math.max(...dataArray.value);
       const percentage = ((maxValue - 128) / 128) * 100;
       // Store last second of volume data for check in onresult function below
