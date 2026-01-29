@@ -20,7 +20,7 @@
         :screenShareState="focusedParticipant.screenShareState"
         :warning="focusedParticipant.warning"
         :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
-        @click="focusOnVideo(focusedParticipant.did)"
+        @click="closeFocusedVideoLayout"
         :style="{ maxHeight: unfocusedParticipants.length ? 'calc(100% - 140px)' : 'none' }"
       />
 
@@ -85,6 +85,7 @@ const {
   focusedParticipant,
   unfocusedParticipants,
   focusOnVideo,
+  closeFocusedVideoLayout,
 } = useVideoLayout();
 
 const videoGrid = ref<HTMLElement | null>(null);
