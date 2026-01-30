@@ -43,6 +43,7 @@ export default function SynergyDemoView({
   const [showLLMInfoModal, setShowLLMInfoModal] = useState(false);
   const [aiDataLoading, setAiDataLoading] = useState(false);
   const [modalRenderKey, setModalRenderKey] = useState(0);
+  const [sdnaInitialized, setSdnaInitialized] = useState(false);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -125,7 +126,15 @@ export default function SynergyDemoView({
 
   useEffect(() => {
     // Ensure SDNA classes are loaded into the perspective
-    ensureSDNA();
+    (async () => {
+      try {
+        await ensureSDNA();
+        setSdnaInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize SDNA classes:', error);
+        setSdnaInitialized(false);
+      }
+    })();
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;
@@ -141,6 +150,18 @@ export default function SynergyDemoView({
 
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
+
+  // Wait for SDNA initialization before rendering
+  if (!sdnaInitialized) {
+    return (
+      <div className={styles.wrapper}>
+        <j-flex direction="column" a="center" j="center" gap="500" style={{ height: '100%' }}>
+          <j-spinner size="lg" />
+          <j-text nomargin>Initializing SDNA classes...</j-text>
+        </j-flex>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

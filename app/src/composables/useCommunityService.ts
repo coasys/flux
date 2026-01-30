@@ -432,17 +432,29 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   // Track channel participants automatically
-  function handleParticipantTracking(link: any) {
+  async function handleParticipantTracking(link: any) {
     if (link.data.predicate !== 'ad4m://has_child') return null;
     if (!link.author) return null;
 
     const channelId = link.data.source;
     const channel = allChannels.value.find((c) => c.baseExpression === channelId);
     if (!channel) return null;
-    if (channel.participants.includes(link.author)) return null;
+    
+    // Load channel data to ensure participants collection is populated
+    await channel.get();
+    
+    if (channel.participants && channel.participants.includes(link.author)) return null;
 
     // Add participant link
-    perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }]);
+    try {
+      await perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }]);
+    } catch (error) {
+      console.error('Failed to add participant to channel:', {
+        channelId,
+        author: link.author,
+        error,
+      });
+    }
 
     return null;
   }

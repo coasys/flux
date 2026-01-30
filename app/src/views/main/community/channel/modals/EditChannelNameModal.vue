@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { useCommunityService } from '@/composables/useCommunityService';
-import { useModalStore } from '@/stores';
+import { useAppStore, useModalStore } from '@/stores';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import { Channel, Conversation } from '@coasys/flux-api';
 import { computed, ref, toRaw, watch } from 'vue';
@@ -46,6 +46,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const modalStore = useModalStore();
+const appStore = useAppStore();
 
 const {
   perspective,
@@ -74,7 +75,14 @@ async function updateChannel() {
         (c) => c.channel.baseExpression === channel.value.baseExpression,
       );
       const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
-      if (!conversationId) return;
+      if (!conversationId) {
+        isSaving.value = false;
+        modalStore.showEditChannelNameModal = false;
+        appStore.showDangerToast({
+          message: 'Conversation not found. Unable to update name.',
+        });
+        return;
+      }
       const conversationModel = new Conversation(perspective, conversationId);
       conversationModel.conversationName = name.value;
       await conversationModel.update();
@@ -89,9 +97,16 @@ async function updateChannel() {
       channelModel.name = name.value;
       await channelModel.update();
     }
+    
+    // Close modal only on success
+    modalStore.showEditChannelNameModal = false;
+  } catch (error) {
+    console.error('Failed to update channel name:', error);
+    appStore.showDangerToast({
+      message: `Failed to update ${isConversation.value ? 'conversation' : 'channel'} name. Please try again.`,
+    });
   } finally {
     isSaving.value = false;
-    modalStore.showEditChannelNameModal = false;
   }
 }
 

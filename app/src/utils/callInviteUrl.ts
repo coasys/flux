@@ -6,8 +6,17 @@
  * Strips protocol prefixes to create clean URL parameters
  */
 export function stripUrlPrefixes(neighbourhoodUrl: string, channelId: string) {
-  const invite = neighbourhoodUrl.replace('neighbourhood://', '');
-  const channel = channelId.replace('literal://string:', '');
+  const neighbourhoodPrefix = 'neighbourhood://';
+  const literalPrefix = 'literal://string:';
+  
+  const invite = neighbourhoodUrl.startsWith(neighbourhoodPrefix)
+    ? neighbourhoodUrl.slice(neighbourhoodPrefix.length)
+    : neighbourhoodUrl;
+  
+  const channel = channelId.startsWith(literalPrefix)
+    ? channelId.slice(literalPrefix.length)
+    : channelId;
+  
   return { invite, channel };
 }
 

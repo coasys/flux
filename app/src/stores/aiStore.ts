@@ -234,8 +234,6 @@ export const useAiStore = defineStore(
         if (itemsToProcess.length === 0) {
           console.log('🤖 No items to process, removing task from queue');
           processingQueue.value.shift();
-          processing.value = false;
-          setTimeout(() => processesNextTask(), 0);
           return;
         }
 
