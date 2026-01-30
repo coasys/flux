@@ -456,8 +456,7 @@ export default class Conversation extends Ad4mModel {
     updateProcessingState({ step: 6 });
     this.conversationName = newConversationInfo.n;
     this.summary = newConversationInfo.s;
-    // Refresh participants collection to ensure it's up-to-date before filtering
-    await this.get();
+
     // Update conversation participants - don't update in-memory array, let it reload from links
     const conversationNewParticipants = Array.from(allNewParticipants).filter(
       (author) => !this.participants.includes(author),
@@ -478,6 +477,7 @@ export default class Conversation extends Ad4mModel {
     if (currentSubgroup) {
       if (showLogs) console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
+      
       // Update current subgroup participants
       const subgroupNewParticipants = Array.from(currentSubgroupNewParticipants).filter(
         (author) => !currentSubgroup.participants.includes(author),

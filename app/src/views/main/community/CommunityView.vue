@@ -145,7 +145,10 @@ function navigateToChannel(channelId?: string) {
 }
 
 onMounted(() => signallingService.startSignalling());
-onUnmounted(() => signallingService.stopSignalling());
+onUnmounted(() => {
+  signallingService.stopSignalling();
+  communityService.cleanup();
+});
 </script>
 
 <style scoped>

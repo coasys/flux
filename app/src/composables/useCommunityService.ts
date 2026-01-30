@@ -72,6 +72,7 @@ export interface CommunityService {
   ) => Promise<void>;
   getParentChannel: (channelId: string) => Partial<Channel> | undefined;
   getConversation: (channelId: string) => Partial<Conversation> | undefined;
+  cleanup: () => void;
 }
 
 const DEFAULT_CHAT_APP_PKG = '@coasys/flux-chat-view';
@@ -440,9 +441,6 @@ export async function createCommunityService(): Promise<CommunityService> {
     const channel = allChannels.value.find((c) => c.baseExpression === channelId);
     if (!channel) return null;
     
-    // Load channel data to ensure participants collection is populated
-    await channel.get();
-    
     if (channel.participants && channel.participants.includes(link.author)) return null;
 
     // Add participant link
@@ -460,14 +458,21 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   // Initialize sync state listener
-  perspective.addSyncStateChangeListener((state: PerspectiveState) => {
+  const syncStateListener = (state: PerspectiveState) => {
     // @ts-ignore
     isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
     return null;
-  });
+  };
+  perspective.addSyncStateChangeListener(syncStateListener);
 
   // Initialize participant tracking
   perspective.addListener('link-added', handleParticipantTracking);
+
+  // Cleanup function to remove all listeners
+  function cleanup() {
+    perspective.removeSyncStateChangeListener(syncStateListener);
+    perspective.removeListener('link-added', handleParticipantTracking);
+  }
 
   getMembers();
 
@@ -516,6 +521,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     moveConversation,
     getParentChannel,
     getConversation,
+    cleanup,
   };
 }
 

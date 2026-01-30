@@ -227,7 +227,7 @@ export const useAiStore = defineStore(
 
         // Get the items to process from the channel
         const unprocessedItems = await rawChannel.unprocessedItems!();
-        const numberOfItemsToProcess = Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY);
+        const numberOfItemsToProcess = Math.max(0, Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY));
         const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
 
         // Skip if no items to process (can happen if task was queued but items were processed by another agent)
