@@ -1,4 +1,4 @@
-import { useAiStore, useAppStore } from '@/stores';
+import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useModel } from '@coasys/ad4m-vue-hooks';
@@ -82,6 +82,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const router = useRouter();
   const appStore = useAppStore();
   const aiStore = useAiStore();
+  const uiStore = useUiStore();
   const { me } = storeToRefs(appStore);
   const { aiEnabled } = storeToRefs(aiStore);
 
@@ -355,6 +356,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
       router.push({ name: 'view', params: { communityId, channelId: channel.baseExpression, viewId: 'conversation' } });
+      uiStore.setCallWindowOpen(true);
     } catch (error) {
       console.error('Failed to create new conversation:', error);
       appStore.showDangerToast({ message: 'Failed to create conversation' });
