@@ -127,6 +127,7 @@ async function handleCopyCallLink() {
   position: relative;
   display: flex;
   justify-content: flex-end;
+  overflow-x: hidden;
 
   .call-window {
     position: relative;
