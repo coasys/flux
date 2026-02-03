@@ -89,6 +89,12 @@
       </j-menu>
     </j-popover>
 
+    <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
+      <j-button @click="handleCopyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :size="isMobile ? 'sm' : 'md'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
+      </j-button>
+    </j-tooltip>
+
     <j-tooltip placement="top" title="Call settings">
       <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
         <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
@@ -134,7 +140,7 @@ const { inCall } = storeToRefs(webrtcStore);
 const { videoLayoutOptions, selectedVideoLayout, selectVideoLayout } = useVideoLayout();
 
 const emojiPopover = ref<HTMLElement | null>(null);
-const videoLayoutPopover = ref<HTMLElement | null>(null);
+const hasCopiedLink = ref(false);
 
 function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   const emoji = e?.detail?.native;
@@ -146,6 +152,16 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   webrtcStore.signalAgentsInCall(WEBRTC_EMOJI, emoji);
   webrtcStore.displayEmoji(emoji, did);
   emojiPopover.value?.removeAttribute('open');
+}
+
+async function handleCopyCallLink() {
+  const success = await webrtcStore.copyCallLink();
+  if (success) {
+    hasCopiedLink.value = true;
+    setTimeout(() => {
+      hasCopiedLink.value = false;
+    }, 3000);
+  }
 }
 </script>
 
