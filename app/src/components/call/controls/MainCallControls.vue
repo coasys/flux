@@ -91,7 +91,7 @@
 
     <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
       <j-button @click="handleCopyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
-        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :size="isMobile ? 'sm' : 'md'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
+        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': isMobile ? hasCopiedLink ? '1.3em' : '1.7em' : hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
       </j-button>
     </j-tooltip>
 
