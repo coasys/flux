@@ -67,16 +67,21 @@ vueApp.mount("#app");
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
 
-    // Restore last saved route
-    if (savedRoute.communityId) {
-      if (savedRoute.viewId) await router.push({ name: 'view', params: savedRoute });
-      else if (savedRoute.channelId) await router.push({ name: 'channel', params: savedRoute });
-      else await router.push({ name: 'community', params: savedRoute });
-      return;
+    // Get current route to check if we should restore saved route
+    const currentRoute = router.currentRoute.value;
+
+    // Don't restore saved route if user is on a special route like join-call
+    if (currentRoute.name !== 'join-call') {
+      // Restore last saved route
+      if (savedRoute.communityId) {
+        if (savedRoute.viewId) await router.push({ name: 'view', params: savedRoute });
+        else if (savedRoute.channelId) await router.push({ name: 'channel', params: savedRoute });
+        else await router.push({ name: 'community', params: savedRoute });
+        return;
+      }
     }
 
     // Navigate to home if user is on landing/signup page
-    const currentRoute = router.currentRoute.value;
     if (currentRoute.name === 'signup' || currentRoute.path === '/' || currentRoute.path === '') {
       router.push('/home');
     }

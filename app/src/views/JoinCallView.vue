@@ -1,18 +1,16 @@
 <template>
   <div class="join-call-view">
-    <j-flex direction="column" a="center" j="center" gap="500" style="height: 100vh">
-      <j-flex direction="column" a="center" gap="400">
-        <j-icon name="telephone" size="xl" color="primary-500" />
-        
-        <template v-if="loading">
-          <j-spinner size="lg" />
-          <j-text size="600" nomargin>{{ loadingMessage }}</j-text>
-        </template>
+    <j-flex direction="column" a="center" gap="400">
+      <j-icon name="telephone" size="xl" color="primary-500" />
+      
+      <j-flex v-if="loading" a="center" gap="400">
+        <j-spinner size="sm" />
+        <j-text size="600" nomargin>{{ loadingMessage }}</j-text>
+      </j-flex>
 
-        <template v-else-if="error">
-          <j-text size="600" nomargin color="danger-600">{{ error }}</j-text>
-          <j-button @click="router.push('/home')" variant="primary">Go to Home</j-button>
-        </template>
+      <j-flex v-else-if="error" a="center" gap="400">
+        <j-text size="600" nomargin color="danger-600">{{ error }}</j-text>
+        <j-button @click="router.push('/home')" variant="primary">Go to Home</j-button>
       </j-flex>
     </j-flex>
   </div>
@@ -22,19 +20,20 @@
 import { useAppStore, useUiStore } from '@/stores';
 import { parseCallInviteUrl } from '@/utils/callInviteUrl';
 import { joinCommunity } from '@coasys/flux-api';
-import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const uiStore = useUiStore();
+const { clientReady } = storeToRefs(appStore);
 
 const loading = ref(true);
-const loadingMessage = ref('Processing call invite...');
+const loadingMessage = ref('Initializing AD4M connection...');
 const error = ref('');
 
-onMounted(async () => {
+async function processCallInvite() {
   try {
     // Parse the URL parameters
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
@@ -92,11 +91,25 @@ onMounted(async () => {
     error.value = 'An unexpected error occurred. Please try again.';
     loading.value = false;
   }
-});
+}
+
+// Wait for AD4M client to be ready before processing the invite
+watch(
+  clientReady,
+  (ready) => {
+    if (ready) {
+      processCallInvite();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped lang="scss">
 .join-call-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100vh;
   background-color: var(--j-color-ui-50);
