@@ -266,9 +266,9 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Sort conversations by last activity timestamp
       const conversationsSortedByLastActivity = conversations
         .filter((c) => c !== null)
-        .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+        .sort((a, b) => new Date(b.lastActivity!).getTime() - new Date(a.lastActivity!).getTime());
 
-      recentConversations.value = conversationsSortedByLastActivity;
+      recentConversations.value = conversationsSortedByLastActivity as ChannelData[];
     } catch (error) {
       console.error('Error loading recent conversations:', error);
       recentConversations.value = [];
@@ -435,7 +435,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   // Track channel participants automatically
-  async function handleParticipantTracking(link: any) {
+  function handleParticipantTracking(link: any) {
     if (link.data.predicate !== 'ad4m://has_child') return null;
     if (!link.author) return null;
 
@@ -446,15 +446,14 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (channel.participants && channel.participants.includes(link.author)) return null;
 
     // Add participant link
-    try {
-      await perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }]);
-    } catch (error) {
-      console.error('Failed to add participant to channel:', {
-        channelId,
-        author: link.author,
-        error,
+    perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+      .catch((error) => {
+        console.error('Failed to add participant to channel:', {
+          channelId,
+          author: link.author,
+          error,
+        });
       });
-    }
 
     return null;
   }
@@ -472,7 +471,6 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   // Cleanup function to remove all listeners
   function cleanup() {
-    perspective.removeSyncStateChangeListener(syncStateListener);
     perspective.removeListener('link-added', handleParticipantTracking);
   }
 
