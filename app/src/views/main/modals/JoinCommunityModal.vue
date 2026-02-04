@@ -1,7 +1,7 @@
 <template>
   <j-modal
     size="sm"
-    :open="true"
+    :open="modalStore.showJoinCommunity"
     @toggle="(e: any) => (modalStore.showJoinCommunity = e.target.open)"
   >
     <j-box p="800">
