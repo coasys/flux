@@ -111,6 +111,7 @@ import { HourglassIcon } from '@/components/icons';
 import { CommunityServiceKey, createCommunityService } from '@/composables/useCommunityService';
 import CommunityLayout from '@/layout/CommunityLayout.vue';
 import { useCommunityServiceStore, useModalStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import Modals from '@/views/main/community/modals/Modals.vue';
 import Sidebar from '@/views/main/community/sidebar/Sidebar.vue';
 import { onMounted, onUnmounted, provide } from 'vue';
@@ -130,7 +131,7 @@ const communityServiceStore = useCommunityServiceStore();
 // Initialize the community service & add it to the community service store
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
-communityServiceStore.addCommunityService(communityId, communityService);
+communityServiceStore.addCommunityService(restoreNeighbourhoodPrefix(communityId), communityService);
 const {
   community,
   isSynced,

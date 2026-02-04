@@ -30,6 +30,7 @@ import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue';
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon.vue';
 import { ChannelData } from '@/composables/useCommunityService';
 import { useCommunityServiceStore, useUiStore, useWebrtcStore } from '@/stores';
+import { restoreChannelPrefix, restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { Channel, Community } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
@@ -52,11 +53,13 @@ function toggleWidgetsDrawer() {
 const callRouteData = computed(() => {
   const communityId = callRoute.value.communityId || (route.params.communityId as string);
   const channelId = callRoute.value.channelId || (route.params.channelId as string);
-  const communityService = communityServiceStore.getCommunityService(communityId);
+  const communityUrl = restoreNeighbourhoodPrefix(communityId);
+  const channelUrl = restoreChannelPrefix(channelId);
+  const communityService = communityServiceStore.getCommunityService(communityUrl);
 
   const communityName = (communityService?.community as Community | undefined)?.name || '';
   const allChannels = (communityService?.allChannels || []) as Channel[];
-  const channel = allChannels.find((c) => c.baseExpression === channelId);
+  const channel = allChannels.find((c) => c.baseExpression === channelUrl);
 
   if (!channel) return { communityName, channelName: '', conversationName: '' };
 
@@ -65,9 +68,9 @@ const callRouteData = computed(() => {
     const recentConversations = (communityService?.recentConversations || []) as ChannelData[];
 
     const parentChannel = channelsWithConversations.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelId),
+      c.children?.some((child) => child.channel.baseExpression === channelUrl),
     );
-    const conversationData = recentConversations?.find((c) => c.channel.baseExpression === channelId);
+    const conversationData = recentConversations?.find((c) => c.channel.baseExpression === channelUrl);
 
     const channelName = parentChannel?.channel.name || '';
     const conversationName = conversationData?.conversation?.conversationName || '';

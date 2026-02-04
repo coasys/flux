@@ -28,6 +28,8 @@ export const CHANNEL_IS_PINNED = 'flux://channel_is_pinned';
 
 export const FLUX_APP = 'flux://has_app';
 
+export const FLUX_PARTICIPANT = 'flux://has_participant';
+
 export const AD4M_CLASS = 'ad4m://has_class';
 
 export const FLUX_CHANNEL = 'flux://channel';

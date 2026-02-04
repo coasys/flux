@@ -5,6 +5,8 @@ import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
+import { community } from '@coasys/flux-constants';
+const { FLUX_PARTICIPANT } = community;
 
 @ModelOptions({ name: 'Conversation' })
 export default class Conversation extends Ad4mModel {
@@ -17,7 +19,7 @@ export default class Conversation extends Ad4mModel {
   @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
   summary: string;
 
-  @Collection({ through: 'flux://has_participant' })
+  @Collection({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {

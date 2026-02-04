@@ -115,7 +115,7 @@ watch(
               baseExpression: conversation.baseExpression,
               name: conversation.conversationName,
               summary: conversation.summary,
-              timestamp: conversation.timestamp,
+              timestamp: conversation.createdAt,
               channelId: channel.baseExpression,
             };
           }),

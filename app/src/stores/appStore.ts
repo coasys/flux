@@ -18,6 +18,7 @@ export const useAppStore = defineStore(
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
     const myPerspectives = ref<PerspectiveProxy[]>([]);
     const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
+    const communitiesLoaded = ref<boolean>(false);
     const holochainRestarting = ref<boolean>(false);
 
     // Store a shallow ref of the Ad4mClient so we retain access to its methods
@@ -96,13 +97,14 @@ export const useAppStore = defineStore(
           .map(async (perspective) => {
             const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
             if (!community) return null;
-            return [perspective.uuid, community] as const;
+            return [perspective.sharedUrl, community] as const;
           }),
       );
 
       // Filter out null results and create object from entries
       const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
       myCommunities.value = { ...myCommunities.value, ...newCommunities };
+      communitiesLoaded.value = true;
     }
 
     async function refreshMyProfile() {
@@ -124,6 +126,11 @@ export const useAppStore = defineStore(
       }
     }
 
+    function getPerspective(neighbourhoodUrl: string): PerspectiveProxy | undefined {
+      const perspective = myPerspectives.value.find(p => p.sharedUrl === neighbourhoodUrl) as PerspectiveProxy | undefined;
+      return toRaw(perspective);
+    }
+
     return {
       // State
       ad4mClient,
@@ -132,6 +139,7 @@ export const useAppStore = defineStore(
       updateState,
       toast,
       notification,
+      communitiesLoaded,
       myPerspectives,
       myCommunities,
       hasJoinedTestingCommunity,
@@ -152,6 +160,7 @@ export const useAppStore = defineStore(
       getMyCommunities,
       refreshMyProfile,
       restartHolochain,
+      getPerspective,
     };
   },
   { persist: { omit: ['myPerspectives', 'myCommunities'] } },

@@ -4,7 +4,6 @@ import pigWav from '@/assets/audio/pig.wav';
 import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
-import { generateCallInviteUrl } from '@/utils/callInviteUrl';
 import { PerspectiveExpression } from '@coasys/ad4m';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
 import { Howl } from 'howler';
@@ -18,6 +17,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -641,6 +641,11 @@ export const useWebrtcStore = defineStore(
       }
     }
 
+    async function copyCallLink() {
+      await navigator.clipboard.writeText(location.href);
+      appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+    }
+
     // Close the call window on route param changes if not in a call or a channel
     watch(
       () => route.params,
@@ -731,36 +736,6 @@ export const useWebrtcStore = defineStore(
       },
       { immediate: true },
     );
-
-    async function copyCallLink(): Promise<boolean> {
-      try {
-        const communityId = callRoute.value.communityId || route.params.communityId as string;
-        const channelId = callRoute.value.channelId || route.params.channelId as string;
-        
-        if (!communityId || !channelId) {
-          appStore.showDangerToast({ message: 'Cannot generate call link - missing route information' });
-          return false;
-        }
-
-        const communityService = getCommunityService(communityId);
-        const neighbourhoodUrl = communityService?.perspective.sharedUrl;
-
-        if (!neighbourhoodUrl) {
-          appStore.showDangerToast({ message: 'Cannot generate call link - community not found' });
-          return false;
-        }
-
-        const callUrl = generateCallInviteUrl(neighbourhoodUrl, channelId);
-        await navigator.clipboard.writeText(callUrl);
-        
-        appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
-        return true;
-      } catch (error) {
-        console.error('Failed to copy call link:', error);
-        appStore.showDangerToast({ message: 'Failed to copy call link. Please try again.' });
-        return false;
-      }
-    }
 
     return {
       inCall,

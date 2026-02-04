@@ -7,16 +7,20 @@ export const useCommunityServiceStore = defineStore(
   () => {
     const communityServices = ref<Record<string, CommunityService>>({});
 
-    function addCommunityService(communityId: string, service: CommunityService) {
-      communityServices.value[communityId] = service;
+    function addCommunityService(communityUrl: string, service: CommunityService) {
+      console.log('Adding community service for:', communityUrl);
+      communityServices.value[communityUrl] = service;
     }
 
-    function getCommunityService(communityId: string): CommunityService | undefined {
-      return communityServices.value[communityId];
+    function getCommunityService(communityUrl: string): CommunityService | undefined {
+      // console.log('999 Getting community service for:', communityUrl);
+      // console.log('999 Available community services:', communityServices.value);
+      // console.log('999 Community service found:', communityServices.value[communityUrl]);
+      return communityServices.value[communityUrl];
     }
 
-    function deleteCommunityService(communityId: string) {
-      delete communityServices.value[communityId];
+    function deleteCommunityService(communityUrl: string) {
+      delete communityServices.value[communityUrl];
     }
 
     return {

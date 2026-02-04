@@ -66,6 +66,7 @@ vueApp.mount("#app");
 
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
+    await appStore.getMyCommunities();
 
     // Get current route to check if we should restore saved route
     const currentRoute = router.currentRoute.value;

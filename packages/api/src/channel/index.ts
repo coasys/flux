@@ -1,10 +1,10 @@
-import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
 import App from '../app';
 
-const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
+const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED, FLUX_APP, FLUX_PARTICIPANT } = community;
 
 @ModelOptions({ name: 'Channel' })
 export class Channel extends Ad4mModel {
@@ -43,12 +43,12 @@ export class Channel extends Ad4mModel {
   isPinned: boolean;
 
   @Collection({
-    through: 'ad4m://has_child',
+    through: FLUX_APP,
     where: { isInstance: App },
   })
   views: string[] = [];
 
-  @Collection({ through: 'flux://has_participant' })
+  @Collection({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {

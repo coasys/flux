@@ -1,4 +1,5 @@
 import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { stripChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from '@coasys/ad4m';
 import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from '@coasys/flux-types';
@@ -331,7 +332,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInChannel(channelId?: string) {
     return computed<AgentData[]>(() => {
       return agentsWithProfiles.value.filter(
-        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.currentRoute?.channelId === channelId,
+        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.currentRoute?.channelId === stripChannelPrefix(channelId || ''),
       );
     });
   }
@@ -339,7 +340,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInCall(channelId?: string) {
     return computed<AgentData[]>(() =>
       agentsWithProfiles.value.filter(
-        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.callRoute?.channelId === channelId,
+        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.callRoute?.channelId === stripChannelPrefix(channelId || ''),
       ),
     );
   }

@@ -1,4 +1,5 @@
-import { useAppStore, useRouteMemoryStore } from '@/stores';
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { RouteParams } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
@@ -13,12 +14,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/update-ad4m',
     name: 'update-ad4m',
     component: () => import(`@/views/update/UpdateAd4m.vue`),
-    meta: { public: true },
-  },
-  {
-    path: '/join-call',
-    name: 'join-call',
-    component: () => import(`@/views/JoinCallView.vue`),
     meta: { public: true },
   },
   {
@@ -37,6 +32,35 @@ const routes: Array<RouteRecordRaw> = [
         props: true,
         name: 'community',
         component: () => import(`@/views/main/community/CommunityView.vue`),
+        beforeEnter: async (to, from, next) => {
+          const appStore = useAppStore();
+          const modalStore = useModalStore();
+          const communityId = to.params.communityId as string;
+
+          if (!communityId) {
+            next();
+            return;
+          }
+
+          // Convert community ID to neighbourhood URL
+          const neighbourhoodUrl = restoreNeighbourhoodPrefix(communityId);
+
+          // Check if user is already a member
+          const isMember = appStore.myPerspectives.some((p) => p.sharedUrl === neighbourhoodUrl);
+
+          if (!isMember) {
+            // Store the pending route and neighbourhood URL
+            modalStore.pendingRoute = to;
+            modalStore.pendingNeighbourhoodUrl = neighbourhoodUrl;
+            modalStore.showJoinCommunity = true;
+            
+            // Cancel navigation - modal will handle it after join
+            next(false);
+            return;
+          }
+
+          next();
+        },
         children: [
           {
             path: ':channelId',
@@ -130,7 +154,7 @@ router.beforeEach(async (to, from, next) => {
 });
 
 // Update the route memory store on each route change
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   const routeMemoryStore = useRouteMemoryStore();
   const { communityId, channelId, viewId } = to.params as RouteParams;
 
@@ -141,6 +165,12 @@ router.afterEach((to) => {
   if (communityId) {
     routeMemoryStore.setLastCommunityRoute(communityId, to.path, to.params);
     if (channelId && viewId) routeMemoryStore.setLastChannelView(communityId, channelId, viewId);
+  }
+
+  // Open call window when navigating to a channel from outside the app (e.g., shared link)
+  if (to.name === 'channel' && !from.name) {
+    const uiStore = useUiStore();
+    uiStore.setCallWindowOpen(true);
   }
 });
 

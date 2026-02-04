@@ -84,6 +84,7 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useModalStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
 import semver from 'semver';
@@ -103,6 +104,7 @@ const selectedPlugins = ref<App[]>([]);
 const isSaving = ref(false);
 
 const channelId = computed(() => route.params.channelId as string);
+const channelUrl = computed(() => restoreChannelPrefix(channelId.value));
 const channel = computed(() => channels.value?.[0] || null);
 const isConversation = computed(() => channel.value?.isConversation);
 const canSave = computed(() => selectedPlugins.value.length >= 1);
@@ -118,8 +120,8 @@ const filteredPackages = computed((): FluxApp[] =>
   tab.value === 'official' ? officialApps.value : communityApps.value,
 );
 
-const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelId.value } } });
-const { entries: apps } = useModel({ perspective, model: App, query: { source: channelId.value } });
+const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelUrl.value } } });
+const { entries: apps } = useModel({ perspective, model: App, query: { source: channelUrl.value } });
 
 function toggleView(app: FluxApp) {
   const isSelectedApp = selectedPlugins.value.some((a) => a.pkg === app.pkg);

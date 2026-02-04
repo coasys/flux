@@ -1,5 +1,6 @@
 import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import {
@@ -87,9 +88,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = (await appStore.ad4mClient.perspective.byUUID(
-    route.params.communityId as string,
-  )) as PerspectiveProxy;
+  const perspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string))!;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure all required SDNA is installed
@@ -239,16 +238,16 @@ export async function createCommunityService(): Promise<CommunityService> {
             lastActivity = lastUnprocessedItem.timestamp;
           } else if (conversation.summary === 'Content will appear when the first items have been processed...') {
             // If the conversation is an empty placeholder use the conversations timestamp
-            lastActivity = conversation.timestamp;
+            lastActivity = conversation.createdAt;
           } else {
             // If no subgroups exist, use the conversation timestamp
             const subgroups = await conversation.subgroups();
-            if (!subgroups.length) lastActivity = conversation.timestamp;
+            if (!subgroups.length) lastActivity = conversation.createdAt;
             else {
               // If no items exist in the last subgroup, use the subgroup timestamp
               const lastSubgroup = subgroups[subgroups.length - 1];
               const items = await lastSubgroup.itemsData();
-              if (!items.length) lastActivity = lastSubgroup.timestamp;
+              if (!items.length) lastActivity = lastSubgroup.createdAt;
               else {
                 // Finally, use the timestamp of the last item in the last subgroup
                 const lastItem = items.sort(
@@ -355,7 +354,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
-      router.push({ name: 'view', params: { communityId, channelId: channel.baseExpression, viewId: 'conversation' } });
+      router.push({ name: 'view', params: { communityId, channelId: stripChannelPrefix(channel.baseExpression), viewId: 'conversation' } });
       uiStore.setCallWindowOpen(true);
     } catch (error) {
       console.error('Failed to create new conversation:', error);
@@ -424,13 +423,13 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   function getParentChannel(channelId: string): Partial<Channel> | undefined {
     const parentChannelData = channelsWithConversations.value.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelId),
+      c.children?.some((child) => child.channel?.baseExpression === channelId),
     );
     return parentChannelData ? parentChannelData.channel : undefined;
   }
 
   function getConversation(channelId: string) {
-    const conversationData = recentConversations.value.find((c) => c.channel.baseExpression === channelId);
+    const conversationData = recentConversations.value.find((c) => c.channel?.baseExpression === channelId);
     return conversationData ? conversationData.conversation : undefined;
   }
 
@@ -488,7 +487,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (aiEnabled.value && !processingStateChecked.value) {
       processingStateChecked.value = true;
       // Delay by heart beat interval to allow time for signals to arrive
-      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), HEARTBEAT_INTERVAL);
+      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.sharedUrl || ''), HEARTBEAT_INTERVAL);
     }
   });
 

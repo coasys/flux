@@ -25,6 +25,10 @@ export const useModalStore = defineStore(
     // Used to track the parent channel when creating a subchannels in the CreateChannel modal
     const createChannelParent = ref<Channel | null>(null);
 
+    // Used to track the route user was trying to access before being prompted to join a community
+    const pendingRoute = ref<any>(null);
+    const pendingNeighbourhoodUrl = ref<string | null>(null);
+
     function hideCreateChannelModal() {
       showCreateChannel.value = false;
 
@@ -49,6 +53,8 @@ export const useModalStore = defineStore(
       showWebrtcSettings.value = false;
       showJoinCommunity.value = false;
       showAddWebLink.value = false;
+      pendingRoute.value = null;
+      pendingNeighbourhoodUrl.value = null;
     }
 
     return {
@@ -69,10 +75,12 @@ export const useModalStore = defineStore(
       showJoinCommunity,
       showAddWebLink,
       createChannelParent,
+      pendingRoute,
+      pendingNeighbourhoodUrl,
 
       hideCreateChannelModal,
       closeAllModals,
     };
   },
-  { persist: { omit: ['createChannelParent'] } },
+  { persist: { omit: ['createChannelParent', 'pendingRoute', 'pendingNeighbourhoodUrl'] } },
 );

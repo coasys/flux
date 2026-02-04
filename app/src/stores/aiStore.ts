@@ -1,5 +1,6 @@
 import { CommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from '@/stores';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { AIModelLoadingStatus, AITask } from '@coasys/ad4m';
 import { Model } from '@coasys/ad4m/lib/src/ai/AIResolver';
 import { Channel } from '@coasys/flux-api';
@@ -200,9 +201,13 @@ export const useAiStore = defineStore(
           .map((item, index) => ({ ...item, originalIndex: index }))
           .sort((a, b) => {
             const { channelId, communityId } = currentRoute.value;
-            // Current channel gets highest priority
-            if (a.channel.baseExpression === channelId && b.channel.baseExpression !== channelId) return -1;
-            if (b.channel.baseExpression === channelId && a.channel.baseExpression !== channelId) return 1;
+            console.log('a.channel.baseExpression:', a.channel.baseExpression);
+            console.log('b.channel.baseExpression:', b.channel.baseExpression);
+            console.log('current channelId:', channelId);
+            console.log('current communityId:', communityId);
+            // Current channel gets highest priority 
+            if (a.channel.baseExpression! === channelId && b.channel.baseExpression! !== channelId) return -1;
+            if (b.channel.baseExpression! === channelId && a.channel.baseExpression! !== channelId) return 1;
 
             // Current community gets second priority
             if (a.communityId === communityId && b.communityId !== communityId) return -1;
@@ -215,7 +220,10 @@ export const useAiStore = defineStore(
         // Get the first task from the queue & its associated communityService
         const { communityId, channel } = processingQueue.value[0];
         const rawChannel = toRaw(channel) as Channel;
+        console.log('*** yo communityId:', communityId);
         communityService = communityServiceStore.getCommunityService(communityId);
+        console.log('*** yo communityService:', communityService);
+        console.log('*** yo rawChannel:', rawChannel.baseExpression);
         const conversation = communityService?.getConversation(rawChannel.baseExpression!);
         const parentChannel = communityService?.getParentChannel(rawChannel.baseExpression!);
 
@@ -226,7 +234,9 @@ export const useAiStore = defineStore(
         }
 
         // Get the items to process from the channel
+        console.log('🤖 Checking for unprocessed items in channel:', await rawChannel);
         const unprocessedItems = await rawChannel.unprocessedItems!();
+        console.log('unprocessedItems:', unprocessedItems);
         const numberOfItemsToProcess = Math.max(0, Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY));
         const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
 

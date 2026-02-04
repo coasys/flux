@@ -2,6 +2,9 @@ import { ModelOptions, Ad4mModel, Flag, Literal, Optional, Collection } from '@c
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
+import { community } from '@coasys/flux-constants';
+
+const { FLUX_PARTICIPANT } = community;
 
 @ModelOptions({
   name: 'ConversationSubgroup',
@@ -16,7 +19,7 @@ export default class ConversationSubgroup extends Ad4mModel {
   @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
   summary: string;
 
-  @Collection({ through: 'flux://has_participant' })
+  @Collection({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
   async stats(): Promise<{ totalItems: number; participants: string[] }> {

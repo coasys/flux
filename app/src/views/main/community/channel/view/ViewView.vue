@@ -18,7 +18,7 @@
       :is="wcName"
       style="height: 100%"
       :class="{ split: webrtcModalOpen, right: webrtcModalOpen && wcName === '@coasys/flux-webrtc-view' }"
-      :source="channelId"
+      :source="restoreChannelPrefix(channelId)"
       :agent="appStore.ad4mClient.agent"
       :client="appStore.ad4mClient"
       :perspective="perspective"
@@ -43,6 +43,7 @@ import Conversation from '@/containers/Conversation.vue';
 import Conversations from '@/containers/Conversations.vue';
 import { useAiStore, useAppStore, useUiStore, useWebrtcStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
+import { stripNeighbourhoodPrefix, stripChannelPrefix, restoreChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Channel, generateWCName, joinCommunity } from '@coasys/flux-api';
 import { onMounted, ref } from 'vue';
@@ -85,7 +86,9 @@ async function onViewClick(e: any) {
     if (url.startsWith('did:')) onAgentClick(url);
     if (url.startsWith('literal://')) {
       const isChannel = await perspective.isSubjectInstance(url, Channel);
-      if (isChannel) router.push({ name: 'channel', params: { communityId, channelId: url } });
+      if (isChannel) {
+        router.push({ name: 'channel', params: { communityId, channelId: stripChannelPrefix(url) } });
+      }
     }
   }
 }
@@ -95,17 +98,16 @@ function onAgentClick(did: string) {
 }
 
 async function onNeighbourhoodClick(url: any) {
-  const allMyPerspectives = await appStore.ad4mClient.perspective.all();
-  const neighbourhood = allMyPerspectives.find((p) => p.sharedUrl === url);
+  const neighbourhood = appStore.myPerspectives.find((p) => p.sharedUrl === url);
 
   if (!neighbourhood) joinCommunityHandler(url);
-  else router.push({ name: 'community', params: { communityId: neighbourhood.uuid } });
+  else if (neighbourhood.sharedUrl) router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(neighbourhood.sharedUrl) } });
 }
 
 function joinCommunityHandler(url: string) {
   isJoiningCommunity.value = true;
   joinCommunity({ joiningLink: url, client: appStore.ad4mClient })
-    .then((community) => router.push({ name: 'community', params: { communityId: community.uuid } }))
+    .then((community) => router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(community.neighbourhoodUrl) } }))
     .finally(() => (isJoiningCommunity.value = false));
 }
 
