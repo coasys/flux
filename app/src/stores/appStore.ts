@@ -11,6 +11,7 @@ import { computed, ref, shallowRef, toRaw } from 'vue';
 export const useAppStore = defineStore(
   'appStore',
   () => {
+    const initialized = ref<boolean>(false);
     const me = ref<Agent>({ did: '' });
     const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>('not-available');
@@ -133,6 +134,7 @@ export const useAppStore = defineStore(
 
     return {
       // State
+      initialized,
       ad4mClient,
       me,
       myProfile,
@@ -163,5 +165,5 @@ export const useAppStore = defineStore(
       getPerspective,
     };
   },
-  { persist: { omit: ['myPerspectives', 'myCommunities'] } },
+  { persist: { omit: ['initialized', 'myPerspectives', 'myCommunities'] } },
 );

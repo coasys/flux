@@ -1,9 +1,5 @@
 <template>
-  <j-modal
-    size="sm"
-    :open="modalStore.showJoinCommunity"
-    @toggle="(e: any) => (modalStore.showJoinCommunity = e.target.open)"
-  >
+  <div class="join-call-view">
     <j-box p="800">
       <j-flex direction="column" a="center" gap="600">
         <j-flex gap="400" a="center">
@@ -17,22 +13,10 @@
         </j-flex>
 
         <j-flex gap="400">
-          <j-button
-            :disabled="isJoining"
-            size="lg"
-            full
-            @click="handleCancel"
-          >
+          <j-button :disabled="isJoining" size="lg" full @click="router.push('/home')">
             Cancel
           </j-button>
-          <j-button
-            :loading="isJoining"
-            :disabled="isJoining"
-            variant="primary"
-            size="lg"
-            full
-            @click="handleJoin"
-          >
+          <j-button :loading="isJoining" :disabled="isJoining" variant="primary" size="lg" full @click="handleJoin">
             Join Community
           </j-button>
         </j-flex>
@@ -42,55 +26,45 @@
         </j-text>
       </j-flex>
     </j-box>
-  </j-modal>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useAppStore, useModalStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { joinCommunity } from '@coasys/flux-api';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
-const modalStore = useModalStore();
 
 const isJoining = ref(false);
 const error = ref('');
 
 async function handleJoin() {
-  if (isJoining.value) return;
   isJoining.value = true;
   error.value = '';
 
   try {
-    const pendingRoute = (modalStore as any).pendingRoute;
-    const neighbourhoodUrl = (modalStore as any).pendingNeighbourhoodUrl;
-
-    if (!neighbourhoodUrl) {
-      error.value = 'Invalid community link';
-      return;
-    }
+    const communityId = route.params.communityId as string;
+    const redirectPath = route.query.redirect as string;
 
     // Join the community
     await joinCommunity({ 
-      joiningLink: neighbourhoodUrl, 
+      joiningLink: restoreNeighbourhoodPrefix(communityId), 
       client: appStore.ad4mClient 
     });
 
     // Refresh communities list
     await appStore.getMyCommunities();
     
+    // Show success message
     appStore.showSuccessToast({ message: 'Successfully joined community!' });
-
-    // Close modal and navigate
-    modalStore.showJoinCommunity = false;
-    (modalStore as any).pendingRoute = null;
-    (modalStore as any).pendingNeighbourhoodUrl = null;
     
-    if (pendingRoute) {
-      router.push(pendingRoute);
-    }
+    // Redirect to the original route if available
+    if (redirectPath) router.push(redirectPath);
   } catch (err) {
     console.error('Failed to join community:', err);
     error.value = 'Failed to join community. The invite link may be invalid or expired.';
@@ -98,11 +72,15 @@ async function handleJoin() {
     isJoining.value = false;
   }
 }
-
-function handleCancel() {
-  modalStore.showJoinCommunity = false;
-  (modalStore as any).pendingRoute = null;
-  (modalStore as any).pendingNeighbourhoodUrl = null;
-  router.push('/home');
-}
 </script>
+
+<style scoped lang="scss">
+.join-call-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background-color: var(--j-color-ui-50);
+}
+</style>
