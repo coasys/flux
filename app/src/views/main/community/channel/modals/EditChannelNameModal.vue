@@ -17,6 +17,16 @@
           @input="(e: any) => (name = e.target.value)"
         />
 
+        <j-flex v-if="isConversation" a="center" gap="300">
+          <j-checkbox
+            :checked="lockName"
+            @change="(e: any) => (lockName = e.target.checked)"
+          />
+          <j-text color="ui-600" nomargin>
+            Lock name (prevent future AI updates)
+          </j-text>
+        </j-flex>
+
         <j-box mt="500">
           <j-flex direction="row" j="end" gap="300">
             <j-button size="lg" variant="link" @click="modalStore.showEditChannelNameModal = false"> Cancel </j-button>
@@ -39,6 +49,7 @@
 <script setup lang="ts">
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useModalStore } from '@/stores';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import { Channel, Conversation } from '@coasys/flux-api';
 import { computed, ref, toRaw, watch } from 'vue';
@@ -57,9 +68,10 @@ const {
 } = useCommunityService();
 
 const name = ref('');
+const lockName = ref(false);
 const isSaving = ref(false);
 
-const channelId = computed(() => route.params.channelId as string);
+const channelId = computed(() => restoreChannelPrefix(route.params.channelId as string));
 const channel = computed(() => channels.value?.[0] || null);
 const isConversation = computed(() => channel.value?.isConversation);
 
@@ -85,6 +97,7 @@ async function updateChannel() {
       }
       const conversationModel = new Conversation(perspective, conversationId);
       conversationModel.conversationName = name.value;
+      conversationModel.nameFixed = lockName.value;
       await conversationModel.update();
       // Refresh sidebar channels
       getPinnedConversations();
@@ -110,24 +123,27 @@ async function updateChannel() {
   }
 }
 
-watch(
-  channel,
-  (newChannel) => {
-    if (newChannel) {
-      if (newChannel.isConversation) {
-        // Get the conversation name for the channel
-        const conversationData = recentConversations.value.find(
-          (c) => c.channel.baseExpression === newChannel.baseExpression,
-        );
-        name.value = conversationData?.conversation?.conversationName || '';
-      } else {
-        // Otherwise just use the channel name
-        name.value = newChannel.name;
+// Update name when channel changes or when conversations are updated by AI
+const updateNameFromChannel = () => {
+  if (channel.value) {
+    if (channel.value.isConversation) {
+      // Get the conversation name and lock state for the channel
+      const conversationData = recentConversations.value.find(
+        (c) => c.channel.baseExpression === channel.value.baseExpression,
+      );
+      if (conversationData?.conversation) {
+        name.value = conversationData.conversation.conversationName!;
+        lockName.value = conversationData.conversation.nameFixed!;
       }
+    } else {
+      // Otherwise just use the channel name
+      name.value = channel.value.name;
     }
-  },
-  { deep: true },
-);
+  }
+};
+
+watch(channel, updateNameFromChannel, { deep: true });
+watch(recentConversations, updateNameFromChannel, { deep: true });
 </script>
 
 <style scoped></style>

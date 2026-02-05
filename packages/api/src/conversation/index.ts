@@ -16,6 +16,9 @@ export default class Conversation extends Ad4mModel {
   @Optional({ through: 'flux://has_name', writable: true, resolveLanguage: 'literal' })
   conversationName: string;
 
+  @Optional({ through: 'flux://name_is_fixed', writable: true, resolveLanguage: 'literal' })
+  nameFixed: boolean = false;
+
   @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
   summary: string;
 
@@ -456,7 +459,10 @@ export default class Conversation extends Ad4mModel {
     // Save conversation info
     const start1 = new Date().getTime();
     updateProcessingState({ step: 6 });
-    this.conversationName = newConversationInfo.n;
+    // Only update name if not manually fixed by user
+    if (!this.nameFixed) {
+      this.conversationName = newConversationInfo.n;
+    }
     this.summary = newConversationInfo.s;
 
     // Update conversation participants - don't update in-memory array, let it reload from links

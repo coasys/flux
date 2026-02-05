@@ -15,7 +15,7 @@
           color="ui-300"
           :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
         />
-        <j-text color="black" weight="700" size="500" nomargin>
+        <j-text color="black" weight="700" size="500" nomargin :tag="conversation && !conversation.nameFixed ? 'i' : 'span'">
           {{ channel.isConversation ? conversation?.conversationName || '' : channel.name }}
         </j-text>
       </j-flex>
