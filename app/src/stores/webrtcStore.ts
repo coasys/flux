@@ -92,7 +92,7 @@ export const useWebrtcStore = defineStore(
     const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
 
-    const communityService = computed(() => getCommunityService(callRoute.value.communityId || ''));
+    const communityService = computed(() => getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')));
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 
