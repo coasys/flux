@@ -208,7 +208,7 @@
 <script setup lang="ts">
 import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
-import { PerspectiveProxy } from '@coasys/ad4m';
+import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Message } from '@coasys/flux-api';
 import { detectBrowser } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
@@ -267,7 +267,8 @@ function renderVolume() {
 async function saveMessage() {
   if (!callRoute.value.communityId || !callRoute.value.channelId) return;
 
-  const perspective = (await appStore.ad4mClient.perspective.byUUID(callRoute.value.communityId)) as PerspectiveProxy;
+  const neighbourhoodUrl = restoreNeighbourhoodPrefix(callRoute.value.communityId);
+  const perspective = await appStore.getPerspective(neighbourhoodUrl);
   if (!perspective) return;
 
   // Fetch latest text & mark message as saving
@@ -299,8 +300,10 @@ async function saveMessage() {
         }, 500);
       }, 500);
     }
+
     // Save message
-    const newMessage = new Message(perspective, undefined, callRoute.value.channelId);
+    const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+    const newMessage = new Message(perspective, undefined, channelUrl);
     newMessage.body = text;
     
     // Store the timestamp from when the transcript started

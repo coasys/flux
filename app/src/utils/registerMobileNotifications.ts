@@ -12,20 +12,19 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
     trigger: `
-            SELECT
-    in.uri as message_id,
-    fn::parse_literal(out.uri) as body_literal,
-    fn::json_path(fn::parse_literal(out.uri), 'data') as message_content,
-    fn::strip_html(
-        fn::json_path(fn::parse_literal(out.uri), 'data')
-    ) as description,
-    $agentDid as mentioned_agent
-FROM link
-WHERE predicate = 'msg://body'
-    AND fn::contains(
+      SELECT
+        in.uri as message_id,
+        fn::parse_literal(out.uri) as body_literal,
+        fn::json_path(fn::parse_literal(out.uri), 'data') as message_content,
+        fn::strip_html(fn::json_path(fn::parse_literal(out.uri), 'data')) as description,
+        $agentDid as mentioned_agent
+      FROM link
+      WHERE predicate = 'msg://body'
+      AND fn::contains(
         fn::json_path(fn::parse_literal(out.uri), 'data'),
         'data-type="mention" href="' + $agentDid + '"'
-    )`,
+      )`
+    ,
     perspectiveIds,
     webhookUrl: 'http://push-notifications.ad4m.dev:13000/notification',
     webhookAuth,
