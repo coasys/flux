@@ -2,7 +2,7 @@
   <div 
     ref="rightSection" 
     class="call-window-panel"
-    :style="{ overflowY: isMobile ? 'scroll' : 'hidden', backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }"
+    :style="{ backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }"
   >
     <div
       ref="callWindow"
@@ -11,13 +11,14 @@
         width: isMobile ? '100%' : `${callWindowOpen ? callWindowWidth : 0}px`,
         pointerEvents: callWindowOpen ? 'auto' : 'none',
         justifyContent: isMobile ? 'flex-start' : 'space-between',
+        padding: isMobile ? 'var(--j-space-300)' : callWindowOpen ? 'var(--j-space-500)' : '0',
       }"
       :aria-hidden="!callWindowOpen"
     >
       <CallResizeHandle v-if="!isMobile" @start-resize="startResize" />
 
       <!-- Header -->
-      <div class="call-window-header">
+      <div class="call-window-header" :style="{ marginBottom: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
         <j-flex direction="column" gap="300">
           <j-text nomargin size="400">
             <b>{{ callRouteData.communityName }}</b>
@@ -25,7 +26,7 @@
             <template v-if="callRouteData.conversationName"> / {{ callRouteData.conversationName }}</template>
           </j-text>
 
-          <j-flex v-if="agentsInCall.length" a="center" gap="100" style="margin-left: -6px">
+          <j-flex v-if="!isMobile && agentsInCall.length" a="center" gap="100" style="margin-left: -6px">
             <AvatarGroup :users="agentsInCall" size="xs" />
             <j-text size="400" nomargin color="ui-500">{{
               `${agentsInCall.length} agent${agentsInCall.length > 1 ? 's' : ''} in the call`
@@ -33,13 +34,13 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow" aria-label="Close call window">
+        <button class="close-button" @click="closeCallWindow" aria-label="Close call window" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
           <j-icon name="x" color="color-white" />
         </button>
       </div>
 
       <!-- Content -->
-      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 55 : 150}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
+      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 28 : 150}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
         <!-- Join prompt -->
         <j-box v-if="!inCall" mb="500">
           <j-flex direction="column" a="center" gap="300">
@@ -116,7 +117,7 @@ function closeCallWindow() {
   position: relative;
   display: flex;
   justify-content: flex-end;
-  overflow-x: hidden;
+  overflow: hidden;
 
   .call-window {
     position: relative;
@@ -132,19 +133,16 @@ function closeCallWindow() {
 
     &.open {
       opacity: 1;
-      padding: var(--j-space-500);
     }
 
     .call-window-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: var(--j-space-400);
+      align-items: center;
 
       .close-button {
         all: unset;
         cursor: pointer;
-        width: 26px;
-        height: 26px;
         border-radius: 50%;
         background-color: var(--j-color-ui-200);
         display: flex;

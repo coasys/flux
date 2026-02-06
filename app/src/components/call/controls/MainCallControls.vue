@@ -1,5 +1,5 @@
 <template>
-  <div class="call-controls">
+  <div class="call-controls" :style="{ padding: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
     <j-tooltip placement="top" :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'">
       <j-button
         :variant="mediaSettings.audioEnabled ? '' : 'primary'"
@@ -38,7 +38,7 @@
       </j-button>
     </j-tooltip>
 
-    <j-tooltip placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
+    <j-tooltip v-if="!isMobile" placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
       <j-button
         :variant="transcriptionEnabled ? '' : 'primary'"
         :disabled="!inCall"
@@ -51,7 +51,7 @@
       </j-button>
     </j-tooltip>
 
-    <j-popover ref="emojiPopover" placement="top">
+    <j-popover v-if="!isMobile" ref="emojiPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Send reaction">
         <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
           <j-icon name="emoji-neutral" :size="isMobile ? 'sm' : 'md'" />
@@ -68,7 +68,7 @@
       </j-button>
     </j-tooltip>
 
-    <j-popover ref="videoLayoutPopover" placement="top">
+    <j-popover v-if="!isMobile" ref="videoLayoutPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Video layout options">
         <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
           <j-icon name="grid" :size="isMobile ? 'sm' : 'md'" />
@@ -95,7 +95,7 @@
       </j-button>
     </j-tooltip>
 
-    <j-tooltip placement="top" title="Call settings">
+    <j-tooltip v-if="!isMobile" placement="top" title="Call settings">
       <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
         <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
@@ -161,7 +161,6 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   align-items: center;
   justify-content: center;
   gap: var(--j-space-400);
-  padding: var(--j-space-400);
   font-family: var(--j-font-family);
   border-radius: var(--j-border-radius);
   background-color: #ffffff08;
