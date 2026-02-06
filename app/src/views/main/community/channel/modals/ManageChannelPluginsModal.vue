@@ -154,7 +154,7 @@ async function updateChannel() {
     const addedApps = selectedPlugins.value
       .filter((app) => !apps.value.some((a) => a.pkg === app.pkg))
       .map((app) => {
-        const appModel = new App(perspective, undefined, channelId.value);
+        const appModel = new App(perspective, undefined, channelUrl.value);
         appModel.name = app.name;
         appModel.description = app.description;
         appModel.icon = app.icon;

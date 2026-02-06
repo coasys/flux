@@ -88,24 +88,29 @@ export const useAppStore = defineStore(
     }
 
     async function getMyCommunities() {
-      // Get all my perspectives
-      myPerspectives.value = await ad4mClient.value.perspective.all();
+      try {
+        // Get all my perspectives
+        myPerspectives.value = await ad4mClient.value.perspective.all();
 
-      // Filter perspectives that have a neighbourhood and map to community entries
-      const communityEntries = await Promise.all(
-        toRaw(myPerspectives.value)
-          .filter((perspective) => perspective.neighbourhood)
-          .map(async (perspective) => {
-            const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
-            if (!community) return null;
-            return [perspective.sharedUrl, community] as const;
-          }),
-      );
+        // Filter perspectives that have a neighbourhood and map to community entries
+        const communityEntries = await Promise.all(
+          toRaw(myPerspectives.value)
+            .filter((perspective) => perspective.neighbourhood)
+            .map(async (perspective) => {
+              const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
+              if (!community) return null;
+              return [perspective.sharedUrl, community] as const;
+            }),
+        );
 
-      // Filter out null results and create object from entries
-      const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
-      myCommunities.value = { ...myCommunities.value, ...newCommunities };
-      communitiesLoaded.value = true;
+        // Filter out null results and create object from entries
+        const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
+        myCommunities.value = { ...myCommunities.value, ...newCommunities };
+        communitiesLoaded.value = true;
+      } catch (e) {
+        showDangerToast({ message: 'Failed to load communities' });
+        throw e;
+      }
     }
 
     async function refreshMyProfile() {

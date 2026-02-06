@@ -16,7 +16,7 @@
         </div>
 
         <j-menu slot="content">
-          <j-menu-item @click="() => handleSetShowLeaveCommunity(true)">
+          <j-menu-item @click="() => handleSetShowLeaveCommunity(true, communityUrl as string)">
             <j-icon slot="start" size="xs" name="box-arrow-left" />
             Leave community
           </j-menu-item>
@@ -83,7 +83,10 @@ function muteCommunity(id: string) {
   // toggleCommunityMute({ communityId: id });
 }
 
-function handleSetShowLeaveCommunity(show: boolean) {
+function handleSetShowLeaveCommunity(show: boolean, communityUrl?: string) {
+  if (communityUrl) {
+    modalStore.leaveCommunityUrl = communityUrl;
+  }
   modalStore.showLeaveCommunity = show;
 }
 

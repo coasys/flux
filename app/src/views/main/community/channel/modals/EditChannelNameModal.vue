@@ -123,9 +123,9 @@ async function updateChannel() {
   }
 }
 
-// Update name when channel changes or when conversations are updated by AI
-const updateNameFromChannel = () => {
-  if (channel.value) {
+// Update name only when modal opens, not continuously
+watch(() => modalStore.showEditChannelNameModal, (isOpen) => {
+  if (isOpen && channel.value) {
     if (channel.value.isConversation) {
       // Get the conversation name and lock state for the channel
       const conversationData = recentConversations.value.find(
@@ -140,10 +140,7 @@ const updateNameFromChannel = () => {
       name.value = channel.value.name;
     }
   }
-};
-
-watch(channel, updateNameFromChannel, { deep: true });
-watch(recentConversations, updateNameFromChannel, { deep: true });
+});
 </script>
 
 <style scoped></style>

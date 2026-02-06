@@ -21,6 +21,9 @@ export const useModalStore = defineStore(
     const showWebrtcSettings = ref(false);
     const showAddWebLink = ref(false);
 
+    // Store the community URL for the leave community modal
+    const leaveCommunityUrl = ref<string | null>(null);
+
     // Used to track the parent channel when creating a subchannels in the CreateChannel modal
     const createChannelParent = ref<Channel | null>(null);
 
@@ -46,6 +49,7 @@ export const useModalStore = defineStore(
       showLeaveCommunity.value = false;
       showWebrtcSettings.value = false;
       showAddWebLink.value = false;
+      leaveCommunityUrl.value = null;
     }
 
     return {
@@ -64,6 +68,7 @@ export const useModalStore = defineStore(
       showLeaveCommunity,
       showWebrtcSettings,
       showAddWebLink,
+      leaveCommunityUrl,
       createChannelParent,
 
       hideCreateChannelModal,

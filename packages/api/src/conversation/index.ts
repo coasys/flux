@@ -205,9 +205,16 @@ export default class Conversation extends Ad4mModel {
           `;
 
           const timestampResults = await this.perspective.querySurrealDB(timestampQuery);
-          const timestamps = (timestampResults || []).map((r: any) => r.channelTimestamp);
-          const start = timestamps.length > 0 ? new Date(timestamps[0]).getTime() : 0;
-          const end = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]).getTime() : 0;
+          
+          // Filter out null/undefined timestamps and convert to numeric timestamps
+          const timestamps = (timestampResults || [])
+            .map((r: any) => r.channelTimestamp)
+            .filter((ts) => ts != null && ts !== '') // Remove null/undefined/empty
+            .map((ts) => new Date(ts).getTime())
+            .filter((time) => !isNaN(time)); // Remove invalid dates (NaN)
+          
+          const start = timestamps.length > 0 ? timestamps[0] : 0;
+          const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
 
           return {
             baseExpression: subgroup.baseExpression,

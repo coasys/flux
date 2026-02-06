@@ -52,7 +52,7 @@
         <JoinCallControls v-if="!inCall" />
         <MainCallControls v-if="inCall" />
 
-        <j-button v-if="!inCall" @click="handleCopyCallLink" size="lg">
+        <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
           <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em', margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0' }" />
           Copy Call Invite Link
         </j-button>
@@ -97,26 +97,15 @@ const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
 const { callWindowWidth, callWindowOpen, isMobile } = storeToRefs(uiStore);
-const { agentsInCall, inCall } = storeToRefs(webrtcStore);
+const { agentsInCall, inCall, hasCopiedLink } = storeToRefs(webrtcStore);
 
 const rightSection = ref<HTMLElement | null>(null);
 const callWindow = ref<HTMLElement | null>(null);
-const hasCopiedLink = ref(false);
 
 const { startResize } = useCallResize(callWindow, rightSection);
 
 function closeCallWindow() {
   uiStore.setCallWindowOpen(false);
-}
-
-async function handleCopyCallLink() {
-  const success = await webrtcStore.copyCallLink();
-  if (success) {
-    hasCopiedLink.value = true;
-    setTimeout(() => {
-      hasCopiedLink.value = false;
-    }, 3000);
-  }
 }
 </script>
 

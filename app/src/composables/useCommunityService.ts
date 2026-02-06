@@ -88,7 +88,12 @@ export async function createCommunityService(): Promise<CommunityService> {
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string))!;
+  const perspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string));
+  if (!perspective) {
+    const communityId = route.params.communityId as string;
+    console.error(`Failed to get perspective for community: ${communityId}`);
+    throw new Error(`Perspective not found for community: ${communityId}. The community may not exist or is not yet loaded.`);
+  }
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure all required SDNA is installed

@@ -91,6 +91,8 @@ export const useWebrtcStore = defineStore(
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
     const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
+    const hasCopiedLink = ref(false);
+    let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
 
     const communityService = computed(() => getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')));
     const signallingService = computed(() => communityService.value?.signallingService);
@@ -642,8 +644,24 @@ export const useWebrtcStore = defineStore(
     }
 
     async function copyCallLink() {
-      await navigator.clipboard.writeText(location.href);
-      appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+      try {
+        await navigator.clipboard.writeText(location.href);
+        appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+        
+        // Clear any existing timer to avoid multiple pending timeouts
+        if (copyLinkTimer !== null) {
+          clearTimeout(copyLinkTimer);
+        }
+        
+        hasCopiedLink.value = true;
+        copyLinkTimer = setTimeout(() => {
+          hasCopiedLink.value = false;
+          copyLinkTimer = null;
+        }, 3000);
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        appStore.showDangerToast({ message: 'Failed to copy link to clipboard' });
+      }
     }
 
     // Close the call window on route param changes if not in a call or a channel
@@ -749,6 +767,7 @@ export const useWebrtcStore = defineStore(
       joiningCall,
       iceServers,
       disconnectedAgents,
+      hasCopiedLink,
       addTrack,
       removeTrack,
       replaceAudioTrack,
