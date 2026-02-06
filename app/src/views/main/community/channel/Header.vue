@@ -137,9 +137,11 @@ async function togglePinned() {
 
 // Automatically open call window if there are agents in call but window is closed
 function checkAndOpenCallWindow() {
-  if (agentsInCall.value.length > 0 && !inCall.value && !callWindowOpen.value) {
-    uiStore.setCallWindowOpen(true);
-  }
+  setTimeout(() => {
+    if (agentsInCall.value.length > 0 && !inCall.value && !callWindowOpen.value) {
+      uiStore.setCallWindowOpen(true);
+    }
+  }, 1000);
 }
 
 // Check on mount and activation (switching back to this view)

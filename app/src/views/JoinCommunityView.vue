@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useModalStore } from '@/stores';
+import { useAppStore, useUiStore } from '@/stores';
 import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { joinCommunity } from '@coasys/flux-api';
 import { ref } from 'vue';
@@ -39,6 +39,7 @@ import { useRouter, useRoute } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
+const uiStore = useUiStore();
 
 const isJoining = ref(false);
 const error = ref('');
@@ -64,7 +65,11 @@ async function handleJoin() {
     appStore.showSuccessToast({ message: 'Successfully joined community!' });
     
     // Redirect to the original route if available
-    if (redirectPath) router.push(redirectPath);
+    if (redirectPath) {
+      router.push(redirectPath);
+      // Open call window if redirecting to a conversation incase it takes longer than the delay in Header.vue to detect agents in call
+      if (redirectPath.includes('/conversation')) uiStore.setCallWindowOpen(true);
+    }
   } catch (err) {
     console.error('Failed to join community:', err);
     error.value = 'Failed to join community. The invite link may be invalid or expired.';
