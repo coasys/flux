@@ -1,14 +1,14 @@
 <template>
-  <div class="call-controls">
+  <div class="call-controls" :style="{ padding: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
     <j-tooltip placement="top" :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'">
       <j-button
         :variant="mediaSettings.audioEnabled ? '' : 'primary'"
         @click="mediaDeviceStore.toggleAudio"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
       >
-        <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" />
+        <j-icon :name="mediaSettings.audioEnabled ? 'mic' : 'mic-mute'" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
@@ -18,10 +18,10 @@
         @click="mediaDeviceStore.toggleVideo"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
         :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
       >
-        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" />
+        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
@@ -31,30 +31,30 @@
         @click="mediaDeviceStore.toggleScreenShare"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
         :disabled="!inCall"
       >
-        <j-icon name="display" />
+        <j-icon name="display" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
-    <j-tooltip placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
+    <j-tooltip v-if="!isMobile" placement="top" :title="`${transcriptionEnabled ? 'Disable' : 'Enable'} transcription`">
       <j-button
         :variant="transcriptionEnabled ? '' : 'primary'"
         :disabled="!inCall"
         @click="aiStore.toggleTranscriptionEnabled"
         square
         circle
-        size="lg"
+        :size="isMobile ? 'md' : 'lg'"
       >
         <TranscriptionIcon :enabled="transcriptionEnabled" />
       </j-button>
     </j-tooltip>
 
-    <j-popover ref="emojiPopover" placement="top">
+    <j-popover v-if="!isMobile" ref="emojiPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Send reaction">
-        <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
-          <j-icon name="emoji-neutral" />
+        <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
+          <j-icon name="emoji-neutral" :size="isMobile ? 'sm' : 'md'" />
         </j-button>
       </j-tooltip>
       <div slot="content">
@@ -63,15 +63,15 @@
     </j-popover>
 
     <j-tooltip v-if="!isMobile" placement="top" :title="callWindowFullscreen ? 'Shrink screen' : 'Full screen'">
-      <j-button @click="uiStore.toggleCallWindowFullscreen" square circle size="lg">
-        <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" />
+      <j-button @click="uiStore.toggleCallWindowFullscreen" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon :name="`arrows-angle-${callWindowFullscreen ? 'contract' : 'expand'}`" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
-    <j-popover ref="videoLayoutPopover" placement="top">
+    <j-popover v-if="!isMobile" ref="videoLayoutPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Video layout options">
-        <j-button variant="transparent" square circle :disabled="!inCall" size="lg">
-          <j-icon name="grid" />
+        <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
+          <j-icon name="grid" :size="isMobile ? 'sm' : 'md'" />
         </j-button>
       </j-tooltip>
       <j-menu slot="content">
@@ -89,15 +89,21 @@
       </j-menu>
     </j-popover>
 
-    <j-tooltip placement="top" title="Call settings">
-      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle size="lg">
-        <j-icon name="gear" />
+    <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
+      <j-button @click="webrtcStore.copyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': isMobile ? hasCopiedLink ? '1.3em' : '1.7em' : hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
+      </j-button>
+    </j-tooltip>
+
+    <j-tooltip v-if="!isMobile" placement="top" title="Call settings">
+      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
+        <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
     <j-tooltip placement="top" title="Leave call">
-      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle size="lg" :disabled="!inCall">
-        <j-icon name="telephone-x" />
+      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle :size="isMobile ? 'md' : 'lg'" :disabled="!inCall">
+        <j-icon name="telephone-x" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
   </div>
@@ -129,12 +135,11 @@ const { me } = storeToRefs(appStore);
 const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 const { mediaSettings, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
-const { inCall } = storeToRefs(webrtcStore);
+const { inCall, hasCopiedLink } = storeToRefs(webrtcStore);
 
 const { videoLayoutOptions, selectedVideoLayout, selectVideoLayout } = useVideoLayout();
 
 const emojiPopover = ref<HTMLElement | null>(null);
-const videoLayoutPopover = ref<HTMLElement | null>(null);
 
 function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   const emoji = e?.detail?.native;
@@ -156,7 +161,6 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   align-items: center;
   justify-content: center;
   gap: var(--j-space-400);
-  padding: var(--j-space-400);
   font-family: var(--j-font-family);
   border-radius: var(--j-border-radius);
   background-color: #ffffff08;

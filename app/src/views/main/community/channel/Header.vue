@@ -15,10 +15,14 @@
           color="ui-300"
           :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
         />
-        <j-text color="black" weight="700" size="500" nomargin>
+        <j-text color="black" weight="700" size="500" nomargin :tag="conversation && !conversation.nameFixed ? 'i' : 'span'">
           {{ channel.isConversation ? conversation?.conversationName || '' : channel.name }}
         </j-text>
       </j-flex>
+
+      <button class="header-button highlighted" @click="editChannelName">
+        <j-icon name="pencil-square" size="sm" />
+      </button>
     </div>
 
     <div class="header-buttons" :style="{ height: `${headerHeight}px` }">
@@ -46,10 +50,6 @@
         <j-icon name="pin" size="sm" style="margin: 3px 7px 0 0" />
         {{ channel.isPinned ? 'Pinned' : 'Pin' }}
       </button>
-      <!-- <button v-else class="header-button highlighted" @click="goToEditChannel">
-        <j-icon name="pencil-square" size="sm" style="margin: 3px 7px 0 0" />
-        Edit channel
-      </button> -->
     </div>
 
     <div class="header-views" :style="{ height: `${headerHeight}px` }">
@@ -62,8 +62,8 @@
         <span>{{ view.name }}</span>
       </label>
 
-      <j-tooltip placement="auto" title="Manage views">
-        <j-button v-if="sameAgent" @click="goToEditChannel" size="sm" variant="ghost">
+      <j-tooltip placement="auto" title="Manage plugins">
+        <j-button v-if="sameAgent" @click="manageChannelPlugins" size="sm" variant="ghost">
           <j-icon size="md" name="plus" />
         </j-button>
       </j-tooltip>
@@ -77,10 +77,11 @@ import { ChevronLeftIcon } from '@/components/icons';
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores';
+import { stripChannelPrefix } from '@/utils/routeUtils';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import { App, Channel } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import { computed, onActivated, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'Header' });
@@ -98,19 +99,23 @@ const { inCall, callRoute } = storeToRefs(webrtcStore);
 const { perspective, signallingService, allChannels, recentConversations } = useCommunityService();
 const { communityId, channelId, viewId } = useRouteParams();
 
-const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId.value));
+const channel = computed(() => allChannels.value.find((c) => stripChannelPrefix(c.baseExpression) === channelId.value));
 const conversation = computed(() =>
   channel.value?.isConversation
-    ? recentConversations.value.find((c) => c.channel.baseExpression === channelId.value)?.conversation
+    ? recentConversations.value.find((c) => c.channel.baseExpression && stripChannelPrefix(c.channel.baseExpression) === channelId.value)?.conversation
     : null,
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId.value)?.value || []);
 
-const { entries: views } = useModel({ perspective, model: App, query: { source: channelId.value } });
+const { entries: views } = useModel({ perspective, model: App, query: { source: channel.value?.baseExpression } });
 
-function goToEditChannel() {
-  modalStore.showEditChannel = true;
+function manageChannelPlugins() {
+  modalStore.showManageChannelPluginsModal = true;
+}
+
+function editChannelName() {
+  modalStore.showEditChannelNameModal = true;
 }
 
 function changeCurrentView(viewId: string) {
@@ -129,6 +134,19 @@ async function togglePinned() {
     appStore.showDangerToast({ message: 'Failed to update pinned state' });
   }
 }
+
+// Automatically open call window if there are agents in call but window is closed
+function checkAndOpenCallWindow() {
+  setTimeout(() => {
+    if (agentsInCall.value.length > 0 && !inCall.value && !callWindowOpen.value) {
+      uiStore.setCallWindowOpen(true);
+    }
+  }, 1000);
+}
+
+// Check on mount and activation (switching back to this view)
+onMounted(checkAndOpenCallWindow);
+onActivated(checkAndOpenCallWindow);
 </script>
 
 <style scoped lang="scss">

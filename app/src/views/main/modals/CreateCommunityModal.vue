@@ -182,6 +182,7 @@ import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { HourglassIcon } from '@/components/icons';
 import { useAppStore, useModalStore } from '@/stores';
 import { isValid } from '@/utils/validation';
+import { stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { PerspectiveProxy } from '@coasys/ad4m';
 import { createCommunity, joinCommunity } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
@@ -206,8 +207,8 @@ const langMeta = ref<any>(null);
 
 const nonFluxCommunities = computed((): Record<string, PerspectiveProxy> => {
   return myPerspectives.value.reduce((acc, perspective) => {
-    const perspectiveIsCommunity = Object.keys(myCommunities.value).some((id) => perspective.uuid === id);
-    if (!perspectiveIsCommunity) return { ...acc, [perspective.uuid]: perspective };
+    const perspectiveIsCommunity = Object.keys(myCommunities.value).some((id) => perspective.sharedUrl === id);
+    if (!perspectiveIsCommunity && perspective.sharedUrl) return { ...acc, [perspective.sharedUrl]: perspective };
     return acc;
   }, {});
 });
@@ -279,7 +280,7 @@ async function joinCommunityMethod() {
     }
 
     const community = await joinCommunity({ joiningLink: neighbourhoodUrl, client: appStore.ad4mClient });
-    router.push({ name: 'community', params: { communityId: community.uuid } });
+    router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(community.neighbourhoodUrl) } });
     closeModal();
   } catch (error) {
     console.error('Error joining community:', error);
@@ -302,7 +303,7 @@ async function createCommunityMethod() {
     });
     // Refresh communities and navigate to the new one
     await appStore.getMyCommunities();
-    router.push({ name: 'community', params: { communityId: community.uuid } });
+    router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(community.neighbourhoodUrl) } });
     closeModal();
   } catch (error) {
     console.error('Error creating community:', error);
@@ -323,7 +324,11 @@ async function createCommunityFromPerspective(perspective: any) {
       perspectiveUuid: perspective.uuid,
       client: appStore.ad4mClient,
     });
-    router.push({ name: 'community', params: { communityId: community.uuid } });
+    await appStore.getMyCommunities();
+    const addedPerspective = appStore.myPerspectives.find(p => p.uuid === community.uuid);
+    if (addedPerspective?.sharedUrl) {
+      router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(addedPerspective.sharedUrl) } });
+    }
     closeModal();
   } catch (error) {
     console.error('Error creating community from perspective:', error);

@@ -17,6 +17,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -90,8 +91,10 @@ export const useWebrtcStore = defineStore(
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
     const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
+    const hasCopiedLink = ref(false);
+    let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const communityService = computed(() => getCommunityService(callRoute.value.communityId || ''));
+    const communityService = computed(() => getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')));
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 
@@ -640,6 +643,27 @@ export const useWebrtcStore = defineStore(
       }
     }
 
+    async function copyCallLink() {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+        
+        // Clear any existing timer to avoid multiple pending timeouts
+        if (copyLinkTimer !== null) {
+          clearTimeout(copyLinkTimer);
+        }
+        
+        hasCopiedLink.value = true;
+        copyLinkTimer = setTimeout(() => {
+          hasCopiedLink.value = false;
+          copyLinkTimer = null;
+        }, 3000);
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        appStore.showDangerToast({ message: 'Failed to copy link to clipboard' });
+      }
+    }
+
     // Close the call window on route param changes if not in a call or a channel
     watch(
       () => route.params,
@@ -743,6 +767,7 @@ export const useWebrtcStore = defineStore(
       joiningCall,
       iceServers,
       disconnectedAgents,
+      hasCopiedLink,
       addTrack,
       removeTrack,
       replaceAudioTrack,
@@ -755,6 +780,7 @@ export const useWebrtcStore = defineStore(
       signalAgent,
       signalAgentsInCall,
       displayEmoji,
+      copyCallLink,
     };
   },
   { persist: false },

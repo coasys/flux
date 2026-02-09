@@ -20,32 +20,44 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from '@/composables/useCommunityService';
-import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const modalStore = useModalStore();
-
-const { ad4mClient } = storeToRefs(appStore);
-const { community } = useCommunityService();
-const { communityId } = useRouteParams();
+const { ad4mClient, myCommunities } = storeToRefs(appStore);
 
 const leaving = ref(false);
 
+const communityUrl = computed(() => modalStore.leaveCommunityUrl);
+const community = computed(() => {
+  if (!communityUrl.value) return { name: 'Unknown' };
+  return myCommunities.value[communityUrl.value] || { name: 'Unknown' };
+});
+
 async function leaveCommunity() {
-  if (!communityId.value) return appStore.showDangerToast({ message: 'Invalid community id.' });
+  const perspective = appStore.getPerspective(communityUrl.value || '');
+  if (!perspective) return appStore.showDangerToast({ message: 'Invalid community id.' });
   leaving.value = true;
   try {
-    await router.push({ name: 'home' });
-    await ad4mClient.value.perspective.remove(communityId.value);
+    if (restoreNeighbourhoodPrefix(route.params.communityId as string) === communityUrl.value) await router.push({ name: 'home' });
+    await ad4mClient.value.perspective.remove(perspective.uuid);
+    // Delete community from appStore myCommunities
+    if (communityUrl.value && communityUrl.value in myCommunities.value) {
+      const updated = { ...myCommunities.value };
+      delete updated[communityUrl.value];
+      myCommunities.value = updated;
+    }
     modalStore.showLeaveCommunity = false;
+    modalStore.leaveCommunityUrl = null;
     appStore.showSuccessToast({ message: 'You left the community.' });
   } catch (e: any) {
+    console.log('Failed to leave community', e);
     appStore.showDangerToast({ message: 'Failed to leave community. Please try again.' });
   } finally {
     leaving.value = false;

@@ -80,8 +80,6 @@ async function initializeApp() {
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }
-
-  appStore.getMyCommunities();
 }
 
 onMounted(async () => initializeApp());

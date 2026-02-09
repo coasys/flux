@@ -3,6 +3,7 @@ import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Message } from '@coasys/flux-api';
 import { REACTION } from '@coasys/flux-constants/src/communityPredicates';
 import { Profile } from '@coasys/flux-types';
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import styles from './MessageItem.module.css';
 

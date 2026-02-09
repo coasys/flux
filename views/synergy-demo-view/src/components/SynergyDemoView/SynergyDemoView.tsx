@@ -3,6 +3,7 @@ import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, To
 import { Profile, SignallingService } from '@coasys/flux-types';
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from '@coasys/flux-utils';
 import { cos_sim } from '@xenova/transformers';
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import MatchColumn from '../MatchColumn';
 import TimelineColumn from '../TimelineColumn';
@@ -42,6 +43,7 @@ export default function SynergyDemoView({
   const [showLLMInfoModal, setShowLLMInfoModal] = useState(false);
   const [aiDataLoading, setAiDataLoading] = useState(false);
   const [modalRenderKey, setModalRenderKey] = useState(0);
+  const [sdnaInitialized, setSdnaInitialized] = useState(false);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -114,13 +116,25 @@ export default function SynergyDemoView({
     return `${matches.length} match${matches.length > 1 ? 'es' : ''} ${searchType === 'topic' ? `for #${selectedTopic.name}` : ''}`;
   }
 
+  async function ensureSDNA() {
+    await perspective.ensureSDNASubjectClass(Conversation);
+    await perspective.ensureSDNASubjectClass(ConversationSubgroup);
+    await perspective.ensureSDNASubjectClass(Topic);
+    await perspective.ensureSDNASubjectClass(Embedding);
+    await perspective.ensureSDNASubjectClass(SemanticRelationship);
+  }
+
   useEffect(() => {
-    // Ensure SDNA classes
-    perspective.ensureSDNASubjectClass(Conversation);
-    perspective.ensureSDNASubjectClass(ConversationSubgroup);
-    perspective.ensureSDNASubjectClass(Topic);
-    perspective.ensureSDNASubjectClass(Embedding);
-    perspective.ensureSDNASubjectClass(SemanticRelationship);
+    // Ensure SDNA classes are loaded into the perspective
+    (async () => {
+      try {
+        await ensureSDNA();
+        setSdnaInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize SDNA classes:', error);
+        setSdnaInitialized(false);
+      }
+    })();
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;
@@ -136,6 +150,18 @@ export default function SynergyDemoView({
 
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
+
+  // Wait for SDNA initialization before rendering
+  if (!sdnaInitialized) {
+    return (
+      <div className={styles.wrapper}>
+        <j-flex direction="column" a="center" j="center" gap="500" style={{ height: '100%' }}>
+          <j-spinner size="lg" />
+          <j-text nomargin>Initializing SDNA classes...</j-text>
+        </j-flex>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>

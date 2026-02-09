@@ -1,4 +1,4 @@
-import { REACTION, REPLY_TO, EDITED_TO, CARD_HIDDEN } from './communityPredicates';
+import { REACTION, HAS_REPLY, EDITED_TO, CARD_HIDDEN } from './communityPredicates';
 import { EntryType } from '@coasys/flux-types';
 
 export const emojiCount = 3;
@@ -22,7 +22,7 @@ export const SDNA = `
         findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "${EDITED_TO}", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
         findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
         findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "${CARD_HIDDEN}", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
-        findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "${REPLY_TO}", Message, ReplyTimestamp, ReplyAuthor), Replies).
+        findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "${HAS_REPLY}", Message, ReplyTimestamp, ReplyAuthor), Replies).
     
     flux_message_query_popular(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
         flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isPopular(Message).

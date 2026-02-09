@@ -3,7 +3,7 @@ import { LinkExpression, Literal } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
 
-const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, REPLY_TO, ZOME } = community;
+const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, HAS_REPLY, ZOME } = community;
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === 'rdf://name',
@@ -14,7 +14,7 @@ export const findLink = {
 
 export const linkIs = {
   message: (link: LinkExpression) => link.data.predicate === EntryType.Message,
-  reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
+  reply: (link: LinkExpression) => link.data.predicate === HAS_REPLY,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
   channel: (link: LinkExpression) => link.data.predicate === CHANNEL,

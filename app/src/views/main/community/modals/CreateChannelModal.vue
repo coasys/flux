@@ -116,6 +116,7 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useModalStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
+import { stripChannelPrefix } from '@/utils/routeUtils';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
 import semver from 'semver';
@@ -193,10 +194,7 @@ async function createChannel() {
     if (!createChannelParent.value) {
       router.push({
         name: 'channel',
-        params: {
-          communityId: communityId.value,
-          channelId: channel.baseExpression,
-        },
+        params: { communityId: communityId.value, channelId: stripChannelPrefix(channel.baseExpression)},
       });
     }
   } finally {

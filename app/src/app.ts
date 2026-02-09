@@ -39,8 +39,9 @@ const vueApp = createApp({ render: () => h(App) })
 const appStore = useAppStore(pinia);
 const routeMemoryStore = useRouteMemoryStore(pinia);
 
-// Store the last route before mounting the app (otherwise gets overwritten by router)
+// Store the last saved route and current params before mounting the app
 const savedRoute = { ...routeMemoryStore.currentRoute };
+const currentParams = router.resolve(window.location.hash.slice(1) || '/').params;
 
 // Mount the app immediately so UI is responsive
 vueApp.mount("#app");
@@ -48,7 +49,7 @@ vueApp.mount("#app");
 // Initialize Ad4m client in an async IIFE to support older browsers
 (async () => {
   try {
-    // Initialize Ad4m client (handles both embedded and standalone modes automatically)
+    // Initialize Ad4m client
     const ad4mClient = await getAd4mClient({
       appInfo: {
         name: 'Flux',
@@ -60,26 +61,33 @@ vueApp.mount("#app");
       multiUser: true,
     });
 
-    if (!ad4mClient) {
-      throw new Error('Ad4mClient not available');
-    }
+    if (!ad4mClient) throw new Error('Ad4mClient not available');
 
+    // Initialize app store
     appStore.setAdamClient(ad4mClient);
     await appStore.refreshMyProfile();
+    await appStore.getMyCommunities();
+    appStore.initialized = true;
 
-    // Restore last saved route
-    if (savedRoute.communityId) {
-      if (savedRoute.viewId) await router.push({ name: 'view', params: savedRoute });
-      else if (savedRoute.channelId) await router.push({ name: 'channel', params: savedRoute });
-      else await router.push({ name: 'community', params: savedRoute });
+    // Fallback to signup if no Flux account found
+    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'))
+    if (!hasFluxAccount) return;
+
+    // Determine which params to use for navigation (prioritize current params)
+    let params = null;
+    if (currentParams.communityId) params = currentParams;
+    else if (savedRoute.communityId) params = savedRoute;
+
+    // Navigate to params if available
+    if (params) {
+      if (params.viewId) await router.push({ name: 'view', params });
+      else if (params.channelId) await router.push({ name: 'channel', params });
+      else await router.push({ name: 'community', params });
       return;
     }
 
-    // Navigate to home if user is on landing/signup page
-    const currentRoute = router.currentRoute.value;
-    if (currentRoute.name === 'signup' || currentRoute.path === '/' || currentRoute.path === '') {
-      router.push('/home');
-    }
+    // Navigate to home if Flux account exists but no saved route
+    router.push('/home');
   } catch (error) {
     console.error('Failed to initialize Flux:', error);
   }

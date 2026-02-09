@@ -28,6 +28,8 @@ export const CHANNEL_IS_PINNED = 'flux://channel_is_pinned';
 
 export const FLUX_APP = 'flux://has_app';
 
+export const FLUX_PARTICIPANT = 'flux://has_participant';
+
 export const AD4M_CLASS = 'ad4m://has_class';
 
 export const FLUX_CHANNEL = 'flux://channel';
@@ -46,7 +48,7 @@ export const CARD_HIDDEN = 'flux://is_card_hidden';
 
 export const OMIT = 'flux://null';
 
-export const REPLY_TO = 'flux://has_reply';
+export const HAS_REPLY = 'flux://has_reply';
 
 export const REACTION = 'flux://has_reaction';
 
@@ -59,6 +61,8 @@ export const BODY = 'flux://body';
 export const URL = 'flux://url';
 
 export const IMAGE = 'flux://image';
+
+export const TRANSCRIPT_STARTED_AT = 'flux://transcript_started_at';
 
 export const THUMBNAIL = 'flux://thumbnail';
 
