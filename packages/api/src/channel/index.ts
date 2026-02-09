@@ -1,10 +1,10 @@
-import { Ad4mModel, Collection, Flag, Literal, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
 import App from '../app';
 
-const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED } = community;
+const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED, FLUX_APP, FLUX_PARTICIPANT } = community;
 
 @ModelOptions({ name: 'Channel' })
 export class Channel extends Ad4mModel {
@@ -43,10 +43,13 @@ export class Channel extends Ad4mModel {
   isPinned: boolean;
 
   @Collection({
-    through: 'ad4m://has_child',
+    through: FLUX_APP,
     where: { isInstance: App },
   })
   views: string[] = [];
+
+  @Collection({ through: FLUX_PARTICIPANT })
+  participants: string[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
@@ -193,56 +196,6 @@ export class Channel extends Ad4mModel {
     } catch (error) {
       console.error('Error getting total item count:', error);
       return 0;
-    }
-  }
-
-  async allAuthors(): Promise<string[]> {
-    // Find the did of everyone who has created an item in the channel
-    try {
-      // const prologQuery = `
-      //   findall(Author, (
-      //     % 1. Get channel item
-      //     triple("${this.baseExpression}", "ad4m://has_child", ItemId),
-      //
-      //     % 2. Get author from link
-      //     link(_, "ad4m://has_child", ItemId, _, Author),
-      //
-      //     % 3. Check item is of valid type
-      //     (
-      //       subject_class("Message", MessageClass),
-      //       instance(MessageClass, ItemId)
-      //       ;
-      //       subject_class("Post", PostClass),
-      //       instance(PostClass, ItemId)
-      //       ;
-      //       subject_class("Task", TaskClass),
-      //       instance(TaskClass, ItemId)
-      //     )
-      //   ), AuthorsWithDuplicates),
-      //   % 4. Remove duplicates
-      //   sort(AuthorsWithDuplicates, UniqueAuthors).
-      // `;
-
-      const surrealQuery = `
-        SELECT VALUE author
-        FROM link
-        WHERE in.uri = '${this.baseExpression}'
-          AND predicate = 'ad4m://has_child'
-          AND author IS NOT NONE
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
-      `;
-
-      const surrealResult: string[] = await this.perspective.querySurrealDB(surrealQuery);
-
-      // Deduplicate authors
-      return [...new Set(surrealResult || [])];
-    } catch (error) {
-      console.error('Error getting channel authors:', error);
-      return [];
     }
   }
 

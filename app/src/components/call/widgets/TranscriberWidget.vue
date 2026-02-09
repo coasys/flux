@@ -208,7 +208,7 @@
 <script setup lang="ts">
 import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
-import { PerspectiveProxy } from '@coasys/ad4m';
+import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Message } from '@coasys/flux-api';
 import { detectBrowser } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
@@ -255,7 +255,7 @@ const modelsReady = computed(
 
 function renderVolume() {
   if (listening.value && analyser.value && dataArray.value) {
-    analyser.value.getByteTimeDomainData(dataArray.value);
+    analyser.value.getByteTimeDomainData(dataArray.value as any);
     const maxValue = Math.max(...dataArray.value);
     const percentage = ((maxValue - 128) / 128) * 100;
     const volume = document.getElementById('volume');
@@ -267,7 +267,8 @@ function renderVolume() {
 async function saveMessage() {
   if (!callRoute.value.communityId || !callRoute.value.channelId) return;
 
-  const perspective = (await appStore.ad4mClient.perspective.byUUID(callRoute.value.communityId)) as PerspectiveProxy;
+  const neighbourhoodUrl = restoreNeighbourhoodPrefix(callRoute.value.communityId);
+  const perspective = await appStore.getPerspective(neighbourhoodUrl);
   if (!perspective) return;
 
   // Fetch latest text & mark message as saving
@@ -299,9 +300,18 @@ async function saveMessage() {
         }, 500);
       }, 500);
     }
+
     // Save message
-    const newMessage = new Message(perspective, undefined, callRoute.value.channelId);
+    const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+    const newMessage = new Message(perspective, undefined, channelUrl);
     newMessage.body = text;
+    
+    // Store the timestamp from when the transcript started
+    const transcriptObj = transcripts.value.find(t => t.id === previousId);
+    if (transcriptObj?.timestamp) {
+      newMessage.transcriptStartedAt = transcriptObj.timestamp.toISOString();
+    }
+    
     await newMessage.save();
   } else {
     if (transcriptCard) {
@@ -385,7 +395,7 @@ function startRemoteTranscription() {
   // Only detect speech when volume is above threshold
   volumeCheckInterval.value = setInterval(() => {
     if (analyser.value && dataArray.value) {
-      analyser.value.getByteTimeDomainData(dataArray.value);
+      analyser.value.getByteTimeDomainData(dataArray.value as any);
       const maxValue = Math.max(...dataArray.value);
       const percentage = ((maxValue - 128) / 128) * 100;
       // Store last second of volume data for check in onresult function below

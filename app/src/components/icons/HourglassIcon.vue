@@ -92,7 +92,6 @@
 #bottom-sand g,
 svg {
   animation-duration: 2s;
-  animation-delay: 1s;
   animation-iteration-count: infinite;
 }
 

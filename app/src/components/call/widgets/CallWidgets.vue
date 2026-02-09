@@ -71,6 +71,7 @@ onMounted(() => {
 
   &.mobile {
     max-width: none;
+    padding-top: 0;
 
     &.open {
       background-color: #1c1a1f;

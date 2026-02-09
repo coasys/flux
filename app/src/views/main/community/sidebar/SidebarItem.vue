@@ -31,9 +31,9 @@
       </div>
 
       <div v-if="item.lastActivity" class="last-activity">
-        <j-text nomargin size="300">•</j-text>
-        <j-text nomargin size="300">
-          <j-timestamp :value="item.lastActivity" relative class="timestamp" />
+        <!-- <j-text nomargin size="300" color="ui-400">•</j-text> -->
+        <j-text nomargin size="300" color="ui-400">
+          <j-timestamp :value="item.lastActivity" class="timestamp" dateStyle="short" timeStyle="short" />
         </j-text>
       </div>
 
@@ -69,6 +69,7 @@
 import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from '@/components/icons';
 import { ChannelData, useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useRouteMemoryStore, useUiStore } from '@/stores';
+import { restoreChannelPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { AgentData, Profile } from '@coasys/flux-types';
 import { computed, ref, watch } from 'vue';
@@ -91,7 +92,7 @@ const isDragOver = ref(false);
 const isDragging = ref(false);
 const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
-const selected = computed(() => item.channel.baseExpression === route.params.channelId);
+const selected = computed(() => item.channel.baseExpression === restoreChannelPrefix(route.params.channelId as string));
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, 'agentsInCall') || []);
 
 function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agentsInChannel' | 'agentsInCall') {
@@ -106,16 +107,16 @@ function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agents
 
 function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
   if (!expanded && item.children?.length) {
-    const childAuthors = item.children.flatMap((child) => child.allAuthors || []);
-    return [...new Set([...(item.allAuthors || []), ...childAuthors])];
+    const childAuthors = item.children.flatMap((child) => child.channel.participants || []);
+    return [...new Set([...(item.channel.participants || []), ...childAuthors])];
   }
-  return item.allAuthors || [];
+  return item.channel.participants || [];
 }
 
 function navigateToChannel() {
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = item.channel.baseExpression || '';
+  const channelId = stripChannelPrefix(item.channel.baseExpression || '');
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
   const defaultViewId = item.channel.isConversation ? 'conversation' : 'conversations';
   router.push({ name: 'view', params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
@@ -127,7 +128,7 @@ function navigateToChannel() {
 function expandIfInNestedChannel() {
   // Expand the item when the user navigates to a channel included in its children
   const currentChannelId = route.params.channelId as string;
-  const inNestedChannel = item.children?.some((c: any) => c.channel.baseExpression === currentChannelId);
+  const inNestedChannel = item.children?.some((c: any) => stripChannelPrefix(c.channel.baseExpression) === currentChannelId);
   if (inNestedChannel) expanded.value = true;
 }
 

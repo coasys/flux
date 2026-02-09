@@ -1,5 +1,6 @@
-import { useAiStore, useAppStore } from '@/stores';
+import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import {
@@ -12,7 +13,10 @@ import {
   getAllFluxApps,
   Message,
   SemanticRelationship,
+  TaskBoard,
+  TaskColumn,
   Topic,
+  Task
 } from '@coasys/flux-api';
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -29,7 +33,6 @@ export interface ChannelData {
   lastActivity?: string;
   agentsInChannel?: AgentData[];
   agentsInCall?: AgentData[];
-  allAuthors?: string[];
 }
 
 export interface ChannelDataWithAgents extends ChannelData {
@@ -70,6 +73,7 @@ export interface CommunityService {
   ) => Promise<void>;
   getParentChannel: (channelId: string) => Partial<Channel> | undefined;
   getConversation: (channelId: string) => Partial<Conversation> | undefined;
+  cleanup: () => void;
 }
 
 const DEFAULT_CHAT_APP_PKG = '@coasys/flux-chat-view';
@@ -79,27 +83,32 @@ export async function createCommunityService(): Promise<CommunityService> {
   const router = useRouter();
   const appStore = useAppStore();
   const aiStore = useAiStore();
+  const uiStore = useUiStore();
   const { me } = storeToRefs(appStore);
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = (await appStore.ad4mClient.perspective.byUUID(
-    route.params.communityId as string,
-  )) as PerspectiveProxy;
+  const perspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string));
+  if (!perspective) {
+    const communityId = route.params.communityId as string;
+    console.error(`Failed to get perspective for community: ${communityId}`);
+    throw new Error(`Perspective not found for community: ${communityId}. The community may not exist or is not yet loaded.`);
+  }
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
   // Ensure all required SDNA is installed
-  await Promise.all([
-    perspective.ensureSDNASubjectClass(Community),
-    perspective.ensureSDNASubjectClass(Channel),
-    perspective.ensureSDNASubjectClass(App),
-    perspective.ensureSDNASubjectClass(Conversation),
-    perspective.ensureSDNASubjectClass(ConversationSubgroup),
-    perspective.ensureSDNASubjectClass(Topic),
-    perspective.ensureSDNASubjectClass(Embedding),
-    perspective.ensureSDNASubjectClass(SemanticRelationship),
-    perspective.ensureSDNASubjectClass(Message),
-  ]);
+  await perspective.ensureSDNASubjectClass(Community);
+  await perspective.ensureSDNASubjectClass(Channel);
+  await perspective.ensureSDNASubjectClass(App);
+  await perspective.ensureSDNASubjectClass(Conversation);
+  await perspective.ensureSDNASubjectClass(ConversationSubgroup);
+  await perspective.ensureSDNASubjectClass(Topic);
+  await perspective.ensureSDNASubjectClass(Embedding);
+  await perspective.ensureSDNASubjectClass(SemanticRelationship);
+  await perspective.ensureSDNASubjectClass(Message);
+  await perspective.ensureSDNASubjectClass(TaskBoard);
+  await perspective.ensureSDNASubjectClass(TaskColumn);
+  await perspective.ensureSDNASubjectClass(Task);
 
   // Initialise the signalling service for the community
   const signallingService = useSignallingService(neighbourhood);
@@ -198,8 +207,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       pinnedConversations.value = await Promise.all(
         pinnedChannels.value.map(async (channel: Channel) => {
           const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-          const allAuthors = await toRaw(channel).allAuthors();
-          return { conversation, channel, allAuthors };
+          return { conversation, channel };
         }),
       );
     } catch (error) {
@@ -228,7 +236,6 @@ export async function createCommunityService(): Promise<CommunityService> {
           let lastActivity: string | null = null;
           const channelRaw = toRaw(channel);
           const unprocessedItems = await channelRaw.unprocessedItems();
-          const allAuthors = await channelRaw.allAuthors();
           if (unprocessedItems.length) {
             const lastUnprocessedItem = unprocessedItems.sort(
               (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -236,16 +243,16 @@ export async function createCommunityService(): Promise<CommunityService> {
             lastActivity = lastUnprocessedItem.timestamp;
           } else if (conversation.summary === 'Content will appear when the first items have been processed...') {
             // If the conversation is an empty placeholder use the conversations timestamp
-            lastActivity = conversation.timestamp;
+            lastActivity = conversation.createdAt;
           } else {
             // If no subgroups exist, use the conversation timestamp
             const subgroups = await conversation.subgroups();
-            if (!subgroups.length) lastActivity = conversation.timestamp;
+            if (!subgroups.length) lastActivity = conversation.createdAt;
             else {
               // If no items exist in the last subgroup, use the subgroup timestamp
               const lastSubgroup = subgroups[subgroups.length - 1];
               const items = await lastSubgroup.itemsData();
-              if (!items.length) lastActivity = lastSubgroup.timestamp;
+              if (!items.length) lastActivity = lastSubgroup.createdAt;
               else {
                 // Finally, use the timestamp of the last item in the last subgroup
                 const lastItem = items.sort(
@@ -256,16 +263,16 @@ export async function createCommunityService(): Promise<CommunityService> {
             }
           }
 
-          return { conversation, channel, lastActivity, allAuthors };
+          return { conversation, channel, lastActivity };
         }),
       );
 
       // Sort conversations by last activity timestamp
       const conversationsSortedByLastActivity = conversations
         .filter((c) => c !== null)
-        .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+        .sort((a, b) => new Date(b.lastActivity!).getTime() - new Date(a.lastActivity!).getTime());
 
-      recentConversations.value = conversationsSortedByLastActivity;
+      recentConversations.value = conversationsSortedByLastActivity as ChannelData[];
     } catch (error) {
       console.error('Error loading recent conversations:', error);
       recentConversations.value = [];
@@ -296,18 +303,15 @@ export async function createCommunityService(): Promise<CommunityService> {
               const conversation = (
                 await Conversation.findAll(perspective, { source: childChannel.baseExpression })
               )[0];
-              const allAuthors = await toRaw(childChannel).allAuthors();
               // TODO: investigate and remove explicit baseExpression from channel if possible
-              // return { channel: childChannel, conversation, allAuthors };
               return {
                 channel: { ...childChannel, baseExpression: childChannel.baseExpression },
                 conversation,
-                allAuthors,
               };
             }),
           );
 
-          return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
+          return { channel, children: conversations };
         }),
       );
     } catch (error) {
@@ -355,7 +359,8 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
-      router.push({ name: 'view', params: { communityId, channelId: channel.baseExpression, viewId: 'conversation' } });
+      router.push({ name: 'view', params: { communityId, channelId: stripChannelPrefix(channel.baseExpression), viewId: 'conversation' } });
+      uiStore.setCallWindowOpen(true);
     } catch (error) {
       console.error('Failed to create new conversation:', error);
       appStore.showDangerToast({ message: 'Failed to create conversation' });
@@ -423,22 +428,55 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   function getParentChannel(channelId: string): Partial<Channel> | undefined {
     const parentChannelData = channelsWithConversations.value.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelId),
+      c.children?.some((child) => child.channel?.baseExpression === channelId),
     );
     return parentChannelData ? parentChannelData.channel : undefined;
   }
 
   function getConversation(channelId: string) {
-    const conversationData = recentConversations.value.find((c) => c.channel.baseExpression === channelId);
+    const conversationData = recentConversations.value.find((c) => c.channel?.baseExpression === channelId);
     return conversationData ? conversationData.conversation : undefined;
   }
 
+  // Track channel participants automatically
+  function handleParticipantTracking(link: any) {
+    if (link.data.predicate !== 'ad4m://has_child') return null;
+    if (!link.author) return null;
+
+    const channelId = link.data.source;
+    const channel = allChannels.value.find((c) => c.baseExpression === channelId);
+    if (!channel) return null;
+    
+    if (channel.participants && channel.participants.includes(link.author)) return null;
+
+    // Add participant link
+    perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+      .catch((error) => {
+        console.error('Failed to add participant to channel:', {
+          channelId,
+          author: link.author,
+          error,
+        });
+      });
+
+    return null;
+  }
+
   // Initialize sync state listener
-  perspective.addSyncStateChangeListener((state: PerspectiveState) => {
+  const syncStateListener = (state: PerspectiveState) => {
     // @ts-ignore
     isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
     return null;
-  });
+  };
+  perspective.addSyncStateChangeListener(syncStateListener);
+
+  // Initialize participant tracking
+  perspective.addListener('link-added', handleParticipantTracking);
+
+  // Cleanup function to remove all listeners
+  function cleanup() {
+    perspective.removeListener('link-added', handleParticipantTracking);
+  }
 
   getMembers();
 
@@ -454,7 +492,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (aiEnabled.value && !processingStateChecked.value) {
       processingStateChecked.value = true;
       // Delay by heart beat interval to allow time for signals to arrive
-      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), HEARTBEAT_INTERVAL);
+      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.sharedUrl || ''), HEARTBEAT_INTERVAL);
     }
   });
 
@@ -487,6 +525,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     moveConversation,
     getParentChannel,
     getConversation,
+    cleanup,
   };
 }
 

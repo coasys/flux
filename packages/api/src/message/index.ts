@@ -2,7 +2,7 @@ import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from '@coasys/ad4m';
 
-const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
+const { BODY, HAS_REPLY, ENTRY_TYPE, REACTION, TRANSCRIPT_STARTED_AT } = community;
 
 @ModelOptions({
   name: 'Message',
@@ -21,13 +21,21 @@ export class Message extends Ad4mModel {
   })
   body: string;
 
+  @Optional({
+    through: TRANSCRIPT_STARTED_AT,
+    writable: true,
+    resolveLanguage: 'literal',
+  })
+  transcriptStartedAt?: string;
+
   @Collection({
     through: REACTION,
   })
   reactions: string[] = [];
 
   @Optional({
-    getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
+    through: HAS_REPLY,
+    surrealGetter: `(<-link[WHERE perspective = $perspective AND predicate = '${HAS_REPLY}'].in.uri)[0]`,
   })
   replyingTo: string | undefined = '';
 
@@ -39,14 +47,12 @@ export class Message extends Ad4mModel {
 
   @Collection({
     through: 'ad4m://has_child',
-    where: {
-      condition: `subject_class("Message", Class), instance(Class, Target)`,
-    },
+    where: { isInstance: 'Message' },
   })
   thread: string[] = [];
 
   @Collection({
-    through: REPLY_TO,
+    through: HAS_REPLY,
   })
   replies: string[] = [];
 }

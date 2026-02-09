@@ -34,7 +34,7 @@ export interface AppStore {
 export interface ModalsStore {
   showCreateCommunity: boolean;
   showEditCommunity: boolean;
-  showEditChannel: boolean;
+  showManageChannelPluginsModal: boolean;
   showCommunityMembers: boolean;
   showCreateChannel: boolean;
   showEditProfile: boolean;

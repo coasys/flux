@@ -6,12 +6,6 @@
 
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
-        <j-box class="signup-view__flow-back" pb="500">
-          <j-button @click="showSignup = false" variant="link">
-            <j-icon name="arrow-left-short" />
-            Back
-          </j-button>
-        </j-box>
 
         <j-box pb="800">
           <FluxLogoIcon width="150px" />
@@ -96,24 +90,13 @@ const {
 
 const canSignUp = computed(() => usernameIsValid.value);
 
-async function checkIfHasFluxProfile() {
-  const { perspective } = await appStore.ad4mClient.agent.me();
-  const fluxLinksFound = perspective?.links?.find((e: any) => e.data.source.startsWith('flux://'));
-  return fluxLinksFound ? true : false;
-}
-
 async function autoFillUser() {
   try {
-    const hasFluxProfile = await checkIfHasFluxProfile();
-    if (hasFluxProfile) {
-      router.push('/home');
-      return;
-    }
+    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
+    if (hasFluxAccount) return;
 
     showSignup.value = true;
-
     const ad4mProfile = await getAd4mProfile(appStore.ad4mClient);
-
     username.value = ad4mProfile.username || '';
     name.value = ad4mProfile.name || '';
     familyName.value = ad4mProfile.familyName || '';
@@ -149,8 +132,8 @@ async function allowNotifications(value: any) {
 }
 
 // Watch for client ready state to trigger autofill
-watch(() => appStore.clientReady, async (isReady) => {
-  if (isReady) await autoFillUser();
+watch(() => appStore.initialized, async (initialized) => {
+  if (initialized) await autoFillUser();
 }, { immediate: true });
 </script>
 

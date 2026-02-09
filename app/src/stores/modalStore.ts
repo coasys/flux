@@ -10,7 +10,8 @@ export const useModalStore = defineStore(
     const showEditCommunity = ref(false);
     const showCommunityMembers = ref(false);
     const showCreateChannel = ref(false);
-    const showEditChannel = ref(false);
+    const showManageChannelPluginsModal = ref(false);
+    const showEditChannelNameModal = ref(false);
     const showEditProfile = ref(false);
     const showSettings = ref(false);
     const showCommunitySettings = ref(false);
@@ -18,15 +19,16 @@ export const useModalStore = defineStore(
     const showCommunityTweaks = ref(false);
     const showLeaveCommunity = ref(false);
     const showWebrtcSettings = ref(false);
-    const showJoinCommunity = ref(false);
     const showAddWebLink = ref(false);
+
+    // Store the community URL for the leave community modal
+    const leaveCommunityUrl = ref<string | null>(null);
 
     // Used to track the parent channel when creating a subchannels in the CreateChannel modal
     const createChannelParent = ref<Channel | null>(null);
 
     function hideCreateChannelModal() {
       showCreateChannel.value = false;
-
       // Reset the parent channel when closing the modal
       createChannelParent.value = null;
     }
@@ -37,7 +39,8 @@ export const useModalStore = defineStore(
       showEditCommunity.value = false;
       showCommunityMembers.value = false;
       showCreateChannel.value = false;
-      showEditChannel.value = false;
+      showManageChannelPluginsModal.value = false;
+      showEditChannelNameModal.value = false;
       showEditProfile.value = false;
       showSettings.value = false;
       showCommunitySettings.value = false;
@@ -45,8 +48,8 @@ export const useModalStore = defineStore(
       showCommunityTweaks.value = false;
       showLeaveCommunity.value = false;
       showWebrtcSettings.value = false;
-      showJoinCommunity.value = false;
       showAddWebLink.value = false;
+      leaveCommunityUrl.value = null;
     }
 
     return {
@@ -55,7 +58,8 @@ export const useModalStore = defineStore(
       showEditCommunity,
       showCommunityMembers,
       showCreateChannel,
-      showEditChannel,
+      showManageChannelPluginsModal,
+      showEditChannelNameModal,
       showEditProfile,
       showSettings,
       showCommunitySettings,
@@ -63,8 +67,8 @@ export const useModalStore = defineStore(
       showCommunityTweaks,
       showLeaveCommunity,
       showWebrtcSettings,
-      showJoinCommunity,
       showAddWebLink,
+      leaveCommunityUrl,
       createChannelParent,
 
       hideCreateChannelModal,

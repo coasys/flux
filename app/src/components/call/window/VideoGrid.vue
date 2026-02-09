@@ -20,13 +20,13 @@
         :screenShareState="focusedParticipant.screenShareState"
         :warning="focusedParticipant.warning"
         :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
-        @click="focusOnVideo(focusedParticipant.did)"
-        :style="{ maxHeight: unfocusedParticipants.length ? 'calc(100% - 140px)' : 'none' }"
+        @click="closeFocusedVideoLayout"
+        :style="{ maxHeight: unfocusedParticipants.length ? `calc(100% - ${isMobile ? 80 : 140}px)` : 'none' }"
       />
 
       <!-- Non-focused videos -->
       <j-flex v-if="unfocusedParticipants.length" j="center">
-        <div class="bottom-row">
+        <div class="bottom-row" :style="{ height: isMobile ? '80px' : '120px' }">
           <MediaPlayer
             v-for="participant in unfocusedParticipants"
             :key="`participant-${participant.did}`"
@@ -70,13 +70,15 @@
 
 <script setup lang="ts">
 import MediaPlayer from '@/components/media-player/MediaPlayer.vue';
-import { useWebrtcStore } from '@/stores';
+import { useWebrtcStore, useUiStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useVideoLayout } from '../composables/useVideoLayout';
 
 const webrtcStore = useWebrtcStore();
+const uiStore = useUiStore();
 const { callEmojis } = storeToRefs(webrtcStore);
+const { isMobile } = storeToRefs(uiStore);
 
 const {
   selectedVideoLayout,
@@ -85,6 +87,7 @@ const {
   focusedParticipant,
   unfocusedParticipants,
   focusOnVideo,
+  closeFocusedVideoLayout,
 } = useVideoLayout();
 
 const videoGrid = ref<HTMLElement | null>(null);
@@ -160,7 +163,6 @@ const videoGrid = ref<HTMLElement | null>(null);
       display: flex;
       overflow-x: auto;
       gap: var(--j-space-400);
-      height: 120px;
 
       > div {
         flex: 0 0 auto;

@@ -108,6 +108,7 @@ import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
 import { llmProcessingSteps, useAiStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
+import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Channel } from '@coasys/flux-api';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
@@ -132,7 +133,7 @@ const { aiEnabled } = storeToRefs(aiStore);
 const { signallingService, perspective, getRecentConversations, getPinnedConversations, getChannelsWithConversations } =
   useCommunityService();
 
-const channelId = route.params.channelId as string;
+const channelUrl = restoreChannelPrefix(route.params.channelId as string);
 
 const conversations = ref<SynergyGroup[]>([]);
 const unprocessedItems = ref<SynergyItem[]>([]);
@@ -146,12 +147,12 @@ const linkUpdatesQueued = ref<any>(null);
 const loading = ref(true);
 
 async function getConversations() {
-  const channel = new Channel(perspective, channelId);
+  const channel = new Channel(perspective, channelUrl);
   return await channel.conversations();
 }
 
 async function getUnprocessedItems() {
-  const channel = new Channel(perspective, channelId);
+  const channel = new Channel(perspective, channelUrl);
   return await channel.unprocessedItems();
 }
 
@@ -183,8 +184,8 @@ async function getData(firstRun?: boolean): Promise<void> {
     if (firstRun || !aiEnabled.value) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
     if (shouldProcess) {
-      const channel = new Channel(perspective, channelId);
-      aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
+      const channel = new Channel(perspective, channelUrl);
+      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
     }
   } catch (error) {
     console.error('Error fetching conversations or unprocessed items:', error);
@@ -247,7 +248,7 @@ watch(
   (newAgents) => {
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(
-      (agent) => agent.processing && agent.processing.channelId === channelId,
+      (agent) => agent.processing && agent.processing.channelId === channelUrl,
     );
 
     // Update the progress bar with the latest processing state

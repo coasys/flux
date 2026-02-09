@@ -1,74 +1,33 @@
-import { ModelOptions, Ad4mModel, Flag, Literal, Optional } from '@coasys/ad4m';
+import { ModelOptions, Ad4mModel, Flag, Literal, Optional, Collection } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
+import { community } from '@coasys/flux-constants';
+
+const { FLUX_PARTICIPANT } = community;
 
 @ModelOptions({
   name: 'ConversationSubgroup',
 })
 export default class ConversationSubgroup extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://conversation_subgroup',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://conversation_subgroup' })
   type: string;
 
-  @Optional({
-    through: 'flux://has_name',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Optional({ through: 'flux://has_name', writable: true, resolveLanguage: 'literal' })
   subgroupName: string;
 
-  @Optional({
-    through: 'flux://has_summary',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
   summary: string;
+
+  @Collection({ through: FLUX_PARTICIPANT })
+  participants: string[] = [];
 
   async stats(): Promise<{ totalItems: number; participants: string[] }> {
     // find the total item count and the dids of participants in the subgroup
     try {
-      // const prologQuery = `
-      //   findall([ItemCount, SortedAuthors], (
-      //     % 1. Gather all items in the subgroup
-      //     findall(Item, (
-      //       triple("${this.baseExpression}", "ad4m://has_child", Item),
-      //       % Ensure item is not a SemanticRelationship
-      //       (
-      //         subject_class("Message", MC),
-      //         instance(MC, Item)
-      //         ;
-      //         subject_class("Post", PC),
-      //         instance(PC, Item)
-      //         ;
-      //         subject_class("Task", TC),
-      //         instance(TC, Item)
-      //       )
-      //     ), AllItems),
-      //
-      //     % 2. Deduplicate items
-      //     sort(AllItems, UniqueItems),
-      //     length(UniqueItems, ItemCount),
-      //
-      //     % 3. For each item, gather its authors
-      //     findall(Author, (
-      //       member(I, UniqueItems),
-      //       link(_, "ad4m://has_child", I, _, Author)
-      //     ), AuthorList),
-      //
-      //     % 4. Remove duplicates among authors
-      //     sort(AuthorList, SortedAuthors)
-      //   ), [Stats]).
-      // `;
-
-      // Get items and participants in one query
-      const surrealQuery = `
-        SELECT VALUE {
-          itemUri: out.uri,
-          author: author
-        }
+      // Count items by getting all matching URIs and counting them
+      const itemsQuery = `
+        SELECT VALUE out.uri
         FROM link
         WHERE in.uri = '${this.baseExpression}'
           AND predicate = 'ad4m://has_child'
@@ -79,19 +38,12 @@ export default class ConversationSubgroup extends Ad4mModel {
           )
       `;
 
-      // console.log('*** ConversationSubgroup.stats() surrealQuery:', surrealQuery);
+      const itemsResult = await this.perspective.querySurrealDB(itemsQuery);
+      const totalItems = itemsResult?.length || 0;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
-
-      // console.log('*** ConversationSubgroup.stats() surrealResult:', surrealResult);
-
-      const totalItems = surrealResult?.length || 0;
-      const participants = [...new Set(surrealResult?.map((r: any) => r.author).filter(Boolean) || [])] as string[];
-
-      // console.log('*** ConversationSubgroup.stats() totalItems:', totalItems);
-      // console.log('*** ConversationSubgroup.stats() participants:', participants);
-
-      return { totalItems, participants };
+      // Use maintained participants Collection
+      await this.get();
+      return { totalItems, participants: this.participants };
     } catch (error) {
       console.error('Error getting subgroup stats:', error);
       return { totalItems: 0, participants: [] };
@@ -193,7 +145,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS baseExpression,
-          timestamp,
+          (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
           fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
@@ -207,15 +159,10 @@ export default class ConversationSubgroup extends Ad4mModel {
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
           )
-        ORDER BY timestamp ASC
+        ORDER BY channelTimestamp ASC
       `;
 
-      // console.log('*** ConversationSubgroup.itemsData() surrealQuery:', surrealQuery);
-
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
-
-      // console.log('*** ConversationSubgroup.itemsData() surrealResult:', JSON.stringify(surrealResult, null, 2));
-      // console.log('*** ConversationSubgroup.itemsData() count:', surrealResult?.length);
 
       return (surrealResult || []).map((item: any) => {
         let text = '';
@@ -235,7 +182,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         return {
           baseExpression: item.baseExpression,
           type,
-          timestamp: new Date(item.timestamp).toISOString(),
+          timestamp: new Date(item.channelTimestamp).toISOString(),
           author: item.author,
           text,
           icon: icons[type] || 'question',
