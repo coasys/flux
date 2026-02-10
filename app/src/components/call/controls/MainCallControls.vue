@@ -95,7 +95,7 @@
       </j-button>
     </j-tooltip>
 
-    <j-tooltip v-if="!isMobile" placement="top" title="Call settings">
+    <j-tooltip placement="top" title="Call settings">
       <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
         <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
