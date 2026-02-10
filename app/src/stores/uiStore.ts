@@ -2,6 +2,7 @@ import { defineStore, storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useMediaDevicesStore } from './mediaDevicesStore';
 import { VideoLayoutOption, WindowState } from './types';
+import { BREAKPOINTS } from '@/constants/breakpoints';
 
 export const useUiStore = defineStore(
   'uiStore',
@@ -29,7 +30,7 @@ export const useUiStore = defineStore(
     const windowState = ref<WindowState>('visible');
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
-    const isMobile = computed(() => windowWidth.value < 800);
+    const isMobile = computed(() => windowWidth.value <= BREAKPOINTS.MOBILE);
 
     // Mutations
     function toggleCommunitySidebar(): void {

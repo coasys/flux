@@ -58,7 +58,7 @@ onMounted(() => {
 onUnmounted(() => window.removeEventListener('resize', uiStore.updateWindowWidth));
 </script>
 
-<style>
+<style lang="scss">
 :root {
   j-menu-group::part(summary) {
     margin: 5px 0;
@@ -69,7 +69,7 @@ onUnmounted(() => window.removeEventListener('resize', uiStore.updateWindowWidth
   }
 }
 
-@media (max-width: 800px) {
+@media screen and (max-width: $breakpoint-mobile) {
   :root {
     --j-font-base-size: 15px !important;
   }

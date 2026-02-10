@@ -306,7 +306,7 @@ watch(
         margin-left: 92px;
         background-color: var(--j-color-primary-200);
 
-        @media screen and (max-width: 800px) {
+        @media screen and (max-width: $breakpoint-mobile) {
           margin-left: 12px;
         }
       }
@@ -318,7 +318,7 @@ watch(
       z-index: 5;
       padding: 90px 20px 90px 60px;
 
-      @media screen and (max-width: 800px) {
+      @media screen and (max-width: $breakpoint-mobile) {
         padding: 70px 0;
         margin-left: -20px;
       }
@@ -330,7 +330,7 @@ watch(
       .unprocessed-items {
         margin-left: 70px;
 
-        @media screen and (max-width: 800px) {
+        @media screen and (max-width: $breakpoint-mobile) {
           margin-left: 56px;
         }
 
