@@ -40,7 +40,7 @@
       </div>
 
       <!-- Content -->
-      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 28 : 150}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
+      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 28 : 120}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
         <!-- Join prompt -->
         <j-box v-if="!inCall" mb="500">
           <j-flex direction="column" a="center" gap="300">

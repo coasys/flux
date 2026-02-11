@@ -1,5 +1,5 @@
 <template>
-  <div class="call-controls" :style="{ padding: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
+  <div class="call-controls" :class="{ mobile: isMobile, 'landscape-mobile': isLandscapeMobile }">
     <j-tooltip placement="top" :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'">
       <j-button
         :variant="mediaSettings.audioEnabled ? '' : 'primary'"
@@ -132,7 +132,7 @@ const modalStore = useModalStore();
 const aiStore = useAiStore();
 
 const { me } = storeToRefs(appStore);
-const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
+const { callWindowFullscreen, isMobile, isLandscapeMobile } = storeToRefs(uiStore);
 const { mediaSettings, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
 const { inCall, hasCopiedLink } = storeToRefs(webrtcStore);
@@ -164,5 +164,17 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   font-family: var(--j-font-family);
   border-radius: var(--j-border-radius);
   background-color: #ffffff08;
+  padding: var(--j-space-400);
+
+  &.mobile {
+    padding: var(--j-space-300);
+    position: absolute;
+    bottom: 0;
+    background-color: #00000053;
+  }
+
+  &.landscape-mobile {
+    left: calc(50% - 90px);
+  }
 }
 </style>

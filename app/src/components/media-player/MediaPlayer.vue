@@ -223,10 +223,10 @@ onMounted(async () => {
 
   .footer {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
-    padding: var(--j-space-400);
+    padding: var(--j-space-300);
     z-index: 3;
 
     .username {

@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useMediaDevicesStore } from './mediaDevicesStore';
 import { VideoLayoutOption, WindowState } from './types';
 import { BREAKPOINTS } from '@/constants/breakpoints';
@@ -29,8 +29,12 @@ export const useUiStore = defineStore(
     const globalError = ref({ show: false, message: '' });
     const windowState = ref<WindowState>('visible');
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
+    const orientation = ref<'portrait' | 'landscape'>(
+      window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
+    );
 
     const isMobile = computed(() => windowWidth.value <= BREAKPOINTS.MOBILE);
+    const isLandscapeMobile = computed(() => isMobile.value && orientation.value === 'landscape');
 
     // Mutations
     function toggleCommunitySidebar(): void {
@@ -120,12 +124,22 @@ export const useUiStore = defineStore(
       callWidgetsHeight.value = height;
     }
 
+    function updateOrientation() {
+      orientation.value = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+    }
+
+    onMounted(() => {
+      window.addEventListener('resize', updateOrientation);
+      window.addEventListener('orientationchange', updateOrientation);
+    });
+
     return {
       // State
       appSidebarWidth,
       headerHeight,
       communitySidebarWidth,
       isMobile,
+      isLandscapeMobile,
       showAppSidebar,
       showCommunitySidebar,
       callWindowOpen,
@@ -137,6 +151,7 @@ export const useUiStore = defineStore(
       globalError,
       windowState,
       callWidgetsHeight,
+      orientation,
 
       // Actions
       toggleCommunitySidebar,

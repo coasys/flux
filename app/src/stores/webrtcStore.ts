@@ -17,7 +17,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
-import { restoreNeighbourhoodPrefix, stripChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -69,7 +69,6 @@ export const useWebrtcStore = defineStore(
     const uiStore = useUiStore();
     const mediaDevicesStore = useMediaDevicesStore();
     const communityServiceStore = useCommunityServiceStore();
-
     const { me } = storeToRefs(appStore);
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
@@ -607,6 +606,11 @@ export const useWebrtcStore = defineStore(
             const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
             createPeerConnection(agent.did, shouldInitiate);
           });
+        }
+
+        // Set the video layout to focused on mobile for better experience
+        if (uiStore.isLandscapeMobile) {
+          uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' })
         }
 
         inCall.value = true;

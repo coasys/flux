@@ -1,32 +1,14 @@
 <template>
   <div
-    ref="videoGrid"
     class="video-grid"
-    :class="selectedVideoLayout.class"
+    :class="[selectedVideoLayout.class, { mobile: isMobile, 'landscape-mobile': isLandscapeMobile }]"
     :style="{ '--number-of-columns': numberOfColumns }"
   >
     <!-- Focused layout -->
     <template v-if="selectedVideoLayout.label === 'Focused'">
-      <!-- Main focused video -->
-      <MediaPlayer
-        :key="`participant-${focusedParticipant.did}`"
-        :did="focusedParticipant.did"
-        :isMe="focusedParticipant.isMe"
-        :inCall="focusedParticipant.inCall"
-        :stream="focusedParticipant.stream"
-        :streamReady="focusedParticipant.streamReady"
-        :audioState="focusedParticipant.audioState"
-        :videoState="focusedParticipant.videoState"
-        :screenShareState="focusedParticipant.screenShareState"
-        :warning="focusedParticipant.warning"
-        :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
-        @click="closeFocusedVideoLayout"
-        :style="{ maxHeight: unfocusedParticipants.length ? `calc(100% - ${isMobile ? 80 : 140}px)` : 'none' }"
-      />
-
       <!-- Non-focused videos -->
-      <j-flex v-if="unfocusedParticipants.length" j="center">
-        <div class="bottom-row" :style="{ height: isMobile ? '80px' : '120px' }">
+      <template v-if="unfocusedParticipants.length">
+        <div :class="isLandscapeMobile ? 'side-column' : 'bottom-row'">
           <MediaPlayer
             v-for="participant in unfocusedParticipants"
             :key="`participant-${participant.did}`"
@@ -43,7 +25,23 @@
             @click="focusOnVideo(participant.did)"
           />
         </div>
-      </j-flex>
+      </template>
+
+      <!-- Main focused video -->
+      <MediaPlayer
+        :key="`participant-${focusedParticipant.did}`"
+        :did="focusedParticipant.did"
+        :isMe="focusedParticipant.isMe"
+        :inCall="focusedParticipant.inCall"
+        :stream="focusedParticipant.stream"
+        :streamReady="focusedParticipant.streamReady"
+        :audioState="focusedParticipant.audioState"
+        :videoState="focusedParticipant.videoState"
+        :screenShareState="focusedParticipant.screenShareState"
+        :warning="focusedParticipant.warning"
+        :emojis="callEmojis.filter((emoji) => emoji.author === focusedParticipant.did)"
+        @click="!isLandscapeMobile && closeFocusedVideoLayout()"
+      />
     </template>
 
     <!-- Other layouts (fixed aspect ratio, flexible) -->
@@ -72,13 +70,13 @@
 import MediaPlayer from '@/components/media-player/MediaPlayer.vue';
 import { useWebrtcStore, useUiStore } from '@/stores';
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useVideoLayout } from '../composables/useVideoLayout';
 
 const webrtcStore = useWebrtcStore();
 const uiStore = useUiStore();
 const { callEmojis } = storeToRefs(webrtcStore);
-const { isMobile } = storeToRefs(uiStore);
+const { isMobile, isLandscapeMobile } = storeToRefs(uiStore);
 
 const {
   selectedVideoLayout,
@@ -90,7 +88,10 @@ const {
   closeFocusedVideoLayout,
 } = useVideoLayout();
 
-const videoGrid = ref<HTMLElement | null>(null);
+// Automatically focus on the first participant when switching to landscape mobile in focused layout
+watch(isLandscapeMobile, (newVal) => {
+  if (newVal) focusOnVideo(focusedParticipant.value.did);
+}, { immediate: true });
 </script>
 
 <style scoped lang="scss">
@@ -105,6 +106,10 @@ const videoGrid = ref<HTMLElement | null>(null);
   // Optimize rendering during layout changes
   will-change: grid-template-columns;
   transition: grid-template-columns 0.2s ease;
+
+  &.mobile {
+    grid-gap: var(--j-space-300);
+  }
 
   > div {
     aspect-ratio: 16/9;
@@ -148,6 +153,23 @@ const videoGrid = ref<HTMLElement | null>(null);
     position: relative;
     contain: strict;
 
+    &.landscape-mobile {
+      flex-direction: row;
+      overflow: hidden;
+
+      > div:first-child {
+        max-width: calc(100% - 120px);
+      }
+    }
+
+    &.mobile:not(.landscape-mobile) > div:first-child {
+      max-height: calc(100% - 80px);
+    }
+
+    &:not(.mobile):not(.landscape-mobile) > div:first-child {
+      max-height: calc(100% - 140px);
+    }
+
     > div {
       flex: 1;
       width: 100%;
@@ -161,8 +183,33 @@ const videoGrid = ref<HTMLElement | null>(null);
 
     .bottom-row {
       display: flex;
+      justify-content: center;
       overflow-x: auto;
       gap: var(--j-space-400);
+      flex: auto 0 0;
+
+      > div {
+        flex: 0 0 auto;
+      }
+    }
+
+    &.mobile .bottom-row {
+      height: 80px;
+      justify-content: start;
+    }
+
+    &:not(.mobile) .bottom-row {
+      height: 120px;
+    }
+
+    .side-column {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      gap: var(--j-space-300);
+      width: 180px;
+      height: 100%;
+      flex: auto 0 0;
 
       > div {
         flex: 0 0 auto;
