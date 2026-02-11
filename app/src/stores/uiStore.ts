@@ -128,10 +128,29 @@ export const useUiStore = defineStore(
       orientation.value = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
     }
 
-    onMounted(() => {
-      window.addEventListener('resize', updateOrientation);
-      window.addEventListener('orientationchange', updateOrientation);
-    });
+    // Setup resize listeners
+    const handleResize = () => {
+      updateWindowWidth();
+      updateOrientation();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleResize);
+    }
+
+    watch(isMobile, (newValue, oldValue) => {
+      if (newValue !== oldValue) {
+        if (newValue) {
+          // Set call window width to 100% of the screen so video grid updates
+          setCallWindowWidth(windowWidth.value);
+        } else {
+          // Revert call window width to desktop mode
+          const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
+          callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
+        }
+      }
+    })
 
     return {
       // State

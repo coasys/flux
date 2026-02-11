@@ -49,13 +49,6 @@ const { globalError, showGlobalLoading } = storeToRefs(uiStore);
 
 // Initialise the global theme
 onMounted(() => themeStore.changeCurrentTheme('global'));
-
-// Set up resize listeners to keep track of window width for responsive design
-onMounted(() => {
-  uiStore.updateWindowWidth();
-  window.addEventListener('resize', uiStore.updateWindowWidth);
-});
-onUnmounted(() => window.removeEventListener('resize', uiStore.updateWindowWidth));
 </script>
 
 <style lang="scss">
