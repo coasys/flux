@@ -35,13 +35,15 @@ export class Message extends Ad4mModel {
 
   @Optional({
     through: HAS_REPLY,
-    surrealGetter: `(<-link[WHERE perspective = $perspective AND predicate = '${HAS_REPLY}'].in.uri)[0]`,
+    getter: `(<-link[WHERE perspective = $perspective AND predicate = '${HAS_REPLY}'].in.uri)[0]`,
   })
   replyingTo: string | undefined = '';
 
   @ReadOnly({
-    getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
-    (length(List, Length), Length > 5 -> Value = true ; Value = false)`,
+    prologGetter: `
+      findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
+      (length(List, Length), Length > 5 -> Value = true ; Value = false)
+    `,
   })
   isPopular: boolean = false;
 
