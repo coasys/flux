@@ -29,6 +29,7 @@
 
       <!-- Main focused video -->
       <MediaPlayer
+        v-if="focusedParticipant"
         :key="`participant-${focusedParticipant.did}`"
         :did="focusedParticipant.did"
         :isMe="focusedParticipant.isMe"
@@ -190,7 +191,7 @@ watch(
       justify-content: center;
       overflow-x: auto;
       gap: var(--j-space-400);
-      flex: auto 0 0;
+      flex: 0 0 auto;
 
       > div {
         flex: 0 0 auto;
@@ -213,7 +214,7 @@ watch(
       gap: var(--j-space-300);
       width: 180px;
       height: 100%;
-      flex: auto 0 0;
+      flex: 0 0 auto;
 
       > div {
         flex: 0 0 auto;

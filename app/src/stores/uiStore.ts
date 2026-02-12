@@ -201,6 +201,8 @@ export const useUiStore = defineStore(
         'selectedVideoLayout',
         'focusedVideoId',
         'callWidgetsHeight',
+        'orientation',
+        'isLandscapeMobile',
       ],
     },
   },
