@@ -38,9 +38,15 @@ const router = useRouter();
 const { channelId } = useRouteParams();
 const { perspective, allChannels } = useCommunityService();
 
-const channel = computed(() => allChannels.value.find((c) => c.baseExpression === restoreChannelPrefix(channelId.value)));
+const channel = computed(() =>
+  allChannels.value.find((c) => c.baseExpression === restoreChannelPrefix(channelId.value)),
+);
 
-const { entries: views } = useModel({ perspective, model: App, query: { source: channel.value?.baseExpression || restoreChannelPrefix(channelId.value) } });
+const { entries: views } = useModel({
+  perspective,
+  model: App,
+  query: { source: channel.value?.baseExpression || restoreChannelPrefix(channelId.value) },
+});
 
 const currentView = ref<string>('');
 const isChangeChannel = ref(false);

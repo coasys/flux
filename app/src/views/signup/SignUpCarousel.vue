@@ -44,7 +44,7 @@
     </j-button>
   </j-box> -->
 
-  <j-flex v-if="clientReady" j="center" a="center" gap="400" style="z-index: 1;">
+  <j-flex v-if="clientReady" j="center" a="center" gap="400" style="z-index: 1">
     <j-spinner size="sm" />
     <j-text nomargin size="600">Loading...</j-text>
   </j-flex>

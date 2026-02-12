@@ -93,7 +93,9 @@ export const useWebrtcStore = defineStore(
     const hasCopiedLink = ref(false);
     let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const communityService = computed(() => getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')));
+    const communityService = computed(() =>
+      getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')),
+    );
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 
@@ -610,7 +612,7 @@ export const useWebrtcStore = defineStore(
 
         // Set the video layout to focused on mobile for better experience
         if (uiStore.isLandscapeMobile) {
-          uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' })
+          uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' });
         }
 
         inCall.value = true;
@@ -651,12 +653,12 @@ export const useWebrtcStore = defineStore(
       try {
         await navigator.clipboard.writeText(location.href);
         appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
-        
+
         // Clear any existing timer to avoid multiple pending timeouts
         if (copyLinkTimer !== null) {
           clearTimeout(copyLinkTimer);
         }
-        
+
         hasCopiedLink.value = true;
         copyLinkTimer = setTimeout(() => {
           hasCopiedLink.value = false;
@@ -685,7 +687,10 @@ export const useWebrtcStore = defineStore(
         );
         // Merge the agent states with their profiles
         agentsInCall.value = await Promise.all(
-          agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did, appStore.ad4mClient)) })),
+          agentsInCallMap.map(async ([did, agent]) => ({
+            ...agent,
+            ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
+          })),
         );
       },
       { deep: true },

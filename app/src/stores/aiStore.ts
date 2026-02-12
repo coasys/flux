@@ -205,7 +205,7 @@ export const useAiStore = defineStore(
             console.log('b.channel.baseExpression:', b.channel.baseExpression);
             console.log('current channelId:', channelId);
             console.log('current communityId:', communityId);
-            // Current channel gets highest priority 
+            // Current channel gets highest priority
             if (a.channel.baseExpression! === channelId && b.channel.baseExpression! !== channelId) return -1;
             if (b.channel.baseExpression! === channelId && a.channel.baseExpression! !== channelId) return 1;
 
@@ -237,7 +237,10 @@ export const useAiStore = defineStore(
         console.log('🤖 Checking for unprocessed items in channel:', await rawChannel);
         const unprocessedItems = await rawChannel.unprocessedItems!();
         console.log('unprocessedItems:', unprocessedItems);
-        const numberOfItemsToProcess = Math.max(0, Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY));
+        const numberOfItemsToProcess = Math.max(
+          0,
+          Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY),
+        );
         const itemsToProcess = unprocessedItems.slice(0, numberOfItemsToProcess);
 
         // Skip if no items to process (can happen if task was queued but items were processed by another agent)

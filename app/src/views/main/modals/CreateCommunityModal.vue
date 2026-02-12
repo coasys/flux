@@ -325,7 +325,7 @@ async function createCommunityFromPerspective(perspective: any) {
       client: appStore.ad4mClient,
     });
     await appStore.getMyCommunities();
-    const addedPerspective = appStore.myPerspectives.find(p => p.uuid === community.uuid);
+    const addedPerspective = appStore.myPerspectives.find((p) => p.uuid === community.uuid);
     if (addedPerspective?.sharedUrl) {
       router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(addedPerspective.sharedUrl) } });
     }

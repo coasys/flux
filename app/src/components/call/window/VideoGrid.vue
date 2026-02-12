@@ -89,9 +89,13 @@ const {
 } = useVideoLayout();
 
 // Automatically focus on the first participant when switching to landscape mobile in focused layout
-watch(isLandscapeMobile, (newVal) => {
-  if (newVal && focusedParticipant.value) focusOnVideo(focusedParticipant.value.did);
-}, { immediate: true });
+watch(
+  isLandscapeMobile,
+  (newVal) => {
+    if (newVal && focusedParticipant.value) focusOnVideo(focusedParticipant.value.did);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">

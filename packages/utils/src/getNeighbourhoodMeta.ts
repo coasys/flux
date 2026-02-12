@@ -24,7 +24,10 @@ export function getMetaFromLinks(links: LinkExpression[]): NeighbourhoodMetaData
   );
 }
 
-export async function getMetaFromNeighbourhood(client: Ad4mClient, neighbourhoodUrl: string): Promise<NeighbourhoodMetaData> {
+export async function getMetaFromNeighbourhood(
+  client: Ad4mClient,
+  neighbourhoodUrl: string,
+): Promise<NeighbourhoodMetaData> {
   const neighbourhoodExp = await client.expression.get(neighbourhoodUrl);
   const meta = JSON.parse(neighbourhoodExp.data).meta;
   return getMetaFromLinks(meta.links);

@@ -332,7 +332,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInChannel(channelId?: string) {
     return computed<AgentData[]>(() => {
       return agentsWithProfiles.value.filter(
-        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.currentRoute?.channelId === stripChannelPrefix(channelId || ''),
+        (agent) =>
+          !['offline', 'invisible'].includes(agent.status) &&
+          agent.currentRoute?.channelId === stripChannelPrefix(channelId || ''),
       );
     });
   }
@@ -340,7 +342,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function getAgentsInCall(channelId?: string) {
     return computed<AgentData[]>(() =>
       agentsWithProfiles.value.filter(
-        (agent) => !['offline', 'invisible'].includes(agent.status) && agent.callRoute?.channelId === stripChannelPrefix(channelId || ''),
+        (agent) =>
+          !['offline', 'invisible'].includes(agent.status) &&
+          agent.callRoute?.channelId === stripChannelPrefix(channelId || ''),
       ),
     );
   }
@@ -350,7 +354,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     [agents, () => appStore.ad4mClient],
     async ([newAgents]) => {
       if (!appStore.ad4mClient) return;
-      
+
       const agentEntries = Object.entries(newAgents);
       agentsWithProfiles.value = await Promise.all(
         agentEntries.map(async ([did, agent]) => ({

@@ -45,7 +45,8 @@ async function leaveCommunity() {
   if (!perspective) return appStore.showDangerToast({ message: 'Invalid community id.' });
   leaving.value = true;
   try {
-    if (restoreNeighbourhoodPrefix(route.params.communityId as string) === communityUrl.value) await router.push({ name: 'home' });
+    if (restoreNeighbourhoodPrefix(route.params.communityId as string) === communityUrl.value)
+      await router.push({ name: 'home' });
     await ad4mClient.value.perspective.remove(perspective.uuid);
     // Delete community from appStore myCommunities
     if (communityUrl.value && communityUrl.value in myCommunities.value) {

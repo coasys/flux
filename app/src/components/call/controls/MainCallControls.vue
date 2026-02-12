@@ -21,7 +21,10 @@
         :size="isMobile ? 'md' : 'lg'"
         :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
       >
-        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" :size="isMobile ? 'sm' : 'md'" />
+        <j-icon
+          :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'"
+          :size="isMobile ? 'sm' : 'md'"
+        />
       </j-button>
     </j-tooltip>
 
@@ -91,18 +94,36 @@
 
     <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
       <j-button @click="webrtcStore.copyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
-        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': isMobile ? hasCopiedLink ? '1.3em' : '1.7em' : hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
+        <j-icon
+          :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+          :style="{
+            '--j-icon-size': isMobile ? (hasCopiedLink ? '1.3em' : '1.7em') : hasCopiedLink ? '1.5em' : '2em',
+            margin: hasCopiedLink ? '0' : '0 0 -4px 0',
+          }"
+        />
       </j-button>
     </j-tooltip>
 
     <j-tooltip placement="top" title="Call settings">
-      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
+      <j-button
+        @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings"
+        square
+        circle
+        :size="isMobile ? 'md' : 'lg'"
+      >
         <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
     <j-tooltip placement="top" title="Leave call">
-      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle :size="isMobile ? 'md' : 'lg'" :disabled="!inCall">
+      <j-button
+        variant="danger"
+        @click="webrtcStore.leaveRoom"
+        square
+        circle
+        :size="isMobile ? 'md' : 'lg'"
+        :disabled="!inCall"
+      >
         <j-icon name="telephone-x" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>

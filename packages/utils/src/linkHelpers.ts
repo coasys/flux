@@ -89,7 +89,10 @@ export async function createLinks(source: string, map: PredicateMap) {
   return links.flat();
 }
 
-export async function createLiteralObject(client: Ad4mClient, { parent, children }: { parent: LinkInput; children: PredicateMap }) {
+export async function createLiteralObject(
+  client: Ad4mClient,
+  { parent, children }: { parent: LinkInput; children: PredicateMap },
+) {
   const expUrl = await client.expression.create(parent.target, 'literal');
 
   const parentLink = new Link({

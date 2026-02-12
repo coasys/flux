@@ -1,9 +1,5 @@
 <template>
-  <div 
-    ref="rightSection" 
-    class="call-window-panel"
-    :style="{ backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }"
-  >
+  <div ref="rightSection" class="call-window-panel" :style="{ backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }">
     <div
       ref="callWindow"
       :class="['call-window', { open: callWindowOpen }]"
@@ -34,7 +30,12 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow" aria-label="Close call window" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
+        <button
+          class="close-button"
+          @click="closeCallWindow"
+          aria-label="Close call window"
+          :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }"
+        >
           <j-icon name="x" color="color-white" />
         </button>
       </div>
@@ -44,11 +45,19 @@
         <template v-if="isLandscapeMobile">
           <VideoGrid />
 
-          <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--j-space-500)">
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              gap: var(--j-space-500);
+            "
+          >
             <!-- Join prompt -->
             <j-box v-if="!inCall" mb="500">
               <j-flex direction="column" a="center" gap="300">
-                <j-text size="700" nomargin style="text-align: center;">You haven't joined this room</j-text>
+                <j-text size="700" nomargin style="text-align: center">You haven't joined this room</j-text>
                 <j-text size="500" nomargin>Your microphone will be enabled.</j-text>
               </j-flex>
             </j-box>
@@ -57,7 +66,13 @@
             <MainCallControls v-if="inCall" />
 
             <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
-              <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em', margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0' }" />
+              <j-icon
+                :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+                :style="{
+                  '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em',
+                  margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0',
+                }"
+              />
               Copy Call Invite Link
             </j-button>
           </div>
@@ -67,7 +82,7 @@
           <!-- Join prompt -->
           <j-box v-if="!inCall" mb="500">
             <j-flex direction="column" a="center" gap="300">
-              <j-text size="700" nomargin style="text-align: center;">You haven't joined this room</j-text>
+              <j-text size="700" nomargin style="text-align: center">You haven't joined this room</j-text>
               <j-text size="500" nomargin>Your microphone will be enabled.</j-text>
             </j-flex>
           </j-box>
@@ -77,7 +92,13 @@
           <MainCallControls v-if="inCall" />
 
           <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
-            <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em', margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0' }" />
+            <j-icon
+              :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+              :style="{
+                '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em',
+                margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0',
+              }"
+            />
             Copy Call Invite Link
           </j-button>
         </template>

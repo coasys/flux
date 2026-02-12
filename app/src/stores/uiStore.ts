@@ -30,9 +30,7 @@ export const useUiStore = defineStore(
     const windowState = ref<WindowState>('visible');
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
     const orientation = ref<'portrait' | 'landscape'>(
-      typeof window !== 'undefined' 
-        ? (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape')
-        : 'landscape'
+      typeof window !== 'undefined' ? (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape') : 'landscape',
     );
 
     const isMobile = computed(() => windowWidth.value <= BREAKPOINTS.MOBILE);
@@ -143,7 +141,7 @@ export const useUiStore = defineStore(
 
     watch(isMobile, (newValue) => {
       if (!callWindowOpen.value) return;
-      
+
       if (newValue) {
         // Set call window width to 100% of the screen so video grid updates
         setCallWindowWidth(windowWidth.value);
@@ -152,7 +150,7 @@ export const useUiStore = defineStore(
         const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
         callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
       }
-    })
+    });
 
     return {
       // State

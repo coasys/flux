@@ -188,9 +188,7 @@ async function getEntanglementProofs() {
         ? agent.perspective.links.filter((l: any) => l.data.predicate === 'ad4m://entanglement_proof')
         : [];
 
-      const expressions = await Promise.all(
-        proofLinks?.map((link: any) => client.expression.get(link.data.target)),
-      );
+      const expressions = await Promise.all(proofLinks?.map((link: any) => client.expression.get(link.data.target)));
 
       // Filter out null/undefined expressions
       const validExpressions = expressions.filter((e) => e && e.data);

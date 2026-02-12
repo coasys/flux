@@ -7,9 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import RecordingIcon from '../RecordingIcon/RecordingIcon.jsx';
 import styles from './Transcriber.module.scss';
 
-type Props = { 
-  source: string; 
-  perspective: any; 
+type Props = {
+  source: string;
+  perspective: any;
   webRTC: WebRTC;
   client: Ad4mClient;
 };

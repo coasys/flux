@@ -133,7 +133,9 @@ export const useAppStore = defineStore(
     }
 
     function getPerspective(neighbourhoodUrl: string): PerspectiveProxy | undefined {
-      const perspective = myPerspectives.value.find(p => p.sharedUrl === neighbourhoodUrl) as PerspectiveProxy | undefined;
+      const perspective = myPerspectives.value.find((p) => p.sharedUrl === neighbourhoodUrl) as
+        | PerspectiveProxy
+        | undefined;
       return toRaw(perspective);
     }
 
