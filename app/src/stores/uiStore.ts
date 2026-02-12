@@ -30,7 +30,9 @@ export const useUiStore = defineStore(
     const windowState = ref<WindowState>('visible');
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
     const orientation = ref<'portrait' | 'landscape'>(
-      window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
+      typeof window !== 'undefined' 
+        ? (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape')
+        : 'landscape'
     );
 
     const isMobile = computed(() => windowWidth.value <= BREAKPOINTS.MOBILE);
@@ -139,16 +141,16 @@ export const useUiStore = defineStore(
       window.addEventListener('orientationchange', handleResize);
     }
 
-    watch(isMobile, (newValue, oldValue) => {
-      if (newValue !== oldValue) {
-        if (newValue) {
-          // Set call window width to 100% of the screen so video grid updates
-          setCallWindowWidth(windowWidth.value);
-        } else {
-          // Revert call window width to desktop mode
-          const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
-          callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
-        }
+    watch(isMobile, (newValue) => {
+      if (!callWindowOpen.value) return;
+      
+      if (newValue) {
+        // Set call window width to 100% of the screen so video grid updates
+        setCallWindowWidth(windowWidth.value);
+      } else {
+        // Revert call window width to desktop mode
+        const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
+        callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
       }
     })
 
