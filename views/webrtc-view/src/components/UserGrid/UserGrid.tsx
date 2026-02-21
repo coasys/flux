@@ -14,10 +14,11 @@ import styles from './UserGrid.module.css';
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
+  fullscreen?: boolean;
   getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function UserGrid({ webRTC, profile, getProfile }: Props) {
+export default function UserGrid({ webRTC, profile, fullscreen, getProfile }: Props) {
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
 
@@ -86,7 +87,7 @@ export default function UserGrid({ webRTC, profile, getProfile }: Props) {
     });
 
   return (
-    <div className={styles.grid} style={{ '--grid-col-size': gridColSize } as any}>
+    <div className={styles.grid} data-fullscreen={fullscreen} style={{ '--grid-col-size': gridColSize } as any}>
       {webRTC.localStream && (
         <Item
           webRTC={webRTC}

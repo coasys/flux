@@ -8,3 +8,16 @@
   min-height: 100%;
   padding: var(--j-space-500);
 }
+
+.wrapper[data-browser-fullscreen='true'] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: var(--j-color-ui-50, #000);
+  padding: var(--j-space-400);
+  display: flex;
+  flex-direction: column;
+}

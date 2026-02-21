@@ -67,9 +67,29 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }
 
   function toggleFullscreen() {
-    setFullscreen(!fullscreen);
+    const goingFullscreen = !fullscreen;
+    setFullscreen(goingFullscreen);
     uiStore.toggleCallFullscreen();
+
+    // Use browser Fullscreen API for true fullscreen
+    if (goingFullscreen && wrapperEl.current) {
+      wrapperEl.current.requestFullscreen?.().catch(() => {});
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
   }
+
+  // Sync fullscreen state when user exits via Escape key
+  useEffect(() => {
+    function onFullscreenChange() {
+      if (!document.fullscreenElement && fullscreen) {
+        setFullscreen(false);
+        uiStore.toggleCallFullscreen();
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, [fullscreen]);
 
   useEffect(() => {
     if (webrtcStore) webrtcStore.addInstance(webRTC);
@@ -80,7 +100,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }, [agent, getProfile]);
 
   return (
-    <section className={styles.wrapper} ref={wrapperEl}>
+    <section className={styles.wrapper} ref={wrapperEl} data-browser-fullscreen={fullscreen}>
       {!webRTC.hasJoined && profile && (
         <JoinScreen
           webRTC={webRTC}
@@ -96,7 +116,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
 
       {webRTC.hasJoined && (
         <>
-          <UserGrid webRTC={webRTC} profile={profile} getProfile={getProfile} />
+          <UserGrid webRTC={webRTC} profile={profile} getProfile={getProfile} fullscreen={fullscreen} />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}

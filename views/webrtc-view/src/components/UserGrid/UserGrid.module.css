@@ -4,3 +4,8 @@
   grid-gap: var(--j-space-500);
   width: 100%;
 }
+
+.grid[data-fullscreen='true'] {
+  height: 100%;
+  align-content: center;
+}
