@@ -521,54 +521,59 @@ export default class Conversation extends Ad4mModel {
     }
 
     updateProcessingState({ step: 7 });
-    // NOTE: Embedding vector creation disabled to improve processing performance.
-    // The embedding code is preserved below for future re-enablement.
+    // Embedding vector creation gated behind ENABLE_EMBEDDINGS environment variable.
+    // Set ENABLE_EMBEDDINGS=true to re-enable. Defaults to off for performance.
+    const enableEmbeddings = typeof process !== 'undefined' && process.env?.ENABLE_EMBEDDINGS === 'true';
 
-    // // create vector embeddings for each unprocessed item
-    // if (showLogs) console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
-    // const start3 = new Date().getTime();
-    // await Promise.all(
-    //   unprocessedItems.map((item, index) =>
-    //     createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1),
-    //   ),
-    // );
-    // const end3 = new Date().getTime();
-    // if (showLogs) console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
+    if (enableEmbeddings) {
+      // create vector embeddings for each unprocessed item
+      if (showLogs) console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
+      const start3 = new Date().getTime();
+      await Promise.all(
+        unprocessedItems.map((item, index) =>
+          createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1),
+        ),
+      );
+      const end3 = new Date().getTime();
+      if (showLogs) console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
 
-    // // update vector embedding for conversation
-    // const start4 = new Date().getTime();
-    // await removeEmbedding(this.perspective, this.baseExpression, batchId);
-    // await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
-    // const end4 = new Date().getTime();
-    // if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
+      // update vector embedding for conversation
+      const start4 = new Date().getTime();
+      await removeEmbedding(this.perspective, this.baseExpression, batchId);
+      await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
+      const end4 = new Date().getTime();
+      if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
-    // // update vector embedding for currentSubgroup if returned from LLM
-    // if (currentSubgroup) {
-    //   const start5 = new Date().getTime();
-    //   await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
-    //   await createEmbedding(
-    //     this.perspective,
-    //     currentSubgroup.summary,
-    //     currentSubgroup.baseExpression,
-    //     this.perspective.ai,
-    //     batchId,
-    //   );
-    //   const end5 = new Date().getTime();
-    //   if (showLogs) console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
-    // }
-    // // create vector embedding for new subgroup if returned from LLM
-    // if (newSubgroupEntity) {
-    //   const start6 = new Date().getTime();
-    //   await createEmbedding(
-    //     this.perspective,
-    //     newSubgroupEntity.summary,
-    //     newSubgroupEntity.baseExpression,
-    //     this.perspective.ai,
-    //     batchId,
-    //   );
-    //   const end6 = new Date().getTime();
-    //   if (showLogs) console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
-    // }
+      // update vector embedding for currentSubgroup if returned from LLM
+      if (currentSubgroup) {
+        const start5 = new Date().getTime();
+        await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
+        await createEmbedding(
+          this.perspective,
+          currentSubgroup.summary,
+          currentSubgroup.baseExpression,
+          this.perspective.ai,
+          batchId,
+        );
+        const end5 = new Date().getTime();
+        if (showLogs) console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
+      }
+      // create vector embedding for new subgroup if returned from LLM
+      if (newSubgroupEntity) {
+        const start6 = new Date().getTime();
+        await createEmbedding(
+          this.perspective,
+          newSubgroupEntity.summary,
+          newSubgroupEntity.baseExpression,
+          this.perspective.ai,
+          batchId,
+        );
+        const end6 = new Date().getTime();
+        if (showLogs) console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
+      }
+    } else if (showLogs) {
+      console.log('Embedding vector creation skipped (ENABLE_EMBEDDINGS not set)');
+    }
 
     // batch commit all new links (currently only "ad4m://has_child" links)
     // i.e. sorting messages into current and/or new sub-group
