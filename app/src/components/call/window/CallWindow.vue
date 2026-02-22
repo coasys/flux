@@ -1,21 +1,21 @@
 <template>
   <div 
     ref="rightSection" 
-    class="call-window-panel"
+    :class="['call-window-panel', { 'call-window-panel--fullscreen': callWindowFullscreen }]"
     :style="{ backgroundColor: isMobile ? '#1c1a1f' : 'transparent' }"
   >
     <div
       ref="callWindow"
       :class="['call-window', { open: callWindowOpen }]"
       :style="{
-        width: isMobile ? '100%' : `${callWindowOpen ? callWindowWidth : 0}px`,
+        width: callWindowFullscreen ? '100%' : (isMobile ? '100%' : `${callWindowOpen ? callWindowWidth : 0}px`),
         pointerEvents: callWindowOpen ? 'auto' : 'none',
         justifyContent: isMobile ? 'flex-start' : 'space-between',
         padding: isMobile ? 'var(--j-space-300)' : callWindowOpen ? 'var(--j-space-500)' : '0',
       }"
       :aria-hidden="!callWindowOpen"
     >
-      <CallResizeHandle v-if="!isMobile" @start-resize="startResize" />
+      <CallResizeHandle v-if="!isMobile && !callWindowFullscreen" @start-resize="startResize" />
 
       <!-- Header -->
       <div class="call-window-header" :style="{ marginBottom: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
@@ -34,8 +34,8 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow" aria-label="Close call window" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
-          <j-icon name="x" color="color-white" />
+        <button class="close-button" @click="closeCallWindow" :aria-label="callWindowFullscreen ? 'Exit fullscreen' : 'Close call window'" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
+          <j-icon :name="callWindowFullscreen ? 'fullscreen-exit' : 'x'" color="color-white" />
         </button>
       </div>
 
@@ -97,7 +97,7 @@ defineProps<{
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { callWindowWidth, callWindowOpen, isMobile } = storeToRefs(uiStore);
+const { callWindowWidth, callWindowOpen, callWindowFullscreen, isMobile } = storeToRefs(uiStore);
 const { agentsInCall, inCall, hasCopiedLink } = storeToRefs(webrtcStore);
 
 const rightSection = ref<HTMLElement | null>(null);
@@ -106,7 +106,12 @@ const callWindow = ref<HTMLElement | null>(null);
 const { startResize } = useCallResize(callWindow, rightSection);
 
 function closeCallWindow() {
-  uiStore.setCallWindowOpen(false);
+  if (callWindowFullscreen.value) {
+    // In fullscreen: exit fullscreen instead of closing the call
+    uiStore.toggleCallWindowFullscreen();
+  } else {
+    uiStore.setCallWindowOpen(false);
+  }
 }
 </script>
 
@@ -119,6 +124,17 @@ function closeCallWindow() {
   justify-content: flex-end;
   overflow: hidden;
 
+  &--fullscreen {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999;
+    background-color: #1c1a1f !important;
+    transform: none !important;
+  }
+
   .call-window {
     position: relative;
     pointer-events: auto;
@@ -127,7 +143,7 @@ function closeCallWindow() {
     height: 100%;
     background-color: #1c1a1f;
     transition: all 0.5s ease-in-out;
-    transition-property: opacity, width, transform;
+    transition-property: opacity, width;
     opacity: 0;
     padding: 0;
 
