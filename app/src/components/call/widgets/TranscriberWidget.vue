@@ -119,6 +119,14 @@
           </j-flex>
         </j-flex>
 
+        <j-flex gap="300" a="center">
+          <j-text nomargin weight="800" size="400">Language:</j-text>
+          <select v-model="selectedLanguage" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
+            <option value="en">English</option>
+            <option value="de">German</option>
+          </select>
+        </j-flex>
+
         <j-flex gap="300">
           <j-text nomargin weight="800" size="400">Whisper:</j-text>
           <j-text v-if="!whisperLoadingStatus" nomargin size="400">Model not found</j-text>
@@ -233,6 +241,7 @@ const { callRoute } = storeToRefs(webrtcStore);
 const browser = detectBrowser();
 
 const transcripts = ref<any[]>([]);
+const selectedLanguage = ref('en');
 const useRemoteService = ref(false);
 const previewText = ref('');
 const usingRemoteService = ref(false);
@@ -478,6 +487,7 @@ async function startLocalTransciption(stream: MediaStream) {
     'Whisper',
     handleTranscriptionText,
     moreDemaningParams,
+    selectedLanguage.value,
   );
 
   const wordByWordParams = {
@@ -492,6 +502,7 @@ async function startLocalTransciption(stream: MediaStream) {
     'whisper_tiny_quantized',
     handleTranscriptionPreview,
     wordByWordParams,
+    selectedLanguage.value,
   );
 
   if (audioContext.value) {
