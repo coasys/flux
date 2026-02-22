@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: repeat(var(--grid-col-size), 1fr);
   grid-auto-rows: 1fr;
-  grid-gap: var(--j-space-500);
+  gap: var(--j-space-500);
   width: 100%;
 }
 

@@ -72,27 +72,38 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
     uiStore.toggleCallFullscreen();
 
     // Try browser Fullscreen API as enhancement
-    if (goingFullscreen && wrapperEl.current) {
-      wrapperEl.current.requestFullscreen?.().catch((err) => {
+    const el = wrapperEl.current;
+    if (goingFullscreen && el) {
+      const requestFs = el.requestFullscreen || (el as any).webkitRequestFullscreen;
+      requestFs?.call(el).catch((err: Error) => {
         console.error('Failed to enter fullscreen:', err);
       });
-    } else if (document.fullscreenElement) {
-      document.exitFullscreen?.().catch((err) => {
-        console.error('Failed to exit fullscreen:', err);
-      });
+    } else {
+      const fsEl = document.fullscreenElement || (document as any).webkitFullscreenElement;
+      if (fsEl) {
+        const exitFs = document.exitFullscreen || (document as any).webkitExitFullscreen;
+        exitFs?.call(document).catch((err: Error) => {
+          console.error('Failed to exit fullscreen:', err);
+        });
+      }
     }
   }
 
   // Sync fullscreen state when user exits via Escape key or other browser UI
   useEffect(() => {
     function onFullscreenChange() {
-      if (!document.fullscreenElement && fullscreen) {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      if (!isFs && fullscreen) {
         setFullscreen(false);
         uiStore.toggleCallFullscreen();
       }
     }
     document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    };
   }, [fullscreen, uiStore]);
 
   useEffect(() => {
