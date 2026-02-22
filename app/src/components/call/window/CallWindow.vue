@@ -34,8 +34,8 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow" aria-label="Close call window" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
-          <j-icon name="x" color="color-white" />
+        <button class="close-button" @click="closeCallWindow" :aria-label="callWindowFullscreen ? 'Exit fullscreen' : 'Close call window'" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
+          <j-icon :name="callWindowFullscreen ? 'fullscreen-exit' : 'x'" color="color-white" />
         </button>
       </div>
 
@@ -106,7 +106,12 @@ const callWindow = ref<HTMLElement | null>(null);
 const { startResize } = useCallResize(callWindow, rightSection);
 
 function closeCallWindow() {
-  uiStore.setCallWindowOpen(false);
+  if (callWindowFullscreen.value) {
+    // In fullscreen: exit fullscreen instead of closing the call
+    uiStore.toggleCallWindowFullscreen();
+  } else {
+    uiStore.setCallWindowOpen(false);
+  }
 }
 </script>
 
