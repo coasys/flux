@@ -67,29 +67,32 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }
 
   function toggleFullscreen() {
-    const goingFullscreen = !fullscreen;
-    setFullscreen(goingFullscreen);
-    uiStore.toggleCallFullscreen();
-
-    // Use browser Fullscreen API for true fullscreen
-    if (goingFullscreen && wrapperEl.current) {
-      wrapperEl.current.requestFullscreen?.().catch(() => {});
+    // Only invoke the browser API; the fullscreenchange handler is the single source of truth
+    if (!fullscreen && wrapperEl.current) {
+      wrapperEl.current.requestFullscreen?.().catch((err) => {
+        console.error('Failed to enter fullscreen:', err);
+      });
     } else if (document.fullscreenElement) {
-      document.exitFullscreen?.().catch(() => {});
+      document.exitFullscreen?.().catch((err) => {
+        console.error('Failed to exit fullscreen:', err);
+      });
     }
   }
 
-  // Sync fullscreen state when user exits via Escape key
+  // Single source of truth: sync state from browser fullscreen events
   useEffect(() => {
     function onFullscreenChange() {
-      if (!document.fullscreenElement && fullscreen) {
-        setFullscreen(false);
-        uiStore.toggleCallFullscreen();
-      }
+      const isFullscreen = !!document.fullscreenElement;
+      setFullscreen((prev) => {
+        if (prev !== isFullscreen) {
+          uiStore.toggleCallFullscreen();
+        }
+        return isFullscreen;
+      });
     }
     document.addEventListener('fullscreenchange', onFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
-  }, [fullscreen]);
+  }, [uiStore]);
 
   useEffect(() => {
     if (webrtcStore) webrtcStore.addInstance(webRTC);

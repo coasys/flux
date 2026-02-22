@@ -1,11 +1,13 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-col-size), 1fr);
+  grid-auto-rows: 1fr;
   grid-gap: var(--j-space-500);
   width: 100%;
 }
 
 .grid[data-fullscreen='true'] {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   align-content: center;
 }
