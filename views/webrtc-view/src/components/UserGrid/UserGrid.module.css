@@ -1,6 +1,13 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-col-size), 1fr);
-  grid-gap: var(--j-space-500);
+  grid-auto-rows: 1fr;
+  gap: var(--j-space-500);
   width: 100%;
+}
+
+.grid[data-fullscreen='true'] {
+  flex: 1;
+  min-height: 0;
+  align-content: center;
 }
