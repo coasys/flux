@@ -615,6 +615,13 @@ watch(
   },
 );
 
+// Watch for language changes — restart transcription with new language
+watch(selectedLanguage, () => {
+  if (listening.value) {
+    restartListening();
+  }
+});
+
 // Watch for remote service changes
 watch(useRemoteService, () => {
   // Skip on first run by checking if audio context is present
