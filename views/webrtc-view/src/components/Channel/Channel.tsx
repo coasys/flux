@@ -71,30 +71,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
     setFullscreen(goingFullscreen);
     uiStore.toggleCallFullscreen();
 
-    // Neutralize parent CSS transforms/transitions that create containing blocks
-    // (position: fixed inside a transformed parent is relative to that parent, not viewport)
-    if (wrapperEl.current) {
-      let el = wrapperEl.current.parentElement;
-      while (el && el !== document.body) {
-        if (goingFullscreen) {
-          const style = getComputedStyle(el);
-          if (style.transform !== 'none' || style.willChange === 'transform') {
-            el.dataset.savedTransform = el.style.transform;
-            el.dataset.savedTransition = el.style.transition;
-            el.style.transform = 'none';
-            el.style.transition = 'none';
-          }
-        } else if (el.dataset.savedTransform !== undefined) {
-          el.style.transform = el.dataset.savedTransform;
-          el.style.transition = el.dataset.savedTransition || '';
-          delete el.dataset.savedTransform;
-          delete el.dataset.savedTransition;
-        }
-        el = el.parentElement;
-      }
-    }
-
-    // Try browser Fullscreen API as enhancement (may fail in iframes/web components)
+    // Try browser Fullscreen API as enhancement
     if (goingFullscreen && wrapperEl.current) {
       wrapperEl.current.requestFullscreen?.().catch((err) => {
         console.error('Failed to enter fullscreen:', err);
