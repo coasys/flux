@@ -636,6 +636,11 @@ export const useWebrtcStore = defineStore(
         inCall.value = false;
         callRoute.value = {};
 
+        // Exit fullscreen before closing the call window
+        if (uiStore.callWindowFullscreen) {
+          uiStore.toggleCallWindowFullscreen();
+        }
+
         // Close the call window
         uiStore.setCallWindowOpen(false);
       } catch (error) {
