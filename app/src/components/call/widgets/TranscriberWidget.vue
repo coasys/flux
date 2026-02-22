@@ -49,6 +49,13 @@
         <j-flex gap="400" j="between" a="center">
           <j-text nomargin uppercase size="400" weight="800" color="primary-500">Transcriber</j-text>
           <j-flex a="center">
+            <j-flex gap="300" a="center" style="margin-right: 12px;">
+              <j-text nomargin weight="800" size="400">Language:</j-text>
+              <select v-model="selectedLanguage" aria-label="Transcription language" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
+                <option value="en">English</option>
+                <option value="de">German</option>
+              </select>
+            </j-flex>
             <j-tooltip
               placement="top"
               :title="`${browser === 'chrome' ? 'Use' : 'Using'} local AI for transcription`"
@@ -121,7 +128,7 @@
 
         <j-flex gap="300" a="center">
           <j-text nomargin weight="800" size="400">Language:</j-text>
-          <select v-model="selectedLanguage" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
+          <select v-model="selectedLanguage" aria-label="Transcription language" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
             <option value="en">English</option>
             <option value="de">German</option>
           </select>
@@ -594,9 +601,9 @@ function toggleRemoteService() {
   useRemoteService.value = !useRemoteService.value;
 }
 
-function restartListening() {
+async function restartListening() {
   console.log('Restarting listening with new settings');
-  stopListening();
+  await stopListening();
   startListening();
 }
 
