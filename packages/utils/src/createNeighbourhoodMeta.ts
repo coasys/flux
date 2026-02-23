@@ -12,6 +12,7 @@ export async function createNeighbourhoodMeta(
   const perspective = await client.perspective.add(`${name}-meta`);
 
   const nameExpression = await client.expression.create(name, 'literal');
+  const createdAtExpression = await client.expression.create(new Date().toISOString(), 'literal');
 
   //Create the links we want on meta
   const expressionLinks = [] as Link[];
@@ -34,7 +35,7 @@ export async function createNeighbourhoodMeta(
   expressionLinks.push(
     new Link({
       source: SELF,
-      target: new Date().toISOString(),
+      target: createdAtExpression,
       predicate: CREATED_AT,
     }),
   );
