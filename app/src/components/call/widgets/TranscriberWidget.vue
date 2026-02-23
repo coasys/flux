@@ -623,20 +623,20 @@ watch(
 );
 
 // Watch for language changes — restart transcription with new language
-watch(selectedLanguage, () => {
+watch(selectedLanguage, async () => {
   if (listening.value) {
-    restartListening();
+    await restartListening();
   }
 });
 
 // Watch for remote service changes
-watch(useRemoteService, () => {
+watch(useRemoteService, async () => {
   // Skip on first run by checking if audio context is present
-  if (audioContext.value) restartListening();
+  if (audioContext.value) await restartListening();
 });
 
 // Watch for microphone changes and restart listening
-watch(activeMicrophoneId, restartListening);
+watch(activeMicrophoneId, async () => await restartListening());
 </script>
 
 <style lang="scss" scoped>
