@@ -631,8 +631,8 @@ watch(useRemoteService, async () => {
 });
 
 // Watch for microphone changes and restart listening
-watch(activeMicrophoneId, () => {
-  if (listening.value) restartListening();
+watch(activeMicrophoneId, async () => {
+  if (listening.value) await restartListening();
 });
 </script>
 
