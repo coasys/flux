@@ -326,7 +326,7 @@ export default class Conversation extends Ad4mModel {
     await Promise.all(
       currentNewTopics.map((topic) => {
         const existingTopic = topicMatches.find((t) => t.topic == topic.n);
-        group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
+        return group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
       }),
     );
   }
