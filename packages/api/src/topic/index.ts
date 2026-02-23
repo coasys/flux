@@ -18,6 +18,7 @@ export default class Topic extends Ad4mModel {
   @Property({
     through: 'flux://topic',
     writable: true,
+    resolveLanguage: 'literal',
   })
   topic: string;
 

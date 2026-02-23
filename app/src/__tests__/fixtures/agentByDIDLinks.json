@@ -7,7 +7,7 @@
         "data": {
           "source": "flux://profile",
           "predicate": "sioc://has_username",
-          "target": "jhon",
+          "target": "literal://string:jhon",
           "__typename": "Link"
         },
         "proof": {

@@ -12,6 +12,7 @@ export default class Task extends Ad4mModel {
   @Property({
     through: 'flux://task_name',
     writable: true,
+    resolveLanguage: 'literal',
   })
   taskName: string;
 
