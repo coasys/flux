@@ -321,11 +321,11 @@ export default class Conversation extends Ad4mModel {
     currentNewTopics = currentNewTopics.filter((topic) => topic.n && topic.n.trim() !== '');
 
     const topicMatches = await Topic.findAll(this.perspective, {
-      where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl()) },
+      where: { topic: currentNewTopics.map((topic) => topic.n) },
     });
     await Promise.all(
       currentNewTopics.map((topic) => {
-        const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
+        const existingTopic = topicMatches.find((t) => t.topic == topic.n);
         group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
       }),
     );

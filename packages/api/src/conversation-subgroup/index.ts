@@ -265,7 +265,7 @@ export default class ConversationSubgroup extends Ad4mModel {
     if (!topic) {
       // console.log('create new topic for:', topicName);
       const newTopic = new Topic(this.perspective);
-      newTopic.topic = Literal.from(topicName).toUrl();
+      newTopic.topic = topicName;
       await newTopic.save(batchId);
       topic = await newTopic.get();
     }
