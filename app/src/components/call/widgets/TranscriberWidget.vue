@@ -51,10 +51,7 @@
           <j-flex a="center">
             <j-flex gap="300" a="center" style="margin-right: 12px;">
               <j-text nomargin weight="800" size="400">Language:</j-text>
-              <select v-model="selectedLanguage" aria-label="Transcription language" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
-                <option value="en">English</option>
-                <option value="de">German</option>
-              </select>
+              <LanguageSelector v-model="selectedLanguage" />
             </j-flex>
             <j-tooltip
               placement="top"
@@ -128,10 +125,7 @@
 
         <j-flex gap="300" a="center">
           <j-text nomargin weight="800" size="400">Language:</j-text>
-          <select v-model="selectedLanguage" aria-label="Transcription language" style="background: var(--j-color-ui-100); color: var(--j-color-ui-800); border: 1px solid var(--j-color-ui-300); border-radius: 4px; padding: 2px 6px; font-size: 12px;">
-            <option value="en">English</option>
-            <option value="de">German</option>
-          </select>
+          <LanguageSelector v-model="selectedLanguage" />
         </j-flex>
 
         <j-flex gap="300">
@@ -221,6 +215,7 @@
 </template>
 
 <script setup lang="ts">
+import LanguageSelector from './LanguageSelector.vue';
 import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
 import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
@@ -636,7 +631,9 @@ watch(useRemoteService, async () => {
 });
 
 // Watch for microphone changes and restart listening
-watch(activeMicrophoneId, async () => await restartListening());
+watch(activeMicrophoneId, () => {
+  if (listening.value) restartListening();
+});
 </script>
 
 <style lang="scss" scoped>
