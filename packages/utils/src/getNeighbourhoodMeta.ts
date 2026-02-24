@@ -12,7 +12,7 @@ export function getMetaFromLinks(links: LinkExpression[]): NeighbourhoodMetaData
         name: predicate === NAME ? Literal.fromUrl(target).get().data : acc.name,
         description: predicate === DESCRIPTION ? Literal.fromUrl(target).get().data : acc.description,
         author: predicate === CREATOR ? target : acc.author,
-        timestamp: predicate === CREATED_AT ? target : acc.timestamp,
+        timestamp: predicate === CREATED_AT ? (target.startsWith('literal://') ? Literal.fromUrl(target).get().data : target) : acc.timestamp,
       };
     },
     {
@@ -24,7 +24,10 @@ export function getMetaFromLinks(links: LinkExpression[]): NeighbourhoodMetaData
   );
 }
 
-export async function getMetaFromNeighbourhood(client: Ad4mClient, neighbourhoodUrl: string): Promise<NeighbourhoodMetaData> {
+export async function getMetaFromNeighbourhood(
+  client: Ad4mClient,
+  neighbourhoodUrl: string,
+): Promise<NeighbourhoodMetaData> {
   const neighbourhoodExp = await client.expression.get(neighbourhoodUrl);
   const meta = JSON.parse(neighbourhoodExp.data).meta;
   return getMetaFromLinks(meta.links);

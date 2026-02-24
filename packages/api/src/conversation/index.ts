@@ -205,14 +205,14 @@ export default class Conversation extends Ad4mModel {
           `;
 
           const timestampResults = await this.perspective.querySurrealDB(timestampQuery);
-          
+
           // Filter out null/undefined timestamps and convert to numeric timestamps
           const timestamps = (timestampResults || [])
             .map((r: any) => r.channelTimestamp)
             .filter((ts) => ts != null && ts !== '') // Remove null/undefined/empty
             .map((ts) => new Date(ts).getTime())
             .filter((time) => !isNaN(time)); // Remove invalid dates (NaN)
-          
+
           const start = timestamps.length > 0 ? timestamps[0] : 0;
           const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
 
@@ -321,12 +321,12 @@ export default class Conversation extends Ad4mModel {
     currentNewTopics = currentNewTopics.filter((topic) => topic.n && topic.n.trim() !== '');
 
     const topicMatches = await Topic.findAll(this.perspective, {
-      where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl()) },
+      where: { topic: currentNewTopics.map((topic) => topic.n) },
     });
     await Promise.all(
       currentNewTopics.map((topic) => {
-        const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
-        group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
+        const existingTopic = topicMatches.find((t) => t.topic == topic.n);
+        return group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
       }),
     );
   }
@@ -492,7 +492,7 @@ export default class Conversation extends Ad4mModel {
     if (currentSubgroup) {
       if (showLogs) console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
-      
+
       // Update current subgroup participants
       const subgroupNewParticipants = Array.from(currentSubgroupNewParticipants).filter(
         (author) => !currentSubgroup.participants.includes(author),

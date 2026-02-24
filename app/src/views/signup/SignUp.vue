@@ -6,7 +6,6 @@
 
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
-
         <j-box pb="800">
           <FluxLogoIcon width="150px" />
         </j-box>
@@ -132,9 +131,13 @@ async function allowNotifications(value: any) {
 }
 
 // Watch for client ready state to trigger autofill
-watch(() => appStore.initialized, async (initialized) => {
-  if (initialized) await autoFillUser();
-}, { immediate: true });
+watch(
+  () => appStore.initialized,
+  async (initialized) => {
+    if (initialized) await autoFillUser();
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>

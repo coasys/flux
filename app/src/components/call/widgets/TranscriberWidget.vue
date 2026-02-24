@@ -316,13 +316,13 @@ async function saveMessage() {
     const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
     const newMessage = new Message(perspective, undefined, channelUrl);
     newMessage.body = text;
-    
+
     // Store the timestamp from when the transcript started
-    const transcriptObj = transcripts.value.find(t => t.id === previousId);
+    const transcriptObj = transcripts.value.find((t) => t.id === previousId);
     if (transcriptObj?.timestamp) {
       newMessage.transcriptStartedAt = transcriptObj.timestamp.toISOString();
     }
-    
+
     await newMessage.save();
   } else {
     if (transcriptCard) {

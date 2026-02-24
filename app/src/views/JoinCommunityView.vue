@@ -8,14 +8,12 @@
         </j-flex>
 
         <j-flex direction="column" a="center" gap="200">
-            <j-text color="ui-600" nomargin>You need to join this community to continue.</j-text>
-            <j-text color="ui-600" nomargin>Would you like to join now?</j-text>
+          <j-text color="ui-600" nomargin>You need to join this community to continue.</j-text>
+          <j-text color="ui-600" nomargin>Would you like to join now?</j-text>
         </j-flex>
 
         <j-flex gap="400">
-          <j-button :disabled="isJoining" size="lg" full @click="router.push('/home')">
-            Cancel
-          </j-button>
+          <j-button :disabled="isJoining" size="lg" full @click="router.push('/home')"> Cancel </j-button>
           <j-button :loading="isJoining" :disabled="isJoining" variant="primary" size="lg" full @click="handleJoin">
             Join Community
           </j-button>
@@ -53,17 +51,17 @@ async function handleJoin() {
     const redirectPath = route.query.redirect as string;
 
     // Join the community
-    await joinCommunity({ 
-      joiningLink: restoreNeighbourhoodPrefix(communityId), 
-      client: appStore.ad4mClient 
+    await joinCommunity({
+      joiningLink: restoreNeighbourhoodPrefix(communityId),
+      client: appStore.ad4mClient,
     });
 
     // Refresh communities list
     await appStore.getMyCommunities();
-    
+
     // Show success message
     appStore.showSuccessToast({ message: 'Successfully joined community!' });
-    
+
     // Redirect to the original route if available
     if (redirectPath) {
       router.push(redirectPath);

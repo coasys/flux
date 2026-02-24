@@ -1,5 +1,5 @@
 <template>
-  <div class="call-controls" :style="{ padding: isMobile ? 'var(--j-space-300)' : 'var(--j-space-400)' }">
+  <div class="call-controls" :class="{ mobile: isMobile, 'landscape-mobile': isLandscapeMobile }">
     <j-tooltip placement="top" :title="mediaSettings.audioEnabled ? 'Mute microphone' : 'Unmute microphone'">
       <j-button
         :variant="mediaSettings.audioEnabled ? '' : 'primary'"
@@ -21,7 +21,10 @@
         :size="isMobile ? 'md' : 'lg'"
         :disabled="!availableDevices.filter((d) => d.kind === 'videoinput').length"
       >
-        <j-icon :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'" :size="isMobile ? 'sm' : 'md'" />
+        <j-icon
+          :name="mediaSettings.videoEnabled ? 'camera-video' : 'camera-video-off'"
+          :size="isMobile ? 'sm' : 'md'"
+        />
       </j-button>
     </j-tooltip>
 
@@ -91,18 +94,36 @@
 
     <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
       <j-button @click="webrtcStore.copyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
-        <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': isMobile ? hasCopiedLink ? '1.3em' : '1.7em' : hasCopiedLink ? '1.5em' : '2em', margin: hasCopiedLink ? '0' : '0 0 -4px 0' }" />
+        <j-icon
+          :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+          :style="{
+            '--j-icon-size': isMobile ? (hasCopiedLink ? '1.3em' : '1.7em') : hasCopiedLink ? '1.5em' : '2em',
+            margin: hasCopiedLink ? '0' : '0 0 -4px 0',
+          }"
+        />
       </j-button>
     </j-tooltip>
 
-    <j-tooltip v-if="!isMobile" placement="top" title="Call settings">
-      <j-button @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings" square circle :size="isMobile ? 'md' : 'lg'">
+    <j-tooltip placement="top" title="Call settings">
+      <j-button
+        @click="modalStore.showWebrtcSettings = !modalStore.showWebrtcSettings"
+        square
+        circle
+        :size="isMobile ? 'md' : 'lg'"
+      >
         <j-icon name="gear" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
 
     <j-tooltip placement="top" title="Leave call">
-      <j-button variant="danger" @click="webrtcStore.leaveRoom" square circle :size="isMobile ? 'md' : 'lg'" :disabled="!inCall">
+      <j-button
+        variant="danger"
+        @click="webrtcStore.leaveRoom"
+        square
+        circle
+        :size="isMobile ? 'md' : 'lg'"
+        :disabled="!inCall"
+      >
         <j-icon name="telephone-x" :size="isMobile ? 'sm' : 'md'" />
       </j-button>
     </j-tooltip>
@@ -132,7 +153,7 @@ const modalStore = useModalStore();
 const aiStore = useAiStore();
 
 const { me } = storeToRefs(appStore);
-const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
+const { callWindowFullscreen, isMobile, isLandscapeMobile } = storeToRefs(uiStore);
 const { mediaSettings, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
 const { inCall, hasCopiedLink } = storeToRefs(webrtcStore);
@@ -164,5 +185,17 @@ function onEmojiClick(e: CustomEvent<{ native?: string }>) {
   font-family: var(--j-font-family);
   border-radius: var(--j-border-radius);
   background-color: #ffffff08;
+  padding: var(--j-space-400);
+
+  &.mobile {
+    padding: var(--j-space-300);
+    position: absolute;
+    bottom: 0;
+    background-color: #00000053;
+  }
+
+  &.landscape-mobile {
+    left: calc(50% - 90px);
+  }
 }
 </style>

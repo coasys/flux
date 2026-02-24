@@ -194,7 +194,7 @@ async function createChannel() {
     if (!createChannelParent.value) {
       router.push({
         name: 'channel',
-        params: { communityId: communityId.value, channelId: stripChannelPrefix(channel.baseExpression)},
+        params: { communityId: communityId.value, channelId: stripChannelPrefix(channel.baseExpression) },
       });
     }
   } finally {

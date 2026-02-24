@@ -17,7 +17,6 @@ import '@coasys/flux-ui/dist/themes/dark.css';
 import '@coasys/flux-ui/dist/themes/retro.css';
 import './themes/themes.css';
 
-
 export const pinia = createPinia();
 
 pinia.use(
@@ -44,7 +43,7 @@ const savedRoute = { ...routeMemoryStore.currentRoute };
 const currentParams = router.resolve(window.location.hash.slice(1) || '/').params;
 
 // Mount the app immediately so UI is responsive
-vueApp.mount("#app");
+vueApp.mount('#app');
 
 // Initialize Ad4m client in an async IIFE to support older browsers
 (async () => {
@@ -70,7 +69,7 @@ vueApp.mount("#app");
     appStore.initialized = true;
 
     // Fallback to signup if no Flux account found
-    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'))
+    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
     if (!hasFluxAccount) return;
 
     // Determine which params to use for navigation (prioritize current params)

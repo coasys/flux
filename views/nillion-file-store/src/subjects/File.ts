@@ -6,7 +6,6 @@ import { ModelOptions, Property, Flag, Ad4mModel } from '@coasys/ad4m';
 export default class File extends Ad4mModel {
   @Flag({
     through: 'flux://entry_type',
-    writable: true,
     value: 'flux://has_file',
   })
   type: String;

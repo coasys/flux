@@ -23,9 +23,7 @@ export class List extends Ad4mModel {
 
   @Collection({
     through: 'ad4m://has_child',
-    where: {
-      condition: `instance(_, Target)`,
-    },
+    where: { prologCondition: `instance(_, Target)` },
   })
   children: string[] = [];
 }

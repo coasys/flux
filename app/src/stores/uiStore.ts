@@ -1,7 +1,8 @@
 import { defineStore, storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useMediaDevicesStore } from './mediaDevicesStore';
 import { VideoLayoutOption, WindowState } from './types';
+import { BREAKPOINTS } from '@/constants/breakpoints';
 
 export const useUiStore = defineStore(
   'uiStore',
@@ -28,8 +29,12 @@ export const useUiStore = defineStore(
     const globalError = ref({ show: false, message: '' });
     const windowState = ref<WindowState>('visible');
     const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024);
+    const orientation = ref<'portrait' | 'landscape'>(
+      typeof window !== 'undefined' ? (window.innerHeight > window.innerWidth ? 'portrait' : 'landscape') : 'landscape',
+    );
 
-    const isMobile = computed(() => windowWidth.value < 800);
+    const isMobile = computed(() => windowWidth.value <= BREAKPOINTS.MOBILE);
+    const isLandscapeMobile = computed(() => isMobile.value && orientation.value === 'landscape');
 
     // Mutations
     function toggleCommunitySidebar(): void {
@@ -119,12 +124,41 @@ export const useUiStore = defineStore(
       callWidgetsHeight.value = height;
     }
 
+    function updateOrientation() {
+      orientation.value = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+    }
+
+    // Setup resize listeners
+    const handleResize = () => {
+      updateWindowWidth();
+      updateOrientation();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('orientationchange', handleResize);
+    }
+
+    watch(isMobile, (newValue) => {
+      if (!callWindowOpen.value) return;
+
+      if (newValue) {
+        // Set call window width to 100% of the screen so video grid updates
+        setCallWindowWidth(windowWidth.value);
+      } else {
+        // Revert call window width to desktop mode
+        const fullWidth = window.innerWidth - communitySidebarWidth.value - appSidebarWidth.value;
+        callWindowWidth.value = callWindowFullscreen.value ? fullWidth : fullWidth / 2;
+      }
+    });
+
     return {
       // State
       appSidebarWidth,
       headerHeight,
       communitySidebarWidth,
       isMobile,
+      isLandscapeMobile,
       showAppSidebar,
       showCommunitySidebar,
       callWindowOpen,
@@ -136,6 +170,7 @@ export const useUiStore = defineStore(
       globalError,
       windowState,
       callWidgetsHeight,
+      orientation,
 
       // Actions
       toggleCommunitySidebar,
@@ -166,6 +201,8 @@ export const useUiStore = defineStore(
         'selectedVideoLayout',
         'focusedVideoId',
         'callWidgetsHeight',
+        'orientation',
+        'isLandscapeMobile',
       ],
     },
   },

@@ -1,5 +1,5 @@
 import { agents, languages, profile } from '@coasys/flux-constants';
-import { resizeImage, dataURItoBlob, blobToDataURL } from '@coasys/flux-utils';
+import { resizeImage, dataURItoBlob, blobToDataURL, createLiteralLinks } from '@coasys/flux-utils';
 import { Ad4mClient, Link, LinkExpression, LinkMutations } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
 
@@ -88,45 +88,14 @@ export default async function ({
       );
     }
 
-    if (givenName) {
-      additions.push(
-        new Link({
-          source: FLUX_PROFILE,
-          target: givenName,
-          predicate: HAS_GIVEN_NAME,
-        }),
-      );
-    }
+    const literalLinks = await createLiteralLinks(client, FLUX_PROFILE, {
+      ...(givenName && { [HAS_GIVEN_NAME]: givenName }),
+      ...(familyName && { [HAS_FAMILY_NAME]: familyName }),
+      ...(email && { [HAS_EMAIL]: email }),
+      ...(username && { [HAS_USERNAME]: username }),
+    });
 
-    if (familyName) {
-      additions.push(
-        new Link({
-          source: FLUX_PROFILE,
-          target: familyName,
-          predicate: HAS_FAMILY_NAME,
-        }),
-      );
-    }
-
-    if (email) {
-      additions.push(
-        new Link({
-          source: FLUX_PROFILE,
-          target: email,
-          predicate: HAS_EMAIL,
-        }),
-      );
-    }
-
-    if (username) {
-      additions.push(
-        new Link({
-          source: FLUX_PROFILE,
-          target: username,
-          predicate: HAS_USERNAME,
-        }),
-      );
-    }
+    additions.push(...literalLinks);
 
     const agent = await client.agent.me();
 
@@ -149,4 +118,4 @@ export default async function ({
   } catch (e) {
     throw new Error(e);
   }
-};
+}

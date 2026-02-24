@@ -17,7 +17,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
-import { restoreNeighbourhoodPrefix, stripChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -69,7 +69,6 @@ export const useWebrtcStore = defineStore(
     const uiStore = useUiStore();
     const mediaDevicesStore = useMediaDevicesStore();
     const communityServiceStore = useCommunityServiceStore();
-
     const { me } = storeToRefs(appStore);
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
@@ -94,7 +93,9 @@ export const useWebrtcStore = defineStore(
     const hasCopiedLink = ref(false);
     let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const communityService = computed(() => getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')));
+    const communityService = computed(() =>
+      getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')),
+    );
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 
@@ -609,6 +610,11 @@ export const useWebrtcStore = defineStore(
           });
         }
 
+        // Set the video layout to focused on mobile for better experience
+        if (uiStore.isLandscapeMobile) {
+          uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' });
+        }
+
         inCall.value = true;
       } catch (error) {
         console.error('Error joining call:', error);
@@ -652,12 +658,12 @@ export const useWebrtcStore = defineStore(
       try {
         await navigator.clipboard.writeText(location.href);
         appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
-        
+
         // Clear any existing timer to avoid multiple pending timeouts
         if (copyLinkTimer !== null) {
           clearTimeout(copyLinkTimer);
         }
-        
+
         hasCopiedLink.value = true;
         copyLinkTimer = setTimeout(() => {
           hasCopiedLink.value = false;
@@ -686,7 +692,10 @@ export const useWebrtcStore = defineStore(
         );
         // Merge the agent states with their profiles
         agentsInCall.value = await Promise.all(
-          agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did, appStore.ad4mClient)) })),
+          agentsInCallMap.map(async ([did, agent]) => ({
+            ...agent,
+            ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
+          })),
         );
       },
       { deep: true },

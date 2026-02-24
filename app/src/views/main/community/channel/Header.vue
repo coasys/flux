@@ -15,7 +15,13 @@
           color="ui-300"
           :style="{ marginRight: channel.isConversation ? '10px' : '5px' }"
         />
-        <j-text color="black" weight="700" size="500" nomargin :tag="conversation && !conversation.nameFixed ? 'i' : 'span'">
+        <j-text
+          color="black"
+          weight="700"
+          size="500"
+          nomargin
+          :tag="conversation && !conversation.nameFixed ? 'i' : 'span'"
+        >
           {{ channel.isConversation ? conversation?.conversationName || '' : channel.name }}
         </j-text>
       </j-flex>
@@ -102,7 +108,9 @@ const { communityId, channelId, viewId } = useRouteParams();
 const channel = computed(() => allChannels.value.find((c) => stripChannelPrefix(c.baseExpression) === channelId.value));
 const conversation = computed(() =>
   channel.value?.isConversation
-    ? recentConversations.value.find((c) => c.channel.baseExpression && stripChannelPrefix(c.channel.baseExpression) === channelId.value)?.conversation
+    ? recentConversations.value.find(
+        (c) => c.channel.baseExpression && stripChannelPrefix(c.channel.baseExpression) === channelId.value,
+      )?.conversation
     : null,
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
