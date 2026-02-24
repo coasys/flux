@@ -3,6 +3,7 @@ import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
+import { formatTranscriptMarkdown } from './export';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
 import { community } from '@coasys/flux-constants';
@@ -592,5 +593,47 @@ export default class Conversation extends Ad4mModel {
     await this.perspective.commitBatch(batchId);
     const endBatchCommit = new Date().getTime();
     if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
+  }
+
+  async exportMarkdown(client: Ad4mClient): Promise<string> {
+    await this.get();
+    const subgroups = await this.subgroups();
+    const topics = await this.topics();
+
+    // Collect all items from all subgroups with author profiles
+    const sections: {
+      name: string;
+      summary: string;
+      items: (SynergyItem & { authorName: string })[];
+    }[] = [];
+
+    for (const subgroup of subgroups) {
+      const items = await subgroup.itemsData();
+      const itemsWithNames = await Promise.all(
+        items.map(async (item) => {
+          let authorName = 'Unknown';
+          try {
+            const profile = await getProfile(item.author, client);
+            authorName = profile.givenName || profile.username || item.author?.slice(0, 16) || 'Unknown';
+          } catch {
+            // Use DID prefix as fallback
+            authorName = item.author?.slice(0, 16) || 'Unknown';
+          }
+          return { ...item, authorName };
+        }),
+      );
+      sections.push({
+        name: subgroup.subgroupName || '',
+        summary: subgroup.summary || '',
+        items: itemsWithNames,
+      });
+    }
+
+    return formatTranscriptMarkdown({
+      title: this.conversationName || 'Untitled Conversation',
+      summary: this.summary || '',
+      topics: topics.map((t) => t.name),
+      sections,
+    });
   }
 }
