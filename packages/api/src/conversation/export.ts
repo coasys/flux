@@ -11,6 +11,7 @@ interface ExportData {
   summary: string;
   topics: string[];
   sections: ExportSection[];
+  unprocessedItems?: (SynergyItem & { authorName: string })[];
 }
 
 function stripHtml(html: string): string {
@@ -57,6 +58,24 @@ export function formatTranscriptMarkdown(data: ExportData): string {
     }
 
     for (const item of section.items) {
+      const text = stripHtml(item.text);
+      if (!text) continue;
+
+      const time = formatTimestamp(item.timestamp);
+      lines.push(`**${item.authorName}** _(${time})_`);
+      lines.push(text);
+      lines.push('');
+    }
+
+    lines.push('---');
+    lines.push('');
+  }
+
+  if (data.unprocessedItems && data.unprocessedItems.length > 0) {
+    lines.push(`## Unprocessed Messages (${data.unprocessedItems.length})`);
+    lines.push('');
+
+    for (const item of data.unprocessedItems) {
       const text = stripHtml(item.text);
       if (!text) continue;
 

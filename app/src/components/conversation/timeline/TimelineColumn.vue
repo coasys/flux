@@ -169,7 +169,10 @@ async function exportTranscript() {
     const markdowns: string[] = [];
     for (const convData of conversations.value) {
       const conv = new Conversation(perspective, convData.baseExpression);
-      const md = await conv.exportMarkdown(appStore.ad4mClient);
+      // Pass unprocessed items to the last (most recent) conversation
+      const isLast = convData === conversations.value[conversations.value.length - 1];
+      const unprocessed = isLast ? unprocessedItems.value : undefined;
+      const md = await conv.exportMarkdown(appStore.ad4mClient, unprocessed);
       markdowns.push(md);
     }
 

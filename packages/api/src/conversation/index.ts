@@ -595,10 +595,23 @@ export default class Conversation extends Ad4mModel {
     if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
 
-  async exportMarkdown(client: Ad4mClient): Promise<string> {
+  async exportMarkdown(
+    client: Ad4mClient,
+    unprocessedItems?: SynergyItem[],
+  ): Promise<string> {
     await this.get();
     const subgroups = await this.subgroups();
     const topics = await this.topics();
+
+    // Helper to resolve author name from DID
+    const resolveAuthorName = async (did: string): Promise<string> => {
+      try {
+        const profile = await getProfile(did, client);
+        return profile.givenName || profile.username || did?.slice(0, 16) || 'Unknown';
+      } catch {
+        return did?.slice(0, 16) || 'Unknown';
+      }
+    };
 
     // Collect all items from all subgroups with author profiles
     const sections: {
@@ -610,17 +623,10 @@ export default class Conversation extends Ad4mModel {
     for (const subgroup of subgroups) {
       const items = await subgroup.itemsData();
       const itemsWithNames = await Promise.all(
-        items.map(async (item) => {
-          let authorName = 'Unknown';
-          try {
-            const profile = await getProfile(item.author, client);
-            authorName = profile.givenName || profile.username || item.author?.slice(0, 16) || 'Unknown';
-          } catch {
-            // Use DID prefix as fallback
-            authorName = item.author?.slice(0, 16) || 'Unknown';
-          }
-          return { ...item, authorName };
-        }),
+        items.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
       );
       sections.push({
         name: subgroup.subgroupName || '',
@@ -629,11 +635,23 @@ export default class Conversation extends Ad4mModel {
       });
     }
 
+    // Resolve unprocessed items author names
+    let unprocessedWithNames;
+    if (unprocessedItems && unprocessedItems.length > 0) {
+      unprocessedWithNames = await Promise.all(
+        unprocessedItems.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
+      );
+    }
+
     return formatTranscriptMarkdown({
       title: this.conversationName || 'Untitled Conversation',
       summary: this.summary || '',
       topics: topics.map((t) => t.name),
       sections,
+      unprocessedItems: unprocessedWithNames,
     });
   }
 }
