@@ -21,6 +21,19 @@
           </j-menu-group>
         </j-menu>
       </j-flex>
+
+      <j-flex a="center" gap="300">
+        <j-button
+          v-if="conversations.length > 0"
+          size="sm"
+          variant="ghost"
+          :loading="exporting"
+          @click="exportTranscript"
+        >
+          <j-icon name="download" slot="start" />
+          Export
+        </j-button>
+      </j-flex>
     </j-flex>
 
     <div class="timeline">
@@ -106,10 +119,10 @@ import Avatar from '@/components/conversation/avatar/Avatar.vue';
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { llmProcessingSteps, useAiStore } from '@/stores';
+import { llmProcessingSteps, useAiStore, useAppStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
 import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
-import { Channel } from '@coasys/flux-api';
+import { Channel, Conversation } from '@coasys/flux-api';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
@@ -126,6 +139,7 @@ defineProps<Props>();
 const LINK_ADDED_TIMEOUT = 2000;
 
 const route = useRoute();
+const appStore = useAppStore();
 const aiStore = useAiStore();
 
 const { aiEnabled } = storeToRefs(aiStore);
@@ -145,6 +159,48 @@ const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
 const loading = ref(true);
+const exporting = ref(false);
+
+async function exportTranscript() {
+  if (exporting.value || conversations.value.length === 0 || !appStore.ad4mClient) return;
+  exporting.value = true;
+  try {
+    // Create Conversation model instances from the timeline data
+    const markdowns: string[] = [];
+    for (const convData of conversations.value) {
+      const conv = new Conversation(perspective, convData.baseExpression);
+      // Pass unprocessed items to the last (most recent) conversation
+      const isLast = convData === conversations.value[conversations.value.length - 1];
+      const unprocessed = isLast ? unprocessedItems.value : undefined;
+      const md = await conv.exportMarkdown(appStore.ad4mClient, unprocessed);
+      markdowns.push(md);
+    }
+
+    const fullMarkdown = markdowns.join('\n\n');
+
+    // Copy to clipboard (separate try/catch so download still works on permission error)
+    try {
+      await navigator.clipboard.writeText(fullMarkdown);
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed:', clipboardError);
+    }
+
+    // Trigger a file download
+    const blob = new Blob([fullMarkdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcript-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export transcript:', error);
+  } finally {
+    exporting.value = false;
+  }
+}
 
 async function getConversations() {
   const channel = new Channel(perspective, channelUrl);
