@@ -10,6 +10,8 @@ interface ExportData {
   title: string;
   summary: string;
   topics: string[];
+  participants?: string[];
+  date?: string;
   sections: ExportSection[];
   unprocessedItems?: (SynergyItem & { authorName: string })[];
 }
@@ -32,6 +34,18 @@ export function formatTranscriptMarkdown(data: ExportData): string {
 
   lines.push(`# ${data.title}`);
   lines.push('');
+
+  if (data.date) {
+    lines.push(`**Date:** ${formatTimestamp(data.date)}`);
+  }
+
+  if (data.participants && data.participants.length > 0) {
+    lines.push(`**Participants:** ${data.participants.join(', ')}`);
+  }
+
+  if (data.date || (data.participants && data.participants.length > 0)) {
+    lines.push('');
+  }
 
   if (data.summary) {
     lines.push(`> ${data.summary}`);

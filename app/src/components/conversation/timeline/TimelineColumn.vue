@@ -178,10 +178,14 @@ async function exportTranscript() {
 
     const fullMarkdown = markdowns.join('\n\n');
 
-    // Copy to clipboard
-    await navigator.clipboard.writeText(fullMarkdown);
+    // Copy to clipboard (separate try/catch so download still works on permission error)
+    try {
+      await navigator.clipboard.writeText(fullMarkdown);
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed:', clipboardError);
+    }
 
-    // Also trigger a download
+    // Trigger a file download
     const blob = new Blob([fullMarkdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

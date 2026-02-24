@@ -603,14 +603,19 @@ export default class Conversation extends Ad4mModel {
     const subgroups = await this.subgroups();
     const topics = await this.topics();
 
-    // Helper to resolve author name from DID
+    // Cache profile lookups to avoid redundant calls for repeated authors
+    const profileCache = new Map<string, string>();
     const resolveAuthorName = async (did: string): Promise<string> => {
+      if (profileCache.has(did)) return profileCache.get(did)!;
+      let name: string;
       try {
         const profile = await getProfile(did, client);
-        return profile.givenName || profile.username || did?.slice(0, 16) || 'Unknown';
+        name = profile.givenName || profile.username || did?.slice(0, 16) || 'Unknown';
       } catch {
-        return did?.slice(0, 16) || 'Unknown';
+        name = did?.slice(0, 16) || 'Unknown';
       }
+      profileCache.set(did, name);
+      return name;
     };
 
     // Collect all items from all subgroups with author profiles
@@ -646,10 +651,25 @@ export default class Conversation extends Ad4mModel {
       );
     }
 
+    // Collect unique participant names
+    const allParticipants = new Set<string>();
+    for (const section of sections) {
+      for (const item of section.items) {
+        allParticipants.add(item.authorName);
+      }
+    }
+    if (unprocessedWithNames) {
+      for (const item of unprocessedWithNames) {
+        allParticipants.add(item.authorName);
+      }
+    }
+
     return formatTranscriptMarkdown({
       title: this.conversationName || 'Untitled Conversation',
       summary: this.summary || '',
       topics: topics.map((t) => t.name),
+      participants: Array.from(allParticipants),
+      date: new Date().toISOString(),
       sections,
       unprocessedItems: unprocessedWithNames,
     });
