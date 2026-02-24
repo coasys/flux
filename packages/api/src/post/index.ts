@@ -43,9 +43,7 @@ export class Post extends Ad4mModel {
 
   @Collection({
     through: 'ad4m://has_child',
-    where: {
-      isInstance: Message,
-    },
+    where: { isInstance: Message },
   })
   comments: string[] = [];
 }

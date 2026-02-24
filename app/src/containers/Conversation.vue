@@ -324,7 +324,7 @@ watch(
   display: flex;
   flex-direction: column;
 
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: $breakpoint-mobile) {
     padding: var(--j-space-400);
   }
 
@@ -380,7 +380,7 @@ watch(
       }
     }
 
-    // Applied when viewport width is < 800px
+    // Applied on mobile
     &.mobile {
       .match-column-wrapper {
         width: calc(100% - 30px);

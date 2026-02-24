@@ -13,11 +13,7 @@
       <CallWidgets :callRouteData="callRouteData" />
     </div>
     <CallWidgets v-else :callRouteData="callRouteData" />
-    <div
-      class="call-window-wrapper"
-      :class="{ open: callWindowOpen }"
-
-    >
+    <div class="call-window-wrapper" :class="{ open: callWindowOpen }">
       <CallWindow :callRouteData="callRouteData" />
     </div>
   </div>

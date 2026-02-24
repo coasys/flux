@@ -61,7 +61,7 @@ async function deleteLink() {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .link-card {
   position: relative;
   width: 100%;
@@ -74,7 +74,7 @@ async function deleteLink() {
   overflow: hidden;
 }
 
-@media (min-width: 800px) {
+@media screen and (min-width: calc($breakpoint-mobile + 1px)) {
   .link-card {
     grid-template-columns: 1fr 5fr;
   }

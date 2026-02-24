@@ -11,6 +11,7 @@ export default class TaskColumn extends Ad4mModel {
   @Property({
     through: 'flux://column_name',
     writable: true,
+    resolveLanguage: 'literal',
   })
   columnName: string;
 

@@ -34,33 +34,82 @@
           </j-flex>
         </j-flex>
 
-        <button class="close-button" @click="closeCallWindow" :aria-label="callWindowFullscreen ? 'Exit fullscreen' : 'Close call window'" :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }">
+        <button 
+          class="close-button" 
+          @click="closeCallWindow" 
+          :aria-label="callWindowFullscreen ? 'Exit fullscreen' : 'Close call window'" 
+          :style="{ width: isMobile ? '20px' : '26px', height: isMobile ? '20px' : '26px' }"
+        >
           <j-icon :name="callWindowFullscreen ? 'fullscreen-exit' : 'x'" color="color-white" />
         </button>
       </div>
 
       <!-- Content -->
-      <div class="call-window-content" :style="{ height: `calc(100% - ${isMobile ? 28 : 150}px)`, gap: `var(--j-space-${isMobile ? 300 : 500})` }">
-        <!-- Join prompt -->
-        <j-box v-if="!inCall" mb="500">
-          <j-flex direction="column" a="center" gap="300">
-            <j-text size="800" nomargin>You haven't joined this room</j-text>
-            <j-text size="500" nomargin>Your microphone will be enabled.</j-text>
-          </j-flex>
-        </j-box>
+      <div class="call-window-content" :class="{ mobile: isMobile, 'landscape-mobile': isLandscapeMobile }">
+        <template v-if="isLandscapeMobile">
+          <VideoGrid />
 
-        <VideoGrid />
-        <JoinCallControls v-if="!inCall" />
-        <MainCallControls v-if="inCall" />
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              gap: var(--j-space-500);
+            "
+          >
+            <!-- Join prompt -->
+            <j-box v-if="!inCall" mb="500">
+              <j-flex direction="column" a="center" gap="300">
+                <j-text size="700" nomargin style="text-align: center">You haven't joined this room</j-text>
+                <j-text size="500" nomargin>Your microphone will be enabled.</j-text>
+              </j-flex>
+            </j-box>
 
-        <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
-          <j-icon :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'" :style="{ '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em', margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0' }" />
-          Copy Call Invite Link
-        </j-button>
+            <JoinCallControls v-if="!inCall" />
+            <MainCallControls v-if="inCall" />
+
+            <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
+              <j-icon
+                :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+                :style="{
+                  '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em',
+                  margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0',
+                }"
+              />
+              Copy Call Invite Link
+            </j-button>
+          </div>
+        </template>
+
+        <template v-else>
+          <!-- Join prompt -->
+          <j-box v-if="!inCall" mb="500">
+            <j-flex direction="column" a="center" gap="300">
+              <j-text size="700" nomargin style="text-align: center">You haven't joined this room</j-text>
+              <j-text size="500" nomargin>Your microphone will be enabled.</j-text>
+            </j-flex>
+          </j-box>
+
+          <VideoGrid />
+          <JoinCallControls v-if="!inCall" />
+          <MainCallControls v-if="inCall" />
+
+          <j-button v-if="!inCall" @click="webrtcStore.copyCallLink" size="lg">
+            <j-icon
+              :name="hasCopiedLink ? 'clipboard-check' : 'link-45deg'"
+              :style="{
+                '--j-icon-size': hasCopiedLink ? '1.5em' : '1.9em',
+                margin: hasCopiedLink ? '0 -5px 0 0' : '0 -5px -3px 0',
+              }"
+            />
+            Copy Call Invite Link
+          </j-button>
+        </template>
       </div>
 
       <!-- Footer -->
-      <div class="call-window-footer" v-if="!inCall">
+      <div class="call-window-footer" v-if="!inCall && !isLandscapeMobile">
         <div class="disclaimer">
           <j-flex a="center" gap="300">
             <j-icon name="exclamation-circle" size="xs" color="warning-500" />
@@ -97,7 +146,7 @@ defineProps<{
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { callWindowWidth, callWindowOpen, callWindowFullscreen, isMobile } = storeToRefs(uiStore);
+const { callWindowWidth, callWindowOpen, callWindowFullscreen, isMobile, isLandscapeMobile } = storeToRefs(uiStore);
 const { agentsInCall, inCall, hasCopiedLink } = storeToRefs(webrtcStore);
 
 const rightSection = ref<HTMLElement | null>(null);
@@ -178,6 +227,23 @@ function closeCallWindow() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      height: calc(100% - 120px);
+      gap: var(--j-space-500);
+
+      &.mobile {
+        padding: var(--j-space-300);
+        height: calc(100% - 28px);
+        gap: var(--j-space-300);
+      }
+
+      &.landscape-mobile {
+        flex-direction: row;
+
+        :deep(.media-player) {
+          width: auto;
+          max-height: calc(100vh - 100px);
+        }
+      }
     }
 
     .call-window-footer {

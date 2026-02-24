@@ -66,7 +66,7 @@ function updateCommunityTheme(val: Theme) {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .settings {
   display: grid;
   gap: var(--j-space-1000);
@@ -74,7 +74,7 @@ function updateCommunityTheme(val: Theme) {
   overflow-y: auto;
 }
 
-@media (min-width: 800px) {
+@media screen and (max-width: $breakpoint-mobile) {
   .settings {
     grid-template-columns: 1fr 4fr;
   }

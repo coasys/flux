@@ -101,13 +101,16 @@ async function onNeighbourhoodClick(url: any) {
   const neighbourhood = appStore.myPerspectives.find((p) => p.sharedUrl === url);
 
   if (!neighbourhood) joinCommunityHandler(url);
-  else if (neighbourhood.sharedUrl) router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(neighbourhood.sharedUrl) } });
+  else if (neighbourhood.sharedUrl)
+    router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(neighbourhood.sharedUrl) } });
 }
 
 function joinCommunityHandler(url: string) {
   isJoiningCommunity.value = true;
   joinCommunity({ joiningLink: url, client: appStore.ad4mClient })
-    .then((community) => router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(community.neighbourhoodUrl) } }))
+    .then((community) =>
+      router.push({ name: 'community', params: { communityId: stripNeighbourhoodPrefix(community.neighbourhoodUrl) } }),
+    )
     .finally(() => (isJoiningCommunity.value = false));
 }
 

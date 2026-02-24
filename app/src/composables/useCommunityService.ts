@@ -16,7 +16,7 @@ import {
   TaskBoard,
   TaskColumn,
   Topic,
-  Task
+  Task,
 } from '@coasys/flux-api';
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -92,7 +92,9 @@ export async function createCommunityService(): Promise<CommunityService> {
   if (!perspective) {
     const communityId = route.params.communityId as string;
     console.error(`Failed to get perspective for community: ${communityId}`);
-    throw new Error(`Perspective not found for community: ${communityId}. The community may not exist or is not yet loaded.`);
+    throw new Error(
+      `Perspective not found for community: ${communityId}. The community may not exist or is not yet loaded.`,
+    );
   }
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
@@ -359,7 +361,10 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
-      router.push({ name: 'view', params: { communityId, channelId: stripChannelPrefix(channel.baseExpression), viewId: 'conversation' } });
+      router.push({
+        name: 'view',
+        params: { communityId, channelId: stripChannelPrefix(channel.baseExpression), viewId: 'conversation' },
+      });
       uiStore.setCallWindowOpen(true);
     } catch (error) {
       console.error('Failed to create new conversation:', error);
@@ -446,11 +451,12 @@ export async function createCommunityService(): Promise<CommunityService> {
     const channelId = link.data.source;
     const channel = allChannels.value.find((c) => c.baseExpression === channelId);
     if (!channel) return null;
-    
+
     if (channel.participants && channel.participants.includes(link.author)) return null;
 
     // Add participant link
-    perspective.addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+    perspective
+      .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
       .catch((error) => {
         console.error('Failed to add participant to channel:', {
           channelId,

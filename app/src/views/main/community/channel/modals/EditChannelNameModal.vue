@@ -18,13 +18,8 @@
         />
 
         <j-flex v-if="isConversation" a="center" gap="300">
-          <j-checkbox
-            :checked="lockName"
-            @change="(e: any) => (lockName = e.target.checked)"
-          />
-          <j-text color="ui-600" nomargin>
-            Lock name (prevent future AI updates)
-          </j-text>
+          <j-checkbox :checked="lockName" @change="(e: any) => (lockName = e.target.checked)" />
+          <j-text color="ui-600" nomargin> Lock name (prevent future AI updates) </j-text>
         </j-flex>
 
         <j-box mt="500">
@@ -110,7 +105,7 @@ async function updateChannel() {
       channelModel.name = name.value;
       await channelModel.update();
     }
-    
+
     // Close modal only on success
     modalStore.showEditChannelNameModal = false;
   } catch (error) {
@@ -124,23 +119,26 @@ async function updateChannel() {
 }
 
 // Update name only when modal opens, not continuously
-watch(() => modalStore.showEditChannelNameModal, (isOpen) => {
-  if (isOpen && channel.value) {
-    if (channel.value.isConversation) {
-      // Get the conversation name and lock state for the channel
-      const conversationData = recentConversations.value.find(
-        (c) => c.channel.baseExpression === channel.value.baseExpression,
-      );
-      if (conversationData?.conversation) {
-        name.value = conversationData.conversation.conversationName!;
-        lockName.value = conversationData.conversation.nameFixed!;
+watch(
+  () => modalStore.showEditChannelNameModal,
+  (isOpen) => {
+    if (isOpen && channel.value) {
+      if (channel.value.isConversation) {
+        // Get the conversation name and lock state for the channel
+        const conversationData = recentConversations.value.find(
+          (c) => c.channel.baseExpression === channel.value.baseExpression,
+        );
+        if (conversationData?.conversation) {
+          name.value = conversationData.conversation.conversationName!;
+          lockName.value = conversationData.conversation.nameFixed!;
+        }
+      } else {
+        // Otherwise just use the channel name
+        name.value = channel.value.name;
       }
-    } else {
-      // Otherwise just use the channel name
-      name.value = channel.value.name;
     }
-  }
-});
+  },
+);
 </script>
 
 <style scoped></style>

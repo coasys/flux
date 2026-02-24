@@ -42,7 +42,7 @@
       </div>
     </j-flex>
 
-    <j-flex class="footer" j="between" a="end">
+    <j-flex class="header" j="between" a="start">
       <span class="username">
         {{ profile?.username || 'Unknown user' }}
       </span>
@@ -212,22 +212,22 @@ onMounted(async () => {
 
   .emojis {
     position: absolute;
-    left: var(--j-space-400);
-    top: var(--j-space-400);
-    z-index: 3;
+    left: var(--j-space-300);
+    top: calc(var(--j-space-400) + 30px);
+    z-index: 2;
 
     .emoji {
       font-size: 3rem;
     }
   }
 
-  .footer {
+  .header {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
-    padding: var(--j-space-400);
-    z-index: 3;
+    padding: var(--j-space-300);
+    z-index: 4;
 
     .username {
       padding: var(--j-space-200) var(--j-space-400);

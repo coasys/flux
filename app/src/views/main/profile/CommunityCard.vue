@@ -14,7 +14,7 @@
 defineProps({ uuid: { type: String }, name: { type: String }, url: { type: String }, description: { type: String } });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .community-card {
   position: relative;
   width: 100%;
@@ -37,7 +37,7 @@ defineProps({ uuid: { type: String }, name: { type: String }, url: { type: Strin
   --j-avatar-size: 70px;
 }
 
-@media (min-width: 800px) {
+@media screen and (min-width: calc($breakpoint-mobile + 1px)) {
   .community-card__image {
     --j-avatar-size: 100px;
   }

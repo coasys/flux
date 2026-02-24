@@ -11,6 +11,7 @@ export default class TaskBoard extends Ad4mModel {
   @Property({
     through: 'flux://board_name',
     writable: true,
+    resolveLanguage: 'literal',
   })
   boardName: string;
 

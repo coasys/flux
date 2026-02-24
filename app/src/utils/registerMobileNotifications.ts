@@ -23,8 +23,7 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
       AND fn::contains(
         fn::json_path(fn::parse_literal(out.uri), 'data'),
         'data-type="mention" href="' + $agentDid + '"'
-      )`
-    ,
+      )`,
     perspectiveIds,
     webhookUrl: 'http://push-notifications.ad4m.dev:13000/notification',
     webhookAuth,

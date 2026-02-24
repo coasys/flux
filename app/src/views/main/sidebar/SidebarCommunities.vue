@@ -1,6 +1,10 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-tooltip v-for="(community, communityUrl) in myCommunities" :key="communityUrl" :title="community.name || 'Unknown Community'">
+    <j-tooltip
+      v-for="(community, communityUrl) in myCommunities"
+      :key="communityUrl"
+      :title="community.name || 'Unknown Community'"
+    >
       <j-popover event="contextmenu">
         <div slot="trigger" :class="getAvatarClasses(communityUrl)">
           <div v-if="isInCall(communityUrl)" class="recording-icon">
