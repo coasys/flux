@@ -31,7 +31,7 @@ function formatTimestamp(ts: string): string {
 
 function blockquote(text: string): string {
   return text
-    .split('\n')
+    .split(/\r?\n/)
     .map((line) => `> ${line}`)
     .join('\n');
 }
