@@ -23,10 +23,17 @@ function stripHtml(html: string): string {
 function formatTimestamp(ts: string): string {
   try {
     const date = new Date(ts);
-    return date.toLocaleString();
+    return date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
   } catch {
     return ts;
   }
+}
+
+function blockquote(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n');
 }
 
 export function formatTranscriptMarkdown(data: ExportData): string {
@@ -48,7 +55,7 @@ export function formatTranscriptMarkdown(data: ExportData): string {
   }
 
   if (data.summary) {
-    lines.push(`> ${data.summary}`);
+    lines.push(blockquote(data.summary));
     lines.push('');
   }
 
@@ -67,7 +74,7 @@ export function formatTranscriptMarkdown(data: ExportData): string {
     }
 
     if (section.summary) {
-      lines.push(`> ${section.summary}`);
+      lines.push(blockquote(section.summary));
       lines.push('');
     }
 

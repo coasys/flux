@@ -669,7 +669,9 @@ export default class Conversation extends Ad4mModel {
       summary: this.summary || '',
       topics: topics.map((t) => t.name),
       participants: Array.from(allParticipants),
-      date: new Date().toISOString(),
+      date: sections.length > 0 && sections[0].items.length > 0
+        ? sections[0].items[0].timestamp
+        : new Date().toISOString(),
       sections,
       unprocessedItems: unprocessedWithNames,
     });

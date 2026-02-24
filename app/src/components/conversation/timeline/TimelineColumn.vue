@@ -162,7 +162,7 @@ const loading = ref(true);
 const exporting = ref(false);
 
 async function exportTranscript() {
-  if (exporting.value || conversations.value.length === 0) return;
+  if (exporting.value || conversations.value.length === 0 || !appStore.ad4mClient) return;
   exporting.value = true;
   try {
     // Create Conversation model instances from the timeline data
