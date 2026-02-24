@@ -15,7 +15,10 @@ export async function getExpression(client: Ad4mClient, link: LinkExpression): P
   }
 }
 
-export async function getExpressions(client: Ad4mClient, expressionLinks: LinkExpression[]): Promise<(Expression | null)[]> {
+export async function getExpressions(
+  client: Ad4mClient,
+  expressionLinks: LinkExpression[],
+): Promise<(Expression | null)[]> {
   const linkPromises = expressionLinks.map((link) => getExpression(client, link));
   return await Promise.all(linkPromises);
 }

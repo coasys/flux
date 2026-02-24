@@ -69,7 +69,7 @@ watch(
         console.warn('ProfileModal: Ad4mClient not initialized yet');
         return;
       }
-      
+
       try {
         profile.value = await getCachedAgentProfile(newDid, appStore.ad4mClient);
       } catch (error) {

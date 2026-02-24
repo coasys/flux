@@ -89,8 +89,9 @@
   --j-focus-outline: 0px 0px 0px 4px var(--j-color-focus);
 
   /* FONT FAMILY */
-  --j-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --j-font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
 
   --j-font-base-size: 16px;
 

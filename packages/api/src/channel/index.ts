@@ -4,7 +4,15 @@ import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
 import App from '../app';
 
-const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, CHANNEL_IS_PINNED, FLUX_APP, FLUX_PARTICIPANT } = community;
+const {
+  ENTRY_TYPE,
+  CHANNEL_NAME,
+  CHANNEL_DESCRIPTION,
+  CHANNEL_IS_CONVERSATION,
+  CHANNEL_IS_PINNED,
+  FLUX_APP,
+  FLUX_PARTICIPANT,
+} = community;
 
 @ModelOptions({ name: 'Channel' })
 export class Channel extends Ad4mModel {

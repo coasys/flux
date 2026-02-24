@@ -43,13 +43,13 @@ const modalStore = useModalStore();
 const currentTab = ref('voice-video');
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .wrapper {
   display: grid;
   gap: var(--j-space-200);
 }
 
-@media (min-width: 800px) {
+@media screen and (min-width: calc($breakpoint-mobile + 1px)) {
   .wrapper {
     grid-template-columns: 1fr 3fr;
     gap: var(--j-space-300);
@@ -61,7 +61,8 @@ const currentTab = ref('voice-video');
   padding: var(--j-space-800) 0 var(--j-space-400) 0;
   background: var(--j-color-ui-50);
 }
-@media (min-width: 800px) {
+
+@media screen and (min-width: calc($breakpoint-mobile + 1px)) {
   .menu {
     padding: var(--j-space-400) 0;
   }
@@ -73,7 +74,8 @@ const currentTab = ref('voice-video');
   min-height: 30rem;
   padding: var(--j-space-400);
 }
-@media (min-width: 800px) {
+
+@media screen and (min-width: calc($breakpoint-mobile + 1px)) {
   .contents {
     padding: var(--j-space-500);
   }

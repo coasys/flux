@@ -199,7 +199,7 @@ onMounted(getData);
       margin-left: 92px;
       background-color: var(--j-color-primary-200);
 
-      @media screen and (max-width: 800px) {
+      @media screen and (max-width: $breakpoint-mobile) {
         margin-left: 12px;
       }
     }
@@ -212,7 +212,7 @@ onMounted(getData);
     color: var(--j-color-ui-500);
     font-size: 24px;
 
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: $breakpoint-mobile) {
       margin: 0 0 0 50px;
     }
   }
@@ -227,7 +227,7 @@ onMounted(getData);
     z-index: 5;
     padding: 40px 0 10px 60px;
 
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: $breakpoint-mobile) {
       padding: 60px 0;
       margin-left: -20px;
     }

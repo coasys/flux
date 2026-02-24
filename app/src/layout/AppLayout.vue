@@ -78,7 +78,7 @@ function checkDirection() {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .app-layout {
   height: 100%;
   display: grid;
@@ -108,7 +108,7 @@ function checkDirection() {
   transition: all 0.3s ease;
 }
 
-@media (max-width: 800px) {
+@media screen and (max-width: $breakpoint-mobile) {
   .app-layout__sidebar {
     z-index: 0;
   }
@@ -132,11 +132,11 @@ function checkDirection() {
   transition: width 0.5s ease-in-out;
   margin-left: 0;
 
-  @media (min-width: 801px) {
+  @media (min-width: calc($breakpoint-mobile + 1px)) {
     min-width: v-bind('communitySidebarWidth + "px"');
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: $breakpoint-mobile) {
     min-width: unset;
   }
 }

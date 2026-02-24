@@ -118,4 +118,4 @@ export default async function ({
   } catch (e) {
     throw new Error(e);
   }
-};
+}
