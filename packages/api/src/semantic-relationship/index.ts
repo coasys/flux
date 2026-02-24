@@ -1,6 +1,11 @@
 import { ModelOptions, Ad4mModel, Flag, Property, Literal, Optional } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
+function ensureExpressionUri(id: string): string {
+  if (!id) return id;
+  return id.includes('://') ? id : Literal.from(id).toUrl();
+}
+
 const CHANNEL_FROM_ITEM = `
   % Find Channel that owns this Item
   subject_class("Channel", CH),
@@ -54,8 +59,9 @@ export default class SemanticRelationship extends Ad4mModel {
   async itemEmbedding(itemId: string): Promise<number[]> {
     // get the embedding of a specific item
     try {
+      const expressionUri = ensureExpressionUri(itemId);
       const result = await this.perspective.infer(`
-        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace('ItemId', `"${itemId}"`)}
+        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace('ItemId', `"${expressionUri}"`)}
         ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}.
       `);
 
