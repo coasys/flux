@@ -108,7 +108,7 @@ export const useAiStore = defineStore(
         const llm = allModels.value.find((model) => model.modelType === 'LLM');
         if (llm) llmLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(llm.id);
 
-        const whisper = allModels.value.find((model) => model.name === 'Whisper');
+        const whisper = allModels.value.find((model) => model.name === 'Whisper' || model.name === 'whisper_large_v3');
         if (whisper) whisperLoadingStatus.value = await ad4mClient.value.ai.modelLoadingStatus(whisper.id);
 
         const whisperTiny = allModels.value.find((model) => model.name === 'Whisper tiny quantized');
