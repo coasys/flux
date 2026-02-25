@@ -1266,10 +1266,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.3.tgz#a48438b600dfaee7b0832f0cfcd5583fc21b0b55"
   integrity sha512-nFlgSmtx6Zwaw0tEvZgQsWHBeOfWWB/AvEoCApopLT4mHkBVoSrwkLvy2PjZs5wxCbsmqvQczr3XCyTwaDZVQg==
 
-"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.12.0-rc1-dev":
-  version "0.12.0-rc1-dev"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.12.0-rc1-dev.tgz#004993f41c733fa270934e442095dbf34d2281e3"
-  integrity sha512-DDac+dtt0UGHUuSQ6YNsGnkvoDajhvwndrXXUURcsikMy94dsra5U/jni11tgiHeZPhW/AVKBsC+bXTRA3eaOg==
+"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.12.0-rc1-dev.1":
+  version "0.12.0-rc1-dev.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.12.0-rc1-dev.1.tgz#d7a636c5d92ff5c3e96749264e52ab893f91980e"
+  integrity sha512-RNvnPSUV4HewB/War02fNTA7fJN5KLSE2z2racjiQ6/NwDrikTsbMIB/fFVogYqMLWG9YGYlo02IHi63PVFirw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1296,10 +1296,10 @@
     "@coasys/ad4m" "0.11.2-dev.2"
     "@coasys/hooks-helpers" "0.11.2-dev.2"
 
-"@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev.2", "@coasys/ad4m@0.12.0-rc1-dev":
-  version "0.12.0-rc1-dev"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.12.0-rc1-dev.tgz#2bc554db411b5d2c3fa04d8a975236ed64595301"
-  integrity sha512-tCa7GFJLLc6nkuqj9SNrIDd2QKQkhIwY/5km8J+jeQe5Hec3aqztiQIHTK3pM5vJVGgjBgjENyakl8+OdCceeA==
+"@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev.2", "@coasys/ad4m@0.12.0-rc1-dev.1":
+  version "0.12.0-rc1-dev.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.12.0-rc1-dev.1.tgz#2cb7a37266f9338d75519730b0340d5117dd96a2"
+  integrity sha512-ggSaZc9c1GIivWbqyKOEo7chpvdg+Xr0kStpsvfBaLlly+MmTVzsMYj7pB1tBdPN/Lyq4/pwts6hgl790Grm5w==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
