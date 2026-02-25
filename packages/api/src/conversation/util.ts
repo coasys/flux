@@ -1,4 +1,4 @@
-import { AIClient } from '@coasys/ad4m';
+import { AIClient, Literal } from '@coasys/ad4m';
 import { languages } from '@coasys/flux-constants';
 import Embedding from '../embedding';
 import SemanticRelationship from '../semantic-relationship';
@@ -6,13 +6,19 @@ import SemanticRelationship from '../semantic-relationship';
 const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 const showLogs = false; // Set to true to enable debug logs
 
+export function ensureExpressionUri(id: string): string {
+  if (!id) return id;
+  return id.includes('://') ? id : Literal.from(id).toUrl();
+}
+
 async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
+  const expressionUri = ensureExpressionUri(itemId);
   const result = await perspective.infer(`
     findall(Relationship, (
       % 1. Find SemanticRelationship connected to item
       subject_class("SemanticRelationship", SR),
       instance(SR, Relationship),
-      property_getter(SR, Relationship, "expression", "${itemId}"),
+      property_getter(SR, Relationship, "expression", "${expressionUri}"),
       
       % 2. Get tag and check it's an Embedding
       property_getter(SR, Relationship, "tag", TagId),
@@ -67,7 +73,7 @@ export async function createEmbedding(
   // create semantic relationship subject entity
   const start3 = new Date().getTime();
   const relationship = new SemanticRelationship(perspective, undefined, itemId);
-  relationship.expression = itemId;
+  relationship.expression = ensureExpressionUri(itemId);
   relationship.tag = embedding.baseExpression;
   await relationship.save(batchId);
   const end3 = new Date().getTime();

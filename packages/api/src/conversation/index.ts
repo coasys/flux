@@ -3,6 +3,7 @@ import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
+import { formatTranscriptMarkdown } from './export';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
 import { community } from '@coasys/flux-constants';
@@ -592,5 +593,90 @@ export default class Conversation extends Ad4mModel {
     await this.perspective.commitBatch(batchId);
     const endBatchCommit = new Date().getTime();
     if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
+  }
+
+  async exportMarkdown(
+    client: Ad4mClient,
+    unprocessedItems?: SynergyItem[],
+  ): Promise<string> {
+    await this.get();
+    const subgroups = await this.subgroups();
+    const topics = await this.topics();
+
+    // Cache profile lookups to avoid redundant calls for repeated authors
+    const profileCache = new Map<string, string>();
+    const resolveAuthorName = async (did: string): Promise<string> => {
+      if (profileCache.has(did)) return profileCache.get(did)!;
+      let name: string;
+      try {
+        const profile = await getProfile(did, client);
+        name = profile.givenName || profile.username || did?.slice(0, 16) || 'Unknown';
+      } catch {
+        name = did?.slice(0, 16) || 'Unknown';
+      }
+      profileCache.set(did, name);
+      return name;
+    };
+
+    // Collect all items from all subgroups with author profiles
+    const sections: {
+      name: string;
+      summary: string;
+      items: (SynergyItem & { authorName: string })[];
+    }[] = [];
+
+    for (const subgroup of subgroups) {
+      const items = await subgroup.itemsData();
+      const itemsWithNames = await Promise.all(
+        items.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
+      );
+      sections.push({
+        name: subgroup.subgroupName || '',
+        summary: subgroup.summary || '',
+        items: itemsWithNames,
+      });
+    }
+
+    // Resolve unprocessed items author names
+    let unprocessedWithNames;
+    if (unprocessedItems && unprocessedItems.length > 0) {
+      unprocessedWithNames = await Promise.all(
+        unprocessedItems.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
+      );
+    }
+
+    // Collect unique participant names
+    const allParticipants = new Set<string>();
+    for (const section of sections) {
+      for (const item of section.items) {
+        allParticipants.add(item.authorName);
+      }
+    }
+    if (unprocessedWithNames) {
+      for (const item of unprocessedWithNames) {
+        allParticipants.add(item.authorName);
+      }
+    }
+
+    return formatTranscriptMarkdown({
+      title: this.conversationName || 'Untitled Conversation',
+      summary: this.summary || '',
+      topics: topics.map((t) => t.name),
+      participants: Array.from(allParticipants),
+      date: (() => {
+        for (const section of sections) {
+          if (section.items.length > 0) return section.items[0].timestamp;
+        }
+        return new Date().toISOString();
+      })(),
+      sections,
+      unprocessedItems: unprocessedWithNames,
+    });
   }
 }
