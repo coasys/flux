@@ -599,7 +599,7 @@ function toggleRemoteService() {
 async function restartListening() {
   console.log('Restarting listening with new settings');
   await stopListening();
-  startListening();
+  await startListening();
 }
 
 onMounted(() => {
