@@ -93,7 +93,7 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const modalStore = useModalStore();
-const { perspective, recentConversations, allChannels } = useCommunityService();
+const { perspective, recentConversationsWithAgents: recentConversations, allChannels } = useCommunityService();
 
 const tab = ref<'official' | 'community'>('official');
 const isLoading = ref(false);
@@ -188,7 +188,7 @@ watch(
     if (newChannel) {
       if (newChannel.isConversation) {
         // Get the conversation name for the channel
-        const conversationData = recentConversations.value.find((c) => c.channel.id === newChannel.id);
+        const conversationData = recentConversations.value.find((c) => c.channel?.id === newChannel.id);
         name.value = conversationData?.conversation?.conversationName || '';
       } else {
         // Otherwise just use the channel name

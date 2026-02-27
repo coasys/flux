@@ -161,8 +161,9 @@ export const useAiStore = defineStore(
 
       // Search conversations for processing tasks we are responsible for
       const tasks = await Promise.all(
-        unref(communityService.recentConversations).map(async (conversationData) => {
-          const unprocessedItems = await toRaw(conversationData.channel).unprocessedItems!();
+        unref(communityService.recentConversationsWithAgents).map(async (conversationData) => {
+          if (!conversationData.channel) return null;
+          const unprocessedItems = await toRaw(conversationData.channel).unprocessedItems();
           const shouldProcess = await checkIfWeShouldProcessTask(unprocessedItems, communityService.signallingService);
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
         }),

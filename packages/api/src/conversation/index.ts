@@ -10,7 +10,7 @@ import { community } from '@coasys/flux-constants';
 const { FLUX_PARTICIPANT } = community;
 
 @Model({ name: 'Conversation' })
-class Conversation extends Ad4mModel {
+export class Conversation extends Ad4mModel {
   @Flag({ through: 'flux://entry_type', value: 'flux://conversation' })
   type: string;
 

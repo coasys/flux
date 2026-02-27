@@ -101,13 +101,18 @@ const { me } = storeToRefs(appStore);
 const { isMobile, callWindowOpen, headerHeight } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
-const { perspective, signallingService, allChannels, recentConversations } = useCommunityService();
+const {
+  perspective,
+  signallingService,
+  allChannels,
+  recentConversationsWithAgents: recentConversations,
+} = useCommunityService();
 const { communityId, channelId, viewId } = useRouteParams();
 
 const channel = computed(() => allChannels.value.find((c) => stripChannelPrefix(c.id) === channelId.value));
 const conversation = computed(() =>
   channel.value?.isConversation
-    ? recentConversations.value.find((c) => c.channel.id && stripChannelPrefix(c.channel.id) === channelId.value)
+    ? recentConversations.value.find((c) => c.channel?.id && stripChannelPrefix(c.channel.id) === channelId.value)
         ?.conversation
     : null,
 );

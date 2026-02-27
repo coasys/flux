@@ -83,23 +83,28 @@ const props = defineProps<Props>();
 const route = useRoute();
 const router = useRouter();
 
-const { perspective, newConversationLoading, startNewConversation, moveConversation, channelsWithConversations } =
-  useCommunityService();
+const {
+  perspective,
+  newConversationLoading,
+  startNewConversation,
+  moveConversation,
+  channelsWithConversationsAndAgents: channelsWithConversations,
+} = useCommunityService();
 
 const numberOfConversationsDisplayed = ref(5);
 
 // Derive conversations from the already-computed channelsWithConversations in useCommunityService
 const conversations = computed((): (SynergyGroup & { channelId: string })[] => {
-  const parentEntry = channelsWithConversations.value.find((c) => c.channel.id === props.parentChannel.id);
+  const parentEntry = channelsWithConversations.value.find((c) => c.channel?.id === props.parentChannel.id);
   if (!parentEntry?.children) return [];
   return parentEntry.children
-    .filter((child) => child.conversation)
+    .filter((child) => child.conversation && child.channel)
     .map((child) => ({
       id: child.conversation!.id,
       name: child.conversation!.conversationName,
       summary: child.conversation!.summary,
       timestamp: child.conversation!.createdAt,
-      channelId: child.channel.id,
+      channelId: child.channel!.id,
     })) as (SynergyGroup & { channelId: string })[];
 });
 

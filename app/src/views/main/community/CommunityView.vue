@@ -135,7 +135,7 @@ communityServiceStore.addCommunityService(restoreNeighbourhoodPrefix(communityId
 const {
   community,
   isSynced,
-  channelsWithConversations,
+  channelsWithConversationsAndAgents: channelsWithConversations,
   signallingService,
   newConversationLoading,
   startNewConversation,

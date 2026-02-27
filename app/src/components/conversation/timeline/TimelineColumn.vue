@@ -100,9 +100,7 @@
                   <Avatar :did="item.author" show-name />
                 </j-flex>
                 <j-timestamp :value="item.timestamp" relative class="timestamp" />
-                <j-badge v-if="processingState?.itemIds?.includes(item.id)" variant="success">
-                  Processing...
-                </j-badge>
+                <j-badge v-if="processingState?.itemIds?.includes(item.id)" variant="success"> Processing... </j-badge>
               </j-flex>
 
               <j-text nomargin v-html="item.text" class="item-text" color="color-white" />
@@ -204,7 +202,9 @@ async function exportTranscript() {
 
 async function getConversations() {
   const channel = new Channel(perspective, channelUrl);
-  return await channel.conversations();
+  await channel.get({ conversations: true });
+  const result = channel.conversationsData();
+  return result;
 }
 
 async function getUnprocessedItems() {

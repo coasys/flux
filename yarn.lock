@@ -1279,16 +1279,16 @@
 "@coasys/ad4m-react-hooks@0.11.1", "@coasys/ad4m-react-hooks@file:../ad4m/ad4m-hooks/react":
   version "0.12.0-rc1-dev.2"
   dependencies:
-    "@coasys/ad4m" "workspace:0.12.0-rc1-dev.2"
+    "@coasys/ad4m" "workspace:*"
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
 "@coasys/ad4m-vue-hooks@0.11.1", "@coasys/ad4m-vue-hooks@file:../ad4m/ad4m-hooks/vue":
   version "0.12.0-rc1-dev.2"
   dependencies:
-    "@coasys/ad4m" "workspace:0.12.0-rc1-dev.2"
+    "@coasys/ad4m" "workspace:*"
 
-"@coasys/ad4m@0.11.1", "@coasys/ad4m@file:../ad4m/core", "@coasys/ad4m@workspace:0.12.0-rc1-dev.2":
+"@coasys/ad4m@0.11.1", "@coasys/ad4m@file:../ad4m/core", "@coasys/ad4m@workspace:*":
   version "0.12.0-rc1-dev.2"
   dependencies:
     "@apollo/client" "3.7.10"

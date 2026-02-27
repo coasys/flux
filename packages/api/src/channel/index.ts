@@ -203,53 +203,13 @@ export class Channel extends Ad4mModel {
     }
   }
 
-  async conversations(): Promise<SynergyGroup[]> {
-    // Find the necissary data to render conversations in timeline components
-    try {
-      // const prologQuery = `
-      //   findall(ConversationInfo, (
-      //     % 1. Identify all conversations in the channel
-      //     subject_class("Conversation", CC),
-      //     instance(CC, Conversation),
-
-      //     % 2. Get timestamp from link
-      //     link("${this.id}", "ad4m://has_child", Conversation, Timestamp, _),
-
-      //     % 3. Retrieve conversation properties
-      //     property_getter(CC, Conversation, "conversationName", ConversationName),
-      //     property_getter(CC, Conversation, "summary", Summary),
-
-      //     % 4. Build a single structure for each conversation
-      //     ConversationInfo = [Conversation, ConversationName, Summary, Timestamp]
-      //   ), Conversations).
-      // `;
-
-      const surrealQuery = `
-        SELECT
-          out.uri AS id,
-          timestamp,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
-        FROM link
-        WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
-          AND out->link[WHERE predicate = 'flux://has_name'][0] IS NOT NONE
-          AND out->link[WHERE predicate = 'flux://has_summary'][0] IS NOT NONE
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation'
-      `;
-
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
-
-      return (surrealResult || []).map((conv: any) => ({
-        id: conv.id,
-        name: conv.name,
-        summary: conv.summary,
-        timestamp: new Date(conv.timestamp).toISOString(),
-      }));
-    } catch (error) {
-      console.error('Error getting channel conversations:', error);
-      return [];
-    }
+  conversationsData(): SynergyGroup[] {
+    return this.conversations.map((c) => ({
+      id: c.id,
+      name: c.conversationName,
+      summary: c.summary,
+      timestamp: c.createdAt,
+    }));
   }
 }
 

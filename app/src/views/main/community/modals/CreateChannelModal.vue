@@ -178,6 +178,7 @@ async function createChannel() {
     channel.isConversation = false;
     channel.isPinned = false;
     await channel.save();
+    console.log('Channel created with ID:', channel.id);
     if (createChannelParent.value?.id) {
       await perspective.add(
         new Link({ source: createChannelParent.value.id, predicate: 'ad4m://has_child', target: channel.id }),
