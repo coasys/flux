@@ -2,7 +2,7 @@ import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
-  baseExpression: string;
+  id: string;
   name: string;
   relevance: number;
 }
@@ -55,11 +55,11 @@ export default class Topic extends Ad4mModel {
       // remove duplicates
       const rows = result[0]?.Matches || [];
       const dedupMap: Record<string, any> = {};
-      for (const [baseExpression, relevance, channelId, channelName] of rows) {
-        if (!dedupMap[baseExpression]) {
+      for (const [id, relevance, channelId, channelName] of rows) {
+        if (!dedupMap[id]) {
           // convert prolog response to JS
-          dedupMap[baseExpression] = {
-            baseExpression,
+          dedupMap[id] = {
+            id,
             type: 'Conversation',
             relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
             channelId,
@@ -77,9 +77,9 @@ export default class Topic extends Ad4mModel {
   async linkedSubgroups(): Promise<SynergyMatch[]> {
     try {
       const result = await this.perspective.infer(this.matchQuery('Subgroup'));
-      return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
+      return (result[0]?.Matches || []).map(([id, relevance, channelId, channelName]) => ({
         // convert prolog response to JS
-        baseExpression,
+        id,
         type: 'ConversationSubgroup',
         relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
         channelId,

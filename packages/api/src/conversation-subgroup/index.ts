@@ -1,4 +1,4 @@
-import { Model, Ad4mModel, Flag, Literal, HasMany } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, Property } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { ensureExpressionUri } from '../conversation/util';
