@@ -1,4 +1,4 @@
-import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, Flag, Model, Property } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
@@ -14,7 +14,7 @@ const {
   FLUX_PARTICIPANT,
 } = community;
 
-@ModelOptions({ name: 'Channel' })
+@Model({ name: 'Channel' })
 export class Channel extends Ad4mModel {
   @Flag({
     through: ENTRY_TYPE,
@@ -24,39 +24,28 @@ export class Channel extends Ad4mModel {
 
   @Property({
     through: CHANNEL_NAME,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   name: string;
 
-  @Optional({
+  @Property({
     through: CHANNEL_DESCRIPTION,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   description: string;
 
-  @Optional({
+  @Property({
     through: CHANNEL_IS_CONVERSATION,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   isConversation: boolean;
 
-  @Optional({
+  @Property({
     through: CHANNEL_IS_PINNED,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   isPinned: boolean;
 
-  @Collection({
-    through: FLUX_APP,
-    where: { isInstance: App },
-  })
+  @HasMany(() => App, { through: FLUX_APP })
   views: string[] = [];
 
-  @Collection({ through: FLUX_PARTICIPANT })
+  @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
@@ -65,7 +54,7 @@ export class Channel extends Ad4mModel {
       // const prologQuery = `
       //   findall([ItemId, Author, Timestamp, Type, Text], (
       //     % 1. Get channel item
-      //     triple("${this.baseExpression}", "ad4m://has_child", ItemId),
+      //     triple("${this.id}", "ad4m://has_child", ItemId),
       //
       //     % 2. Ensure item is not yet connected to a subgroup (i.e unprocessed)
       //     findall(SubgroupItem, (
@@ -116,7 +105,7 @@ export class Channel extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
@@ -166,7 +155,7 @@ export class Channel extends Ad4mModel {
       //   findall(Count, (
       //     findall(Item, (
       //       % 1. Get items linked to channel
-      //       triple("${this.baseExpression}", "ad4m://has_child", Item),
+      //       triple("${this.id}", "ad4m://has_child", Item),
       //
       //       % 2. Check item is of valid type
       //       (
@@ -189,7 +178,7 @@ export class Channel extends Ad4mModel {
       const surrealQuery = `
         SELECT count() AS count
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
@@ -217,7 +206,7 @@ export class Channel extends Ad4mModel {
       //     instance(CC, Conversation),
 
       //     % 2. Get timestamp from link
-      //     link("${this.baseExpression}", "ad4m://has_child", Conversation, Timestamp, _),
+      //     link("${this.id}", "ad4m://has_child", Conversation, Timestamp, _),
 
       //     % 3. Retrieve conversation properties
       //     property_getter(CC, Conversation, "conversationName", ConversationName),
@@ -235,7 +224,7 @@ export class Channel extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://has_name'][0] IS NOT NONE
           AND out->link[WHERE predicate = 'flux://has_summary'][0] IS NOT NONE

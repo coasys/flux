@@ -1,4 +1,4 @@
-import { Ad4mModel, Collection, Flag, ModelOptions, Optional, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, Flag, Model, Property } from '@coasys/ad4m';
 import { community, languages } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import Channel from '../channel';
@@ -12,7 +12,7 @@ interface FileData {
   data_base64: string;
 }
 
-@ModelOptions({
+@Model({
   name: 'Community',
 })
 export class Community extends Ad4mModel {
@@ -21,42 +21,31 @@ export class Community extends Ad4mModel {
 
   @Property({
     through: NAME,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   name: string;
 
   @Property({
     through: DESCRIPTION,
-    writable: true,
-    resolveLanguage: 'literal',
   })
   description: string;
 
-  @Optional({
+  @Property({
     through: IMAGE,
-    writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     transform: (data) =>
       data?.data_base64 ? `data:${data?.file_type || 'image/png'};base64,${data?.data_base64}` : data,
   })
   image: string | FileData;
 
-  @Optional({
+  @Property({
     through: THUMBNAIL,
-    writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     transform: (data) =>
       data?.data_base64 ? `data:${data?.file_type || 'image/png'};base64,${data?.data_base64}` : data,
   })
   thumbnail: string | FileData;
 
-  @Collection({
-    through: 'ad4m://has_child',
-    where: {
-      isInstance: Channel,
-    },
-  })
+  @HasMany({ through: 'ad4m://has_child' })
   channels: string[] = [];
 }
 

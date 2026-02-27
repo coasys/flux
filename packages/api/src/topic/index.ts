@@ -1,4 +1,4 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
@@ -7,7 +7,7 @@ export class TopicWithRelevance {
   relevance: number;
 }
 
-@ModelOptions({ name: 'Topic' })
+@Model({ name: 'Topic' })
 export default class Topic extends Ad4mModel {
   @Flag({
     through: 'flux://entry_type',
@@ -17,8 +17,6 @@ export default class Topic extends Ad4mModel {
 
   @Property({
     through: 'flux://topic',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   topic: string;
 
@@ -29,7 +27,7 @@ export default class Topic extends Ad4mModel {
         % 1. Find SemanticRelationships that have tag = topicId
         subject_class("SemanticRelationship", SR),
         instance(SR, Relationship),
-        triple(Relationship, "flux://has_tag", "${this.baseExpression}"),
+        triple(Relationship, "flux://has_tag", "${this.id}"),
   
         % 2. Grab the subgroup and relevance
         property_getter(SR, Relationship, "expression", Subgroup),

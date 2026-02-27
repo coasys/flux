@@ -1,8 +1,8 @@
-import { ModelOptions, Ad4mModel, Flag, Property } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
 import { languages } from '@coasys/flux-constants';
 const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 
-@ModelOptions({
+@Model({
   name: 'Embedding',
 })
 export default class Embedding extends Ad4mModel {
@@ -14,14 +14,11 @@ export default class Embedding extends Ad4mModel {
 
   @Property({
     through: 'flux://embedding',
-    writable: true,
   })
   embedding: any;
 
   @Property({
     through: 'flux://model',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   model: string;
 }

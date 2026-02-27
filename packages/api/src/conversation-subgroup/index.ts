@@ -1,4 +1,4 @@
-import { ModelOptions, Ad4mModel, Flag, Literal, Optional, Collection } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Literal, HasMany } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { ensureExpressionUri } from '../conversation/util';
@@ -7,20 +7,20 @@ import { community } from '@coasys/flux-constants';
 
 const { FLUX_PARTICIPANT } = community;
 
-@ModelOptions({
+@Model({
   name: 'ConversationSubgroup',
 })
 export default class ConversationSubgroup extends Ad4mModel {
   @Flag({ through: 'flux://entry_type', value: 'flux://conversation_subgroup' })
   type: string;
 
-  @Optional({ through: 'flux://has_name', writable: true, resolveLanguage: 'literal' })
+  @Property({ through: 'flux://has_name' })
   subgroupName: string;
 
-  @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
+  @Property({ through: 'flux://has_summary' })
   summary: string;
 
-  @Collection({ through: FLUX_PARTICIPANT })
+  @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
   async stats(): Promise<{ totalItems: number; participants: string[] }> {
@@ -30,7 +30,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       const itemsQuery = `
         SELECT VALUE out.uri
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
@@ -61,7 +61,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       //       % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's baseExpression
       //       subject_class("SemanticRelationship", SR),
       //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", "${this.baseExpression}"),
+      //       triple(Relationship, "flux://has_expression", "${this.id}"),
       //
       //       % 2. Retrieve the Topic base
       //       triple(Relationship, "flux://has_tag", TopicBase),
@@ -83,7 +83,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName
         FROM link
         WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
+          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
       `;
@@ -116,7 +116,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       // const prologQuery = `
       //   findall([Item, Timestamp, Author, Type, Text], (
       //     % 1. Get item linked to subgroup
-      //     triple("${this.baseExpression}", "ad4m://has_child", Item),
+      //     triple("${this.id}", "ad4m://has_child", Item),
       //
       //     % 2. Get timestamp and author from earliest link
       //     findall([T, A], link(_, "ad4m://has_child", Item, T, A), AllData),
@@ -153,7 +153,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
@@ -205,7 +205,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       //       % 1. Find semantic relationships where expression = this subgroup
       //       subject_class("SemanticRelationship", SR),
       //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", "${this.baseExpression}"),
+      //       triple(Relationship, "flux://has_expression", "${this.id}"),
       //
       //       % 2. Get topic and relevance
       //       triple(Relationship, "flux://has_tag", TopicBase),
@@ -229,7 +229,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
         FROM link
         WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
+          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
       `;
@@ -270,8 +270,8 @@ export default class ConversationSubgroup extends Ad4mModel {
       await newTopic.save(batchId);
       topic = await newTopic.get();
     }
-    const expressionUri = ensureExpressionUri(this.baseExpression);
-    const tagUri = ensureExpressionUri(topic.baseExpression);
+    const expressionUri = ensureExpressionUri(this.id);
+    const tagUri = ensureExpressionUri(topic.id);
     let existingTopicRelationship = isNewGroup
       ? null
       : ((
@@ -282,7 +282,7 @@ export default class ConversationSubgroup extends Ad4mModel {
     if (!existingTopicRelationship && !isNewGroup) {
       existingTopicRelationship = (
         await SemanticRelationship.findAll(this.perspective, {
-          where: { expression: this.baseExpression, tag: topic.baseExpression },
+          where: { expression: this.id, tag: topic.id },
         })
       )[0] as SemanticRelationship;
     }

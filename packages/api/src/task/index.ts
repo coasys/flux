@@ -1,7 +1,7 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Collection } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property, HasMany } from '@coasys/ad4m';
 import Message from '../message';
 
-@ModelOptions({ name: 'Task' })
+@Model({ name: 'Task' })
 export default class Task extends Ad4mModel {
   @Flag({
     through: 'flux://entry_type',
@@ -11,19 +11,14 @@ export default class Task extends Ad4mModel {
 
   @Property({
     through: 'flux://task_name',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   taskName: string;
 
-  @Collection({
+  @HasMany({
     through: 'flux://task_assignee',
   })
   assignees: string[] = [];
 
-  @Collection({
-    through: 'ad4m://has_child',
-    where: { isInstance: Message },
-  })
+  @HasMany(() => Message, { through: 'ad4m://has_child' })
   comments: string[] = [];
 }

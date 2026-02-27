@@ -1,4 +1,4 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal, Optional } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 function ensureExpressionUri(id: string): string {
@@ -29,7 +29,7 @@ const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
   property_getter(E, EmbeddingId, "embedding", Embedding)
 `;
 
-@ModelOptions({ name: 'SemanticRelationship' })
+@Model({ name: 'SemanticRelationship' })
 export default class SemanticRelationship extends Ad4mModel {
   @Flag({
     through: 'flux://entry_type',
@@ -39,20 +39,16 @@ export default class SemanticRelationship extends Ad4mModel {
 
   @Property({
     through: 'flux://has_expression',
-    writable: true,
   })
   expression: string; // base url of expression
 
-  @Optional({
+  @Property({
     through: 'flux://has_tag',
-    writable: true,
   })
   tag: string; // base url of semantic tag
 
-  @Optional({
+  @Property({
     through: 'flux://has_relevance',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   relevance: number; // 0 - 100
 

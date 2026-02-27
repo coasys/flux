@@ -1,4 +1,4 @@
-import { Ad4mModel, Ad4mClient, Flag, Link, Literal, ModelOptions, Optional, Collection } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property } from '@coasys/ad4m';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
@@ -9,22 +9,25 @@ import { createEmbedding, removeEmbedding } from './util';
 import { community } from '@coasys/flux-constants';
 const { FLUX_PARTICIPANT } = community;
 
-@ModelOptions({ name: 'Conversation' })
-export default class Conversation extends Ad4mModel {
+@Model({ name: 'Conversation' })
+class Conversation extends Ad4mModel {
   @Flag({ through: 'flux://entry_type', value: 'flux://conversation' })
   type: string;
 
-  @Optional({ through: 'flux://has_name', writable: true, resolveLanguage: 'literal' })
+  @Property({ through: 'flux://has_name' })
   conversationName: string;
 
-  @Optional({ through: 'flux://name_is_fixed', writable: true, resolveLanguage: 'literal' })
+  @Property({ through: 'flux://name_is_fixed' })
   nameFixed: boolean = false;
 
-  @Optional({ through: 'flux://has_summary', writable: true, resolveLanguage: 'literal' })
+  @Property({ through: 'flux://has_summary' })
   summary: string;
 
-  @Collection({ through: FLUX_PARTICIPANT })
+  @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
+
+  @HasMany(() => ConversationSubgroup, { through: 'ad4m://has_child' })
+  subgroupEntities: ConversationSubgroup[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
     // find the total subgroup count and the dids of participants in the conversation
@@ -33,7 +36,7 @@ export default class Conversation extends Ad4mModel {
       const subgroupsQuery = `
         SELECT VALUE out.uri
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
@@ -62,7 +65,7 @@ export default class Conversation extends Ad4mModel {
       //       findall(Subgroup, (
       //         subject_class("ConversationSubgroup", CS),
       //         instance(CS, Subgroup),
-      //         triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
+      //         triple("${this.id}", "ad4m://has_child", Subgroup)
       //       ), SubgroupList),
       //
       //       % 2. Get topics from relationships
@@ -92,8 +95,8 @@ export default class Conversation extends Ad4mModel {
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
           AND (
-            in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
-            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.baseExpression}'][0] IS NOT NONE
+            in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
+            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.id}'][0] IS NOT NONE
           )
       `;
 
@@ -121,7 +124,8 @@ export default class Conversation extends Ad4mModel {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    return await ConversationSubgroup.findAll(this.perspective, { source: this.baseExpression });
+    await this.get({ subgroupEntities: true });
+    return this.subgroupEntities as unknown as ConversationSubgroup[];
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {
@@ -132,7 +136,7 @@ export default class Conversation extends Ad4mModel {
       //     % 1. Identify all subgroups in the conversation
       //     subject_class("ConversationSubgroup", CS),
       //     instance(CS, Subgroup),
-      //     triple("${this.baseExpression}", "ad4m://has_child", Subgroup),
+      //     triple("${this.id}", "ad4m://has_child", Subgroup),
       //
       //     % 2. Retrieve subgroup properties
       //     property_getter(CS, Subgroup, "subgroupName", SubgroupName),
@@ -182,7 +186,7 @@ export default class Conversation extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
         ORDER BY timestamp ASC
@@ -333,10 +337,11 @@ export default class Conversation extends Ad4mModel {
   }
 
   private async createNewGroup(newGroup: { n: string; s: string }, batchId: string) {
-    let newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
+    const newSubgroupEntity = new ConversationSubgroup(this.perspective);
     newSubgroupEntity.subgroupName = newGroup.n;
     newSubgroupEntity.summary = newGroup.s;
     await newSubgroupEntity.save(batchId);
+    await this.addSubgroupEntities(newSubgroupEntity, batchId);
     return newSubgroupEntity;
   }
 
@@ -415,7 +420,7 @@ export default class Conversation extends Ad4mModel {
       }
       if (item.author) allNewParticipants.add(item.author);
       newLinks.push({
-        source: itemsSubgroup.baseExpression,
+        source: itemsSubgroup.id,
         predicate: 'ad4m://has_child',
         target: item.baseExpression,
       });
@@ -479,7 +484,7 @@ export default class Conversation extends Ad4mModel {
     );
     if (conversationNewParticipants.length > 0) {
       const participantLinks = conversationNewParticipants.map((author) => ({
-        source: this.baseExpression,
+        source: this.id,
         predicate: 'flux://has_participant',
         target: author,
       }));
@@ -500,7 +505,7 @@ export default class Conversation extends Ad4mModel {
       );
       if (subgroupNewParticipants.length > 0) {
         const participantLinks = subgroupNewParticipants.map((author) => ({
-          source: currentSubgroup.baseExpression,
+          source: currentSubgroup.id,
           predicate: 'flux://has_participant',
           target: author,
         }));
@@ -514,7 +519,7 @@ export default class Conversation extends Ad4mModel {
     // Set new subgroup participants
     if (newSubgroupEntity) {
       const participantLinks = Array.from(newSubgroupParticipants).map((author) => ({
-        source: newSubgroupEntity.baseExpression,
+        source: newSubgroupEntity.id,
         predicate: 'flux://has_participant',
         target: author,
       }));
@@ -540,19 +545,19 @@ export default class Conversation extends Ad4mModel {
 
       // update vector embedding for conversation
       const start4 = new Date().getTime();
-      await removeEmbedding(this.perspective, this.baseExpression, batchId);
-      await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
+      await removeEmbedding(this.perspective, this.id, batchId);
+      await createEmbedding(this.perspective, this.summary, this.id, this.perspective.ai, batchId);
       const end4 = new Date().getTime();
       if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
 
       // update vector embedding for currentSubgroup if returned from LLM
       if (currentSubgroup) {
         const start5 = new Date().getTime();
-        await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
+        await removeEmbedding(this.perspective, currentSubgroup.id, batchId);
         await createEmbedding(
           this.perspective,
           currentSubgroup.summary,
-          currentSubgroup.baseExpression,
+          currentSubgroup.id,
           this.perspective.ai,
           batchId,
         );
@@ -565,7 +570,7 @@ export default class Conversation extends Ad4mModel {
         await createEmbedding(
           this.perspective,
           newSubgroupEntity.summary,
-          newSubgroupEntity.baseExpression,
+          newSubgroupEntity.id,
           this.perspective.ai,
           batchId,
         );
@@ -595,10 +600,7 @@ export default class Conversation extends Ad4mModel {
     if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
 
-  async exportMarkdown(
-    client: Ad4mClient,
-    unprocessedItems?: SynergyItem[],
-  ): Promise<string> {
+  async exportMarkdown(client: Ad4mClient, unprocessedItems?: SynergyItem[]): Promise<string> {
     await this.get();
     const subgroups = await this.subgroups();
     const topics = await this.topics();
@@ -680,3 +682,6 @@ export default class Conversation extends Ad4mModel {
     });
   }
 }
+
+export interface Conversation extends HasManyMethods<'subgroupEntities' | 'participants'> {}
+export default Conversation;

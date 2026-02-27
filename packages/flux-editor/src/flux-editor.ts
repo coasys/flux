@@ -7,8 +7,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
 import { PluginKey } from 'prosemirror-state';
 import { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
-import { Channel, Message, SubjectRepository, getProfile } from '@coasys/flux-api';
-import { PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
+import { Channel, Message, getProfile } from '@coasys/flux-api';
+import { PerspectiveProxy, Ad4mClient, Link as Ad4mLink } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
 import defaultActions from './defaultActions';
 import { shouldPlaceAbove } from './utils';
@@ -124,11 +124,6 @@ export default class MyElement extends LitElement {
 
   @state()
   editor: Editor | null;
-
-  @state()
-  repo: SubjectRepository<{
-    [x: string]: any;
-  }>;
 
   @state()
   members: Profile[] = [];
@@ -342,31 +337,23 @@ export default class MyElement extends LitElement {
 
   async fetchChannels() {
     if (this.perspective) {
-      const model = new SubjectRepository(Channel as any, {
-        perspective: this.perspective,
-        source: 'ad4m://self',
-      });
-
-      model
-        .getAllData()
+      Channel.findAll(this.perspective)
         .then((entries) => {
-          this.channels = entries as Channel[];
+          this.channels = entries;
         })
         .catch((error) => console.log);
     }
   }
 
   async submit() {
-    const repo = new SubjectRepository(Message as any, {
-      perspective: this.perspective,
-      source: this.source,
-    });
-
     try {
       const html = this.editor.getHTML();
       this.isCreating = true;
-      const result = await repo.create({ body: html });
-      console.log('CREATED: ', result);
+      const message = await Message.create(this.perspective, { body: html });
+      await this.perspective.add(
+        new Ad4mLink({ source: this.source, predicate: 'ad4m://has_child', target: message.id }),
+      );
+      console.log('CREATED: ', message);
       this.editor.commands.clearContent();
     } catch (e) {
       console.log(e);
