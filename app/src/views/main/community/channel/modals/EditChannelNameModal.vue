@@ -45,7 +45,6 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useModalStore } from '@/stores';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
-import { useModel } from '@coasys/ad4m-vue-hooks';
 import { Channel, Conversation } from '@coasys/flux-api';
 import { computed, ref, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -60,6 +59,7 @@ const {
   getPinnedConversations,
   getRecentConversations,
   getChannelsWithConversations,
+  allChannels,
 } = useCommunityService();
 
 const name = ref('');
@@ -67,10 +67,8 @@ const lockName = ref(false);
 const isSaving = ref(false);
 
 const channelId = computed(() => restoreChannelPrefix(route.params.channelId as string));
-const channel = computed(() => channels.value?.[0] || null);
+const channel = computed(() => allChannels.value.find((c) => c.id === channelId.value) || null);
 const isConversation = computed(() => channel.value?.isConversation);
-
-const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelId.value } } });
 
 async function updateChannel() {
   isSaving.value = true;
@@ -78,10 +76,8 @@ async function updateChannel() {
   try {
     if (isConversation.value) {
       // Update the associated conversation name
-      const conversationData = recentConversations.value.find(
-        (c) => c.channel.baseExpression === channel.value.baseExpression,
-      );
-      const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
+      const conversationData = recentConversations.value.find((c) => c.channel.id === channel.value.id);
+      const conversationId = toRaw(conversationData?.conversation)?.id;
       if (!conversationId) {
         isSaving.value = false;
         modalStore.showEditChannelNameModal = false;
@@ -125,9 +121,7 @@ watch(
     if (isOpen && channel.value) {
       if (channel.value.isConversation) {
         // Get the conversation name and lock state for the channel
-        const conversationData = recentConversations.value.find(
-          (c) => c.channel.baseExpression === channel.value.baseExpression,
-        );
+        const conversationData = recentConversations.value.find((c) => c.channel.id === channel.value.id);
         if (conversationData?.conversation) {
           name.value = conversationData.conversation.conversationName!;
           lockName.value = conversationData.conversation.nameFixed!;

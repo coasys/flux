@@ -5,7 +5,7 @@
     <j-flex a="center" gap="500">
       <j-button
         variant="primary"
-        @click="() => startNewConversation(parentChannel.baseExpression)"
+        @click="() => startNewConversation(parentChannel.id)"
         :loading="newConversationLoading"
         :disabled="newConversationLoading"
       >
@@ -70,10 +70,9 @@
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import { ChevronDownIcon } from '@/components/icons';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { useModel } from '@coasys/ad4m-vue-hooks';
-import { Channel, Conversation } from '@coasys/flux-api';
+import { Channel } from '@coasys/flux-api';
 import { SynergyGroup } from '@coasys/flux-utils';
-import { ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 interface Props {
@@ -84,16 +83,25 @@ const props = defineProps<Props>();
 const route = useRoute();
 const router = useRouter();
 
-const { perspective, newConversationLoading, startNewConversation, moveConversation } = useCommunityService();
+const { perspective, newConversationLoading, startNewConversation, moveConversation, channelsWithConversations } =
+  useCommunityService();
 
-const { entries: conversationChannels } = useModel({
-  perspective,
-  model: Channel,
-  query: { source: props.parentChannel.baseExpression, where: { isConversation: true } },
-});
-
-const conversations = ref<(SynergyGroup & { channelId: string })[]>([]);
 const numberOfConversationsDisplayed = ref(5);
+
+// Derive conversations from the already-computed channelsWithConversations in useCommunityService
+const conversations = computed((): (SynergyGroup & { channelId: string })[] => {
+  const parentEntry = channelsWithConversations.value.find((c) => c.channel.id === props.parentChannel.id);
+  if (!parentEntry?.children) return [];
+  return parentEntry.children
+    .filter((child) => child.conversation)
+    .map((child) => ({
+      baseExpression: child.conversation!.id,
+      name: child.conversation!.conversationName,
+      summary: child.conversation!.summary,
+      timestamp: child.conversation!.createdAt,
+      channelId: child.channel.id,
+    })) as (SynergyGroup & { channelId: string })[];
+});
 
 function navigateToConversation(channelId: string) {
   router.push({
@@ -101,34 +109,6 @@ function navigateToConversation(channelId: string) {
     params: { communityId: route.params.communityId, channelId, viewId: 'conversation' },
   });
 }
-
-watch(
-  conversationChannels,
-  async (newConversationChannels) => {
-    try {
-      const newConversations = (
-        await Promise.all(
-          newConversationChannels.map(async (channel) => {
-            const [conversation] = await Conversation.findAll(perspective, { source: channel.baseExpression });
-            if (!conversation) return null;
-            return {
-              baseExpression: conversation.baseExpression,
-              name: conversation.conversationName,
-              summary: conversation.summary,
-              timestamp: conversation.createdAt,
-              channelId: channel.baseExpression,
-            };
-          }),
-        )
-      ).filter(Boolean) as (SynergyGroup & { channelId: string })[];
-
-      conversations.value = newConversations;
-    } catch (error) {
-      console.error('Failed to load conversations:', error);
-    }
-  },
-  { immediate: true },
-);
 </script>
 
 <style lang="scss" scoped>

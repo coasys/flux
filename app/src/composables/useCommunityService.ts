@@ -1,7 +1,7 @@
 import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
-import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
+import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useModel } from '@coasys/ad4m-vue-hooks';
 import {
   App,
@@ -140,27 +140,27 @@ export async function createCommunityService(): Promise<CommunityService> {
   const pinnedConversationsWithAgents = computed((): ChannelDataWithAgents[] => {
     return pinnedConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channel.id).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channel.id).value,
     }));
   });
   const recentConversationsWithAgents = computed((): ChannelDataWithAgents[] => {
     return recentConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channel.id).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channel.id).value,
     }));
   });
   const channelsWithConversationsAndAgents = computed((): ChannelDataWithAgents[] => {
     return channelsWithConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channel.id).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channel.id).value,
       children:
         data.children?.map((child) => ({
           ...child,
-          agentsInChannel: signallingService.getAgentsInChannel(child.channel.baseExpression).value,
-          agentsInCall: signallingService.getAgentsInCall(child.channel.baseExpression).value,
+          agentsInChannel: signallingService.getAgentsInChannel(child.channel.id).value,
+          agentsInCall: signallingService.getAgentsInCall(child.channel.id).value,
         })) || [],
     }));
   });
@@ -169,7 +169,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const pinnedChannelsSignature = computed(() =>
     allChannels.value
       .filter((channel) => channel.isPinned)
-      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .map((channel) => `${channel.id}:${channel.name}`)
       .sort()
       .join(','),
   );
@@ -177,7 +177,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const conversationChannelsSignature = computed(() =>
     allChannels.value
       .filter((channel) => channel.isConversation)
-      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .map((channel) => `${channel.id}:${channel.name}`)
       .sort()
       .join(','),
   );
@@ -208,7 +208,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Loop through all the pinned channels and get the conversation data for each
       pinnedConversations.value = await Promise.all(
         pinnedChannels.value.map(async (channel: Channel) => {
-          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+          await channel.get({ conversations: true });
+          const conversation = channel.conversations[0];
           return { conversation, channel };
         }),
       );
@@ -230,7 +231,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
       const conversations = await Promise.all(
         conversationChannels.value.map(async (channel: Channel) => {
-          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+          await channel.get({ conversations: true });
+          const conversation = channel.conversations[0];
 
           if (!conversation) return null;
 
@@ -294,20 +296,17 @@ export async function createCommunityService(): Promise<CommunityService> {
       channelsWithConversations.value = await Promise.all(
         spaceChannels.value.map(async (channel: Channel) => {
           // Get all nested conversation channels
-          const nestedConversationChannels = await Channel.findAll(perspective, {
-            source: channel.baseExpression,
-            where: { isConversation: true },
-          });
+          await channel.get({ childChannels: true });
+          const nestedConversationChannels = (channel.childChannels as Channel[]).filter((c) => c.isConversation);
 
           // Get the conversation data for each of the nested conversation channels
           const conversations = await Promise.all(
             nestedConversationChannels.map(async (childChannel: Channel) => {
-              const conversation = (
-                await Conversation.findAll(perspective, { source: childChannel.baseExpression })
-              )[0];
-              // TODO: investigate and remove explicit baseExpression from channel if possible
+              await childChannel.get({ conversations: true });
+              const conversation = childChannel.conversations[0];
+              // TODO: investigate and remove explicit id from channel if possible
               return {
-                channel: { ...childChannel, baseExpression: childChannel.baseExpression },
+                channel: { ...childChannel, id: childChannel.id },
                 conversation,
               };
             }),
@@ -329,18 +328,22 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       // Create the channel
-      const channel = new Channel(perspective, undefined, parentChannelId);
+      const channel = new Channel(perspective);
       channel.name = '';
       channel.description = '';
       channel.isConversation = true;
       channel.isPinned = false;
       await channel.save();
+      await perspective.add(
+        new Link({ source: parentChannelId || 'ad4m://self', predicate: 'ad4m://has_child', target: channel.id }),
+      );
 
       // Create the first placeholder conversation
-      const conversation = new Conversation(perspective, undefined, channel.baseExpression);
+      const conversation = new Conversation(perspective);
       conversation.conversationName = 'New conversation';
       conversation.summary = 'Content will appear when the first items have been processed...';
       await conversation.save();
+      await perspective.add(new Link({ source: channel.id, predicate: 'ad4m://has_child', target: conversation.id }));
 
       // Attach the chat app
       const fluxApps = await getAllFluxApps();
@@ -349,12 +352,13 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       const { name, description, icon, pkg } = chatAppData;
 
-      const chatApp = new App(perspective, undefined, channel.baseExpression);
+      const chatApp = new App(perspective);
       chatApp.name = name;
       chatApp.description = description;
       chatApp.icon = icon;
       chatApp.pkg = pkg;
       await chatApp.save();
+      await perspective.add(new Link({ source: channel.id, predicate: 'flux://has_app', target: chatApp.id }));
 
       // Update the recent conversations
       getRecentConversations();
@@ -363,7 +367,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       const communityId = route.params.communityId as string;
       router.push({
         name: 'view',
-        params: { communityId, channelId: stripChannelPrefix(channel.baseExpression), viewId: 'conversation' },
+        params: { communityId, channelId: stripChannelPrefix(channel.id), viewId: 'conversation' },
       });
       uiStore.setCallWindowOpen(true);
     } catch (error) {
@@ -433,13 +437,13 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   function getParentChannel(channelId: string): Partial<Channel> | undefined {
     const parentChannelData = channelsWithConversations.value.find((c) =>
-      c.children?.some((child) => child.channel?.baseExpression === channelId),
+      c.children?.some((child) => child.channel?.id === channelId),
     );
     return parentChannelData ? parentChannelData.channel : undefined;
   }
 
   function getConversation(channelId: string) {
-    const conversationData = recentConversations.value.find((c) => c.channel?.baseExpression === channelId);
+    const conversationData = recentConversations.value.find((c) => c.channel?.id === channelId);
     return conversationData ? conversationData.conversation : undefined;
   }
 
@@ -449,7 +453,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (!link.author) return null;
 
     const channelId = link.data.source;
-    const channel = allChannels.value.find((c) => c.baseExpression === channelId);
+    const channel = allChannels.value.find((c) => c.id === channelId);
     if (!channel) return null;
 
     if (channel.participants && channel.participants.includes(link.author)) return null;

@@ -118,6 +118,7 @@ import { useModalStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
 import { stripChannelPrefix } from '@/utils/routeUtils';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
+import { Link } from '@coasys/ad4m';
 import { storeToRefs } from 'pinia';
 import semver from 'semver';
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
@@ -171,21 +172,29 @@ async function createChannel() {
       throw new Error('Cannot create a channel because perspective is undefined.');
     }
 
-    const channel = new Channel(perspective, undefined, createChannelParent.value?.baseExpression || undefined);
+    const channel = new Channel(perspective);
     channel.name = channelName.value;
     channel.description = channelDescription.value;
     channel.isConversation = false;
     channel.isPinned = false;
     await channel.save();
+    if (createChannelParent.value?.id) {
+      await perspective.add(
+        new Link({ source: createChannelParent.value.id, predicate: 'ad4m://has_child', target: channel.id }),
+      );
+    } else {
+      await perspective.add(new Link({ source: 'ad4m://self', predicate: 'ad4m://has_child', target: channel.id }));
+    }
 
     await Promise.all(
       selectedPlugins.value.map(async (app) => {
-        const appInstance = new App(perspective, undefined, channel.baseExpression);
+        const appInstance = new App(perspective);
         appInstance.name = app.name;
         appInstance.description = app.description;
         appInstance.icon = app.icon;
         appInstance.pkg = app.pkg;
         await appInstance.save();
+        await perspective.add(new Link({ source: channel.id, predicate: 'flux://has_app', target: appInstance.id }));
       }),
     );
 
@@ -194,7 +203,7 @@ async function createChannel() {
     if (!createChannelParent.value) {
       router.push({
         name: 'channel',
-        params: { communityId: communityId.value, channelId: stripChannelPrefix(channel.baseExpression) },
+        params: { communityId: communityId.value, channelId: stripChannelPrefix(channel.id) },
       });
     }
   } finally {

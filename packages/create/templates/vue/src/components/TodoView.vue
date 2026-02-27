@@ -18,7 +18,7 @@
           <j-flex j="between">
             <div :class="{ [styles.doneTodo]: todo.done }">
               <j-checkbox
-                @change="toggleTodo({ id: todo.baseExpression, done: $event.target.checked })"
+                @change="toggleTodo({ id: todo.id, done: $event.target.checked })"
                 :checked="todo.done"
                 style="--j-border-radius: 50%"
                 size="sm"
@@ -32,7 +32,7 @@
                 </j-text>
               </j-checkbox>
             </div>
-            <j-button @click="deleteTodo(todo.baseExpression)">Delete</j-button>
+            <j-button @click="deleteTodo(todo.id)">Delete</j-button>
           </j-flex>
         </j-box>
       </j-flex>
@@ -41,9 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-vue-hooks';
-import { ref, onMounted } from 'vue';
+import { Link, LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 import Todo from '../subjects/Todo';
 
@@ -57,27 +56,49 @@ type Props = {
 const { perspective, source } = defineProps<Props>();
 
 const title = ref('');
+const todos = ref<Todo[]>([]);
+
+async function loadTodos() {
+  const links = await perspective.get(new LinkQuery({ source, predicate: 'ad4m://has_child' }));
+  const items = await Promise.all(
+    links.map(async (link) => {
+      const todo = new Todo(perspective, link.data.target);
+      await todo.get();
+      return todo;
+    }),
+  );
+  todos.value = items;
+}
 
 onMounted(async () => {
   await perspective.ensureSDNASubjectClass(Todo);
+  loadTodos();
+  perspective.addListener('link-added', handleLinkAdded);
 });
 
-const { entries: todos } = useModel({ perspective, model: Todo, query: { source } });
+onUnmounted(() => {
+  perspective.removeListener('link-added', handleLinkAdded);
+});
 
-const createTodo = () => {
-  const todo = new Todo(perspective, undefined, source);
-  todo.title = title.value;
-  todo.save();
+function handleLinkAdded(link: any) {
+  if (link.data?.source === source && link.data?.predicate === 'ad4m://has_child') loadTodos();
+  return null;
+}
+
+const createTodo = async () => {
+  const todo = await Todo.create(perspective, { title: title.value });
+  await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: todo.id }));
+  loadTodos();
 };
 
 const toggleTodo = ({ id, done }) => {
-  const todo = new Todo(perspective, id, source);
+  const todo = new Todo(perspective, id);
   todo.done = done;
   todo.update();
 };
 
 const deleteTodo = (id: string) => {
-  const todo = new Todo(perspective, id, source);
+  const todo = new Todo(perspective, id);
   todo.delete();
 };
 </script>

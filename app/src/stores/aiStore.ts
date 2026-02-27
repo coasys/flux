@@ -176,9 +176,7 @@ export const useAiStore = defineStore(
       const filteredTasks = tasks.filter(
         (task) =>
           !processingQueue.value.some(
-            (t) =>
-              t.communityId === task.communityId &&
-              toRaw(t.channel).baseExpression === toRaw(task.channel).baseExpression,
+            (t) => t.communityId === task.communityId && toRaw(t.channel).id === toRaw(task.channel).id,
           ),
       );
 
@@ -203,8 +201,8 @@ export const useAiStore = defineStore(
             const { channelId, communityId } = currentRoute.value;
 
             // Current channel gets highest priority
-            if (a.channel.baseExpression! === channelId && b.channel.baseExpression! !== channelId) return -1;
-            if (b.channel.baseExpression! === channelId && a.channel.baseExpression! !== channelId) return 1;
+            if (a.channel.id! === channelId && b.channel.id! !== channelId) return -1;
+            if (b.channel.id! === channelId && a.channel.id! !== channelId) return 1;
 
             // Current community gets second priority
             if (a.communityId === communityId && b.communityId !== communityId) return -1;
@@ -218,8 +216,8 @@ export const useAiStore = defineStore(
         const { communityId, channel } = processingQueue.value[0];
         const rawChannel = toRaw(channel) as Channel;
         communityService = communityServiceStore.getCommunityService(communityId);
-        const conversation = communityService?.getConversation(rawChannel.baseExpression!);
-        const parentChannel = communityService?.getParentChannel(rawChannel.baseExpression!);
+        const conversation = communityService?.getConversation(rawChannel.id!);
+        const parentChannel = communityService?.getParentChannel(rawChannel.id!);
 
         if (!communityService || !conversation) {
           console.error('Missing community service or conversation');
@@ -258,7 +256,7 @@ export const useAiStore = defineStore(
         const itemIds = itemsToProcess.map((item) => item.baseExpression);
         setProcessingState({
           step: 1,
-          channelId: rawChannel.baseExpression,
+          channelId: rawChannel.id,
           author: me.value.did,
           itemIds,
           communityName: communityService.perspective.name,

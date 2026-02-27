@@ -85,15 +85,15 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useModalStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
-import { useModel } from '@coasys/ad4m-vue-hooks';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
+import { Link } from '@coasys/ad4m';
 import semver from 'semver';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const modalStore = useModalStore();
-const { perspective, recentConversations } = useCommunityService();
+const { perspective, recentConversations, allChannels } = useCommunityService();
 
 const tab = ref<'official' | 'community'>('official');
 const isLoading = ref(false);
@@ -105,7 +105,7 @@ const isSaving = ref(false);
 
 const channelId = computed(() => route.params.channelId as string);
 const channelUrl = computed(() => restoreChannelPrefix(channelId.value));
-const channel = computed(() => channels.value?.[0] || null);
+const channel = computed(() => allChannels.value.find((c) => c.id === channelUrl.value) || null);
 const isConversation = computed(() => channel.value?.isConversation);
 const canSave = computed(() => selectedPlugins.value.length >= 1);
 const officialApps = computed(() =>
@@ -120,8 +120,20 @@ const filteredPackages = computed((): FluxApp[] =>
   tab.value === 'official' ? officialApps.value : communityApps.value,
 );
 
-const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelUrl.value } } });
-const { entries: apps } = useModel({ perspective, model: App, query: { source: channelUrl.value } });
+const views = ref<App[]>([]);
+watch(
+  channel,
+  async (newChannel) => {
+    if (newChannel) {
+      await newChannel.get({ views: true });
+      views.value = newChannel.views;
+      selectedPlugins.value = newChannel.views;
+    } else {
+      views.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 function toggleView(app: FluxApp) {
   const isSelectedApp = selectedPlugins.value.some((a) => a.pkg === app.pkg);
@@ -142,24 +154,25 @@ async function updateChannel() {
   isSaving.value = true;
 
   try {
-    const removeApps = apps.value
+    const removeApps = views.value
       .filter((app) => !selectedPlugins.value.some((a) => a.pkg === app.pkg))
       .map((app) => {
-        const appModel = new App(perspective, app.baseExpression);
+        const appModel = new App(perspective, app.id);
         return appModel.delete();
       });
 
     await Promise.all(removeApps);
 
     const addedApps = selectedPlugins.value
-      .filter((app) => !apps.value.some((a) => a.pkg === app.pkg))
-      .map((app) => {
-        const appModel = new App(perspective, undefined, channelUrl.value);
+      .filter((app) => !views.value.some((a) => a.pkg === app.pkg))
+      .map(async (app) => {
+        const appModel = new App(perspective);
         appModel.name = app.name;
         appModel.description = app.description;
         appModel.icon = app.icon;
         appModel.pkg = app.pkg;
-        return appModel.save();
+        await appModel.save();
+        await perspective.add(new Link({ source: channelUrl.value, predicate: 'flux://has_app', target: appModel.id }));
       });
 
     await Promise.all(addedApps);
@@ -170,22 +183,12 @@ async function updateChannel() {
 }
 
 watch(
-  apps,
-  (newApps) => {
-    if (newApps) selectedPlugins.value = newApps;
-  },
-  { deep: true, immediate: true },
-);
-
-watch(
   channel,
   (newChannel) => {
     if (newChannel) {
       if (newChannel.isConversation) {
         // Get the conversation name for the channel
-        const conversationData = recentConversations.value.find(
-          (c) => c.channel.baseExpression === newChannel.baseExpression,
-        );
+        const conversationData = recentConversations.value.find((c) => c.channel.id === newChannel.id);
         name.value = conversationData?.conversation?.conversationName || '';
       } else {
         // Otherwise just use the channel name

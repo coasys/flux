@@ -60,7 +60,7 @@
     </div>
 
     <div v-if="expanded && item.children?.length" style="margin-left: var(--j-space-500)">
-      <SidebarItem v-for="child in item.children" :key="child.channel.baseExpression" :item="child" is-child />
+      <SidebarItem v-for="child in item.children" :key="child.channel.id" :item="child" is-child />
     </div>
   </j-flex>
 </template>
@@ -92,7 +92,7 @@ const isDragOver = ref(false);
 const isDragging = ref(false);
 const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
-const selected = computed(() => item.channel.baseExpression === restoreChannelPrefix(route.params.channelId as string));
+const selected = computed(() => item.channel.id === restoreChannelPrefix(route.params.channelId as string));
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, 'agentsInCall') || []);
 
 function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agentsInChannel' | 'agentsInCall') {
@@ -116,7 +116,7 @@ function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
 function navigateToChannel() {
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = stripChannelPrefix(item.channel.baseExpression || '');
+  const channelId = stripChannelPrefix(item.channel.id || '');
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
   const defaultViewId = item.channel.isConversation ? 'conversation' : 'conversations';
   router.push({ name: 'view', params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
@@ -128,9 +128,7 @@ function navigateToChannel() {
 function expandIfInNestedChannel() {
   // Expand the item when the user navigates to a channel included in its children
   const currentChannelId = route.params.channelId as string;
-  const inNestedChannel = item.children?.some(
-    (c: any) => stripChannelPrefix(c.channel.baseExpression) === currentChannelId,
-  );
+  const inNestedChannel = item.children?.some((c: any) => stripChannelPrefix(c.channel.id) === currentChannelId);
   if (inNestedChannel) expanded.value = true;
 }
 
@@ -142,7 +140,7 @@ function handleDragStart(event: DragEvent) {
   event.dataTransfer!.setData(
     'application/json',
     JSON.stringify({
-      conversationChannelId: item.channel.baseExpression!,
+      conversationChannelId: item.channel.id!,
       name: item.conversation?.conversationName || '',
     }),
   );
@@ -181,7 +179,7 @@ async function handleDrop(event: DragEvent) {
   try {
     const dropData = event.dataTransfer!.getData('application/json');
     const { conversationChannelId, name } = JSON.parse(dropData);
-    await moveConversation(conversationChannelId, item.channel.baseExpression!, name);
+    await moveConversation(conversationChannelId, item.channel.id!, name);
   } catch (error) {
     console.error('Error handling drop:', error);
   }

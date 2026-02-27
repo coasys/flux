@@ -55,7 +55,7 @@ const callRouteData = computed(() => {
 
   const communityName = (communityService?.community as Community | undefined)?.name || '';
   const allChannels = (communityService?.allChannels || []) as Channel[];
-  const channel = allChannels.find((c) => c.baseExpression === channelUrl);
+  const channel = allChannels.find((c) => c.id === channelUrl);
 
   if (!channel) return { communityName, channelName: '', conversationName: '' };
 
@@ -64,9 +64,9 @@ const callRouteData = computed(() => {
     const recentConversations = (communityService?.recentConversations || []) as ChannelData[];
 
     const parentChannel = channelsWithConversations.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelUrl),
+      c.children?.some((child) => child.channel.id === channelUrl),
     );
-    const conversationData = recentConversations?.find((c) => c.channel.baseExpression === channelUrl);
+    const conversationData = recentConversations?.find((c) => c.channel.id === channelUrl);
 
     const channelName = parentChannel?.channel.name || '';
     const conversationName = conversationData?.conversation?.conversationName || '';

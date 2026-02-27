@@ -1,8 +1,9 @@
-import { Ad4mModel, HasMany, Flag, Model, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Model, Property } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
 import App from '../app';
+import Conversation from '../conversation';
 
 const {
   ENTRY_TYPE,
@@ -43,10 +44,16 @@ export class Channel extends Ad4mModel {
   isPinned: boolean;
 
   @HasMany(() => App, { through: FLUX_APP })
-  views: string[] = [];
+  views: App[] = [];
 
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
+
+  @HasMany(() => Conversation, { through: 'ad4m://has_child' })
+  conversations: Conversation[] = [];
+
+  @HasMany(() => Channel, { through: 'ad4m://has_child' })
+  childChannels: Channel[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
@@ -246,4 +253,5 @@ export class Channel extends Ad4mModel {
   }
 }
 
+export interface Channel extends HasManyMethods<'conversations' | 'childChannels' | 'views' | 'participants'> {}
 export default Channel;
