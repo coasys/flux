@@ -7,6 +7,8 @@ import createCommunity from './createCommunity';
 import createProfile from './createProfile';
 import Embedding from './embedding';
 import Channel from './channel';
+import getAd4mProfile from './getAd4mProfile';
+import getAgentLinks from './getAgentLinks';
 import getAgentWebLinks from './getAgentWebLinks';
 import type { Me } from './getMe';
 import getMe from './getMe';

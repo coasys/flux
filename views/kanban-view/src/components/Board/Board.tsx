@@ -1,4 +1,13 @@
-import { Ad4mModel, Literal, makeRandomPrologAtom, PerspectiveProxy } from '@coasys/ad4m';
+import { Ad4mModel, Literal, PerspectiveProxy } from '@coasys/ad4m';
+
+function makeRandomPrologAtom(length: number): string {
+  const characters = 'abcdefghijklmnopqrstuvwxyz';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
 import { useModel } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
