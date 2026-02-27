@@ -67,7 +67,7 @@ async function updateCommunity() {
       compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(communityImage.value as string), 0.6));
     }
 
-    const communityModel = new Community(perspective, community.value.baseExpression);
+    const communityModel = new Community(perspective, community.value.id);
     communityModel.name = communityName.value;
     communityModel.description = communityDescription.value;
     // @ts-ignore

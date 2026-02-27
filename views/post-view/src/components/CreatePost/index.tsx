@@ -1,4 +1,5 @@
 import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
+import { Link } from '@coasys/ad4m';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { PostOption, postOptions } from '../../constants/options';
 import FileUpload from '../FileUpload';
@@ -23,7 +24,7 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
   const isEditing = !!postId;
 
   async function getPost() {
-    const entry = await new Post(perspective, postId, source).get();
+    const entry = await new Post(perspective, postId).get();
     setState({
       title: entry.title || undefined,
       body: entry.body || undefined,
@@ -77,15 +78,18 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
     let data = state;
 
     try {
-      const post = new Post(perspective, isEditing ? postId : undefined, source);
+      const post = new Post(perspective, isEditing ? postId : undefined);
       post.title = data.title;
       post.body = data.body;
       post.url = data.url;
       post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
       if (isEditing) await post.update();
-      else await post.save();
+      else {
+        await post.save();
+        await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: post.id }));
+      }
 
-      onPublished(isEditing ? postId : post?.baseExpression);
+      onPublished(isEditing ? postId : post?.id);
     } catch (e) {
       console.log(e);
     } finally {

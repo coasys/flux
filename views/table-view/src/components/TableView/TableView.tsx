@@ -35,7 +35,7 @@ export default function TableView({ perspective, agent, source: initialSource }:
 
   const source = history.length ? history[history.length - 1] : 'ad4m://self';
 
-  const { entries } = useModel({ perspective, model: selected, query: { source } });
+  const { entries } = useModel({ perspective, model: selected, query: {} });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);

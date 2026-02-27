@@ -21,7 +21,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
   const { entries: posts, loading } = useModel({
     perspective,
     model: Post,
-    query: { source, order: { timestamp: 'DESC' } },
+    query: { order: { timestamp: 'DESC' } },
   });
 
   const displayStyle: DisplayView =
@@ -75,7 +75,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
       )}
       <div className={[style.posts, displayStyle].join(' ')}>
         {posts.map((post) => (
-          <PostItem key={post.baseExpression} agent={agent} post={post} displayView={view} getProfile={getProfile} />
+          <PostItem key={post.id} agent={agent} post={post} displayView={view} getProfile={getProfile} />
         ))}
       </div>
     </div>

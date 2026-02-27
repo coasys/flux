@@ -138,7 +138,7 @@ export default function Post({
           Comments ({post.comments?.length})
         </j-text>
         {/* @ts-ignore */}
-        <comment-section agent={agent} perspective={perspective} source={post.baseExpression} />
+        <comment-section agent={agent} perspective={perspective} source={post.id} />
       </j-box>
     </div>
   );

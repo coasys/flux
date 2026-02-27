@@ -58,7 +58,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       //   % Collect and deduplicate topic data for this specific subgroup
       //   findall(TopicList, (
       //     findall([TopicBase, TopicName], (
-      //       % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's baseExpression
+      //       % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's id
       //       subject_class("SemanticRelationship", SR),
       //       instance(SR, Relationship),
       //       triple(Relationship, "flux://has_expression", "${this.id}"),
@@ -100,7 +100,7 @@ export default class ConversationSubgroup extends Ad4mModel {
 
       return Array.from(uniqueTopics.values()).map(
         ({ topicBase, topicName }): SynergyTopic => ({
-          baseExpression: topicBase,
+          id: topicBase,
           name: topicName,
         }),
       );
@@ -145,7 +145,7 @@ export default class ConversationSubgroup extends Ad4mModel {
 
       const surrealQuery = `
         SELECT
-          out.uri AS baseExpression,
+          out.uri AS id,
           (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
@@ -181,7 +181,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
 
         return {
-          baseExpression: item.baseExpression,
+          id: item.id,
           type,
           timestamp: new Date(item.channelTimestamp).toISOString(),
           author: item.author,
@@ -245,7 +245,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       }
 
       return Array.from(uniqueTopics.values()).map(({ topicBase, topicName, relevance }) => ({
-        baseExpression: topicBase,
+        id: topicBase,
         name: topicName,
         relevance: parseInt(relevance, 10) || 0,
       }));

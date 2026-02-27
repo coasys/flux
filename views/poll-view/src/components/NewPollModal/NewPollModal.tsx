@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { Link } from '@coasys/ad4m';
 import { useRef, useState } from 'preact/hooks';
 import Answer from '../../models/Answer';
 import Poll from '../../models/Poll';
@@ -51,18 +52,23 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
     setAnswersError(answersValid ? '' : 'At least 2 answers required for locked polls');
     if (title && answersValid) {
       setLoading(true);
-      const newPoll = new Poll(perspective, undefined, source);
+      const newPoll = new Poll(perspective);
       newPoll.title = title;
       newPoll.description = description;
       newPoll.voteType = voteType;
       newPoll.answersLocked = answersLocked;
       await newPoll.save();
+      await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: newPoll.id }));
 
       Promise.all(
         answers.map((answer) => {
-          const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
+          const newAnswer = new Answer(perspective);
           newAnswer.text = answer.text;
-          return newAnswer.save();
+          return newAnswer
+            .save()
+            .then(() =>
+              perspective.add(new Link({ source: newPoll.id, predicate: 'ad4m://has_child', target: newAnswer.id })),
+            );
         }),
       )
         .then(() => close())

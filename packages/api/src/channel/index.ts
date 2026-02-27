@@ -104,7 +104,7 @@ export class Channel extends Ad4mModel {
 
       const surrealQuery = `
         SELECT
-          out.uri AS baseExpression,
+          out.uri AS id,
           author,
           timestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
@@ -141,7 +141,7 @@ export class Channel extends Ad4mModel {
         }
 
         return {
-          baseExpression: item.baseExpression,
+          id: item.id,
           author: item.author,
           timestamp: new Date(item.timestamp).toISOString(),
           text,
@@ -226,7 +226,7 @@ export class Channel extends Ad4mModel {
 
       const surrealQuery = `
         SELECT
-          out.uri AS baseExpression,
+          out.uri AS id,
           timestamp,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
@@ -241,7 +241,7 @@ export class Channel extends Ad4mModel {
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
       return (surrealResult || []).map((conv: any) => ({
-        baseExpression: conv.baseExpression,
+        id: conv.id,
         name: conv.name,
         summary: conv.summary,
         timestamp: new Date(conv.timestamp).toISOString(),

@@ -313,7 +313,7 @@ export default class MyElement extends LitElement {
     console.log('this.channels: ', this.channels);
     const matches = this.channels
       .filter((c) => this.getSafeString(c.name).toLowerCase().startsWith(query.toLowerCase()))
-      .map((channel) => ({ id: channel.baseExpression, label: channel.name }))
+      .map((channel) => ({ id: channel.id, label: channel.name }))
       .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;

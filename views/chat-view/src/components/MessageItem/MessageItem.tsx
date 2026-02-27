@@ -54,7 +54,7 @@ export default function MessageItem({
     const me = await agent.me();
     const reactions = await perspective.get(
       new LinkQuery({
-        source: message.baseExpression,
+        source: message.id,
         predicate: REACTION,
         target: expression,
       }),
@@ -66,7 +66,7 @@ export default function MessageItem({
       perspective.removeLinks(myReactions);
     } else {
       perspective.add({
-        source: message.baseExpression,
+        source: message.id,
         predicate: REACTION,
         target: expression,
       });

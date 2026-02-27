@@ -74,7 +74,7 @@ export async function createEmbedding(
   const start3 = new Date().getTime();
   const relationship = new SemanticRelationship(perspective, undefined, itemId);
   relationship.expression = ensureExpressionUri(itemId);
-  relationship.tag = embedding.baseExpression;
+  relationship.tag = embedding.id;
   await relationship.save(batchId);
   const end3 = new Date().getTime();
   if (showLogs) console.log(`${index ? `Item ${index}` : ''} SR saved in ${duration(start3, end3)}`);

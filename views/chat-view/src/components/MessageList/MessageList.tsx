@@ -40,7 +40,7 @@ export default function MessageList({
   const { entries, loading, totalCount, loadMore } = useModel({
     perspective,
     model: Message,
-    query: { source, order: { timestamp: 'DESC' } },
+    query: { order: { timestamp: 'DESC' } },
     pageSize: PAGE_SIZE,
   });
 
@@ -131,16 +131,16 @@ export default function MessageList({
         alignToBottom
         overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
-        computeItemKey={(index) => messages[index].baseExpression}
+        computeItemKey={(index) => messages[index].id}
         totalCount={messages.length}
         initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (
             <MessageItem
-              isReplying={messages[index].baseExpression === replyId}
+              isReplying={messages[index].id === replyId}
               perspective={perspective}
               showAvatar={showAvatar(index)}
-              key={messages[index].baseExpression}
+              key={messages[index].id}
               agent={agent}
               message={messages[index]}
               isThread={isThread}

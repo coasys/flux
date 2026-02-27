@@ -112,7 +112,7 @@ class Conversation extends Ad4mModel {
 
       return Array.from(uniqueTopics.values()).map(
         ({ topicBase, topicName }): SynergyTopic => ({
-          baseExpression: topicBase,
+          id: topicBase,
           name: topicName,
         }),
       );
@@ -181,7 +181,7 @@ class Conversation extends Ad4mModel {
       // Simplified query - get subgroups without timestamps first
       const surrealQuery = `
         SELECT
-          out.uri AS baseExpression,
+          out.uri AS id,
           timestamp,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
@@ -203,7 +203,7 @@ class Conversation extends Ad4mModel {
             SELECT
               (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp
             FROM link
-            WHERE in.uri = '${subgroup.baseExpression}'
+            WHERE in.uri = '${subgroup.id}'
               AND predicate = 'ad4m://has_child'
               AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0] IS NOT NONE
             ORDER BY channelTimestamp ASC
@@ -222,7 +222,7 @@ class Conversation extends Ad4mModel {
           const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
 
           return {
-            baseExpression: subgroup.baseExpression,
+            id: subgroup.id,
             name: subgroup.name || '',
             summary: subgroup.summary || '',
             start,
@@ -263,7 +263,7 @@ class Conversation extends Ad4mModel {
     let idToBaseExpression = {};
     let nextId = 0;
     for (const item of unprocessedItems) {
-      idToBaseExpression[nextId] = item.baseExpression;
+      idToBaseExpression[nextId] = item.id;
       nextId++;
     }
     const result = await LLMTaskWithExpectedOutputs(
@@ -386,7 +386,7 @@ class Conversation extends Ad4mModel {
 
     // Handle case where the conversation is empty (no group yet) but LLM returns data in group and not in newGroup
     if (!currentSubgroup && detectResult.group && !detectResult.newGroup) {
-      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].baseExpression };
+      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].id };
       detectResult.group = null;
     }
 
@@ -396,7 +396,7 @@ class Conversation extends Ad4mModel {
     if (detectResult.newGroup) {
       newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
-        (item) => item.baseExpression === detectResult.newGroup.firstItemId,
+        (item) => item.id === detectResult.newGroup.firstItemId,
       );
     }
 
@@ -422,7 +422,7 @@ class Conversation extends Ad4mModel {
       newLinks.push({
         source: itemsSubgroup.id,
         predicate: 'ad4m://has_child',
-        target: item.baseExpression,
+        target: item.id,
       });
     }
 
@@ -537,7 +537,7 @@ class Conversation extends Ad4mModel {
       const start3 = new Date().getTime();
       await Promise.all(
         unprocessedItems.map((item, index) =>
-          createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1),
+          createEmbedding(this.perspective, item.text, item.id, this.perspective.ai, batchId, index + 1),
         ),
       );
       const end3 = new Date().getTime();

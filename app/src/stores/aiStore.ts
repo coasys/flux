@@ -253,7 +253,7 @@ export const useAiStore = defineStore(
         }
 
         // Set our initial processing state
-        const itemIds = itemsToProcess.map((item) => item.baseExpression);
+        const itemIds = itemsToProcess.map((item) => item.id);
         setProcessingState({
           step: 1,
           channelId: rawChannel.id,

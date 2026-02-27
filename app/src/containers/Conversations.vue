@@ -19,7 +19,7 @@
         <div
           class="conversation-wrapper"
           v-for="conversation in conversations.slice(0, numberOfConversationsDisplayed)"
-          :key="conversation.baseExpression"
+          :key="conversation.id"
         >
           <div class="fades">
             <div class="fade-top" />
@@ -95,7 +95,7 @@ const conversations = computed((): (SynergyGroup & { channelId: string })[] => {
   return parentEntry.children
     .filter((child) => child.conversation)
     .map((child) => ({
-      baseExpression: child.conversation!.id,
+      id: child.conversation!.id,
       name: child.conversation!.conversationName,
       summary: child.conversation!.summary,
       timestamp: child.conversation!.createdAt,

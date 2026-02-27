@@ -1,4 +1,4 @@
-import { LinkQuery, PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
+import { Link, LinkQuery, PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Message } from '@coasys/flux-api';
 import { community } from '@coasys/flux-constants';
@@ -39,22 +39,22 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       const text = editor.current?.editor.getText();
       editor.current?.clear();
 
-      // @ts-ignore
-      const message = new Message(perspective, undefined, source);
+      const message = new Message(perspective);
       message.body = html;
       await message.save();
+      await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: message.id }));
 
       if (replyMessage) {
         perspective.addLinks([
           {
-            source: replyMessage.baseExpression,
+            source: replyMessage.id,
             predicate: HAS_REPLY,
-            target: message.baseExpression,
+            target: message.id,
           },
           // {
-          //   source: replyMessage.baseExpression,
+          //   source: replyMessage.id,
           //   predicate: EntryType.Message,
-          //   target: message.baseExpression,
+          //   target: message.id,
           // },
         ]);
       }
@@ -72,7 +72,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   }
 
   function onOpenEmojiPicker(message: Message, position: { x: number; y: number }) {
-    setPickerInfo({ x: position.x, y: position.y, id: message.baseExpression });
+    setPickerInfo({ x: position.x, y: position.y, id: message.id });
   }
 
   async function onOpenThread(message: Message) {
@@ -93,7 +93,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       el.agent = agent;
       el.client = client;
       el.getProfile = getProfile;
-      el.setAttribute('source', message.baseExpression);
+      el.setAttribute('source', message.id);
       el.setAttribute('threaded', 'true');
     }
   }
@@ -186,7 +186,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
           onEmojiClick={onOpenEmojiPicker}
           onReplyClick={(message) => setReplyMessage(message)}
           onThreadClick={(message) => onOpenThread(message)}
-          replyId={replyMessage?.baseExpression}
+          replyId={replyMessage?.id}
           perspective={perspective}
           isThread={threaded}
           agent={agent}

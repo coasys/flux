@@ -54,7 +54,7 @@
       <div v-else id="timeline-0" class="items">
         <TimelineBlock
           v-for="(conversation, index) in conversations"
-          :key="conversation.baseExpression"
+          :key="conversation.id"
           block-type="conversation"
           :last-child="index === conversations.length - 1"
           :data="conversation"
@@ -92,7 +92,7 @@
             <ProgressBar :steps="llmProcessingSteps" :current-step="processingState.step" />
           </j-box>
 
-          <j-flex v-for="item in unprocessedItems" :key="item.baseExpression" gap="400" a="center" class="item-card">
+          <j-flex v-for="item in unprocessedItems" :key="item.id" gap="400" a="center" class="item-card">
             <j-flex gap="300" direction="column">
               <j-flex gap="400" a="center">
                 <j-icon :name="item.icon" color="ui-400" size="lg" />
@@ -100,7 +100,7 @@
                   <Avatar :did="item.author" show-name />
                 </j-flex>
                 <j-timestamp :value="item.timestamp" relative class="timestamp" />
-                <j-badge v-if="processingState?.itemIds?.includes(item.baseExpression)" variant="success">
+                <j-badge v-if="processingState?.itemIds?.includes(item.id)" variant="success">
                   Processing...
                 </j-badge>
               </j-flex>
@@ -168,7 +168,7 @@ async function exportTranscript() {
     // Create Conversation model instances from the timeline data
     const markdowns: string[] = [];
     for (const convData of conversations.value) {
-      const conv = new Conversation(perspective, convData.baseExpression);
+      const conv = new Conversation(perspective, convData.id);
       // Pass unprocessed items to the last (most recent) conversation
       const isLast = convData === conversations.value[conversations.value.length - 1];
       const unprocessed = isLast ? unprocessedItems.value : undefined;

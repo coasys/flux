@@ -33,7 +33,7 @@
       <!-- Timeline blocks -->
       <TimelineBlock
         v-for="conversation in visibleConversations"
-        :key="conversation.baseExpression"
+        :key="conversation.id"
         block-type="conversation"
         :data="conversation"
         :timeline-index="index + 1"
@@ -121,7 +121,7 @@ async function getData() {
 
     // Find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
-      if (conversation.baseExpression === props.match.baseExpression) {
+      if (conversation.id === props.match.id) {
         // Store the conversations index & mark loading false to prevent further loading of children
         matchIndexes.value = {
           ...matchIndexes.value,
