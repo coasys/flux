@@ -25,7 +25,7 @@ import { useAppStore } from '@/stores';
 import Modals from '@/views/main/modals/Modals.vue';
 import Sidebar from '@/views/main/sidebar/Sidebar.vue';
 import { LinkExpression, Literal, PerspectiveProxy } from '@coasys/ad4m';
-import { usePerspectives } from '@coasys/ad4m-vue-hooks';
+import { usePerspectives } from '@coasys/flux-vue';
 import { ensureLLMTasks } from '@coasys/flux-api/src/conversation/LLMutils';
 import { EntryType } from '@coasys/flux-types';
 import semver from 'semver';
