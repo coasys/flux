@@ -20,7 +20,7 @@ import {
 } from '@coasys/flux-api';
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from 'vue';
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { HEARTBEAT_INTERVAL, useSignallingService } from './useSignallingService';
 
@@ -238,8 +238,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
           // If there are unprocessed items, use the latest unprocessed items timestamp
           let lastActivity: string | null = null;
-          const channelRaw = toRaw(channel);
-          const unprocessedItems = await channelRaw.unprocessedItems();
+          const unprocessedItems = await channel.unprocessedItems();
           if (unprocessedItems.length) {
             const lastUnprocessedItem = unprocessedItems.sort(
               (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),

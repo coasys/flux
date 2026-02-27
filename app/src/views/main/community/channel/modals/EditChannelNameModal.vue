@@ -46,7 +46,7 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useModalStore } from '@/stores';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { Channel, Conversation } from '@coasys/flux-api';
-import { computed, ref, toRaw, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -76,8 +76,8 @@ async function updateChannel() {
   try {
     if (isConversation.value) {
       // Update the associated conversation name
-      const conversationData = recentConversations.value.find((c) => c.channel.id === channel.value.id);
-      const conversationId = toRaw(conversationData?.conversation)?.id;
+      const conversationData = recentConversations.value.find((c) => c.channel?.id === channel.value?.id);
+      const conversationId = conversationData?.conversation?.id;
       if (!conversationId) {
         isSaving.value = false;
         modalStore.showEditChannelNameModal = false;
@@ -121,7 +121,7 @@ watch(
     if (isOpen && channel.value) {
       if (channel.value.isConversation) {
         // Get the conversation name and lock state for the channel
-        const conversationData = recentConversations.value.find((c) => c.channel.id === channel.value.id);
+        const conversationData = recentConversations.value.find((c) => c.channel?.id === channel.value?.id);
         if (conversationData?.conversation) {
           name.value = conversationData.conversation.conversationName!;
           lockName.value = conversationData.conversation.nameFixed!;
