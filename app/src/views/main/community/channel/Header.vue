@@ -124,8 +124,11 @@ watch(
   channel,
   async (newChannel) => {
     if (newChannel) {
-      await newChannel.get({ views: true });
-      views.value = newChannel.views;
+      const channelWithViews = await Channel.findOne(perspective, {
+        where: { id: newChannel.id },
+        include: { views: true },
+      });
+      views.value = channelWithViews?.views ?? [];
     } else {
       views.value = [];
     }
@@ -149,9 +152,10 @@ async function togglePinned() {
   if (!channel.value) return;
 
   try {
-    const channelModel = new Channel(perspective, channel.value.id);
+    const channelModel = await Channel.findOne(perspective, { where: { id: channel.value.id } });
+    if (!channelModel) return;
     channelModel.isPinned = !channel.value.isPinned;
-    await channelModel.update();
+    await channelModel.save();
   } catch (error) {
     console.error('Error toggling pinned state:', error);
     appStore.showDangerToast({ message: 'Failed to update pinned state' });

@@ -76,7 +76,7 @@ export default async function createCommunity({
     }
 
     // Create the community model
-    const newCommunity = new Community(perspective, 'ad4m://self');
+    const newCommunity = new Community(perspective);
     newCommunity.name = name;
     newCommunity.description = description;
 

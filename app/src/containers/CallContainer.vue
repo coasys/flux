@@ -24,7 +24,7 @@ import CallWidgets from '@/components/call/widgets/CallWidgets.vue';
 import CallWindow from '@/components/call/window/CallWindow.vue';
 import ChevronDownIcon from '@/components/icons/ChevronDownIcon.vue';
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon.vue';
-import { ChannelData } from '@/composables/useCommunityService';
+import { ChannelDataWithAgents } from '@/composables/useCommunityService';
 import { useCommunityServiceStore, useUiStore, useWebrtcStore } from '@/stores';
 import { restoreChannelPrefix, restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { Channel, Community } from '@coasys/flux-api';
@@ -60,15 +60,16 @@ const callRouteData = computed(() => {
   if (!channel) return { communityName, channelName: '', conversationName: '' };
 
   if (channel.isConversation) {
-    const channelsWithConversations = (communityService?.channelsWithConversations || []) as ChannelData[];
-    const recentConversations = (communityService?.recentConversations || []) as ChannelData[];
+    const channelsWithConversations = (communityService?.channelsWithConversationsAndAgents ||
+      []) as ChannelDataWithAgents[];
+    const recentConversations = (communityService?.recentConversationsWithAgents || []) as ChannelDataWithAgents[];
 
     const parentChannel = channelsWithConversations.find((c) =>
-      c.children?.some((child) => child.channel.id === channelUrl),
+      c.children?.some((child) => child.channelId === channelUrl),
     );
-    const conversationData = recentConversations?.find((c) => c.channel.id === channelUrl);
+    const conversationData = recentConversations?.find((c) => c.channelId === channelUrl);
 
-    const channelName = parentChannel?.channel.name || '';
+    const channelName = parentChannel?.channel?.name || '';
     const conversationName = conversationData?.conversation?.conversationName || '';
 
     return { communityName, channelName, conversationName };

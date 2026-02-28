@@ -86,20 +86,21 @@ async function updateChannel() {
         });
         return;
       }
-      const conversationModel = new Conversation(perspective, conversationId);
+      const conversationModel = await Conversation.findOne(perspective, { where: { id: conversationId } });
+      if (!conversationModel) throw new Error('Conversation not found');
       conversationModel.conversationName = name.value;
       conversationModel.nameFixed = lockName.value;
-      await conversationModel.update();
+      await conversationModel.save();
       // Refresh sidebar channels
       getPinnedConversations();
       getRecentConversations();
       getChannelsWithConversations();
     } else {
       // Update the channel name directly
-      const channelModel = new Channel(perspective, channelId.value);
-      await channelModel.get(); // Must await the get() here otherwise channel views get lost in the update (not sure why)
+      const channelModel = await Channel.findOne(perspective, { where: { id: channelId.value } });
+      if (!channelModel) throw new Error('Channel not found');
       channelModel.name = name.value;
-      await channelModel.update();
+      await channelModel.save();
     }
 
     // Close modal only on success

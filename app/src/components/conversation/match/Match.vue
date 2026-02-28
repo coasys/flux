@@ -116,9 +116,11 @@ const visibleConversations = computed(() =>
 
 async function getData() {
   try {
-    const channel = new Channel(perspective, channelId.value);
-    await channel.get({ conversations: true });
-    const newConversations = channel.conversationsData();
+    const channel = await Channel.findOne(perspective, {
+      where: { id: channelId.value },
+      include: { conversations: true },
+    });
+    const newConversations = channel?.conversationsData() ?? [];
 
     // Find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {

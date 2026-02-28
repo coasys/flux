@@ -17,30 +17,19 @@ const {
 
 @Model({ name: 'Channel' })
 export class Channel extends Ad4mModel {
-  @Flag({
-    through: ENTRY_TYPE,
-    value: EntryType.Channel,
-  })
+  @Flag({ through: ENTRY_TYPE, value: EntryType.Channel })
   type: string;
 
-  @Property({
-    through: CHANNEL_NAME,
-  })
+  @Property({ through: CHANNEL_NAME })
   name: string;
 
-  @Property({
-    through: CHANNEL_DESCRIPTION,
-  })
+  @Property({ through: CHANNEL_DESCRIPTION })
   description: string;
 
-  @Property({
-    through: CHANNEL_IS_CONVERSATION,
-  })
+  @Property({ through: CHANNEL_IS_CONVERSATION })
   isConversation: boolean;
 
-  @Property({
-    through: CHANNEL_IS_PINNED,
-  })
+  @Property({ through: CHANNEL_IS_PINNED })
   isPinned: boolean;
 
   @HasMany(() => App, { through: FLUX_APP })

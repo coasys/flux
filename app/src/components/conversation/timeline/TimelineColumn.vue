@@ -201,10 +201,8 @@ async function exportTranscript() {
 }
 
 async function getConversations() {
-  const channel = new Channel(perspective, channelUrl);
-  await channel.get({ conversations: true });
-  const result = channel.conversationsData();
-  return result;
+  const channel = await Channel.findOne(perspective, { where: { id: channelUrl }, include: { conversations: true } });
+  return channel?.conversationsData() ?? [];
 }
 
 async function getUnprocessedItems() {
