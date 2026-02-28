@@ -318,9 +318,12 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Loop through all the space channels and get the conversations in each
       channelsWithConversations.value = await Promise.all(
         spaceChannels.value.map(async (channel: Channel) => {
-          // Get all nested conversation channels
-          await channel.get({ childChannels: true });
-          const nestedConversationChannels = (channel.childChannels as Channel[]).filter((c) => c.isConversation);
+          // Get all nested conversation channels — linked via CHANNEL predicate (same as startNewConversation)
+          const links = await perspective.get(new LinkQuery({ source: channel.id, predicate: CHANNEL }));
+          const childChannelIds = new Set(links.map((l) => l.data.target));
+          const nestedConversationChannels = allChannels.value.filter(
+            (ch) => ch.isConversation && childChannelIds.has(ch.id),
+          );
 
           // Get the conversation data for each of the nested conversation channels
           const conversations = await Promise.all(

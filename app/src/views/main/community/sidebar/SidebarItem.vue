@@ -1,5 +1,5 @@
 <template>
-  <j-flex direction="column">
+  <j-flex v-if="item.channel" direction="column">
     <div
       class="channel"
       :class="{
@@ -60,14 +60,14 @@
     </div>
 
     <div v-if="expanded && item.children?.length" style="margin-left: var(--j-space-500)">
-      <SidebarItem v-for="child in item.children" :key="child.channel.id" :item="child" is-child />
+      <SidebarItem v-for="child in item.children" :key="child.channel?.id || child.channelId" :item="child" is-child />
     </div>
   </j-flex>
 </template>
 
 <script setup lang="ts">
 import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from '@/components/icons';
-import { ChannelData, useCommunityService } from '@/composables/useCommunityService';
+import { ChannelDataWithAgents, useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useRouteMemoryStore, useUiStore } from '@/stores';
 import { restoreChannelPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
@@ -77,7 +77,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 defineOptions({ name: 'SidebarItem' });
 
-type Props = { item: ChannelData; isChild?: boolean };
+type Props = { item: ChannelDataWithAgents; isChild?: boolean };
 const { item } = defineProps<Props>();
 
 const route = useRoute();
@@ -92,10 +92,10 @@ const isDragOver = ref(false);
 const isDragging = ref(false);
 const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
-const selected = computed(() => item.channel.id === restoreChannelPrefix(route.params.channelId as string));
+const selected = computed(() => item.channel?.id === restoreChannelPrefix(route.params.channelId as string));
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, 'agentsInCall') || []);
 
-function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agentsInChannel' | 'agentsInCall') {
+function aggregateAgents(expanded: boolean, item: ChannelDataWithAgents, agentKey: 'agentsInChannel' | 'agentsInCall') {
   // If collapsed and children exist, aggregate agents from child channels
   if (!expanded && item.children?.length) {
     const childAgents = item.children.flatMap((child) => child[agentKey] || []);
@@ -105,20 +105,20 @@ function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agents
   return item[agentKey];
 }
 
-function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
+function aggregateAllAuthors(expanded: boolean, item: ChannelDataWithAgents): string[] {
   if (!expanded && item.children?.length) {
-    const childAuthors = item.children.flatMap((child) => child.channel.participants || []);
-    return [...new Set([...(item.channel.participants || []), ...childAuthors])];
+    const childAuthors = item.children.flatMap((child) => child.channel?.participants || []);
+    return [...new Set([...(item.channel?.participants || []), ...childAuthors])];
   }
-  return item.channel.participants || [];
+  return item.channel?.participants || [];
 }
 
 function navigateToChannel() {
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = stripChannelPrefix(item.channel.id || '');
+  const channelId = stripChannelPrefix(item.channel?.id || '');
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
-  const defaultViewId = item.channel.isConversation ? 'conversation' : 'conversations';
+  const defaultViewId = item.channel?.isConversation ? 'conversation' : 'conversations';
   router.push({ name: 'view', params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
 
   // Toggle the community sidebar shut if open (only has effect on mobile)
@@ -133,14 +133,14 @@ function expandIfInNestedChannel() {
 }
 
 function handleDragStart(event: DragEvent) {
-  if (!item.channel.isConversation) return;
+  if (!item.channel?.isConversation) return;
 
   isDragging.value = true;
   event.dataTransfer!.effectAllowed = 'move';
   event.dataTransfer!.setData(
     'application/json',
     JSON.stringify({
-      conversationChannelId: item.channel.id!,
+      conversationChannelId: item.channel?.id!,
       name: item.conversation?.conversationName || '',
     }),
   );
@@ -154,7 +154,7 @@ function handleDragEnd() {
 }
 
 function handleDragOver(event: DragEvent) {
-  if (item.channel.isConversation) return;
+  if (item.channel?.isConversation) return;
 
   event.preventDefault();
   event.dataTransfer!.dropEffect = 'move';
@@ -170,7 +170,7 @@ function handleDragLeave(event: DragEvent) {
 }
 
 async function handleDrop(event: DragEvent) {
-  if (item.channel.isConversation) return;
+  if (item.channel?.isConversation) return;
 
   event.preventDefault();
   event.stopPropagation();
@@ -179,7 +179,7 @@ async function handleDrop(event: DragEvent) {
   try {
     const dropData = event.dataTransfer!.getData('application/json');
     const { conversationChannelId, name } = JSON.parse(dropData);
-    await moveConversation(conversationChannelId, item.channel.id!, name);
+    await moveConversation(conversationChannelId, item.channel?.id!, name);
   } catch (error) {
     console.error('Error handling drop:', error);
   }
