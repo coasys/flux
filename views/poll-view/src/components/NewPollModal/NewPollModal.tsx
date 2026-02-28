@@ -58,7 +58,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
       newPoll.voteType = voteType;
       newPoll.answersLocked = answersLocked;
       await newPoll.save();
-      await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: newPoll.id }));
+      await perspective.add(new Link({ source, predicate: 'flux://has_poll', target: newPoll.id }));
 
       Promise.all(
         answers.map((answer) => {
@@ -67,7 +67,9 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
           return newAnswer
             .save()
             .then(() =>
-              perspective.add(new Link({ source: newPoll.id, predicate: 'ad4m://has_child', target: newAnswer.id })),
+              perspective.add(
+                new Link({ source: newPoll.id, predicate: 'flux://has_poll_answer', target: newAnswer.id }),
+              ),
             );
         }),
       )

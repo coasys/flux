@@ -1,7 +1,7 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLive } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
-import { Post } from '@coasys/flux-api';
+import { Channel, Post } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { useState } from 'preact/hooks';
 import { DisplayView, displayOptions } from '../../constants/options';
@@ -18,10 +18,10 @@ type Props = {
 export default function PostList({ agent, perspective, source, getProfile }: Props) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, loading } = useModel({
+  const { data: posts, loading } = useLive(Post, {
     perspective,
-    model: Post,
-    query: { order: { timestamp: 'DESC' } },
+    parent: { model: Channel, id: source, field: 'posts' },
+    query: { order: { createdAt: 'DESC' } },
   });
 
   const displayStyle: DisplayView =

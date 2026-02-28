@@ -1,4 +1,5 @@
-import { Model, Flag, Property, Ad4mModel } from '@coasys/ad4m';
+import { Model, Flag, Property, Ad4mModel, HasMany } from '@coasys/ad4m';
+import Answer from './Answer';
 
 @Model({
   name: 'Poll',
@@ -29,4 +30,7 @@ export default class Poll extends Ad4mModel {
     through: 'flux://poll_answers_locked',
   })
   answersLocked: boolean;
+
+  @HasMany(() => Answer, { through: 'flux://has_poll_answer' })
+  answers: Answer[] = [];
 }

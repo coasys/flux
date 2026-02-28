@@ -4,7 +4,7 @@ import { EntryType } from '@coasys/flux-types';
 import Channel from '../channel';
 
 const { FILE_STORAGE_LANGUAGE } = languages;
-const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
+const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE, CHANNEL } = community;
 
 interface FileData {
   name: string;
@@ -45,7 +45,7 @@ export class Community extends Ad4mModel {
   })
   thumbnail: string | FileData;
 
-  @HasMany({ through: 'ad4m://has_child' })
+  @HasMany({ through: CHANNEL })
   channels: string[] = [];
 }
 

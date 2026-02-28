@@ -4,6 +4,11 @@ import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
 import App from '../app';
 import Conversation from '../conversation';
+import Message from '../message';
+import Post from '../post';
+import Task from '../task';
+import TaskBoard from '../task-board';
+import TaskColumn from '../task-column';
 
 const {
   ENTRY_TYPE,
@@ -13,6 +18,14 @@ const {
   CHANNEL_IS_PINNED,
   FLUX_APP,
   FLUX_PARTICIPANT,
+  CHANNEL_MESSAGE,
+  CHANNEL_CONVERSATION,
+  CHANNEL_SUBCHANNEL,
+  SUBGROUP_ITEM,
+  CHANNEL_TASK_BOARD,
+  CHANNEL_TASK_COLUMN,
+  CHANNEL_TASK,
+  CHANNEL_POST,
 } = community;
 
 @Model({ name: 'Channel' })
@@ -38,11 +51,26 @@ export class Channel extends Ad4mModel {
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  @HasMany(() => Conversation, { through: 'ad4m://has_child' })
+  @HasMany(() => Message, { through: CHANNEL_MESSAGE })
+  messages: Message[] = [];
+
+  @HasMany(() => Conversation, { through: CHANNEL_CONVERSATION })
   conversations: Conversation[] = [];
 
-  @HasMany(() => Channel, { through: 'ad4m://has_child' })
+  @HasMany(() => Channel, { through: CHANNEL_SUBCHANNEL })
   childChannels: Channel[] = [];
+
+  @HasMany(() => TaskBoard, { through: CHANNEL_TASK_BOARD })
+  boards: TaskBoard[] = [];
+
+  @HasMany(() => TaskColumn, { through: CHANNEL_TASK_COLUMN })
+  taskColumns: TaskColumn[] = [];
+
+  @HasMany(() => Task, { through: CHANNEL_TASK })
+  tasks: Task[] = [];
+
+  @HasMany(() => Post, { through: CHANNEL_POST })
+  posts: Post[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
@@ -102,13 +130,8 @@ export class Channel extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
-          AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'][0] IS NONE
+          AND predicate IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
+          AND out<-link[WHERE predicate = '${SUBGROUP_ITEM}' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'][0] IS NONE
         ORDER BY timestamp ASC
       `;
 
@@ -175,12 +198,7 @@ export class Channel extends Ad4mModel {
         SELECT count() AS count
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
+          AND predicate IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
@@ -202,5 +220,15 @@ export class Channel extends Ad4mModel {
   }
 }
 
-export interface Channel extends HasManyMethods<'conversations' | 'childChannels' | 'views' | 'participants'> {}
+export interface Channel extends HasManyMethods<
+  | 'conversations'
+  | 'childChannels'
+  | 'messages'
+  | 'views'
+  | 'participants'
+  | 'boards'
+  | 'taskColumns'
+  | 'tasks'
+  | 'posts'
+> {}
 export default Channel;

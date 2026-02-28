@@ -1,7 +1,7 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLive } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
-import { Message } from '@coasys/flux-api';
+import { Channel, Message } from '@coasys/flux-api';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Virtuoso } from 'react-virtuoso';
 import MessageItem from '../MessageItem';
@@ -37,21 +37,26 @@ export default function MessageList({
   const [showButton, setShowButton] = useState(false);
   const showButtonTimeoutRef = useRef(null);
 
-  const { entries, loading, totalCount, loadMore } = useModel({
+  const {
+    data: entries,
+    loading,
+    totalCount,
+    loadMore,
+  } = useLive(Message, {
     perspective,
-    model: Message,
-    query: { order: { timestamp: 'DESC' } },
+    parent: { model: Channel, id: source, field: 'messages' },
+    query: { order: { createdAt: 'DESC' } },
     pageSize: PAGE_SIZE,
   });
 
   const messages = useMemo(() => {
     // Reverse order after pagination for inverted message scrolling
-    return entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    return entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [entries]);
 
-  function differenceInMinutes(timestamp1: string | number | Date, timestamp2: string | number | Date): number {
-    const date1 = new Date(timestamp1);
-    const date2 = new Date(timestamp2);
+  function differenceInMinutes(createdAt1: string | number | Date, createdAt2: string | number | Date): number {
+    const date1 = new Date(createdAt1);
+    const date2 = new Date(createdAt2);
     const differenceInMilliseconds = date1.getTime() - date2.getTime();
     const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
     return Math.floor(differenceInMinutes);
@@ -65,7 +70,7 @@ export default function MessageList({
     // Show avatar if author changed
     if (previousMessage.author !== message.author) return true;
     // For same author, show avatar if messages are separated by ≥ 2 minutes
-    const timeDifference = differenceInMinutes(new Date(message.timestamp), new Date(previousMessage.timestamp));
+    const timeDifference = differenceInMinutes(new Date(message.createdAt), new Date(previousMessage.createdAt));
 
     return timeDifference >= 2;
   }

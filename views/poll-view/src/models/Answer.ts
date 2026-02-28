@@ -1,4 +1,5 @@
-import { Model, Flag, Property, Ad4mModel } from '@coasys/ad4m';
+import { Model, Flag, Property, Ad4mModel, HasMany } from '@coasys/ad4m';
+import Vote from './Vote';
 
 @Model({
   name: 'Answer',
@@ -14,4 +15,7 @@ export default class Answer extends Ad4mModel {
     through: 'rdf://text',
   })
   text: string;
+
+  @HasMany(() => Vote, { through: 'flux://has_answer_vote' })
+  votes: Vote[] = [];
 }

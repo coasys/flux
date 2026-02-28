@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { AgentClient, Link, PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLive } from '@coasys/ad4m-react-hooks';
 import { getProfile } from '@coasys/flux-api';
 import { v4 } from 'uuid';
 import * as nil from '@nillion/client-web';
@@ -89,16 +89,14 @@ export function FileView({ perspective, source, agent }: Props) {
 
   const [showLoader, setShowLoader] = useState<boolean>(false);
 
-  const { entries: files } = useModel({
+  const { data: files } = useLive(File, {
     perspective,
-    model: File,
-    query: {},
+    query: { linkedFrom: { id: source, predicate: 'ad4m://has_child' } },
   });
 
-  const { entries: nillionUsers } = useModel({
+  const { data: nillionUsers } = useLive(NillionUser, {
     perspective,
-    model: NillionUser,
-    query: {},
+    query: { linkedFrom: { id: source, predicate: 'ad4m://has_child' } },
   });
 
   console.log({ nillionUsers });

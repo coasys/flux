@@ -1,9 +1,10 @@
 import { Ad4mModel, HasMany, Flag, Model, Property } from '@coasys/ad4m';
 import { community, languages } from '@coasys/flux-constants';
+
 import { EntryType } from '@coasys/flux-types';
 import Message from '../message';
 
-const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
+const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE, POST_COMMENT } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;
 
 @Model({
@@ -36,8 +37,8 @@ export class Post extends Ad4mModel {
   @Property({ through: URL })
   url: string;
 
-  @HasMany(() => Message, { through: 'ad4m://has_child' })
-  comments: string[] = [];
+  @HasMany(() => Message, { through: POST_COMMENT })
+  comments: Message[] = [];
 }
 
 export default Post;

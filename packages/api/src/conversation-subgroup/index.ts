@@ -5,7 +5,7 @@ import { ensureExpressionUri } from '../conversation/util';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
 import { community } from '@coasys/flux-constants';
 
-const { FLUX_PARTICIPANT } = community;
+const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
 
 @Model({
   name: 'ConversationSubgroup',
@@ -31,7 +31,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         SELECT VALUE out.uri
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
+          AND predicate = '${SUBGROUP_ITEM}'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
@@ -146,7 +146,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS id,
-          (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp,
+          (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
           fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
@@ -154,7 +154,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
+          AND predicate = '${SUBGROUP_ITEM}'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
@@ -290,7 +290,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       existingTopicRelationship.expression = expressionUri;
       existingTopicRelationship.tag = tagUri;
       existingTopicRelationship.relevance = relevance;
-      await existingTopicRelationship.update(batchId);
+      await existingTopicRelationship.save(batchId);
     } else {
       const relationship = new SemanticRelationship(this.perspective);
       relationship.expression = expressionUri;

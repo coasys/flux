@@ -1,11 +1,14 @@
 import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
 import { Link } from '@coasys/ad4m';
+import { community } from '@coasys/flux-constants';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { PostOption, postOptions } from '../../constants/options';
 import FileUpload from '../FileUpload';
 import PostImagePreview from '../PostImagePreview';
 import styles from './index.module.css';
 import { Post } from '@coasys/flux-api';
+
+const { CHANNEL_POST } = community;
 
 const initialState = {
   title: null,
@@ -86,7 +89,7 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
       if (isEditing) await post.update();
       else {
         await post.save();
-        await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: post.id }));
+        await perspective.add(new Link({ source, predicate: CHANNEL_POST, target: post.id }));
       }
 
       onPublished(isEditing ? postId : post?.id);

@@ -1,6 +1,6 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
 import { useMe } from '@coasys/flux-react-web';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLive } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Post as PostSubject } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
@@ -24,8 +24,7 @@ export default function Post({
   const [author, setAuthor] = useState<Profile | null>(null);
   const [ogData, setOgData] = useState<any>({});
 
-  const { entries: posts } = useModel({ perspective, model: PostSubject, query: { where: { base: id } } });
-  const post = posts[0];
+  const { data: post } = useLive(PostSubject, { perspective, id });
 
   const { me } = useMe(agent);
 

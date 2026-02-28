@@ -2,7 +2,7 @@ import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-vue-hooks';
+import { useLive } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
@@ -18,6 +18,9 @@ import {
   Topic,
   Task,
 } from '@coasys/flux-api';
+import { community as communityPredicates } from '@coasys/flux-constants';
+
+const { CHANNEL, CHANNEL_CONVERSATION } = communityPredicates;
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
 import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
@@ -104,26 +107,30 @@ export async function createCommunityService(): Promise<CommunityService> {
   const perspective: PerspectiveProxy = maybePerspective;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
-  // Ensure all required SDNA is installed
-  await perspective.ensureSDNASubjectClass(Community);
-  await perspective.ensureSDNASubjectClass(Channel);
-  await perspective.ensureSDNASubjectClass(App);
-  await perspective.ensureSDNASubjectClass(Conversation);
-  await perspective.ensureSDNASubjectClass(ConversationSubgroup);
-  await perspective.ensureSDNASubjectClass(Topic);
-  await perspective.ensureSDNASubjectClass(Embedding);
-  await perspective.ensureSDNASubjectClass(SemanticRelationship);
-  await perspective.ensureSDNASubjectClass(Message);
-  await perspective.ensureSDNASubjectClass(TaskBoard);
-  await perspective.ensureSDNASubjectClass(TaskColumn);
-  await perspective.ensureSDNASubjectClass(Task);
+  // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
+  for (const Model of [
+    Community,
+    Channel,
+    App,
+    Conversation,
+    ConversationSubgroup,
+    Topic,
+    Embedding,
+    SemanticRelationship,
+    Message,
+    TaskBoard,
+    TaskColumn,
+    Task,
+  ]) {
+    await Model.register(perspective);
+  }
 
   // Initialise the signalling service for the community
   const signallingService = useSignallingService(neighbourhood);
 
-  // Model subscriptions (Todo: singularise communities when singular useModel hook available)
-  const { entries: communities } = useModel({ perspective, model: Community });
-  const { entries: allChannels } = useModel({ perspective, model: Channel });
+  // Model subscriptions (Todo: singularise communities when singular useLive hook available)
+  const { data: communities } = useLive(Community, { perspective });
+  const { data: allChannels } = useLive(Channel, { perspective });
 
   // Cache for conversation instances — populated during data fetching, looked up in computeds.
   // Plain Map (not reactive) is sufficient: updates always precede the ref changes that trigger re-computation.
@@ -348,7 +355,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       channel.isPinned = false;
       await channel.save();
       await perspective.add(
-        new Link({ source: parentChannelId || 'ad4m://self', predicate: 'ad4m://has_child', target: channel.id }),
+        new Link({ source: parentChannelId || 'ad4m://self', predicate: CHANNEL, target: channel.id }),
       );
 
       // Create the first placeholder conversation
@@ -356,7 +363,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       conversation.conversationName = 'New conversation';
       conversation.summary = 'Content will appear when the first items have been processed...';
       await conversation.save();
-      await perspective.add(new Link({ source: channel.id, predicate: 'ad4m://has_child', target: conversation.id }));
+      await perspective.add(new Link({ source: channel.id, predicate: CHANNEL_CONVERSATION, target: conversation.id }));
 
       // Attach the chat app
       const fluxApps = await getAllFluxApps();
@@ -397,9 +404,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       // Get the link from the conversation channel to its current parent
-      const existingLinks = await perspective.get(
-        new LinkQuery({ predicate: 'ad4m://has_child', target: conversationChannelId }),
-      );
+      const existingLinks = await perspective.get(new LinkQuery({ predicate: CHANNEL, target: conversationChannelId }));
       const link = existingLinks[0];
       if (!link) {
         console.warn(`No parent link found for conversation ${conversationChannelId}`);
@@ -415,7 +420,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Update the link to point to the new parent channel
       await perspective.update(link, {
         source: newSpaceChannelId,
-        predicate: 'ad4m://has_child',
+        predicate: CHANNEL,
         target: conversationChannelId,
       });
 
@@ -460,7 +465,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   // Track channel participants automatically
   function handleParticipantTracking(link: any) {
-    if (link.data.predicate !== 'ad4m://has_child') return null;
+    if (link.data.predicate !== CHANNEL) return null;
     if (!link.author) return null;
 
     const channelId = link.data.source;

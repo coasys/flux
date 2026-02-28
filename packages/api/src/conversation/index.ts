@@ -7,7 +7,7 @@ import { formatTranscriptMarkdown } from './export';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
 import { community } from '@coasys/flux-constants';
-const { FLUX_PARTICIPANT } = community;
+const { FLUX_PARTICIPANT, CONVERSATION_SUBGROUP, SUBGROUP_ITEM } = community;
 
 @Model({ name: 'Conversation' })
 export class Conversation extends Ad4mModel {
@@ -26,7 +26,7 @@ export class Conversation extends Ad4mModel {
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  @HasMany(() => ConversationSubgroup, { through: 'ad4m://has_child' })
+  @HasMany(() => ConversationSubgroup, { through: CONVERSATION_SUBGROUP })
   subgroupEntities: ConversationSubgroup[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
@@ -37,7 +37,7 @@ export class Conversation extends Ad4mModel {
         SELECT VALUE out.uri
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
+          AND predicate = 'flux://has_subgroup'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
 
@@ -96,7 +96,7 @@ export class Conversation extends Ad4mModel {
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
           AND (
             in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
-            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.id}'][0] IS NOT NONE
+            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'flux://has_subgroup' AND in.uri = '${this.id}'][0] IS NOT NONE
           )
       `;
 
@@ -187,7 +187,7 @@ export class Conversation extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
+          AND predicate = 'flux://has_subgroup'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
         ORDER BY timestamp ASC
       `;
@@ -201,11 +201,11 @@ export class Conversation extends Ad4mModel {
           // Get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
             SELECT
-              (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp
+              (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp
             FROM link
             WHERE in.uri = '${subgroup.id}'
-              AND predicate = 'ad4m://has_child'
-              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0] IS NOT NONE
+              AND predicate = 'flux://has_item'
+              AND out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0] IS NOT NONE
             ORDER BY channelTimestamp ASC
           `;
 
@@ -421,7 +421,7 @@ export class Conversation extends Ad4mModel {
       if (item.author) allNewParticipants.add(item.author);
       newLinks.push({
         source: itemsSubgroup.id,
-        predicate: 'ad4m://has_child',
+        predicate: SUBGROUP_ITEM,
         target: item.id,
       });
     }
@@ -490,7 +490,7 @@ export class Conversation extends Ad4mModel {
       }));
       await this.perspective.addLinks(participantLinks, 'shared', batchId);
     }
-    await this.update(batchId);
+    await this.save(batchId);
     const end1 = new Date().getTime();
     if (showLogs) console.log('Conversation info updated: ', duration(start1, end1));
 
@@ -511,7 +511,7 @@ export class Conversation extends Ad4mModel {
         }));
         await this.perspective.addLinks(participantLinks, 'shared', batchId);
       }
-      await currentSubgroup.update(batchId);
+      await currentSubgroup.save(batchId);
       const end2 = new Date().getTime();
       if (showLogs) console.log('Current subgroup info updated: ', duration(start2, end2));
     }
@@ -581,12 +581,12 @@ export class Conversation extends Ad4mModel {
       console.log('Embedding vector creation skipped (ENABLE_EMBEDDINGS not set)');
     }
 
-    // batch commit all new links (currently only "ad4m://has_child" links)
+    // batch commit all new links (currently only "flux://has_item" links)
     // i.e. sorting messages into current and/or new sub-group
     const start7 = new Date().getTime();
     await this.perspective.addLinks(newLinks, 'shared', batchId);
     const end7 = new Date().getTime();
-    if (showLogs) console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
+    if (showLogs) console.log('"flux://has_item" links batch commited: ', duration(start7, end7));
 
     const endProcessing = new Date().getTime();
 

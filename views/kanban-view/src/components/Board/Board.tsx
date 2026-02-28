@@ -8,7 +8,7 @@ function makeRandomPrologAtom(length: number): string {
   }
   return result;
 }
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLive } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useMemo } from 'preact/hooks';
@@ -51,7 +51,10 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     setAgentProfiles(profiles);
   }
 
-  const { entries } = useModel({ perspective, model: selectedClass, query: { source } });
+  const { data: entries } = useLive(selectedClass, {
+    perspective,
+    query: { linkedFrom: { id: source, predicate: 'ad4m://has_child' } },
+  });
 
   const data = useMemo(() => {
     return transformData(tasks, selectedProperty, namedOptions[selectedProperty] || []);
@@ -83,13 +86,13 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     const status = destination.droppableId;
 
     setTasks((oldTasks) => {
-      const changedTask = oldTasks.find((t) => t.baseExpression === draggableId);
+      const changedTask = oldTasks.find((t) => t.id === draggableId);
       if (changedTask) {
         changedTask[selectedProperty] = status;
         changedTask.update();
       }
 
-      const newTasks = oldTasks.map((t) => (t.baseExpression === draggableId ? changedTask : t));
+      const newTasks = oldTasks.map((t) => (t.id === draggableId ? changedTask : t));
       return newTasks;
     });
 
@@ -125,14 +128,14 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
 
     // Create a map of task IDs to their full Ad4mModel instances
     const taskMap = {};
-    tasks.forEach((task) => (taskMap[task.baseExpression] = task));
+    tasks.forEach((task) => (taskMap[task.id] = task));
 
     // Organize tasks into columns while preserving the full Ad4mModel instances
     const columns = { ...defaultColumns };
     tasks.forEach((task) => {
       const columnId = task[property] || 'unknown';
       if (!columns[columnId]) columns[columnId] = { id: columnId, title: columnId, taskIds: [] };
-      columns[columnId].taskIds.push(task.baseExpression);
+      columns[columnId].taskIds.push(task.id);
     });
 
     return {
@@ -174,7 +177,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       const column = columns[key];
       result[key] = {
         ...column,
-        taskIds: task[propertyName] === column.id ? [...column.taskIds, task.baseExpression] : column.taskIds,
+        taskIds: task[propertyName] === column.id ? [...column.taskIds, task.id] : column.taskIds,
       };
     });
     return result;
@@ -276,7 +279,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
                           className={`${styles.tasks} ${snapshot.isDraggingOver ? styles.isDraggingOver : ''}`}
                         >
                           {tasks.map((task, index) => (
-                            <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index}>
+                            <Draggable key={task.id} draggableId={task.id} index={index}>
                               {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
