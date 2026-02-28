@@ -102,10 +102,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     setNewColumnLoading(true);
 
     // Create and save the new column
-    const newColumn = new TaskColumn(perspective);
-    newColumn.columnName = newColumnName;
-    newColumn.orderedTaskIds = JSON.stringify([]);
-    await newColumn.save();
+    const newColumn = await TaskColumn.create(perspective, { columnName: newColumnName, orderedTaskIds: JSON.stringify([]) });
     await perspective.addLinks([new Link({ source: channelId, predicate: CHANNEL_TASK_COLUMN, target: newColumn.id })]);
 
     // Update the board's orderedColumnIds

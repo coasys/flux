@@ -39,9 +39,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       const text = editor.current?.editor.getText();
       editor.current?.clear();
 
-      const message = new Message(perspective);
-      message.body = html;
-      await message.save();
+      const message = await Message.create(perspective, { body: html });
       await perspective.add(
         new Link({ source, predicate: threaded ? community.MESSAGE_THREAD : CHANNEL_MESSAGE, target: message.id }),
       );

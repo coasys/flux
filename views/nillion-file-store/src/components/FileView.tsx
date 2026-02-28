@@ -286,12 +286,7 @@ export function FileView({ perspective, source, agent }: Props) {
 
         const sizeInMB = quote.rawSecret!.length / 1_048_576;
 
-        const newFile = new File(perspective);
-        newFile.name = fileName;
-        newFile.secretId = secretId;
-        newFile.storeId = storeId;
-        newFile.size = sizeInMB.toString();
-        await newFile.save();
+        const newFile = await File.create(perspective, { name: fileName, secretId, storeId, size: sizeInMB.toString() });
         await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: newFile.id }));
 
         setShowLoader(false);

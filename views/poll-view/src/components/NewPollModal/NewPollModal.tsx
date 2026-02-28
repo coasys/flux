@@ -52,26 +52,17 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
     setAnswersError(answersValid ? '' : 'At least 2 answers required for locked polls');
     if (title && answersValid) {
       setLoading(true);
-      const newPoll = new Poll(perspective);
-      newPoll.title = title;
-      newPoll.description = description;
-      newPoll.voteType = voteType;
-      newPoll.answersLocked = answersLocked;
-      await newPoll.save();
+      const newPoll = await Poll.create(perspective, { title, description, voteType, answersLocked });
       await perspective.add(new Link({ source, predicate: 'flux://has_poll', target: newPoll.id }));
 
       Promise.all(
-        answers.map((answer) => {
-          const newAnswer = new Answer(perspective);
-          newAnswer.text = answer.text;
-          return newAnswer
-            .save()
-            .then(() =>
-              perspective.add(
-                new Link({ source: newPoll.id, predicate: 'flux://has_poll_answer', target: newAnswer.id }),
-              ),
-            );
-        }),
+        answers.map((answer) =>
+          Answer.create(perspective, { text: answer.text }).then((newAnswer) =>
+            perspective.add(
+              new Link({ source: newPoll.id, predicate: 'flux://has_poll_answer', target: newAnswer.id }),
+            ),
+          ),
+        ),
       )
         .then(() => close())
         .catch(console.log);

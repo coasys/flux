@@ -94,9 +94,7 @@ export default function PollCard(props: {
   }
 
   async function createVote(answerId, score) {
-    const newVote = new Vote(perspective);
-    newVote.score = score;
-    await newVote.save();
+    const newVote = await Vote.create(perspective, { score });
     await perspective.add(new Link({ source: answerId, predicate: 'flux://has_answer_vote', target: newVote.id }));
   }
 

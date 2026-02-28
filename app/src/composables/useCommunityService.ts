@@ -351,21 +351,16 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       // Create the channel
-      const channel = new Channel(perspective);
-      channel.name = '';
-      channel.description = '';
-      channel.isConversation = true;
-      channel.isPinned = false;
-      await channel.save();
+      const channel = await Channel.create(perspective, { name: '', description: '', isConversation: true, isPinned: false });
       await perspective.add(
         new Link({ source: parentChannelId || 'ad4m://self', predicate: CHANNEL, target: channel.id }),
       );
 
       // Create the first placeholder conversation
-      const conversation = new Conversation(perspective);
-      conversation.conversationName = 'New conversation';
-      conversation.summary = 'Content will appear when the first items have been processed...';
-      await conversation.save();
+      const conversation = await Conversation.create(perspective, {
+        conversationName: 'New conversation',
+        summary: 'Content will appear when the first items have been processed...',
+      });
       await perspective.add(new Link({ source: channel.id, predicate: CHANNEL_CONVERSATION, target: conversation.id }));
 
       // Attach the chat app
@@ -375,12 +370,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       const { name, description, icon, pkg } = chatAppData;
 
-      const chatApp = new App(perspective);
-      chatApp.name = name;
-      chatApp.description = description;
-      chatApp.icon = icon;
-      chatApp.pkg = pkg;
-      await chatApp.save();
+      const chatApp = await App.create(perspective, { name, description, icon, pkg });
       await perspective.add(new Link({ source: channel.id, predicate: 'flux://has_app', target: chatApp.id }));
 
       // Update the recent conversations
