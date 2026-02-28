@@ -1,4 +1,3 @@
-import { Link } from '@coasys/ad4m';
 import { useLive } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import * as d3 from 'd3';
@@ -64,8 +63,10 @@ export default function PollCard(props: {
             }
             users.push(...votes.map((v: any) => v.author));
             resolve({
-              ...answer,
               id: answer.id,
+              text: answer.text,
+              author: answer.author,
+              timestamp: answer.timestamp,
               totalVotes: votes.length,
               totalPoints: totalAnswerPoints,
               myPoints: previousVote?.score || 0,
@@ -94,14 +95,13 @@ export default function PollCard(props: {
   }
 
   async function createVote(answerId, score) {
-    const newVote = await Vote.create(perspective, { score });
-    await perspective.add(new Link({ source: answerId, predicate: 'flux://has_answer_vote', target: newVote.id }));
+    await Vote.create(perspective, { score }, { parent: { model: Answer, id: answerId } });
   }
 
   async function updateVote(voteId, score) {
     const vote = new Vote(perspective, voteId);
     vote.score = score;
-    await vote.update();
+    await vote.save();
   }
 
   async function vote(answerId: string, value?: number) {
@@ -121,7 +121,7 @@ export default function PollCard(props: {
 
   useEffect(() => {
     buildAnswerData();
-  }, [JSON.stringify(answers)]);
+  }, [answers.map((a) => a.id).join(',')]);
 
   return (
     <j-box p="600" className={styles.poll}>

@@ -20,7 +20,7 @@ import {
 } from '@coasys/flux-api';
 import { community as communityPredicates } from '@coasys/flux-constants';
 
-const { CHANNEL, CHANNEL_CONVERSATION } = communityPredicates;
+const { CHANNEL } = communityPredicates;
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
 import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
@@ -351,17 +351,25 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       // Create the channel
-      const channel = await Channel.create(perspective, { name: '', description: '', isConversation: true, isPinned: false });
+      const channel = await Channel.create(perspective, {
+        name: '',
+        description: '',
+        isConversation: true,
+        isPinned: false,
+      });
       await perspective.add(
         new Link({ source: parentChannelId || 'ad4m://self', predicate: CHANNEL, target: channel.id }),
       );
 
       // Create the first placeholder conversation
-      const conversation = await Conversation.create(perspective, {
-        conversationName: 'New conversation',
-        summary: 'Content will appear when the first items have been processed...',
-      });
-      await perspective.add(new Link({ source: channel.id, predicate: CHANNEL_CONVERSATION, target: conversation.id }));
+      await Conversation.create(
+        perspective,
+        {
+          conversationName: 'New conversation',
+          summary: 'Content will appear when the first items have been processed...',
+        },
+        { parent: { model: Channel, id: channel.id } },
+      );
 
       // Attach the chat app
       const fluxApps = await getAllFluxApps();
@@ -370,8 +378,7 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       const { name, description, icon, pkg } = chatAppData;
 
-      const chatApp = await App.create(perspective, { name, description, icon, pkg });
-      await perspective.add(new Link({ source: channel.id, predicate: 'flux://has_app', target: chatApp.id }));
+      await App.create(perspective, { name, description, icon, pkg }, { parent: { model: Channel, id: channel.id } });
 
       // Update the recent conversations
       getRecentConversations();

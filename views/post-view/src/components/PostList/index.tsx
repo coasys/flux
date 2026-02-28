@@ -20,7 +20,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
 
   const { data: posts, loading } = useLive(Post, {
     perspective,
-    parent: { model: Channel, id: source, field: 'posts' },
+    parent: { model: Channel, id: source },
     query: { order: { createdAt: 'DESC' } },
   });
 

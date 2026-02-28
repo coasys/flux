@@ -5,18 +5,20 @@ import Answer from '../../models/Answer';
 import Poll from '../../models/Poll';
 import AnswerCard from '../AnswerCard';
 import styles from './NewPollModal.module.scss';
+import { Profile } from '@coasys/flux-types';
 
 type Props = {
   perspective: any;
   source: string;
   myDid: string;
   close: () => void;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 type VoteTypes = 'single-choice' | 'multiple-choice' | 'weighted-choice';
 const voteTypes = ['single-choice', 'multiple-choice', 'weighted-choice'] as VoteTypes[];
 
-export default function PollView({ perspective, source, myDid, close }: Props) {
+export default function PollView({ perspective, source, myDid, close, getProfile }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
@@ -57,11 +59,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
 
       Promise.all(
         answers.map((answer) =>
-          Answer.create(perspective, { text: answer.text }).then((newAnswer) =>
-            perspective.add(
-              new Link({ source: newPoll.id, predicate: 'flux://has_poll_answer', target: newAnswer.id }),
-            ),
-          ),
+          Answer.create(perspective, { text: answer.text }, { parent: { model: Poll, id: newPoll.id } }),
         ),
       )
         .then(() => close())
@@ -113,6 +111,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
                 index={index}
                 color={colorScale.current(index)}
                 removeAnswer={removeAnswer}
+                getProfile={getProfile}
                 preview
               />
             ))}

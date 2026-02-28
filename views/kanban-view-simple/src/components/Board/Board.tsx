@@ -33,13 +33,13 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
   const { data: boards } = useLive(TaskBoard, {
     perspective,
-    parent: { model: Channel, id: channelId, field: 'boards' },
+    parent: { model: Channel, id: channelId },
   });
   const { data: columns } = useLive(TaskColumn, {
     perspective,
-    parent: { model: Channel, id: channelId, field: 'taskColumns' },
+    parent: { model: Channel, id: channelId },
   });
-  const { data: tasks } = useLive(Task, { perspective, parent: { model: Channel, id: channelId, field: 'tasks' } });
+  const { data: tasks } = useLive(Task, { perspective, parent: { model: Channel, id: channelId } });
 
   async function initialiseBoard() {
     await perspective.ensureSDNASubjectClass(TaskBoard);
@@ -102,8 +102,11 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     setNewColumnLoading(true);
 
     // Create and save the new column
-    const newColumn = await TaskColumn.create(perspective, { columnName: newColumnName, orderedTaskIds: JSON.stringify([]) });
-    await perspective.addLinks([new Link({ source: channelId, predicate: CHANNEL_TASK_COLUMN, target: newColumn.id })]);
+    const newColumn = await TaskColumn.create(
+      perspective,
+      { columnName: newColumnName, orderedTaskIds: JSON.stringify([]) },
+      { parent: { model: Channel, id: channelId } },
+    );
 
     // Update the board's orderedColumnIds
     const currentBoard = (

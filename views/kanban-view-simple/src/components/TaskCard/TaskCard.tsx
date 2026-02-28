@@ -34,7 +34,7 @@ export default function TaskCard({
 }: Props) {
   const [showTaskSettings, setShowTaskSettings] = useState(false);
 
-  const { data: comments } = useLive(Message, { perspective, parent: { model: Task, id: task.id, field: 'comments' } });
+  const { data: comments } = useLive(Message, { perspective, parent: { model: Task, id: task.id } });
 
   const assignedProfiles = useMemo(() => {
     return agentProfiles.filter((p) => task.assignees.includes(p.did));

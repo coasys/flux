@@ -54,7 +54,13 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
       </j-button>
 
       {modalOpen && (
-        <NewPollModal perspective={perspective} source={source} myDid={myDid} close={() => setModalOpen(false)} />
+        <NewPollModal
+          perspective={perspective}
+          source={source}
+          myDid={myDid}
+          close={() => setModalOpen(false)}
+          getProfile={getProfile}
+        />
       )}
 
       <j-flex gap="500" direction="column">
