@@ -37,6 +37,12 @@
   </div>
 </template>
 
+<script lang="ts">
+// Module-level map — prevents concurrent customElements.define() calls for the
+// same generated tag name when multiple ViewView instances mount simultaneously.
+const _wcDefineInProgress = new Map<string, Promise<void>>();
+</script>
+
 <script setup lang="ts">
 import { useCommunityService } from '@/composables/useCommunityService';
 import Conversation from '@/containers/Conversation.vue';
@@ -139,14 +145,24 @@ onMounted(async () => {
     const generatedName = await generateWCName(viewId as string);
 
     if (!customElements.get(generatedName)) {
-      const module = await fetchFluxApp(viewId as string);
-      if (module?.default) {
-        try {
-          await customElements.define(generatedName, module.default);
-        } catch (e) {
-          console.error(`Failed to define custom element ${generatedName}:`, e);
-        }
+      // Deduplicate concurrent define() attempts for the same element name.
+      // Without this, two ViewView instances mounting at the same time both pass
+      // the customElements.get() check and the second define() call throws.
+      if (!_wcDefineInProgress.has(generatedName)) {
+        const definePromise = (async () => {
+          const module = await fetchFluxApp(viewId as string);
+          if (module?.default) {
+            try {
+              customElements.define(generatedName, module.default);
+            } catch (e) {
+              console.error(`Failed to define custom element ${generatedName}:`, e);
+            }
+          }
+        })();
+        _wcDefineInProgress.set(generatedName, definePromise);
+        definePromise.finally(() => _wcDefineInProgress.delete(generatedName));
       }
+      await _wcDefineInProgress.get(generatedName);
     }
 
     wcName.value = generatedName;

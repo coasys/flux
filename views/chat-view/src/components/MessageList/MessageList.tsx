@@ -44,7 +44,9 @@ export default function MessageList({
     loadMore,
   } = useLive(Message, {
     perspective,
-    parent: { model: Channel, id: source, field: 'messages' },
+    parent: isThread
+      ? { model: Message, id: source, field: 'thread' }
+      : { model: Channel, id: source, field: 'messages' },
     query: { order: { createdAt: 'DESC' } },
     pageSize: PAGE_SIZE,
   });

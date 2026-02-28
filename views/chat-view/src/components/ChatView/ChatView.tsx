@@ -42,7 +42,9 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       const message = new Message(perspective);
       message.body = html;
       await message.save();
-      await perspective.add(new Link({ source, predicate: CHANNEL_MESSAGE, target: message.id }));
+      await perspective.add(
+        new Link({ source, predicate: threaded ? community.MESSAGE_THREAD : CHANNEL_MESSAGE, target: message.id }),
+      );
 
       if (replyMessage) {
         perspective.addLinks([
@@ -86,15 +88,23 @@ export default function ChatView({ agent, client, perspective, source, threaded,
 
       if (!el) {
         el = document.createElement(element.localName);
+        el.className = styles.webComponent;
+        el.perspective = perspective;
+        el.agent = agent;
+        el.client = client;
+        el.getProfile = getProfile;
+        el.setAttribute('source', message.id);
+        el.setAttribute('threaded', 'true');
         container.append(el);
+      } else {
+        el.className = styles.webComponent;
+        el.perspective = perspective;
+        el.agent = agent;
+        el.client = client;
+        el.getProfile = getProfile;
+        el.setAttribute('source', message.id);
+        el.setAttribute('threaded', 'true');
       }
-      el.className = styles.webComponent;
-      el.perspective = perspective;
-      el.agent = agent;
-      el.client = client;
-      el.getProfile = getProfile;
-      el.setAttribute('source', message.id);
-      el.setAttribute('threaded', 'true');
     }
   }
 
