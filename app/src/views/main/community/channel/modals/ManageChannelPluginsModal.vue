@@ -210,7 +210,7 @@ watch(
         loadedPlugins[app.pkg] = 'loading';
 
         const module = await fetchFluxApp(app.pkg);
-        if (module) {
+        if (module && !customElements.get(wcName)) {
           customElements.define(wcName, module.default);
         }
 
