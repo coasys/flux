@@ -7,17 +7,14 @@ export class TopicWithRelevance {
   relevance: number;
 }
 
+// TODO: remove Prolog queries
+
 @Model({ name: 'Topic' })
 export default class Topic extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://has_topic',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://has_topic' })
   type: string;
 
-  @Property({
-    through: 'flux://topic',
-  })
+  @Property({ through: 'flux://topic' })
   topic: string;
 
   private matchQuery(type: 'Conversation' | 'Subgroup'): string {

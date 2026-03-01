@@ -7,24 +7,15 @@ import Message from '../message';
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE, POST_COMMENT } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;
 
-@Model({
-  name: 'Post',
-})
+@Model({ name: 'Post' })
 export class Post extends Ad4mModel {
-  @Flag({
-    through: ENTRY_TYPE,
-    value: EntryType.Post,
-  })
+  @Flag({ through: ENTRY_TYPE, value: EntryType.Post })
   type: string;
 
-  @Property({
-    through: TITLE,
-  })
+  @Property({ through: TITLE })
   title: string;
 
-  @Property({
-    through: BODY,
-  })
+  @Property({ through: BODY })
   body: string;
 
   @Property({

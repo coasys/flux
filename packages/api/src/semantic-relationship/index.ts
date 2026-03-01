@@ -1,6 +1,8 @@
 import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
+// TODO: remove Prolog queries
+
 function ensureExpressionUri(id: string): string {
   if (!id) return id;
   return id.includes('://') ? id : Literal.from(id).toUrl();
@@ -31,25 +33,16 @@ const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
 
 @Model({ name: 'SemanticRelationship' })
 export default class SemanticRelationship extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://has_semantic_relationship',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://has_semantic_relationship' })
   type: string;
 
-  @Property({
-    through: 'flux://has_expression',
-  })
+  @Property({ through: 'flux://has_expression' })
   expression: string; // base url of expression
 
-  @Property({
-    through: 'flux://has_tag',
-  })
+  @Property({ through: 'flux://has_tag' })
   tag: string; // base url of semantic tag
 
-  @Property({
-    through: 'flux://has_relevance',
-  })
+  @Property({ through: 'flux://has_relevance' })
   relevance: number; // 0 - 100
 
   async itemEmbedding(itemId: string): Promise<number[]> {

@@ -56,36 +56,6 @@ export class Conversation extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the conversations topics (via its subgroups)
     try {
-      // const prologQuery = `
-      //   % Get all topics and sort in one step
-      //   findall(TopicList, (
-      //     % First get all topic pairs
-      //     findall([TopicBase, TopicName], (
-      //       % 1. Gather subgroups
-      //       findall(Subgroup, (
-      //         subject_class("ConversationSubgroup", CS),
-      //         instance(CS, Subgroup),
-      //         triple("${this.id}", "ad4m://has_child", Subgroup)
-      //       ), SubgroupList),
-      //
-      //       % 2. Get topics from relationships
-      //       member(S, SubgroupList),
-      //       subject_class("SemanticRelationship", SR),
-      //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", S),
-      //       triple(Relationship, "flux://has_tag", TopicBase),
-      //
-      //       % 3. Get topic names
-      //       subject_class("Topic", T),
-      //       instance(T, TopicBase),
-      //       property_getter(T, TopicBase, "topic", TopicName)
-      //     ), AllTopics),
-      //
-      //     % Remove duplicates
-      //     sort(AllTopics, TopicList)
-      //   ), [Topics]).
-      // `;
-
       const surrealQuery = `
         SELECT
           out.uri AS topicBase,
@@ -131,53 +101,6 @@ export class Conversation extends Ad4mModel {
   async subgroupsData(): Promise<SynergyGroup[]> {
     // find the necissary data to render the conversations subgroups in timeline components (include timestamps for the first and last item in each subgroup)
     try {
-      // const prologQuery = `
-      //   findall(SubgroupInfo, (
-      //     % 1. Identify all subgroups in the conversation
-      //     subject_class("ConversationSubgroup", CS),
-      //     instance(CS, Subgroup),
-      //     triple("${this.id}", "ad4m://has_child", Subgroup),
-      //
-      //     % 2. Retrieve subgroup properties
-      //     property_getter(CS, Subgroup, "subgroupName", SubgroupName),
-      //     (property_getter(CS, Subgroup, "summary", S) -> Summary = S ; Summary = ""),
-      //
-      //     % 3. Collect timestamps for valid items only
-      //     findall(Timestamp, (
-      //       triple(Subgroup, "ad4m://has_child", Item),
-      //
-      //       % Check item is valid type
-      //       (
-      //         subject_class("Message", MC),
-      //         instance(MC, Item)
-      //         ;
-      //         subject_class("Post", PC),
-      //         instance(PC, Item)
-      //         ;
-      //         subject_class("Task", TC),
-      //         instance(TC, Item)
-      //       ),
-      //
-      //       % Get items timestamp from link to channel
-      //       link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
-      //       subject_class("Channel", CH),
-      //       instance(CH, ChannelId)
-      //     ), Timestamps),
-      //
-      //     % 4. Derive start and end from earliest & latest timestamps
-      //     (
-      //       Timestamps = []
-      //       -> StartTime = 0, EndTime = 0
-      //       ; sort(Timestamps, Sorted),
-      //         Sorted = [StartTime|_],
-      //         reverse(Sorted, [EndTime|_])
-      //     ),
-      //
-      //     % 5. Build a single structure for each subgroup
-      //     SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
-      //   ), Subgroups).
-      // `;
-
       // Simplified query - get subgroups without timestamps first
       const surrealQuery = `
         SELECT
@@ -337,10 +260,11 @@ export class Conversation extends Ad4mModel {
   }
 
   private async createNewGroup(newGroup: { n: string; s: string }, batchId: string) {
-    const newSubgroupEntity = new ConversationSubgroup(this.perspective);
-    newSubgroupEntity.subgroupName = newGroup.n;
-    newSubgroupEntity.summary = newGroup.s;
-    await newSubgroupEntity.save(batchId);
+    const newSubgroupEntity = await ConversationSubgroup.create(
+      this.perspective,
+      { subgroupName: newGroup.n, summary: newGroup.s },
+      { batchId },
+    );
     await this.addSubgroupEntities(newSubgroupEntity, batchId);
     return newSubgroupEntity;
   }

@@ -2,6 +2,7 @@ import { PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import '@coasys/flux-ui/dist/main.d.ts';
+import { Fragment } from 'preact';
 import { useContext } from 'preact/hooks';
 import Header from './components/Header';
 import Overlay from './components/Overlay/Overlay';
@@ -21,7 +22,7 @@ function Feed({ agent, perspective, source, getProfile }) {
   return (
     <>
       <Header agent={agent} getProfile={getProfile} />
-      <PostList agent={agent} perspective={perspective} source={source} getProfile={getProfile} />
+      <PostList perspective={perspective} source={source} getProfile={getProfile} />
     </>
   );
 }

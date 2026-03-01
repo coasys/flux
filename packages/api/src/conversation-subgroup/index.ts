@@ -7,9 +7,7 @@ import { community } from '@coasys/flux-constants';
 
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
 
-@Model({
-  name: 'ConversationSubgroup',
-})
+@Model({ name: 'ConversationSubgroup' })
 export default class ConversationSubgroup extends Ad4mModel {
   @Flag({ through: 'flux://entry_type', value: 'flux://conversation_subgroup' })
   type: string;
@@ -54,29 +52,6 @@ export default class ConversationSubgroup extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the subgroups topics
     try {
-      // const prologQuery = `
-      //   % Collect and deduplicate topic data for this specific subgroup
-      //   findall(TopicList, (
-      //     findall([TopicBase, TopicName], (
-      //       % 1. Find semantic relationships where 'flux://has_expression' = this subgroup's id
-      //       subject_class("SemanticRelationship", SR),
-      //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", "${this.id}"),
-      //
-      //       % 2. Retrieve the Topic base
-      //       triple(Relationship, "flux://has_tag", TopicBase),
-      //
-      //       % 3. Get the topic class & name
-      //       subject_class("Topic", T),
-      //       instance(T, TopicBase),
-      //       property_getter(T, TopicBase, "topic", TopicName)
-      //     ), UnsortedTopics),
-      //
-      //     % 4. Deduplicate via sort
-      //     sort(UnsortedTopics, TopicList)
-      //   ), [Topics]).
-      // `;
-
       const surrealQuery = `
         SELECT
           out.uri AS topicBase,
@@ -113,36 +88,6 @@ export default class ConversationSubgroup extends Ad4mModel {
   async itemsData(): Promise<SynergyItem[]> {
     // find the necissary data to render the subgroups items in timeline components
     try {
-      // const prologQuery = `
-      //   findall([Item, Timestamp, Author, Type, Text], (
-      //     % 1. Get item linked to subgroup
-      //     triple("${this.id}", "ad4m://has_child", Item),
-      //
-      //     % 2. Get timestamp and author from earliest link
-      //     findall([T, A], link(_, "ad4m://has_child", Item, T, A), AllData),
-      //     sort(AllData, SortedData),
-      //     SortedData = [[Timestamp, Author]|_],
-      //
-      //     % 3. Check item type and get text content
-      //     (
-      //       Type = "Message",
-      //       subject_class("Message", MC),
-      //       instance(MC, Item),
-      //       property_getter(MC, Item, "body", Text)
-      //       ;
-      //       Type = "Post",
-      //       subject_class("Post", PC),
-      //       instance(PC, Item),
-      //       property_getter(PC, Item, "title", Text)
-      //       ;
-      //       Type = "Task",
-      //       subject_class("Task", TC),
-      //       instance(TC, Item),
-      //       property_getter(TC, Item, "name", Text)
-      //     )
-      //   ), Items).
-      // `;
-
       const surrealQuery = `
         SELECT
           out.uri AS id,
@@ -198,30 +143,6 @@ export default class ConversationSubgroup extends Ad4mModel {
   // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
     try {
-      // const prologQuery = `
-      //   findall(TopicList, (
-      //     % First get all topic triples
-      //     findall([TopicBase, TopicName, Relevance], (
-      //       % 1. Find semantic relationships where expression = this subgroup
-      //       subject_class("SemanticRelationship", SR),
-      //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", "${this.id}"),
-      //
-      //       % 2. Get topic and relevance
-      //       triple(Relationship, "flux://has_tag", TopicBase),
-      //       property_getter(SR, Relationship, "relevance", Relevance),
-      //
-      //       % 3. Get topic name
-      //       subject_class("Topic", T),
-      //       instance(T, TopicBase),
-      //       property_getter(T, TopicBase, "topic", TopicName)
-      //     ), UnsortedTopics),
-      //
-      //     % 4. Remove duplicates via sort
-      //     sort(UnsortedTopics, TopicList)
-      //   ), [Topics]).
-      // `;
-
       const surrealQuery = `
         SELECT
           out.uri AS topicBase,
@@ -264,11 +185,7 @@ export default class ConversationSubgroup extends Ad4mModel {
   ) {
     let topic = existingTopic;
     if (!topic) {
-      // console.log('create new topic for:', topicName);
-      const newTopic = new Topic(this.perspective);
-      newTopic.topic = topicName;
-      await newTopic.save(batchId);
-      topic = await newTopic.get();
+      topic = await Topic.create(this.perspective, { topic: topicName }, { batchId });
     }
     const expressionUri = ensureExpressionUri(this.id);
     const tagUri = ensureExpressionUri(topic.id);
@@ -292,11 +209,11 @@ export default class ConversationSubgroup extends Ad4mModel {
       existingTopicRelationship.relevance = relevance;
       await existingTopicRelationship.save(batchId);
     } else {
-      const relationship = new SemanticRelationship(this.perspective);
-      relationship.expression = expressionUri;
-      relationship.tag = tagUri;
-      relationship.relevance = relevance;
-      await relationship.save(batchId);
+      await SemanticRelationship.create(
+        this.perspective,
+        { expression: expressionUri, tag: tagUri, relevance },
+        { batchId },
+      );
     }
   }
 }
