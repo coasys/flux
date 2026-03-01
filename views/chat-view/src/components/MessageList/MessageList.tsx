@@ -43,9 +43,7 @@ export default function MessageList({
     totalCount,
     loadMore,
   } = useLiveQuery(Message, perspective, {
-    parent: isThread
-      ? { model: Message, id: source, field: 'thread' }
-      : { model: Channel, id: source },
+    parent: isThread ? { model: Message, id: source, field: 'thread' } : { model: Channel, id: source },
     query: { order: { createdAt: 'DESC' } },
     pageSize: PAGE_SIZE,
   });

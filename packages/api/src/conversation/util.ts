@@ -36,9 +36,8 @@ export async function removeEmbedding(perspective, itemId, batchId: string): Pro
     if (showLogs) console.log('embeddingSRId found:', embeddingSRId);
     const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId);
     const { tag } = await semanticRelationship.get();
-    const embedding = new Embedding(perspective, tag);
-    await embedding.delete(batchId);
-    await semanticRelationship.delete(batchId);
+    await Embedding.delete(perspective, tag, batchId);
+    await SemanticRelationship.delete(perspective, embeddingSRId, batchId);
   }
 }
 

@@ -53,7 +53,7 @@ export default function TaskSettings({
       // Update task name if changed
       if (task.taskName !== taskName) {
         taskModel.taskName = taskName;
-        await taskModel.update(batchId);
+        await taskModel.save(batchId);
       }
 
       // Update column if changed
@@ -64,12 +64,12 @@ export default function TaskSettings({
         // Update orderedTaskIds in source column
         const sourceOrderedTaskIds = JSON.parse(source.orderedTaskIds).filter((id) => id !== task.id);
         source.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
-        await source.update(batchId);
+        await source.save(batchId);
 
         // Update orderedTaskIds in destination column
         const destinationOrderedTaskIds = [...(JSON.parse(destination.orderedTaskIds) || []), task.id];
         destination.orderedTaskIds = JSON.stringify(destinationOrderedTaskIds);
-        await destination.update(batchId);
+        await destination.save(batchId);
       }
 
       // Update assignees if changed
@@ -115,7 +115,7 @@ export default function TaskSettings({
       const columnModel = columns.find((col) => col.columnName === taskColumn);
       const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.id];
       columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-      await columnModel.update(batchId);
+      await columnModel.save(batchId);
 
       // Commit batch updates
       await perspective.commitBatch(batchId);
@@ -131,8 +131,7 @@ export default function TaskSettings({
     const batchId = await perspective.createBatch();
 
     // Delete task model
-    const taskModel = new Task(perspective, task.id);
-    await taskModel.delete(batchId);
+    await Task.delete(perspective, task.id, batchId);
 
     // Delete task link to perspective
     const linkQuery = new LinkQuery({ source: channelId, predicate: CHANNEL_TASK, target: task.id });
@@ -143,7 +142,7 @@ export default function TaskSettings({
     const columnModel = columns.find((col) => col.id === column.id);
     const newOrderedTaskIds = JSON.parse(column.orderedTaskIds).filter((id: string) => id !== task.id);
     columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-    await columnModel.update(batchId);
+    await columnModel.save(batchId);
 
     // Commit batch updates
     await perspective.commitBatch(batchId);

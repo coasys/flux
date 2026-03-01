@@ -23,8 +23,7 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
   });
 
   async function deletePoll(id: string) {
-    const poll = new Poll(perspective, id);
-    await poll.delete();
+    await Poll.delete(perspective, id);
   }
 
   async function ensureModels() {

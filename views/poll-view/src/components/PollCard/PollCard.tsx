@@ -93,9 +93,7 @@ export default function PollCard(props: {
   }
 
   async function updateVote(voteId, score) {
-    const vote = new Vote(perspective, voteId);
-    vote.score = score;
-    await vote.save();
+    await Vote.update(perspective, voteId, { score });
   }
 
   async function vote(answerId: string, value?: number) {

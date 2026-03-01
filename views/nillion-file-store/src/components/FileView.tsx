@@ -415,8 +415,7 @@ export function FileView({ perspective, source, agent }: Props) {
           files={files}
           handleGetQuote={handleGetQuote}
           deleteFile={async (id: string) => {
-            const file = new File(perspective, id);
-            await file.delete();
+            await File.delete(perspective, id);
           }}
           profiles={profiles}
         />
