@@ -1,5 +1,5 @@
 import { AgentClient, PerspectiveProxy } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useState } from 'preact/hooks';
 import Answer from '../../models/Answer';
@@ -18,9 +18,8 @@ type Props = {
 export default function PollView({ perspective, source, agent, getProfile }: Props) {
   const [myDid, setMyDid] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: polls } = useLive(Poll, {
-    perspective,
-    query: { linkedFrom: { id: source, predicate: 'flux://has_poll' } },
+  const { data: polls } = useLiveQuery(Poll, perspective, {
+    parent: { id: source, predicate: 'flux://has_poll' },
   });
 
   async function deletePoll(id: string) {
@@ -28,7 +27,7 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
     await poll.delete();
   }
 
-  async function ensureSDNAClasses() {
+  async function ensureModels() {
     await Promise.all([Poll, Answer, Vote].map((M) => M.register(perspective)));
   }
 
@@ -39,7 +38,7 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
   }
 
   useEffect(() => {
-    ensureSDNAClasses();
+    ensureModels();
     getMyDid();
   }, []);
 

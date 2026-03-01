@@ -1,7 +1,9 @@
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { Fragment } from 'preact';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Vote from '../../models/Vote';
+import Answer from '../../models/Answer';
 import Avatar from '../Avatar';
 import styles from './AnswerCard.module.scss';
 
@@ -25,9 +27,8 @@ export default function AnswerCard(props: {
   const [points, setPoints] = useState(myPoints);
   const pointsRef = useRef(0);
   const slidingRef = useRef(false);
-  const { data: votes } = useLive(Vote, {
-    perspective,
-    query: { linkedFrom: { id: answer.id, predicate: 'flux://has_answer_vote' } },
+  const { data: votes } = useLiveQuery(Vote, perspective, {
+    parent: { model: Answer, id: answer.id },
   });
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-vue-hooks';
+import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
@@ -128,9 +128,9 @@ export async function createCommunityService(): Promise<CommunityService> {
   // Initialise the signalling service for the community
   const signallingService = useSignallingService(neighbourhood);
 
-  // Model subscriptions (Todo: singularise communities when singular useLive hook available)
-  const { data: communities } = useLive(Community, { perspective });
-  const { data: allChannels } = useLive(Channel, { perspective });
+  // Model subscriptions
+  const { data: communities } = useLiveQuery(Community, perspective);
+  const { data: allChannels } = useLiveQuery(Channel, perspective);
 
   // Cache for conversation instances — populated during data fetching, looked up in computeds.
   // Plain Map (not reactive) is sufficient: updates always precede the ref changes that trigger re-computation.

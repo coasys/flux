@@ -1,5 +1,5 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Channel, Post } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
@@ -18,8 +18,7 @@ type Props = {
 export default function PostList({ agent, perspective, source, getProfile }: Props) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { data: posts, loading } = useLive(Post, {
-    perspective,
+  const { data: posts, loading } = useLiveQuery(Post, perspective, {
     parent: { model: Channel, id: source },
     query: { order: { createdAt: 'DESC' } },
   });

@@ -12,21 +12,15 @@ interface FileData {
   data_base64: string;
 }
 
-@Model({
-  name: 'Community',
-})
+@Model({ name: 'Community' })
 export class Community extends Ad4mModel {
   @Flag({ through: ENTRY_TYPE, value: EntryType.Community })
   type: string;
 
-  @Property({
-    through: NAME,
-  })
+  @Property({ through: NAME })
   name: string;
 
-  @Property({
-    through: DESCRIPTION,
-  })
+  @Property({ through: DESCRIPTION })
   description: string;
 
   @Property({

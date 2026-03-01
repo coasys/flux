@@ -1,5 +1,5 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Channel, Message } from '@coasys/flux-api';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -42,11 +42,10 @@ export default function MessageList({
     loading,
     totalCount,
     loadMore,
-  } = useLive(Message, {
-    perspective,
+  } = useLiveQuery(Message, perspective, {
     parent: isThread
       ? { model: Message, id: source, field: 'thread' }
-      : { model: Channel, id: source, field: 'messages' },
+      : { model: Channel, id: source },
     query: { order: { createdAt: 'DESC' } },
     pageSize: PAGE_SIZE,
   });

@@ -1,5 +1,5 @@
 import { PerspectiveProxy, AgentClient } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useState, Fragment, useMemo } from 'react';
 import styles from './TaskCard.module.scss';
@@ -34,7 +34,7 @@ export default function TaskCard({
 }: Props) {
   const [showTaskSettings, setShowTaskSettings] = useState(false);
 
-  const { data: comments } = useLive(Message, { perspective, parent: { model: Task, id: task.id } });
+  const { data: comments } = useLiveQuery(Message, perspective, { parent: { model: Task, id: task.id } });
 
   const assignedProfiles = useMemo(() => {
     return agentProfiles.filter((p) => task.assignees.includes(p.did));

@@ -8,7 +8,7 @@ function makeRandomPrologAtom(length: number): string {
   }
   return result;
 }
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useMemo } from 'preact/hooks';
@@ -51,9 +51,8 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     setAgentProfiles(profiles);
   }
 
-  const { data: entries } = useLive(selectedClass, {
-    perspective,
-    query: { linkedFrom: { id: source, predicate: 'ad4m://has_child' } },
+  const { data: entries } = useLiveQuery(selectedClass, perspective, {
+    parent: { id: source, predicate: 'ad4m://has_child' },
   });
 
   const data = useMemo(() => {

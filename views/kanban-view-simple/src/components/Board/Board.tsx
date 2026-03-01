@@ -1,5 +1,5 @@
 import { PerspectiveProxy, LinkQuery, Link } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useState, useEffect, Fragment, useRef } from 'react';
@@ -31,24 +31,16 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   const [updating, setUpdating] = useState(false);
   const updatingRef = useRef(false);
 
-  const { data: boards } = useLive(TaskBoard, {
-    perspective,
-    parent: { model: Channel, id: channelId },
-  });
-  const { data: columns } = useLive(TaskColumn, {
-    perspective,
-    parent: { model: Channel, id: channelId },
-  });
-  const { data: tasks } = useLive(Task, { perspective, parent: { model: Channel, id: channelId } });
+  const { data: boards } = useLiveQuery(TaskBoard, perspective, { parent: { model: Channel, id: channelId } });
+  const { data: columns } = useLiveQuery(TaskColumn, perspective, { parent: { model: Channel, id: channelId } });
+  const { data: tasks } = useLiveQuery(Task, perspective, { parent: { model: Channel, id: channelId } });
 
   async function initialiseBoard() {
     await perspective.ensureSDNASubjectClass(TaskBoard);
     await perspective.ensureSDNASubjectClass(TaskColumn);
     await perspective.ensureSDNASubjectClass(Task);
 
-    const board = (
-      await TaskBoard.findAll(perspective, { linkedFrom: { id: channelId, predicate: CHANNEL_TASK_BOARD } })
-    )[0];
+    const board = await TaskBoard.findOne(perspective, { parent: { model: Channel, id: channelId } });
     if (board) setBoard(board);
     else {
       // Create the default columns
@@ -109,9 +101,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     );
 
     // Update the board's orderedColumnIds
-    const currentBoard = (
-      await TaskBoard.findAll(perspective, { linkedFrom: { id: channelId, predicate: CHANNEL_TASK_BOARD } })
-    )[0];
+    const currentBoard = await TaskBoard.findOne(perspective, { parent: { model: Channel, id: channelId } });
     const newOrderedColumnIds = [...JSON.parse(currentBoard.orderedColumnIds), newColumn.id];
     currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
     await currentBoard.save();
@@ -134,9 +124,9 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     setUpdating(true);
 
     // Generate the new orderedColumnIds
-    const currentBoard = (
-      await TaskBoard.findAll(perspective, { linkedFrom: { id: channelId, predicate: CHANNEL_TASK_BOARD } })
-    )[0];
+    const currentBoard = await TaskBoard.findOne(perspective, {
+      parent: { model: Channel, id: channelId },
+    });
     const orderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
     const newOrderedColumnIds = orderedColumnIds.filter((id: string) => id !== columnId);
 
@@ -201,9 +191,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         setColumnsWithTasks(newColumnsWithTasks);
 
         // Update the perspective
-        const currentBoard = (
-          await TaskBoard.findAll(perspective, { linkedFrom: { id: channelId, predicate: CHANNEL_TASK_BOARD } })
-        )[0];
+        const currentBoard = (await TaskBoard.findAll(perspective, { parent: { model: Channel, id: channelId } }))[0];
         const newOrderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
         newOrderedColumnIds.splice(source.index, 1);
         newOrderedColumnIds.splice(destination.index, 0, draggableId);

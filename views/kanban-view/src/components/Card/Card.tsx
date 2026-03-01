@@ -1,5 +1,5 @@
 import { Ad4mModel, PerspectiveProxy } from '@coasys/ad4m';
-import { useLive } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Message } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { useMemo } from 'preact/hooks';
@@ -18,9 +18,8 @@ export default function Card({ task, onClick, perspective, agentProfiles }: Prop
     return agentProfiles.filter((p) => assigneeSet.has(p.did));
   }, [task.assignees, agentProfiles]);
 
-  const { data: comments } = useLive(Message, {
-    perspective,
-    query: { linkedFrom: { id: task.id, predicate: 'ad4m://has_child' } },
+  const { data: comments } = useLiveQuery(Message, perspective, {
+    parent: { id: task.id, predicate: 'ad4m://has_child' },
   });
 
   return (
