@@ -299,11 +299,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     // Keep the cleanup interval running — follower tabs still evaluate peer staleness
   }
 
-  // Register tab coordinator callbacks so leadership changes toggle broadcasting
-  tabCoordinator.onBecomeLeader(() => {
+  // Register tab coordinator callbacks so leadership changes toggle broadcasting.
+  // Keep the unsubscribe handles so stopSignalling can clean up.
+  const unsubBecomeLeader = tabCoordinator.onBecomeLeader(() => {
     if (signalling.value) startBroadcasting();
   });
-  tabCoordinator.onLoseLeadership(() => {
+  const unsubLoseLeadership = tabCoordinator.onLoseLeadership(() => {
     stopBroadcasting();
   });
 
@@ -327,6 +328,10 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   function stopSignalling(): void {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
+
+    // Unsubscribe from tab coordinator to avoid leaking closures
+    unsubBecomeLeader();
+    unsubLoseLeadership();
 
     // Clear the intervals
     stopBroadcasting();

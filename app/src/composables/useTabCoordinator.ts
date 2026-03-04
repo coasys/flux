@@ -58,8 +58,8 @@ function createTabCoordinator() {
   let currentLeaderTabId: string | null = null;
 
   // Callbacks that consumers register (signalling start/stop)
-  const onBecomeLeader: Array<() => void> = [];
-  const onLoseLeadership: Array<() => void> = [];
+  const onBecomeLeaderCbs = new Set<() => void>();
+  const onLoseLeadershipCbs = new Set<() => void>();
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   function post(msg: Omit<CoordinatorMessage, 'tabId' | 'timestamp'>) {
@@ -68,7 +68,7 @@ function createTabCoordinator() {
 
   function startLeaderHeartbeat() {
     stopLeaderHeartbeat();
-    leaderHeartbeatTimer = setInterval(() => post({ type: 'heartbeat' }), LEADER_HEARTBEAT_INTERVAL);
+    leaderHeartbeatTimer = setInterval(() => post({ type: 'heartbeat', inCall: _inCall }), LEADER_HEARTBEAT_INTERVAL);
   }
 
   function stopLeaderHeartbeat() {
@@ -100,14 +100,18 @@ function createTabCoordinator() {
     currentLeaderTabId = tabId;
     otherTabInCall.value = false;
     startLeaderHeartbeat();
-    onBecomeLeader.forEach((cb) => cb());
+    onBecomeLeaderCbs.forEach((cb) => {
+      cb();
+    });
   }
 
   function loseLeadership() {
     if (!isLeader.value) return;
     isLeader.value = false;
     stopLeaderHeartbeat();
-    onLoseLeadership.forEach((cb) => cb());
+    onLoseLeadershipCbs.forEach((cb) => {
+      cb();
+    });
   }
 
   /**
@@ -295,10 +299,20 @@ function createTabCoordinator() {
     setInCall,
     /** Request the leader tab to surface itself (window.focus) */
     requestLeaderFocus: () => post({ type: 'request-focus' }),
-    /** Register a callback for when this tab becomes the leader */
-    onBecomeLeader: (cb: () => void) => { onBecomeLeader.push(cb); },
-    /** Register a callback for when this tab loses leadership */
-    onLoseLeadership: (cb: () => void) => { onLoseLeadership.push(cb); },
+    /** Subscribe to leadership gained. Returns an unsubscribe function. */
+    onBecomeLeader: (cb: () => void) => {
+      onBecomeLeaderCbs.add(cb);
+      return () => {
+        onBecomeLeaderCbs.delete(cb);
+      };
+    },
+    /** Subscribe to leadership lost. Returns an unsubscribe function. */
+    onLoseLeadership: (cb: () => void) => {
+      onLoseLeadershipCbs.add(cb);
+      return () => {
+        onLoseLeadershipCbs.delete(cb);
+      };
+    },
     destroy,
   };
 }
