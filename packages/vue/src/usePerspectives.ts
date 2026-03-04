@@ -34,8 +34,8 @@ function addListeners(p: PerspectiveProxy) {
     return null;
   });
 
-  p.removeListener('link-removed', (link) => {
-    onAddedLinkCbs.value.forEach((cb) => {
+  p.addListener('link-removed', (link) => {
+    onRemovedLinkCbs.value.forEach((cb) => {
       cb(p, link);
     });
     return null;
@@ -101,10 +101,18 @@ export function usePerspectives(client: Ad4mClient) {
 
   function onLinkAdded(cb: Function) {
     onAddedLinkCbs.value.push(cb);
+    return () => {
+      const idx = onAddedLinkCbs.value.indexOf(cb);
+      if (idx !== -1) onAddedLinkCbs.value.splice(idx, 1);
+    };
   }
 
   function onLinkRemoved(cb: Function) {
     onRemovedLinkCbs.value.push(cb);
+    return () => {
+      const idx = onRemovedLinkCbs.value.indexOf(cb);
+      if (idx !== -1) onRemovedLinkCbs.value.splice(idx, 1);
+    };
   }
 
   return { perspectives, neighbourhoods, onLinkAdded, onLinkRemoved };
