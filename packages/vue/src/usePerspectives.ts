@@ -61,30 +61,30 @@ export function usePerspectives(client: Ad4mClient) {
       addListeners(p);
     });
 
-    client.perspective.addPerspectiveUpdatedListener(async (handle) => {
-      const perspective = await client.perspective.byUUID(handle.uuid);
-
-      if (perspective) {
-        perspectives.value = {
-          ...perspectives.value,
-          [handle.uuid]: perspective,
-        };
-      }
+    client.perspective.addPerspectiveUpdatedListener((handle) => {
+      client.perspective.byUUID(handle.uuid).then((perspective) => {
+        if (perspective) {
+          perspectives.value = {
+            ...perspectives.value,
+            [handle.uuid]: perspective,
+          };
+        }
+      });
       return null;
     });
 
     // Add new incoming perspectives
-    // @ts-ignore
-    client.perspective.addPerspectiveAddedListener(async (handle) => {
-      const perspective = await client.perspective.byUUID(handle.uuid);
-
-      if (perspective) {
-        perspectives.value = {
-          ...perspectives.value,
-          [handle.uuid]: perspective,
-        };
-        addListeners(perspective);
-      }
+    client.perspective.addPerspectiveAddedListener((handle) => {
+      client.perspective.byUUID(handle.uuid).then((perspective) => {
+        if (perspective) {
+          perspectives.value = {
+            ...perspectives.value,
+            [handle.uuid]: perspective,
+          };
+          addListeners(perspective);
+        }
+      });
+      return null;
     });
 
     // Remove new deleted perspectives
