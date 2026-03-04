@@ -114,8 +114,11 @@ function createTabCoordinator() {
    * Attempt to claim leadership.  If `force` is true (used when joining a
    * call) we will claim even if another leader exists, unless that leader
    * is itself in a call.
+   *
+   * Returns a promise that resolves after a short grace period, giving
+   * the current leader time to respond with 'call-pinned' if it refuses.
    */
-  function claimLeadership(force = false): boolean {
+  async function claimLeadership(force = false): Promise<boolean> {
     if (isLeader.value) return true; // already leader
 
     // If we know the current leader is in a call, don't try unless forced
@@ -125,7 +128,13 @@ function createTabCoordinator() {
     // Optimistically become leader — if the existing leader refuses it will
     // send back a 'call-pinned' message and we'll revert.
     becomeLeader();
-    return true;
+
+    // Wait briefly for a potential 'call-pinned' rejection from the current
+    // leader. BroadcastChannel is async so we need this grace period.
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // If we lost leadership during the wait, the claim was rejected
+    return isLeader.value;
   }
 
   function resign() {
@@ -157,11 +166,10 @@ function createTabCoordinator() {
         break;
 
       case 'call-pinned':
-        // The existing leader refused our claim because it's in a call
-        if (isLeader.value && currentLeaderTabId !== tabId) {
-          // Revert our optimistic claim
-          loseLeadership();
-        }
+        // The existing leader refused our claim because it's in a call.
+        // Always revert our optimistic claim — msg.tabId is guaranteed to
+        // be a different tab (own messages are filtered at the top).
+        if (isLeader.value) loseLeadership();
         otherTabInCall.value = true;
         currentLeaderTabId = msg.tabId;
         resetLeaderTimeout();

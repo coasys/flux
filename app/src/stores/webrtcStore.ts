@@ -597,9 +597,9 @@ export const useWebrtcStore = defineStore(
 
       try {
         // Promote this tab to leader so it controls signalling & WebRTC.
-        // If another tab is already in a call the claim will be refused.
-        const claimed = tabCoordinator.claimLeadership(true);
-        if (!claimed || tabCoordinator.otherTabInCall.value) {
+        // claimLeadership waits briefly for a potential 'call-pinned' rejection.
+        const claimed = await tabCoordinator.claimLeadership(true);
+        if (!claimed) {
           appStore.showDangerToast({ message: 'You are already in a call in another tab.' });
           tabCoordinator.requestLeaderFocus();
           joiningCall.value = false;
