@@ -81,8 +81,13 @@ function createTabCoordinator() {
   function resetLeaderTimeout() {
     if (leaderTimeoutTimer) clearTimeout(leaderTimeoutTimer);
     leaderTimeoutTimer = setTimeout(() => {
-      // Leader appears dead — if we're visible, claim
-      if (document.visibilityState === 'visible') claimLeadership();
+      // Leader appears dead — if we're visible, claim.
+      // Clear stale otherTabInCall so claimLeadership isn't rejected by a
+      // guard that no longer applies (the leader that was in a call is gone).
+      if (document.visibilityState === 'visible') {
+        otherTabInCall.value = false;
+        claimLeadership();
+      }
     }, LEADER_TIMEOUT);
   }
 

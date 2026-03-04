@@ -299,14 +299,24 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     // Keep the cleanup interval running — follower tabs still evaluate peer staleness
   }
 
-  // Register tab coordinator callbacks so leadership changes toggle broadcasting.
-  // Keep the unsubscribe handles so stopSignalling can clean up.
-  const unsubBecomeLeader = tabCoordinator.onBecomeLeader(() => {
-    if (signalling.value) startBroadcasting();
-  });
-  const unsubLoseLeadership = tabCoordinator.onLoseLeadership(() => {
-    stopBroadcasting();
-  });
+  // Unsubscribe handles for leadership callbacks — stored at composable scope
+  // so stopSignalling can clean up and startSignalling can re-subscribe.
+  let unsubBecomeLeader: (() => void) | null = null;
+  let unsubLoseLeadership: (() => void) | null = null;
+
+  /** (Re-)subscribe to tab-coordinator leadership events. */
+  function subscribeLeadership(): void {
+    // Avoid double-subscribe: tear down any existing subscriptions first.
+    if (unsubBecomeLeader) unsubBecomeLeader();
+    if (unsubLoseLeadership) unsubLoseLeadership();
+
+    unsubBecomeLeader = tabCoordinator.onBecomeLeader(() => {
+      if (signalling.value) startBroadcasting();
+    });
+    unsubLoseLeadership = tabCoordinator.onLoseLeadership(() => {
+      stopBroadcasting();
+    });
+  }
 
   function startSignalling(): void {
     if (signalling.value) stopSignalling();
@@ -321,6 +331,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     // Start the cleanup interval on all tabs (evaluates agent staleness)
     cleanupInterval = setInterval(evaluateAgents, CLEANUP_INTERVAL);
 
+    // Subscribe (or re-subscribe) to leadership changes
+    subscribeLeadership();
+
     // Only the leader tab broadcasts heartbeats to the network
     if (tabCoordinator.isLeader.value) startBroadcasting();
   }
@@ -330,8 +343,14 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     neighbourhood.removeSignalHandler(onSignal);
 
     // Unsubscribe from tab coordinator to avoid leaking closures
-    unsubBecomeLeader();
-    unsubLoseLeadership();
+    if (unsubBecomeLeader) {
+      unsubBecomeLeader();
+      unsubBecomeLeader = null;
+    }
+    if (unsubLoseLeadership) {
+      unsubLoseLeadership();
+      unsubLoseLeadership = null;
+    }
 
     // Clear the intervals
     stopBroadcasting();
