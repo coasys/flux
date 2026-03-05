@@ -22,6 +22,7 @@ const models = [
   'DistilLargeV2', // The distil-large model.
   'DistilLargeV3', // The distil-large-v3 model.
   'QuantizedDistilLargeV3', // The quantized distil-large-v3 model.
+  'QuantizedLargeV3Turbo', // The quantized large-v3-turbo model (best quality/speed ratio).
 ];
 
 export default function Transcription({ webRTC }: Props) {
