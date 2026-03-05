@@ -1266,10 +1266,10 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-6.0.3.tgz#a48438b600dfaee7b0832f0cfcd5583fc21b0b55"
   integrity sha512-nFlgSmtx6Zwaw0tEvZgQsWHBeOfWWB/AvEoCApopLT4mHkBVoSrwkLvy2PjZs5wxCbsmqvQczr3XCyTwaDZVQg==
 
-"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.11.2-dev.5":
-  version "0.11.2-dev.5"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.11.2-dev.5.tgz#b6d9e6cf65acea76521ae1c70097f175b29eb038"
-  integrity sha512-OZlHas+rOoG9yweEuuu5sNqN226hVsrkMQrsjUQPlWJOeXD/E6uAuGVbaMicOGmT9ou/Q5S/6gKXpboL/gN0vQ==
+"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.12.0-rc1-dev.1":
+  version "0.12.0-rc1-dev.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.12.0-rc1-dev.1.tgz#d7a636c5d92ff5c3e96749264e52ab893f91980e"
+  integrity sha512-RNvnPSUV4HewB/War02fNTA7fJN5KLSE2z2racjiQ6/NwDrikTsbMIB/fFVogYqMLWG9YGYlo02IHi63PVFirw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1296,10 +1296,10 @@
     "@coasys/ad4m" "0.11.2-dev.2"
     "@coasys/hooks-helpers" "0.11.2-dev.2"
 
-"@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev.2", "@coasys/ad4m@0.11.2-dev.6":
-  version "0.11.2-dev.6"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.11.2-dev.6.tgz#deff0347aca6ba6f503cbe92d894053410752dd7"
-  integrity sha512-8jVG/CxWCrnXqpMO+Vug1q+Xha2e59NGOFeNeRVMzo+nlsBqvKr2QG/Y9i3fUmq/3KQ7x3yDc8ZGhuMVy/d3Ew==
+"@coasys/ad4m@0.11.1", "@coasys/ad4m@0.11.2-dev.2", "@coasys/ad4m@0.12.0-rc1-dev.1":
+  version "0.12.0-rc1-dev.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.12.0-rc1-dev.1.tgz#2cb7a37266f9338d75519730b0340d5117dd96a2"
+  integrity sha512-ggSaZc9c1GIivWbqyKOEo7chpvdg+Xr0kStpsvfBaLlly+MmTVzsMYj7pB1tBdPN/Lyq4/pwts6hgl790Grm5w==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
@@ -3774,6 +3774,11 @@
   version "8.3.4"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.4.tgz#bd86a43617df0594787d38b735f55c805becf1bc"
   integrity sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==
+
+"@types/valid-url@^1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@types/valid-url/-/valid-url-1.0.7.tgz#f99e3d89dea90f34a7cc695a6f152728abfb245a"
+  integrity sha512-tgsWVG80dM5PVEBSbXUttPJTBCOo0IKbBh4R4z/SHsC5C81A3aaUH4fsbj+JYk7fopApU/Mao1c0EWTE592TSg==
 
 "@types/web-bluetooth@^0.0.20":
   version "0.0.20"
@@ -14344,6 +14349,11 @@ vali-date@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/vali-date/-/vali-date-1.0.0.tgz#1b904a59609fb328ef078138420934f6b86709a6"
   integrity sha512-sgECfZthyaCKW10N0fm27cg8HYTFK5qMWgypqkXMQ4Wbl/zZKx7xZICgcoxIIE+WFAP/MBL2EFwC/YvLxw3Zeg==
+
+valid-url@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/valid-url/-/valid-url-1.0.9.tgz#1c14479b40f1397a75782f115e4086447433a200"
+  integrity sha512-QQDsV8OnSf5Uc30CKSwG9lnhMPe6exHtTXLRYX8uMwKENy640pU+2BgBL0LRbDh/eYRahNCS7aewCx0wf3NYVA==
 
 validate-npm-package-license@^3.0.1:
   version "3.0.4"
