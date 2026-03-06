@@ -1,0 +1,1 @@
+export { useVoiceRecorder } from './useVoiceRecorder';

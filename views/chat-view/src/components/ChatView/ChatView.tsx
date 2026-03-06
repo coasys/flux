@@ -5,6 +5,7 @@ import { community } from '@coasys/flux-constants';
 import { EntryType, Profile } from '@coasys/flux-types';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import MessageList from '../MessageList/MessageList';
+import { useVoiceRecorder } from '../../composables/useVoiceRecorder';
 import styles from './ChatView.module.css';
 
 const { HAS_REPLY, REACTION } = community;
@@ -32,6 +33,35 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   const [threadProfile, setThreadProfile] = useState<Profile | null>(null);
   const editor = useRef(null);
   const threadContainer = useRef(null);
+
+  // Voice recording state
+  const { isRecording, isTranscribing, previewText, toggleRecording } = useVoiceRecorder({
+    client,
+    onTranscript: async (text) => {
+      // Save the transcribed text as a message
+      try {
+        const message = new Message(perspective, undefined, source);
+        message.body = `<p>${text}</p>`;
+        await message.save();
+
+        if (replyMessage) {
+          perspective.addLinks([
+            {
+              source: replyMessage.baseExpression,
+              predicate: HAS_REPLY,
+              target: message.baseExpression,
+            },
+          ]);
+          setReplyMessage(null);
+        }
+      } catch (e) {
+        console.error('Failed to save voice transcript:', e);
+      }
+    },
+    onError: (error) => {
+      console.error('Voice recording error:', error);
+    },
+  });
 
   async function submit() {
     try {
@@ -207,6 +237,23 @@ export default function ChatView({ agent, client, perspective, source, threaded,
               </j-flex>
             </j-box>
           )}
+          {/* Voice recording preview */}
+          {(isRecording || isTranscribing) && (
+            <j-box py="300">
+              <j-flex a="center" gap="400">
+                {isRecording && <j-spinner size="xs" />}
+                <j-text nomargin color="primary-500" size="300">
+                  {isRecording ? 'Recording...' : 'Transcribing...'}
+                </j-text>
+                {previewText && (
+                  <j-text nomargin color="ui-400" size="300" style={{ fontStyle: 'italic' }}>
+                    {previewText}
+                  </j-text>
+                )}
+              </j-flex>
+            </j-box>
+          )}
+
           {/* @ts-ignore */}
           <flux-editor
             ref={editor}
@@ -230,6 +277,17 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                 variant="ghost"
               >
                 <j-icon size="sm" name="type" />
+              </j-button>
+              {/* Voice record button */}
+              <j-button
+                onClick={toggleRecording}
+                circle
+                square
+                size="sm"
+                variant={isRecording ? 'danger' : 'ghost'}
+                disabled={isTranscribing}
+              >
+                <j-icon size="sm" name={isRecording ? 'stop-fill' : 'mic'}></j-icon>
               </j-button>
             </footer>
             {/* @ts-ignore */}
