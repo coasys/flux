@@ -48,16 +48,18 @@
 <script setup lang="ts">
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
-import { useAppStore } from '@/stores';
+import { useAppStore, useUiStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
 
 const router = useRouter();
+const route = useRoute();
 const appStore = useAppStore();
+const uiStore = useUiStore();
 
 const showSignup = ref(false);
 const profilePicture = ref();
@@ -117,7 +119,16 @@ async function createUser() {
   })
     .then(async () => {
       await appStore.refreshMyProfile();
-      router.push({ name: 'home' });
+      
+      // Check if there's a redirect path (e.g., from a shared community link)
+      const redirectPath = route.query.redirect as string;
+      if (redirectPath) {
+        router.push(redirectPath);
+        // Note: Call window will open automatically via router.afterEach
+        // when user actually enters a channel with an active call
+      } else {
+        router.push({ name: 'home' });
+      }
       registerNotification(appStore.ad4mClient);
     })
     .finally(() => {
