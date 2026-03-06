@@ -84,7 +84,8 @@ router.beforeEach(async (to, from, next) => {
 
     // Block all other routes until initialized
     if (!appStore.initialized) {
-      next({ name: 'signup' });
+      // Preserve the intended route so we can redirect after signup
+      next({ name: 'signup', query: { redirect: to.fullPath } });
       return;
     }
 
