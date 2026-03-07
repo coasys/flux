@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Transcript {
@@ -76,11 +76,12 @@ const previewText = ref('');
 const transcripts = ref<Transcript[]>([]);
 const currentTranscriptId = ref('');
 
-// Audio recording refs
-let mediaRecorder: MediaRecorder | null = null;
-let audioChunks: Blob[] = [];
+// Audio capture refs (AudioWorklet approach)
+let audioContext: AudioContext | null = null;
+let workletNode: AudioWorkletNode | null = null;
 let stream: MediaStream | null = null;
 let transcriptionStreamId: string | null = null;
+let fastTranscriptionStreamId: string | null = null;
 
 const currentTranscript = computed(() => 
   transcripts.value.find(t => t.id === currentTranscriptId.value)
@@ -95,12 +96,40 @@ function handleTranscriptionText(text: string) {
 }
 
 function handleTranscriptionPreview(text: string) {
-  previewText.value += text;
+  previewText.value = text;
+}
+
+async function cleanup() {
+  // Stop all tracks
+  stream?.getTracks().forEach(track => track.stop());
+  stream = null;
+  
+  // Disconnect and close audio context
+  workletNode?.disconnect();
+  workletNode = null;
+  
+  await audioContext?.close();
+  audioContext = null;
+  
+  // Close transcription streams
+  if (transcriptionStreamId) {
+    await props.client.ai.closeTranscriptionStream(transcriptionStreamId);
+    transcriptionStreamId = null;
+  }
+  if (fastTranscriptionStreamId) {
+    await props.client.ai.closeTranscriptionStream(fastTranscriptionStreamId);
+    fastTranscriptionStreamId = null;
+  }
 }
 
 async function startRecording() {
+  // Guard: prevent multiple concurrent recordings
+  if (isRecording.value || audioContext) {
+    console.warn('Recording already in progress');
+    return;
+  }
+
   try {
-    audioChunks = [];
     previewText.value = '';
     
     // Initialize new transcript
@@ -114,36 +143,58 @@ async function startRecording() {
     }];
     
     // Get microphone access
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      audio: { echoCancellation: true, noiseSuppression: true } 
+    });
     
-    // Open transcription stream
+    // Open transcription streams (final + preview)
     transcriptionStreamId = await props.client.ai.openTranscriptionStream(
       'Whisper',
       handleTranscriptionText,
       { startThreshold: 0.8 }
     );
     
-    // Set up media recorder
-    mediaRecorder = new MediaRecorder(stream);
+    fastTranscriptionStreamId = await props.client.ai.openTranscriptionStream(
+      'whisper_tiny_quantized',
+      handleTranscriptionPreview,
+      {
+        startThreshold: 0.5,
+        startWindow: 80,
+        endThreshold: 0.1,
+        endWindow: 50,
+        timeBeforeSpeech: 20,
+      }
+    );
     
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0 && transcriptionStreamId) {
-        // Convert and feed to transcription
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const arrayBuffer = reader.result as ArrayBuffer;
-          const audioData = Array.from(new Int16Array(arrayBuffer));
-          props.client.ai.feedTranscriptionStream([transcriptionStreamId!], audioData as any);
-        };
-        reader.readAsArrayBuffer(event.data);
+    // Set up AudioContext and Worklet for raw PCM capture
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Load the audio worklet processor
+    await audioContext.audioWorklet.addModule('/audio-processor.js');
+    
+    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+    workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+    
+    // Handle audio data from worklet
+    workletNode.port.onmessage = (event) => {
+      if (isRecording.value) {
+        const audioData = Array.from(event.data);
+        // Feed to both transcription streams
+        props.client.ai.feedTranscriptionStream(
+          [fastTranscriptionStreamId!, transcriptionStreamId!], 
+          audioData as any
+        );
       }
     };
     
-    mediaRecorder.start(100);
+    mediaStreamSource.connect(workletNode);
+    workletNode.connect(audioContext.destination);
+    
     isRecording.value = true;
   } catch (error) {
     console.error('Failed to start recording:', error);
     transcripts.value = [];
+    await cleanup();
   }
 }
 
@@ -153,19 +204,7 @@ async function stopRecording() {
   isRecording.value = false;
   isTranscribing.value = true;
   
-  // Stop media recorder
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-  }
-  
-  // Stop tracks
-  stream?.getTracks().forEach(track => track.stop());
-  
-  // Close transcription stream
-  if (transcriptionStreamId) {
-    await props.client.ai.closeTranscriptionStream(transcriptionStreamId);
-    transcriptionStreamId = null;
-  }
+  await cleanup();
   
   // Save the message
   const transcript = currentTranscript.value;
@@ -210,6 +249,13 @@ async function toggleRecording() {
     await startRecording();
   }
 }
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (isRecording.value || audioContext) {
+    cleanup();
+  }
+});
 </script>
 
 <style scoped lang="scss">
