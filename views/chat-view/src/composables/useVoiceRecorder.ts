@@ -21,24 +21,39 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [previewText, setPreviewText] = useState('');
   
+  // Track final and preview separately
+  const finalTextRef = useRef('');
+  const previewTextRef = useRef('');
+  
   const audioContextRef = useRef<AudioContext | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const transcriptionStreamIdRef = useRef<string | null>(null);
   const fastTranscriptionStreamIdRef = useRef<string | null>(null);
 
-  const handleTranscriptionText = useCallback((text: string) => {
-    setPreviewText((prev) => prev + text);
+  const updateDisplayText = useCallback(() => {
+    // Show final + preview (preview with indicator)
+    const final = finalTextRef.current;
+    const preview = previewTextRef.current;
+    if (preview && !final.endsWith(preview)) {
+      setPreviewText(final + preview);
+    } else {
+      setPreviewText(final);
+    }
   }, []);
 
+  const handleTranscriptionText = useCallback((text: string) => {
+    // Final transcription - append to final, clear preview
+    finalTextRef.current += text;
+    previewTextRef.current = '';
+    updateDisplayText();
+  }, [updateDisplayText]);
+
   const handleTranscriptionPreview = useCallback((text: string) => {
-    // Live preview during transcription
-    setPreviewText((prev) => {
-      // Append preview text (will be replaced by final)
-      const base = prev.split('...')[0];
-      return base + text + '...';
-    });
-  }, []);
+    // Preview transcription - update preview only
+    previewTextRef.current = text;
+    updateDisplayText();
+  }, [updateDisplayText]);
 
   const startRecording = async () => {
     // Guard: prevent multiple concurrent recordings
@@ -48,6 +63,9 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
     }
 
     try {
+      // Reset state
+      finalTextRef.current = '';
+      previewTextRef.current = '';
       setPreviewText('');
       
       // Get microphone access
@@ -147,12 +165,15 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       
       await cleanup();
       
-      // Send the transcript
-      const finalText = previewText.replace(/\.\.\.$/, '').trim();
+      // Send the final transcript (preview is discarded)
+      const finalText = finalTextRef.current.trim();
       if (finalText) {
         onTranscript(finalText);
       }
       
+      // Reset state
+      finalTextRef.current = '';
+      previewTextRef.current = '';
       setPreviewText('');
     } catch (error) {
       console.error('Failed to stop recording:', error);
