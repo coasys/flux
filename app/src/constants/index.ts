@@ -34,6 +34,14 @@ export const viewOptions = [
     component: 'webrtc-view',
   },
   {
+    title: 'SoA Tree',
+    description: 'View State of Affairs nodes as a collapsible tree',
+    icon: 'diagram-3',
+    type: ChannelView.SoATree,
+    pkg: '@coasys/flux-soa-tree-view',
+    component: 'soa-tree-view',
+  },
+  {
     title: 'Debug',
     description: 'WebRTC debugger',
     icon: 'bug',

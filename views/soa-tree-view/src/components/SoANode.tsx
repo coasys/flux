@@ -107,8 +107,8 @@ export default function SoANode({ node, depth }: Props) {
             <div className={styles.property}>
               <span className={styles.propLabel}>Tags</span>
               <div className={styles.tagList}>
-                {node.tags.split(',').map((tag) => (
-                  <span key={tag.trim()} className={styles.tag}>{tag.trim()}</span>
+                {node.tags.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                  <span key={tag} className={styles.tag}>{tag}</span>
                 ))}
               </div>
             </div>

@@ -75,13 +75,15 @@ function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
     } else if (pred === 'soa://description') {
       node.description = parseLiteralString(target);
     } else if (pred === 'soa://confidence') {
-      node.confidence = parseFloat(parseLiteralString(target));
+      const conf = parseFloat(parseLiteralString(target));
+      node.confidence = Number.isFinite(conf) ? Math.max(0, Math.min(1, conf)) : undefined;
     } else if (pred === 'soa://status') {
       node.status = parseLiteralString(target);
     } else if (pred === 'soa://tags') {
       node.tags = parseLiteralString(target);
     } else if (pred === 'soa://priority') {
-      node.priority = parseInt(parseLiteralString(target), 10);
+      const prio = parseInt(parseLiteralString(target), 10);
+      node.priority = Number.isFinite(prio) ? prio : undefined;
     } else if (pred === 'soa://source') {
       node.source = parseLiteralString(target);
     } else if (pred === 'soa://rel_parent') {
@@ -130,6 +132,8 @@ export default function SoATreeView({ perspective, source }: Props) {
     async function loadTree() {
       try {
         setLoading(true);
+        // TODO: Optimize with server-side filtering by querying each soa:// predicate individually
+        // instead of fetching all links and filtering client-side
         const allLinks = await perspective.queryLinks({});
         const soaLinks = allLinks.filter(
           (l: LinkExpression) => l.data.predicate?.startsWith('soa://')

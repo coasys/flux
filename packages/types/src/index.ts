@@ -104,6 +104,7 @@ export enum ChannelView {
   Graph = 'flux://has_graph_view',
   Voice = 'flux://has_voice_view',
   Debug = 'flux://has_debug_view',
+  SoATree = 'flux://has_soa_tree_view',
 }
 
 export enum EntryType {

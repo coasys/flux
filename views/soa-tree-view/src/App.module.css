@@ -3,3 +3,9 @@
   width: 100%;
   height: 100%;
 }
+
+.error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--j-color-danger-500, #e53e3e);
+}
