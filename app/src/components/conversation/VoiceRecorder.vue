@@ -14,9 +14,8 @@
           <j-button
             @click="cancelRecording"
             circle
-            square
             size="xs"
-            variant="ghost"
+            variant="danger"
             title="Cancel"
           >
             <j-icon size="xs" name="x" />
@@ -46,16 +45,16 @@
     <j-flex gap="300" a="center" class="recorder-controls">
       <j-button
         @click="toggleRecording"
-        :variant="isRecording ? 'danger' : 'primary'"
+        variant="primary"
         :disabled="isTranscribing"
         circle
         size="lg"
       >
-        <j-icon :name="isRecording ? 'stop-fill' : 'mic-fill'" size="lg" />
+        <j-icon :name="isRecording ? 'send' : 'mic-fill'" size="lg" />
       </j-button>
       <div class="recorder-status">
         <j-text v-if="isRecording" nomargin color="danger-500" size="400">
-          Recording... Click to stop
+          Recording... Click to send
         </j-text>
         <j-text v-else-if="isTranscribing" nomargin color="primary-500" size="400">
           Transcribing...
@@ -295,6 +294,9 @@ onUnmounted(() => {
   bottom: var(--j-space-600);
   right: var(--j-space-600);
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   
   .transcript-card {
     background-color: rgba(255, 255, 255, 0.95);
@@ -317,6 +319,9 @@ onUnmounted(() => {
     border-radius: var(--j-border-radius);
     padding: var(--j-space-300) var(--j-space-400);
     box-shadow: var(--j-shadow-md);
+    width: auto;
+    min-width: 280px;
+    max-width: 400px;
     
     .recorder-status {
       flex: 1;

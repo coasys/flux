@@ -252,9 +252,8 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                   <j-button
                     onClick={cancelRecording}
                     circle
-                    square
                     size="xs"
-                    variant="ghost"
+                    variant="danger"
                     title="Cancel"
                   >
                     <j-icon size="xs" name="x" />
@@ -304,10 +303,10 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                 circle
                 square
                 size="sm"
-                variant={isRecording ? 'danger' : 'ghost'}
+                variant="primary"
                 disabled={isTranscribing}
               >
-                <j-icon size="sm" name={isRecording ? 'stop-fill' : 'mic'}></j-icon>
+                <j-icon size="sm" name={isRecording ? 'send' : 'mic'}></j-icon>
               </j-button>
             </footer>
             {/* @ts-ignore */}
