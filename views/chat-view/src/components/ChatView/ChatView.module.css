@@ -2,6 +2,14 @@
   --body-min-height: auto;
   --grid-template-areas: 'toolbar toolbar toolbar' 'body body footer';
 }
+
+.voicePreviewCard {
+  background-color: var(--j-color-ui-100);
+  border-radius: var(--j-border-radius);
+  margin: 0 var(--j-space-500) var(--j-space-300) var(--j-space-500);
+  max-width: 100%;
+}
+
 .editor::part(base) {
   background: var(--j-color-white);
 }
@@ -14,6 +22,7 @@
 .editor::part(footer) {
   align-items: end;
   border: 0;
+  gap: var(--j-space-200);
 }
 
 .wrapper {

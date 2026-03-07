@@ -237,19 +237,21 @@ export default function ChatView({ agent, client, perspective, source, threaded,
               </j-flex>
             </j-box>
           )}
-          {/* Voice recording preview */}
-          {(isRecording || isTranscribing) && (
-            <j-box py="300">
-              <j-flex a="center" gap="400">
-                {isRecording && <j-spinner size="xs" />}
-                <j-text nomargin color="primary-500" size="300">
-                  {isRecording ? 'Recording...' : 'Transcribing...'}
-                </j-text>
+          {/* Voice recording preview card */}
+          {(isRecording || isTranscribing || finalText || previewText) && (
+            <j-box py="300" className={styles.voicePreviewCard}>
+              <j-flex direction="column" gap="300">
+                <j-flex a="center" gap="300">
+                  {isRecording && <j-spinner size="xs" />}
+                  <j-text nomargin color="primary-500" size="300">
+                    {isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : ''}
+                  </j-text>
+                </j-flex>
                 {(finalText || previewText) && (
-                  <j-text nomargin color="ui-300" size="300">
+                  <j-text nomargin color="ui-800" size="400">
                     {finalText}
                     {previewText && (
-                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-500)' }}>
+                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-400)' }}>
                         {previewText}
                       </span>
                     )}
