@@ -300,11 +300,15 @@ onUnmounted(() => {
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: var(--j-border-radius);
     box-shadow: var(--j-shadow-lg);
-    max-width: 400px;
+    width: 400px;
+    max-width: 90vw;
     backdrop-filter: blur(4px);
     
     .transcript-item {
       padding: var(--j-space-300);
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
   }
   
