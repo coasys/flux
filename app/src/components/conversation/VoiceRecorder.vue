@@ -53,15 +53,17 @@
       >
         <j-icon :name="isRecording ? 'stop-fill' : 'mic-fill'" size="lg" />
       </j-button>
-      <j-text v-if="isRecording" nomargin color="danger-500" size="400">
-        Recording... Click to stop
-      </j-text>
-      <j-text v-else-if="isTranscribing" nomargin color="primary-500" size="400">
-        Transcribing...
-      </j-text>
-      <j-text v-else nomargin color="ui-400" size="300">
-        Click to record voice message
-      </j-text>
+      <div class="recorder-status">
+        <j-text v-if="isRecording" nomargin color="danger-500" size="400">
+          Recording... Click to stop
+        </j-text>
+        <j-text v-else-if="isTranscribing" nomargin color="primary-500" size="400">
+          Transcribing...
+        </j-text>
+        <j-text v-else nomargin color="ui-400" size="300">
+          Click to record voice message
+        </j-text>
+      </div>
     </j-flex>
   </div>
 </template>
@@ -311,6 +313,12 @@ onUnmounted(() => {
     border-radius: var(--j-border-radius);
     padding: var(--j-space-300) var(--j-space-400);
     box-shadow: var(--j-shadow-md);
+    
+    .recorder-status {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
   }
 }
 </style>
