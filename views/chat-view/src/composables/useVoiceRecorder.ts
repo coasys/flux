@@ -24,8 +24,9 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const [previewText, setPreviewText] = useState('');
   const [finalText, setFinalText] = useState('');
   
-  // Track preview separately (final is in state for UI)
+  // Track text in refs for use in callbacks (avoids stale closure)
   const previewTextRef = useRef('');
+  const finalTextRef = useRef('');
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
@@ -35,7 +36,11 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
 
   const handleTranscriptionText = useCallback((text: string) => {
     // Final transcription - append to final, clear preview
-    setFinalText((prev) => prev + text);
+    setFinalText((prev) => {
+      const updated = prev + text;
+      finalTextRef.current = updated;
+      return updated;
+    });
     previewTextRef.current = '';
     setPreviewText('');
   }, []);
@@ -56,6 +61,7 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
     try {
       // Reset state
       setFinalText('');
+      finalTextRef.current = '';
       previewTextRef.current = '';
       setPreviewText('');
       
@@ -156,14 +162,15 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       
       await cleanup();
       
-      // Send the final transcript (preview is discarded)
-      const finalTextValue = finalText.trim();
+      // Send the final transcript (use ref to avoid stale closure)
+      const finalTextValue = finalTextRef.current.trim();
       if (finalTextValue) {
         onTranscript(finalTextValue);
       }
       
       // Reset state
       setFinalText('');
+      finalTextRef.current = '';
       previewTextRef.current = '';
       setPreviewText('');
     } catch (error) {
@@ -184,6 +191,7 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       
       // Reset state without sending
       setFinalText('');
+      finalTextRef.current = '';
       previewTextRef.current = '';
       setPreviewText('');
       setIsTranscribing(false);
