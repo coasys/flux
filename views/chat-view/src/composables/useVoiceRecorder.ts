@@ -15,6 +15,7 @@ interface UseVoiceRecorderReturn {
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
   toggleRecording: () => Promise<void>;
+  cancelRecording: () => Promise<void>;
 }
 
 export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceRecorderOptions): UseVoiceRecorderReturn {
@@ -173,6 +174,25 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
     }
   };
 
+  const cancelRecording = async () => {
+    if (!isRecording && !isTranscribing && !finalText && !previewText) return;
+    
+    try {
+      setIsRecording(false);
+      
+      await cleanup();
+      
+      // Reset state without sending
+      setFinalText('');
+      previewTextRef.current = '';
+      setPreviewText('');
+      setIsTranscribing(false);
+    } catch (error) {
+      console.error('Failed to cancel recording:', error);
+      onError?.(error as Error);
+    }
+  };
+
   const toggleRecording = async () => {
     if (isRecording) {
       await stopRecording();
@@ -198,5 +218,6 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
     startRecording,
     stopRecording,
     toggleRecording,
+    cancelRecording,
   };
 }

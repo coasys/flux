@@ -35,7 +35,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   const threadContainer = useRef(null);
 
   // Voice recording state
-  const { isRecording, isTranscribing, previewText, finalText, toggleRecording } = useVoiceRecorder({
+  const { isRecording, isTranscribing, previewText, finalText, toggleRecording, cancelRecording } = useVoiceRecorder({
     client,
     onTranscript: async (text) => {
       // Save the transcribed text as a message
@@ -241,11 +241,24 @@ export default function ChatView({ agent, client, perspective, source, threaded,
           {(isRecording || isTranscribing || finalText || previewText) && (
             <j-box py="300" className={styles.voicePreviewCard}>
               <j-flex direction="column" gap="300">
-                <j-flex a="center" gap="300">
-                  {isRecording && <j-spinner size="xs" />}
-                  <j-text nomargin color="primary-500" size="300">
-                    {isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : ''}
-                  </j-text>
+                <j-flex a="center" gap="300" j="between">
+                  <j-flex a="center" gap="300">
+                    {isRecording && <j-spinner size="xs" />}
+                    <j-text nomargin color="primary-500" size="300">
+                      {isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : ''}
+                    </j-text>
+                  </j-flex>
+                  {/* Cancel button */}
+                  <j-button
+                    onClick={cancelRecording}
+                    circle
+                    square
+                    size="xs"
+                    variant="ghost"
+                    title="Cancel"
+                  >
+                    <j-icon size="xs" name="x" />
+                  </j-button>
                 </j-flex>
                 {(finalText || previewText) && (
                   <j-text nomargin color="ui-800" size="400">

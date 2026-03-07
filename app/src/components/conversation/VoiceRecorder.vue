@@ -3,6 +3,25 @@
     <!-- Transcription card (similar to call transcriber) -->
     <j-box v-if="transcripts.length || previewText" mb="300" class="transcript-card">
       <j-flex direction="column" gap="300">
+        <!-- Header with cancel button -->
+        <j-flex j="between" a="center">
+          <j-flex a="center" gap="300">
+            <j-spinner v-if="isRecording || isTranscribing" size="xxs" />
+            <j-text nomargin size="300" color="primary-500">
+              {{ isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : '' }}
+            </j-text>
+          </j-flex>
+          <j-button
+            @click="cancelRecording"
+            circle
+            square
+            size="xs"
+            variant="ghost"
+            title="Cancel"
+          >
+            <j-icon size="xs" name="x" />
+          </j-button>
+        </j-flex>
         <div
           v-for="transcript in transcripts"
           :key="transcript.id"
@@ -18,10 +37,6 @@
                 {{ previewText }}
               </span>
             </j-text>
-            <j-flex v-if="transcript.state === 'transcribing'" gap="300" a="center">
-              <j-spinner size="xxs" />
-              <j-text nomargin size="300" color="primary-500"> Transcribing... </j-text>
-            </j-flex>
           </j-flex>
         </div>
       </j-flex>
@@ -239,6 +254,20 @@ async function stopRecording() {
     }, 1000);
   }
   
+  isTranscribing.value = false;
+}
+
+async function cancelRecording() {
+  if (!isRecording.value && !isTranscribing.value && transcripts.value.length === 0) return;
+  
+  isRecording.value = false;
+  
+  await cleanup();
+  
+  // Clear without saving
+  transcripts.value = [];
+  currentTranscriptId.value = '';
+  previewText.value = '';
   isTranscribing.value = false;
 }
 
