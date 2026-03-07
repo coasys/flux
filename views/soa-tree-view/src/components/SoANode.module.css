@@ -1,0 +1,149 @@
+.nodeWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.nodeHeader:hover {
+  background-color: var(--j-color-ui-100, #f1f5f9);
+}
+
+.nodeHeader.expanded {
+  background-color: var(--j-color-ui-50, #f8fafc);
+}
+
+.toggle {
+  font-size: 12px;
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--j-color-ui-400, #94a3b8);
+}
+
+.icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--j-color-ui-800, #1e293b);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.priorityBadge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: var(--j-color-ui-200, #e2e8f0);
+  color: var(--j-color-ui-600, #475569);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.relCount {
+  font-size: 11px;
+  color: var(--j-color-ui-400, #94a3b8);
+  flex-shrink: 0;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+
+.property {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.propLabel {
+  font-size: 12px;
+  color: var(--j-color-ui-400, #94a3b8);
+  font-weight: 500;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.confidenceBar {
+  width: 80px;
+  height: 6px;
+  background-color: var(--j-color-ui-200, #e2e8f0);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.confidenceFill {
+  height: 100%;
+  background-color: var(--j-color-primary-500, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.2s;
+}
+
+.confidenceValue {
+  font-size: 12px;
+  color: var(--j-color-ui-500, #64748b);
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background-color: var(--j-color-ui-100, #f1f5f9);
+  color: var(--j-color-ui-600, #475569);
+}
+
+.relationships {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.relBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background-color: var(--j-color-ui-100, #f1f5f9);
+  color: var(--j-color-ui-600, #475569);
+  border: 1px solid var(--j-color-ui-200, #e2e8f0);
+}
+
+.children {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

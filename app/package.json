@@ -38,6 +38,7 @@
     "@coasys/flux-poll-view": "0.11.0",
     "@coasys/flux-post-view": "0.11.0",
     "@coasys/flux-synergy-demo-view": "0.11.0",
+    "@coasys/flux-soa-tree-view": "0.11.0",
     "@coasys/flux-table-view": "0.11.0",
     "@coasys/flux-types": "0.11.0",
     "@coasys/flux-ui": "0.11.0",
