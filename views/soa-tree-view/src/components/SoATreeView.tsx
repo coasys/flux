@@ -22,17 +22,6 @@ type Props = {
   source: string;
 };
 
-const PROPERTY_PREDICATES = [
-  'soa://title',
-  'soa://modality',
-  'soa://description',
-  'soa://confidence',
-  'soa://status',
-  'soa://tags',
-  'soa://priority',
-  'soa://source',
-];
-
 const RELATIONSHIP_PREDICATES = [
   'soa://rel_supports',
   'soa://rel_contradicts',

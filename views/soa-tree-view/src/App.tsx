@@ -2,7 +2,7 @@ import styles from './App.module.css';
 import { PerspectiveProxy } from '@coasys/ad4m';
 import SoATreeView from './components/SoATreeView';
 import '@coasys/flux-ui/dist/main.d.ts';
-import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { AgentClient } from '@coasys/ad4m';
 
 type Props = {
   agent: AgentClient;
