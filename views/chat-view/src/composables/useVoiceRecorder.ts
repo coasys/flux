@@ -11,6 +11,7 @@ interface UseVoiceRecorderReturn {
   isRecording: boolean;
   isTranscribing: boolean;
   previewText: string;
+  finalText: string;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
   toggleRecording: () => Promise<void>;
@@ -20,9 +21,9 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [previewText, setPreviewText] = useState('');
+  const [finalText, setFinalText] = useState('');
   
-  // Track final and preview separately
-  const finalTextRef = useRef('');
+  // Track preview separately (final is in state for UI)
   const previewTextRef = useRef('');
   
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -31,29 +32,18 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const transcriptionStreamIdRef = useRef<string | null>(null);
   const fastTranscriptionStreamIdRef = useRef<string | null>(null);
 
-  const updateDisplayText = useCallback(() => {
-    // Show final + preview (preview with indicator)
-    const final = finalTextRef.current;
-    const preview = previewTextRef.current;
-    if (preview && !final.endsWith(preview)) {
-      setPreviewText(final + preview);
-    } else {
-      setPreviewText(final);
-    }
-  }, []);
-
   const handleTranscriptionText = useCallback((text: string) => {
     // Final transcription - append to final, clear preview
-    finalTextRef.current += text;
+    setFinalText((prev) => prev + text);
     previewTextRef.current = '';
-    updateDisplayText();
-  }, [updateDisplayText]);
+    setPreviewText('');
+  }, []);
 
   const handleTranscriptionPreview = useCallback((text: string) => {
     // Preview transcription - update preview only
     previewTextRef.current = text;
-    updateDisplayText();
-  }, [updateDisplayText]);
+    setPreviewText(text);
+  }, []);
 
   const startRecording = async () => {
     // Guard: prevent multiple concurrent recordings
@@ -64,7 +54,7 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
 
     try {
       // Reset state
-      finalTextRef.current = '';
+      setFinalText('');
       previewTextRef.current = '';
       setPreviewText('');
       
@@ -166,13 +156,13 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       await cleanup();
       
       // Send the final transcript (preview is discarded)
-      const finalText = finalTextRef.current.trim();
-      if (finalText) {
-        onTranscript(finalText);
+      const finalTextValue = finalText.trim();
+      if (finalTextValue) {
+        onTranscript(finalTextValue);
       }
       
       // Reset state
-      finalTextRef.current = '';
+      setFinalText('');
       previewTextRef.current = '';
       setPreviewText('');
     } catch (error) {
@@ -204,6 +194,7 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
     isRecording,
     isTranscribing,
     previewText,
+    finalText,
     startRecording,
     stopRecording,
     toggleRecording,

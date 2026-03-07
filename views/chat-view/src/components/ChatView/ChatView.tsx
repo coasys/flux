@@ -35,7 +35,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   const threadContainer = useRef(null);
 
   // Voice recording state
-  const { isRecording, isTranscribing, previewText, toggleRecording } = useVoiceRecorder({
+  const { isRecording, isTranscribing, previewText, finalText, toggleRecording } = useVoiceRecorder({
     client,
     onTranscript: async (text) => {
       // Save the transcribed text as a message
@@ -245,9 +245,14 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                 <j-text nomargin color="primary-500" size="300">
                   {isRecording ? 'Recording...' : 'Transcribing...'}
                 </j-text>
-                {previewText && (
-                  <j-text nomargin color="ui-400" size="300" style={{ fontStyle: 'italic' }}>
-                    {previewText}
+                {(finalText || previewText) && (
+                  <j-text nomargin color="ui-300" size="300">
+                    {finalText}
+                    {previewText && (
+                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-500)' }}>
+                        {previewText}
+                      </span>
+                    )}
                   </j-text>
                 )}
               </j-flex>
