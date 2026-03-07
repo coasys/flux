@@ -4,10 +4,12 @@
 }
 
 .voicePreviewCard {
-  background-color: var(--j-color-ui-100);
+  background-color: rgba(255, 255, 255, 0.95);
   border-radius: var(--j-border-radius);
   margin: 0 var(--j-space-500) var(--j-space-300) var(--j-space-500);
   max-width: 100%;
+  box-shadow: var(--j-shadow-lg);
+  backdrop-filter: blur(4px);
 }
 
 .editor::part(base) {

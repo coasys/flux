@@ -266,10 +266,11 @@ onUnmounted(() => {
   z-index: 100;
   
   .transcript-card {
-    background-color: var(--j-color-ui-100);
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: var(--j-border-radius);
     box-shadow: var(--j-shadow-lg);
     max-width: 400px;
+    backdrop-filter: blur(4px);
     
     .transcript-item {
       padding: var(--j-space-300);
