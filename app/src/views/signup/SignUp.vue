@@ -124,10 +124,8 @@ async function createUser() {
       const redirectPath = route.query.redirect as string;
       if (redirectPath) {
         router.push(redirectPath);
-        // Open call window if redirecting to a conversation
-        if (redirectPath.includes('/conversation') || redirectPath.includes('/channel')) {
-          uiStore.setCallWindowOpen(true);
-        }
+        // Note: Call window will open automatically via router.afterEach
+        // when user enters a channel with an active call
       } else {
         router.push({ name: 'home' });
       }

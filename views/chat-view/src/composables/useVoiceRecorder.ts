@@ -1,5 +1,5 @@
 import { Ad4mClient } from '@coasys/ad4m';
-import { useState, useRef, useCallback } from 'preact/hooks';
+import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 
 interface UseVoiceRecorderOptions {
   client: Ad4mClient;
@@ -21,93 +21,144 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [previewText, setPreviewText] = useState('');
   
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const transcriptionStreamIdRef = useRef<string | null>(null);
+  const fastTranscriptionStreamIdRef = useRef<string | null>(null);
 
   const handleTranscriptionText = useCallback((text: string) => {
     setPreviewText((prev) => prev + text);
   }, []);
 
+  const handleTranscriptionPreview = useCallback((text: string) => {
+    // Live preview during transcription
+    setPreviewText((prev) => {
+      // Append preview text (will be replaced by final)
+      const base = prev.split('...')[0];
+      return base + text + '...';
+    });
+  }, []);
+
   const startRecording = async () => {
+    // Guard: prevent multiple concurrent recordings
+    if (isRecording || audioContextRef.current) {
+      console.warn('Recording already in progress');
+      return;
+    }
+
     try {
-      audioChunksRef.current = [];
       setPreviewText('');
       
       // Get microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { echoCancellation: true, noiseSuppression: true } 
+      });
       streamRef.current = stream;
       
-      // Open transcription stream using AD4M AI service
+      // Open transcription streams (final + preview)
       transcriptionStreamIdRef.current = await client.ai.openTranscriptionStream(
         'Whisper',
         handleTranscriptionText,
         { startThreshold: 0.8 }
       );
       
-      // Set up media recorder to capture audio
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
+      fastTranscriptionStreamIdRef.current = await client.ai.openTranscriptionStream(
+        'whisper_tiny_quantized',
+        handleTranscriptionPreview,
+        {
+          startThreshold: 0.5,
+          startWindow: 80,
+          endThreshold: 0.1,
+          endWindow: 50,
+          timeBeforeSpeech: 20,
+        }
+      );
       
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-          
-          // Feed audio data to transcription stream
-          // Note: This is a simplified version - in reality we'd need to convert
-          // the audio data to the format expected by the transcription service
-          if (transcriptionStreamIdRef.current) {
-            // Convert blob to array and feed to transcription
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const arrayBuffer = reader.result as ArrayBuffer;
-              const audioData = Array.from(new Int16Array(arrayBuffer));
-              client.ai.feedTranscriptionStream([transcriptionStreamIdRef.current!], audioData as any);
-            };
-            reader.readAsArrayBuffer(event.data);
-          }
+      // Set up AudioContext and Worklet for raw PCM capture
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      
+      // Load the audio worklet processor
+      await audioContext.audioWorklet.addModule('/audio-processor.js');
+      
+      const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+      const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+      workletNodeRef.current = workletNode;
+      
+      // Handle audio data from worklet
+      workletNode.port.onmessage = (event) => {
+        if (isRecordingRef.current) {
+          const audioData = Array.from(event.data);
+          // Feed to both transcription streams
+          client.ai.feedTranscriptionStream(
+            [fastTranscriptionStreamIdRef.current!, transcriptionStreamIdRef.current!], 
+            audioData as any
+          );
         }
       };
       
-      mediaRecorder.start(100); // Collect data every 100ms
+      mediaStreamSource.connect(workletNode);
+      workletNode.connect(audioContext.destination);
+      
       setIsRecording(true);
     } catch (error) {
       console.error('Failed to start recording:', error);
       onError?.(error as Error);
+      await cleanup();
+    }
+  };
+
+  // Ref to track recording state in worklet callback
+  const isRecordingRef = useRef(false);
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+  }, [isRecording]);
+
+  const cleanup = async () => {
+    // Stop all tracks
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+    
+    // Disconnect and close audio context
+    workletNodeRef.current?.disconnect();
+    workletNodeRef.current = null;
+    
+    await audioContextRef.current?.close();
+    audioContextRef.current = null;
+    
+    // Close transcription streams
+    if (transcriptionStreamIdRef.current) {
+      await client.ai.closeTranscriptionStream(transcriptionStreamIdRef.current);
+      transcriptionStreamIdRef.current = null;
+    }
+    if (fastTranscriptionStreamIdRef.current) {
+      await client.ai.closeTranscriptionStream(fastTranscriptionStreamIdRef.current);
+      fastTranscriptionStreamIdRef.current = null;
     }
   };
 
   const stopRecording = async () => {
+    if (!isRecording) return;
+    
     try {
       setIsRecording(false);
       setIsTranscribing(true);
       
-      // Stop media recorder
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
-      
-      // Stop all tracks
-      streamRef.current?.getTracks().forEach(track => track.stop());
-      
-      // Close transcription stream and get final result
-      if (transcriptionStreamIdRef.current) {
-        await client.ai.closeTranscriptionStream(transcriptionStreamIdRef.current);
-        transcriptionStreamIdRef.current = null;
-      }
+      await cleanup();
       
       // Send the transcript
-      if (previewText.trim()) {
-        onTranscript(previewText.trim());
+      const finalText = previewText.replace(/\.\.\.$/, '').trim();
+      if (finalText) {
+        onTranscript(finalText);
       }
       
       setPreviewText('');
-      setIsTranscribing(false);
     } catch (error) {
       console.error('Failed to stop recording:', error);
-      setIsTranscribing(false);
       onError?.(error as Error);
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
@@ -118,6 +169,15 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       await startRecording();
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (isRecordingRef.current || audioContextRef.current) {
+        cleanup();
+      }
+    };
+  }, []);
 
   return {
     isRecording,

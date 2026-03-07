@@ -174,7 +174,8 @@ async function stopRecording() {
     
     try {
       const message = new Message(props.perspective, undefined, props.source);
-      message.body = `<p>${transcript.text.trim()}</p>`;
+      message.body = transcript.text.trim();
+      message.transcriptStartedAt = transcript.timestamp;
       await message.save();
       
       transcript.state = 'saved';
