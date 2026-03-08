@@ -42,7 +42,7 @@ export async function getAllFluxApps(): Promise<FluxApp[]> {
 }
 
 export function getOfflineFluxApps(): FluxApp[] {
-  const packages = ['chat-view', 'post-view', 'graph-view', 'webrtc-view', 'table-view', 'kanban-board'];
+  const packages = ['chat-view', 'post-view', 'graph-view', 'webrtc-view', 'table-view', 'kanban-board', 'flux-soa-tree-view'];
 
   const fluxApps = packages.map((name) => ({
     created: '',
