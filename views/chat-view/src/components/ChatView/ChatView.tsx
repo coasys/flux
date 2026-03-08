@@ -29,6 +29,11 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   } | null>(null);
   const [threadSource, setThreadSource] = useState<Message | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
+  const replyMessageRef = useRef<Message | null>(null);
+  // Keep ref in sync with state to avoid stale closure in voice recorder callback
+  useEffect(() => {
+    replyMessageRef.current = replyMessage;
+  }, [replyMessage]);
   const [replyProfile, setReplyProfile] = useState<Profile | null>(null);
   const [threadProfile, setThreadProfile] = useState<Profile | null>(null);
   const editor = useRef(null);
@@ -44,10 +49,12 @@ export default function ChatView({ agent, client, perspective, source, threaded,
         message.body = `<p>${text}</p>`;
         await message.save();
 
-        if (replyMessage) {
-          perspective.addLinks([
+        // Use ref to avoid stale closure
+        const currentReplyMessage = replyMessageRef.current;
+        if (currentReplyMessage) {
+          await perspective.addLinks([
             {
-              source: replyMessage.baseExpression,
+              source: currentReplyMessage.baseExpression,
               predicate: HAS_REPLY,
               target: message.baseExpression,
             },

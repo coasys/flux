@@ -230,7 +230,7 @@ async function stopRecording() {
     try {
       const message = new Message(props.perspective, undefined, props.source);
       message.body = transcript.text.trim();
-      message.transcriptStartedAt = transcript.timestamp;
+      message.transcriptStartedAt = transcript.timestamp.toISOString();
       await message.save();
       
       transcript.state = 'saved';
@@ -281,9 +281,9 @@ async function toggleRecording() {
 }
 
 // Cleanup on unmount
-onUnmounted(() => {
+onUnmounted(async () => {
   if (isRecording.value || audioContext) {
-    cleanup();
+    await cleanup();
   }
 });
 </script>
