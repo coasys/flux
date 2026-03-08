@@ -1,5 +1,6 @@
 import styles from './App.module.css';
-import { PerspectiveProxy, AgentClient } from '@coasys/ad4m';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import type { AgentClient } from '@coasys/ad4m';
 import SoATreeView from './components/SoATreeView';
 import '@coasys/flux-ui/dist/main.css';
 
