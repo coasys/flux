@@ -22,7 +22,7 @@
       :agent="appStore.ad4mClient.agent"
       :client="appStore.ad4mClient"
       :perspective="perspective"
-      :getProfile="getCachedAgentProfile"
+      :getProfile="(did: string) => getCachedAgentProfile(did, appStore.ad4mClient)"
       :appStore="appStore"
       :webrtcStore="webrtcStore"
       :uiStore="uiStore"

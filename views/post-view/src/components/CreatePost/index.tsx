@@ -81,12 +81,13 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
     let data = state;
 
     try {
+      await Post.register(perspective);
       const post = new Post(perspective, isEditing ? postId : undefined);
       post.title = data.title;
       post.body = data.body;
       post.url = data.url;
       post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
-      if (isEditing) await post.update();
+      if (isEditing) await post.save();
       else {
         await post.save();
         await perspective.add(new Link({ source, predicate: CHANNEL_POST, target: post.id }));
