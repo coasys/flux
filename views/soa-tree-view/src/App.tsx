@@ -1,21 +1,19 @@
 import styles from './App.module.css';
 import { PerspectiveProxy } from '@coasys/ad4m';
-import type { AgentClient } from '@coasys/ad4m';
 import SoATreeView from './components/SoATreeView';
 import '@coasys/flux-ui/dist/main.css';
 
 type Props = {
-  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 };
 
-export default function App({ agent, perspective, source }: Props) {
-  if (!perspective?.uuid || !agent) {
+export default function App({ perspective, source }: Props) {
+  if (!perspective?.uuid || !source) {
     return (
       <div className={styles.appContainer}>
         <div className={styles.error}>
-          No perspective or agent client available
+          No perspective or source available
         </div>
       </div>
     );
