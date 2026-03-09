@@ -80,7 +80,7 @@ export default function MessageItem({
 
   async function getReplyMessage() {
     try {
-      const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } });
+      const replies = await Message.findAll(perspective, { where: { id: message.replyingTo } });
       if (replies[0]) {
         setReplyMessage(replies[0]);
         setReplyProfile(await getProfile(replies[0].author));

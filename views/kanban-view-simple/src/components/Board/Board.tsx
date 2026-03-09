@@ -141,7 +141,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     // Delete the columns tasks and their links to the perspective
     const column = columns.find((col) => col.id === columnId);
     const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
-    const columnTasks = await Task.findAll(perspective, { where: { base: taskIds } });
+    const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
     await Promise.all(
       columnTasks.map(async (task) => {
         // Delete the task model
@@ -275,7 +275,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       newColumns.map(async (column) => {
         // Get tasks and order them by the columns orderedTaskIds property
         const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
-        const columnTasks = await Task.findAll(perspective, { where: { base: taskIds } });
+        const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
         const taskMap = new Map(columnTasks.map((t) => [t.id, t]));
         const orderedTasks = taskIds.map((id) => taskMap.get(id)).filter(Boolean);
 
