@@ -213,10 +213,10 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   useEffect(() => {
     return () => {
       if (isRecordingRef.current || audioContextRef.current) {
-        cleanup();
+        cleanup().catch((err) => console.error('Cleanup error:', err));
       }
     };
-  }, []);
+  }, [client]);
 
   return {
     isRecording,
