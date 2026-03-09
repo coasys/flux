@@ -102,6 +102,13 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
     // Update the board's orderedColumnIds
     const currentBoard = await TaskBoard.findOne(perspective, { parent: { model: Channel, id: channelId } });
+    if (!currentBoard) {
+      console.error('Board not found when adding column');
+      setNewColumnLoading(false);
+      updatingRef.current = false;
+      setUpdating(false);
+      return;
+    }
     const newOrderedColumnIds = [...JSON.parse(currentBoard.orderedColumnIds), newColumn.id];
     currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
     await currentBoard.save();
@@ -127,6 +134,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     const currentBoard = await TaskBoard.findOne(perspective, {
       parent: { model: Channel, id: channelId },
     });
+    if (!currentBoard) {
+      console.error('Board not found when deleting column');
+      updatingRef.current = false;
+      setUpdating(false);
+      return;
+    }
     const orderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
     const newOrderedColumnIds = orderedColumnIds.filter((id: string) => id !== columnId);
 
@@ -210,6 +223,10 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         const newColumns = [...columnsWithTasks];
         const sourceColumn = newColumns.find((col) => col.id === source.droppableId);
         const destinationColumn = newColumns.find((col) => col.id === destination.droppableId);
+        if (!sourceColumn || !destinationColumn) {
+          console.error('Source or destination column not found in drag handler');
+          return;
+        }
 
         // Remove task from source column and add to destination column
         const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
@@ -232,11 +249,19 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
         // Update orderedTaskIds in source column
         const sourceColumnModel = columns.find((col) => col.id === source.droppableId);
+        if (!sourceColumnModel) {
+          console.error('Source column model not found');
+          return;
+        }
         sourceColumnModel.orderedTaskIds = sourceColumn.orderedTaskIds;
         await sourceColumnModel.save(batchId);
 
         // Update orderedTaskIds in destination column
         const destinationColumnModel = columns.find((col) => col.id === destination.droppableId);
+        if (!destinationColumnModel) {
+          console.error('Destination column model not found');
+          return;
+        }
         destinationColumnModel.orderedTaskIds = destinationColumn.orderedTaskIds;
         await destinationColumnModel.save(batchId);
 
@@ -245,6 +270,10 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       } else {
         // If the task is reordered within the same column
         const column = columnsWithTasks.find((col) => col.id === source.droppableId);
+        if (!column) {
+          console.error('Column not found for reorder');
+          return;
+        }
 
         // Create the new orderedTaskIds
         const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
@@ -261,6 +290,10 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
         // Update the perspective
         const columnModel = columns.find((col) => col.id === column.id);
+        if (!columnModel) {
+          console.error('Column model not found for reorder');
+          return;
+        }
         columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
         await columnModel.save();
       }
