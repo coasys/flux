@@ -209,7 +209,9 @@
 import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
 import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { Link } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
+import { community } from '@coasys/flux-constants';
 import { detectBrowser } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
@@ -303,16 +305,18 @@ async function saveMessage() {
 
     // Save message
     const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
-    const newMessage = new Message(perspective, undefined, channelUrl);
-    newMessage.body = text;
+    const messageData: any = { body: text };
 
     // Store the timestamp from when the transcript started
     const transcriptObj = transcripts.value.find((t) => t.id === previousId);
     if (transcriptObj?.timestamp) {
-      newMessage.transcriptStartedAt = transcriptObj.timestamp.toISOString();
+      messageData.transcriptStartedAt = transcriptObj.timestamp.toISOString();
     }
 
-    await newMessage.save();
+    const message = await Message.create(perspective, messageData);
+    await perspective.add(
+      new Link({ source: channelUrl, predicate: community.CHANNEL_MESSAGE, target: message.id }),
+    );
   } else {
     if (transcriptCard) {
       transcriptCard.classList.add('slideLeft');
