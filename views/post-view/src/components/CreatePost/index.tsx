@@ -1,5 +1,4 @@
 import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
-import { Link } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { PostOption, postOptions } from '../../constants/options';
@@ -82,18 +81,23 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
 
     try {
       await Post.register(perspective);
-      const post = new Post(perspective, isEditing ? postId : undefined);
-      post.title = data.title;
-      post.body = data.body;
-      post.url = data.url;
-      post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
-      if (isEditing) await post.save();
-      else {
-        await post.save();
-        await perspective.add(new Link({ source, predicate: CHANNEL_POST, target: post.id }));
-      }
 
-      onPublished(isEditing ? postId : post?.id);
+      if (isEditing) {
+        const updateData: any = { title: data.title, body: data.body, url: data.url };
+        if (imageReplaced) updateData.image = data.image;
+        const post = await Post.update(perspective, postId, updateData);
+        onPublished(postId);
+      } else {
+        const post = await Post.create(perspective, {
+          title: data.title,
+          body: data.body,
+          url: data.url,
+          image: data.image,
+        }, {
+          parent: { id: source, predicate: CHANNEL_POST },
+        });
+        onPublished(post?.id);
+      }
     } catch (e) {
       console.log(e);
     } finally {

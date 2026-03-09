@@ -150,13 +150,13 @@ onMounted(async () => {
       // the customElements.get() check and the second define() call throws.
       if (!_wcDefineInProgress.has(generatedName)) {
         const definePromise = (async () => {
-          const module = await fetchFluxApp(viewId as string);
-          if (module?.default) {
-            try {
+          try {
+            const module = await fetchFluxApp(viewId as string);
+            if (module?.default) {
               customElements.define(generatedName, module.default);
-            } catch (e) {
-              console.error(`Failed to define custom element ${generatedName}:`, e);
             }
+          } catch (e) {
+            console.error(`Failed to define custom element ${generatedName}:`, e);
           }
         })();
         _wcDefineInProgress.set(generatedName, definePromise);
@@ -165,7 +165,9 @@ onMounted(async () => {
       await _wcDefineInProgress.get(generatedName);
     }
 
-    wcName.value = generatedName;
+    if (customElements.get(generatedName)) {
+      wcName.value = generatedName;
+    }
   }
   loading.value = false;
 });

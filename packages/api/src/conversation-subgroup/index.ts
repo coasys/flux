@@ -1,4 +1,4 @@
-import { Model, Ad4mModel, Flag, HasMany, Property } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, Property, escapeSurrealString } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
@@ -27,8 +27,8 @@ export default class ConversationSubgroup extends Ad4mModel {
       const itemsQuery = `
         SELECT VALUE out.uri
         FROM link
-        WHERE in.uri = '${this.id}'
-          AND predicate = '${SUBGROUP_ITEM}'
+        WHERE in.uri = '${escapeSurrealString(this.id)}'
+          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
@@ -57,7 +57,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName
         FROM link
         WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
+          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
       `;
@@ -90,15 +90,21 @@ export default class ConversationSubgroup extends Ad4mModel {
       const surrealQuery = `
         SELECT
           out.uri AS id,
-          (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp,
+          (
+            fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri)
+            ?? out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
+            ?? out<-link[WHERE predicate IN ['flux://has_post', 'flux://has_task'] AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
+            ?? out->link[WHERE predicate = 'flux://entry_type'][0].timestamp
+            ?? timestamp
+          ) AS channelTimestamp,
           out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
           out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
           fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
           fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
-        WHERE in.uri = '${this.id}'
-          AND predicate = '${SUBGROUP_ITEM}'
+        WHERE in.uri = '${escapeSurrealString(this.id)}'
+          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
           AND (
             out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
             OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
@@ -127,7 +133,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         return {
           id: item.id,
           type,
-          timestamp: new Date(item.channelTimestamp).toISOString(),
+          timestamp: item.channelTimestamp ? new Date(item.channelTimestamp).toISOString() : new Date(0).toISOString(),
           author: item.author,
           text,
           icon: icons[type] || 'question',
@@ -149,7 +155,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
         FROM link
         WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
+          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
       `;

@@ -1,4 +1,4 @@
-import { Link, LinkQuery, PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
+import { LinkQuery, PerspectiveProxy, Ad4mClient } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Message } from '@coasys/flux-api';
 import { community } from '@coasys/flux-constants';
@@ -39,10 +39,9 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       const text = editor.current?.editor.getText();
       editor.current?.clear();
 
-      const message = await Message.create(perspective, { body: html });
-      await perspective.add(
-        new Link({ source, predicate: threaded ? community.MESSAGE_THREAD : CHANNEL_MESSAGE, target: message.id }),
-      );
+      const message = await Message.create(perspective, { body: html }, {
+        parent: { id: source, predicate: threaded ? community.MESSAGE_THREAD : CHANNEL_MESSAGE },
+      });
 
       if (replyMessage) {
         perspective.addLinks([
