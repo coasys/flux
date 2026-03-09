@@ -1,7 +1,6 @@
 import { Model, Ad4mModel, Flag, HasMany, Property } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
-import { ensureExpressionUri } from '../conversation/util';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
 import { community } from '@coasys/flux-constants';
 
@@ -187,31 +186,20 @@ export default class ConversationSubgroup extends Ad4mModel {
     if (!topic) {
       topic = await Topic.create(this.perspective, { topic: topicName }, { batchId });
     }
-    const expressionUri = ensureExpressionUri(this.id);
-    const tagUri = ensureExpressionUri(topic.id);
-    let existingTopicRelationship = isNewGroup
+    const existingTopicRelationship = isNewGroup
       ? null
       : ((
           await SemanticRelationship.findAll(this.perspective, {
-            where: { expression: expressionUri, tag: tagUri },
+            where: { expression: this.id, tag: topic.id },
           })
         )[0] as SemanticRelationship);
-    if (!existingTopicRelationship && !isNewGroup) {
-      existingTopicRelationship = (
-        await SemanticRelationship.findAll(this.perspective, {
-          where: { expression: this.id, tag: topic.id },
-        })
-      )[0] as SemanticRelationship;
-    }
     if (existingTopicRelationship) {
-      existingTopicRelationship.expression = expressionUri;
-      existingTopicRelationship.tag = tagUri;
       existingTopicRelationship.relevance = relevance;
       await existingTopicRelationship.save(batchId);
     } else {
       await SemanticRelationship.create(
         this.perspective,
-        { expression: expressionUri, tag: tagUri, relevance },
+        { expression: this.id, tag: topic.id, relevance },
         { batchId },
       );
     }
