@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'preact/hooks';
-import { AgentClient, PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { AgentClient, Link, PerspectiveProxy } from '@coasys/ad4m';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { getProfile } from '@coasys/flux-api';
 import { v4 } from 'uuid';
 import * as nil from '@nillion/client-web';
@@ -20,8 +20,6 @@ import FileInputComponent from './FileInput';
 import QuoteView from './QuoteView';
 import Files from './Files';
 import AddPermissions from './AddPermissions';
-
-import styles from './FileView.module.css';
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -89,16 +87,12 @@ export function FileView({ perspective, source, agent }: Props) {
 
   const [showLoader, setShowLoader] = useState<boolean>(false);
 
-  const { entries: files } = useModel({
-    perspective,
-    model: File,
-    query: { source },
+  const { data: files } = useLiveQuery(File, perspective, {
+    parent: { id: source, predicate: 'ad4m://has_child' },
   });
 
-  const { entries: nillionUsers } = useModel({
-    perspective,
-    model: NillionUser,
-    query: { source },
+  const { data: nillionUsers } = useLiveQuery(NillionUser, perspective, {
+    parent: { id: source, predicate: 'ad4m://has_child' },
   });
 
   console.log({ nillionUsers });
@@ -109,9 +103,10 @@ export function FileView({ perspective, source, agent }: Props) {
     const createNillionUser = async () => {
       console.log('Creating nillion user...', client.user_id);
       const me = await agent.me();
-      const newNillionUser = new NillionUser(perspective, me.did, source);
+      const newNillionUser = new NillionUser(perspective, me.did);
       newNillionUser.userId = client.user_id;
       await newNillionUser.save();
+      await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: newNillionUser.id }));
       console.log('Nillion user created', newNillionUser);
     };
 
@@ -122,7 +117,7 @@ export function FileView({ perspective, source, agent }: Props) {
     //Fetch the agent profiles for each file author
     const fetchProfiles = async () => {
       for (const did of otherAgents) {
-        const profile = await getProfile(did);
+        const profile = await getProfile(did, client);
         setProfiles((prev) => new Map(prev).set(did, profile));
       }
     };
@@ -287,12 +282,13 @@ export function FileView({ perspective, source, agent }: Props) {
 
         const sizeInMB = quote.rawSecret!.length / 1_048_576;
 
-        const newFile = new File(perspective, undefined, source);
-        newFile.name = fileName;
-        newFile.secretId = secretId;
-        newFile.storeId = storeId;
-        newFile.size = sizeInMB.toString();
-        await newFile.save();
+        const newFile = await File.create(perspective, {
+          name: fileName,
+          secretId,
+          storeId,
+          size: sizeInMB.toString(),
+        });
+        await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: newFile.id }));
 
         setShowLoader(false);
 
@@ -419,8 +415,7 @@ export function FileView({ perspective, source, agent }: Props) {
           files={files}
           handleGetQuote={handleGetQuote}
           deleteFile={async (id: string) => {
-            const file = new File(perspective, id, source);
-            await file.delete();
+            await File.delete(perspective, id);
           }}
           profiles={profiles}
         />

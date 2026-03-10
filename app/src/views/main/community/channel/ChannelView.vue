@@ -43,9 +43,7 @@ const uiStore = useUiStore();
 const { allChannels } = useCommunityService();
 const { isMobile } = storeToRefs(uiStore);
 
-const channel = computed(() =>
-  allChannels.value.find((c) => c.baseExpression === restoreChannelPrefix(channelId || '')),
-);
+const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId || '')));
 
 onMounted(() => {
   // Navigate to the conversation or conversations view if no viewId present when entering channel

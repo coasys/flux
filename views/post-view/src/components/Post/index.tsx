@@ -1,9 +1,9 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useMe, useModel } from '@coasys/ad4m-react-hooks';
+import { useMe } from '@coasys/flux-react-web';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Post as PostSubject } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
-import { profileFormatter } from '@coasys/flux-utils';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import UIContext from '../../context/UIContext';
 import { getTimeSince } from '../../utils';
@@ -24,10 +24,9 @@ export default function Post({
   const [author, setAuthor] = useState<Profile | null>(null);
   const [ogData, setOgData] = useState<any>({});
 
-  const { entries: posts } = useModel({ perspective, model: PostSubject, query: { where: { base: id } } });
-  const post = posts[0];
+  const { data: post } = useLiveQuery(PostSubject, perspective, { id });
 
-  const { me } = useMe(agent, profileFormatter);
+  const { me } = useMe(agent);
 
   async function fetchOgData(url) {
     try {
@@ -138,7 +137,7 @@ export default function Post({
           Comments ({post.comments?.length})
         </j-text>
         {/* @ts-ignore */}
-        <comment-section agent={agent} perspective={perspective} source={post.baseExpression} />
+        <comment-section agent={agent} perspective={perspective} source={post.id} />
       </j-box>
     </div>
   );

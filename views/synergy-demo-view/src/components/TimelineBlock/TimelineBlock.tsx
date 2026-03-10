@@ -59,7 +59,7 @@ export default function TimelineBlock({
   loading,
   getProfile,
 }: Props) {
-  const { baseExpression, name, summary, timestamp, start, end, author, index, parentIndex } = data;
+  const { id, name, summary, timestamp, start, end, author, index, parentIndex } = data;
   const [totalChildren, setTotalChildren] = useState(0);
   const [participants, setParticipants] = useState<string[]>([]);
   const [topics, setTopics] = useState<SynergyTopic[]>([]);
@@ -95,36 +95,36 @@ export default function TimelineBlock({
   );
 
   async function getConversationStats() {
-    const conversation = new Conversation(perspective, baseExpression);
+    const conversation = new Conversation(perspective, id);
     const stats = await conversation.stats();
     setTotalChildren(stats.totalSubgroups);
     setParticipants(stats.participants);
   }
 
   async function getSubgroupStats() {
-    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, id);
     const stats = await subgroup.stats();
     setTotalChildren(stats.totalItems);
     setParticipants(stats.participants);
   }
 
   async function getConversationTopics() {
-    const conversation = new Conversation(perspective, baseExpression);
+    const conversation = new Conversation(perspective, id);
     setTopics(await conversation.topics());
   }
 
   async function getSubgroupTopics() {
-    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, id);
     setTopics(await subgroup.topics());
   }
 
   async function getSubgroups() {
-    const conversation = new Conversation(perspective, baseExpression);
+    const conversation = new Conversation(perspective, id);
     const subgroups = await conversation.subgroupsData();
     if (match) {
       // look for match in subgroups
       subgroups.forEach((subgroup, subgroupIndex) => {
-        if (subgroup.baseExpression === match.baseExpression) {
+        if (subgroup.id === match.id) {
           // if found, store the subgroups index & mark loading true to prevent further loading
           setMatchIndexes({ conversation: index, subgroup: subgroupIndex, item: undefined });
           setLoading(false);
@@ -141,7 +141,7 @@ export default function TimelineBlock({
       itemIds.map(async (itemId) => {
         // grab all links connecting the item to the subgroup
         const links = await perspective.get(
-          new LinkQuery({ source: baseExpression, predicate: 'ad4m://has_child', target: itemId }),
+          new LinkQuery({ source: id, predicate: 'ad4m://has_child', target: itemId }),
         );
         // remove all except the first link
         return links.slice(1);
@@ -151,17 +151,17 @@ export default function TimelineBlock({
   }
 
   async function getItems() {
-    const subgroup = new ConversationSubgroup(perspective, baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, id);
     const items = await subgroup.itemsData();
     const uniqueItems = new Map();
     const duplicates = new Set<string>();
     items.forEach((item, itemIndex) => {
       // store duplicates for link cleanup
-      if (uniqueItems.has(item.baseExpression)) duplicates.add(item.baseExpression);
+      if (uniqueItems.has(item.id)) duplicates.add(item.id);
       else {
-        uniqueItems.set(item.baseExpression, item);
+        uniqueItems.set(item.id, item);
         // set match indexes and stop loading if match found
-        if (match && item.baseExpression === match.baseExpression) {
+        if (match && item.id === match.id) {
           setMatchIndexes({ conversation: parentIndex, subgroup: index, item: itemIndex });
           setLoading(false);
         }
@@ -174,7 +174,7 @@ export default function TimelineBlock({
   }
 
   function onGroupClick() {
-    if (!match) setSelectedItemId(selected ? null : baseExpression);
+    if (!match) setSelectedItemId(selected ? null : id);
     if (!selected) {
       if (blockType === 'conversation') getConversationTopics();
       if (blockType === 'subgroup') getSubgroupTopics();
@@ -197,7 +197,7 @@ export default function TimelineBlock({
       if (blockType === 'conversation') getSubgroups();
       if (blockType === 'subgroup') getItems();
       // deselects block when clicked on if not a match and not the currently selected item
-      if (!match && selectedItemId !== baseExpression) setSelectedItemId(null);
+      if (!match && selectedItemId !== id) setSelectedItemId(null);
     }
   }, [showChildren, refreshTrigger]);
 
@@ -213,8 +213,8 @@ export default function TimelineBlock({
 
   // mark as selected & get topics if match
   useEffect(() => {
-    const isSelected = selectedItemId === baseExpression;
-    const isMatch = match?.baseExpression === baseExpression;
+    const isSelected = selectedItemId === id;
+    const isMatch = match?.id === id;
     setSelected(isSelected || isMatch);
     if (isMatch) {
       if (blockType === 'conversation') getConversationTopics();
@@ -235,7 +235,7 @@ export default function TimelineBlock({
   }, [selectedItemId]);
 
   return (
-    <div id={`timeline-block-${baseExpression}`} className={`${styles.block} ${styles[blockType]}`}>
+    <div id={`timeline-block-${id}`} className={`${styles.block} ${styles[blockType]}`}>
       {!match && <button className={styles.groupButton} onClick={onGroupClick} />}
       {blockType === 'conversation' && <j-timestamp value={timestamp} relative className={styles.timestamp} />}
       {blockType === 'subgroup' && (
@@ -253,7 +253,7 @@ export default function TimelineBlock({
           <j-flex direction="column" gap="300" className={`${styles.card} ${selected && styles.selected}`}>
             <j-flex a="center" gap="400">
               <j-flex a="center" gap="400">
-                {match && match.baseExpression === baseExpression && (
+                {match && match.id === id && (
                   <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
                 )}
                 <h1>{name}</h1>
@@ -275,8 +275,8 @@ export default function TimelineBlock({
               <j-flex gap="300" wrap style={{ marginTop: 5 }}>
                 {topics.map((topic) => (
                   <button
-                    className={`${styles.tag} ${selectedTopicId === topic.baseExpression && styles.focus}`}
-                    onClick={() => search('topic', baseExpression, topic)}
+                    className={`${styles.tag} ${selectedTopicId === topic.id && styles.focus}`}
+                    onClick={() => search('topic', id, topic)}
                     disabled={!!match}
                     style={{ cursor: !!match ? 'default' : 'pointer' }}
                   >
@@ -284,7 +284,7 @@ export default function TimelineBlock({
                   </button>
                 ))}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', baseExpression)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', id)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>
@@ -314,7 +314,7 @@ export default function TimelineBlock({
               </div>
               {visibleChildren.map((child, index) => (
                 <TimelineBlock
-                  key={child.baseExpression}
+                  key={child.id}
                   agent={agent}
                   perspective={perspective}
                   blockType={blockType === 'conversation' ? 'subgroup' : 'item'}
@@ -356,7 +356,7 @@ export default function TimelineBlock({
       )}
       {blockType === 'item' && (
         <j-flex gap="400" a="center" className={`${styles.itemCard} ${selected && styles.selected}`}>
-          {match && match.baseExpression === baseExpression && (
+          {match && match.id === id && (
             <PercentageRing ringSize={70} fontSize={10} score={match.score * 100} />
           )}
           <j-flex gap="300" direction="column">
@@ -376,7 +376,7 @@ export default function TimelineBlock({
               <j-flex gap="300" wrap style={{ marginTop: 10 }}>
                 {/* {topics.map((topic) => (
                   <button
-                    className={`${styles.tag} ${selected && selectedTopicId === topic.baseExpression && styles.focus}`}
+                    className={`${styles.tag} ${selected && selectedTopicId === topic.id && styles.focus}`}
                     onClick={() => search("topic", topic)}
                     disabled={!!match}
                     style={{ cursor: !!match ? "default" : "pointer" }}
@@ -385,7 +385,7 @@ export default function TimelineBlock({
                   </button>
                 ))} */}
                 {!match && (
-                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', baseExpression)}>
+                  <button className={`${styles.tag} ${styles.vector}`} onClick={() => search('vector', id)}>
                     <j-icon name="flower2" color="color-success-500" size="sm" style={{ marginRight: 5 }} />
                     Synergize
                   </button>

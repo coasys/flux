@@ -303,16 +303,17 @@ async function saveMessage() {
 
     // Save message
     const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
-    const newMessage = new Message(perspective, undefined, channelUrl);
-    newMessage.body = text;
+    const messageData: any = { body: text };
 
     // Store the timestamp from when the transcript started
     const transcriptObj = transcripts.value.find((t) => t.id === previousId);
     if (transcriptObj?.timestamp) {
-      newMessage.transcriptStartedAt = transcriptObj.timestamp.toISOString();
+      messageData.transcriptStartedAt = transcriptObj.timestamp.toISOString();
     }
 
-    await newMessage.save();
+    await Message.create(perspective, messageData, {
+      parent: { id: channelUrl, predicate: 'ad4m://has_child' },
+    });
   } else {
     if (transcriptCard) {
       transcriptCard.classList.add('slideLeft');

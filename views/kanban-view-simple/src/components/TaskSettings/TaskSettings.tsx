@@ -1,4 +1,4 @@
-import { PerspectiveProxy, LinkQuery, AgentClient } from '@coasys/ad4m';
+import { PerspectiveProxy, LinkQuery, AgentClient, Link } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
 import { useState, useMemo } from 'react';
 import styles from './TaskSettings.module.scss';
@@ -44,13 +44,13 @@ export default function TaskSettings({
     if (task) {
       // Update existing task
       const batchId = await perspective.createBatch();
-      const taskModel = new Task(perspective, task.baseExpression);
+      const taskModel = new Task(perspective, task.id);
       await taskModel.get();
 
       // Update task name if changed
       if (task.taskName !== taskName) {
         taskModel.taskName = taskName;
-        await taskModel.update(batchId);
+        await taskModel.save(batchId);
       }
 
       // Update column if changed
@@ -59,14 +59,14 @@ export default function TaskSettings({
         const destination = columns.find((col) => col.columnName === taskColumn);
 
         // Update orderedTaskIds in source column
-        const sourceOrderedTaskIds = JSON.parse(source.orderedTaskIds).filter((id) => id !== task.baseExpression);
+        const sourceOrderedTaskIds = JSON.parse(source.orderedTaskIds).filter((id) => id !== task.id);
         source.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
-        await source.update(batchId);
+        await source.save(batchId);
 
         // Update orderedTaskIds in destination column
-        const destinationOrderedTaskIds = [...(JSON.parse(destination.orderedTaskIds) || []), task.baseExpression];
+        const destinationOrderedTaskIds = [...(JSON.parse(destination.orderedTaskIds) || []), task.id];
         destination.orderedTaskIds = JSON.stringify(destinationOrderedTaskIds);
-        await destination.update(batchId);
+        await destination.save(batchId);
       }
 
       // Update assignees if changed
@@ -74,13 +74,13 @@ export default function TaskSettings({
       const removals = task.assignees.filter((a) => !taskAssignees.includes(a));
 
       for (const assignee of additions) {
-        const newLink = { source: task.baseExpression, predicate: 'flux://task_assignee', target: assignee };
+        const newLink = { source: task.id, predicate: 'flux://task_assignee', target: assignee };
         await perspective.addLinks([newLink], undefined, batchId);
       }
 
       for (const assignee of removals) {
         const oldLinks = await perspective.get(
-          new LinkQuery({ source: task.baseExpression, predicate: 'flux://task_assignee', target: assignee }),
+          new LinkQuery({ source: task.id, predicate: 'flux://task_assignee', target: assignee }),
         );
         await perspective.removeLinks([oldLinks[0]], batchId);
       }
@@ -90,18 +90,18 @@ export default function TaskSettings({
     } else {
       // Create new task
       const batchId = await perspective.createBatch();
-      const newTaskModel = new Task(perspective, undefined, channelId);
+      const newTaskModel = new Task(perspective);
       newTaskModel.taskName = taskName;
       await newTaskModel.save(batchId);
 
       // Link the task to the perspective
-      const newLink = { source: channelId, predicate: 'ad4m://has_child', target: newTaskModel.baseExpression };
+      const newLink = { source: channelId, predicate: 'ad4m://has_child', target: newTaskModel.id };
       await perspective.addLinks([newLink], undefined, batchId);
 
       // Add assignee links
       for (const assignee of taskAssignees) {
         const assigneeLink = {
-          source: newTaskModel.baseExpression,
+          source: newTaskModel.id,
           predicate: 'flux://task_assignee',
           target: assignee,
         };
@@ -110,9 +110,9 @@ export default function TaskSettings({
 
       // Store the task position in the column
       const columnModel = columns.find((col) => col.columnName === taskColumn);
-      const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.baseExpression];
+      const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.id];
       columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-      await columnModel.update(batchId);
+      await columnModel.save(batchId);
 
       // Commit batch updates
       await perspective.commitBatch(batchId);
@@ -128,19 +128,19 @@ export default function TaskSettings({
     const batchId = await perspective.createBatch();
 
     // Delete task model
-    const taskModel = new Task(perspective, task.baseExpression);
+    const taskModel = new Task(perspective, task.id);
     await taskModel.delete(batchId);
 
     // Delete task link to perspective
-    const linkQuery = new LinkQuery({ source: channelId, predicate: 'ad4m://has_child', target: task.baseExpression });
+    const linkQuery = new LinkQuery({ source: channelId, predicate: 'ad4m://has_child', target: task.id });
     const oldLinks = await perspective.get(linkQuery);
     await perspective.removeLinks(oldLinks, batchId);
 
     // Update orderedTaskIds in column
-    const columnModel = columns.find((col) => col.baseExpression === column.baseExpression);
-    const newOrderedTaskIds = JSON.parse(column.orderedTaskIds).filter((id: string) => id !== task.baseExpression);
+    const columnModel = columns.find((col) => col.id === column.id);
+    const newOrderedTaskIds = JSON.parse(column.orderedTaskIds).filter((id: string) => id !== task.id);
     columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-    await columnModel.update(batchId);
+    await columnModel.save(batchId);
 
     // Commit batch updates
     await perspective.commitBatch(batchId);
@@ -177,8 +177,8 @@ export default function TaskSettings({
               <j-menu-group collapsible title={taskColumn} id="task-settings-menu">
                 {columns.map((column) => (
                   <j-menu-item
-                    key={column.baseExpression}
-                    selected={task?.baseExpression === column.baseExpression}
+                    key={column.id}
+                    selected={task?.id === column.id}
                     onClick={() => {
                       setTaskColumn(column.columnName);
                       closeMenu('task-settings-menu');
@@ -247,7 +247,7 @@ export default function TaskSettings({
       {task && (
         <div className={styles.commentSection}>
           {/* @ts-ignore */}
-          <comment-section perspective={perspective} source={task.baseExpression} agent={agent} />
+          <comment-section perspective={perspective} source={task.id} agent={agent} />
         </div>
       )}
     </j-modal>

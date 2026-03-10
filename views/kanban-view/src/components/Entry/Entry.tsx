@@ -86,5 +86,5 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
     );
   }
 
-  return <span>{task.baseExpression}</span>;
+  return <span>{task.id}</span>;
 }

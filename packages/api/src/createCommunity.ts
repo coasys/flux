@@ -75,22 +75,23 @@ export default async function createCommunity({
       );
     }
 
-    // Create the community model
-    const newCommunity = new Community(perspective, 'ad4m://self');
-    newCommunity.name = name;
-    newCommunity.description = description;
-
+    // Resize images if provided
+    let thumbnail: string | undefined;
+    let compressedImage: string | undefined;
     if (image) {
-      // Resize and add image
-      const thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
-      if (thumbnail)
-        newCommunity.thumbnail = { data_base64: thumbnail, name: 'community-image', file_type: 'image/png' };
-      if (compressedImage)
-        newCommunity.image = { data_base64: compressedImage, name: 'community-image', file_type: 'image/png' };
+      thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
+      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
     }
 
-    await newCommunity.save();
+    // Create the community model
+    const newCommunity = await Community.create(perspective, {
+      name,
+      description,
+      ...(thumbnail && { thumbnail: { data_base64: thumbnail, name: 'community-image', file_type: 'image/png' } }),
+      ...(compressedImage && {
+        image: { data_base64: compressedImage, name: 'community-image', file_type: 'image/png' },
+      }),
+    });
 
     // Update notifications to include the new community
     const notifications = await client.runtime.notifications();
@@ -108,7 +109,7 @@ export default async function createCommunity({
     return {
       uuid: perspective.uuid,
       author: author,
-      id: newCommunity.baseExpression,
+      id: newCommunity.id,
       timestamp: newCommunity.timestamp,
       name: newCommunity.name,
       description: newCommunity.description || '',

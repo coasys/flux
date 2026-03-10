@@ -1,19 +1,14 @@
-import { ModelOptions, Flag, Property, Ad4mModel } from '@coasys/ad4m';
+import { Model, Flag, Property, Ad4mModel, HasMany } from '@coasys/ad4m';
+import Vote from './Vote';
 
-@ModelOptions({
-  name: 'Answer',
-})
+@Model({ name: 'Answer' })
 export default class Answer extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://has_answer',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://has_answer' })
   type: string;
 
-  @Property({
-    through: 'rdf://text',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'rdf://text' })
   text: string;
+
+  @HasMany(() => Vote)
+  votes: Vote[] = [];
 }

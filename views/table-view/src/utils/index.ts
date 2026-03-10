@@ -8,7 +8,7 @@ export async function getEntry(entry) {
   const promises = getters.map((getter) => entry[getter]);
   return Promise.all(promises).then((values) => {
     return getters.reduce((acc, getter, index) => {
-      return { ...acc, id: entry.baseExpression, [getter]: values[index] };
+      return { ...acc, id: entry.id, [getter]: values[index] };
     }, {});
   });
 }

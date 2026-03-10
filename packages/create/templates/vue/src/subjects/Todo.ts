@@ -1,6 +1,6 @@
-import { ModelOptions, Property, Flag, Ad4mModel } from '@coasys/ad4m';
+import { Model, Property, Flag, Ad4mModel } from '@coasys/ad4m';
 
-@ModelOptions({
+@Model({
   name: 'Todo',
 })
 export default class Todo extends Ad4mModel {
@@ -12,22 +12,16 @@ export default class Todo extends Ad4mModel {
 
   @Property({
     through: 'rdf://title',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   title: string;
 
   @Property({
     through: 'rdf://description',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   desc: string;
 
   @Property({
     through: 'rdf://status',
-    writable: true,
-    resolveLanguage: 'literal',
   })
   done: boolean;
 }

@@ -37,7 +37,7 @@ export default function PostItem({ post, displayView, getProfile }) {
 
   return (
     <div
-      onClick={() => UIMehthods.goToPost(post.baseExpression)}
+      onClick={() => UIMehthods.goToPost(post.id)}
       className={[styles.post, displayStyle, popularStyle].join(' ')}
     >
       <div className={styles.postContentWrapper}>

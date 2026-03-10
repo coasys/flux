@@ -1,40 +1,23 @@
-import { ModelOptions, Flag, Property, Ad4mModel } from '@coasys/ad4m';
+import { Model, Flag, Property, Ad4mModel, HasMany } from '@coasys/ad4m';
+import Answer from './Answer';
 
-@ModelOptions({
-  name: 'Poll',
-})
+@Model({ name: 'Poll' })
 export default class Poll extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://has_poll',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://has_poll' })
   type: string;
 
-  @Property({
-    through: 'rdf://title',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'rdf://title' })
   title: string;
 
-  @Property({
-    through: 'rdf://description',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'rdf://description' })
   description: string;
 
-  @Property({
-    through: 'flux://vote_type',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'flux://vote_type' })
   voteType: 'single-choice' | 'multiple-choice' | 'weighted-choice';
 
-  @Property({
-    through: 'flux://poll_answers_locked',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'flux://poll_answers_locked' })
   answersLocked: boolean;
+
+  @HasMany(() => Answer)
+  answers: Answer[] = [];
 }

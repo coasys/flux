@@ -44,7 +44,7 @@ export default function Files({ files, handleGetQuote, deleteFile, profiles }: F
               >
                 <j-icon name="download" />
               </j-button>
-              <j-button square variant="subtle" size="sm" onClick={() => deleteFile(file.baseExpression)}>
+              <j-button square variant="subtle" size="sm" onClick={() => deleteFile(file.id)}>
                 <j-icon name="x" />
               </j-button>
             </j-flex>
