@@ -92,8 +92,7 @@ export default class ConversationSubgroup extends Ad4mModel {
           out.uri AS id,
           (
             fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri)
-            ?? out<-link[WHERE predicate = 'flux://has_message' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
-            ?? out<-link[WHERE predicate IN ['flux://has_post', 'flux://has_task'] AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
+            ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
             ?? out->link[WHERE predicate = 'flux://entry_type'][0].timestamp
             ?? timestamp
           ) AS channelTimestamp,

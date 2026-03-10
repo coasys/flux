@@ -195,7 +195,7 @@ async function createChannel() {
         appInstance.icon = app.icon;
         appInstance.pkg = app.pkg;
         await appInstance.save();
-        await perspective.add(new Link({ source: channel.id, predicate: 'flux://has_app', target: appInstance.id }));
+        await perspective.add(new Link({ source: channel.id, predicate: 'ad4m://has_child', target: appInstance.id }));
       }),
     );
 

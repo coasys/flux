@@ -4,12 +4,9 @@ import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useState, useEffect, Fragment, useRef } from 'react';
 import { Channel, Task, TaskBoard, TaskColumn } from '@coasys/flux-api';
-import { community } from '@coasys/flux-constants';
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
 import styles from './Board.module.scss';
 import Column from '../Column';
-
-const { CHANNEL_TASK_BOARD, CHANNEL_TASK_COLUMN, CHANNEL_TASK } = community;
 
 type BoardProps = {
   perspective: PerspectiveProxy;
@@ -52,7 +49,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
           column.orderedTaskIds = JSON.stringify([]);
           await column.save(batchId);
           await perspective.addLinks(
-            [new Link({ source: channelId, predicate: CHANNEL_TASK_COLUMN, target: column.id })],
+            [new Link({ source: channelId, predicate: 'ad4m://has_child', target: column.id })],
             undefined,
             batchId,
           );
@@ -66,7 +63,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       newBoard.orderedColumnIds = JSON.stringify(defaultColumns.map((col) => col.id));
       await newBoard.save(batchId);
       await perspective.addLinks(
-        [new Link({ source: channelId, predicate: CHANNEL_TASK_BOARD, target: newBoard.id })],
+        [new Link({ source: channelId, predicate: 'ad4m://has_child', target: newBoard.id })],
         undefined,
         batchId,
       );
@@ -163,7 +160,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         // Remove the tasks link to the perspective
         const linkQuery = new LinkQuery({
           source: channelId,
-          predicate: CHANNEL_TASK,
+          predicate: 'ad4m://has_child',
           target: task.id,
         });
         const links = await perspective.get(linkQuery);

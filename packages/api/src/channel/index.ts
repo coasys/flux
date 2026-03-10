@@ -16,16 +16,8 @@ const {
   CHANNEL_DESCRIPTION,
   CHANNEL_IS_CONVERSATION,
   CHANNEL_IS_PINNED,
-  FLUX_APP,
   FLUX_PARTICIPANT,
-  CHANNEL_MESSAGE,
-  CHANNEL_CONVERSATION,
-  CHANNEL_SUBCHANNEL,
   SUBGROUP_ITEM,
-  CHANNEL_TASK_BOARD,
-  CHANNEL_TASK_COLUMN,
-  CHANNEL_TASK,
-  CHANNEL_POST,
 } = community;
 
 @Model({ name: 'Channel' })
@@ -45,31 +37,31 @@ export class Channel extends Ad4mModel {
   @Property({ through: CHANNEL_IS_PINNED })
   isPinned: boolean;
 
-  @HasMany(() => App, { through: FLUX_APP })
+  @HasMany(() => App)
   views: App[] = [];
 
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  @HasMany(() => Message, { through: CHANNEL_MESSAGE })
+  @HasMany(() => Message)
   messages: Message[] = [];
 
-  @HasMany(() => Conversation, { through: CHANNEL_CONVERSATION })
+  @HasMany(() => Conversation)
   conversations: Conversation[] = [];
 
-  @HasMany(() => Channel, { through: CHANNEL_SUBCHANNEL })
+  @HasMany(() => Channel)
   childChannels: Channel[] = [];
 
-  @HasMany(() => TaskBoard, { through: CHANNEL_TASK_BOARD })
+  @HasMany(() => TaskBoard)
   boards: TaskBoard[] = [];
 
-  @HasMany(() => TaskColumn, { through: CHANNEL_TASK_COLUMN })
+  @HasMany(() => TaskColumn)
   taskColumns: TaskColumn[] = [];
 
-  @HasMany(() => Task, { through: CHANNEL_TASK })
+  @HasMany(() => Task)
   tasks: Task[] = [];
 
-  @HasMany(() => Post, { through: CHANNEL_POST })
+  @HasMany(() => Post)
   posts: Post[] = [];
 
   async unprocessedItems(): Promise<SynergyItem[]> {
@@ -86,7 +78,9 @@ export class Channel extends Ad4mModel {
           fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri
+              IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
           AND out<-link[WHERE predicate = '${SUBGROUP_ITEM}' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'][0] IS NONE
         ORDER BY timestamp ASC
       `;
@@ -130,7 +124,9 @@ export class Channel extends Ad4mModel {
         SELECT count() AS count
         FROM link
         WHERE in.uri = '${this.id}'
-          AND predicate IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri
+              IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);

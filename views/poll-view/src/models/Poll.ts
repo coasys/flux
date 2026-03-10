@@ -18,6 +18,6 @@ export default class Poll extends Ad4mModel {
   @Property({ through: 'flux://poll_answers_locked' })
   answersLocked: boolean;
 
-  @HasMany(() => Answer, { through: 'flux://has_poll_answer' })
+  @HasMany(() => Answer)
   answers: Answer[] = [];
 }

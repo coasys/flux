@@ -9,6 +9,6 @@ export default class Answer extends Ad4mModel {
   @Property({ through: 'rdf://text' })
   text: string;
 
-  @HasMany(() => Vote, { through: 'flux://has_answer_vote' })
+  @HasMany(() => Vote)
   votes: Vote[] = [];
 }

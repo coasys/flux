@@ -172,7 +172,7 @@ async function updateChannel() {
         appModel.icon = app.icon;
         appModel.pkg = app.pkg;
         await appModel.save();
-        await perspective.add(new Link({ source: channelUrl.value, predicate: 'flux://has_app', target: appModel.id }));
+        await perspective.add(new Link({ source: channelUrl.value, predicate: 'ad4m://has_child', target: appModel.id }));
       });
 
     await Promise.all(addedApps);

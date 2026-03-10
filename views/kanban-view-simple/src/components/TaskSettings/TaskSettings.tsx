@@ -3,11 +3,8 @@ import { Profile } from '@coasys/flux-types';
 import { useState, useMemo } from 'react';
 import styles from './TaskSettings.module.scss';
 import { Task, TaskColumn } from '@coasys/flux-api';
-import { community } from '@coasys/flux-constants';
 import AvatarGroup from '../AvatarGroup';
 import { ColumnWithTasks } from '../Board/Board';
-
-const { CHANNEL_TASK } = community;
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -98,7 +95,7 @@ export default function TaskSettings({
       await newTaskModel.save(batchId);
 
       // Link the task to the perspective
-      const newLink = { source: channelId, predicate: CHANNEL_TASK, target: newTaskModel.id };
+      const newLink = { source: channelId, predicate: 'ad4m://has_child', target: newTaskModel.id };
       await perspective.addLinks([newLink], undefined, batchId);
 
       // Add assignee links
@@ -131,10 +128,11 @@ export default function TaskSettings({
     const batchId = await perspective.createBatch();
 
     // Delete task model
-    await Task.delete(perspective, task.id, batchId);
+    const taskModel = new Task(perspective, task.id);
+    await taskModel.delete(batchId);
 
     // Delete task link to perspective
-    const linkQuery = new LinkQuery({ source: channelId, predicate: CHANNEL_TASK, target: task.id });
+    const linkQuery = new LinkQuery({ source: channelId, predicate: 'ad4m://has_child', target: task.id });
     const oldLinks = await perspective.get(linkQuery);
     await perspective.removeLinks(oldLinks, batchId);
 

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import MessageList from '../MessageList/MessageList';
 import styles from './ChatView.module.css';
 
-const { HAS_REPLY, REACTION, CHANNEL_MESSAGE } = community;
+const { HAS_REPLY, REACTION, MESSAGE_THREAD } = community;
 
 type Props = {
   agent: AgentClient;
@@ -40,7 +40,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       editor.current?.clear();
 
       const message = await Message.create(perspective, { body: html }, {
-        parent: { id: source, predicate: threaded ? community.MESSAGE_THREAD : CHANNEL_MESSAGE },
+        parent: { id: source, predicate: threaded ? MESSAGE_THREAD : 'ad4m://has_child' },
       });
 
       if (replyMessage) {

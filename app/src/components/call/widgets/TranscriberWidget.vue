@@ -210,7 +210,6 @@ import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
 import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Message } from '@coasys/flux-api';
-import { community } from '@coasys/flux-constants';
 import { detectBrowser } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
@@ -313,7 +312,7 @@ async function saveMessage() {
     }
 
     await Message.create(perspective, messageData, {
-      parent: { id: channelUrl, predicate: community.CHANNEL_MESSAGE },
+      parent: { id: channelUrl, predicate: 'ad4m://has_child' },
     });
   } else {
     if (transcriptCard) {
