@@ -20,7 +20,7 @@ export class Message extends Ad4mModel {
 
   @Property({
     through: HAS_REPLY,
-    getter: `(<-link[WHERE perspective = $perspective AND predicate = '${HAS_REPLY}'].in.uri)[0]`,
+    getter: `(<-link[WHERE predicate = '${HAS_REPLY}'].in.uri)[0]`,
   })
   replyingTo?: string;
 
