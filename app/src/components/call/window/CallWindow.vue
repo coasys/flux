@@ -116,7 +116,7 @@
             <j-text size="400" nomargin color="warning-500"> This is a beta feature </j-text>
           </j-flex>
           <j-text size="300" nomargin color="warning-500">
-            We use external STUN servers to establish the connection. Any further communication is peer-to-peer.
+            Connections are established using addresses discovered by the Iroh transport layer. All communication is peer-to-peer.
           </j-text>
         </div>
       </div>

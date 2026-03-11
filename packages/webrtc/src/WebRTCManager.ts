@@ -1,7 +1,6 @@
 import { Agent, Literal, NeighbourhoodProxy, PerspectiveExpression, PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
-import { getDefaultIceServers } from '@coasys/flux-utils';
 import { AD4MPeer, AD4MPeerInstance } from './ad4mPeer';
 
 function getExpressionData(data: any) {
@@ -69,11 +68,6 @@ export type Settings = {
   transcriber: Transcriber;
 };
 
-export type IceServer = {
-  urls: string;
-  username?: string;
-  credential?: string;
-};
 
 type Props = {
   agent: AgentClient;
@@ -112,7 +106,6 @@ export class WebRTCManager {
   localStream: MediaStream;
   localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
-  iceServers: IceServer[] = getDefaultIceServers();
 
   constructor(props: Props) {
     this.init(props);
@@ -260,7 +253,7 @@ export class WebRTCManager {
       neighbourhood: this.neighbourhood,
       stream: this.localStream,
       initiator: initiator,
-      options: { config: { iceServers: this.iceServers } },
+      options: { config: { iceServers: [] } }, // ICE candidates provided by Iroh transport via ad4mClient.runtime.iceCandidates(),
     });
 
     const peer = ad4mPeer.connect();
@@ -519,8 +512,4 @@ export class WebRTCManager {
     });
   }
 
-  setIceServers(iceServers: IceServer[]) {
-    // console.log("⚙️ Setting ICE servers: ", iceServers);
-    this.iceServers = iceServers;
-  }
 }
