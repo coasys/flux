@@ -1,21 +1,24 @@
 import * as d3 from 'd3';
+import { Link } from '@coasys/ad4m';
 import { useRef, useState } from 'preact/hooks';
 import Answer from '../../models/Answer';
 import Poll from '../../models/Poll';
 import AnswerCard from '../AnswerCard';
 import styles from './NewPollModal.module.scss';
+import { Profile } from '@coasys/flux-types';
 
 type Props = {
   perspective: any;
   source: string;
   myDid: string;
   close: () => void;
+  getProfile: (did: string) => Promise<Profile>;
 };
 
 type VoteTypes = 'single-choice' | 'multiple-choice' | 'weighted-choice';
 const voteTypes = ['single-choice', 'multiple-choice', 'weighted-choice'] as VoteTypes[];
 
-export default function PollView({ perspective, source, myDid, close }: Props) {
+export default function PollView({ perspective, source, myDid, close, getProfile }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
@@ -51,19 +54,13 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
     setAnswersError(answersValid ? '' : 'At least 2 answers required for locked polls');
     if (title && answersValid) {
       setLoading(true);
-      const newPoll = new Poll(perspective, undefined, source);
-      newPoll.title = title;
-      newPoll.description = description;
-      newPoll.voteType = voteType;
-      newPoll.answersLocked = answersLocked;
-      await newPoll.save();
+      const newPoll = await Poll.create(perspective, { title, description, voteType, answersLocked });
+      await perspective.add(new Link({ source, predicate: 'flux://has_poll', target: newPoll.id }));
 
       Promise.all(
-        answers.map((answer) => {
-          const newAnswer = new Answer(perspective, undefined, newPoll.baseExpression);
-          newAnswer.text = answer.text;
-          return newAnswer.save();
-        }),
+        answers.map((answer) =>
+          Answer.create(perspective, { text: answer.text }, { parent: { model: Poll, id: newPoll.id } }),
+        ),
       )
         .then(() => close())
         .catch(console.log);
@@ -114,6 +111,7 @@ export default function PollView({ perspective, source, myDid, close }: Props) {
                 index={index}
                 color={colorScale.current(index)}
                 removeAnswer={removeAnswer}
+                getProfile={getProfile}
                 preview
               />
             ))}

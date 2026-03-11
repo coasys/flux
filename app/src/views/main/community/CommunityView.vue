@@ -60,7 +60,7 @@
             <button
               v-for="channelData in channelsWithConversations"
               class="channel-card"
-              @click="() => navigateToChannel(channelData.channel.baseExpression)"
+              @click="() => navigateToChannel(channelData.channel.id)"
             >
               # {{ channelData.channel.name }}
             </button>
@@ -135,7 +135,7 @@ communityServiceStore.addCommunityService(restoreNeighbourhoodPrefix(communityId
 const {
   community,
   isSynced,
-  channelsWithConversations,
+  channelsWithConversationsAndAgents: channelsWithConversations,
   signallingService,
   newConversationLoading,
   startNewConversation,

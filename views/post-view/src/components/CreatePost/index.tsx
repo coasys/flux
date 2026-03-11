@@ -23,7 +23,7 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
   const isEditing = !!postId;
 
   async function getPost() {
-    const entry = await new Post(perspective, postId, source).get();
+    const entry = await new Post(perspective, postId).get();
     setState({
       title: entry.title || undefined,
       body: entry.body || undefined,
@@ -77,15 +77,24 @@ export default function CreatePost({ postId, source, agent, perspective, onPubli
     let data = state;
 
     try {
-      const post = new Post(perspective, isEditing ? postId : undefined, source);
-      post.title = data.title;
-      post.body = data.body;
-      post.url = data.url;
-      post.image = !isEditing ? data.image : imageReplaced ? data.image : undefined;
-      if (isEditing) await post.update();
-      else await post.save();
+      await Post.register(perspective);
 
-      onPublished(isEditing ? postId : post?.baseExpression);
+      if (isEditing) {
+        const updateData: any = { title: data.title, body: data.body, url: data.url };
+        if (imageReplaced) updateData.image = data.image;
+        const post = await Post.update(perspective, postId, updateData);
+        onPublished(postId);
+      } else {
+        const post = await Post.create(perspective, {
+          title: data.title,
+          body: data.body,
+          url: data.url,
+          image: data.image,
+        }, {
+          parent: { id: source, predicate: 'ad4m://has_child' },
+        });
+        onPublished(post?.id);
+      }
     } catch (e) {
       console.log(e);
     } finally {

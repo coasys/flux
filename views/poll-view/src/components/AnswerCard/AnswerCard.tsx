@@ -1,7 +1,9 @@
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { Fragment } from 'preact';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import Vote from '../../models/Vote';
+import Answer from '../../models/Answer';
 import Avatar from '../Avatar';
 import styles from './AnswerCard.module.scss';
 
@@ -25,13 +27,15 @@ export default function AnswerCard(props: {
   const [points, setPoints] = useState(myPoints);
   const pointsRef = useRef(0);
   const slidingRef = useRef(false);
-  const { entries: votes } = useModel({ perspective, model: Vote, query: { source: answer.baseExpression } });
+  const { data: votes } = useLiveQuery(Vote, perspective, {
+    parent: { model: Answer, id: answer.id },
+  });
 
   useEffect(() => {
     window.addEventListener('mouseup', () => {
       if (slidingRef.current) {
         slidingRef.current = false;
-        vote(answer.baseExpression, pointsRef.current);
+        vote(answer.id, pointsRef.current);
       }
     });
   }, []);
@@ -93,12 +97,12 @@ export default function AnswerCard(props: {
                     onInput={(e: any) => {
                       pointsRef.current = +e.target.value;
                       setPoints(+e.target.value);
-                      vote(answer.baseExpression, +e.target.value);
+                      vote(answer.id, +e.target.value);
                     }}
                   />
                 </j-flex>
               ) : (
-                <j-checkbox onChange={() => vote(answer.baseExpression)} checked={hasVoted} size="sm">
+                <j-checkbox onChange={() => vote(answer.id)} checked={hasVoted} size="sm">
                   <j-icon slot="checkmark" size="xs" name="check" />
                 </j-checkbox>
               )}

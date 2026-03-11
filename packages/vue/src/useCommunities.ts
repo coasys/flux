@@ -1,17 +1,12 @@
 import { ref, watch, ShallowRef } from 'vue';
-import { SubjectRepository, getPerspectiveMeta } from '@coasys/flux-api';
+import { getPerspectiveMeta } from '@coasys/flux-api';
 import { PerspectiveProxy } from '@coasys/ad4m';
 import { Community } from '@coasys/flux-api';
 
 async function getCommunity(p: PerspectiveProxy): Promise<Community> {
-  const subject = new SubjectRepository(Community, {
-    perspective: p,
-  });
-
-  const community = await subject.getData();
-
-  if (community) {
-    return community;
+  const results = await Community.findAll(p);
+  if (results.length > 0) {
+    return results[0];
   } else {
     try {
       const meta = await getPerspectiveMeta(p.uuid);

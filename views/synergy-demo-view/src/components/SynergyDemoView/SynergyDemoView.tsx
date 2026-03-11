@@ -59,14 +59,14 @@ export default function SynergyDemoView({
     }
     const matches = await Promise.all(
       allEmbeddings.map(async (e: any) => {
-        const { baseExpression, type, embedding, channelId, channelName } = e;
+        const { id, type, embedding, channelId, channelName } = e;
         // Filter out results that don't match the search filters
-        const isSourceItem = baseExpression === itemId;
+        const isSourceItem = id === itemId;
         const wrongChannel = !filterSettings.includeChannel && channelId === source;
         if (isSourceItem || wrongChannel) return null;
         // Generate a similarity score for the embedding
         const score = await cos_sim(sourceEmbedding, embedding);
-        return { baseExpression, channelId, channelName, type, score };
+        return { id, channelId, channelName, type, score };
       }),
     );
     return matches.filter((item) => item && item.score > 0.2);
@@ -84,11 +84,11 @@ export default function SynergyDemoView({
       currentGrouping === 'Conversations' ? await topic.linkedConversations() : await topic.linkedSubgroups();
     // Filter out results that don't match the search filters
     const filteredMatches = matches.map((relationship) => {
-      const { baseExpression, type, channelId, channelName, relevance } = relationship;
-      const isSourceItem = baseExpression === itemId;
+      const { id, type, channelId, channelName, relevance } = relationship;
+      const isSourceItem = id === itemId;
       const wrongChannel = !filterSettings.includeChannel && channelId === source;
       if (isSourceItem || wrongChannel) return null;
-      return { baseExpression, channelId, channelName, type, score: relevance / 100 };
+      return { id, channelId, channelName, type, score: relevance / 100 };
     });
 
     return filteredMatches.filter((i) => i !== null);
@@ -102,7 +102,7 @@ export default function SynergyDemoView({
     setSearchItemId(itemId);
     setSelectedTopic(type === 'topic' ? topic : null);
     const newMatches =
-      type === 'topic' ? await findTopicMatches(itemId, topic.baseExpression) : await findEmbeddingMatches(itemId);
+      type === 'topic' ? await findTopicMatches(itemId, topic.id) : await findEmbeddingMatches(itemId);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);
@@ -340,7 +340,7 @@ export default function SynergyDemoView({
             agent={agent}
             perspective={perspective}
             channelId={source}
-            selectedTopicId={selectedTopic?.baseExpression || ''}
+            selectedTopicId={selectedTopic?.id || ''}
             signallingService={signallingService}
             signalsHealthy={signalsHealthy}
             appStore={appStore}
@@ -363,7 +363,7 @@ export default function SynergyDemoView({
             perspective={perspective}
             agent={agent}
             matches={matches}
-            selectedTopicId={selectedTopic?.baseExpression || ''}
+            selectedTopicId={selectedTopic?.id || ''}
             searchType={searchType}
             filterSettings={filterSettings}
             setFilterSettings={setFilterSettings}

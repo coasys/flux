@@ -1,5 +1,5 @@
 import { AgentClient, PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useEffect, useState } from 'preact/hooks';
 import Answer from '../../models/Answer';
@@ -18,18 +18,16 @@ type Props = {
 export default function PollView({ perspective, source, agent, getProfile }: Props) {
   const [myDid, setMyDid] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const { entries: polls } = useModel({ perspective, model: Poll, query: { source } });
+  const { data: polls } = useLiveQuery(Poll, perspective, {
+    parent: { id: source, predicate: 'flux://has_poll' },
+  });
 
   async function deletePoll(id: string) {
-    const poll = new Poll(perspective, id, source);
-    await poll.delete();
+    await Poll.delete(perspective, id);
   }
 
-  async function ensureSDNAClasses() {
-    // Ensure all SDNA classes are loaded into the perspective
-    await perspective.ensureSDNASubjectClass(Poll);
-    await perspective.ensureSDNASubjectClass(Answer);
-    await perspective.ensureSDNASubjectClass(Vote);
+  async function ensureModels() {
+    await Promise.all([Poll, Answer, Vote].map((M) => M.register(perspective)));
   }
 
   async function getMyDid() {
@@ -39,7 +37,7 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
   }
 
   useEffect(() => {
-    ensureSDNAClasses();
+    ensureModels();
     getMyDid();
   }, []);
 
@@ -54,13 +52,19 @@ export default function PollView({ perspective, source, agent, getProfile }: Pro
       </j-button>
 
       {modalOpen && (
-        <NewPollModal perspective={perspective} source={source} myDid={myDid} close={() => setModalOpen(false)} />
+        <NewPollModal
+          perspective={perspective}
+          source={source}
+          myDid={myDid}
+          close={() => setModalOpen(false)}
+          getProfile={getProfile}
+        />
       )}
 
       <j-flex gap="500" direction="column">
         {polls.map((poll) => (
           <PollCard
-            key={poll.baseExpression}
+            key={poll.id}
             perspective={perspective}
             myDid={myDid}
             poll={poll}
