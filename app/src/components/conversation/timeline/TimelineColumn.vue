@@ -33,6 +33,16 @@
           <j-icon name="download" slot="start" />
           Export
         </j-button>
+
+        <j-button
+          size="sm"
+          variant="ghost"
+          :loading="exportingFlat"
+          @click="exportChannelMessagesFlat"
+        >
+          <j-icon name="download" slot="start" />
+          Export messages
+        </j-button>
       </j-flex>
     </j-flex>
 
@@ -117,6 +127,7 @@ import Avatar from '@/components/conversation/avatar/Avatar.vue';
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { llmProcessingSteps, useAiStore, useAppStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
 import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
@@ -158,6 +169,78 @@ const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
 const loading = ref(true);
 const exporting = ref(false);
+const exportingFlat = ref(false);
+
+function stripHtml(html: string): string {
+  return html?.replace(/<[^>]*>/g, '')?.trim() || '';
+}
+
+function formatTimestamp(ts: string): string {
+  try {
+    const date = new Date(ts);
+    return date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+  } catch {
+    return ts;
+  }
+}
+
+async function exportChannelMessagesFlat() {
+  if (exportingFlat.value || !appStore.ad4mClient) return;
+  exportingFlat.value = true;
+  try {
+    const channel = new Channel(perspective, channelUrl);
+    const items = await channel.allItems();
+    if (!items || items.length === 0) {
+      exportingFlat.value = false;
+      return;
+    }
+
+    const itemsWithNames = await Promise.all(
+      items.map(async (item) => {
+        const profile = await getCachedAgentProfile(item.author, appStore.ad4mClient);
+        const authorName = profile.givenName || profile.username || item.author?.slice(0, 16) || 'Unknown';
+        return { ...item, authorName };
+      }),
+    );
+
+    const sorted = [...itemsWithNames].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+    const lines: string[] = [];
+    lines.push('# Channel messages');
+    lines.push('');
+
+    for (const item of sorted) {
+      const text = stripHtml(item.text);
+      if (!text) continue;
+      const time = formatTimestamp(item.timestamp);
+      lines.push(`**${item.authorName}** _(${time})_`);
+      lines.push(text);
+      lines.push('');
+    }
+
+    const fullMarkdown = lines.join('\n');
+
+    try {
+      await navigator.clipboard.writeText(fullMarkdown);
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed:', clipboardError);
+    }
+
+    const blob = new Blob([fullMarkdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `channel-messages-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export flat channel messages:', error);
+  } finally {
+    exportingFlat.value = false;
+  }
+}
 
 async function exportTranscript() {
   if (exporting.value || conversations.value.length === 0 || !appStore.ad4mClient) return;
