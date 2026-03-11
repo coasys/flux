@@ -73,6 +73,7 @@ type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
+  iceServers?: RTCIceServer[];
 };
 
 export enum Event {
@@ -106,8 +107,10 @@ export class WebRTCManager {
   localStream: MediaStream;
   localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
+  private iceServers: RTCIceServer[];
 
   constructor(props: Props) {
+    this.iceServers = props.iceServers || [];
     this.init(props);
   }
 
@@ -253,7 +256,7 @@ export class WebRTCManager {
       neighbourhood: this.neighbourhood,
       stream: this.localStream,
       initiator: initiator,
-      options: { config: { iceServers: [] // ICE candidates will be provided by Iroh transport via ad4mClient.runtime.iceCandidates() } },
+      options: { config: { iceServers: this.iceServers } },
     });
 
     const peer = ad4mPeer.connect();
@@ -484,6 +487,14 @@ export class WebRTCManager {
         },
       ],
     });
+  }
+
+  /**
+   * Update ICE servers for future peer connections.
+   * Existing connections are not affected — only new ones use the updated servers.
+   */
+  updateIceServers(iceServers: RTCIceServer[]) {
+    this.iceServers = iceServers;
   }
 
   async sendTestSignal(recipientDid: string) {
