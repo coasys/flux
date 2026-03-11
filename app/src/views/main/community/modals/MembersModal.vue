@@ -56,7 +56,7 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore } from '@/stores';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const emit = defineEmits(['close', 'submit']);
@@ -88,5 +88,7 @@ async function profileClick(did: string) {
 }
 
 // Refetch members every time the modal is opened
-onMounted(() => getMembers());
+watch(() => modalStore.showCommunityMembers, (open) => {
+  if (open) getMembers();
+}, { immediate: true });
 </script>
