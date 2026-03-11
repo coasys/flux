@@ -26,26 +26,6 @@ export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
-const defaultIceServers = [
-  {
-    urls: 'stun:relay.ad4m.dev:3478',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'turn:relay.ad4m.dev:443',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'stun:stun.l.google.com:19302',
-  },
-  {
-    urls: 'stun:global.stun.twilio.com:3478',
-  },
-] as IceServer[];
-
-export type IceServer = { urls: string; username?: string; credential?: string };
 export type MediaState = 'on' | 'off' | 'loading';
 export type PeerConnection = {
   did: string;
@@ -88,7 +68,6 @@ export const useWebrtcStore = defineStore(
     const myAgentStatus = ref<AgentStatus>('active');
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
-    const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
     const hasCopiedLink = ref(false);
     let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
@@ -207,7 +186,7 @@ export const useWebrtcStore = defineStore(
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
-        config: { iceServers: iceServers.value },
+        config: { iceServers: [] } // ICE candidates will be provided by Iroh transport via ad4mClient.runtime.iceCandidates(),
         trickle: true,
       }) as Instance;
 
@@ -577,17 +556,8 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    function addIceServer(newIceServer: IceServer) {
-      iceServers.value = [...iceServers.value, newIceServer];
-    }
 
-    function removeIceServer(url: string) {
-      iceServers.value = iceServers.value.filter((server) => server.urls !== url);
-    }
 
-    function resetIceServers() {
-      iceServers.value = defaultIceServers;
-    }
 
     async function joinRoom() {
       joiningCall.value = true;
@@ -779,16 +749,12 @@ export const useWebrtcStore = defineStore(
       communityService,
       peerConnections,
       joiningCall,
-      iceServers,
       disconnectedAgents,
       hasCopiedLink,
       addTrack,
       removeTrack,
       replaceAudioTrack,
       replaceVideoTrack,
-      addIceServer,
-      removeIceServer,
-      resetIceServers,
       joinRoom,
       leaveRoom,
       signalAgent,

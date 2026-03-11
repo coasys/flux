@@ -2,7 +2,6 @@ export * from './asyncFilter';
 export * from './createNeighbourhoodMeta';
 export * from './expressionHelpers';
 export * from './formatString';
-export * from './getDefaultIceServers';
 export * from './getImage';
 export * from './getNeighbourhoodMeta';
 export * from './languageHelpers';

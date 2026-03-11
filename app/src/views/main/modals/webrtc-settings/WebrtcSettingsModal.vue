@@ -13,9 +13,6 @@
           <j-menu-item :selected="currentTab === 'transcription'" @click="currentTab = 'transcription'">
             Transcription
           </j-menu-item>
-          <j-menu-item :selected="currentTab === 'connection'" @click="currentTab = 'connection'">
-            Connection
-          </j-menu-item>
           <!-- <j-menu-item :selected="currentTab === 'debug'" @click="currentTab = 'debug'"> Debug </j-menu-item> -->
         </j-menu-group-item>
       </div>
@@ -23,7 +20,6 @@
       <div class="contents">
         <VoiceVideo v-if="currentTab === 'voice-video'" />
         <Transcription v-if="currentTab === 'transcription'" />
-        <Connection v-if="currentTab === 'connection'" />
         <Debug v-if="currentTab === 'debug'" />
       </div>
     </div>
@@ -33,7 +29,6 @@
 <script setup lang="ts">
 import { useModalStore } from '@/stores';
 import { ref } from 'vue';
-import Connection from './Connection.vue';
 import Debug from './Debug.vue';
 import Transcription from './Transcription.vue';
 import VoiceVideo from './VoiceVideo.vue';
