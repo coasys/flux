@@ -1,7 +1,6 @@
 import { Agent, Literal, NeighbourhoodProxy, PerspectiveExpression, PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
-import { getDefaultIceServers } from '@coasys/flux-utils';
 import { AD4MPeer, AD4MPeerInstance } from './ad4mPeer';
 
 function getExpressionData(data: any) {
@@ -69,16 +68,12 @@ export type Settings = {
   transcriber: Transcriber;
 };
 
-export type IceServer = {
-  urls: string;
-  username?: string;
-  credential?: string;
-};
 
 type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
+  iceServers?: RTCIceServer[];
 };
 
 export enum Event {
@@ -112,9 +107,10 @@ export class WebRTCManager {
   localStream: MediaStream;
   localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
-  iceServers: IceServer[] = getDefaultIceServers();
+  private iceServers: RTCIceServer[];
 
   constructor(props: Props) {
+    this.iceServers = props.iceServers || [];
     this.init(props);
   }
 
@@ -493,6 +489,14 @@ export class WebRTCManager {
     });
   }
 
+  /**
+   * Update ICE servers for future peer connections.
+   * Existing connections are not affected — only new ones use the updated servers.
+   */
+  updateIceServers(iceServers: RTCIceServer[]) {
+    this.iceServers = iceServers;
+  }
+
   async sendTestSignal(recipientDid: string) {
     // console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
@@ -519,8 +523,5 @@ export class WebRTCManager {
     });
   }
 
-  setIceServers(iceServers: IceServer[]) {
-    // console.log("⚙️ Setting ICE servers: ", iceServers);
-    this.iceServers = iceServers;
   }
 }

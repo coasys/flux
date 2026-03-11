@@ -26,26 +26,6 @@ export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
-const defaultIceServers = [
-  {
-    urls: 'stun:relay.ad4m.dev:3478',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'turn:relay.ad4m.dev:443',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'stun:stun.l.google.com:19302',
-  },
-  {
-    urls: 'stun:global.stun.twilio.com:3478',
-  },
-] as IceServer[];
-
-export type IceServer = { urls: string; username?: string; credential?: string };
 export type MediaState = 'on' | 'off' | 'loading';
 export type PeerConnection = {
   did: string;
@@ -73,6 +53,59 @@ export const useWebrtcStore = defineStore(
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
 
+    // --- Iroh-ICE: Dynamic STUN server discovery from executor ---
+    const executorIceServers = ref<RTCIceServer[]>([]);
+    let iceRefreshInterval: NodeJS.Timeout | null = null;
+
+    /**
+     * Format executor ICE candidate addresses as STUN server URLs.
+     * Each candidate's address:port becomes a `stun:` URL for RTCPeerConnection.
+     */
+    function formatStunServers(candidates: Array<{ address: string; port: number }>): RTCIceServer[] {
+      return candidates
+        .filter((c) => c.address && c.port)
+        .map((c) => ({ urls: `stun:${c.address}:${c.port}` }));
+    }
+
+    /**
+     * Fetch ICE candidates from the executor and update iceServers.
+     * Falls back to empty list if executor is unavailable.
+     */
+    async function refreshIceServers() {
+      try {
+        const wsUrl = localStorage.getItem('ad4m-url') || 'ws://localhost:12000/graphql';
+        const httpUrl = wsUrl.replace('ws://', 'http://').replace('wss://', 'https://');
+        const token = localStorage.getItem('ad4m-token') || '';
+        const response = await fetch(httpUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(token ? { authorization: token } : {}) },
+          body: JSON.stringify({ query: '{ runtimeIceCandidates { address port } }' }),
+        });
+        const json = await response.json();
+        const candidates = json?.data?.runtimeIceCandidates || [];
+        executorIceServers.value = formatStunServers(candidates);
+      } catch (e) {
+        console.warn('iroh-ice: failed to fetch ICE candidates from executor:', e);
+        // Keep existing servers on failure; fall back to empty on first failure
+      }
+    }
+
+    /** Start periodic ICE server refresh (every 60s). */
+    function startIceRefresh() {
+      if (iceRefreshInterval) return;
+      refreshIceServers(); // immediate first fetch
+      iceRefreshInterval = setInterval(refreshIceServers, 60_000);
+    }
+
+    /** Stop periodic ICE server refresh. */
+    function stopIceRefresh() {
+      if (iceRefreshInterval) {
+        clearInterval(iceRefreshInterval);
+        iceRefreshInterval = null;
+      }
+    }
+    // --- End Iroh-ICE ---
+
     const popSound = new Howl({ src: [popWav] });
     const guitarSound = new Howl({ src: [guitarWav] });
     const kissSound = new Howl({ src: [kissWav] });
@@ -88,7 +121,6 @@ export const useWebrtcStore = defineStore(
     const myAgentStatus = ref<AgentStatus>('active');
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
-    const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
     const hasCopiedLink = ref(false);
     let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
@@ -207,7 +239,7 @@ export const useWebrtcStore = defineStore(
       const peer = new SimplePeer({
         initiator,
         stream: localStream.value || undefined,
-        config: { iceServers: iceServers.value },
+        config: { iceServers: executorIceServers.value }, // Dynamic STUN servers from Iroh transport
         trickle: true,
       }) as Instance;
 
@@ -577,20 +609,14 @@ export const useWebrtcStore = defineStore(
       }
     }
 
-    function addIceServer(newIceServer: IceServer) {
-      iceServers.value = [...iceServers.value, newIceServer];
-    }
 
-    function removeIceServer(url: string) {
-      iceServers.value = iceServers.value.filter((server) => server.urls !== url);
-    }
 
-    function resetIceServers() {
-      iceServers.value = defaultIceServers;
-    }
 
     async function joinRoom() {
       joiningCall.value = true;
+
+      // Start fetching STUN servers from executor
+      startIceRefresh();
 
       try {
         // Update the call route
@@ -626,6 +652,9 @@ export const useWebrtcStore = defineStore(
 
     async function leaveRoom() {
       try {
+        // Stop STUN server refresh
+        stopIceRefresh();
+
         // Signal all peers that we're leaving the call
         signalPeers(WEBRTC_LEAVING_CALL);
 
@@ -779,16 +808,12 @@ export const useWebrtcStore = defineStore(
       communityService,
       peerConnections,
       joiningCall,
-      iceServers,
       disconnectedAgents,
       hasCopiedLink,
       addTrack,
       removeTrack,
       replaceAudioTrack,
       replaceVideoTrack,
-      addIceServer,
-      removeIceServer,
-      resetIceServers,
       joinRoom,
       leaveRoom,
       signalAgent,

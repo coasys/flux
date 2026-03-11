@@ -1,8 +1,8 @@
-import { getDefaultIceServers, getForVersion, setForVersion, throttle } from '@coasys/flux-utils';
+import { getForVersion, setForVersion, throttle } from '@coasys/flux-utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { version } from '../package.json';
 
-import { Connection, Event, EventLogItem, IceServer, Settings, WebRTCManager } from '@coasys/flux-webrtc';
+import { Connection, Event, EventLogItem, Settings, WebRTCManager } from '@coasys/flux-webrtc';
 
 import { Agent, PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
@@ -45,7 +45,6 @@ export type WebRTC = {
   localState: Peer['state'];
   connections: Peer[];
   devices: MediaDeviceInfo[];
-  iceServers: IceServer[];
   reactions: Reaction[];
   localEventLog: EventLogItem[];
   isInitialised: boolean;
@@ -62,7 +61,6 @@ export type WebRTC = {
   onChangeAudio: (deviceId: string) => void;
   onToggleScreenShare: (enabled: boolean) => void;
   onChangeState: (newState: Peer['state']) => void;
-  onChangeIceServers: (servers: IceServer[]) => void;
   updateTranscriptionSetting: (setting: string, value: any) => void;
 };
 
@@ -78,7 +76,6 @@ export default function useWebRTC({ enabled, source, perspective, agent: agentCl
   const [agent, setAgent] = useState<Agent>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const devicesRef = useRef<MediaDeviceInfo[]>([]);
-  const [iceServers, setIceServers] = useState<IceServer[]>(getDefaultIceServers());
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
@@ -944,11 +941,6 @@ export default function useWebRTC({ enabled, source, perspective, agent: agentCl
     throttledStateBroadcast(newState);
   }
 
-  function onChangeIceServers(newServers: IceServer[]) {
-    setIceServers(newServers);
-    setForVersion(version, 'iceServers', JSON.stringify(newServers));
-    manager.current.iceServers = newServers;
-  }
 
   async function onJoin({ initialState }) {
     setIsLoading(true);
@@ -995,7 +987,6 @@ export default function useWebRTC({ enabled, source, perspective, agent: agentCl
     localEventLog,
     connections,
     devices,
-    iceServers,
     reactions,
     isInitialised,
     hasJoined,
@@ -1011,7 +1002,6 @@ export default function useWebRTC({ enabled, source, perspective, agent: agentCl
     onChangeAudio,
     onToggleScreenShare,
     onChangeState,
-    onChangeIceServers,
     updateTranscriptionSetting,
   };
 }

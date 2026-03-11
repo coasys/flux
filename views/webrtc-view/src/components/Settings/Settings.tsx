@@ -2,7 +2,6 @@ import { WebRTC } from '@coasys/flux-react-web';
 import { Profile } from '@coasys/flux-types';
 import { useState } from 'preact/hooks';
 
-import Connection from './Connection';
 import Debug from './Debug';
 import Transcription from './Transcription';
 import VoiceVideo from './VoiceVideo';
@@ -27,9 +26,6 @@ export default function Settings({ webRTC, profile }: Props) {
           <j-menu-item selected={currentTab === 'transcription'} onClick={() => setCurrentTab('transcription')}>
             Transcription
           </j-menu-item>
-          <j-menu-item selected={currentTab === 'connection'} onClick={() => setCurrentTab('connection')}>
-            Connection
-          </j-menu-item>
           <j-menu-item selected={currentTab === 'debug'} onClick={() => setCurrentTab('debug')}>
             Debug
           </j-menu-item>
@@ -39,7 +35,6 @@ export default function Settings({ webRTC, profile }: Props) {
       <div className={styles.contents}>
         <>{currentTab === 'voice-video' && <VoiceVideo webRTC={webRTC} />}</>
         <>{currentTab === 'transcription' && <Transcription webRTC={webRTC} />}</>
-        <>{currentTab === 'connection' && <Connection webRTC={webRTC} />}</>
         <>{currentTab === 'debug' && <Debug webRTC={webRTC} profile={profile} />}</>
       </div>
     </div>
