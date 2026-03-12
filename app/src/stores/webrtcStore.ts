@@ -28,12 +28,12 @@ export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
-    urls: 'stun:relay.ad4m.dev:3478',
+    urls: 'stun:turn.ad4m.dev:3478',
     username: 'openrelay',
     credential: 'openrelay',
   },
   {
-    urls: 'turn:relay.ad4m.dev:443',
+    urls: 'turns:turn.ad4m.dev:5349',
     username: 'openrelay',
     credential: 'openrelay',
   },
