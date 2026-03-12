@@ -41,6 +41,7 @@ function parseLiteralString(literal: string): string {
 function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
   const nodeMap = new Map<string, SoANodeData>();
   const parentChildLinks: { parent: string; child: string }[] = [];
+  const referencedTargets = new Set<string>();
 
   // First pass: find all nodes (anything with a soa://title link)
   for (const link of soaLinks) {
@@ -61,7 +62,7 @@ function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
     }
   }
 
-  // Second pass: collect properties and relationships
+  // Second pass: collect properties, relationships, and track referenced targets
   for (const link of soaLinks) {
     const pred = link.data.predicate;
     const base = link.data.source;
@@ -89,7 +90,9 @@ function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
     } else if (pred === 'soa://rel_parent') {
       // source is parent of target
       parentChildLinks.push({ parent: base, child: target });
+      referencedTargets.add(target);
     } else if (RELATIONSHIP_PREDICATES.includes(pred)) {
+      referencedTargets.add(target);
       const targetNode = nodeMap.get(target);
       node.relationships.push({
         predicate: pred.replace('soa://rel_', ''),
@@ -99,15 +102,46 @@ function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
     }
   }
 
-  // Build tree from parent-child links
+  // Register placeholder nodes for items referenced only by relationships
+  for (const target of referencedTargets) {
+    if (!nodeMap.has(target)) {
+      nodeMap.set(target, {
+        base: target,
+        title: '(unknown)',
+        modality: 'observation',
+        children: [],
+        relationships: [],
+      });
+    }
+  }
+
+  // Build tree from parent-child links with cycle detection
   const childSet = new Set<string>();
   for (const { parent, child } of parentChildLinks) {
+    // Detect back-edges: if child is an ancestor of parent, skip to prevent cycles
     const parentNode = nodeMap.get(parent);
     const childNode = nodeMap.get(child);
-    if (parentNode && childNode) {
-      parentNode.children.push(childNode);
-      childSet.add(child);
+    if (!parentNode || !childNode) continue;
+
+    // Check for back-edge: if parent is already a descendant of child, skip
+    const isDescendant = (ancestor: string, descendant: string): boolean => {
+      const ancNode = nodeMap.get(ancestor);
+      if (!ancNode) return false;
+      for (const c of ancNode.children) {
+        if (c.base === descendant || isDescendant(c.base, descendant)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Skip if adding this link would create a cycle (child is already an ancestor of parent)
+    if (isDescendant(child, parent)) {
+      continue;
     }
+
+    parentNode.children.push(childNode);
+    childSet.add(child);
   }
 
   // Root nodes are those that are never a child
@@ -132,12 +166,10 @@ export default function SoATreeView({ perspective, source }: Props) {
     async function loadTree() {
       try {
         setLoading(true);
-        // TODO: Optimize with server-side filtering by querying each soa:// predicate individually
-        // instead of fetching all links and filtering client-side
-        const allLinks = await perspective.queryLinks({});
-        const soaLinks = allLinks.filter(
-          (l: LinkExpression) => l.data.predicate?.startsWith('soa://')
-        );
+        // Use server-side filtering with LinkQuery to fetch only soa:// links
+        const soaLinks = await perspective.queryLinks({
+          predicate: 'soa://',
+        });
 
         if (!cancelled) {
           const tree = buildTree(soaLinks);

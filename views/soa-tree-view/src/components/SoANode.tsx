@@ -45,9 +45,7 @@ export default function SoANode({ node, depth }: Props) {
   const hasDetails =
     node.description ||
     node.confidence != null ||
-    node.status ||
     node.tags ||
-    node.priority != null ||
     node.source ||
     node.relationships.length > 0;
 
@@ -55,9 +53,10 @@ export default function SoANode({ node, depth }: Props) {
 
   return (
     <div className={styles.nodeWrapper} style={{ paddingLeft: `${depth * 20}px` }}>
-      <div
+      <button
         className={`${styles.nodeHeader} ${expanded ? styles.expanded : ''}`}
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
       >
         <span className={styles.toggle}>
           {hasChildren || hasDetails ? (expanded ? '\u25BE' : '\u25B8') : '\u00A0\u00A0'}
@@ -82,7 +81,7 @@ export default function SoANode({ node, depth }: Props) {
             {node.relationships.length} rel
           </span>
         )}
-      </div>
+      </button>
 
       {expanded && hasDetails && (
         <div className={styles.details} style={{ paddingLeft: `${depth * 20 + 28}px` }}>
@@ -107,7 +106,7 @@ export default function SoANode({ node, depth }: Props) {
             <div className={styles.property}>
               <span className={styles.propLabel}>Tags</span>
               <div className={styles.tagList}>
-                {node.tags.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                {node.tags.split(',').map((tag) => tag.trim()).filter((tag) => tag !== '').map((tag) => (
                   <span key={tag} className={styles.tag}>{tag}</span>
                 ))}
               </div>
