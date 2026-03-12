@@ -326,11 +326,28 @@ onUnmounted(async () => {
     width: auto;
     min-width: 280px;
     max-width: 400px;
-    
+
     .recorder-status {
       flex: 1;
       min-width: 0;
       overflow-wrap: break-word;
+    }
+  }
+
+  // Responsive adjustments for small screens
+  @media (max-width: 480px) {
+    bottom: var(--j-space-300);
+    right: var(--j-space-300);
+
+    .transcript-card {
+      width: calc(100vw - 2 * var(--j-space-300));
+      max-width: calc(100vw - 2 * var(--j-space-300));
+    }
+
+    .recorder-controls {
+      min-width: auto;
+      width: calc(100vw - 2 * var(--j-space-300));
+      max-width: calc(100vw - 2 * var(--j-space-300));
     }
   }
 }
