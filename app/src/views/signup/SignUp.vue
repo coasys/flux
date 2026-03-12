@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
-import { useAppStore, useUiStore } from '@/stores';
+import { useAppStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
@@ -59,7 +59,6 @@ import SignUpCarousel from './SignUpCarousel.vue';
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
-const uiStore = useUiStore();
 
 const showSignup = ref(false);
 const profilePicture = ref();

@@ -111,10 +111,6 @@ function handleTranscriptionText(text: string) {
   }
 }
 
-function handleTranscriptionPreview(text: string) {
-  previewText.value = text;
-}
-
 async function cleanup() {
   // Stop all tracks
   stream?.getTracks().forEach(track => track.stop());
@@ -127,13 +123,21 @@ async function cleanup() {
   await audioContext?.close();
   audioContext = null;
   
-  // Close transcription streams
+  // Close transcription streams with error handling
   if (transcriptionStreamId) {
-    await props.client.ai.closeTranscriptionStream(transcriptionStreamId);
+    try {
+      await props.client.ai.closeTranscriptionStream(transcriptionStreamId);
+    } catch (err) {
+      console.error('Error closing transcription stream:', err);
+    }
     transcriptionStreamId = null;
   }
   if (fastTranscriptionStreamId) {
-    await props.client.ai.closeTranscriptionStream(fastTranscriptionStreamId);
+    try {
+      await props.client.ai.closeTranscriptionStream(fastTranscriptionStreamId);
+    } catch (err) {
+      console.error('Error closing fast transcription stream:', err);
+    }
     fastTranscriptionStreamId = null;
   }
 }
@@ -172,7 +176,7 @@ async function startRecording() {
     
     fastTranscriptionStreamId = await props.client.ai.openTranscriptionStream(
       'whisper_tiny_quantized',
-      handleTranscriptionPreview,
+      (text: string) => { previewText.value = text; },
       {
         startThreshold: 0.5,
         startWindow: 80,
