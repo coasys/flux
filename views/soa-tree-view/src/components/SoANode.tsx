@@ -42,25 +42,27 @@ type Props = {
 export default function SoANode({ node, depth }: Props) {
   const [expanded, setExpanded] = useState(depth === 0);
   const hasChildren = node.children.length > 0;
+  const tags = node.tags?.split(',').map((tag) => tag.trim()).filter(Boolean) ?? [];
   const hasDetails =
-    node.description ||
+    !!node.description ||
     node.confidence != null ||
-    node.status ||
-    node.tags ||
-    node.priority != null ||
-    node.source ||
+    tags.length > 0 ||
+    !!node.source ||
     node.relationships.length > 0;
+  const isExpandable = hasChildren || hasDetails;
 
   const icon = MODALITY_ICONS[node.modality] || '\uD83D\uDD35';
 
   return (
     <div className={styles.nodeWrapper} style={{ paddingLeft: `${depth * 20}px` }}>
-      <div
+      <button
+        type="button"
         className={`${styles.nodeHeader} ${expanded ? styles.expanded : ''}`}
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => isExpandable && setExpanded((value) => !value)}
+        aria-expanded={isExpandable ? expanded : undefined}
       >
         <span className={styles.toggle}>
-          {hasChildren || hasDetails ? (expanded ? '\u25BE' : '\u25B8') : '\u00A0\u00A0'}
+          {isExpandable ? (expanded ? '\u25BE' : '\u25B8') : '\u00A0\u00A0'}
         </span>
         <span className={styles.icon} title={node.modality}>{icon}</span>
         <span className={styles.title}>{node.title || '(untitled)'}</span>
@@ -82,7 +84,7 @@ export default function SoANode({ node, depth }: Props) {
             {node.relationships.length} rel
           </span>
         )}
-      </div>
+      </button>
 
       {expanded && hasDetails && (
         <div className={styles.details} style={{ paddingLeft: `${depth * 20 + 28}px` }}>
@@ -103,11 +105,11 @@ export default function SoANode({ node, depth }: Props) {
               <span className={styles.confidenceValue}>{Math.round(node.confidence * 100)}%</span>
             </div>
           )}
-          {node.tags && (
+          {tags.length > 0 && (
             <div className={styles.property}>
               <span className={styles.propLabel}>Tags</span>
               <div className={styles.tagList}>
-                {node.tags.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                {tags.map((tag) => (
                   <span key={tag} className={styles.tag}>{tag}</span>
                 ))}
               </div>

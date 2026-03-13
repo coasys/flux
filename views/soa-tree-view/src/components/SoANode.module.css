@@ -12,6 +12,12 @@
   cursor: pointer;
   user-select: none;
   transition: background-color 0.15s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .nodeHeader:hover {
