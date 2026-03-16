@@ -19,7 +19,6 @@ type SoANodeData = {
 
 type Props = {
   perspective: PerspectiveProxy;
-  source: string;
 };
 
 const RELATIONSHIP_PREDICATES = [
@@ -175,7 +174,7 @@ function buildTree(soaLinks: LinkExpression[]): SoANodeData[] {
   return roots;
 }
 
-export default function SoATreeView({ perspective, source }: Props) {
+export default function SoATreeView({ perspective }: Props) {
   const [roots, setRoots] = useState<SoANodeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -215,7 +214,7 @@ export default function SoATreeView({ perspective, source }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [perspective?.uuid, source]);
+  }, [perspective?.uuid]);
 
   if (loading) {
     return (

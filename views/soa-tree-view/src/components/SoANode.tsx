@@ -42,11 +42,12 @@ type Props = {
 export default function SoANode({ node, depth }: Props) {
   const [expanded, setExpanded] = useState(depth === 0);
   const hasChildren = node.children.length > 0;
+  const parsedTags = node.tags?.split(',').map((t) => t.trim()).filter(Boolean) ?? [];
   // Only count fields that render in the collapsible details section (not status/priority which render in header)
   const hasDetails =
     node.description ||
     node.confidence != null ||
-    node.tags ||
+    parsedTags.length > 0 ||
     node.source ||
     node.relationships.length > 0;
 
@@ -104,11 +105,11 @@ export default function SoANode({ node, depth }: Props) {
               <span className={styles.confidenceValue}>{Math.round(node.confidence * 100)}%</span>
             </div>
           )}
-          {node.tags && (
+          {parsedTags.length > 0 && (
             <div className={styles.property}>
               <span className={styles.propLabel}>Tags</span>
               <div className={styles.tagList}>
-                {node.tags.split(',').map((tag) => tag.trim()).filter(Boolean).map((tag) => (
+                {parsedTags.map((tag) => (
                   <span key={tag} className={styles.tag}>{tag}</span>
                 ))}
               </div>
