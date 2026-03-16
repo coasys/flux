@@ -42,12 +42,11 @@ type Props = {
 export default function SoANode({ node, depth }: Props) {
   const [expanded, setExpanded] = useState(depth === 0);
   const hasChildren = node.children.length > 0;
+  // Only count fields that render in the collapsible details section (not status/priority which render in header)
   const hasDetails =
     node.description ||
     node.confidence != null ||
-    node.status ||
     node.tags ||
-    node.priority != null ||
     node.source ||
     node.relationships.length > 0;
 
@@ -55,9 +54,11 @@ export default function SoANode({ node, depth }: Props) {
 
   return (
     <div className={styles.nodeWrapper} style={{ paddingLeft: `${depth * 20}px` }}>
-      <div
+      <button
         className={`${styles.nodeHeader} ${expanded ? styles.expanded : ''}`}
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        type="button"
       >
         <span className={styles.toggle}>
           {hasChildren || hasDetails ? (expanded ? '\u25BE' : '\u25B8') : '\u00A0\u00A0'}
@@ -82,7 +83,7 @@ export default function SoANode({ node, depth }: Props) {
             {node.relationships.length} rel
           </span>
         )}
-      </div>
+      </button>
 
       {expanded && hasDetails && (
         <div className={styles.details} style={{ paddingLeft: `${depth * 20 + 28}px` }}>

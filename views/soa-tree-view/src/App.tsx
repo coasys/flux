@@ -1,7 +1,7 @@
 import styles from './App.module.css';
 import { PerspectiveProxy } from '@coasys/ad4m';
 import SoATreeView from './components/SoATreeView';
-import '@coasys/flux-ui/dist/main.css';
+import '@coasys/flux-ui/dist/main.css'; // Runtime CSS import
 
 type Props = {
   perspective: PerspectiveProxy;
