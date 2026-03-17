@@ -23,26 +23,26 @@
       </j-flex>
 
       <j-flex a="center" gap="300">
-        <j-button
-          v-if="conversations.length > 0"
-          size="sm"
-          variant="ghost"
-          :loading="exporting"
-          @click="exportTranscript"
-        >
-          <j-icon name="download" slot="start" />
-          Export
-        </j-button>
-
-        <j-button
-          size="sm"
-          variant="ghost"
-          :loading="exportingFlat"
-          @click="exportChannelMessagesFlat"
-        >
-          <j-icon name="download" slot="start" />
-          Export messages
-        </j-button>
+        <j-popover placement="bottom-end">
+          <j-button
+            v-if="conversations.length > 0"
+            size="sm"
+            variant="ghost"
+            :loading="exporting || exportingFlat"
+            slot="trigger"
+          >
+            <j-icon name="download" slot="start" />
+            Export
+          </j-button>
+          <j-menu slot="content">
+            <j-menu-item @click="() => exportTranscript()">
+              <j-text nomargin>With summaries and sub-groups</j-text>
+            </j-menu-item>
+            <j-menu-item @click="() => exportChannelMessagesFlat()">
+              <j-text nomargin>Flat channel messages</j-text>
+            </j-menu-item>
+          </j-menu>
+        </j-popover>
       </j-flex>
     </j-flex>
 
