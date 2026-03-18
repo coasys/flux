@@ -57,7 +57,7 @@ vueApp.mount('#app');
         iconPath: window.location.origin + '/icon.png',
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-      multiUser: true,
+      hosting: true,
     });
 
     if (!ad4mClient) throw new Error('Ad4mClient not available');
