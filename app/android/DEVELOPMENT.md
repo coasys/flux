@@ -11,10 +11,10 @@ This document covers the challenges, workarounds, and setup required to develop 
   export JAVA_HOME=/opt/homebrew/opt/openjdk@21
   ```
 - **Android SDK** — install via Android Studio or standalone SDK tools
-  - Ensure `~/Library/Android/sdk` exists (or set `ANDROID_SDK_ROOT`)
+  - Ensure your Android SDK is installed (default: `~/Library/Android/sdk`, or set `ANDROID_SDK_ROOT`)
   - Create `android/local.properties` (gitignored):
     ```properties
-    sdk.dir=/Users/<you>/Library/Android/sdk
+    sdk.dir=/path/to/your/Android/sdk
     ```
 - **ADB** — for deploying to a physical device over USB
 
@@ -101,7 +101,7 @@ This allows the WebView to make HTTP/WS requests to any host, and trusts user-in
 ad4m-executor run \
   --app-data-path /tmp/ad4m-dev-data \
   --gql-port 12000 \
-  --admin-credential hextest123 \
+  --admin-credential <your-admin-credential> \
   --localhost false \
   --connect-holochain true \
   --hc-use-mdns true \
@@ -114,12 +114,15 @@ The `--localhost false` flag binds the HTTP server to `0.0.0.0` instead of `127.
 
 The AD4M executor does not handle CORS preflight (`OPTIONS`) requests. When the WebView makes cross-origin requests to the executor, the preflight fails with `405 Method Not Allowed`.
 
-Run a simple CORS proxy:
+Run a simple CORS proxy (no dependencies required):
 
 ```javascript
-// cors-proxy.js
+// cors-proxy.js — place in project root or a scripts/ directory
 const http = require('http');
 const net = require('net');
+
+const EXECUTOR_PORT = 12000;  // Must match --gql-port above
+const PROXY_PORT = 12002;     // Port the phone will connect to
 
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -127,7 +130,7 @@ const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
   
-  const opts = { hostname: '127.0.0.1', port: 12000, path: req.url, method: req.method, headers: req.headers };
+  const opts = { hostname: '127.0.0.1', port: EXECUTOR_PORT, path: req.url, method: req.method, headers: req.headers };
   delete opts.headers.host;
   const proxy = http.request(opts, (pRes) => {
     pRes.headers['access-control-allow-origin'] = '*';
@@ -138,8 +141,9 @@ const server = http.createServer((req, res) => {
   req.pipe(proxy);
 });
 
+// WebSocket upgrade passthrough
 server.on('upgrade', (req, socket, head) => {
-  const target = net.createConnection(12000, '127.0.0.1', () => {
+  const target = net.createConnection(EXECUTOR_PORT, '127.0.0.1', () => {
     const reqStr = `${req.method} ${req.url} HTTP/1.1\r\n` +
       Object.entries(req.headers).map(([k,v]) => `${k}: ${v}`).join('\r\n') + '\r\n\r\n';
     target.write(reqStr);
@@ -150,7 +154,7 @@ server.on('upgrade', (req, socket, head) => {
   socket.on('error', () => target.destroy());
 });
 
-server.listen(12002, '0.0.0.0', () => console.log('CORS proxy on 0.0.0.0:12002'));
+server.listen(PROXY_PORT, '0.0.0.0', () => console.log(`CORS proxy on 0.0.0.0:${PROXY_PORT} → 127.0.0.1:${EXECUTOR_PORT}`));
 ```
 
 ```bash
@@ -159,15 +163,19 @@ node cors-proxy.js
 
 #### 5. Connect the app
 
-The phone needs to reach the CORS proxy. Options:
-- **Same Wi-Fi network** — use the dev machine's LAN IP (e.g., `ws://192.168.1.x:12002/graphql`)
-- **USB via ADB reverse** — `adb reverse tcp:12002 tcp:12002` (note: does not work reliably with Capacitor's `localhost` origin)
+The phone needs to reach the CORS proxy. Find your dev machine's LAN IP (e.g., `ifconfig | grep "inet "`) and connect using:
+
+```
+ws://<DEV_MACHINE_LAN_IP>:12002/graphql
+```
 
 Then inject via Chrome DevTools (see "Remote Debugging" below) or use ad4m-connect's "Remote Node" UI.
 
+> **Note:** `adb reverse tcp:12002 tcp:12002` does not work reliably with Capacitor because the WebView already uses `localhost` for serving the app.
+
 ### Production TLS Connection
 
-For connecting to a production executor with proper TLS certificates (e.g., `wss://lucksus.ad4m.dev:12001/graphql`), the default `https://localhost` Capacitor scheme works. The server must present a full certificate chain signed by a trusted CA (Let's Encrypt, etc.). Self-signed certificates will not work without additional Android configuration.
+For connecting to a production executor with proper TLS certificates, the default `https://localhost` Capacitor scheme works. The server must present a full certificate chain signed by a trusted CA (Let's Encrypt, etc.). Self-signed certificates will not work without additional Android configuration.
 
 ## Remote Debugging via Chrome DevTools
 
@@ -197,19 +205,19 @@ Alternatively, open `chrome://inspect/#devices` in Chrome on the dev machine to 
 
 ### Injecting Auth (Admin Token Bypass)
 
-For development, bypass ad4m-connect's login flow by injecting the admin token directly:
+For development, bypass ad4m-connect's login flow by injecting the admin token directly via the Chrome DevTools console or CDP:
 
 ```javascript
-// Via CDP Runtime.evaluate
+// Via Chrome DevTools console (chrome://inspect/#devices) or CDP Runtime.evaluate
 const el = document.querySelector('ad4m-connect');
 const core = el.core;
-core.url = 'ws://192.168.1.x:12002/graphql';
-core.token = 'hextest123';  // Must match --admin-credential
+core.url = 'ws://<DEV_MACHINE_LAN_IP>:12002/graphql';
+core.token = '<your-admin-credential>';  // Must match --admin-credential
 await core.buildClient();
 await core.connect();
 await core.checkAuth();
-await core.ad4mClient.agent.unlock('test');
-// Navigate past login
+await core.ad4mClient.agent.unlock('<your-agent-passphrase>');
+// Navigate past login screen
 window.location.hash = '#/home';
 ```
 
