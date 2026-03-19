@@ -569,6 +569,13 @@ export class Conversation extends Ad4mModel {
       });
     }
 
+    // Sort sections by earliest item timestamp (content time, not link creation time)
+    sections.sort((a, b) => {
+      const aTime = a.items.length > 0 ? new Date(a.items[0].timestamp).getTime() : 0;
+      const bTime = b.items.length > 0 ? new Date(b.items[0].timestamp).getTime() : 0;
+      return aTime - bTime;
+    });
+
     // Resolve unprocessed items author names
     let unprocessedWithNames;
     if (unprocessedItems && unprocessedItems.length > 0) {
