@@ -185,11 +185,12 @@ export const useAiStore = defineStore(
         unref(communityService.recentConversationsWithAgents).map(async (conversationData) => {
           if (!conversationData.channel) return null;
           const rawChannel = toRaw(conversationData.channel);
+          if (!rawChannel.id) return null;
           const unprocessedItems = await rawChannel.unprocessedItems();
           const shouldProcess = await checkIfWeShouldProcessTask(
             unprocessedItems,
             communityService.signallingService,
-            rawChannel.id!,
+            rawChannel.id,
           );
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
         }),
