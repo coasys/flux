@@ -118,7 +118,7 @@ export class Conversation extends Ad4mModel {
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
       // Get timestamps for each subgroup separately
-      return await Promise.all(
+      const subgroups = await Promise.all(
         (surrealResult || []).map(async (subgroup: any) => {
           // Query to get timestamps for items in this subgroup
           // Get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
@@ -153,6 +153,9 @@ export class Conversation extends Ad4mModel {
           };
         }),
       );
+
+      // Sort by actual content start time, not link creation time
+      return subgroups.sort((a, b) => a.start - b.start);
     } catch (error) {
       console.error('Error getting conversation subgroups:', error);
       return [];
