@@ -3,6 +3,7 @@ import kissWav from '@/assets/audio/kiss.wav';
 import pigWav from '@/assets/audio/pig.wav';
 import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
+import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { PerspectiveExpression } from '@coasys/ad4m';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
@@ -28,12 +29,12 @@ export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
-    urls: 'stun:relay.ad4m.dev:3478',
+    urls: 'stun:turn.ad4m.dev:3478',
     username: 'openrelay',
     credential: 'openrelay',
   },
   {
-    urls: 'turn:relay.ad4m.dev:443',
+    urls: 'turns:turn.ad4m.dev:5349',
     username: 'openrelay',
     credential: 'openrelay',
   },
@@ -72,6 +73,8 @@ export const useWebrtcStore = defineStore(
     const { me } = storeToRefs(appStore);
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
+
+    const tabCoordinator = useTabCoordinator();
 
     const popSound = new Howl({ src: [popWav] });
     const guitarSound = new Howl({ src: [guitarWav] });
@@ -593,6 +596,16 @@ export const useWebrtcStore = defineStore(
       joiningCall.value = true;
 
       try {
+        // Promote this tab to leader so it controls signalling & WebRTC.
+        // claimLeadership waits briefly for a potential 'call-pinned' rejection.
+        const claimed = await tabCoordinator.claimLeadership(true);
+        if (!claimed) {
+          appStore.showDangerToast({ message: 'You are already in a call in another tab.' });
+          tabCoordinator.requestLeaderFocus();
+          joiningCall.value = false;
+          return;
+        }
+
         // Update the call route
         callRoute.value = route.params;
 
@@ -641,6 +654,7 @@ export const useWebrtcStore = defineStore(
         // Reset state
         inCall.value = false;
         callRoute.value = {};
+        tabCoordinator.setInCall(false);
 
         // Exit fullscreen before closing the call window
         if (uiStore.callWindowFullscreen) {
@@ -768,6 +782,9 @@ export const useWebrtcStore = defineStore(
       },
       { immediate: true },
     );
+
+    // Keep the tab coordinator in sync with call state
+    watch(inCall, (nowInCall) => tabCoordinator.setInCall(nowInCall), { immediate: true });
 
     return {
       inCall,
