@@ -15,6 +15,7 @@ import getMe from './getMe';
 import getPerspectiveMeta from './getPerspectiveMeta';
 import getProfile from './getProfile';
 import joinCommunity from './joinCommunity';
+import MemoryEntry from './memory-entry';
 import Message from './message';
 import Post from './post';
 import SemanticRelationship from './semantic-relationship';
@@ -45,6 +46,7 @@ export {
   getProfile,
   joinCommunity,
   Me,
+  MemoryEntry,
   Message,
   Post,
   SemanticRelationship,

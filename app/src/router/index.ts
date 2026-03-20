@@ -34,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import(`@/views/main/community/CommunityView.vue`),
         children: [
           {
+            path: 'memory',
+            name: 'memory',
+            component: () => import(`@/views/main/community/memory/MemoryView.vue`),
+          },
+          {
             path: ':channelId',
             props: true,
             name: 'channel',
