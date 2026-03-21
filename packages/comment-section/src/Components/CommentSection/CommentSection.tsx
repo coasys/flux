@@ -1,12 +1,11 @@
 import CommentItem from '../CommentItem';
-import { useState, useRef } from 'preact/hooks';
+import { useState, useRef, useEffect } from 'preact/hooks';
 import { Message } from '@coasys/flux-api';
-import { useModel, useMe } from '@coasys/ad4m-react-hooks';
-import { PerspectiveProxy } from '@coasys/ad4m';
+import { useMe } from '@coasys/flux-react-web';
+import { Link, LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import styles from './CommentSection.module.css';
 import Avatar from '../Avatar';
-import { profileFormatter } from '@coasys/flux-utils';
 
 export default function CommentSection({
   agent,
@@ -17,12 +16,33 @@ export default function CommentSection({
   perspective: PerspectiveProxy;
   source: string;
 }) {
-  const myAgent = useMe(agent, profileFormatter);
+  const myAgent = useMe(agent);
 
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
+  const [comments, setComments] = useState<Message[]>([]);
 
-  const { entries: comments } = useModel({ perspective, model: Message, query: { source } });
+  async function loadComments() {
+    const links = await perspective.get(new LinkQuery({ source, predicate: 'ad4m://has_child' }));
+    const messages = await Promise.all(
+      links.map(async (link) => {
+        const msg = new Message(perspective, link.data.target);
+        await msg.get();
+        return msg;
+      }),
+    );
+    setComments(messages.filter((m) => m.body));
+  }
+
+  useEffect(() => {
+    loadComments();
+    const handler = (link: any) => {
+      if (link.data?.source === source && link.data?.predicate === 'ad4m://has_child') loadComments();
+      return null;
+    };
+    perspective.addListener('link-added', handler);
+    return () => perspective.removeListener('link-added', handler);
+  }, [source]);
 
   function onKeydown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -35,9 +55,8 @@ export default function CommentSection({
     try {
       const html = editor.current?.editor.getHTML();
       editor.current?.clear();
-      const message = new Message(perspective, undefined, source);
-      message.body = html;
-      await message.save();
+      const message = await Message.create(perspective, { body: html });
+      await perspective.add(new Link({ source, predicate: 'ad4m://has_child', target: message.id }));
     } catch (e) {
       console.log(e);
     }

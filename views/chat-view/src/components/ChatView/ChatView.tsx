@@ -8,7 +8,7 @@ import MessageList from '../MessageList/MessageList';
 import { useVoiceRecorder } from '../../composables/useVoiceRecorder';
 import styles from './ChatView.module.css';
 
-const { HAS_REPLY, REACTION } = community;
+const { HAS_REPLY, REACTION, MESSAGE_THREAD } = community;
 
 type Props = {
   agent: AgentClient;
@@ -76,22 +76,21 @@ export default function ChatView({ agent, client, perspective, source, threaded,
       const text = editor.current?.editor.getText();
       editor.current?.clear();
 
-      // @ts-ignore
-      const message = new Message(perspective, undefined, source);
-      message.body = html;
-      await message.save();
+      const message = await Message.create(perspective, { body: html }, {
+        parent: { id: source, predicate: threaded ? MESSAGE_THREAD : 'ad4m://has_child' },
+      });
 
       if (replyMessage) {
         perspective.addLinks([
           {
-            source: replyMessage.baseExpression,
+            source: replyMessage.id,
             predicate: HAS_REPLY,
-            target: message.baseExpression,
+            target: message.id,
           },
           // {
-          //   source: replyMessage.baseExpression,
+          //   source: replyMessage.id,
           //   predicate: EntryType.Message,
-          //   target: message.baseExpression,
+          //   target: message.id,
           // },
         ]);
       }
@@ -109,7 +108,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   }
 
   function onOpenEmojiPicker(message: Message, position: { x: number; y: number }) {
-    setPickerInfo({ x: position.x, y: position.y, id: message.baseExpression });
+    setPickerInfo({ x: position.x, y: position.y, id: message.id });
   }
 
   async function onOpenThread(message: Message) {
@@ -123,15 +122,23 @@ export default function ChatView({ agent, client, perspective, source, threaded,
 
       if (!el) {
         el = document.createElement(element.localName);
+        el.className = styles.webComponent;
+        el.perspective = perspective;
+        el.agent = agent;
+        el.client = client;
+        el.getProfile = getProfile;
+        el.setAttribute('source', message.id);
+        el.setAttribute('threaded', 'true');
         container.append(el);
+      } else {
+        el.className = styles.webComponent;
+        el.perspective = perspective;
+        el.agent = agent;
+        el.client = client;
+        el.getProfile = getProfile;
+        el.setAttribute('source', message.id);
+        el.setAttribute('threaded', 'true');
       }
-      el.className = styles.webComponent;
-      el.perspective = perspective;
-      el.agent = agent;
-      el.client = client;
-      el.getProfile = getProfile;
-      el.setAttribute('source', message.baseExpression);
-      el.setAttribute('threaded', 'true');
     }
   }
 
@@ -223,7 +230,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
           onEmojiClick={onOpenEmojiPicker}
           onReplyClick={(message) => setReplyMessage(message)}
           onThreadClick={(message) => onOpenThread(message)}
-          replyId={replyMessage?.baseExpression}
+          replyId={replyMessage?.id}
           perspective={perspective}
           isThread={threaded}
           agent={agent}

@@ -14,7 +14,7 @@ export type LinkExpression = { author: string; data: Link };
 
 export class SynergyGroup {
   // Used for conversations & subgroups
-  baseExpression: string;
+  id: string;
   name: string;
   summary: string;
   timestamp: string;
@@ -26,7 +26,7 @@ export class SynergyGroup {
 
 export class SynergyItem {
   // Used for items: messages, posts, & tasks
-  baseExpression: string;
+  id: string;
   author: string;
   type: ItemType;
   icon: string;
@@ -37,7 +37,7 @@ export class SynergyItem {
 }
 
 export class SynergyMatch {
-  baseExpression: string;
+  id: string;
   channelId: string;
   channelName: string;
   type: string;
@@ -47,7 +47,7 @@ export class SynergyMatch {
 }
 
 export class SynergyTopic {
-  baseExpression: string;
+  id: string;
   name: string;
 }
 

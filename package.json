@@ -45,10 +45,11 @@
     ]
   },
   "resolutions": {
-    "@coasys/ad4m": "0.12.0-rc1-dev.1",
-    "@coasys/ad4m-connect": "0.12.0-rc1-dev.1",
-    "@coasys/ad4m-vue-hooks": "0.11.2-dev.2",
-    "@coasys/ad4m-react-hooks": "0.11.2-dev.2",
-    "@coasys/hooks-helpers": "0.11.2-dev.2"
+    "@coasys/ad4m": "0.12.0-rc2",
+    "@coasys/ad4m-connect": "0.12.0-rc2",
+    "@coasys/ad4m-vue-hooks": "0.12.0-rc2",
+    "@coasys/ad4m-react-hooks": "0.12.0-rc2",
+    "@coasys/hooks-helpers": "0.12.0-rc2",
+    "@preact/preset-vite": "2.9.4"
   }
 }

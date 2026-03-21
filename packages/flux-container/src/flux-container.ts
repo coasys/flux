@@ -8,10 +8,9 @@ if (!customElements.get('j-button')) {
 }
 
 import { getAd4mClient } from '@coasys/ad4m-connect';
-import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
+import { Ad4mClient, Link, PerspectiveProxy } from '@coasys/ad4m';
 import { createCommunity, joinCommunity } from '@coasys/flux-api';
 import { Channel, Community } from '@coasys/flux-api';
-import { SubjectRepository } from '@coasys/flux-api';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
 @customElement('flux-container')
@@ -199,9 +198,7 @@ export class MyElement extends LitElement {
       perspective.addListener('link-added', async (link) => {
         const isChannel = await perspective.isSubjectInstance(link.data.source, Channel.prototype.className);
         if (isChannel) {
-          this.channels = await new SubjectRepository(Channel, {
-            perspective,
-          }).getAllData();
+          this.channels = await Channel.findAll(perspective);
         }
         return null;
       });
@@ -213,9 +210,7 @@ export class MyElement extends LitElement {
     try {
       this.isLoading = true;
 
-      const channels = await new SubjectRepository(Channel, {
-        perspective: perspective,
-      }).getAllData();
+      const channels = await Channel.findAll(perspective);
 
       this.channels = channels;
 
@@ -277,11 +272,8 @@ export class MyElement extends LitElement {
   async onCreateChannel() {
     this.isCreatingChannel = true;
     try {
-      const model = new SubjectRepository(Channel, {
-        perspective: this.perspective,
-        source: 'ad4m://self',
-      });
-      await model.create({ name: this.title });
+      const model = await Channel.create(this.perspective, { name: this.title });
+      await this.perspective.add(new Link({ source: 'ad4m://self', predicate: 'ad4m://has_child', target: model.id }));
       this.title = '';
       this.showCreateChannel = false;
     } catch (e) {

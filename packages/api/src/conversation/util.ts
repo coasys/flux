@@ -30,9 +30,8 @@ export async function removeEmbedding(perspective, itemId, batchId: string): Pro
     if (showLogs) console.log('embeddingSRId found:', embeddingSRId);
     const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId);
     const { tag } = await semanticRelationship.get();
-    const embedding = new Embedding(perspective, tag);
-    await embedding.delete(batchId);
-    await semanticRelationship.delete(batchId);
+    await Embedding.delete(perspective, tag, batchId);
+    await SemanticRelationship.delete(perspective, embeddingSRId, batchId);
   }
 }
 
@@ -56,20 +55,18 @@ export async function createEmbedding(
   if (showLogs) console.log(`${index ? `Item ${index} e` : 'E'}mbedding created in ${duration(start1, end1)}`);
   // create embedding subject entity
   const start2 = new Date().getTime();
-  const embedding = new Embedding(perspective, undefined, itemId);
-  embedding.model = 'bert';
   const embeddingExpression = await perspective.createExpression(rawEmbedding, EMBEDDING_VECTOR_LANGUAGE);
   if (showLogs) console.log(`embeddingExpression for item ${index}:`, embeddingExpression);
-  embedding.embedding = embeddingExpression;
-  await embedding.save(batchId);
+  const embedding = await Embedding.create(perspective, { model: 'bert', embedding: embeddingExpression }, { batchId });
   const end2 = new Date().getTime();
   if (showLogs) console.log(`${index ? `Item ${index} e` : 'E'}mbedding saved in ${duration(start2, end2)}`);
   // create semantic relationship subject entity
   const start3 = new Date().getTime();
-  const relationship = new SemanticRelationship(perspective, undefined, itemId);
-  relationship.expression = itemId;
-  relationship.tag = embedding.baseExpression;
-  await relationship.save(batchId);
+  await SemanticRelationship.create(
+    perspective,
+    { expression: itemId, tag: embedding.id },
+    { batchId },
+  );
   const end3 = new Date().getTime();
   if (showLogs) console.log(`${index ? `Item ${index}` : ''} SR saved in ${duration(start3, end3)}`);
 }

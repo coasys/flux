@@ -67,7 +67,8 @@ async function updateCommunity() {
       compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(communityImage.value as string), 0.6));
     }
 
-    const communityModel = new Community(perspective, community.value.baseExpression);
+    const communityModel = await Community.findOne(perspective, { where: { id: community.value.id } });
+    if (!communityModel) throw new Error('Community not found');
     communityModel.name = communityName.value;
     communityModel.description = communityDescription.value;
     // @ts-ignore
@@ -79,7 +80,7 @@ async function updateCommunity() {
         }
       : undefined;
 
-    await communityModel.update();
+    await communityModel.save();
   } catch (e) {
     console.log(e);
   } finally {

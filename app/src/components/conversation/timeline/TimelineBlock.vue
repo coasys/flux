@@ -1,5 +1,5 @@
 <template>
-  <div :id="`timeline-block-${data.baseExpression}`" :class="['block', blockType]">
+  <div :id="`timeline-block-${data.id}`" :class="['block', blockType]">
     <button v-if="!match" class="group-button" @click="onGroupClick" />
 
     <!-- Timestamps -->
@@ -29,7 +29,7 @@
         <j-flex a="center" gap="400">
           <j-flex a="center" gap="400">
             <PercentageRing
-              v-if="match && match.score !== undefined && match.baseExpression === data.baseExpression"
+              v-if="match && match.score !== undefined && match.id === data.id"
               :ring-size="70"
               :font-size="10"
               :score="(match.score || 0) * 100"
@@ -58,9 +58,9 @@
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 5px">
           <button
             v-for="topic in visibleTopics"
-            :key="topic.baseExpression"
-            :class="['tag', { focus: selectedTopicId === topic.baseExpression }]"
-            @click="search!('topic', data.baseExpression, topic)"
+            :key="topic.id"
+            :class="['tag', { focus: selectedTopicId === topic.id }]"
+            @click="search!('topic', data.id, topic)"
             :disabled="!!match"
             :style="{ cursor: !!match ? 'default' : 'pointer' }"
           >
@@ -71,7 +71,7 @@
             {{ showAllTopics ? 'Show less topics' : `Show ${topics.length - 6} more topics` }}
           </button>
 
-          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
+          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.id)">
             <j-icon name="flower2" color="color-success-500" size="sm" style="margin-right: 5px" />
             Synergize
           </button>
@@ -100,7 +100,7 @@
         <!-- Recursive timeline blocks -->
         <TimelineBlock
           v-for="(child, index) in visibleChildren"
-          :key="child.baseExpression"
+          :key="child.id"
           :block-type="blockType === 'conversation' ? 'subgroup' : 'item'"
           :last-child="index === visibleChildren.length - 1"
           :data="child"
@@ -141,7 +141,7 @@
     <!-- Content for items -->
     <j-flex v-else-if="blockType === 'item'" gap="400" a="center" :class="['item-card', { selected }]">
       <PercentageRing
-        v-if="match && match.baseExpression === data.baseExpression"
+        v-if="match && match.id === data.id"
         :ring-size="70"
         :font-size="10"
         :score="(match.score || 0) * 100"
@@ -158,7 +158,7 @@
         <div class="item-text" v-html="(data as SynergyItem).text" />
 
         <j-flex v-if="selected" gap="300" wrap style="margin-top: 10px">
-          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.baseExpression)">
+          <button v-if="!match" :class="['tag', 'vector']" @click="search!('vector', data.id)">
             <j-icon name="flower2" color="color-success-500" size="sm" style="margin-right: 5px" />
             Synergize
           </button>
@@ -273,7 +273,7 @@ const subgroupDurationMins = computed(() => {
 
 async function getConversationStats() {
   try {
-    const conversation = new Conversation(perspective, props.data.baseExpression);
+    const conversation = new Conversation(perspective, props.data.id);
     const stats = await conversation.stats();
     totalChildren.value = stats.totalSubgroups;
     participants.value = stats.participants;
@@ -286,7 +286,7 @@ async function getConversationStats() {
 
 async function getSubgroupStats() {
   try {
-    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, props.data.id);
     const stats = await subgroup.stats();
     totalChildren.value = stats.totalItems;
     participants.value = stats.participants;
@@ -299,7 +299,7 @@ async function getSubgroupStats() {
 
 async function getConversationTopics() {
   try {
-    const conversation = new Conversation(perspective, props.data.baseExpression);
+    const conversation = new Conversation(perspective, props.data.id);
     topics.value = await conversation.topics();
   } catch (error) {
     console.error('Error fetching conversation topics:', error);
@@ -309,7 +309,7 @@ async function getConversationTopics() {
 
 async function getSubgroupTopics() {
   try {
-    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, props.data.id);
     topics.value = await subgroup.topics();
   } catch (error) {
     console.error('Error fetching subgroup topics:', error);
@@ -319,13 +319,13 @@ async function getSubgroupTopics() {
 
 async function getSubgroups() {
   try {
-    const conversation = new Conversation(perspective, props.data.baseExpression);
+    const conversation = new Conversation(perspective, props.data.id);
     const subgroups = await conversation.subgroupsData();
 
     if (props.match) {
       // Look for match in subgroups
       subgroups.forEach((subgroup, subgroupIndex) => {
-        if (subgroup.baseExpression === props.match!.baseExpression) {
+        if (subgroup.id === props.match!.id) {
           // If found, store the subgroups index & mark loading true to prevent further loading
           props.setMatchIndexes?.({
             conversation: props.data.index,
@@ -351,7 +351,7 @@ async function removeDuplicateItems(itemIds: string[]) {
       itemIds.map(async (itemId) => {
         // Grab all links connecting the item to the subgroup
         const links = await perspective.get(
-          new LinkQuery({ source: props.data.baseExpression, predicate: 'ad4m://has_child', target: itemId }),
+          new LinkQuery({ source: props.data.id, predicate: 'ad4m://has_child', target: itemId }),
         );
         // Remove all except the first link
         return links.slice(1);
@@ -365,19 +365,19 @@ async function removeDuplicateItems(itemIds: string[]) {
 
 async function getItems() {
   try {
-    const subgroup = new ConversationSubgroup(perspective, props.data.baseExpression);
+    const subgroup = new ConversationSubgroup(perspective, props.data.id);
     const items = await subgroup.itemsData();
     const uniqueItems = new Map();
     const duplicates = new Set<string>();
 
     items.forEach((item, itemIndex) => {
       // Store duplicates for link cleanup
-      if (uniqueItems.has(item.baseExpression)) {
-        duplicates.add(item.baseExpression);
+      if (uniqueItems.has(item.id)) {
+        duplicates.add(item.id);
       } else {
-        uniqueItems.set(item.baseExpression, item);
+        uniqueItems.set(item.id, item);
         // Set match indexes and stop loading if match found
-        if (props.match && item.baseExpression === props.match.baseExpression) {
+        if (props.match && item.id === props.match.id) {
           props.setMatchIndexes?.({
             conversation: (props.data as SynergyGroup).parentIndex,
             subgroup: props.data.index,
@@ -403,7 +403,7 @@ async function getItems() {
 
 function onGroupClick() {
   if (!props.match) {
-    props.setSelectedItemId?.(selected.value ? null : props.data.baseExpression);
+    props.setSelectedItemId?.(selected.value ? null : props.data.id);
   }
   if (!selected.value) {
     if (props.blockType === 'conversation') getConversationTopics();
@@ -433,7 +433,7 @@ watch(
       if (props.blockType === 'conversation') getSubgroups();
       if (props.blockType === 'subgroup') getItems();
       // Deselects block when clicked on if not a match and not the currently selected item
-      if (!props.match && props.selectedItemId !== props.data.baseExpression) {
+      if (!props.match && props.selectedItemId !== props.data.id) {
         props.setSelectedItemId?.(null);
       }
     }
@@ -463,8 +463,8 @@ watch(
 watch(
   () => props.selectedItemId,
   () => {
-    const isSelected = props.selectedItemId === props.data.baseExpression;
-    const isMatch = props.match?.baseExpression === props.data.baseExpression;
+    const isSelected = props.selectedItemId === props.data.id;
+    const isMatch = props.match?.id === props.data.id;
     selected.value = isSelected || isMatch;
 
     if (isMatch) {

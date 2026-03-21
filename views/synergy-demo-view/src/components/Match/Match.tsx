@@ -40,7 +40,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
     const newConversations = await channel.conversations();
     // find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
-      if (conversation.baseExpression === match.baseExpression) {
+      if (conversation.id === match.id) {
         // store the conversations index & mark loading true to prevent further loading of children
         setMatchIndexes((prev) => ({ ...prev, conversation: conversationIndex }));
         setLoading(false);
@@ -96,7 +96,7 @@ export default function Match({ perspective, agent, match, index, grouping, sele
             })
             .map((conversation) => (
               <TimelineBlock
-                key={conversation.baseExpression}
+                key={conversation.id}
                 agent={agent}
                 perspective={perspective}
                 blockType="conversation"

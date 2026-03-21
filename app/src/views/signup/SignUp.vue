@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
-import { useAppStore } from '@/stores';
+import { useAppStore, useUiStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
@@ -59,6 +59,7 @@ import SignUpCarousel from './SignUpCarousel.vue';
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
+const uiStore = useUiStore();
 
 const showSignup = ref(false);
 const profilePicture = ref();
@@ -124,7 +125,7 @@ async function createUser() {
       if (redirectPath) {
         router.push(redirectPath);
         // Note: Call window will open automatically via router.afterEach
-        // when user enters a channel with an active call
+        // when user actually enters a channel with an active call
       } else {
         router.push({ name: 'home' });
       }

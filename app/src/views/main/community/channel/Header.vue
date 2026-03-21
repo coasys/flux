@@ -84,10 +84,9 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores';
 import { stripChannelPrefix } from '@/utils/routeUtils';
-import { useModel } from '@coasys/ad4m-vue-hooks';
 import { App, Channel } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
-import { computed, onActivated, onMounted } from 'vue';
+import { computed, onActivated, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'Header' });
@@ -102,21 +101,40 @@ const { me } = storeToRefs(appStore);
 const { isMobile, callWindowOpen, headerHeight } = storeToRefs(uiStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
-const { perspective, signallingService, allChannels, recentConversations } = useCommunityService();
+const {
+  perspective,
+  signallingService,
+  allChannels,
+  recentConversationsWithAgents: recentConversations,
+} = useCommunityService();
 const { communityId, channelId, viewId } = useRouteParams();
 
-const channel = computed(() => allChannels.value.find((c) => stripChannelPrefix(c.baseExpression) === channelId.value));
+const channel = computed(() => allChannels.value.find((c) => stripChannelPrefix(c.id) === channelId.value));
 const conversation = computed(() =>
   channel.value?.isConversation
-    ? recentConversations.value.find(
-        (c) => c.channel.baseExpression && stripChannelPrefix(c.channel.baseExpression) === channelId.value,
-      )?.conversation
+    ? recentConversations.value.find((c) => c.channel?.id && stripChannelPrefix(c.channel.id) === channelId.value)
+        ?.conversation
     : null,
 );
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId.value)?.value || []);
 
-const { entries: views } = useModel({ perspective, model: App, query: { source: channel.value?.baseExpression } });
+const views = ref<App[]>([]);
+watch(
+  channel,
+  async (newChannel) => {
+    if (newChannel) {
+      const channelWithViews = await Channel.findOne(perspective, {
+        where: { id: newChannel.id },
+        include: { views: true },
+      });
+      views.value = channelWithViews?.views ?? [];
+    } else {
+      views.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 function manageChannelPlugins() {
   modalStore.showManageChannelPluginsModal = true;
@@ -134,9 +152,10 @@ async function togglePinned() {
   if (!channel.value) return;
 
   try {
-    const channelModel = new Channel(perspective, channel.value.baseExpression);
+    const channelModel = await Channel.findOne(perspective, { where: { id: channel.value.id } });
+    if (!channelModel) return;
     channelModel.isPinned = !channel.value.isPinned;
-    await channelModel.update();
+    await channelModel.save();
   } catch (error) {
     console.error('Error toggling pinned state:', error);
     appStore.showDangerToast({ message: 'Failed to update pinned state' });

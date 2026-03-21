@@ -68,7 +68,7 @@ export default function CardDetails({
         <comment-section
           className={styles.commentSection}
           perspective={perspective}
-          source={task.baseExpression}
+          source={task.id}
           agent={agent}
         />
       </div>
