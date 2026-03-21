@@ -8,19 +8,19 @@
 
       <j-flex gap="300" a="center" wrap="wrap">
         <!-- Memory type filter -->
-        <select class="memory-filter" v-model="filterType" @change="applyFilters">
+        <select class="memory-filter" v-model="filterType">
           <option value="">All Types</option>
           <option v-for="t in availableTypes" :key="t" :value="t">{{ formatType(t) }}</option>
         </select>
 
         <!-- Author filter -->
-        <select class="memory-filter" v-model="filterAuthor" @change="applyFilters">
+        <select class="memory-filter" v-model="filterAuthor">
           <option value="">All Agents</option>
           <option v-for="a in availableAuthors" :key="a.did" :value="a.did">{{ a.name }}</option>
         </select>
 
         <!-- Importance filter -->
-        <select class="memory-filter" v-model="filterImportance" @change="applyFilters">
+        <select class="memory-filter" v-model="filterImportance">
           <option value="0">Any Importance</option>
           <option value="7">⭐ 7+</option>
           <option value="8">⭐ 8+</option>
@@ -233,10 +233,6 @@ const filteredEntries = computed(() => {
   });
 });
 
-function applyFilters() {
-  // Filters are reactive — nothing to do, computed handles it
-}
-
 function getAuthorProfile(did: string): Profile | undefined {
   return profileCache.value[did];
 }
@@ -315,7 +311,6 @@ function filterByTag(tag: string) {
   filterAuthor.value = '';
   filterImportance.value = '0';
   filterTag.value = tag;
-  applyFilters();
 }
 </script>
 
