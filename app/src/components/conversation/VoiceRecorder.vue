@@ -1,13 +1,11 @@
 <template>
   <div class="voice-recorder">
-    <!-- Transcription card (similar to call transcriber) -->
-    <j-box v-if="transcripts.length || previewText" mb="300" class="transcript-card">
+    <j-box v-if="isRecording || isTranscribing || finalText || previewText" py="300" class="voice-preview-card">
       <j-flex direction="column" gap="300">
-        <!-- Header with cancel button -->
-        <j-flex j="between" a="center">
+        <j-flex a="center" gap="300" j="between">
           <j-flex a="center" gap="300">
-            <j-spinner v-if="isRecording || isTranscribing" size="xxs" />
-            <j-text nomargin size="300" color="primary-500">
+            <j-spinner v-if="isRecording" size="xs" />
+            <j-text nomargin color="primary-500" size="300">
               {{ isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : '' }}
             </j-text>
           </j-flex>
@@ -15,70 +13,41 @@
             @click="cancelRecording"
             circle
             size="xs"
-            variant="danger"
+            variant="ghost"
             title="Cancel"
           >
             <j-icon size="xs" name="x" />
           </j-button>
         </j-flex>
-        <div
-          v-for="transcript in transcripts"
-          :key="transcript.id"
-          class="transcript-item"
-        >
-          <j-flex direction="column" gap="200">
-            <j-text nomargin size="400" color="ui-800">
-              {{ transcript.text }}
-              <span
-                v-if="previewText && transcript.id === currentTranscriptId"
-                :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-400)' }"
-              >
-                {{ previewText }}
-              </span>
-            </j-text>
-          </j-flex>
-        </div>
+        <j-text v-if="finalText || previewText" nomargin color="ui-800" size="400">
+          {{ finalText }}
+          <span
+            v-if="previewText"
+            :style="{ fontStyle: 'italic', color: 'var(--j-color-ui-400)' }"
+          >
+            {{ previewText }}
+          </span>
+        </j-text>
       </j-flex>
     </j-box>
 
-    <!-- Recording button -->
-    <j-flex gap="300" a="center" class="recorder-controls">
-      <j-button
-        @click="toggleRecording"
-        variant="primary"
-        :disabled="isTranscribing"
-        circle
-        size="lg"
-      >
-        <j-icon :name="isRecording ? 'send' : 'mic-fill'" size="lg" />
-      </j-button>
-      <div class="recorder-status">
-        <j-text v-if="isRecording" nomargin color="danger-500" size="400">
-          Recording... Click to send
-        </j-text>
-        <j-text v-else-if="isTranscribing" nomargin color="primary-500" size="400">
-          Transcribing...
-        </j-text>
-        <j-text v-else nomargin color="ui-400" size="300">
-          Click to record voice message
-        </j-text>
-      </div>
-    </j-flex>
+    <j-button
+      @click="toggleRecording"
+      circle
+      square
+      size="sm"
+      variant="primary"
+      :disabled="isTranscribing"
+    >
+      <j-icon size="sm" :name="isRecording ? 'send' : 'mic'" />
+    </j-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
-import { ref, computed, onUnmounted } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
-
-interface Transcript {
-  id: string;
-  text: string;
-  timestamp: Date;
-  state: 'transcribing' | 'saving' | 'saved' | 'aborted';
-}
+import { ref, onUnmounted } from 'vue';
 
 const props = defineProps<{
   client: Ad4mClient;
@@ -89,8 +58,8 @@ const props = defineProps<{
 const isRecording = ref(false);
 const isTranscribing = ref(false);
 const previewText = ref('');
-const transcripts = ref<Transcript[]>([]);
-const currentTranscriptId = ref('');
+const finalText = ref('');
+const transcriptTimestamp = ref<Date | null>(null);
 
 // Audio capture refs (AudioWorklet approach)
 let audioContext: AudioContext | null = null;
@@ -99,16 +68,9 @@ let stream: MediaStream | null = null;
 let transcriptionStreamId: string | null = null;
 let fastTranscriptionStreamId: string | null = null;
 
-const currentTranscript = computed(() => 
-  transcripts.value.find(t => t.id === currentTranscriptId.value)
-);
-
 function handleTranscriptionText(text: string) {
+  finalText.value += text;
   previewText.value = '';
-  const transcript = currentTranscript.value;
-  if (transcript) {
-    transcript.text += text;
-  }
 }
 
 async function cleanup() {
@@ -150,17 +112,9 @@ async function startRecording() {
   }
 
   try {
+    finalText.value = '';
     previewText.value = '';
-    
-    // Initialize new transcript
-    const id = uuidv4();
-    currentTranscriptId.value = id;
-    transcripts.value = [{
-      id,
-      text: '',
-      timestamp: new Date(),
-      state: 'transcribing'
-    }];
+    transcriptTimestamp.value = new Date();
     
     // Get microphone access
     stream = await navigator.mediaDevices.getUserMedia({ 
@@ -213,7 +167,9 @@ async function startRecording() {
     isRecording.value = true;
   } catch (error) {
     console.error('Failed to start recording:', error);
-    transcripts.value = [];
+    finalText.value = '';
+    previewText.value = '';
+    transcriptTimestamp.value = null;
     await cleanup();
   }
 }
@@ -226,53 +182,36 @@ async function stopRecording() {
   
   await cleanup();
   
-  // Save the message
-  const transcript = currentTranscript.value;
-  if (transcript && transcript.text.trim()) {
-    transcript.state = 'saving';
-    
+  const text = finalText.value.trim();
+  if (text) {
     try {
       const message = new Message(props.perspective, undefined, props.source);
-      message.body = transcript.text.trim();
-      message.transcriptStartedAt = transcript.timestamp.toISOString();
+      message.body = text;
+      if (transcriptTimestamp.value) {
+        message.transcriptStartedAt = transcriptTimestamp.value.toISOString();
+      }
       await message.save();
-      
-      transcript.state = 'saved';
-      
-      // Clear transcript after a delay
-      setTimeout(() => {
-        transcripts.value = [];
-        currentTranscriptId.value = '';
-      }, 2000);
     } catch (e) {
       console.error('Failed to save voice message:', e);
-      transcript.state = 'aborted';
     }
-  } else {
-    // No text captured, abort
-    if (transcript) {
-      transcript.state = 'aborted';
-    }
-    setTimeout(() => {
-      transcripts.value = [];
-      currentTranscriptId.value = '';
-    }, 1000);
   }
   
+  finalText.value = '';
+  previewText.value = '';
+  transcriptTimestamp.value = null;
   isTranscribing.value = false;
 }
 
 async function cancelRecording() {
-  if (!isRecording.value && !isTranscribing.value && transcripts.value.length === 0) return;
+  if (!isRecording.value && !isTranscribing.value && !finalText.value && !previewText.value) return;
   
   isRecording.value = false;
   
   await cleanup();
   
-  // Clear without saving
-  transcripts.value = [];
-  currentTranscriptId.value = '';
+  finalText.value = '';
   previewText.value = '';
+  transcriptTimestamp.value = null;
   isTranscribing.value = false;
 }
 
@@ -295,60 +234,22 @@ onUnmounted(async () => {
 <style scoped lang="scss">
 .voice-recorder {
   position: fixed;
-  bottom: var(--j-space-600);
-  right: var(--j-space-600);
+  bottom: 80px;
+  right: var(--j-space-500);
   z-index: 100;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  
-  .transcript-card {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: var(--j-border-radius);
-    box-shadow: var(--j-shadow-lg);
-    width: 400px;
-    max-width: 90vw;
-    backdrop-filter: blur(4px);
-    
-    .transcript-item {
-      padding: var(--j-space-300);
-      max-width: 100%;
-      overflow-wrap: break-word;
-      word-break: break-word;
-    }
-  }
-  
-  .recorder-controls {
-    background-color: var(--j-color-ui-50);
-    border-radius: var(--j-border-radius);
-    padding: var(--j-space-300) var(--j-space-400);
-    box-shadow: var(--j-shadow-md);
-    width: auto;
-    min-width: 280px;
-    max-width: 400px;
+  gap: var(--j-space-300);
+}
 
-    .recorder-status {
-      flex: 1;
-      min-width: 0;
-      overflow-wrap: break-word;
-    }
-  }
-
-  // Responsive adjustments for small screens
-  @media (max-width: 480px) {
-    bottom: var(--j-space-300);
-    right: var(--j-space-300);
-
-    .transcript-card {
-      width: calc(100vw - 2 * var(--j-space-300));
-      max-width: calc(100vw - 2 * var(--j-space-300));
-    }
-
-    .recorder-controls {
-      min-width: auto;
-      width: calc(100vw - 2 * var(--j-space-300));
-      max-width: calc(100vw - 2 * var(--j-space-300));
-    }
-  }
+.voice-preview-card {
+  background-color: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-100);
+  border-radius: var(--j-border-radius);
+  box-shadow: var(--j-shadow-lg);
+  backdrop-filter: blur(4px);
+  max-width: 400px;
+  padding: var(--j-space-400);
 }
 </style>
