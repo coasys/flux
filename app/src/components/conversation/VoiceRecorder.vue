@@ -4,7 +4,7 @@
       <j-flex direction="column" gap="300">
         <j-flex a="center" gap="300" j="between">
           <j-flex a="center" gap="300">
-            <j-spinner v-if="isRecording" size="xs" />
+            <span v-if="isRecording" class="recording-led" />
             <j-text nomargin color="primary-500" size="300">
               {{ isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : '' }}
             </j-text>
@@ -241,6 +241,21 @@ onUnmounted(async () => {
   flex-direction: column;
   align-items: flex-end;
   gap: var(--j-space-300);
+}
+
+.recording-led {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--j-color-danger-500);
+  animation: pulse-led 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-led {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
 }
 
 .voice-preview-card {
