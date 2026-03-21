@@ -179,7 +179,7 @@ const availableAuthors = computed(() => {
       authors.set(entry.author, getAuthorName(entry.author));
     }
   }
-  return [...authors.entries()].map(([did, name]) => ({ did, name })).sort((a, b) => a.name.localeCompare(b.name));
+  return [...authors.entries()].map(([did, name]) => ({ did, name })).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 });
 
 // Computed: filtered entries
