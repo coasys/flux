@@ -37,16 +37,32 @@
     </div>
 
     <div class="memory-stream" ref="streamRef">
-      <div v-if="loading" class="memory-loading">
+      <div v-if="loadError" class="memory-error">
+        <j-icon name="alert-triangle" size="xl" />
+        <j-text variant="heading-sm">Failed to load memories</j-text>
+        <j-text size="400" color="ui-500">
+          Could not connect to the neighbourhood. Please try again.
+        </j-text>
+      </div>
+
+      <div v-else-if="loading" class="memory-loading">
         <j-spinner />
         <j-text>Loading memories...</j-text>
       </div>
 
-      <div v-else-if="!filteredEntries.length" class="memory-empty">
+      <div v-else-if="!allEntries.length" class="memory-empty">
         <j-icon name="brain" size="xl" />
         <j-text variant="heading-sm">No memories yet</j-text>
         <j-text size="400" color="ui-500">
           AI agents can create memories in this neighbourhood using the MemoryEntry social DNA.
+        </j-text>
+      </div>
+
+      <div v-else-if="!filteredEntries.length" class="memory-empty">
+        <j-icon name="filter" size="xl" />
+        <j-text variant="heading-sm">No results for your filters</j-text>
+        <j-text size="400" color="ui-500">
+          Try adjusting the type, author, or importance filters above.
         </j-text>
       </div>
 
@@ -99,7 +115,7 @@ import { useAppStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { MemoryEntry } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 defineOptions({ name: 'MemoryView' });
 
@@ -107,6 +123,7 @@ const appStore = useAppStore();
 const { perspective } = useCommunityService();
 
 const loading = ref(true);
+const loadError = ref(false);
 const allEntries = ref<MemoryEntry[]>([]);
 const profileCache = ref<Record<string, Profile>>({});
 
@@ -114,18 +131,30 @@ const profileCache = ref<Record<string, Profile>>({});
 const filterType = ref('');
 const filterAuthor = ref('');
 const filterImportance = ref('0');
+const filterTag = ref('');
 const streamRef = ref<HTMLElement>();
+
+// Helper: safe timestamp parsing
+function safeParseTimestamp(value: string | undefined): number {
+  if (!value) return 0;
+  try {
+    const parsed = new Date(value).getTime();
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch {
+    return 0;
+  }
+}
 
 // Load all MemoryEntry instances
 async function loadEntries() {
   loading.value = true;
+  loadError.value = false;
   try {
     const entries = await MemoryEntry.findAll(perspective);
     // Sort by timestamp descending (newest first)
     entries.sort((a: MemoryEntry, b: MemoryEntry) => {
-      // Use createdAt (memory://timestamp property), not Ad4mModel.timestamp
-      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const ta = safeParseTimestamp(a.createdAt);
+      const tb = safeParseTimestamp(b.createdAt);
       return tb - ta;
     });
     allEntries.value = entries;
@@ -143,6 +172,7 @@ async function loadEntries() {
     }
   } catch (e) {
     console.error('Failed to load memory entries:', e);
+    loadError.value = true;
   } finally {
     loading.value = false;
   }
@@ -163,6 +193,13 @@ onMounted(async () => {
     });
   } catch (e) {
     console.warn('Could not set up live listener:', e);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof unsubscribe === 'function') {
+    unsubscribe();
+    unsubscribe = null;
   }
 });
 
@@ -188,6 +225,10 @@ const filteredEntries = computed(() => {
     if (filterType.value && entry.memoryType !== filterType.value) return false;
     if (filterAuthor.value && entry.author !== filterAuthor.value) return false;
     if (Number(filterImportance.value) > 0 && (entry.importance || 0) < Number(filterImportance.value)) return false;
+    if (filterTag.value) {
+      const tags = parseTags(entry.tags);
+      if (!tags.includes(filterTag.value)) return false;
+    }
     return true;
   });
 });
@@ -223,22 +264,20 @@ function formatType(type: string): string {
 }
 
 function formatTimestamp(ts: string): string {
-  if (!ts) return '';
-  try {
-    const date = new Date(ts);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
+  const parsed = safeParseTimestamp(ts);
+  if (!parsed) return '';
+  
+  const date = new Date(parsed);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
 
-    if (diffHours < 24) {
-      return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    } else if (diffHours < 48) {
-      return 'Yesterday ' + date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    }
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch {
-    return ts;
+  if (diffHours < 24) {
+    return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  } else if (diffHours < 48) {
+    return 'Yesterday ' + date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   }
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function renderMarkdown(content: string): string {
@@ -271,13 +310,12 @@ function parseTags(tags: string): string[] {
 }
 
 function filterByTag(tag: string) {
-  // Simple tag filter — just filter to entries containing this tag
-  // Could be enhanced with a dedicated tag filter in the future
+  // Clear other filters and apply tag filter
   filterType.value = '';
   filterAuthor.value = '';
   filterImportance.value = '0';
-  // For now, we'll use the search approach — filter allEntries by tag
-  // This is a UX enhancement we can add later
+  filterTag.value = tag;
+  applyFilters();
 }
 </script>
 
