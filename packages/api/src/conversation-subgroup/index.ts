@@ -1,4 +1,10 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, escapeSurrealString } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
+
+// SPARQL migration helper
+function parseLit(val: string | undefined): string {
+  if (!val) return '';
+  try { return Literal.fromUrl(val).get(); } catch { return val; }
+}
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
@@ -23,17 +29,14 @@ export default class ConversationSubgroup extends Ad4mModel {
   async stats(): Promise<{ totalItems: number; participants: string[] }> {
     // find the total item count and the dids of participants in the subgroup
     try {
-      // Count items by getting all matching URIs and counting them
+      // SPARQL migration
       const itemsQuery = `
-        SELECT VALUE out.uri
-        FROM link
-        WHERE in.uri = '${escapeSurrealString(this.id)}'
-          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
+        PREFIX ad4m: <ad4m://ontology/>
+        SELECT ?item WHERE {
+          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?item .
+          ?link2 a ad4m:Link ; ad4m:source ?item ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type .
+          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
+        }
       `;
 
       const itemsResult = await this.perspective.querySurrealDB(itemsQuery);
@@ -51,24 +54,29 @@ export default class ConversationSubgroup extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the subgroups topics
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS topicBase,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName
-        FROM link
-        WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
-          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+      // SPARQL migration
+      const sparqlQuery = `
+        PREFIX ad4m: <ad4m://ontology/>
+        SELECT ?topicBase ?topicName WHERE {
+          ?tagLink a ad4m:Link ; ad4m:predicate "flux://has_tag" ; ad4m:source ?semRel ; ad4m:target ?topicBase .
+          ?exprLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_expression" ; ad4m:target "${this.id}" .
+          ?typeLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_semantic_relationship" .
+          ?topicTypeLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_topic" .
+          OPTIONAL { ?topicNameLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://topic" ; ad4m:target ?topicNameRaw . }
+        }
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
-      for (const topic of surrealResult || []) {
-        if (!uniqueTopics.has(topic.topicBase)) {
-          uniqueTopics.set(topic.topicBase, topic);
+      for (const binding of sparqlResult || []) {
+        const topicBase = binding.topicBase?.value;
+        if (topicBase && !uniqueTopics.has(topicBase)) {
+          uniqueTopics.set(topicBase, {
+            topicBase,
+            topicName: parseLit(binding.topicNameRaw?.value),
+          });
         }
       }
 
@@ -87,34 +95,47 @@ export default class ConversationSubgroup extends Ad4mModel {
   async itemsData(): Promise<SynergyItem[]> {
     // find the necissary data to render the subgroups items in timeline components
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS id,
-          (
-            fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri)
-            ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
-            ?? out->link[WHERE predicate = 'flux://entry_type'][0].timestamp
-            ?? timestamp
-          ) AS channelTimestamp,
-          out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
-          out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
-        FROM link
-        WHERE in.uri = '${escapeSurrealString(this.id)}'
-          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
-        ORDER BY channelTimestamp ASC
+      // SPARQL migration
+      const sparqlQuery = `
+        PREFIX ad4m: <ad4m://ontology/>
+        SELECT ?id ?type ?author ?timestamp ?body ?title ?taskName ?transcriptStart ?channelTs WHERE {
+          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?id ; ad4m:timestamp ?timestamp .
+          ?typeLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type ; ad4m:author ?author .
+          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
+          OPTIONAL { ?bodyLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://body" ; ad4m:target ?body . }
+          OPTIONAL { ?titleLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://title" ; ad4m:target ?title . }
+          OPTIONAL { ?taskNameLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://name" ; ad4m:target ?taskName . }
+          OPTIONAL { ?tsLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://transcript_started_at" ; ad4m:target ?transcriptStart . }
+          OPTIONAL { ?chLink a ad4m:Link ; ad4m:predicate "ad4m://has_child" ; ad4m:target ?id ; ad4m:source ?chSrc ; ad4m:timestamp ?channelTs .
+                     ?chTypeLink a ad4m:Link ; ad4m:source ?chSrc ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_channel" . }
+        }
+        ORDER BY ?timestamp
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
 
-      return (surrealResult || []).map((item: any) => {
+      // Deduplicate by id (SPARQL may return multiple rows per item due to OPTIONALs)
+      const itemMap = new Map<string, any>();
+      for (const binding of sparqlResult || []) {
+        const id = binding.id?.value;
+        if (!id || itemMap.has(id)) continue;
+        const transcriptStart = parseLit(binding.transcriptStart?.value);
+        const channelTs = binding.channelTs?.value;
+        const fallbackTs = binding.timestamp?.value;
+        const channelTimestamp = transcriptStart || channelTs || fallbackTs;
+
+        itemMap.set(id, {
+          id,
+          type: binding.type?.value,
+          author: binding.author?.value,
+          channelTimestamp,
+          messageBody: parseLit(binding.body?.value),
+          postTitle: parseLit(binding.title?.value),
+          taskName: parseLit(binding.taskName?.value),
+        });
+      }
+
+      return Array.from(itemMap.values()).map((item: any) => {
         let text = '';
         let type = '';
 
@@ -144,28 +165,33 @@ export default class ConversationSubgroup extends Ad4mModel {
     }
   }
 
-  // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS topicBase,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName,
-          fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
-        FROM link
-        WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
-          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+      // SPARQL migration
+      const sparqlQuery = `
+        PREFIX ad4m: <ad4m://ontology/>
+        SELECT ?topicBase ?topicNameRaw ?relevanceRaw WHERE {
+          ?tagLink a ad4m:Link ; ad4m:predicate "flux://has_tag" ; ad4m:source ?semRel ; ad4m:target ?topicBase .
+          ?exprLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_expression" ; ad4m:target "${this.id}" .
+          ?typeLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_semantic_relationship" .
+          ?topicTypeLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_topic" .
+          OPTIONAL { ?topicNameLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://topic" ; ad4m:target ?topicNameRaw . }
+          OPTIONAL { ?relLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_relevance" ; ad4m:target ?relevanceRaw . }
+        }
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
-      for (const topic of surrealResult || []) {
-        if (!uniqueTopics.has(topic.topicBase)) {
-          uniqueTopics.set(topic.topicBase, topic);
+      for (const binding of sparqlResult || []) {
+        const topicBase = binding.topicBase?.value;
+        if (topicBase && !uniqueTopics.has(topicBase)) {
+          uniqueTopics.set(topicBase, {
+            topicBase,
+            topicName: parseLit(binding.topicNameRaw?.value),
+            relevance: parseLit(binding.relevanceRaw?.value),
+          });
         }
       }
 
