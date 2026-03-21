@@ -4,12 +4,29 @@
 }
 
 .voicePreviewCard {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-100);
   border-radius: var(--j-border-radius);
   margin: 0 var(--j-space-500) var(--j-space-300) var(--j-space-500);
   max-width: 100%;
   box-shadow: var(--j-shadow-lg);
   backdrop-filter: blur(4px);
+  padding: var(--j-space-400);
+}
+
+.recordingLed {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--j-color-danger-500);
+  animation: pulse-led 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-led {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
 }
 
 .editor::part(base) {

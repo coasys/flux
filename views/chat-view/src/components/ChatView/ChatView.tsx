@@ -246,21 +246,20 @@ export default function ChatView({ agent, client, perspective, source, threaded,
           )}
           {/* Voice recording preview card */}
           {(isRecording || isTranscribing || finalText || previewText) && (
-            <j-box py="300" className={styles.voicePreviewCard}>
+            <div className={styles.voicePreviewCard}>
               <j-flex direction="column" gap="300">
                 <j-flex a="center" gap="300" j="between">
                   <j-flex a="center" gap="300">
-                    {isRecording && <j-spinner size="xs" />}
+                    {isRecording && <span className={styles.recordingLed} />}
                     <j-text nomargin color="primary-500" size="300">
                       {isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : ''}
                     </j-text>
                   </j-flex>
-                  {/* Cancel button */}
                   <j-button
                     onClick={cancelRecording}
                     circle
                     size="xs"
-                    variant="danger"
+                    variant="ghost"
                     title="Cancel"
                   >
                     <j-icon size="xs" name="x" />
@@ -277,7 +276,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                   </j-text>
                 )}
               </j-flex>
-            </j-box>
+            </div>
           )}
 
           {/* @ts-ignore */}
