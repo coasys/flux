@@ -21,7 +21,7 @@ export class MemoryEntry extends Ad4mModel {
   content: string = '';
 
   @Property({ through: MEMORY_TIMESTAMP, resolveLanguage: 'literal' })
-  timestamp: string = '';
+  createdAt: string = '';
 
   @Property({ through: MEMORY_TYPE, resolveLanguage: 'literal' })
   memoryType: string = '';

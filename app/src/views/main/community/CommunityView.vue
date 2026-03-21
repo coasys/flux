@@ -19,7 +19,7 @@
 
     <!-- TODO: Move the logic below into seperate componenets -->
 
-    <div v-if="!isSynced && !route.params.channelId" class="center">
+    <div v-if="!isSynced && !route.params.channelId && route.name !== 'memory'" class="center">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
@@ -36,7 +36,7 @@
       </j-box>
     </div>
 
-    <div class="center" v-if="isSynced && !route.params.channelId && community && channelsWithConversations.length">
+    <div class="center" v-if="isSynced && !route.params.channelId && route.name !== 'memory' && community && channelsWithConversations.length">
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community.thumbnail || null" />
@@ -69,7 +69,7 @@
       </div>
     </div>
 
-    <div class="center" v-if="isSynced && !route.params.channelId && channelsWithConversations.length === 0">
+    <div class="center" v-if="isSynced && !route.params.channelId && route.name !== 'memory' && channelsWithConversations.length === 0">
       <div class="center-inner">
         <j-flex gap="500" direction="column" a="center" j="center">
           <j-avatar :initials="`${community?.name}`.charAt(0)" size="xxl" :src="community?.thumbnail || null" />

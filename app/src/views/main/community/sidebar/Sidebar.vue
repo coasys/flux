@@ -74,9 +74,13 @@ const {
 const hasMemoryEntries = ref(false);
 onMounted(async () => {
   try {
+    console.log('[MemoryView] Checking for MemoryEntry instances...');
+    console.log('[MemoryView] perspective:', perspective?.uuid);
     const entries = await MemoryEntry.findAll(perspective);
+    console.log('[MemoryView] Found entries:', entries.length);
     hasMemoryEntries.value = entries.length > 0;
-  } catch {
+  } catch (e) {
+    console.error('[MemoryView] Error checking MemoryEntry:', e);
     hasMemoryEntries.value = false;
   }
 });

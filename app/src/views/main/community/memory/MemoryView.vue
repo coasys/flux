@@ -123,9 +123,10 @@ async function loadEntries() {
     const entries = await MemoryEntry.findAll(perspective);
     // Sort by timestamp descending (newest first)
     entries.sort((a: MemoryEntry, b: MemoryEntry) => {
-      const ta = a.timestamp || '';
-      const tb = b.timestamp || '';
-      return tb.localeCompare(ta);
+      // Ad4mModel.timestamp is a getter returning the link timestamp (Date or string)
+      const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return tb - ta;
     });
     allEntries.value = entries;
 
