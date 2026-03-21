@@ -75,7 +75,7 @@
                 <span v-for="n in Math.min(entry.importance, 5)" :key="n">⭐</span>
               </span>
               <j-text size="200" color="ui-400" nomargin>
-                {{ formatTimestamp(entry.timestamp) }}
+                {{ formatTimestamp(entry.createdAt) }}
               </j-text>
             </j-flex>
           </div>
@@ -123,9 +123,9 @@ async function loadEntries() {
     const entries = await MemoryEntry.findAll(perspective);
     // Sort by timestamp descending (newest first)
     entries.sort((a: MemoryEntry, b: MemoryEntry) => {
-      // Ad4mModel.timestamp is a getter returning the link timestamp (Date or string)
-      const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      // Use createdAt (memory://timestamp property), not Ad4mModel.timestamp
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return tb - ta;
     });
     allEntries.value = entries;
