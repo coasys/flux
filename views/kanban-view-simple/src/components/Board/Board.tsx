@@ -15,6 +15,19 @@ type BoardProps = {
   getProfile: (did: string) => Promise<Profile>;
 };
 
+/** Safely parse a JSON string, returning the fallback value on failure.
+ *  This handles cases where the value is a literal:// URI string or a
+ *  signed expression envelope that cannot be parsed as a JSON array. */
+function safeJsonParse<T>(value: string | undefined | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    console.warn('Failed to parse JSON value, using fallback:', value?.slice(0, 80));
+    return fallback;
+  }
+}
+
 export type ColumnWithTasks = TaskColumn & { tasks: Task[] };
 
 export default function Board({ perspective, channelId, agent, getProfile }: BoardProps) {
@@ -106,7 +119,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       setUpdating(false);
       return;
     }
-    const newOrderedColumnIds = [...JSON.parse(currentBoard.orderedColumnIds), newColumn.id];
+    const newOrderedColumnIds = [...safeJsonParse<string[]>(currentBoard.orderedColumnIds, []), newColumn.id];
     currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
     await currentBoard.save();
 
@@ -137,7 +150,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       setUpdating(false);
       return;
     }
-    const orderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
+    const orderedColumnIds = safeJsonParse<string[]>(currentBoard.orderedColumnIds, []);
     const newOrderedColumnIds = orderedColumnIds.filter((id: string) => id !== columnId);
 
     // Update the UI
@@ -150,7 +163,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
     // Delete the columns tasks and their links to the perspective
     const column = columns.find((col) => col.id === columnId);
-    const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
+    const taskIds = safeJsonParse<string[]>(column.orderedTaskIds, []);
     const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
     await Promise.all(
       columnTasks.map(async (task) => {
@@ -202,7 +215,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
         // Update the perspective
         const currentBoard = (await TaskBoard.findAll(perspective, { parent: { model: Channel, id: channelId } }))[0];
-        const newOrderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
+        const newOrderedColumnIds = safeJsonParse<string[]>(currentBoard.orderedColumnIds, []);
         newOrderedColumnIds.splice(source.index, 1);
         newOrderedColumnIds.splice(destination.index, 0, draggableId);
         currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
@@ -230,12 +243,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         destinationColumn.tasks.splice(destination.index, 0, movedTask);
 
         // Update orderedTaskIds in source column
-        const sourceOrderedTaskIds = JSON.parse(sourceColumn.orderedTaskIds);
+        const sourceOrderedTaskIds = safeJsonParse<string[]>(sourceColumn.orderedTaskIds, []);
         sourceOrderedTaskIds.splice(source.index, 1);
         sourceColumn.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
 
         // Update orderedTaskIds in destination column
-        const destOrderedTaskIds = JSON.parse(destinationColumn.orderedTaskIds);
+        const destOrderedTaskIds = safeJsonParse<string[]>(destinationColumn.orderedTaskIds, []);
         destOrderedTaskIds.splice(destination.index, 0, draggableId);
         destinationColumn.orderedTaskIds = JSON.stringify(destOrderedTaskIds);
 
@@ -273,7 +286,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         }
 
         // Create the new orderedTaskIds
-        const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
+        const newOrderedTaskIds = safeJsonParse<string[]>(column.orderedTaskIds, []);
         newOrderedTaskIds.splice(source.index, 1);
         newOrderedTaskIds.splice(destination.index, 0, draggableId);
 
@@ -304,7 +317,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     const newColumnsWithTasks = (await Promise.all(
       newColumns.map(async (column) => {
         // Get tasks and order them by the columns orderedTaskIds property
-        const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
+        const taskIds = safeJsonParse<string[]>(column.orderedTaskIds, []);
         const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
         const taskMap = new Map(columnTasks.map((t) => [t.id, t]));
         const orderedTasks = taskIds.map((id) => taskMap.get(id)).filter(Boolean);
@@ -332,7 +345,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
   // Update columns with tasks when columns or tasks change, unless an update is ongoing
   useEffect(() => {
-    if (board && !updatingRef.current) getColumnsWithTasks(columns, JSON.parse(board.orderedColumnIds));
+    if (board && !updatingRef.current) getColumnsWithTasks(columns, safeJsonParse<string[]>(board.orderedColumnIds, []));
   }, [board, columns, tasks]);
 
   // Update board when boards subscription updates
