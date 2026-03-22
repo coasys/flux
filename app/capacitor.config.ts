@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'org.coasys.flux',
   appName: 'flux',
   webDir: 'dist',
+  server: {
+    androidScheme: 'http',
+  },
   plugins: {
     StatusBar: {
       style: 'DARK',

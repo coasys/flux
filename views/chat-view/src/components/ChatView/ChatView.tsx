@@ -5,6 +5,7 @@ import { community } from '@coasys/flux-constants';
 import { EntryType, Profile } from '@coasys/flux-types';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import MessageList from '../MessageList/MessageList';
+import { useVoiceRecorder } from '../../composables/useVoiceRecorder';
 import styles from './ChatView.module.css';
 
 const { HAS_REPLY, REACTION, MESSAGE_THREAD } = community;
@@ -28,10 +29,46 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   } | null>(null);
   const [threadSource, setThreadSource] = useState<Message | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
+  const replyMessageRef = useRef<Message | null>(null);
+  // Keep ref in sync with state to avoid stale closure in voice recorder callback
+  useEffect(() => {
+    replyMessageRef.current = replyMessage;
+  }, [replyMessage]);
   const [replyProfile, setReplyProfile] = useState<Profile | null>(null);
   const [threadProfile, setThreadProfile] = useState<Profile | null>(null);
   const editor = useRef(null);
   const threadContainer = useRef(null);
+
+  // Voice recording state
+  const { isRecording, isTranscribing, previewText, finalText, toggleRecording, cancelRecording } = useVoiceRecorder({
+    client,
+    onTranscript: async (text) => {
+      // Save the transcribed text as a message
+      try {
+        const message = new Message(perspective, undefined, source);
+        message.body = `<p>${text}</p>`;
+        await message.save();
+
+        // Use ref to avoid stale closure
+        const currentReplyMessage = replyMessageRef.current;
+        if (currentReplyMessage) {
+          await perspective.addLinks([
+            {
+              source: currentReplyMessage.baseExpression,
+              predicate: HAS_REPLY,
+              target: message.baseExpression,
+            },
+          ]);
+          setReplyMessage(null);
+        }
+      } catch (e) {
+        console.error('Failed to save voice transcript:', e);
+      }
+    },
+    onError: (error) => {
+      console.error('Voice recording error:', error);
+    },
+  });
 
   async function submit() {
     try {
@@ -214,6 +251,41 @@ export default function ChatView({ agent, client, perspective, source, threaded,
               </j-flex>
             </j-box>
           )}
+          {/* Voice recording preview card */}
+          {(isRecording || isTranscribing || finalText || previewText) && (
+            <div className={styles.voicePreviewCard}>
+              <j-flex direction="column" gap="300">
+                <j-flex a="center" gap="300" j="between">
+                  <j-flex a="center" gap="300">
+                    {isRecording && <span className={styles.recordingLed} />}
+                    <j-text nomargin color="primary-500" size="300">
+                      {isRecording ? 'Recording...' : isTranscribing ? 'Transcribing...' : ''}
+                    </j-text>
+                  </j-flex>
+                  <j-button
+                    onClick={cancelRecording}
+                    circle
+                    size="xs"
+                    variant="ghost"
+                    title="Cancel"
+                  >
+                    <j-icon size="xs" name="x" />
+                  </j-button>
+                </j-flex>
+                {(finalText || previewText) && (
+                  <j-text nomargin color="ui-800" size="400">
+                    {finalText}
+                    {previewText && (
+                      <span style={{ fontStyle: 'italic', color: 'var(--j-color-ui-400)' }}>
+                        {previewText}
+                      </span>
+                    )}
+                  </j-text>
+                )}
+              </j-flex>
+            </div>
+          )}
+
           {/* @ts-ignore */}
           <flux-editor
             ref={editor}
@@ -237,6 +309,17 @@ export default function ChatView({ agent, client, perspective, source, threaded,
                 variant="ghost"
               >
                 <j-icon size="sm" name="type" />
+              </j-button>
+              {/* Voice record button */}
+              <j-button
+                onClick={toggleRecording}
+                circle
+                square
+                size="sm"
+                variant="primary"
+                disabled={isTranscribing}
+              >
+                <j-icon size="sm" name={isRecording ? 'send' : 'mic'}></j-icon>
               </j-button>
             </footer>
             {/* @ts-ignore */}
