@@ -5,7 +5,7 @@ import { ref } from 'vue';
 export const useModalStore = defineStore(
   'modalStore',
   () => {
-    const showDisclaimer = ref(true);
+    const showDisclaimer = ref(false);
     const showCreateCommunity = ref(false);
     const showEditCommunity = ref(false);
     const showCommunityMembers = ref(false);

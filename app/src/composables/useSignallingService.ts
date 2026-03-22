@@ -5,6 +5,7 @@ import { Link, NeighbourhoodProxy, PerspectiveExpression } from '@coasys/ad4m';
 import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
+import { useTabCoordinator } from './useTabCoordinator';
 
 export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
@@ -13,6 +14,7 @@ const MAX_AGE = 60000; // 60 seconds before "offline"
 const NEW_STATE = 'agent/new-state';
 
 export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
+  const tabCoordinator = useTabCoordinator();
   const appStore = useAppStore();
   const webrtcStore = useWebrtcStore();
   const mediaDevicesStore = useMediaDevicesStore();
@@ -221,6 +223,8 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
 
   function broadcastState(target: string = ''): void {
     if (!signalling.value) return;
+    // Only the leader tab broadcasts to the network to prevent duplicate heartbeats
+    if (!tabCoordinator.isLeader.value) return;
 
     // Broadcast my state to the neighbourhood
     const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
@@ -278,6 +282,42 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     }, delay);
   }
 
+  // ── Leader-only broadcasting ──────────────────────────────────────────────
+  // These start/stop the heartbeat + cleanup timers that only the leader should run.
+  function startBroadcasting(): void {
+    if (!signalling.value) return;
+    broadcastState('first-broadcast');
+    scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
+    if (!cleanupInterval) cleanupInterval = setInterval(evaluateAgents, CLEANUP_INTERVAL);
+  }
+
+  function stopBroadcasting(): void {
+    if (heartbeatTimeout) {
+      clearTimeout(heartbeatTimeout);
+      heartbeatTimeout = null;
+    }
+    // Keep the cleanup interval running — follower tabs still evaluate peer staleness
+  }
+
+  // Unsubscribe handles for leadership callbacks — stored at composable scope
+  // so stopSignalling can clean up and startSignalling can re-subscribe.
+  let unsubBecomeLeader: (() => void) | null = null;
+  let unsubLoseLeadership: (() => void) | null = null;
+
+  /** (Re-)subscribe to tab-coordinator leadership events. */
+  function subscribeLeadership(): void {
+    // Avoid double-subscribe: tear down any existing subscriptions first.
+    if (unsubBecomeLeader) unsubBecomeLeader();
+    if (unsubLoseLeadership) unsubLoseLeadership();
+
+    unsubBecomeLeader = tabCoordinator.onBecomeLeader(() => {
+      if (signalling.value) startBroadcasting();
+    });
+    unsubLoseLeadership = tabCoordinator.onLoseLeadership(() => {
+      stopBroadcasting();
+    });
+  }
+
   function startSignalling(): void {
     if (signalling.value) stopSignalling();
     signalling.value = true;
@@ -285,24 +325,35 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     // Add my agent state to the agents map
     agents.value[me.value.did] = myState.value;
 
-    // Add signal handler
+    // All tabs listen for signals so the UI stays up-to-date
     neighbourhood.addSignalHandler(onSignal);
 
-    // Send first broadcast
-    broadcastState('first-broadcast');
-
-    // Schedule first heartbeat
-    scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
-
-    // Start the cleanup interval
+    // Start the cleanup interval on all tabs (evaluates agent staleness)
     cleanupInterval = setInterval(evaluateAgents, CLEANUP_INTERVAL);
+
+    // Subscribe (or re-subscribe) to leadership changes
+    subscribeLeadership();
+
+    // Only the leader tab broadcasts heartbeats to the network
+    if (tabCoordinator.isLeader.value) startBroadcasting();
   }
 
   function stopSignalling(): void {
     // Remove the signal handler
     neighbourhood.removeSignalHandler(onSignal);
 
+    // Unsubscribe from tab coordinator to avoid leaking closures
+    if (unsubBecomeLeader) {
+      unsubBecomeLeader();
+      unsubBecomeLeader = null;
+    }
+    if (unsubLoseLeadership) {
+      unsubLoseLeadership();
+      unsubLoseLeadership = null;
+    }
+
     // Clear the intervals
+    stopBroadcasting();
     if (cleanupInterval) {
       clearInterval(cleanupInterval);
       cleanupInterval = null;

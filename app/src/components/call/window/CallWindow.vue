@@ -182,6 +182,8 @@ function closeCallWindow() {
     z-index: 9999;
     background-color: #1c1a1f !important;
     transform: none !important;
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
   }
 
   .call-window {

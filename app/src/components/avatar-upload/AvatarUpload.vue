@@ -18,6 +18,7 @@
     style="display: none"
     @change="selectFile"
   />
+  <Teleport to="body">
   <div class="cropper" v-if="tempProfileImage !== null">
     <Cropper
       ref="cropper"
@@ -35,6 +36,7 @@
       </j-flex>
     </j-box>
   </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -146,16 +148,28 @@ function selectImage() {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 800px;
+  max-width: calc(100vw - 32px);
   min-height: 600px;
   display: flex;
   flex-direction: column;
   border-radius: 4px;
   z-index: 999;
+
+  @media screen and (max-width: 768px) {
+    width: calc(100vw - 32px);
+    min-height: auto;
+    max-height: 90vh;
+    padding: var(--j-space-400);
+  }
 }
 
 .cropper__element {
   flex-grow: 1;
   max-height: 80vh;
+
+  @media screen and (max-width: 768px) {
+    max-height: 60vh;
+  }
 
   &__background {
     background: transparent !important;

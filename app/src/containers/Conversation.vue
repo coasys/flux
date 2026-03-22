@@ -143,12 +143,21 @@
         />
       </div>
     </div>
+
+    <!-- Voice recorder button -->
+    <VoiceRecorder
+      :client="appStore.ad4mClient"
+      :perspective="perspective"
+      :source="restoreChannelPrefix(route.params.channelId as string)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import MatchColumn from '@/components/conversation/match/MatchColumn.vue';
 import TimelineColumn from '@/components/conversation/timeline/TimelineColumn.vue';
+import VoiceRecorder from '@/components/conversation/VoiceRecorder.vue';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useAiStore, useUiStore, useWebrtcStore, useAppStore } from '@/stores';
 import { SemanticRelationship, Topic } from '@coasys/flux-api';

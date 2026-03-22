@@ -1,10 +1,10 @@
 PODS:
-  - Capacitor (6.1.1):
+  - Capacitor (7.6.0):
     - CapacitorCordova
-  - CapacitorCordova (6.1.1)
-  - CapacitorPushNotifications (6.0.1):
+  - CapacitorCordova (7.6.0)
+  - CapacitorPushNotifications (7.0.6):
     - Capacitor
-  - CapacitorStatusBar (6.0.0):
+  - CapacitorStatusBar (7.0.5):
     - Capacitor
   - Firebase/CoreOnly (10.28.1):
     - FirebaseCore (= 10.28.1)
@@ -97,10 +97,10 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: 8941aba4364ba9d1b22188569001f2ce45cc2b00
-  CapacitorCordova: 8f2cc8d8d3619c566e9418fe8772064a94266106
-  CapacitorPushNotifications: 293fabe42c7229756078e81f2d3a60394ba4e5d8
-  CapacitorStatusBar: 2e4369f99166125435641b1908d05f561eaba6f6
+  Capacitor: 6e644e9e3369368ac601c77a0fad57f34b78aaa6
+  CapacitorCordova: f163aa2e84b79efc54d6a75b305bc7e05fb80c5d
+  CapacitorPushNotifications: b8e30637549ce91468b8c4dddbef2657be831f4c
+  CapacitorStatusBar: 6de542f202c0dd3f9d0a73b240d4c9d3dddc49b4
   Firebase: 49e62242b3ae422a002ab647a7e62a332a8c3ec1
   FirebaseCore: dfc33f0dffba05f76181da9cc0151171ebb3bd10
   FirebaseCoreInternal: 58d07f1362fddeb0feb6a857d1d1d1c5e558e698
@@ -111,6 +111,6 @@ SPEC CHECKSUMS:
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: cab24cb3336397639fecb9f7e192d1411747a5a1
+PODFILE CHECKSUM: a51047b18305f8b3a46a069eb032c7445b82f282
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

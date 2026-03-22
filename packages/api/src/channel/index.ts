@@ -64,6 +64,58 @@ export class Channel extends Ad4mModel {
   @HasMany(() => Post)
   posts: Post[] = [];
 
+  async allItems(): Promise<SynergyItem[]> {
+    // Get all items (messages, posts, tasks) in the channel
+    try {
+      const surrealQuery = `
+        SELECT
+          out.uri AS id,
+          author,
+          timestamp,
+          out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
+          fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
+        FROM link
+        WHERE in.uri = '${this.id}'
+          AND predicate = 'ad4m://has_child'
+          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri
+              IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
+        ORDER BY timestamp ASC
+      `;
+
+      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+
+      return (surrealResult || []).map((item: any) => {
+        let text = '';
+        let type = '';
+
+        if (item.type === 'flux://has_message') {
+          text = item.messageBody || '';
+          type = 'Message';
+        } else if (item.type === 'flux://has_post') {
+          text = item.postTitle || '';
+          type = 'Post';
+        } else if (item.type === 'flux://has_task') {
+          text = item.taskName || '';
+          type = 'Task';
+        }
+
+        return {
+          id: item.id,
+          author: item.author,
+          timestamp: new Date(item.timestamp).toISOString(),
+          text,
+          type,
+          icon: icons[type] ? icons[type] : 'question',
+        };
+      });
+    } catch (error) {
+      console.error('Error getting all channel items:', error);
+      return [];
+    }
+  }
+
   async unprocessedItems(): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel
     try {

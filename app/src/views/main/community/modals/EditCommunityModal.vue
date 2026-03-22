@@ -4,7 +4,7 @@
     :open="modalStore.showEditCommunity"
     @toggle="(e: any) => (modalStore.showEditCommunity = e.target.open)"
   >
-    <j-box p="800">
+    <j-box :p="isMobile ? '500' : '800'">
       <j-text variant="heading-sm">Edit Community</j-text>
       <avatar-upload :value="communityImage" @change="(val) => (communityImage = val || '')" />
       <j-flex direction="column" gap="400">
@@ -42,12 +42,14 @@
 <script setup lang="ts">
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { useModalStore } from '@/stores';
+import { useModalStore, useUiStore } from '@/stores';
 import { Community } from '@coasys/flux-api';
 import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
+import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
 
 const modalStore = useModalStore();
+const { isMobile } = storeToRefs(useUiStore());
 
 const { perspective, community } = useCommunityService();
 
