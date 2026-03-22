@@ -59,12 +59,8 @@ export async function createNeighbourhoodMeta(
   await client.perspective.remove(perspective.uuid);
   const links = [] as LinkExpression[];
   for (const link in perspectiveSnapshot!.links) {
-    //Deep copy the object... so we can delete __typename fields inject by apollo client
-    const newLink = JSON.parse(JSON.stringify(perspectiveSnapshot!.links[link]));
-    newLink.__typename = undefined;
-    newLink.data.__typename = undefined;
-    newLink.proof.__typename = undefined;
-    links.push(newLink);
+    links.push(perspectiveSnapshot!.links[link]);
   }
+  return links;
   return links;
 }
