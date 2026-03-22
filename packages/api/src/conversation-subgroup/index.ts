@@ -57,7 +57,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         PREFIX ad4m: <ad4m://ontology/>
-        SELECT ?topicBase ?topicName WHERE {
+        SELECT ?topicBase ?topicNameRaw WHERE {
           ?tagLink a ad4m:Link ; ad4m:predicate "flux://has_tag" ; ad4m:source ?semRel ; ad4m:target ?topicBase .
           ?exprLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_expression" ; ad4m:target "${this.id}" .
           ?typeLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_semantic_relationship" .
@@ -114,17 +114,26 @@ export default class ConversationSubgroup extends Ad4mModel {
 
       const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
 
-      // Deduplicate by id (SPARQL may return multiple rows per item due to OPTIONALs)
-      const itemMap = new Map<string, any>();
+      // Collect items — keep duplicate IDs so the view can detect and clean them up
+      const items: any[] = [];
+      const seen = new Map<string, any>();
       for (const binding of sparqlResult || []) {
         const id = binding.id?.value;
-        if (!id || itemMap.has(id)) continue;
+        if (!id) continue;
+
+        // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
+        if (seen.has(id)) {
+          // Duplicate id — add reference to items but don't overwrite coalesced data
+          items.push(seen.get(id));
+          continue;
+        }
+
         const transcriptStart = parseLit(binding.transcriptStart?.value);
         const channelTs = binding.channelTs?.value;
         const fallbackTs = binding.timestamp?.value;
         const channelTimestamp = transcriptStart || channelTs || fallbackTs;
 
-        itemMap.set(id, {
+        const item = {
           id,
           type: binding.type?.value,
           author: binding.author?.value,
@@ -132,10 +141,18 @@ export default class ConversationSubgroup extends Ad4mModel {
           messageBody: parseLit(binding.body?.value),
           postTitle: parseLit(binding.title?.value),
           taskName: parseLit(binding.taskName?.value),
-        });
+        };
+        seen.set(id, item);
+        items.push(item);
       }
 
-      return Array.from(itemMap.values()).map((item: any) => {
+      // Sort by the effective timestamp (transcriptStart || channelTs || fallback)
+      const sorted = items.sort((a: any, b: any) => {
+        const tsA = a.channelTimestamp || '';
+        const tsB = b.channelTimestamp || '';
+        return tsA < tsB ? -1 : tsA > tsB ? 1 : 0;
+      });
+      return sorted.map((item: any) => {
         let text = '';
         let type = '';
 
