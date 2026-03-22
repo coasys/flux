@@ -97,6 +97,8 @@ const callRouteData = computed(() => {
   position: fixed;
   left: 0;
   bottom: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 
   .call-window-wrapper {
     width: 100%;
