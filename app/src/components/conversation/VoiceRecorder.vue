@@ -185,12 +185,13 @@ async function stopRecording() {
   const text = finalText.value.trim();
   if (text) {
     try {
-      const message = new Message(props.perspective, undefined, props.source);
-      message.body = text;
+      const messageData: any = { body: text };
       if (transcriptTimestamp.value) {
-        message.transcriptStartedAt = transcriptTimestamp.value.toISOString();
+        messageData.transcriptStartedAt = transcriptTimestamp.value.toISOString();
       }
-      await message.save();
+      await Message.create(props.perspective, messageData, {
+        parent: { id: props.source, predicate: 'ad4m://has_child' },
+      });
     } catch (e) {
       console.error('Failed to save voice message:', e);
     }

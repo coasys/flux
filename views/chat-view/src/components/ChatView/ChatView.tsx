@@ -43,20 +43,18 @@ export default function ChatView({ agent, client, perspective, source, threaded,
   const { isRecording, isTranscribing, previewText, finalText, toggleRecording, cancelRecording } = useVoiceRecorder({
     client,
     onTranscript: async (text) => {
-      // Save the transcribed text as a message
       try {
-        const message = new Message(perspective, undefined, source);
-        message.body = `<p>${text}</p>`;
-        await message.save();
+        const message = await Message.create(perspective, { body: `<p>${text}</p>` }, {
+          parent: { id: source, predicate: 'ad4m://has_child' },
+        });
 
-        // Use ref to avoid stale closure
         const currentReplyMessage = replyMessageRef.current;
         if (currentReplyMessage) {
           await perspective.addLinks([
             {
-              source: currentReplyMessage.baseExpression,
+              source: currentReplyMessage.id,
               predicate: HAS_REPLY,
-              target: message.baseExpression,
+              target: message.id,
             },
           ]);
           setReplyMessage(null);
