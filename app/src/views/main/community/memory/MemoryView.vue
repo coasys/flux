@@ -115,7 +115,7 @@ import { useAppStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { MemoryEntry } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 defineOptions({ name: 'MemoryView' });
 
