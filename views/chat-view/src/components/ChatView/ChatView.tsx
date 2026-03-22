@@ -45,7 +45,7 @@ export default function ChatView({ agent, client, perspective, source, threaded,
     onTranscript: async (text) => {
       try {
         const message = await Message.create(perspective, { body: `<p>${text}</p>` }, {
-          parent: { id: source, predicate: 'ad4m://has_child' },
+          parent: { id: source, predicate: threaded ? MESSAGE_THREAD : 'ad4m://has_child' },
         });
 
         const currentReplyMessage = replyMessageRef.current;
