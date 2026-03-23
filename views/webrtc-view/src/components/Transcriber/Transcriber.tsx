@@ -1,15 +1,21 @@
 import { Message } from '@coasys/flux-api';
 import { WebRTC } from '@coasys/flux-react-web';
 import { detectBrowser } from '@coasys/flux-utils';
+import { Ad4mClient } from '@coasys/ad4m';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { v4 as uuidv4 } from 'uuid';
 import RecordingIcon from '../RecordingIcon/RecordingIcon.jsx';
 import styles from './Transcriber.module.scss';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 
-type Props = { source: string; perspective: any; webRTC: WebRTC };
+type Props = {
+  source: string;
+  perspective: any;
+  webRTC: WebRTC;
+  client: Ad4mClient;
+};
 
-export default function Transcriber({ source, perspective, webRTC }: Props) {
+export default function Transcriber({ source, perspective, webRTC, client }: Props) {
+  // All hooks must be called unconditionally before any early returns
   const { audio, transcriber } = webRTC.localState.settings;
   const { messageTimeout } = transcriber;
   const [transcripts, setTranscripts] = useState<any[]>([]);
@@ -30,6 +36,40 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
   const volumeCheckInterval = useRef(null);
   const browser = detectBrowser();
   const [previewText, setPreviewText] = useState('');
+
+  // useEffect hooks must come before any early returns
+  useEffect(() => {
+    return () => {
+      if (!client) return;
+      stopListening();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!client) return;
+    if (audio) startListening();
+    else stopListening();
+  }, [audio, client]);
+
+  useEffect(() => {
+    if (!client) return;
+    // skip on first run by checking if audio context is present
+    if (audioContext.current) {
+      // restart listening with new settings
+      stopListening();
+      startListening();
+    }
+  }, [useRemoteService, client]);
+
+  // Runtime validation for required client prop (after all hooks)
+  if (!client) {
+    console.error('Transcriber: required prop "client" is missing');
+    return (
+      <div className={styles.transcriber}>
+        <p>Transcriber unavailable: client not initialized</p>
+      </div>
+    );
+  }
 
   function renderVolume() {
     if (listening.current) {
@@ -223,8 +263,6 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
 
   async function startLocalTransciption(stream: MediaStream) {
     // set up audio context & worklet node
-    const client = await getAd4mClient();
-
     const moreDemaningParams = { startThreshold: 0.8 };
     streamId.current = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
     const wordByWordParams = {
@@ -246,7 +284,7 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
         const audioData = Array.from(event.data);
-        client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData);
+        client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData as any);
       }
     };
     workletNode.connect(audioContext.current.destination);
@@ -286,31 +324,12 @@ export default function Transcriber({ source, perspective, webRTC }: Props) {
     recognition.current?.stop();
     clearInterval(volumeCheckInterval.current);
     if (streamId.current) {
-      const client = await getAd4mClient();
       await client.ai.closeTranscriptionStream(streamId.current);
       await client.ai.closeTranscriptionStream(fastStreamId.current);
       streamId.current = null;
       fastStreamId.current = null;
     }
   }
-
-  useEffect(() => {
-    return () => stopListening();
-  }, []);
-
-  useEffect(() => {
-    if (audio) startListening();
-    else stopListening();
-  }, [audio]);
-
-  useEffect(() => {
-    // skip on first run by checking if audio context is present
-    if (audioContext.current) {
-      // restart listening with new settings
-      stopListening();
-      startListening();
-    }
-  }, [useRemoteService]);
 
   return (
     <div className={styles.wrapper}>

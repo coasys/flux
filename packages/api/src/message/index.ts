@@ -1,53 +1,40 @@
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
-import { ModelOptions, Property, Optional, Collection, Flag, Ad4mModel, ReadOnly } from '@coasys/ad4m';
+import { Model, Property, HasMany, Flag, Ad4mModel } from '@coasys/ad4m';
 
-const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
+const { BODY, HAS_REPLY, ENTRY_TYPE, REACTION, TRANSCRIPT_STARTED_AT, MESSAGE_THREAD } = community;
 
-@ModelOptions({
-  name: 'Message',
-})
+@Model({ name: 'Message' })
 export class Message extends Ad4mModel {
-  @Flag({
-    through: ENTRY_TYPE,
-    value: EntryType.Message,
-  })
+  @Flag({ through: ENTRY_TYPE, value: EntryType.Message })
   type: string;
 
-  @Property({
-    through: BODY,
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: BODY })
   body: string;
 
-  @Collection({
-    through: REACTION,
-  })
+  @Property({ through: TRANSCRIPT_STARTED_AT })
+  transcriptStartedAt?: string;
+
+  @HasMany({ through: REACTION })
   reactions: string[] = [];
 
-  @Optional({
-    getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
+  @Property({
+    through: HAS_REPLY,
+    getter: `(<-link[WHERE predicate = '${HAS_REPLY}'].in.uri)[0]`,
   })
-  replyingTo: string | undefined = '';
+  replyingTo?: string;
 
-  @ReadOnly({
-    getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List),
-    (length(List, Length), Length > 5 -> Value = true ; Value = false)`,
+  @Property({
+    through: 'flux://is_popular',
+    getter: `count(<-link[WHERE predicate = '${REACTION}' AND out.uri = 'emoji://1f44d']) > 5`,
+    readOnly: true,
   })
   isPopular: boolean = false;
 
-  @Collection({
-    through: 'ad4m://has_child',
-    where: {
-      condition: `subject_class("Message", Class), instance(Class, Target)`,
-    },
-  })
+  @HasMany({ through: MESSAGE_THREAD })
   thread: string[] = [];
 
-  @Collection({
-    through: REPLY_TO,
-  })
+  @HasMany({ through: HAS_REPLY })
   replies: string[] = [];
 }
 

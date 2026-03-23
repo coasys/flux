@@ -51,7 +51,7 @@ function stopResize() {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .community-layout {
   height: 100%;
   display: flex;
@@ -85,7 +85,7 @@ function stopResize() {
   flex-shrink: 0;
 }
 
-@media (max-width: 800px) {
+@media screen and (max-width: $breakpoint-mobile) {
   .community-layout .community-layout__drawer {
     height: 100%;
     width: 100% !important;

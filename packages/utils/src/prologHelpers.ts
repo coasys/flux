@@ -1,6 +1,5 @@
 import { EntryType, ModelProperty, Entry } from '@coasys/flux-types';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
-import { Literal } from '@coasys/ad4m';
+import { Ad4mClient, Literal } from '@coasys/ad4m';
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -63,12 +62,14 @@ export function generatePrologQuery({
 }
 
 export async function queryProlog({
+  client,
   perspectiveUuid,
   id,
   type,
   source,
   properties,
 }: {
+  client: Ad4mClient;
   perspectiveUuid: string;
   id?: string;
   source?: string;
@@ -77,8 +78,6 @@ export async function queryProlog({
     [x: string]: ModelProperty;
   };
 }): Promise<Entry[]> {
-  const client = await getAd4mClient();
-
   const { query, assertQuery, assertEntry, retractQuery, retractEntry } = generatePrologQuery({
     id,
     type,
@@ -107,17 +106,17 @@ export async function queryProlog({
     ...Object.keys(properties).map((name) => capitalizeFirstLetter(name)),
   ]);
 
-  const result = await Promise.all(entries.map((entry) => resolveEntryWithLatestProperties(entry, properties)));
+  const result = await Promise.all(entries.map((entry) => resolveEntryWithLatestProperties(client, entry, properties)));
   return result;
 }
 
 export async function resolveEntryWithLatestProperties(
+  client: Ad4mClient,
   entry,
   properties: {
     [x: string]: ModelProperty;
   },
 ): Promise<Entry> {
-  const client = await getAd4mClient();
   const propertyNames = Object.keys(entry);
   let cleanedEntry = {} as Entry;
 

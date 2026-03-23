@@ -1,20 +1,25 @@
 import { Message, Messages } from '@coasys/flux-types';
-import { Expression, LinkExpression } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
+import { Ad4mClient, Expression, LinkExpression } from '@coasys/ad4m';
 
-export async function getExpression(link: LinkExpression): Promise<Expression | null> {
-  const client = await getAd4mClient();
-
+export async function getExpression(client: Ad4mClient, link: LinkExpression): Promise<Expression | null> {
   const expression = await client.expression.get(link.data.target);
   if (expression) {
-    return { ...expression, data: JSON.parse(expression.data) };
+    try {
+      return { ...expression, data: JSON.parse(expression.data) };
+    } catch (error) {
+      console.error('expressionHelpers: Failed to parse expression data for', link.data.target, error);
+      return null;
+    }
   } else {
     return null;
   }
 }
 
-export async function getExpressions(expressionLinks: LinkExpression[]) {
-  const linkPromises = expressionLinks.map((link) => getExpression(link));
+export async function getExpressions(
+  client: Ad4mClient,
+  expressionLinks: LinkExpression[],
+): Promise<(Expression | null)[]> {
+  const linkPromises = expressionLinks.map((link) => getExpression(client, link));
   return await Promise.all(linkPromises);
 }
 

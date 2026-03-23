@@ -15,7 +15,9 @@
       </KeepAlive>
     </RouterView>
 
-    <Modals />
+    <Teleport to="body">
+      <Modals />
+    </Teleport>
 
     <!-- TODO: Move the logic below into seperate componenets -->
 
@@ -60,7 +62,7 @@
             <button
               v-for="channelData in channelsWithConversations"
               class="channel-card"
-              @click="() => navigateToChannel(channelData.channel.baseExpression)"
+              @click="() => navigateToChannel(channelData.channel.id)"
             >
               # {{ channelData.channel.name }}
             </button>
@@ -111,6 +113,7 @@ import { HourglassIcon } from '@/components/icons';
 import { CommunityServiceKey, createCommunityService } from '@/composables/useCommunityService';
 import CommunityLayout from '@/layout/CommunityLayout.vue';
 import { useCommunityServiceStore, useModalStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import Modals from '@/views/main/community/modals/Modals.vue';
 import Sidebar from '@/views/main/community/sidebar/Sidebar.vue';
 import { onMounted, onUnmounted, provide } from 'vue';
@@ -130,11 +133,11 @@ const communityServiceStore = useCommunityServiceStore();
 // Initialize the community service & add it to the community service store
 const communityService = await createCommunityService();
 provide(CommunityServiceKey, communityService);
-communityServiceStore.addCommunityService(communityId, communityService);
+communityServiceStore.addCommunityService(restoreNeighbourhoodPrefix(communityId), communityService);
 const {
   community,
   isSynced,
-  channelsWithConversations,
+  channelsWithConversationsAndAgents: channelsWithConversations,
   signallingService,
   newConversationLoading,
   startNewConversation,
@@ -145,7 +148,10 @@ function navigateToChannel(channelId?: string) {
 }
 
 onMounted(() => signallingService.startSignalling());
-onUnmounted(() => signallingService.stopSignalling());
+onUnmounted(() => {
+  signallingService.stopSignalling();
+  communityService.cleanup();
+});
 </script>
 
 <style scoped>

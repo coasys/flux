@@ -1,7 +1,6 @@
 import { PerspectiveProxy } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
-import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
-import { Post } from '@coasys/flux-api';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
+import { Channel, Post } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { useState } from 'preact/hooks';
 import { DisplayView, displayOptions } from '../../constants/options';
@@ -9,19 +8,17 @@ import PostItem from '../PostItem';
 import style from './index.module.css';
 
 type Props = {
-  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
   getProfile: (did: string) => Promise<Profile>;
 };
 
-export default function PostList({ agent, perspective, source, getProfile }: Props) {
+export default function PostList({ perspective, source, getProfile }: Props) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, loading } = useModel({
-    perspective,
-    model: Post,
-    query: { source, order: { timestamp: 'DESC' } },
+  const { data: posts, loading } = useLiveQuery(Post, perspective, {
+    parent: { model: Channel, id: source },
+    query: { order: { createdAt: 'DESC' } },
   });
 
   const displayStyle: DisplayView =
@@ -75,7 +72,7 @@ export default function PostList({ agent, perspective, source, getProfile }: Pro
       )}
       <div className={[style.posts, displayStyle].join(' ')}>
         {posts.map((post) => (
-          <PostItem key={post.baseExpression} agent={agent} post={post} displayView={view} getProfile={getProfile} />
+          <PostItem key={post.id} post={post} displayView={view} getProfile={getProfile} />
         ))}
       </div>
     </div>

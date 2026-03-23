@@ -1,24 +1,20 @@
-import { ModelOptions, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
-  baseExpression: string;
+  id: string;
   name: string;
   relevance: number;
 }
 
-@ModelOptions({ name: 'Topic' })
+// TODO: remove Prolog queries
+
+@Model({ name: 'Topic' })
 export default class Topic extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://has_topic',
-  })
+  @Flag({ through: 'flux://entry_type', value: 'flux://has_topic' })
   type: string;
 
-  @Property({
-    through: 'flux://topic',
-    writable: true,
-  })
+  @Property({ through: 'flux://topic' })
   topic: string;
 
   private matchQuery(type: 'Conversation' | 'Subgroup'): string {
@@ -28,7 +24,7 @@ export default class Topic extends Ad4mModel {
         % 1. Find SemanticRelationships that have tag = topicId
         subject_class("SemanticRelationship", SR),
         instance(SR, Relationship),
-        triple(Relationship, "flux://has_tag", "${this.baseExpression}"),
+        triple(Relationship, "flux://has_tag", "${this.id}"),
   
         % 2. Grab the subgroup and relevance
         property_getter(SR, Relationship, "expression", Subgroup),
@@ -56,11 +52,11 @@ export default class Topic extends Ad4mModel {
       // remove duplicates
       const rows = result[0]?.Matches || [];
       const dedupMap: Record<string, any> = {};
-      for (const [baseExpression, relevance, channelId, channelName] of rows) {
-        if (!dedupMap[baseExpression]) {
+      for (const [id, relevance, channelId, channelName] of rows) {
+        if (!dedupMap[id]) {
           // convert prolog response to JS
-          dedupMap[baseExpression] = {
-            baseExpression,
+          dedupMap[id] = {
+            id,
             type: 'Conversation',
             relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
             channelId,
@@ -78,9 +74,9 @@ export default class Topic extends Ad4mModel {
   async linkedSubgroups(): Promise<SynergyMatch[]> {
     try {
       const result = await this.perspective.infer(this.matchQuery('Subgroup'));
-      return (result[0]?.Matches || []).map(([baseExpression, relevance, channelId, channelName]) => ({
+      return (result[0]?.Matches || []).map(([id, relevance, channelId, channelName]) => ({
         // convert prolog response to JS
-        baseExpression,
+        id,
         type: 'ConversationSubgroup',
         relevance: parseInt(Literal.fromUrl(relevance).get().data, 10),
         channelId,

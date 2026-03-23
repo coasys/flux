@@ -1,125 +1,52 @@
-import { Ad4mModel, Flag, Link, Literal, ModelOptions, Optional } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property } from '@coasys/ad4m';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
+import { formatTranscriptMarkdown } from './export';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
+import { community } from '@coasys/flux-constants';
+const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
 
-@ModelOptions({
-  name: 'Conversation',
-})
-export default class Conversation extends Ad4mModel {
-  @Flag({
-    through: 'flux://entry_type',
-    value: 'flux://conversation',
-  })
+@Model({ name: 'Conversation' })
+export class Conversation extends Ad4mModel {
+  @Flag({ through: 'flux://entry_type', value: 'flux://conversation' })
   type: string;
 
-  @Optional({
-    through: 'flux://has_name',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'flux://has_name' })
   conversationName: string;
 
-  @Optional({
-    through: 'flux://has_summary',
-    writable: true,
-    resolveLanguage: 'literal',
-  })
+  @Property({ through: 'flux://name_is_fixed' })
+  nameFixed: boolean = false;
+
+  @Property({ through: 'flux://has_summary' })
   summary: string;
+
+  @HasMany({ through: FLUX_PARTICIPANT })
+  participants: string[] = [];
+
+  @HasMany(() => ConversationSubgroup)
+  subgroupEntities: ConversationSubgroup[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
     // find the total subgroup count and the dids of participants in the conversation
     try {
-      // const prologQuery = `
-      //   findall([SubgroupCount, SortedAuthors], (
-      //     % 1. Gather all subgroups and find the count
-      //     findall(Subgroup, (
-      //       subject_class("ConversationSubgroup", CS),
-      //       instance(CS, Subgroup),
-      //       triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
-      //     ), SubgroupList),
-      //     length(SubgroupList, SubgroupCount),
-      //
-      //     % 2. Gather and deduplicate authors
-      //     findall(Author, (
-      //       member(S, SubgroupList),
-      //       triple(S, "ad4m://has_child", Item),
-      //       link(_, "ad4m://has_child", Item, _, Author)
-      //     ), AuthorList),
-      //     sort(AuthorList, SortedAuthors)
-      //   ), [Stats]).
-      // `;
-
-      const countQuery = `
-        SELECT count() AS count
-        FROM link
-        WHERE in.uri = '${this.baseExpression}'
-          AND predicate = 'ad4m://has_child'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
-      `;
-
+      // Count subgroups by getting all matching URIs and counting them
       const subgroupsQuery = `
-        SELECT out.uri AS subgroupUri
+        SELECT VALUE out.uri
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
       `;
 
-      // Execute both queries in parallel
-      const [countResult, subgroupsResult] = await Promise.all([
-        this.perspective.querySurrealDB(countQuery),
-        this.perspective.querySurrealDB(subgroupsQuery),
-      ]);
+      const subgroupsResult = await this.perspective.querySurrealDB(subgroupsQuery);
+      const totalSubgroups = subgroupsResult?.length || 0;
 
-      // Extract total subgroup count
-      let totalSubgroups = 0;
-      for (const result of countResult || []) {
-        const countValue = result?.count;
-        const count =
-          typeof countValue === 'object' && countValue?.Int !== undefined ? countValue.Int : (countValue ?? 0);
-        totalSubgroups += count;
-      }
-
-      // Extract subgroup URIs
-      const subgroupUris = (subgroupsResult || []).map((r: any) => r.subgroupUri);
-
-      // Get participants from all items in all subgroups
-      let participants: string[] = [];
-      if (subgroupUris.length > 0) {
-        // For each subgroup, get all items and their authors
-        const itemsResults = await Promise.all(
-          subgroupUris.map(async (subgroupUri: string) => {
-            const itemsQuery = `
-              SELECT author
-              FROM link
-              WHERE in.uri = '${subgroupUri}'
-                AND predicate = 'ad4m://has_child'
-                AND (
-                  out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-                  OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-                )
-                AND author IS NOT NONE
-            `;
-            return await this.perspective.querySurrealDB(itemsQuery);
-          }),
-        );
-        // Flatten and deduplicate
-        participants = [
-          ...new Set(
-            itemsResults
-              .flat()
-              .map((r: any) => r.author)
-              .filter(Boolean),
-          ),
-        ];
-      }
-
-      return { totalSubgroups, participants };
+      // Use maintained participants Collection instead of expensive queries
+      await this.get();
+      return { totalSubgroups, participants: this.participants };
     } catch (error) {
       console.error('Error getting conversation stats:', error);
       return { totalSubgroups: 0, participants: [] };
@@ -129,36 +56,6 @@ export default class Conversation extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the conversations topics (via its subgroups)
     try {
-      // const prologQuery = `
-      //   % Get all topics and sort in one step
-      //   findall(TopicList, (
-      //     % First get all topic pairs
-      //     findall([TopicBase, TopicName], (
-      //       % 1. Gather subgroups
-      //       findall(Subgroup, (
-      //         subject_class("ConversationSubgroup", CS),
-      //         instance(CS, Subgroup),
-      //         triple("${this.baseExpression}", "ad4m://has_child", Subgroup)
-      //       ), SubgroupList),
-      //
-      //       % 2. Get topics from relationships
-      //       member(S, SubgroupList),
-      //       subject_class("SemanticRelationship", SR),
-      //       instance(SR, Relationship),
-      //       triple(Relationship, "flux://has_expression", S),
-      //       triple(Relationship, "flux://has_tag", TopicBase),
-      //
-      //       % 3. Get topic names
-      //       subject_class("Topic", T),
-      //       instance(T, TopicBase),
-      //       property_getter(T, TopicBase, "topic", TopicName)
-      //     ), AllTopics),
-      //
-      //     % Remove duplicates
-      //     sort(AllTopics, TopicList)
-      //   ), [Topics]).
-      // `;
-
       const surrealQuery = `
         SELECT
           out.uri AS topicBase,
@@ -168,8 +65,8 @@ export default class Conversation extends Ad4mModel {
           AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
           AND (
-            in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.baseExpression}'
-            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.baseExpression}'][0] IS NOT NONE
+            in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${this.id}'
+            OR in->link[WHERE predicate = 'flux://has_expression'][0].out<-link[WHERE predicate = 'ad4m://has_child' AND in.uri = '${this.id}'][0] IS NOT NONE
           )
       `;
 
@@ -185,7 +82,7 @@ export default class Conversation extends Ad4mModel {
 
       return Array.from(uniqueTopics.values()).map(
         ({ topicBase, topicName }): SynergyTopic => ({
-          baseExpression: topicBase,
+          id: topicBase,
           name: topicName,
         }),
       );
@@ -197,93 +94,58 @@ export default class Conversation extends Ad4mModel {
 
   async subgroups(): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities
-    return await ConversationSubgroup.findAll(this.perspective, { source: this.baseExpression });
+    await this.get({ subgroupEntities: true });
+    return this.subgroupEntities as unknown as ConversationSubgroup[];
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {
     // find the necissary data to render the conversations subgroups in timeline components (include timestamps for the first and last item in each subgroup)
     try {
-      // const prologQuery = `
-      //   findall(SubgroupInfo, (
-      //     % 1. Identify all subgroups in the conversation
-      //     subject_class("ConversationSubgroup", CS),
-      //     instance(CS, Subgroup),
-      //     triple("${this.baseExpression}", "ad4m://has_child", Subgroup),
-      //
-      //     % 2. Retrieve subgroup properties
-      //     property_getter(CS, Subgroup, "subgroupName", SubgroupName),
-      //     (property_getter(CS, Subgroup, "summary", S) -> Summary = S ; Summary = ""),
-      //
-      //     % 3. Collect timestamps for valid items only
-      //     findall(Timestamp, (
-      //       triple(Subgroup, "ad4m://has_child", Item),
-      //
-      //       % Check item is valid type
-      //       (
-      //         subject_class("Message", MC),
-      //         instance(MC, Item)
-      //         ;
-      //         subject_class("Post", PC),
-      //         instance(PC, Item)
-      //         ;
-      //         subject_class("Task", TC),
-      //         instance(TC, Item)
-      //       ),
-      //
-      //       % Get items timestamp from link to channel
-      //       link(ChannelId, "ad4m://has_child", Item, Timestamp, _),
-      //       subject_class("Channel", CH),
-      //       instance(CH, ChannelId)
-      //     ), Timestamps),
-      //
-      //     % 4. Derive start and end from earliest & latest timestamps
-      //     (
-      //       Timestamps = []
-      //       -> StartTime = 0, EndTime = 0
-      //       ; sort(Timestamps, Sorted),
-      //         Sorted = [StartTime|_],
-      //         reverse(Sorted, [EndTime|_])
-      //     ),
-      //
-      //     % 5. Build a single structure for each subgroup
-      //     SubgroupInfo = [Subgroup, SubgroupName, Summary, StartTime, EndTime]
-      //   ), Subgroups).
-      // `;
-
       // Simplified query - get subgroups without timestamps first
       const surrealQuery = `
         SELECT
-          out.uri AS baseExpression,
+          out.uri AS id,
+          timestamp,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_name'][0].out.uri) AS name,
           fn::parse_literal(out->link[WHERE predicate = 'flux://has_summary'][0].out.uri) AS summary
         FROM link
-        WHERE in.uri = '${this.baseExpression}'
+        WHERE in.uri = '${this.id}'
           AND predicate = 'ad4m://has_child'
           AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://conversation_subgroup'
+        ORDER BY timestamp ASC
       `;
 
       const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
 
       // Get timestamps for each subgroup separately
-      return await Promise.all(
+      const subgroups = await Promise.all(
         (surrealResult || []).map(async (subgroup: any) => {
           // Query to get timestamps for items in this subgroup
-          // Using graph traversal from subgroup children that are also channel children
+          // Get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
-            SELECT VALUE timestamp
+            SELECT
+              (fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri) ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp) AS channelTimestamp
             FROM link
-            WHERE in.uri = '${subgroup.baseExpression}'
-              AND predicate = 'ad4m://has_child'
-              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_channel'][0] IS NOT NONE
-            ORDER BY timestamp ASC
+            WHERE in.uri = '${subgroup.id}'
+              AND predicate = 'flux://has_item'
+              AND out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0] IS NOT NONE
+            ORDER BY channelTimestamp ASC
           `;
 
-          const timestamps = await this.perspective.querySurrealDB(timestampQuery);
-          const start = timestamps.length > 0 ? new Date(timestamps[0]).getTime() : 0;
-          const end = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]).getTime() : 0;
+          const timestampResults = await this.perspective.querySurrealDB(timestampQuery);
+
+          // Filter out null/undefined timestamps and convert to numeric timestamps
+          const timestamps = (timestampResults || [])
+            .map((r: any) => r.channelTimestamp)
+            .filter((ts) => ts != null && ts !== '') // Remove null/undefined/empty
+            .map((ts) => new Date(ts).getTime())
+            .filter((time) => !isNaN(time)); // Remove invalid dates (NaN)
+
+          const start = timestamps.length > 0 ? timestamps[0] : 0;
+          const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
 
           return {
-            baseExpression: subgroup.baseExpression,
+            id: subgroup.id,
             name: subgroup.name || '',
             summary: subgroup.summary || '',
             start,
@@ -291,6 +153,9 @@ export default class Conversation extends Ad4mModel {
           };
         }),
       );
+
+      // Sort by actual content start time, not link creation time
+      return subgroups.sort((a, b) => a.start - b.start);
     } catch (error) {
       console.error('Error getting conversation subgroups:', error);
       return [];
@@ -300,6 +165,7 @@ export default class Conversation extends Ad4mModel {
   private async detectNewGroup(
     currentSubgroup: ConversationSubgroup | null,
     unprocessedItems: SynergyItem[],
+    client: Ad4mClient,
   ): Promise<{
     group: { n: string; s: string };
     newGroup?: { n: string; s: string; firstItemId: string };
@@ -309,7 +175,7 @@ export default class Conversation extends Ad4mModel {
     const unprocessedItemsWithProfile: (SynergyItem & Profile)[] = await Promise.all(
       unprocessedItems.map(async (item) => ({
         ...item,
-        ...(await getProfile(item.author)),
+        ...(await getProfile(item.author, client)),
       })),
     );
 
@@ -323,7 +189,7 @@ export default class Conversation extends Ad4mModel {
     let idToBaseExpression = {};
     let nextId = 0;
     for (const item of unprocessedItems) {
-      idToBaseExpression[nextId] = item.baseExpression;
+      idToBaseExpression[nextId] = item.id;
       nextId++;
     }
     const result = await LLMTaskWithExpectedOutputs(
@@ -382,28 +248,34 @@ export default class Conversation extends Ad4mModel {
       this.perspective.ai,
     );
 
+    // Filter out topics with empty/null/undefined names to prevent Literal conversion errors
+    currentNewTopics = currentNewTopics.filter((topic) => topic.n && topic.n.trim() !== '');
+
     const topicMatches = await Topic.findAll(this.perspective, {
-      where: { topic: currentNewTopics.map((topic) => Literal.from(topic.n).toUrl()) },
+      where: { topic: currentNewTopics.map((topic) => topic.n) },
     });
     await Promise.all(
       currentNewTopics.map((topic) => {
-        const existingTopic = topicMatches.find((t) => t.topic == Literal.from(topic.n).toUrl());
-        group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
+        const existingTopic = topicMatches.find((t) => t.topic == topic.n);
+        return group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
       }),
     );
   }
 
   private async createNewGroup(newGroup: { n: string; s: string }, batchId: string) {
-    let newSubgroupEntity = new ConversationSubgroup(this.perspective, undefined, this.baseExpression);
-    newSubgroupEntity.subgroupName = newGroup.n;
-    newSubgroupEntity.summary = newGroup.s;
-    await newSubgroupEntity.save(batchId);
+    const newSubgroupEntity = await ConversationSubgroup.create(
+      this.perspective,
+      { subgroupName: newGroup.n, summary: newGroup.s },
+      { batchId },
+    );
+    await this.addSubgroupEntities(newSubgroupEntity, batchId);
     return newSubgroupEntity;
   }
 
   async processNewExpressions(
     unprocessedItems: SynergyItem[],
     updateProcessingState: (newState: Partial<ProcessingState> | null) => void,
+    client: Ad4mClient,
   ) {
     const showLogs = false; // Set to true to enable detailed logging
     const duration = (start, end) => `${((end - start) / 1000).toFixed(1)} secs`;
@@ -425,7 +297,7 @@ export default class Conversation extends Ad4mModel {
 
     updateProcessingState({ step: 3 });
     // Have LLM sort new messages into old group or detect subject change
-    let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems);
+    let detectResult = await this.detectNewGroup(currentSubgroup, unprocessedItems, client);
 
     // Handle case where group is present but properties are not set
     if (detectResult.group && !(detectResult.group.n?.length > 0) && !(detectResult.group.s?.length > 0)) {
@@ -441,7 +313,7 @@ export default class Conversation extends Ad4mModel {
 
     // Handle case where the conversation is empty (no group yet) but LLM returns data in group and not in newGroup
     if (!currentSubgroup && detectResult.group && !detectResult.newGroup) {
-      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].baseExpression };
+      detectResult.newGroup = { ...detectResult.group, firstItemId: unprocessedItems[0].id };
       detectResult.group = null;
     }
 
@@ -451,7 +323,7 @@ export default class Conversation extends Ad4mModel {
     if (detectResult.newGroup) {
       newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
-        (item) => item.baseExpression === detectResult.newGroup.firstItemId,
+        (item) => item.id === detectResult.newGroup.firstItemId,
       );
     }
 
@@ -459,19 +331,25 @@ export default class Conversation extends Ad4mModel {
     const newLinks: Link[] = [];
     const currentNewMessages: string[] = [];
     const newGroupMessages: string[] = [];
+    const currentSubgroupNewParticipants = new Set<string>();
+    const newSubgroupParticipants = new Set<string>();
+    const allNewParticipants = new Set<string>();
     for (const [itemIndex, item] of unprocessedItems.entries()) {
       let itemsSubgroup;
       if ((detectResult.newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) || !currentSubgroup) {
         itemsSubgroup = newSubgroupEntity;
         newGroupMessages.push(item.text);
+        if (item.author) newSubgroupParticipants.add(item.author);
       } else {
         itemsSubgroup = currentSubgroup;
         currentNewMessages.push(item.text);
+        if (item.author) currentSubgroupNewParticipants.add(item.author);
       }
+      if (item.author) allNewParticipants.add(item.author);
       newLinks.push({
-        source: itemsSubgroup.baseExpression,
-        predicate: 'ad4m://has_child',
-        target: item.baseExpression,
+        source: itemsSubgroup.id,
+        predicate: SUBGROUP_ITEM,
+        target: item.id,
       });
     }
 
@@ -521,9 +399,25 @@ export default class Conversation extends Ad4mModel {
     // Save conversation info
     const start1 = new Date().getTime();
     updateProcessingState({ step: 6 });
-    this.conversationName = newConversationInfo.n;
+    // Only update name if not manually fixed by user
+    if (!this.nameFixed) {
+      this.conversationName = newConversationInfo.n;
+    }
     this.summary = newConversationInfo.s;
-    await this.update(batchId);
+
+    // Update conversation participants - don't update in-memory array, let it reload from links
+    const conversationNewParticipants = Array.from(allNewParticipants).filter(
+      (author) => !this.participants.includes(author),
+    );
+    if (conversationNewParticipants.length > 0) {
+      const participantLinks = conversationNewParticipants.map((author) => ({
+        source: this.id,
+        predicate: 'flux://has_participant',
+        target: author,
+      }));
+      await this.perspective.addLinks(participantLinks, 'shared', batchId);
+    }
+    await this.save(batchId);
     const end1 = new Date().getTime();
     if (showLogs) console.log('Conversation info updated: ', duration(start1, end1));
 
@@ -531,64 +425,95 @@ export default class Conversation extends Ad4mModel {
     if (currentSubgroup) {
       if (showLogs) console.log('Current subgroup updating:', currentSubgroup);
       const start2 = new Date().getTime();
-      await currentSubgroup.update(batchId);
+
+      // Update current subgroup participants
+      const subgroupNewParticipants = Array.from(currentSubgroupNewParticipants).filter(
+        (author) => !currentSubgroup.participants.includes(author),
+      );
+      if (subgroupNewParticipants.length > 0) {
+        const participantLinks = subgroupNewParticipants.map((author) => ({
+          source: currentSubgroup.id,
+          predicate: 'flux://has_participant',
+          target: author,
+        }));
+        await this.perspective.addLinks(participantLinks, 'shared', batchId);
+      }
+      await currentSubgroup.save(batchId);
       const end2 = new Date().getTime();
       if (showLogs) console.log('Current subgroup info updated: ', duration(start2, end2));
     }
 
-    updateProcessingState({ step: 7 });
-    // create vector embeddings for each unprocessed item
-    if (showLogs) console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
-    const start3 = new Date().getTime();
-    await Promise.all(
-      unprocessedItems.map((item, index) =>
-        createEmbedding(this.perspective, item.text, item.baseExpression, this.perspective.ai, batchId, index + 1),
-      ),
-    );
-    const end3 = new Date().getTime();
-    if (showLogs) console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
-
-    // update vector embedding for conversation
-    const start4 = new Date().getTime();
-    await removeEmbedding(this.perspective, this.baseExpression, batchId);
-    await createEmbedding(this.perspective, this.summary, this.baseExpression, this.perspective.ai, batchId);
-    const end4 = new Date().getTime();
-    if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
-
-    // update vector embedding for currentSubgroup if returned from LLM
-    if (currentSubgroup) {
-      const start5 = new Date().getTime();
-      await removeEmbedding(this.perspective, currentSubgroup.baseExpression, batchId);
-      await createEmbedding(
-        this.perspective,
-        currentSubgroup.summary,
-        currentSubgroup.baseExpression,
-        this.perspective.ai,
-        batchId,
-      );
-      const end5 = new Date().getTime();
-      if (showLogs) console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
-    }
-    // create vector embedding for new subgroup if returned from LLM
+    // Set new subgroup participants
     if (newSubgroupEntity) {
-      const start6 = new Date().getTime();
-      await createEmbedding(
-        this.perspective,
-        newSubgroupEntity.summary,
-        newSubgroupEntity.baseExpression,
-        this.perspective.ai,
-        batchId,
-      );
-      const end6 = new Date().getTime();
-      if (showLogs) console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
+      const participantLinks = Array.from(newSubgroupParticipants).map((author) => ({
+        source: newSubgroupEntity.id,
+        predicate: 'flux://has_participant',
+        target: author,
+      }));
+      await this.perspective.addLinks(participantLinks, 'shared', batchId);
     }
 
-    // batch commit all new links (currently only "ad4m://has_child" links)
+    updateProcessingState({ step: 7 });
+    // Embedding vector creation gated behind ENABLE_EMBEDDINGS environment variable.
+    // Set ENABLE_EMBEDDINGS=true to re-enable. Defaults to off for performance.
+    const enableEmbeddings = typeof process !== 'undefined' && process.env?.ENABLE_EMBEDDINGS === 'true';
+
+    if (enableEmbeddings) {
+      // create vector embeddings for each unprocessed item
+      if (showLogs) console.log('Creating vector embeddings for each unprocessed item...', unprocessedItems);
+      const start3 = new Date().getTime();
+      await Promise.all(
+        unprocessedItems.map((item, index) =>
+          createEmbedding(this.perspective, item.text, item.id, this.perspective.ai, batchId, index + 1),
+        ),
+      );
+      const end3 = new Date().getTime();
+      if (showLogs) console.log('Vector embeddings for each unprocessed item created: ', duration(start3, end3));
+
+      // update vector embedding for conversation
+      const start4 = new Date().getTime();
+      await removeEmbedding(this.perspective, this.id, batchId);
+      await createEmbedding(this.perspective, this.summary, this.id, this.perspective.ai, batchId);
+      const end4 = new Date().getTime();
+      if (showLogs) console.log('Vector embedding for conversation created: ', duration(start4, end4));
+
+      // update vector embedding for currentSubgroup if returned from LLM
+      if (currentSubgroup) {
+        const start5 = new Date().getTime();
+        await removeEmbedding(this.perspective, currentSubgroup.id, batchId);
+        await createEmbedding(
+          this.perspective,
+          currentSubgroup.summary,
+          currentSubgroup.id,
+          this.perspective.ai,
+          batchId,
+        );
+        const end5 = new Date().getTime();
+        if (showLogs) console.log('Vector embedding for currentSubgroup created: ', duration(start5, end5));
+      }
+      // create vector embedding for new subgroup if returned from LLM
+      if (newSubgroupEntity) {
+        const start6 = new Date().getTime();
+        await createEmbedding(
+          this.perspective,
+          newSubgroupEntity.summary,
+          newSubgroupEntity.id,
+          this.perspective.ai,
+          batchId,
+        );
+        const end6 = new Date().getTime();
+        if (showLogs) console.log('Vector embedding for new subgroup created: ', duration(start6, end6));
+      }
+    } else if (showLogs) {
+      console.log('Embedding vector creation skipped (ENABLE_EMBEDDINGS not set)');
+    }
+
+    // batch commit all new links (currently only "flux://has_item" links)
     // i.e. sorting messages into current and/or new sub-group
     const start7 = new Date().getTime();
     await this.perspective.addLinks(newLinks, 'shared', batchId);
     const end7 = new Date().getTime();
-    if (showLogs) console.log('"ad4m://has_child" links batch commited: ', duration(start7, end7));
+    if (showLogs) console.log('"flux://has_item" links batch commited: ', duration(start7, end7));
 
     const endProcessing = new Date().getTime();
 
@@ -601,4 +526,96 @@ export default class Conversation extends Ad4mModel {
     const endBatchCommit = new Date().getTime();
     if (showLogs) console.log('Batch committed in: ', duration(startBatchCommit, endBatchCommit));
   }
+
+  async exportMarkdown(client: Ad4mClient, unprocessedItems?: SynergyItem[]): Promise<string> {
+    await this.get();
+    const subgroups = await this.subgroups();
+    const topics = await this.topics();
+
+    // Cache profile lookups to avoid redundant calls for repeated authors
+    const profileCache = new Map<string, string>();
+    const resolveAuthorName = async (did: string): Promise<string> => {
+      if (profileCache.has(did)) return profileCache.get(did)!;
+      let name: string;
+      try {
+        const profile = await getProfile(did, client);
+        name = profile.givenName || profile.username || did?.slice(0, 16) || 'Unknown';
+      } catch {
+        name = did?.slice(0, 16) || 'Unknown';
+      }
+      profileCache.set(did, name);
+      return name;
+    };
+
+    // Collect all items from all subgroups with author profiles
+    const sections: {
+      name: string;
+      summary: string;
+      items: (SynergyItem & { authorName: string })[];
+    }[] = [];
+
+    for (const subgroup of subgroups) {
+      const items = await subgroup.itemsData();
+      const itemsWithNames = await Promise.all(
+        items.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
+      );
+      sections.push({
+        name: subgroup.subgroupName || '',
+        summary: subgroup.summary || '',
+        items: itemsWithNames,
+      });
+    }
+
+    // Sort sections by earliest item timestamp (content time, not link creation time)
+    sections.sort((a, b) => {
+      const aTime = a.items.length > 0 ? new Date(a.items[0].timestamp).getTime() : 0;
+      const bTime = b.items.length > 0 ? new Date(b.items[0].timestamp).getTime() : 0;
+      return aTime - bTime;
+    });
+
+    // Resolve unprocessed items author names
+    let unprocessedWithNames;
+    if (unprocessedItems && unprocessedItems.length > 0) {
+      unprocessedWithNames = await Promise.all(
+        unprocessedItems.map(async (item) => ({
+          ...item,
+          authorName: await resolveAuthorName(item.author),
+        })),
+      );
+    }
+
+    // Collect unique participant names
+    const allParticipants = new Set<string>();
+    for (const section of sections) {
+      for (const item of section.items) {
+        allParticipants.add(item.authorName);
+      }
+    }
+    if (unprocessedWithNames) {
+      for (const item of unprocessedWithNames) {
+        allParticipants.add(item.authorName);
+      }
+    }
+
+    return formatTranscriptMarkdown({
+      title: this.conversationName || 'Untitled Conversation',
+      summary: this.summary || '',
+      topics: topics.map((t) => t.name),
+      participants: Array.from(allParticipants),
+      date: (() => {
+        for (const section of sections) {
+          if (section.items.length > 0) return section.items[0].timestamp;
+        }
+        return new Date().toISOString();
+      })(),
+      sections,
+      unprocessedItems: unprocessedWithNames,
+    });
+  }
 }
+
+export interface Conversation extends HasManyMethods<'subgroupEntities' | 'participants'> {}
+export default Conversation;

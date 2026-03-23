@@ -33,7 +33,7 @@
       <!-- Timeline blocks -->
       <TimelineBlock
         v-for="conversation in visibleConversations"
-        :key="conversation.baseExpression"
+        :key="conversation.id"
         block-type="conversation"
         :data="conversation"
         :timeline-index="index + 1"
@@ -116,12 +116,15 @@ const visibleConversations = computed(() =>
 
 async function getData() {
   try {
-    const channel = new Channel(perspective, channelId.value);
-    const newConversations = await channel.conversations();
+    const channel = await Channel.findOne(perspective, {
+      where: { id: channelId.value },
+      include: { conversations: true },
+    });
+    const newConversations = channel?.conversationsData() ?? [];
 
     // Find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {
-      if (conversation.baseExpression === props.match.baseExpression) {
+      if (conversation.id === props.match.id) {
         // Store the conversations index & mark loading false to prevent further loading of children
         matchIndexes.value = {
           ...matchIndexes.value,
@@ -199,7 +202,7 @@ onMounted(getData);
       margin-left: 92px;
       background-color: var(--j-color-primary-200);
 
-      @media screen and (max-width: 800px) {
+      @media screen and (max-width: $breakpoint-mobile) {
         margin-left: 12px;
       }
     }
@@ -212,7 +215,7 @@ onMounted(getData);
     color: var(--j-color-ui-500);
     font-size: 24px;
 
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: $breakpoint-mobile) {
       margin: 0 0 0 50px;
     }
   }
@@ -227,7 +230,7 @@ onMounted(getData);
     z-index: 5;
     padding: 40px 0 10px 60px;
 
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: $breakpoint-mobile) {
       padding: 60px 0;
       margin-left: -20px;
     }

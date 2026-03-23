@@ -8,8 +8,12 @@ if (!customElements.get('flux-editor')) {
   customElements.define('flux-editor', Editor);
 }
 
-const CustomElement: HTMLElement = toCustomElement(App, ['perspective', 'agent', 'source', 'threaded', 'getProfile'], {
-  shadow: false,
-});
+const CustomElement: HTMLElement = toCustomElement(
+  App,
+  ['perspective', 'agent', 'client', 'source', 'threaded', 'getProfile'],
+  {
+    shadow: false,
+  },
+);
 
 export default CustomElement;

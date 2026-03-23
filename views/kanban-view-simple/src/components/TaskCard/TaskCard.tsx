@@ -1,10 +1,9 @@
 import { PerspectiveProxy, AgentClient } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
-import { Message } from '@coasys/flux-api';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { Profile } from '@coasys/flux-types';
 import { useState, Fragment, useMemo } from 'react';
 import styles from './TaskCard.module.scss';
-import { Task, TaskColumn } from '@coasys/flux-api';
+import { Message, Task, TaskColumn } from '@coasys/flux-api';
 import { Draggable } from 'react-beautiful-dnd';
 import TaskSettings from '../TaskSettings';
 import AvatarGroup from '../AvatarGroup';
@@ -35,7 +34,7 @@ export default function TaskCard({
 }: Props) {
   const [showTaskSettings, setShowTaskSettings] = useState(false);
 
-  const { entries: comments } = useModel({ perspective, model: Message, query: { source: task.baseExpression } });
+  const { data: comments } = useLiveQuery(Message, perspective, { parent: { model: Task, id: task.id } });
 
   const assignedProfiles = useMemo(() => {
     return agentProfiles.filter((p) => task.assignees.includes(p.did));
@@ -44,7 +43,7 @@ export default function TaskCard({
   return (
     <>
       <div className={styles.wrapper} onClick={() => !updating && setShowTaskSettings(true)}>
-        <Draggable key={task.baseExpression} draggableId={task.baseExpression} index={index} isDragDisabled={updating}>
+        <Draggable key={task.id} draggableId={task.id} index={index} isDragDisabled={updating}>
           {(provided, snapshot) => (
             <div
               ref={provided.innerRef}

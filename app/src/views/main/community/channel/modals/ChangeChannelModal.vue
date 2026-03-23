@@ -10,12 +10,7 @@
         :class="{ 'tab-modal': true, checked: view.pkg === currentView }"
         @click="() => changeCurrentView(view.pkg)"
       >
-        <input
-          type="radio"
-          :name="channel?.baseExpression"
-          :checked.prop="view.pkg === currentView"
-          :value.prop="view.pkg"
-        />
+        <input type="radio" :name="channel?.id" :checked.prop="view.pkg === currentView" :value.prop="view.pkg" />
         <j-icon :name="view.icon" size="xs" />
         <span>{{ view.name }}</span>
       </label>
@@ -26,9 +21,9 @@
 <script setup lang="ts">
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
-import { useModel } from '@coasys/ad4m-vue-hooks';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { App } from '@coasys/flux-api';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -37,12 +32,24 @@ const router = useRouter();
 const { channelId } = useRouteParams();
 const { perspective, allChannels } = useCommunityService();
 
-const { entries: views } = useModel({ perspective, model: App, query: { source: channelId.value } });
+const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId.value)));
+
+const views = ref<App[]>([]);
+watch(
+  channel,
+  async (newChannel) => {
+    if (newChannel) {
+      await newChannel.get({ views: true });
+      views.value = newChannel.views;
+    } else {
+      views.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 const currentView = ref<string>('');
 const isChangeChannel = ref(false);
-
-const channel = computed(() => allChannels.value.find((c) => c.baseExpression === channelId.value));
 
 function changeCurrentView(viewId: string) {
   const { communityId, channelId } = route.params;

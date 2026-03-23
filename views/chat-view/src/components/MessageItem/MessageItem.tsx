@@ -3,6 +3,7 @@ import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Message } from '@coasys/flux-api';
 import { REACTION } from '@coasys/flux-constants/src/communityPredicates';
 import { Profile } from '@coasys/flux-types';
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import styles from './MessageItem.module.css';
 
@@ -53,7 +54,7 @@ export default function MessageItem({
     const me = await agent.me();
     const reactions = await perspective.get(
       new LinkQuery({
-        source: message.baseExpression,
+        source: message.id,
         predicate: REACTION,
         target: expression,
       }),
@@ -65,7 +66,7 @@ export default function MessageItem({
       perspective.removeLinks(myReactions);
     } else {
       perspective.add({
-        source: message.baseExpression,
+        source: message.id,
         predicate: REACTION,
         target: expression,
       });
@@ -79,7 +80,7 @@ export default function MessageItem({
 
   async function getReplyMessage() {
     try {
-      const replies = await Message.findAll(perspective, { where: { base: message.replyingTo } });
+      const replies = await Message.findAll(perspective, { where: { id: message.replyingTo } });
       if (replies[0]) {
         setReplyMessage(replies[0]);
         setReplyProfile(await getProfile(replies[0].author));

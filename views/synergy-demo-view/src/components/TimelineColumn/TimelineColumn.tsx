@@ -145,7 +145,7 @@ export default function TimelineColumn({
   }
 
   async function processBatch(items: SynergyItem[], conversationId: string) {
-    const itemIds = items.map((item) => item.baseExpression);
+    const itemIds = items.map((item) => item.id);
     signallingService.setProcessingState({ step: 1, channelId, author: appStore.me.did, itemIds });
     const conversation = new Conversation(perspective, conversationId);
     await conversation.processNewExpressions(items, signallingService.setProcessingState);
@@ -166,10 +166,10 @@ export default function TimelineColumn({
       if (!currentConversation) {
         // If no conversation found, create a new one and process all items into the new conversation
         const conversation = await createNewConversation();
-        await processBatch(itemsToProcess, conversation.baseExpression);
+        await processBatch(itemsToProcess, conversation.id);
       } else {
         // If current conversation exists but no last conversation, put all items in the current conversation
-        if (!lastConversation) await processBatch(itemsToProcess, currentConversation.baseExpression);
+        if (!lastConversation) await processBatch(itemsToProcess, currentConversation.id);
         else {
           // If multiple conversations found, split items before and after current conversation based on their timestamps
           const [previousBatch, newBatch] = itemsToProcess.reduce(
@@ -178,8 +178,8 @@ export default function TimelineColumn({
             [[], []] as [SynergyItem[], SynergyItem[]],
           );
 
-          if (previousBatch.length) await processBatch(previousBatch, lastConversation.baseExpression);
-          if (newBatch.length) await processBatch(newBatch, currentConversation.baseExpression);
+          if (previousBatch.length) await processBatch(previousBatch, lastConversation.id);
+          if (newBatch.length) await processBatch(newBatch, currentConversation.id);
         }
       }
     } catch (e) {
@@ -301,7 +301,7 @@ export default function TimelineColumn({
         <div id="timeline-0" className={styles.items}>
           {conversations.map((conversation: SynergyGroup, index) => (
             <TimelineBlock
-              key={conversation.baseExpression}
+              key={conversation.id}
               agent={agent}
               perspective={perspective}
               blockType="conversation"
@@ -354,7 +354,7 @@ export default function TimelineColumn({
                 </j-box>
               )}
               {unprocessedItems.map((item) => (
-                <j-flex key={item.baseExpression} gap="400" a="center" className={styles.itemCard}>
+                <j-flex key={item.id} gap="400" a="center" className={styles.itemCard}>
                   <j-flex gap="300" direction="column">
                     <j-flex gap="400" a="center">
                       <j-icon name={item.icon} color="ui-400" size="lg" />
@@ -362,7 +362,7 @@ export default function TimelineColumn({
                         <Avatar did={item.author} showName getProfile={getProfile} />
                       </j-flex>
                       <j-timestamp value={item.timestamp} relative className={styles.timestamp} />
-                      {processingState?.itemIds?.includes(item.baseExpression) && (
+                      {processingState?.itemIds?.includes(item.id) && (
                         <j-badge variant="success">Processing...</j-badge>
                       )}
                     </j-flex>

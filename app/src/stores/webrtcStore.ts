@@ -3,6 +3,7 @@ import kissWav from '@/assets/audio/kiss.wav';
 import pigWav from '@/assets/audio/pig.wav';
 import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
+import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { PerspectiveExpression } from '@coasys/ad4m';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
@@ -17,6 +18,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -27,12 +29,12 @@ export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
-    urls: 'stun:relay.ad4m.dev:3478',
+    urls: 'stun:turn.ad4m.dev:3478',
     username: 'openrelay',
     credential: 'openrelay',
   },
   {
-    urls: 'turn:relay.ad4m.dev:443',
+    urls: 'turns:turn.ad4m.dev:5349',
     username: 'openrelay',
     credential: 'openrelay',
   },
@@ -68,10 +70,11 @@ export const useWebrtcStore = defineStore(
     const uiStore = useUiStore();
     const mediaDevicesStore = useMediaDevicesStore();
     const communityServiceStore = useCommunityServiceStore();
-
     const { me } = storeToRefs(appStore);
     const { stream: localStream, mediaSettings } = storeToRefs(mediaDevicesStore);
     const { getCommunityService } = communityServiceStore;
+
+    const tabCoordinator = useTabCoordinator();
 
     const popSound = new Howl({ src: [popWav] });
     const guitarSound = new Howl({ src: [guitarWav] });
@@ -90,8 +93,12 @@ export const useWebrtcStore = defineStore(
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
     const iceServers = ref(defaultIceServers);
     const disconnectedAgents = ref<string[]>([]);
+    const hasCopiedLink = ref(false);
+    let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const communityService = computed(() => getCommunityService(callRoute.value.communityId || ''));
+    const communityService = computed(() =>
+      getCommunityService(restoreNeighbourhoodPrefix(callRoute.value.communityId || '')),
+    );
     const signallingService = computed(() => communityService.value?.signallingService);
     const agentsInCommunity = computed<Record<string, AgentState>>(() => signallingService.value?.agents || {});
 
@@ -279,7 +286,7 @@ export const useWebrtcStore = defineStore(
 
           // Clean up the peer connection
           cleanupPeerConnection(did);
-          const peerProfile = await getCachedAgentProfile(did);
+          const peerProfile = await getCachedAgentProfile(did, appStore.ad4mClient);
           appStore.showDangerToast({ message: `👤 ${peerProfile.username || did} has left the call` });
         }
       });
@@ -589,6 +596,16 @@ export const useWebrtcStore = defineStore(
       joiningCall.value = true;
 
       try {
+        // Promote this tab to leader so it controls signalling & WebRTC.
+        // claimLeadership waits briefly for a potential 'call-pinned' rejection.
+        const claimed = await tabCoordinator.claimLeadership(true);
+        if (!claimed) {
+          appStore.showDangerToast({ message: 'You are already in a call in another tab.' });
+          tabCoordinator.requestLeaderFocus();
+          joiningCall.value = false;
+          return;
+        }
+
         // Update the call route
         callRoute.value = route.params;
 
@@ -604,6 +621,11 @@ export const useWebrtcStore = defineStore(
             const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
             createPeerConnection(agent.did, shouldInitiate);
           });
+        }
+
+        // Set the video layout to focused on mobile for better experience
+        if (uiStore.isLandscapeMobile) {
+          uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' });
         }
 
         inCall.value = true;
@@ -632,11 +654,38 @@ export const useWebrtcStore = defineStore(
         // Reset state
         inCall.value = false;
         callRoute.value = {};
+        tabCoordinator.setInCall(false);
+
+        // Exit fullscreen before closing the call window
+        if (uiStore.callWindowFullscreen) {
+          uiStore.toggleCallWindowFullscreen();
+        }
 
         // Close the call window
         uiStore.setCallWindowOpen(false);
       } catch (error) {
         console.error('Error leaving call:', error);
+      }
+    }
+
+    async function copyCallLink() {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        appStore.showSuccessToast({ message: 'Call invite link copied to clipboard!' });
+
+        // Clear any existing timer to avoid multiple pending timeouts
+        if (copyLinkTimer !== null) {
+          clearTimeout(copyLinkTimer);
+        }
+
+        hasCopiedLink.value = true;
+        copyLinkTimer = setTimeout(() => {
+          hasCopiedLink.value = false;
+          copyLinkTimer = null;
+        }, 3000);
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        appStore.showDangerToast({ message: 'Failed to copy link to clipboard' });
       }
     }
 
@@ -657,7 +706,10 @@ export const useWebrtcStore = defineStore(
         );
         // Merge the agent states with their profiles
         agentsInCall.value = await Promise.all(
-          agentsInCallMap.map(async ([did, agent]) => ({ ...agent, ...(await getCachedAgentProfile(did)) })),
+          agentsInCallMap.map(async ([did, agent]) => ({
+            ...agent,
+            ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
+          })),
         );
       },
       { deep: true },
@@ -731,6 +783,9 @@ export const useWebrtcStore = defineStore(
       { immediate: true },
     );
 
+    // Keep the tab coordinator in sync with call state
+    watch(inCall, (nowInCall) => tabCoordinator.setInCall(nowInCall), { immediate: true });
+
     return {
       inCall,
       callRoute,
@@ -743,6 +798,7 @@ export const useWebrtcStore = defineStore(
       joiningCall,
       iceServers,
       disconnectedAgents,
+      hasCopiedLink,
       addTrack,
       removeTrack,
       replaceAudioTrack,
@@ -755,6 +811,7 @@ export const useWebrtcStore = defineStore(
       signalAgent,
       signalAgentsInCall,
       displayEmoji,
+      copyCallLink,
     };
   },
   { persist: false },

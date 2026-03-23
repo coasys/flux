@@ -7,9 +7,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
 import { PluginKey } from 'prosemirror-state';
 import { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
-import { Channel, Message, SubjectRepository, getProfile } from '@coasys/flux-api';
-import { PerspectiveProxy } from '@coasys/ad4m';
-import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
+import { Channel, Message, getProfile } from '@coasys/flux-api';
+import { PerspectiveProxy, Ad4mClient, Link as Ad4mLink } from '@coasys/ad4m';
 import { Profile } from '@coasys/flux-types';
 import defaultActions from './defaultActions';
 import { shouldPlaceAbove } from './utils';
@@ -115,7 +114,7 @@ export default class MyElement extends LitElement {
   perspective: PerspectiveProxy | null;
 
   @property({ type: Object })
-  agent: AgentClient | null;
+  client: Ad4mClient | null;
 
   @property({ type: String })
   source: null;
@@ -125,11 +124,6 @@ export default class MyElement extends LitElement {
 
   @state()
   editor: Editor | null;
-
-  @state()
-  repo: SubjectRepository<{
-    [x: string]: any;
-  }>;
 
   @state()
   members: Profile[] = [];
@@ -327,11 +321,11 @@ export default class MyElement extends LitElement {
   }
 
   async fetchProfiles() {
-    if (this.perspective) {
-      const me = await this.agent.me();
+    if (this.perspective && this.client?.agent) {
+      const me = await this.client.agent.me();
       const neighbourhood = this.perspective.getNeighbourhoodProxy();
       const othersDids = await neighbourhood.otherAgents();
-      const profilePromises = [...othersDids, me.did].map(async (did) => getProfile(did));
+      const profilePromises = [...new Set([...othersDids, me.did])].map(async (did) => getProfile(did, this.client!));
       const newProfiles = await Promise.all(profilePromises);
       this.members = newProfiles;
     }
@@ -343,13 +337,7 @@ export default class MyElement extends LitElement {
 
   async fetchChannels() {
     if (this.perspective) {
-      const model = new SubjectRepository(Channel, {
-        perspective: this.perspective,
-        source: 'ad4m://self',
-      });
-
-      model
-        .getAllData()
+      Channel.findAll(this.perspective)
         .then((entries) => {
           this.channels = entries;
         })
@@ -358,16 +346,14 @@ export default class MyElement extends LitElement {
   }
 
   async submit() {
-    const repo = new SubjectRepository(Message, {
-      perspective: this.perspective,
-      source: this.source,
-    });
-
     try {
       const html = this.editor.getHTML();
       this.isCreating = true;
-      const result = await repo.create({ body: html });
-      console.log('CREATED: ', result);
+      const message = await Message.create(this.perspective, { body: html });
+      await this.perspective.add(
+        new Ad4mLink({ source: this.source, predicate: 'ad4m://has_child', target: message.id }),
+      );
+      console.log('CREATED: ', message);
       this.editor.commands.clearContent();
     } catch (e) {
       console.log(e);

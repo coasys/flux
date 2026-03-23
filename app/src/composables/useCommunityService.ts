@@ -1,7 +1,8 @@
-import { useAiStore, useAppStore } from '@/stores';
+import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
-import { LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-vue-hooks';
+import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
+import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
+import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
@@ -12,27 +13,36 @@ import {
   getAllFluxApps,
   Message,
   SemanticRelationship,
+  TaskBoard,
+  TaskColumn,
   Topic,
+  Task,
 } from '@coasys/flux-api';
+import { community as communityPredicates } from '@coasys/flux-constants';
+
+const { CHANNEL } = communityPredicates;
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, toRaw, watch } from 'vue';
+import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { HEARTBEAT_INTERVAL, useSignallingService } from './useSignallingService';
 
+// Stored in ref<> — only primitives, no model instances (avoids Vue UnwrapRef structural incompatibility)
 export interface ChannelData {
-  channel: Partial<Channel>;
-  conversation?: Partial<Conversation>;
-  children?: ChannelData[];
-  // notifications?: any;
-  // hasNewMessages?: boolean;
+  channelId: string;
+  conversationId?: string;
   lastActivity?: string;
-  agentsInChannel?: AgentData[];
-  agentsInCall?: AgentData[];
-  allAuthors?: string[];
+  children?: ChannelData[];
 }
 
-export interface ChannelDataWithAgents extends ChannelData {
+// Returned from computed — includes resolved model instances (ComputedRef does not apply deep unwrapping)
+export interface ChannelDataWithAgents {
+  channelId: string;
+  channel?: Channel;
+  conversationId?: string;
+  conversation?: Conversation;
+  lastActivity?: string;
+  children?: ChannelDataWithAgents[];
   agentsInChannel: AgentData[];
   agentsInCall: AgentData[];
 }
@@ -68,8 +78,9 @@ export interface CommunityService {
     newSpaceChannelId: string,
     conversationName?: string,
   ) => Promise<void>;
-  getParentChannel: (channelId: string) => Partial<Channel> | undefined;
-  getConversation: (channelId: string) => Partial<Conversation> | undefined;
+  getParentChannel: (channelId: string) => Channel | undefined;
+  getConversation: (channelId: string) => Conversation | undefined;
+  cleanup: () => void;
 }
 
 const DEFAULT_CHAT_APP_PKG = '@coasys/flux-chat-view';
@@ -79,34 +90,51 @@ export async function createCommunityService(): Promise<CommunityService> {
   const router = useRouter();
   const appStore = useAppStore();
   const aiStore = useAiStore();
+  const uiStore = useUiStore();
   const { me } = storeToRefs(appStore);
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const perspective = (await appStore.ad4mClient.perspective.byUUID(
-    route.params.communityId as string,
-  )) as PerspectiveProxy;
+  const maybePerspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string));
+  if (!maybePerspective) {
+    const communityId = route.params.communityId as string;
+    console.error(`Failed to get perspective for community: ${communityId}`);
+    throw new Error(
+      `Perspective not found for community: ${communityId}. The community may not exist or is not yet loaded.`,
+    );
+  }
+  // Narrowed to PerspectiveProxy — TypeScript does not narrow through closures so we reassign explicitly
+  const perspective: PerspectiveProxy = maybePerspective;
   const neighbourhood = perspective.getNeighbourhoodProxy();
 
-  // Ensure all required SDNA is installed
-  await Promise.all([
-    perspective.ensureSDNASubjectClass(Community),
-    perspective.ensureSDNASubjectClass(Channel),
-    perspective.ensureSDNASubjectClass(App),
-    perspective.ensureSDNASubjectClass(Conversation),
-    perspective.ensureSDNASubjectClass(ConversationSubgroup),
-    perspective.ensureSDNASubjectClass(Topic),
-    perspective.ensureSDNASubjectClass(Embedding),
-    perspective.ensureSDNASubjectClass(SemanticRelationship),
-    perspective.ensureSDNASubjectClass(Message),
-  ]);
+  // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
+  for (const Model of [
+    Community,
+    Channel,
+    App,
+    Conversation,
+    ConversationSubgroup,
+    Topic,
+    Embedding,
+    SemanticRelationship,
+    Message,
+    TaskBoard,
+    TaskColumn,
+    Task,
+  ]) {
+    await Model.register(perspective);
+  }
 
   // Initialise the signalling service for the community
   const signallingService = useSignallingService(neighbourhood);
 
-  // Model subscriptions (Todo: singularise communities when singular useModel hook available)
-  const { entries: communities } = useModel({ perspective, model: Community });
-  const { entries: allChannels } = useModel({ perspective, model: Channel });
+  // Model subscriptions
+  const { data: communities } = useLiveQuery(Community, perspective);
+  const { data: allChannels } = useLiveQuery(Channel, perspective);
+
+  // Cache for conversation instances — populated during data fetching, looked up in computeds.
+  // Plain Map (not reactive) is sufficient: updates always precede the ref changes that trigger re-computation.
+  const conversationCache = new Map<string, Conversation>();
 
   const processingStateChecked = ref(false);
   const isSynced = ref(true);
@@ -129,27 +157,38 @@ export async function createCommunityService(): Promise<CommunityService> {
   const pinnedConversationsWithAgents = computed((): ChannelDataWithAgents[] => {
     return pinnedConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      channel: allChannels.value.find((c) => c.id === data.channelId),
+      conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      children: undefined,
     }));
   });
   const recentConversationsWithAgents = computed((): ChannelDataWithAgents[] => {
     return recentConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      channel: allChannels.value.find((c) => c.id === data.channelId),
+      conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      children: undefined,
     }));
   });
   const channelsWithConversationsAndAgents = computed((): ChannelDataWithAgents[] => {
     return channelsWithConversations.value.map((data) => ({
       ...data,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channel.baseExpression).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channel.baseExpression).value,
+      channel: allChannels.value.find((c) => c.id === data.channelId),
+      conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
+      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
       children:
         data.children?.map((child) => ({
           ...child,
-          agentsInChannel: signallingService.getAgentsInChannel(child.channel.baseExpression).value,
-          agentsInCall: signallingService.getAgentsInCall(child.channel.baseExpression).value,
+          channel: allChannels.value.find((c) => c.id === child.channelId),
+          conversation: child.conversationId ? conversationCache.get(child.conversationId) : undefined,
+          agentsInChannel: signallingService.getAgentsInChannel(child.channelId).value,
+          agentsInCall: signallingService.getAgentsInCall(child.channelId).value,
+          children: undefined,
         })) || [],
     }));
   });
@@ -158,7 +197,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const pinnedChannelsSignature = computed(() =>
     allChannels.value
       .filter((channel) => channel.isPinned)
-      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .map((channel) => `${channel.id}:${channel.name}`)
       .sort()
       .join(','),
   );
@@ -166,7 +205,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   const conversationChannelsSignature = computed(() =>
     allChannels.value
       .filter((channel) => channel.isConversation)
-      .map((channel) => `${channel.baseExpression}:${channel.name}`)
+      .map((channel) => `${channel.id}:${channel.name}`)
       .sort()
       .join(','),
   );
@@ -175,11 +214,11 @@ export async function createCommunityService(): Promise<CommunityService> {
     try {
       membersLoading.value = true;
       const others = (await neighbourhood?.otherAgents()) || [];
-      const allMembersDids = [...others, me.value.did];
+      const allMembersDids = [...new Set([...others, me.value.did])];
       // Pre-fill members with partial profiles to speed up display
       members.value = allMembersDids.map((did) => ({ did, profileThumbnailPicture: undefined }));
       // Fetch full profiles with images
-      members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did)));
+      members.value = await Promise.all(allMembersDids.map((did) => getCachedAgentProfile(did, appStore.ad4mClient)));
       membersLoading.value = false;
     } catch (error) {
       console.error('Error loading community members:', error);
@@ -191,15 +230,14 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (pinnedConversationsLoading.value) return;
     pinnedConversationsLoading.value = true;
 
-    // console.log("*** Loading pinned conversations ***");
-
     try {
       // Loop through all the pinned channels and get the conversation data for each
       pinnedConversations.value = await Promise.all(
         pinnedChannels.value.map(async (channel: Channel) => {
-          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
-          const allAuthors = await toRaw(channel).allAuthors();
-          return { conversation, channel, allAuthors };
+          await channel.get({ conversations: true });
+          const conversation = channel.conversations[0];
+          if (conversation) conversationCache.set(conversation.id, conversation);
+          return { channelId: channel.id, conversationId: conversation?.id };
         }),
       );
     } catch (error) {
@@ -214,21 +252,19 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (recentConversationsLoading.value) return;
     recentConversationsLoading.value = true;
 
-    // console.log("*** Loading recent conversations ***");
-
     try {
       // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
       const conversations = await Promise.all(
         conversationChannels.value.map(async (channel: Channel) => {
-          const conversation = (await Conversation.findAll(perspective, { source: channel.baseExpression }))[0];
+          await channel.get({ conversations: true });
+          const conversation = channel.conversations[0];
 
           if (!conversation) return null;
+          conversationCache.set(conversation.id, conversation);
 
           // If there are unprocessed items, use the latest unprocessed items timestamp
           let lastActivity: string | null = null;
-          const channelRaw = toRaw(channel);
-          const unprocessedItems = await channelRaw.unprocessedItems();
-          const allAuthors = await channelRaw.allAuthors();
+          const unprocessedItems = await channel.unprocessedItems();
           if (unprocessedItems.length) {
             const lastUnprocessedItem = unprocessedItems.sort(
               (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -236,16 +272,16 @@ export async function createCommunityService(): Promise<CommunityService> {
             lastActivity = lastUnprocessedItem.timestamp;
           } else if (conversation.summary === 'Content will appear when the first items have been processed...') {
             // If the conversation is an empty placeholder use the conversations timestamp
-            lastActivity = conversation.timestamp;
+            lastActivity = conversation.createdAt;
           } else {
             // If no subgroups exist, use the conversation timestamp
             const subgroups = await conversation.subgroups();
-            if (!subgroups.length) lastActivity = conversation.timestamp;
+            if (!subgroups.length) lastActivity = conversation.createdAt;
             else {
               // If no items exist in the last subgroup, use the subgroup timestamp
               const lastSubgroup = subgroups[subgroups.length - 1];
               const items = await lastSubgroup.itemsData();
-              if (!items.length) lastActivity = lastSubgroup.timestamp;
+              if (!items.length) lastActivity = lastSubgroup.createdAt;
               else {
                 // Finally, use the timestamp of the last item in the last subgroup
                 const lastItem = items.sort(
@@ -256,16 +292,16 @@ export async function createCommunityService(): Promise<CommunityService> {
             }
           }
 
-          return { conversation, channel, lastActivity, allAuthors };
+          return { channelId: channel.id, conversationId: conversation.id, lastActivity };
         }),
       );
 
       // Sort conversations by last activity timestamp
       const conversationsSortedByLastActivity = conversations
         .filter((c) => c !== null)
-        .sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+        .sort((a, b) => new Date(b.lastActivity!).getTime() - new Date(a.lastActivity!).getTime());
 
-      recentConversations.value = conversationsSortedByLastActivity;
+      recentConversations.value = conversationsSortedByLastActivity as ChannelData[];
     } catch (error) {
       console.error('Error loading recent conversations:', error);
       recentConversations.value = [];
@@ -278,36 +314,28 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (channelsWithConversationsLoading.value) return;
     channelsWithConversationsLoading.value = true;
 
-    // console.log("*** Loading channels with conversations ***");
-
     try {
       // Loop through all the space channels and get the conversations in each
       channelsWithConversations.value = await Promise.all(
         spaceChannels.value.map(async (channel: Channel) => {
-          // Get all nested conversation channels
-          const nestedConversationChannels = await Channel.findAll(perspective, {
-            source: channel.baseExpression,
-            where: { isConversation: true },
-          });
+          // Get all nested conversation channels — linked via CHANNEL predicate (same as startNewConversation)
+          const links = await perspective.get(new LinkQuery({ source: channel.id, predicate: CHANNEL }));
+          const childChannelIds = new Set(links.map((l) => l.data.target));
+          const nestedConversationChannels = allChannels.value.filter(
+            (ch) => ch.isConversation && childChannelIds.has(ch.id),
+          );
 
           // Get the conversation data for each of the nested conversation channels
           const conversations = await Promise.all(
             nestedConversationChannels.map(async (childChannel: Channel) => {
-              const conversation = (
-                await Conversation.findAll(perspective, { source: childChannel.baseExpression })
-              )[0];
-              const allAuthors = await toRaw(childChannel).allAuthors();
-              // TODO: investigate and remove explicit baseExpression from channel if possible
-              // return { channel: childChannel, conversation, allAuthors };
-              return {
-                channel: { ...childChannel, baseExpression: childChannel.baseExpression },
-                conversation,
-                allAuthors,
-              };
+              await childChannel.get({ conversations: true });
+              const conversation = childChannel.conversations[0];
+              if (conversation) conversationCache.set(conversation.id, conversation);
+              return { channelId: childChannel.id, conversationId: conversation?.id };
             }),
           );
 
-          return { channel, children: conversations, allAuthors: await toRaw(channel).allAuthors() };
+          return { channelId: channel.id, children: conversations };
         }),
       );
     } catch (error) {
@@ -323,18 +351,25 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     try {
       // Create the channel
-      const channel = new Channel(perspective, undefined, parentChannelId);
-      channel.name = '';
-      channel.description = '';
-      channel.isConversation = true;
-      channel.isPinned = false;
-      await channel.save();
+      const channel = await Channel.create(perspective, {
+        name: '',
+        description: '',
+        isConversation: true,
+        isPinned: false,
+      });
+      await perspective.add(
+        new Link({ source: parentChannelId || 'ad4m://self', predicate: CHANNEL, target: channel.id }),
+      );
 
       // Create the first placeholder conversation
-      const conversation = new Conversation(perspective, undefined, channel.baseExpression);
-      conversation.conversationName = 'New conversation';
-      conversation.summary = 'Content will appear when the first items have been processed...';
-      await conversation.save();
+      await Conversation.create(
+        perspective,
+        {
+          conversationName: 'New conversation',
+          summary: 'Content will appear when the first items have been processed...',
+        },
+        { parent: { model: Channel, id: channel.id } },
+      );
 
       // Attach the chat app
       const fluxApps = await getAllFluxApps();
@@ -343,19 +378,18 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       const { name, description, icon, pkg } = chatAppData;
 
-      const chatApp = new App(perspective, undefined, channel.baseExpression);
-      chatApp.name = name;
-      chatApp.description = description;
-      chatApp.icon = icon;
-      chatApp.pkg = pkg;
-      await chatApp.save();
+      await App.create(perspective, { name, description, icon, pkg }, { parent: { model: Channel, id: channel.id } });
 
       // Update the recent conversations
       getRecentConversations();
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
-      router.push({ name: 'view', params: { communityId, channelId: channel.baseExpression, viewId: 'conversation' } });
+      router.push({
+        name: 'view',
+        params: { communityId, channelId: stripChannelPrefix(channel.id), viewId: 'conversation' },
+      });
+      uiStore.setCallWindowOpen(true);
     } catch (error) {
       console.error('Failed to create new conversation:', error);
       appStore.showDangerToast({ message: 'Failed to create conversation' });
@@ -369,14 +403,8 @@ export async function createCommunityService(): Promise<CommunityService> {
     moveConversationLoading.value = true;
 
     try {
-      console.log(
-        `➡️ Moving conversation "${conversationName || conversationChannelId}" to channel ${newSpaceChannelId}`,
-      );
-
       // Get the link from the conversation channel to its current parent
-      const existingLinks = await perspective.get(
-        new LinkQuery({ predicate: 'ad4m://has_child', target: conversationChannelId }),
-      );
+      const existingLinks = await perspective.get(new LinkQuery({ predicate: CHANNEL, target: conversationChannelId }));
       const link = existingLinks[0];
       if (!link) {
         console.warn(`No parent link found for conversation ${conversationChannelId}`);
@@ -392,7 +420,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Update the link to point to the new parent channel
       await perspective.update(link, {
         source: newSpaceChannelId,
-        predicate: 'ad4m://has_child',
+        predicate: CHANNEL,
         target: conversationChannelId,
       });
 
@@ -421,24 +449,60 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   }
 
-  function getParentChannel(channelId: string): Partial<Channel> | undefined {
-    const parentChannelData = channelsWithConversations.value.find((c) =>
-      c.children?.some((child) => child.channel.baseExpression === channelId),
+  function getParentChannel(channelId: string): Channel | undefined {
+    const parentData = channelsWithConversations.value.find((c) =>
+      c.children?.some((child) => child.channelId === channelId),
     );
-    return parentChannelData ? parentChannelData.channel : undefined;
+    if (!parentData) return undefined;
+    return allChannels.value.find((c) => c.id === parentData.channelId);
   }
 
-  function getConversation(channelId: string) {
-    const conversationData = recentConversations.value.find((c) => c.channel.baseExpression === channelId);
-    return conversationData ? conversationData.conversation : undefined;
+  function getConversation(channelId: string): Conversation | undefined {
+    const data = recentConversations.value.find((c) => c.channelId === channelId);
+    if (!data?.conversationId) return undefined;
+    return conversationCache.get(data.conversationId);
+  }
+
+  // Track channel participants automatically
+  function handleParticipantTracking(link: any) {
+    if (link.data.predicate !== CHANNEL) return null;
+    if (!link.author) return null;
+
+    const channelId = link.data.source;
+    const channel = allChannels.value.find((c) => c.id === channelId);
+    if (!channel) return null;
+
+    if (channel.participants && channel.participants.includes(link.author)) return null;
+
+    // Add participant link
+    perspective
+      .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+      .catch((error) => {
+        console.error('Failed to add participant to channel:', {
+          channelId,
+          author: link.author,
+          error,
+        });
+      });
+
+    return null;
   }
 
   // Initialize sync state listener
-  perspective.addSyncStateChangeListener((state: PerspectiveState) => {
+  const syncStateListener = (state: PerspectiveState) => {
     // @ts-ignore
     isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
     return null;
-  });
+  };
+  perspective.addSyncStateChangeListener(syncStateListener);
+
+  // Initialize participant tracking
+  perspective.addListener('link-added', handleParticipantTracking);
+
+  // Cleanup function to remove all listeners
+  function cleanup() {
+    perspective.removeListener('link-added', handleParticipantTracking);
+  }
 
   getMembers();
 
@@ -454,7 +518,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     if (aiEnabled.value && !processingStateChecked.value) {
       processingStateChecked.value = true;
       // Delay by heart beat interval to allow time for signals to arrive
-      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.uuid), HEARTBEAT_INTERVAL);
+      setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.sharedUrl || ''), HEARTBEAT_INTERVAL);
     }
   });
 
@@ -487,6 +551,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     moveConversation,
     getParentChannel,
     getConversation,
+    cleanup,
   };
 }
 

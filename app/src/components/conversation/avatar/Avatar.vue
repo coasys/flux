@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { useAppStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Profile } from '@coasys/flux-types';
 import { ref, watch } from 'vue';
@@ -24,11 +25,12 @@ const props = withDefaults(defineProps<Props>(), {
   showName: false,
 });
 
+const appStore = useAppStore();
 const profile = ref<Partial<Profile>>({});
 
 async function fetchProfile(did: string) {
   try {
-    const result = await getCachedAgentProfile(did);
+    const result = await getCachedAgentProfile(did, appStore.ad4mClient);
     profile.value = result || {};
   } catch (error) {
     console.error('Error loading profile:', error);

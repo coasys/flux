@@ -42,7 +42,7 @@
           "data": {
             "source": "self",
             "predicate": "rdf://dateCreated",
-            "target": "2022-01-25T03:58:20.388Z"
+            "target": "literal://string:2022-01-25T03:58:20.388Z"
           },
           "proof": {
             "valid": true,

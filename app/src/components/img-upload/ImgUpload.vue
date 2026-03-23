@@ -152,16 +152,28 @@ watch(tempProfileImage, (newValue) => emit('hide', newValue !== null));
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
+  max-width: 100vw;
   min-height: 600px;
   display: flex;
   flex-direction: column;
   border-radius: 4px;
   z-index: 999;
+
+  @media screen and (max-width: 768px) {
+    min-height: auto;
+    max-height: 90vh;
+    padding: var(--j-space-400);
+    box-sizing: border-box;
+  }
 }
 
 .cropper__element {
   flex-grow: 1;
   max-height: 80vh;
+
+  @media screen and (max-width: 768px) {
+    max-height: 60vh;
+  }
 
   &__background {
     background: transparent !important;

@@ -21,6 +21,29 @@
           </j-menu-group>
         </j-menu>
       </j-flex>
+
+      <j-flex a="center" gap="300">
+        <j-popover placement="bottom-end">
+          <j-button
+            v-if="conversations.length > 0"
+            size="sm"
+            variant="ghost"
+            :loading="exporting || exportingFlat"
+            slot="trigger"
+          >
+            <j-icon name="download" slot="start" />
+            Export
+          </j-button>
+          <j-menu slot="content">
+            <j-menu-item @click="() => exportTranscript()">
+              <j-text nomargin>With summaries and sub-groups</j-text>
+            </j-menu-item>
+            <j-menu-item @click="() => exportChannelMessagesFlat()">
+              <j-text nomargin>Flat channel messages</j-text>
+            </j-menu-item>
+          </j-menu>
+        </j-popover>
+      </j-flex>
     </j-flex>
 
     <div class="timeline">
@@ -41,7 +64,7 @@
       <div v-else id="timeline-0" class="items">
         <TimelineBlock
           v-for="(conversation, index) in conversations"
-          :key="conversation.baseExpression"
+          :key="conversation.id"
           block-type="conversation"
           :last-child="index === conversations.length - 1"
           :data="conversation"
@@ -79,7 +102,7 @@
             <ProgressBar :steps="llmProcessingSteps" :current-step="processingState.step" />
           </j-box>
 
-          <j-flex v-for="item in unprocessedItems" :key="item.baseExpression" gap="400" a="center" class="item-card">
+          <j-flex v-for="item in unprocessedItems" :key="item.id" gap="400" a="center" class="item-card">
             <j-flex gap="300" direction="column">
               <j-flex gap="400" a="center">
                 <j-icon :name="item.icon" color="ui-400" size="lg" />
@@ -87,9 +110,7 @@
                   <Avatar :did="item.author" show-name />
                 </j-flex>
                 <j-timestamp :value="item.timestamp" relative class="timestamp" />
-                <j-badge v-if="processingState?.itemIds?.includes(item.baseExpression)" variant="success">
-                  Processing...
-                </j-badge>
+                <j-badge v-if="processingState?.itemIds?.includes(item.id)" variant="success"> Processing... </j-badge>
               </j-flex>
 
               <j-text nomargin v-html="item.text" class="item-text" color="color-white" />
@@ -106,9 +127,11 @@ import Avatar from '@/components/conversation/avatar/Avatar.vue';
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import ProgressBar from '@/components/progress-bar/ProgressBar.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { llmProcessingSteps, useAiStore } from '@/stores';
+import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { llmProcessingSteps, useAiStore, useAppStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
-import { Channel } from '@coasys/flux-api';
+import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { Channel, Conversation } from '@coasys/flux-api';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
@@ -125,6 +148,7 @@ defineProps<Props>();
 const LINK_ADDED_TIMEOUT = 2000;
 
 const route = useRoute();
+const appStore = useAppStore();
 const aiStore = useAiStore();
 
 const { aiEnabled } = storeToRefs(aiStore);
@@ -132,7 +156,7 @@ const { aiEnabled } = storeToRefs(aiStore);
 const { signallingService, perspective, getRecentConversations, getPinnedConversations, getChannelsWithConversations } =
   useCommunityService();
 
-const channelId = route.params.channelId as string;
+const channelUrl = restoreChannelPrefix(route.params.channelId as string);
 
 const conversations = ref<SynergyGroup[]>([]);
 const unprocessedItems = ref<SynergyItem[]>([]);
@@ -144,14 +168,128 @@ const gettingData = ref(false);
 const linkAddedTimeout = ref<any>(null);
 const linkUpdatesQueued = ref<any>(null);
 const loading = ref(true);
+const exporting = ref(false);
+const exportingFlat = ref(false);
+
+function stripHtml(html: string): string {
+  return html?.replace(/<[^>]*>/g, '')?.trim() || '';
+}
+
+function formatTimestamp(ts: string): string {
+  try {
+    const date = new Date(ts);
+    return date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+  } catch {
+    return ts;
+  }
+}
+
+async function exportChannelMessagesFlat() {
+  if (exportingFlat.value || !appStore.ad4mClient) return;
+  exportingFlat.value = true;
+  try {
+    const channel = new Channel(perspective, channelUrl);
+    const items = await channel.allItems();
+    if (!items || items.length === 0) {
+      exportingFlat.value = false;
+      return;
+    }
+
+    const itemsWithNames = await Promise.all(
+      items.map(async (item) => {
+        const profile = await getCachedAgentProfile(item.author, appStore.ad4mClient);
+        const authorName = profile.givenName || profile.username || item.author?.slice(0, 16) || 'Unknown';
+        return { ...item, authorName };
+      }),
+    );
+
+    const sorted = [...itemsWithNames].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+    const lines: string[] = [];
+    lines.push('# Channel messages');
+    lines.push('');
+
+    for (const item of sorted) {
+      const text = stripHtml(item.text);
+      if (!text) continue;
+      const time = formatTimestamp(item.timestamp);
+      lines.push(`**${item.authorName}** _(${time})_`);
+      lines.push(text);
+      lines.push('');
+    }
+
+    const fullMarkdown = lines.join('\n');
+
+    try {
+      await navigator.clipboard.writeText(fullMarkdown);
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed:', clipboardError);
+    }
+
+    const blob = new Blob([fullMarkdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `channel-messages-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export flat channel messages:', error);
+  } finally {
+    exportingFlat.value = false;
+  }
+}
+
+async function exportTranscript() {
+  if (exporting.value || conversations.value.length === 0 || !appStore.ad4mClient) return;
+  exporting.value = true;
+  try {
+    // Create Conversation model instances from the timeline data
+    const markdowns: string[] = [];
+    for (const convData of conversations.value) {
+      const conv = new Conversation(perspective, convData.id);
+      // Pass unprocessed items to the last (most recent) conversation
+      const isLast = convData === conversations.value[conversations.value.length - 1];
+      const unprocessed = isLast ? unprocessedItems.value : undefined;
+      const md = await conv.exportMarkdown(appStore.ad4mClient, unprocessed);
+      markdowns.push(md);
+    }
+
+    const fullMarkdown = markdowns.join('\n\n');
+
+    // Copy to clipboard (separate try/catch so download still works on permission error)
+    try {
+      await navigator.clipboard.writeText(fullMarkdown);
+    } catch (clipboardError) {
+      console.warn('Clipboard write failed:', clipboardError);
+    }
+
+    // Trigger a file download
+    const blob = new Blob([fullMarkdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcript-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to export transcript:', error);
+  } finally {
+    exporting.value = false;
+  }
+}
 
 async function getConversations() {
-  const channel = new Channel(perspective, channelId);
-  return await channel.conversations();
+  const channel = await Channel.findOne(perspective, { where: { id: channelUrl }, include: { conversations: true } });
+  return channel?.conversationsData() ?? [];
 }
 
 async function getUnprocessedItems() {
-  const channel = new Channel(perspective, channelId);
+  const channel = new Channel(perspective, channelUrl);
   return await channel.unprocessedItems();
 }
 
@@ -183,8 +321,8 @@ async function getData(firstRun?: boolean): Promise<void> {
     if (firstRun || !aiEnabled.value) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
     if (shouldProcess) {
-      const channel = new Channel(perspective, channelId);
-      aiStore.addTasksToProcessingQueue([{ communityId: perspective.uuid, channel: await channel.get() }]);
+      const channel = new Channel(perspective, channelUrl);
+      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
     }
   } catch (error) {
     console.error('Error fetching conversations or unprocessed items:', error);
@@ -247,7 +385,7 @@ watch(
   (newAgents) => {
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(
-      (agent) => agent.processing && agent.processing.channelId === channelId,
+      (agent) => agent.processing && agent.processing.channelId === channelUrl,
     );
 
     // Update the progress bar with the latest processing state
@@ -305,7 +443,7 @@ watch(
         margin-left: 92px;
         background-color: var(--j-color-primary-200);
 
-        @media screen and (max-width: 800px) {
+        @media screen and (max-width: $breakpoint-mobile) {
           margin-left: 12px;
         }
       }
@@ -317,7 +455,7 @@ watch(
       z-index: 5;
       padding: 90px 20px 90px 60px;
 
-      @media screen and (max-width: 800px) {
+      @media screen and (max-width: $breakpoint-mobile) {
         padding: 70px 0;
         margin-left: -20px;
       }
@@ -329,7 +467,7 @@ watch(
       .unprocessed-items {
         margin-left: 70px;
 
-        @media screen and (max-width: 800px) {
+        @media screen and (max-width: $breakpoint-mobile) {
           margin-left: 56px;
         }
 

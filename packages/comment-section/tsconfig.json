@@ -12,5 +12,5 @@
       "react-dom": ["node_modules/preact/compat"]
     }
   },
-  "include": ["src/**/*.tsx", "src/**/*.ts"]
+  "include": ["src/**/*.tsx", "src/**/*.ts", "globals.d.ts"]
 }

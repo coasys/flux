@@ -6,13 +6,6 @@
 
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
-        <j-box class="signup-view__flow-back" pb="500">
-          <j-button @click="showSignup = false" variant="link">
-            <j-icon name="arrow-left-short" />
-            Back
-          </j-button>
-        </j-box>
-
         <j-box pb="800">
           <FluxLogoIcon width="150px" />
         </j-box>
@@ -53,20 +46,20 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from '@/ad4mConnect';
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { FluxLogoIcon } from '@/components/icons';
-import { useAppStore } from '@/stores';
+import { useAppStore, useUiStore } from '@/stores';
 import { useValidation } from '@/utils/validation';
-import { getAd4mClient } from '@coasys/ad4m-connect';
 import { createProfile, getAd4mProfile } from '@coasys/flux-api';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 import SignUpCarousel from './SignUpCarousel.vue';
 
 const router = useRouter();
+const route = useRoute();
 const appStore = useAppStore();
+const uiStore = useUiStore();
 
 const showSignup = ref(false);
 const profilePicture = ref();
@@ -98,30 +91,18 @@ const {
 
 const canSignUp = computed(() => usernameIsValid.value);
 
-async function checkIfHasFluxProfile() {
-  const client = await getAd4mClient();
-  const { perspective } = await client.agent.me();
-  const fluxLinksFound = perspective?.links.find((e) => e.data.source.startsWith('flux://'));
-  return fluxLinksFound ? true : false;
-}
-
 async function autoFillUser() {
   try {
-    const hasFluxProfile = await checkIfHasFluxProfile();
-    if (hasFluxProfile) {
-      router.push('/home');
-      return;
-    }
+    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
+    if (hasFluxAccount) return;
 
     showSignup.value = true;
-
-    const ad4mProfile = await getAd4mProfile();
-
+    const ad4mProfile = await getAd4mProfile(appStore.ad4mClient);
     username.value = ad4mProfile.username || '';
     name.value = ad4mProfile.name || '';
     familyName.value = ad4mProfile.familyName || '';
   } catch (e) {
-    console.log(e);
+    console.error('SignUp: Error in autoFillUser:', e);
   }
 }
 
@@ -134,11 +115,21 @@ async function createUser() {
     email: email.value,
     username: username.value,
     profilePicture: profilePicture.value,
+    client: appStore.ad4mClient,
   })
     .then(async () => {
-      appStore.refreshMyProfile();
-      router.push({ name: 'home' });
-      registerNotification();
+      await appStore.refreshMyProfile();
+      
+      // Check if there's a redirect path (e.g., from a shared community link)
+      const redirectPath = route.query.redirect as string;
+      if (redirectPath) {
+        router.push(redirectPath);
+        // Note: Call window will open automatically via router.afterEach
+        // when user actually enters a channel with an active call
+      } else {
+        router.push({ name: 'home' });
+      }
+      registerNotification(appStore.ad4mClient);
     })
     .finally(() => {
       isCreatingUser.value = false;
@@ -150,18 +141,14 @@ async function allowNotifications(value: any) {
   appStore.changeNotificationState(!appStore.notification.globalNotification);
 }
 
-onMounted(() => {
-  async function authStateChangeHandler() {
-    if (ad4mConnect.authState === 'authenticated') autoFillUser();
-  }
-
-  // Fire the authStateChangeHandler immediately incase the user is already authenticated
-  authStateChangeHandler();
-
-  // Listen for authentication state changes
-  ad4mConnect.addEventListener('authstatechange', authStateChangeHandler);
-  onBeforeUnmount(() => ad4mConnect.removeEventListener('authstatechange', authStateChangeHandler));
-});
+// Watch for client ready state to trigger autofill
+watch(
+  () => appStore.initialized,
+  async (initialized) => {
+    if (initialized) await autoFillUser();
+  },
+  { immediate: true },
+);
 </script>
 
 <style lang="scss" scoped>

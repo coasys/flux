@@ -1,5 +1,5 @@
-import { ad4mConnect } from '@/ad4mConnect';
-import { useAppStore, useRouteMemoryStore } from '@/stores';
+import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore } from '@/stores';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { RouteParams } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
@@ -14,6 +14,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/update-ad4m',
     name: 'update-ad4m',
     component: () => import(`@/views/update/UpdateAd4m.vue`),
+    meta: { public: true },
   },
   {
     path: '/',
@@ -59,42 +60,58 @@ const routes: Array<RouteRecordRaw> = [
         name: 'settings',
         component: () => import(`@/containers/Settings.vue`),
       },
+      {
+        path: '/join-community/:communityId',
+        name: 'join-community',
+        component: () => import('@/views/JoinCommunityView.vue'),
+      },
     ],
   },
 ];
 
 const router = createRouter({ history: createWebHashHistory(), routes });
 
-// Handle login routing
+// Handle authentication and route guarding
 router.beforeEach(async (to, from, next) => {
   try {
-    const isAuthenticated = await ad4mConnect.isAuthenticated();
-    if (isAuthenticated) {
-      const appStore = useAppStore();
-      const { me } = storeToRefs(appStore);
+    const appStore = useAppStore();
 
-      // Handle authenticated routes
-      const fluxAccountCreated = me.value.perspective?.links.find((e) => e.data.source.startsWith('flux://'));
-      const isOnSignupOrMain = to.name === 'signup' || to.name === 'main';
-      if (fluxAccountCreated && isOnSignupOrMain) {
-        await appStore.refreshMyProfile();
-        next('/home');
-      } else if (!fluxAccountCreated && !isOnSignupOrMain) next('/signup');
-      else next();
-    } else {
-      // If not logged in, redirect to signup
-      if (to.name !== 'signup') next('/signup');
+    // Allow signup to display while initializing
+    if (!appStore.initialized && to.name === 'signup') {
       next();
+      return;
     }
+
+    // Block all other routes until initialized
+    if (!appStore.initialized) {
+      // Preserve the intended route so we can redirect after signup
+      next({ name: 'signup', query: { redirect: to.fullPath } });
+      return;
+    }
+
+    // Check community membership for any route with communityId & redirect to join view if not a member
+    const communityId = to.params.communityId;
+    if (communityId && to.name !== 'join-community') {
+      const neighbourhoodUrl = restoreNeighbourhoodPrefix(communityId as string);
+      const isMember = appStore.myPerspectives.some((p) => p.sharedUrl === neighbourhoodUrl);
+      if (!isMember) {
+        next({ name: 'join-community', params: { communityId }, query: { redirect: to.fullPath } });
+        return;
+      }
+    }
+
+    // Allow all other navigation
+    next();
   } catch (e) {
-    console.log('Error in route', e);
-    if (to.name !== 'signup') next('/signup');
-    else next();
+    console.log('Error in route guard:', e);
+    // On error, redirect to signup unless already there
+    if (to.name === 'signup') next();
+    else next('/signup');
   }
 });
 
 // Update the route memory store on each route change
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   const routeMemoryStore = useRouteMemoryStore();
   const { communityId, channelId, viewId } = to.params as RouteParams;
 
@@ -105,6 +122,12 @@ router.afterEach((to) => {
   if (communityId) {
     routeMemoryStore.setLastCommunityRoute(communityId, to.path, to.params);
     if (channelId && viewId) routeMemoryStore.setLastChannelView(communityId, channelId, viewId);
+  }
+
+  // Open call window when navigating to a channel from outside the app (e.g., shared link)
+  if (to.name === 'channel' && !from.name) {
+    const uiStore = useUiStore();
+    uiStore.setCallWindowOpen(true);
   }
 });
 

@@ -142,7 +142,15 @@ export default ({ mode }) => {
         ),
       },
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "@/styles/breakpoints.scss" as *;`,
+        },
+      },
+    },
     server: {
+      https: false,
       port: 3030,
       proxy: {
         '/nilchain-proxy': {

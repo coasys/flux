@@ -1,9 +1,13 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-tooltip v-for="(community, uuid) in myCommunities" :key="uuid" :title="community.name || 'Unknown Community'">
+    <j-tooltip
+      v-for="(community, communityUrl) in myCommunities"
+      :key="communityUrl"
+      :title="community.name || 'Unknown Community'"
+    >
       <j-popover event="contextmenu">
-        <div slot="trigger" :class="getAvatarClasses(uuid)">
-          <div v-if="isInCall(uuid)" class="recording-icon">
+        <div slot="trigger" :class="getAvatarClasses(communityUrl)">
+          <div v-if="isInCall(communityUrl)" class="recording-icon">
             <RecordingIcon :size="30" />
           </div>
 
@@ -11,22 +15,22 @@
             class="left-nav__community-item"
             :src="community.image || null"
             :initials="`${community?.name}`.charAt(0).toUpperCase()"
-            @click="() => handleCommunityClick(uuid as string)"
+            @click="() => handleCommunityClick(communityUrl as string)"
           />
         </div>
 
         <j-menu slot="content">
-          <j-menu-item @click="() => handleSetShowLeaveCommunity(true, uuid as string)">
+          <j-menu-item @click="() => handleSetShowLeaveCommunity(true, communityUrl as string)">
             <j-icon slot="start" size="xs" name="box-arrow-left" />
             Leave community
           </j-menu-item>
 
-          <j-menu-item @click="() => muteCommunity(uuid as string)">
+          <j-menu-item @click="() => muteCommunity(communityUrl as string)">
             <j-icon size="xs" slot="start" name="bell" />
             Mute Community
           </j-menu-item>
 
-          <j-menu-item @click="() => toggleHideMutedChannels(uuid as string)">
+          <j-menu-item @click="() => toggleHideMutedChannels(communityUrl as string)">
             <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
@@ -45,6 +49,7 @@
 <script setup lang="ts">
 import RecordingIcon from '@/components/icons/RecordingIcon.vue';
 import { useAppStore, useModalStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from '@/stores';
+import { stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -60,20 +65,16 @@ const routeMemoryStore = useRouteMemoryStore();
 const { myCommunities } = storeToRefs(appStore);
 const { inCall, callRoute } = storeToRefs(webrtcStore);
 
-function isInCall(uuid: string) {
-  return inCall.value && callRoute.value.communityId === uuid;
+function isInCall(communityUrl: string) {
+  return inCall.value && callRoute.value.communityId === communityUrl;
 }
 
-function isPresent(uuid: string) {
-  return route.params.communityId === uuid;
+function isPresent(communityUrl: string) {
+  return route.params.communityId === stripNeighbourhoodPrefix(communityUrl);
 }
 
-function getAvatarClasses(uuid: string) {
-  return { 'avatar-wrapper': true, 'in-call': isInCall(uuid), present: isPresent(uuid) };
-}
-
-function communityIsActive(communityId: string) {
-  return route.params.communityId === communityId;
+function getAvatarClasses(communityUrl: string) {
+  return { 'avatar-wrapper': true, 'in-call': isInCall(communityUrl), present: isPresent(communityUrl) };
 }
 
 // Todo: Implement hidding muted channels
@@ -86,16 +87,19 @@ function muteCommunity(id: string) {
   // toggleCommunityMute({ communityId: id });
 }
 
-function handleSetShowLeaveCommunity(show: boolean, uuid: string) {
+function handleSetShowLeaveCommunity(show: boolean, communityUrl?: string) {
+  if (communityUrl) {
+    modalStore.leaveCommunityUrl = communityUrl;
+  }
   modalStore.showLeaveCommunity = show;
 }
 
-// Todo: investigate why toggleCommunitySidebar class applied in CommunityLayout doesn't change the UI
-function handleCommunityClick(communityId: string) {
-  if (communityIsActive(communityId)) uiStore.toggleCommunitySidebar();
+function handleCommunityClick(communityUrl: string) {
+  if (isPresent(communityUrl)) uiStore.toggleCommunitySidebar();
   else {
     uiStore.setCommunitySidebarOpen(true);
     // Navigate back to the last route if saved
+    const communityId = stripNeighbourhoodPrefix(communityUrl);
     const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
     router.push(lastRoute ? lastRoute.path : { name: 'community', params: { communityId } });
   }

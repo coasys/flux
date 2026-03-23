@@ -98,6 +98,23 @@
 
 .item[data-focused='true'] {
   max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: auto !important;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+.item[data-focused='true'] video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
 }
 .item[data-focused='true']:hover .details {
   opacity: 0 !important;
@@ -156,6 +173,16 @@
   border-radius: 50%;
   list-style: none;
   aspect-ratio: 1/1;
+}
+
+:-webkit-full-screen .item {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+:fullscreen .item {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 @keyframes appear {

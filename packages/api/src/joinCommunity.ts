@@ -1,15 +1,14 @@
 import { Community } from '@coasys/flux-types';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
 import { getMetaFromLinks } from '@coasys/flux-utils';
 import { Ad4mClient } from '@coasys/ad4m';
 
 export interface Payload {
   joiningLink: string;
+  client: Ad4mClient;
 }
 
-export default async ({ joiningLink }: Payload): Promise<Community> => {
+export default async ({ joiningLink, client }: Payload): Promise<Community> => {
   try {
-    const client: Ad4mClient = await getAd4mClient();
     const agent = await client.agent.me();
     const allPerspectives = await client.perspective.all();
 

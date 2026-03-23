@@ -49,16 +49,9 @@ const { globalError, showGlobalLoading } = storeToRefs(uiStore);
 
 // Initialise the global theme
 onMounted(() => themeStore.changeCurrentTheme('global'));
-
-// Set up resize listeners to keep track of window width for responsive design
-onMounted(() => {
-  uiStore.updateWindowWidth();
-  window.addEventListener('resize', uiStore.updateWindowWidth);
-});
-onUnmounted(() => window.removeEventListener('resize', uiStore.updateWindowWidth));
 </script>
 
-<style>
+<style lang="scss">
 :root {
   j-menu-group::part(summary) {
     margin: 5px 0;
@@ -69,7 +62,7 @@ onUnmounted(() => window.removeEventListener('resize', uiStore.updateWindowWidth
   }
 }
 
-@media (max-width: 800px) {
+@media screen and (max-width: $breakpoint-mobile) {
   :root {
     --j-font-base-size: 15px !important;
   }
@@ -113,7 +106,7 @@ body {
   text-rendering: optimizeLegibility;
   color: var(--j-color-ui-800);
   font-family: var(--j-font-family);
-  background-color: var(--j-color-white);
+  /* background-color: var(--j-color-white); */
 }
 
 #app {

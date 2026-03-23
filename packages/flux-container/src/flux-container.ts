@@ -7,12 +7,10 @@ if (!customElements.get('j-button')) {
   import('@coasys/flux-ui/dist/themes/dark.css');
 }
 
-import Ad4mConnectUI from '@coasys/ad4m-connect';
-import { getAd4mClient } from '@coasys/ad4m-connect/utils';
-import { Ad4mClient, PerspectiveProxy } from '@coasys/ad4m';
+import { getAd4mClient } from '@coasys/ad4m-connect';
+import { Ad4mClient, Link, PerspectiveProxy } from '@coasys/ad4m';
 import { createCommunity, joinCommunity } from '@coasys/flux-api';
 import { Channel, Community } from '@coasys/flux-api';
-import { SubjectRepository } from '@coasys/flux-api';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 
 @customElement('flux-container')
@@ -147,17 +145,16 @@ export class MyElement extends LitElement {
   connectedCallback() {
     super.connectedCallback();
 
-    const ui = Ad4mConnectUI({
-      appName: 'Flux App',
-      appDesc: 'A flux app',
-      appDomain: 'app.flux.io',
-      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-    });
+    // Initialize Ad4m client with new API
+    (async () => {
+      try {
+        const client: Ad4mClient = await getAd4mClient({
+          appName: 'Flux App',
+          appDesc: 'A flux app',
+          appDomain: 'app.flux.io',
+          capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
+        });
 
-    ui.connect();
-    ui.addEventListener('authstatechange', async () => {
-      if (ui.authState === 'authenticated') {
-        const client: Ad4mClient = await getAd4mClient();
         this.client = client;
 
         const perspectives = await client.perspective.all();
@@ -181,8 +178,10 @@ export class MyElement extends LitElement {
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
         }
+      } catch (error) {
+        console.error('Failed to initialize Ad4m client:', error);
       }
-    });
+    })();
   }
 
   async setPerspective(uuid: string) {
@@ -199,9 +198,7 @@ export class MyElement extends LitElement {
       perspective.addListener('link-added', async (link) => {
         const isChannel = await perspective.isSubjectInstance(link.data.source, Channel.prototype.className);
         if (isChannel) {
-          this.channels = await new SubjectRepository(Channel, {
-            perspective,
-          }).getAllData();
+          this.channels = await Channel.findAll(perspective);
         }
         return null;
       });
@@ -213,9 +210,7 @@ export class MyElement extends LitElement {
     try {
       this.isLoading = true;
 
-      const channels = await new SubjectRepository(Channel, {
-        perspective: perspective,
-      }).getAllData();
+      const channels = await Channel.findAll(perspective);
 
       this.channels = channels;
 
@@ -231,6 +226,12 @@ export class MyElement extends LitElement {
         // @ts-ignore
         console.log('setting agent', this.appElement);
         this.appElement.agent = this.client.agent;
+      }
+
+      // @ts-ignore
+      if (!this.appElement.client) {
+        // @ts-ignore
+        this.appElement.client = this.client;
       }
 
       console.log('setting source');
@@ -271,11 +272,8 @@ export class MyElement extends LitElement {
   async onCreateChannel() {
     this.isCreatingChannel = true;
     try {
-      const model = new SubjectRepository(Channel, {
-        perspective: this.perspective,
-        source: 'ad4m://self',
-      });
-      await model.create({ name: this.title });
+      const model = await Channel.create(this.perspective, { name: this.title });
+      await this.perspective.add(new Link({ source: 'ad4m://self', predicate: 'ad4m://has_child', target: model.id }));
       this.title = '';
       this.showCreateChannel = false;
     } catch (e) {

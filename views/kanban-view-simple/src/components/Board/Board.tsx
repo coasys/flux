@@ -1,9 +1,9 @@
-import { PerspectiveProxy, LinkQuery } from '@coasys/ad4m';
-import { useModel } from '@coasys/ad4m-react-hooks';
+import { PerspectiveProxy, LinkQuery, Link } from '@coasys/ad4m';
+import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Profile } from '@coasys/flux-types';
 import { useState, useEffect, Fragment, useRef } from 'react';
-import { Task, TaskBoard, TaskColumn } from '@coasys/flux-api';
+import { Channel, Task, TaskBoard, TaskColumn } from '@coasys/flux-api';
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
 import styles from './Board.module.scss';
 import Column from '../Column';
@@ -28,37 +28,45 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   const [updating, setUpdating] = useState(false);
   const updatingRef = useRef(false);
 
-  const { entries: boards } = useModel({ perspective, model: TaskBoard, query: { source: channelId } });
-  const { entries: columns } = useModel({ perspective, model: TaskColumn, query: { source: channelId } });
-  const { entries: tasks } = useModel({ perspective, model: Task, query: { source: channelId } });
+  const { data: boards } = useLiveQuery(TaskBoard, perspective, { parent: { model: Channel, id: channelId } });
+  const { data: columns } = useLiveQuery(TaskColumn, perspective, { parent: { model: Channel, id: channelId } });
+  const { data: tasks } = useLiveQuery(Task, perspective, { parent: { model: Channel, id: channelId } });
 
   async function initialiseBoard() {
-    await Promise.all([
-      perspective.ensureSDNASubjectClass(TaskBoard),
-      perspective.ensureSDNASubjectClass(TaskColumn),
-      perspective.ensureSDNASubjectClass(Task),
-    ]);
+    await perspective.ensureSDNASubjectClass(TaskBoard);
+    await perspective.ensureSDNASubjectClass(TaskColumn);
+    await perspective.ensureSDNASubjectClass(Task);
 
-    const board = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
+    const board = await TaskBoard.findOne(perspective, { parent: { model: Channel, id: channelId } });
     if (board) setBoard(board);
     else {
       // Create the default columns
       const batchId = await perspective.createBatch();
       const defaultColumns = await Promise.all(
         ['todo', 'doing', 'done'].map(async (name) => {
-          const column = new TaskColumn(perspective, undefined, channelId);
+          const column = new TaskColumn(perspective);
           column.columnName = name;
           column.orderedTaskIds = JSON.stringify([]);
           await column.save(batchId);
+          await perspective.addLinks(
+            [new Link({ source: channelId, predicate: 'ad4m://has_child', target: column.id })],
+            undefined,
+            batchId,
+          );
           return column;
         }),
       );
 
       // Create the board with the ordered column ids
-      const newBoard = new TaskBoard(perspective, undefined, channelId);
+      const newBoard = new TaskBoard(perspective);
       newBoard.boardName = 'Kanban Board';
-      newBoard.orderedColumnIds = JSON.stringify(defaultColumns.map((col) => col.baseExpression));
+      newBoard.orderedColumnIds = JSON.stringify(defaultColumns.map((col) => col.id));
       await newBoard.save(batchId);
+      await perspective.addLinks(
+        [new Link({ source: channelId, predicate: 'ad4m://has_child', target: newBoard.id })],
+        undefined,
+        batchId,
+      );
 
       // Commit the batch and update the board state
       await perspective.commitBatch(batchId);
@@ -69,7 +77,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
   async function getProfiles() {
     const others = await perspective.getNeighbourhoodProxy().otherAgents();
     const me = await agent.me();
-    const agentDids = [me.did, ...others];
+    const agentDids = [...new Set([...others, me.did])];
     // Set minimal profiles while loading full ones
     setAgentProfiles(agentDids.map((did) => ({ did }) as Profile));
     const profiles = await Promise.all(agentDids.map(getProfile));
@@ -83,16 +91,24 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     setNewColumnLoading(true);
 
     // Create and save the new column
-    const newColumn = new TaskColumn(perspective, undefined, channelId);
-    newColumn.columnName = newColumnName;
-    newColumn.orderedTaskIds = JSON.stringify([]);
-    await newColumn.save();
+    const newColumn = await TaskColumn.create(
+      perspective,
+      { columnName: newColumnName, orderedTaskIds: JSON.stringify([]) },
+      { parent: { model: Channel, id: channelId } },
+    );
 
     // Update the board's orderedColumnIds
-    const currentBoard = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
-    const newOrderedColumnIds = [...JSON.parse(currentBoard.orderedColumnIds), newColumn.baseExpression];
+    const currentBoard = await TaskBoard.findOne(perspective, { parent: { model: Channel, id: channelId } });
+    if (!currentBoard) {
+      console.error('Board not found when adding column');
+      setNewColumnLoading(false);
+      updatingRef.current = false;
+      setUpdating(false);
+      return;
+    }
+    const newOrderedColumnIds = [...JSON.parse(currentBoard.orderedColumnIds), newColumn.id];
     currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
-    await currentBoard.update();
+    await currentBoard.save();
 
     // Update the UI
     await getColumnsWithTasks(columns, newOrderedColumnIds);
@@ -112,7 +128,15 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
     setUpdating(true);
 
     // Generate the new orderedColumnIds
-    const currentBoard = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
+    const currentBoard = await TaskBoard.findOne(perspective, {
+      parent: { model: Channel, id: channelId },
+    });
+    if (!currentBoard) {
+      console.error('Board not found when deleting column');
+      updatingRef.current = false;
+      setUpdating(false);
+      return;
+    }
     const orderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
     const newOrderedColumnIds = orderedColumnIds.filter((id: string) => id !== columnId);
 
@@ -122,12 +146,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
     // Update the perspective
     currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
-    await currentBoard.update();
+    await currentBoard.save();
 
     // Delete the columns tasks and their links to the perspective
-    const column = columns.find((col) => col.baseExpression === columnId);
+    const column = columns.find((col) => col.id === columnId);
     const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
-    const columnTasks = await Task.findAll(perspective, { where: { base: taskIds } });
+    const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
     await Promise.all(
       columnTasks.map(async (task) => {
         // Delete the task model
@@ -137,7 +161,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         const linkQuery = new LinkQuery({
           source: channelId,
           predicate: 'ad4m://has_child',
-          target: task.baseExpression,
+          target: task.id,
         });
         const links = await perspective.get(linkQuery);
         await perspective.removeLinks(links);
@@ -177,12 +201,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         setColumnsWithTasks(newColumnsWithTasks);
 
         // Update the perspective
-        const currentBoard = (await TaskBoard.findAll(perspective, { source: channelId }))[0];
+        const currentBoard = (await TaskBoard.findAll(perspective, { parent: { model: Channel, id: channelId } }))[0];
         const newOrderedColumnIds = JSON.parse(currentBoard.orderedColumnIds);
         newOrderedColumnIds.splice(source.index, 1);
         newOrderedColumnIds.splice(destination.index, 0, draggableId);
         currentBoard.orderedColumnIds = JSON.stringify(newOrderedColumnIds);
-        await currentBoard.update();
+        await currentBoard.save();
 
         // Update the board state
         setBoard(currentBoard);
@@ -194,8 +218,12 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       if (destination.droppableId !== source.droppableId) {
         // Optimistically update the UI
         const newColumns = [...columnsWithTasks];
-        const sourceColumn = newColumns.find((col) => col.baseExpression === source.droppableId);
-        const destinationColumn = newColumns.find((col) => col.baseExpression === destination.droppableId);
+        const sourceColumn = newColumns.find((col) => col.id === source.droppableId);
+        const destinationColumn = newColumns.find((col) => col.id === destination.droppableId);
+        if (!sourceColumn || !destinationColumn) {
+          console.error('Source or destination column not found in drag handler');
+          return;
+        }
 
         // Remove task from source column and add to destination column
         const [movedTask] = sourceColumn.tasks.splice(source.index, 1);
@@ -217,20 +245,32 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
         const batchId = await perspective.createBatch();
 
         // Update orderedTaskIds in source column
-        const sourceColumnModel = columns.find((col) => col.baseExpression === source.droppableId);
+        const sourceColumnModel = columns.find((col) => col.id === source.droppableId);
+        if (!sourceColumnModel) {
+          console.error('Source column model not found');
+          return;
+        }
         sourceColumnModel.orderedTaskIds = sourceColumn.orderedTaskIds;
-        await sourceColumnModel.update(batchId);
+        await sourceColumnModel.save(batchId);
 
         // Update orderedTaskIds in destination column
-        const destinationColumnModel = columns.find((col) => col.baseExpression === destination.droppableId);
+        const destinationColumnModel = columns.find((col) => col.id === destination.droppableId);
+        if (!destinationColumnModel) {
+          console.error('Destination column model not found');
+          return;
+        }
         destinationColumnModel.orderedTaskIds = destinationColumn.orderedTaskIds;
-        await destinationColumnModel.update(batchId);
+        await destinationColumnModel.save(batchId);
 
         // Apply batch updates
         await perspective.commitBatch(batchId);
       } else {
         // If the task is reordered within the same column
-        const column = columnsWithTasks.find((col) => col.baseExpression === source.droppableId);
+        const column = columnsWithTasks.find((col) => col.id === source.droppableId);
+        if (!column) {
+          console.error('Column not found for reorder');
+          return;
+        }
 
         // Create the new orderedTaskIds
         const newOrderedTaskIds = JSON.parse(column.orderedTaskIds);
@@ -239,16 +279,20 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
 
         // Optimistically update the UI
         const newColumns = [...columnsWithTasks];
-        const newColumn = newColumns.find((col) => col.baseExpression === column.baseExpression);
+        const newColumn = newColumns.find((col) => col.id === column.id);
         const [movedTask] = newColumn.tasks.splice(source.index, 1);
         newColumn.tasks.splice(destination.index, 0, movedTask);
         newColumn.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
         setColumnsWithTasks(newColumns);
 
         // Update the perspective
-        const columnModel = columns.find((col) => col.baseExpression === column.baseExpression);
+        const columnModel = columns.find((col) => col.id === column.id);
+        if (!columnModel) {
+          console.error('Column model not found for reorder');
+          return;
+        }
         columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
-        await columnModel.update();
+        await columnModel.save();
       }
     } finally {
       updatingRef.current = false;
@@ -261,19 +305,17 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
       newColumns.map(async (column) => {
         // Get tasks and order them by the columns orderedTaskIds property
         const taskIds = column.orderedTaskIds ? JSON.parse(column.orderedTaskIds) : [];
-        const columnTasks = await Task.findAll(perspective, { where: { base: taskIds } });
-        const taskMap = new Map(columnTasks.map((t) => [t.baseExpression, t]));
+        const columnTasks = await Task.findAll(perspective, { where: { id: taskIds } });
+        const taskMap = new Map(columnTasks.map((t) => [t.id, t]));
         const orderedTasks = taskIds.map((id) => taskMap.get(id)).filter(Boolean);
 
-        return { ...column, baseExpression: column.baseExpression, tasks: orderedTasks };
+        return { ...column, id: column.id, tasks: orderedTasks };
       }),
     )) as ColumnWithTasks[];
 
     // Filter and sort columns based on the board's orderedColumnIds
-    const filteredColumns = newColumnsWithTasks.filter((col) => orderedColumnIds.includes(col.baseExpression));
-    filteredColumns.sort(
-      (a, b) => orderedColumnIds.indexOf(a.baseExpression) - orderedColumnIds.indexOf(b.baseExpression),
-    );
+    const filteredColumns = newColumnsWithTasks.filter((col) => orderedColumnIds.includes(col.id));
+    filteredColumns.sort((a, b) => orderedColumnIds.indexOf(a.id) - orderedColumnIds.indexOf(b.id));
 
     setColumnsWithTasks(filteredColumns);
   }
@@ -309,7 +351,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
                 <div className={styles.board} ref={provided.innerRef} {...provided.droppableProps}>
                   {columnsWithTasks.map((column, index) => (
                     <Column
-                      key={column.baseExpression}
+                      key={column.id}
                       perspective={perspective}
                       channelId={channelId}
                       agent={agent}
@@ -318,7 +360,7 @@ export default function Board({ perspective, channelId, agent, getProfile }: Boa
                       column={column}
                       updating={updating}
                       index={index}
-                      deleteColumn={() => deleteColumn(column.baseExpression)}
+                      deleteColumn={() => deleteColumn(column.id)}
                     />
                   ))}
                   {provided.placeholder}

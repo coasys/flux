@@ -34,7 +34,7 @@ export default function Column({
   const [showNewTaskSettings, setShowNewTaskSettings] = useState(false);
 
   return (
-    <Draggable draggableId={column.baseExpression} index={index} isDragDisabled={updating}>
+    <Draggable draggableId={column.id} index={index} isDragDisabled={updating}>
       {(provided) => (
         <div ref={provided.innerRef} {...provided.draggableProps} className={styles.column}>
           <div className={styles.columnHeader} {...provided.dragHandleProps}>
@@ -47,7 +47,7 @@ export default function Column({
             </j-button>
           </div>
 
-          <Droppable droppableId={column.baseExpression}>
+          <Droppable droppableId={column.id}>
             {(provided, snapshot) => (
               <div
                 ref={provided.innerRef}
@@ -56,7 +56,7 @@ export default function Column({
               >
                 {column.tasks.map((task, index) => (
                   <TaskCard
-                    key={task.baseExpression}
+                    key={task.id}
                     perspective={perspective}
                     channelId={channelId}
                     agent={agent}

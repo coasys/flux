@@ -1,20 +1,16 @@
 <template>
-  <j-modal :open="modalStore.showEditChannel" @toggle="(e: any) => (modalStore.showEditChannel = e.target.open)">
+  <j-modal
+    :open="modalStore.showManageChannelPluginsModal"
+    @toggle="(e: any) => (modalStore.showManageChannelPluginsModal = e.target.open)"
+  >
     <j-box p="800">
       <j-flex direction="column" gap="500">
-        <j-text variant="heading-sm">Edit {{ isConversation ? 'Conversation' : 'Channel' }}</j-text>
+        <j-text size="700" weight="600" color="primary-700" nomargin>
+          Manage {{ isConversation ? 'Conversation' : 'Channel' }} Plugins
+        </j-text>
 
-        <j-input
-          size="lg"
-          label="Name"
-          :value="name"
-          @keydown.enter="updateChannel"
-          @input="(e: any) => (name = e.target.value)"
-        />
-
-        <j-box pb="500" pt="300">
+        <j-box pb="500">
           <j-box pb="300">
-            <j-text variant="label">Select at least one plugin</j-text>
             <j-text size="300" variant="label">
               Can't find a suitable plugin?
               <a target="_blank" style="color: var(--j-color-black)" href="https://docs.fluxsocial.io">Create one</a>
@@ -65,7 +61,9 @@
 
         <j-box mt="500">
           <j-flex direction="row" j="end" gap="300">
-            <j-button size="lg" variant="link" @click="modalStore.showEditChannel = false"> Cancel </j-button>
+            <j-button size="lg" variant="link" @click="modalStore.showManageChannelPluginsModal = false">
+              Cancel
+            </j-button>
             <j-button
               :loading="isSaving"
               :disabled="!canSave || isSaving"
@@ -86,30 +84,16 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useModalStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
-import { useModel } from '@coasys/ad4m-vue-hooks';
-import {
-  App,
-  Channel,
-  Conversation,
-  FluxApp,
-  generateWCName,
-  getAllFluxApps,
-  getOfflineFluxApps,
-} from '@coasys/flux-api';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
+import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
+import { Link } from '@coasys/ad4m';
 import semver from 'semver';
-import { computed, onMounted, reactive, ref, toRaw, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const modalStore = useModalStore();
-
-const {
-  perspective,
-  recentConversations,
-  getPinnedConversations,
-  getRecentConversations,
-  getChannelsWithConversations,
-} = useCommunityService();
+const { perspective, recentConversationsWithAgents: recentConversations, allChannels } = useCommunityService();
 
 const tab = ref<'official' | 'community'>('official');
 const isLoading = ref(false);
@@ -120,7 +104,8 @@ const selectedPlugins = ref<App[]>([]);
 const isSaving = ref(false);
 
 const channelId = computed(() => route.params.channelId as string);
-const channel = computed(() => channels.value?.[0] || null);
+const channelUrl = computed(() => restoreChannelPrefix(channelId.value));
+const channel = computed(() => allChannels.value.find((c) => c.id === channelUrl.value) || null);
 const isConversation = computed(() => channel.value?.isConversation);
 const canSave = computed(() => selectedPlugins.value.length >= 1);
 const officialApps = computed(() =>
@@ -135,8 +120,20 @@ const filteredPackages = computed((): FluxApp[] =>
   tab.value === 'official' ? officialApps.value : communityApps.value,
 );
 
-const { entries: channels } = useModel({ perspective, model: Channel, query: { where: { base: channelId.value } } });
-const { entries: apps } = useModel({ perspective, model: App, query: { source: channelId.value } });
+const views = ref<App[]>([]);
+watch(
+  channel,
+  async (newChannel) => {
+    if (newChannel) {
+      await newChannel.get({ views: true });
+      views.value = newChannel.views;
+      selectedPlugins.value = newChannel.views;
+    } else {
+      views.value = [];
+    }
+  },
+  { immediate: true },
+);
 
 function toggleView(app: FluxApp) {
   const isSelectedApp = selectedPlugins.value.some((a) => a.pkg === app.pkg);
@@ -157,61 +154,33 @@ async function updateChannel() {
   isSaving.value = true;
 
   try {
-    const removeApps = apps.value
+    const removeApps = views.value
       .filter((app) => !selectedPlugins.value.some((a) => a.pkg === app.pkg))
       .map((app) => {
-        const appModel = new App(perspective, app.baseExpression);
+        const appModel = new App(perspective, app.id);
         return appModel.delete();
       });
 
     await Promise.all(removeApps);
 
     const addedApps = selectedPlugins.value
-      .filter((app) => !apps.value.some((a) => a.pkg === app.pkg))
-      .map((app) => {
-        const appModel = new App(perspective, undefined, channelId.value);
+      .filter((app) => !views.value.some((a) => a.pkg === app.pkg))
+      .map(async (app) => {
+        const appModel = new App(perspective);
         appModel.name = app.name;
         appModel.description = app.description;
         appModel.icon = app.icon;
         appModel.pkg = app.pkg;
-        return appModel.save();
+        await appModel.save();
+        await perspective.add(new Link({ source: channelUrl.value, predicate: 'ad4m://has_child', target: appModel.id }));
       });
 
     await Promise.all(addedApps);
-
-    if (isConversation.value) {
-      // Update the assosiated conversation name
-      const conversationData = recentConversations.value.find(
-        (c) => c.channel.baseExpression === channel.value.baseExpression,
-      );
-      const conversationId = toRaw(conversationData?.conversation)?.baseExpression;
-      if (!conversationId) return;
-      const conversationModel = new Conversation(perspective, conversationId);
-      conversationModel.conversationName = name.value;
-      await conversationModel.update();
-      // Refresh sidebar channels
-      getPinnedConversations();
-      getRecentConversations();
-      getChannelsWithConversations();
-    } else {
-      // Update the channel name directly
-      const channelModel = new Channel(perspective, channelId.value);
-      channelModel.name = name.value;
-      await channelModel.update();
-    }
   } finally {
     isSaving.value = false;
-    modalStore.showEditChannel = false;
+    modalStore.showManageChannelPluginsModal = false;
   }
 }
-
-watch(
-  apps,
-  (newApps) => {
-    if (newApps) selectedPlugins.value = newApps;
-  },
-  { deep: true, immediate: true },
-);
 
 watch(
   channel,
@@ -219,9 +188,7 @@ watch(
     if (newChannel) {
       if (newChannel.isConversation) {
         // Get the conversation name for the channel
-        const conversationData = recentConversations.value.find(
-          (c) => c.channel.baseExpression === newChannel.baseExpression,
-        );
+        const conversationData = recentConversations.value.find((c) => c.channel?.id === newChannel.id);
         name.value = conversationData?.conversation?.conversationName || '';
       } else {
         // Otherwise just use the channel name
@@ -243,7 +210,7 @@ watch(
         loadedPlugins[app.pkg] = 'loading';
 
         const module = await fetchFluxApp(app.pkg);
-        if (module) {
+        if (module && !customElements.get(wcName)) {
           customElements.define(wcName, module.default);
         }
 

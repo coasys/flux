@@ -19,18 +19,17 @@
 </template>
 
 <script setup lang="ts">
-import { ad4mConnect } from '@/ad4mConnect';
 import CallContainer from '@/containers/CallContainer.vue';
 import AppLayout from '@/layout/AppLayout.vue';
 import { useAppStore } from '@/stores';
 import Modals from '@/views/main/modals/Modals.vue';
 import Sidebar from '@/views/main/sidebar/Sidebar.vue';
 import { LinkExpression, Literal, PerspectiveProxy } from '@coasys/ad4m';
-import { usePerspectives } from '@coasys/ad4m-vue-hooks';
+import { usePerspectives } from '@coasys/flux-vue';
 import { ensureLLMTasks } from '@coasys/flux-api/src/conversation/LLMutils';
 import { EntryType } from '@coasys/flux-types';
 import semver from 'semver';
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { dependencies } from '../../../package.json';
 import { registerNotification } from '../../utils/registerMobileNotifications';
@@ -39,8 +38,7 @@ const route = useRoute();
 const appStore = useAppStore();
 
 const { onLinkAdded } = usePerspectives(appStore.ad4mClient);
-
-const oldAuthState = ref(ad4mConnect.authState);
+let cleanupLinkAdded: (() => void) | undefined;
 
 function gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
   const routeChannelId = route.params.channelId;
@@ -67,22 +65,14 @@ async function initializeApp() {
   });
 
   // Register notification
-  registerNotification();
+  registerNotification(appStore.ad4mClient);
 
   // Ensure LLM tasks are set up
   ensureLLMTasks(appStore.ad4mClient.ai);
 
-  // Reload page if auth state changes
-  ad4mConnect.addEventListener('authstatechange', async () => {
-    let oldState = oldAuthState.value;
-    oldAuthState.value = ad4mConnect.authState;
-    if (ad4mConnect.authState === 'authenticated' && oldState !== 'authenticated') {
-      window.location.reload();
-    }
-  });
-
-  // Listen for new messages
-  onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
+  // Listen for new messages (clean up previous listener if re-mounted)
+  cleanupLinkAdded?.();
+  cleanupLinkAdded = onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
     if (link.data.predicate === EntryType.Message) gotNewMessage(p, link);
   });
 
@@ -92,9 +82,11 @@ async function initializeApp() {
   if (isIncompatible) {
     // this.$router.push({ name: "update-ad4m" });
   }
-
-  appStore.getMyCommunities();
 }
 
 onMounted(async () => initializeApp());
+onUnmounted(() => {
+  cleanupLinkAdded?.();
+  cleanupLinkAdded = undefined;
+});
 </script>

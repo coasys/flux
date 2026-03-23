@@ -1,10 +1,9 @@
-import { useAppStore } from '@/stores';
-import { getAd4mClient } from '@coasys/ad4m-connect';
-import { createPinia } from 'pinia';
+import { useAppStore, useRouteMemoryStore } from '@/stores';
+import { getAd4mClient, isEmbedded } from '@coasys/ad4m-connect';
+import { createPinia, storeToRefs } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
-import './ad4mConnect';
 import App from './App.vue';
 import router from './router';
 // @ts-ignore
@@ -36,25 +35,72 @@ const vueApp = createApp({ render: () => h(App) })
   .use(pinia)
   .use(router);
 
-// Initialize Ad4mClient
 const appStore = useAppStore(pinia);
+const routeMemoryStore = useRouteMemoryStore(pinia);
+
+// Store the last saved route and current params before mounting the app
+const savedRoute = { ...routeMemoryStore.currentRoute };
+const currentParams = router.resolve(window.location.hash.slice(1) || '/').params;
+
+// Mount the app immediately so UI is responsive
+vueApp.mount('#app');
+
+// Initialize Ad4m client in an async IIFE to support older browsers
 (async () => {
   try {
-    const ad4mClient = await getAd4mClient();
+    // Initialize Ad4m client
+    const ad4mClient = await getAd4mClient({
+      appInfo: {
+        name: 'Flux',
+        description: 'A Social Toolkit for the New Internet',
+        url: window.location.origin,
+        iconPath: window.location.origin + '/icon.png',
+      },
+      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
+      multiUser: true,
+    });
+
+    if (!ad4mClient) throw new Error('Ad4mClient not available');
+
+    // Initialize app store
     appStore.setAdamClient(ad4mClient);
-    appStore.refreshMyProfile();
+    await appStore.refreshMyProfile();
+    await appStore.getMyCommunities();
+    appStore.initialized = true;
+
+    // Fallback to signup if no Flux account found
+    const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
+    if (!hasFluxAccount) return;
+
+    // Determine which params to use for navigation (prioritize current params)
+    let params = null;
+    if (currentParams.communityId) params = currentParams;
+    else if (savedRoute.communityId) params = savedRoute;
+
+    // Navigate to params if available
+    if (params) {
+      if (params.viewId) await router.push({ name: 'view', params });
+      else if (params.channelId) await router.push({ name: 'channel', params });
+      else await router.push({ name: 'community', params });
+      return;
+    }
+
+    // Navigate to home if Flux account exists but no saved route
+    router.push('/home');
   } catch (error) {
-    console.error('Failed to initialize Ad4m client:', error);
+    console.error('Failed to initialize Flux:', error);
   }
 })();
 
-// Mount the app
-vueApp.mount('#app');
-
-// Check for service worker updates every 10 minutes and reload
-const intervalMS = 60 * 10 * 1000;
-const updateServiceWorker = useRegisterSW({
-  onRegistered(r: ServiceWorkerRegistration | undefined) {
-    r && setInterval(() => r.update(), intervalMS);
-  },
-});
+// Service worker registration - only register when running in standalone mode
+if (!isEmbedded()) {
+  const intervalMS = 60 * 10 * 1000;
+  useRegisterSW({
+    immediate: true,
+    onRegistered(r: ServiceWorkerRegistration | undefined) {
+      if (r) {
+        setInterval(() => r.update(), intervalMS);
+      }
+    },
+  });
+}

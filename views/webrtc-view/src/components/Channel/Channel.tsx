@@ -67,9 +67,44 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }
 
   function toggleFullscreen() {
-    setFullscreen(!fullscreen);
+    const goingFullscreen = !fullscreen;
+    setFullscreen(goingFullscreen);
     uiStore.toggleCallFullscreen();
+
+    // Try browser Fullscreen API as enhancement
+    const el = wrapperEl.current;
+    if (goingFullscreen && el) {
+      const requestFs = el.requestFullscreen || (el as any).webkitRequestFullscreen;
+      requestFs?.call(el).catch((err: Error) => {
+        console.error('Failed to enter fullscreen:', err);
+      });
+    } else {
+      const fsEl = document.fullscreenElement || (document as any).webkitFullscreenElement;
+      if (fsEl) {
+        const exitFs = document.exitFullscreen || (document as any).webkitExitFullscreen;
+        exitFs?.call(document).catch((err: Error) => {
+          console.error('Failed to exit fullscreen:', err);
+        });
+      }
+    }
   }
+
+  // Sync fullscreen state when user exits via Escape key or other browser UI
+  useEffect(() => {
+    function onFullscreenChange() {
+      const isFs = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      if (!isFs && fullscreen) {
+        setFullscreen(false);
+        uiStore.toggleCallFullscreen();
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+    };
+  }, [fullscreen, uiStore]);
 
   useEffect(() => {
     if (webrtcStore) webrtcStore.addInstance(webRTC);
@@ -80,7 +115,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
   }, [agent, getProfile]);
 
   return (
-    <section className={styles.wrapper} ref={wrapperEl}>
+    <section className={styles.wrapper} ref={wrapperEl} data-browser-fullscreen={fullscreen}>
       {!webRTC.hasJoined && profile && (
         <JoinScreen
           webRTC={webRTC}
@@ -96,7 +131,7 @@ export default function Channel({ source, perspective, agent: agentClient, webrt
 
       {webRTC.hasJoined && (
         <>
-          <UserGrid webRTC={webRTC} profile={profile} getProfile={getProfile} />
+          <UserGrid webRTC={webRTC} profile={profile} getProfile={getProfile} fullscreen={fullscreen} />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}

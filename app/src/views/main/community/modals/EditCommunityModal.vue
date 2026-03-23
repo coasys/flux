@@ -4,7 +4,7 @@
     :open="modalStore.showEditCommunity"
     @toggle="(e: any) => (modalStore.showEditCommunity = e.target.open)"
   >
-    <j-box p="800">
+    <j-box :p="isMobile ? '500' : '800'">
       <j-text variant="heading-sm">Edit Community</j-text>
       <avatar-upload :value="communityImage" @change="(val) => (communityImage = val || '')" />
       <j-flex direction="column" gap="400">
@@ -42,12 +42,14 @@
 <script setup lang="ts">
 import AvatarUpload from '@/components/avatar-upload/AvatarUpload.vue';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { useModalStore } from '@/stores';
+import { useModalStore, useUiStore } from '@/stores';
 import { Community } from '@coasys/flux-api';
 import { blobToDataURL, dataURItoBlob, resizeImage } from '@coasys/flux-utils';
+import { storeToRefs } from 'pinia';
 import { ref, watch } from 'vue';
 
 const modalStore = useModalStore();
+const { isMobile } = storeToRefs(useUiStore());
 
 const { perspective, community } = useCommunityService();
 
@@ -67,7 +69,8 @@ async function updateCommunity() {
       compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(communityImage.value as string), 0.6));
     }
 
-    const communityModel = new Community(perspective, community.value.baseExpression);
+    const communityModel = await Community.findOne(perspective, { where: { id: community.value.id } });
+    if (!communityModel) throw new Error('Community not found');
     communityModel.name = communityName.value;
     communityModel.description = communityDescription.value;
     // @ts-ignore
@@ -79,7 +82,7 @@ async function updateCommunity() {
         }
       : undefined;
 
-    await communityModel.update();
+    await communityModel.save();
   } catch (e) {
     console.log(e);
   } finally {

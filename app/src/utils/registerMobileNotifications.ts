@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core';
 
 import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } from '@capacitor/push-notifications';
 import { Ad4mClient } from '@coasys/ad4m';
-import { getAd4mClient } from '@coasys/ad4m-connect';
 
 const APP_NAME = 'Flux';
 const DESCRIPTION = 'Mobile push notifications for @-mentions';
@@ -13,24 +12,25 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
     trigger: `
-            agent_did(Did),
-            subject_class("Message", C),
-            instance(C, Base),
-            property_getter(C, Base, "body", Body),
-            literal_from_url(Body, JsonString, _),
-            json_property(JsonString, "data", MessageContent),
-            append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
-            string_includes(MessageContent, MentionString),
-            remove_html_tags(MessageContent, Description),
-            Title="You were mentioned".`,
+      SELECT
+        in.uri as message_id,
+        fn::parse_literal(out.uri) as body_literal,
+        fn::json_path(fn::parse_literal(out.uri), 'data') as message_content,
+        fn::strip_html(fn::json_path(fn::parse_literal(out.uri), 'data')) as description,
+        $agentDid as mentioned_agent
+      FROM link
+      WHERE predicate = 'msg://body'
+      AND fn::contains(
+        fn::json_path(fn::parse_literal(out.uri), 'data'),
+        'data-type="mention" href="' + $agentDid + '"'
+      )`,
     perspectiveIds,
     webhookUrl: 'http://push-notifications.ad4m.dev:13000/notification',
     webhookAuth,
   };
 }
 
-export async function registerNotification() {
-  const client: Ad4mClient = await getAd4mClient();
+export async function registerNotification(client: Ad4mClient) {
   const perspctives = await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
 

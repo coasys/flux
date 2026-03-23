@@ -3,6 +3,7 @@ import { Conversation, ConversationSubgroup, Embedding, SemanticRelationship, To
 import { Profile, SignallingService } from '@coasys/flux-types';
 import { FilterSettings, SearchType, SynergyMatch, SynergyTopic } from '@coasys/flux-utils';
 import { cos_sim } from '@xenova/transformers';
+import { Fragment } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import MatchColumn from '../MatchColumn';
 import TimelineColumn from '../TimelineColumn';
@@ -42,6 +43,7 @@ export default function SynergyDemoView({
   const [showLLMInfoModal, setShowLLMInfoModal] = useState(false);
   const [aiDataLoading, setAiDataLoading] = useState(false);
   const [modalRenderKey, setModalRenderKey] = useState(0);
+  const [sdnaInitialized, setSdnaInitialized] = useState(false);
 
   async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
     // Searches for items in the neighbourhood that match the search filters & have similar embedding scores
@@ -57,14 +59,14 @@ export default function SynergyDemoView({
     }
     const matches = await Promise.all(
       allEmbeddings.map(async (e: any) => {
-        const { baseExpression, type, embedding, channelId, channelName } = e;
+        const { id, type, embedding, channelId, channelName } = e;
         // Filter out results that don't match the search filters
-        const isSourceItem = baseExpression === itemId;
+        const isSourceItem = id === itemId;
         const wrongChannel = !filterSettings.includeChannel && channelId === source;
         if (isSourceItem || wrongChannel) return null;
         // Generate a similarity score for the embedding
         const score = await cos_sim(sourceEmbedding, embedding);
-        return { baseExpression, channelId, channelName, type, score };
+        return { id, channelId, channelName, type, score };
       }),
     );
     return matches.filter((item) => item && item.score > 0.2);
@@ -82,11 +84,11 @@ export default function SynergyDemoView({
       currentGrouping === 'Conversations' ? await topic.linkedConversations() : await topic.linkedSubgroups();
     // Filter out results that don't match the search filters
     const filteredMatches = matches.map((relationship) => {
-      const { baseExpression, type, channelId, channelName, relevance } = relationship;
-      const isSourceItem = baseExpression === itemId;
+      const { id, type, channelId, channelName, relevance } = relationship;
+      const isSourceItem = id === itemId;
       const wrongChannel = !filterSettings.includeChannel && channelId === source;
       if (isSourceItem || wrongChannel) return null;
-      return { baseExpression, channelId, channelName, type, score: relevance / 100 };
+      return { id, channelId, channelName, type, score: relevance / 100 };
     });
 
     return filteredMatches.filter((i) => i !== null);
@@ -100,7 +102,7 @@ export default function SynergyDemoView({
     setSearchItemId(itemId);
     setSelectedTopic(type === 'topic' ? topic : null);
     const newMatches =
-      type === 'topic' ? await findTopicMatches(itemId, topic.baseExpression) : await findEmbeddingMatches(itemId);
+      type === 'topic' ? await findTopicMatches(itemId, topic.id) : await findEmbeddingMatches(itemId);
     const sortedMatches = newMatches.sort((a, b) => b.score - a.score);
     setMatches(sortedMatches);
     setSearching(false);
@@ -114,13 +116,25 @@ export default function SynergyDemoView({
     return `${matches.length} match${matches.length > 1 ? 'es' : ''} ${searchType === 'topic' ? `for #${selectedTopic.name}` : ''}`;
   }
 
+  async function ensureSDNA() {
+    await perspective.ensureSDNASubjectClass(Conversation);
+    await perspective.ensureSDNASubjectClass(ConversationSubgroup);
+    await perspective.ensureSDNASubjectClass(Topic);
+    await perspective.ensureSDNASubjectClass(Embedding);
+    await perspective.ensureSDNASubjectClass(SemanticRelationship);
+  }
+
   useEffect(() => {
-    // Ensure SDNA classes
-    perspective.ensureSDNASubjectClass(Conversation);
-    perspective.ensureSDNASubjectClass(ConversationSubgroup);
-    perspective.ensureSDNASubjectClass(Topic);
-    perspective.ensureSDNASubjectClass(Embedding);
-    perspective.ensureSDNASubjectClass(SemanticRelationship);
+    // Ensure SDNA classes are loaded into the perspective
+    (async () => {
+      try {
+        await ensureSDNA();
+        setSdnaInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize SDNA classes:', error);
+        setSdnaInitialized(false);
+      }
+    })();
 
     // Listen for call health updates from the signalling service
     const eventName = `${perspective.uuid}-call-health-update`;
@@ -136,6 +150,18 @@ export default function SynergyDemoView({
 
   // Reset matches when channel changes
   useEffect(() => setMatches([]), [source]);
+
+  // Wait for SDNA initialization before rendering
+  if (!sdnaInitialized) {
+    return (
+      <div className={styles.wrapper}>
+        <j-flex direction="column" a="center" j="center" gap="500" style={{ height: '100%' }}>
+          <j-spinner size="lg" />
+          <j-text nomargin>Initializing SDNA classes...</j-text>
+        </j-flex>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -314,7 +340,7 @@ export default function SynergyDemoView({
             agent={agent}
             perspective={perspective}
             channelId={source}
-            selectedTopicId={selectedTopic?.baseExpression || ''}
+            selectedTopicId={selectedTopic?.id || ''}
             signallingService={signallingService}
             signalsHealthy={signalsHealthy}
             appStore={appStore}
@@ -337,7 +363,7 @@ export default function SynergyDemoView({
             perspective={perspective}
             agent={agent}
             matches={matches}
-            selectedTopicId={selectedTopic?.baseExpression || ''}
+            selectedTopicId={selectedTopic?.id || ''}
             searchType={searchType}
             filterSettings={filterSettings}
             setFilterSettings={setFilterSettings}

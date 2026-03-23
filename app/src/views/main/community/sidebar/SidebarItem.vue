@@ -1,5 +1,5 @@
 <template>
-  <j-flex direction="column">
+  <j-flex v-if="item.channel" direction="column">
     <div
       class="channel"
       :class="{
@@ -31,9 +31,9 @@
       </div>
 
       <div v-if="item.lastActivity" class="last-activity">
-        <j-text nomargin size="300">•</j-text>
-        <j-text nomargin size="300">
-          <j-timestamp :value="item.lastActivity" relative class="timestamp" />
+        <!-- <j-text nomargin size="300" color="ui-400">•</j-text> -->
+        <j-text nomargin size="300" color="ui-400">
+          <j-timestamp :value="item.lastActivity" class="timestamp" dateStyle="short" timeStyle="short" />
         </j-text>
       </div>
 
@@ -60,27 +60,29 @@
     </div>
 
     <div v-if="expanded && item.children?.length" style="margin-left: var(--j-space-500)">
-      <SidebarItem v-for="child in item.children" :key="child.channel.baseExpression" :item="child" is-child />
+      <SidebarItem v-for="child in item.children" :key="child.channel?.id || child.channelId" :item="child" is-child />
     </div>
   </j-flex>
 </template>
 
 <script setup lang="ts">
 import { ChevronDownIcon, ChevronRightIcon, RecordingIcon } from '@/components/icons';
-import { ChannelData, useCommunityService } from '@/composables/useCommunityService';
-import { useRouteMemoryStore, useUiStore } from '@/stores';
+import { ChannelDataWithAgents, useCommunityService } from '@/composables/useCommunityService';
+import { useAppStore, useRouteMemoryStore, useUiStore } from '@/stores';
+import { restoreChannelPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { AgentData, Profile } from '@coasys/flux-types';
-import { computed, defineOptions, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 defineOptions({ name: 'SidebarItem' });
 
-type Props = { item: ChannelData; isChild?: boolean };
+type Props = { item: ChannelDataWithAgents; isChild?: boolean };
 const { item } = defineProps<Props>();
 
 const route = useRoute();
 const router = useRouter();
+const appStore = useAppStore();
 const uiStore = useUiStore();
 const routeMemoryStore = useRouteMemoryStore();
 const { moveConversation, moveConversationLoading } = useCommunityService();
@@ -90,10 +92,10 @@ const isDragOver = ref(false);
 const isDragging = ref(false);
 const agentsInChannel = ref<(AgentData | (Profile & { status: string }))[]>([]);
 
-const selected = computed(() => item.channel.baseExpression === route.params.channelId);
+const selected = computed(() => item.channel?.id === restoreChannelPrefix(route.params.channelId as string));
 const agentsInCall = computed(() => aggregateAgents(expanded.value, item, 'agentsInCall') || []);
 
-function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agentsInChannel' | 'agentsInCall') {
+function aggregateAgents(expanded: boolean, item: ChannelDataWithAgents, agentKey: 'agentsInChannel' | 'agentsInCall') {
   // If collapsed and children exist, aggregate agents from child channels
   if (!expanded && item.children?.length) {
     const childAgents = item.children.flatMap((child) => child[agentKey] || []);
@@ -103,20 +105,20 @@ function aggregateAgents(expanded: boolean, item: ChannelData, agentKey: 'agents
   return item[agentKey];
 }
 
-function aggregateAllAuthors(expanded: boolean, item: ChannelData): string[] {
+function aggregateAllAuthors(expanded: boolean, item: ChannelDataWithAgents): string[] {
   if (!expanded && item.children?.length) {
-    const childAuthors = item.children.flatMap((child) => child.allAuthors || []);
-    return [...new Set([...(item.allAuthors || []), ...childAuthors])];
+    const childAuthors = item.children.flatMap((child) => child.channel?.participants || []);
+    return [...new Set([...(item.channel?.participants || []), ...childAuthors])];
   }
-  return item.allAuthors || [];
+  return item.channel?.participants || [];
 }
 
 function navigateToChannel() {
   // Use the route memory to navigate back to the last opened view in the channel if saved
   const communityId = route.params.communityId as string;
-  const channelId = item.channel.baseExpression || '';
+  const channelId = stripChannelPrefix(item.channel?.id || '');
   const lastViewId = routeMemoryStore.getLastChannelView(communityId, channelId);
-  const defaultViewId = item.channel.isConversation ? 'conversation' : 'conversations';
+  const defaultViewId = item.channel?.isConversation ? 'conversation' : 'conversations';
   router.push({ name: 'view', params: { communityId, channelId, viewId: lastViewId || defaultViewId } });
 
   // Toggle the community sidebar shut if open (only has effect on mobile)
@@ -126,19 +128,19 @@ function navigateToChannel() {
 function expandIfInNestedChannel() {
   // Expand the item when the user navigates to a channel included in its children
   const currentChannelId = route.params.channelId as string;
-  const inNestedChannel = item.children?.some((c: any) => c.channel.baseExpression === currentChannelId);
+  const inNestedChannel = item.children?.some((c: any) => stripChannelPrefix(c.channel.id) === currentChannelId);
   if (inNestedChannel) expanded.value = true;
 }
 
 function handleDragStart(event: DragEvent) {
-  if (!item.channel.isConversation) return;
+  if (!item.channel?.isConversation) return;
 
   isDragging.value = true;
   event.dataTransfer!.effectAllowed = 'move';
   event.dataTransfer!.setData(
     'application/json',
     JSON.stringify({
-      conversationChannelId: item.channel.baseExpression!,
+      conversationChannelId: item.channel?.id!,
       name: item.conversation?.conversationName || '',
     }),
   );
@@ -152,7 +154,7 @@ function handleDragEnd() {
 }
 
 function handleDragOver(event: DragEvent) {
-  if (item.channel.isConversation) return;
+  if (item.channel?.isConversation) return;
 
   event.preventDefault();
   event.dataTransfer!.dropEffect = 'move';
@@ -168,7 +170,7 @@ function handleDragLeave(event: DragEvent) {
 }
 
 async function handleDrop(event: DragEvent) {
-  if (item.channel.isConversation) return;
+  if (item.channel?.isConversation) return;
 
   event.preventDefault();
   event.stopPropagation();
@@ -177,7 +179,7 @@ async function handleDrop(event: DragEvent) {
   try {
     const dropData = event.dataTransfer!.getData('application/json');
     const { conversationChannelId, name } = JSON.parse(dropData);
-    await moveConversation(conversationChannelId, item.channel.baseExpression!, name);
+    await moveConversation(conversationChannelId, item.channel?.id!, name);
   } catch (error) {
     console.error('Error handling drop:', error);
   }
@@ -195,7 +197,7 @@ watch(
       aggregateAllAuthors(expanded.value, item)
         .filter((did) => !activeDids.has(did))
         .map(async (did) => {
-          const profile = (await getCachedAgentProfile(did)) || {};
+          const profile = (await getCachedAgentProfile(did, appStore.ad4mClient)) || {};
           return { ...profile, did, status: 'inactive' };
         }),
     );

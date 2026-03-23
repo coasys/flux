@@ -68,6 +68,7 @@ async function saveProfile() {
       bio: bio.value,
       profilePicture: profilePicture.value,
       profileBackground: profileBackground.value,
+      client: appStore.ad4mClient,
     });
 
     modalStore.showEditProfile = false;
@@ -82,7 +83,7 @@ async function saveProfile() {
 
 async function loadProfileData() {
   if (!me.value?.did) return;
-  const profile = await getCachedAgentProfile(me.value.did);
+  const profile = await getCachedAgentProfile(me.value.did, appStore.ad4mClient);
   profileBackground.value = profile.profileBackground ?? '';
   profilePicture.value = profile.profilePicture ?? '';
   username.value = profile.username ?? '';

@@ -128,13 +128,13 @@
       :class="{ content: true, collapsed: collapsed, mobile: isMobile, 'show-match-column': showMatchColumn }"
     >
       <div class="timeline-column-wrapper">
-        <TimelineColumn :selected-topic-id="selectedTopic?.baseExpression || ''" :search="search" />
+        <TimelineColumn :selected-topic-id="selectedTopic?.id || ''" :search="search" />
       </div>
 
       <div class="match-column-wrapper" :style="{ maxWidth: `${contentWidth}px` }">
         <MatchColumn
           :matches="matches"
-          :selected-topic-id="selectedTopic?.baseExpression || ''"
+          :selected-topic-id="selectedTopic?.id || ''"
           :search-type="searchType"
           :filter-settings="filterSettings"
           :set-filter-settings="setFilterSettings"
@@ -143,12 +143,21 @@
         />
       </div>
     </div>
+
+    <!-- Voice recorder button -->
+    <VoiceRecorder
+      :client="appStore.ad4mClient"
+      :perspective="perspective"
+      :source="restoreChannelPrefix(route.params.channelId as string)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import MatchColumn from '@/components/conversation/match/MatchColumn.vue';
 import TimelineColumn from '@/components/conversation/timeline/TimelineColumn.vue';
+import VoiceRecorder from '@/components/conversation/VoiceRecorder.vue';
+import { restoreChannelPrefix } from '@/utils/routeUtils';
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useAiStore, useUiStore, useWebrtcStore, useAppStore } from '@/stores';
 import { SemanticRelationship, Topic } from '@coasys/flux-api';
@@ -225,14 +234,14 @@ async function findEmbeddingMatches(itemId: string): Promise<SynergyMatch[]> {
 
   const matches = await Promise.all(
     allEmbeddings.map(async (e: any) => {
-      const { baseExpression, type, embedding, channelId, channelName } = e;
+      const { id, type, embedding, channelId, channelName } = e;
       // Filter out results that don't match the search filters
-      const isSourceItem = baseExpression === itemId;
+      const isSourceItem = id === itemId;
       const wrongChannel = !filterSettings.value.includeChannel && channelId === route.params.channelId;
       if (isSourceItem || wrongChannel) return null;
       // Generate a similarity score for the embedding
       const score = await cos_sim(sourceEmbedding, embedding);
-      return { baseExpression, channelId, channelName, type, score };
+      return { id, channelId, channelName, type, score };
     }),
   );
   return matches.filter((item) => item && item.score > MINIMUM_MATCH_SCORE) as SynergyMatch[];
@@ -254,11 +263,11 @@ async function findTopicMatches(itemId: string, topicId: string): Promise<Synerg
 
   // Filter out results that don't match the search filters
   const filteredMatches = topicMatches.map((relationship) => {
-    const { baseExpression, type, channelId, channelName, relevance } = relationship;
-    const isSourceItem = baseExpression === itemId;
+    const { id, type, channelId, channelName, relevance } = relationship;
+    const isSourceItem = id === itemId;
     const wrongChannel = !filterSettings.value.includeChannel && channelId === route.params.channelId;
     if (isSourceItem || wrongChannel) return null;
-    return { baseExpression, channelId, channelName, type, score: (relevance || 0) / 100 };
+    return { id, channelId, channelName, type, score: (relevance || 0) / 100 };
   });
 
   return filteredMatches.filter((i) => i !== null);
@@ -274,7 +283,7 @@ async function search(type: SearchType, itemId: string, topic?: SynergyTopic) {
 
   try {
     const newMatches =
-      type === 'topic' ? await findTopicMatches(itemId, topic!.baseExpression) : await findEmbeddingMatches(itemId);
+      type === 'topic' ? await findTopicMatches(itemId, topic!.id) : await findEmbeddingMatches(itemId);
 
     const sortedMatches = newMatches
       .filter((match): match is SynergyMatch & { score: number } => typeof match.score === 'number')
@@ -324,7 +333,7 @@ watch(
   display: flex;
   flex-direction: column;
 
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: $breakpoint-mobile) {
     padding: var(--j-space-400);
   }
 
@@ -380,7 +389,7 @@ watch(
       }
     }
 
-    // Applied when viewport width is < 800px
+    // Applied on mobile
     &.mobile {
       .match-column-wrapper {
         width: calc(100% - 30px);

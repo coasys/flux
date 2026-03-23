@@ -11,6 +11,7 @@ import { computed, ref, shallowRef, toRaw } from 'vue';
 export const useAppStore = defineStore(
   'appStore',
   () => {
+    const initialized = ref<boolean>(false);
     const me = ref<Agent>({ did: '' });
     const myProfile = ref<Profile | null>(null);
     const updateState = ref<UpdateState>('not-available');
@@ -18,6 +19,7 @@ export const useAppStore = defineStore(
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
     const myPerspectives = ref<PerspectiveProxy[]>([]);
     const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
+    const communitiesLoaded = ref<boolean>(false);
     const holochainRestarting = ref<boolean>(false);
 
     // Store a shallow ref of the Ad4mClient so we retain access to its methods
@@ -28,6 +30,8 @@ export const useAppStore = defineStore(
       if (!ad4mClientRef.value) console.error('Trying to access Ad4mClient before initialization');
       return ad4mClientRef.value as Ad4mClient;
     });
+
+    const clientReady = computed(() => ad4mClientRef.value !== null);
 
     const hasJoinedTestingCommunity = computed(() => {
       return !!myPerspectives.value.find((p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD);
@@ -76,7 +80,7 @@ export const useAppStore = defineStore(
 
     async function joinTestingCommunity() {
       try {
-        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD });
+        await joinCommunity({ joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD, client: ad4mClient.value });
       } catch (e) {
         showDangerToast({ message: e.message });
         throw new Error(e);
@@ -84,28 +88,35 @@ export const useAppStore = defineStore(
     }
 
     async function getMyCommunities() {
-      // Get all my perspectives
-      myPerspectives.value = await ad4mClient.value.perspective.all();
+      try {
+        // Get all my perspectives
+        myPerspectives.value = await ad4mClient.value.perspective.all();
 
-      // Filter perspectives that have a neighbourhood and map to community entries
-      const communityEntries = await Promise.all(
-        toRaw(myPerspectives.value)
-          .filter((perspective) => perspective.neighbourhood)
-          .map(async (perspective) => {
-            const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
-            if (!community) return null;
-            return [perspective.uuid, community] as const;
-          }),
-      );
+        // Filter perspectives that have a neighbourhood and map to community entries
+        const communityEntries = await Promise.all(
+          toRaw(myPerspectives.value)
+            .filter((perspective) => perspective.neighbourhood)
+            .map(async (perspective) => {
+              const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
+              if (!community) return null;
+              return [perspective.sharedUrl, community] as const;
+            }),
+        );
 
-      // Filter out null results and create object from entries
-      const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
-      myCommunities.value = { ...myCommunities.value, ...newCommunities };
+        // Filter out null results and create object from entries
+        const newCommunities = Object.fromEntries(communityEntries.filter(Boolean) as Array<[string, Community]>);
+        myCommunities.value = { ...myCommunities.value, ...newCommunities };
+        communitiesLoaded.value = true;
+      } catch (e) {
+        showDangerToast({ message: 'Failed to load communities' });
+        throw e;
+      }
     }
 
     async function refreshMyProfile() {
+      // First fetch the agent info
       me.value = await ad4mClient.value.agent.me();
-      myProfile.value = await getCachedAgentProfile(me.value.did, true);
+      myProfile.value = await getCachedAgentProfile(me.value.did, ad4mClient.value, true);
     }
 
     async function restartHolochain() {
@@ -121,18 +132,28 @@ export const useAppStore = defineStore(
       }
     }
 
+    function getPerspective(neighbourhoodUrl: string): PerspectiveProxy | undefined {
+      const perspective = myPerspectives.value.find((p) => p.sharedUrl === neighbourhoodUrl) as
+        | PerspectiveProxy
+        | undefined;
+      return toRaw(perspective);
+    }
+
     return {
       // State
+      initialized,
       ad4mClient,
       me,
       myProfile,
       updateState,
       toast,
       notification,
+      communitiesLoaded,
       myPerspectives,
       myCommunities,
       hasJoinedTestingCommunity,
       holochainRestarting,
+      clientReady,
 
       // Mutations
       setAdamClient,
@@ -148,7 +169,8 @@ export const useAppStore = defineStore(
       getMyCommunities,
       refreshMyProfile,
       restartHolochain,
+      getPerspective,
     };
   },
-  { persist: { omit: ['myPerspectives', 'myCommunities'] } },
+  { persist: { omit: ['initialized', 'myPerspectives', 'myCommunities'] } },
 );
