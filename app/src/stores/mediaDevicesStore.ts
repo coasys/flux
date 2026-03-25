@@ -99,6 +99,7 @@ export const useMediaDevicesStore = defineStore(
 
     async function findAvailableDevices() {
       try {
+        const previousOutputIds = new Set(audioOutputs.value.map((d) => d.deviceId));
         availableDevices.value = await navigator.mediaDevices.enumerateDevices();
 
         // Set default devices if not already set
@@ -108,6 +109,20 @@ export const useMediaDevicesStore = defineStore(
 
         if (microphones.value.length > 0 && !activeMicrophoneId.value) {
           activeMicrophoneId.value = microphones.value[0].deviceId;
+        }
+
+        // Auto-switch to newly connected audio output (e.g. AirPods just connected)
+        if (audioOutputs.value.length > 0) {
+          if (!activeAudioOutputId.value) {
+            activeAudioOutputId.value = audioOutputs.value[0].deviceId;
+          } else {
+            // Detect newly added output device and auto-switch to it
+            const newOutput = audioOutputs.value.find((d) => !previousOutputIds.has(d.deviceId));
+            if (newOutput) {
+              console.log('🎧 New audio output detected, auto-switching to:', newOutput.label);
+              switchAudioOutput(newOutput.deviceId);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to get device list:', err);
