@@ -19,14 +19,15 @@
     "node": ">=18.16.0"
   },
   "dependencies": {
+    "@capgo/capacitor-audio-session": "7.1.11",
     "graphql": "^15.7.2"
   },
   "devDependencies": {
     "eslint-config-custom": "*",
     "patch-package": "*",
     "prettier": "latest",
-    "turbo": "latest",
-    "prettier-plugin-sort-package-json": "latest"
+    "prettier-plugin-sort-package-json": "latest",
+    "turbo": "latest"
   },
   "workspaces": {
     "packages": [
