@@ -1,0 +1,8 @@
+node_modules/
+.git/
+app/dist/
+**/dist/
+.turbo/
+*.log
+.DS_Store
+.env*
