@@ -14,9 +14,8 @@ export function restoreNeighbourhoodPrefix(communityId: string): string {
   return `neighbourhood://${communityId}`;
 }
 
-// Strips literal:string: prefix from channel ID (handles both literal:// and literal: formats)
+// Strips literal:string: prefix from channel ID
 export function stripChannelPrefix(channelId: string): string {
-  if (channelId.startsWith('literal://string:')) return channelId.slice('literal://string:'.length);
   if (channelId.startsWith('literal:string:')) return channelId.slice('literal:string:'.length);
   return channelId;
 }
