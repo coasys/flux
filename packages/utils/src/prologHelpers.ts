@@ -127,7 +127,7 @@ export async function resolveEntryWithLatestProperties(
     const isArray = Array.isArray(val);
 
     async function resolveExp(url) {
-      return url.startsWith('literal://')
+      return url.startsWith('literal:')
         ? Literal.fromUrl(url).get().data
         : (await client.expression.get(url)).data.replace(/['"]+/g, '');
     }

@@ -88,12 +88,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     //   aiEnabled: true,
     //   callRoute: {
     //     communityId: "eac01428-0bc7-4589-ba97-02bdebe93103",
-    //     channelId: "literal://string:qochwldaaabrdsvfzmnmvqjd",
+    //     channelId: "literal:string:qochwldaaabrdsvfzmnmvqjd",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
     //     communityId: "eac01428-0bc7-4589-ba97-02bdebe93103",
-    //     channelId: "literal://string:qochwldaaabrdsvfzmnmvqjd",
+    //     channelId: "literal:string:qochwldaaabrdsvfzmnmvqjd",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -110,12 +110,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     //   aiEnabled: true,
     //   callRoute: {
     //     communityId: "eac01428-0bc7-4589-ba97-02bdebe93103",
-    //     channelId: "literal://string:qochwldaaabrdsvfzmnmvqjd",
+    //     channelId: "literal:string:qochwldaaabrdsvfzmnmvqjd",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
     //     communityId: "eac01428-0bc7-4589-ba97-02bdebe93103",
-    //     channelId: "literal://string:qochwldaaabrdsvfzmnmvqjd",
+    //     channelId: "literal:string:qochwldaaabrdsvfzmnmvqjd",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -132,12 +132,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     //   aiEnabled: true,
     //   callRoute: {
     //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
-    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
+    //     channelId: "literal:string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
     //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
-    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
+    //     channelId: "literal:string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,
@@ -154,12 +154,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     //   aiEnabled: true,
     //   callRoute: {
     //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
-    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
+    //     channelId: "literal:string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   currentRoute: {
     //     communityId: "bdce1be5-ec8f-4242-bad0-124428daaf48",
-    //     channelId: "literal://string:ppfcssybewchueydyctoqkht",
+    //     channelId: "literal:string:ppfcssybewchueydyctoqkht",
     //     viewId: "@coasys/flux-chat-view",
     //   },
     //   inCall: true,

@@ -1266,17 +1266,13 @@
   resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-7.0.5.tgz#0ab57756fe3ac2eaba9d5f94ed90c11c86a14f15"
   integrity sha512-d0DI/Usy4RrNiV5xfnypXNRLmWYMixC2yAUAwe6sCQQ0HF7oskDf4RpCxcZqbxnpc4H4A0qqiOSltfJLFAYshg==
 
-"@coasys/ad4m-connect@0.11.1", "@coasys/ad4m-connect@0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.12.0.tgz#917162d002c38e459ac3bf1fe007f198d4c30bab"
-  integrity sha512-9ZeM5EHmvLLNEEYAx1tZJDV2WqDWmdYzr4K0halariz2SIO9W+UlFL9srrS0ucCrdLUgO1YvQQxZC3Wcm6Q0Sw==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
-    auto-bind "^5.0.1"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
-    lit "^2.3.1"
+"@coasys/ad4m-connect@0.11.1":
+  version "0.0.0"
+  uid ""
+
+"@coasys/ad4m-connect@link:/tmp/sparql-demo/ad4m/connect":
+  version "0.0.0"
+  uid ""
 
 "@coasys/ad4m-react-hooks@0.11.1", "@coasys/ad4m-react-hooks@0.12.0":
   version "0.12.0"
@@ -1296,19 +1292,21 @@
     "@coasys/ad4m" "workspace:0.12.0"
     "@coasys/hooks-helpers" "workspace:*"
 
-"@coasys/ad4m@0.11.1", "@coasys/ad4m@0.12.0", "@coasys/ad4m@workspace:*", "@coasys/ad4m@workspace:0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.12.0.tgz#acf99046deba9a830b01a6bc8dbe016f01001f10"
-  integrity sha512-2HRReBN6GbON0U+zTX0KfD8QzdcIMV72pVHF9ziK3iMIs/w2ONId3XwhL3jyrZwRtcyF3c3gHeStNhqPcKI7Iw==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@holochain/client" "0.16.0"
-    base64-js "*"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    pako "*"
-    reflect-metadata "^0.1.13"
+"@coasys/ad4m@0.11.1":
+  version "0.0.0"
+  uid ""
+
+"@coasys/ad4m@link:/tmp/sparql-demo/ad4m/core":
+  version "0.0.0"
+  uid ""
+
+"@coasys/ad4m@workspace:*":
+  version "0.0.0"
+  uid ""
+
+"@coasys/ad4m@workspace:0.12.0":
+  version "0.0.0"
+  uid ""
 
 "@coasys/hooks-helpers@0.12.0", "@coasys/hooks-helpers@workspace:*":
   version "0.12.0"
