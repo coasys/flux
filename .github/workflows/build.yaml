@@ -20,12 +20,13 @@ jobs:
         run: |
           BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            "https://api.github.com/repos/coasys/ad4m/branches/$BRANCH")
-          if [ "$HTTP_CODE" = "200" ]; then
+          if git ls-remote --exit-code --heads \
+            https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
             echo "ad4m_match=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Found matching AD4M branch: $BRANCH"
           else
             echo "ad4m_match=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No matching AD4M branch — using published packages"
           fi
 
       # --- AD4M linked build (only when matching branch exists) ---
@@ -41,8 +42,14 @@ jobs:
         if: steps.branch.outputs.ad4m_match == 'true'
         id: ad4m-hash
         run: |
-          HASH=$(find ad4m/core ad4m/connect ad4m/ad4m-hooks -name '*.ts' -o -name '*.json' | \
-            sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+          HASH=$(
+            {
+              find ad4m/core ad4m/connect ad4m/ad4m-hooks -type f \( -name '*.ts' -o -name '*.json' \)
+              for file in ad4m/package.json ad4m/pnpm-lock.yaml ad4m/pnpm-workspace.yaml; do
+                [ -f "$file" ] && printf '%s\n' "$file"
+              done
+            } | sort | xargs sha256sum | sha256sum | cut -d' ' -f1
+          )
           echo "hash=$HASH" >> "$GITHUB_OUTPUT"
 
       - name: Cache AD4M built outputs
@@ -102,4 +109,4 @@ jobs:
         run: NODE_OPTIONS='--max-old-space-size=4096' yarn build
 
       - name: Test
-        run: yarn test || true
+        run: yarn test

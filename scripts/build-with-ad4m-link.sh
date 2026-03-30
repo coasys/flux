@@ -5,11 +5,9 @@ set -euo pipefail
 BRANCH="${BRANCH:-${HEAD:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}}}"
 echo "==> Detected branch: $BRANCH"
 
-# Check if coasys/ad4m has a matching branch
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-  "https://api.github.com/repos/coasys/ad4m/branches/$BRANCH")
-
-if [ "$HTTP_CODE" = "200" ]; then
+# Check if coasys/ad4m has a matching branch (git ls-remote handles slashes natively)
+if git ls-remote --exit-code --heads \
+  https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and linking"
 
   git clone --depth 1 --single-branch --branch "$BRANCH" \
