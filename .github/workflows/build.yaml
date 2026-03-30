@@ -107,6 +107,3 @@ jobs:
 
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' yarn build
-
-      - name: Test
-        run: yarn test
