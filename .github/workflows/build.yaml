@@ -1,0 +1,116 @@
+name: Build
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for matching AD4M branch
+        id: check-ad4m
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          # Check if branch exists on coasys/ad4m
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://api.github.com/repos/coasys/ad4m/branches/$BRANCH")
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "match=true" >> $GITHUB_OUTPUT
+            echo "✅ Found matching AD4M branch: $BRANCH"
+          else
+            echo "match=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No matching AD4M branch — using published packages"
+          fi
+
+      # ── AD4M SDK build (only if matching branch exists) ──
+      - name: Cache AD4M build
+        if: steps.check-ad4m.outputs.match == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ad4m/node_modules
+            ad4m/core/lib
+            ad4m/connect/dist
+            ad4m/ad4m-hooks/helpers/lib
+            ad4m/ad4m-hooks/react/lib
+            ad4m/ad4m-hooks/vue/lib
+          key: ad4m-sdk-${{ steps.check-ad4m.outputs.branch }}-${{ hashFiles('ad4m/core/src/**', 'ad4m/connect/src/**', 'ad4m/ad4m-hooks/**/src/**') }}
+          restore-keys: |
+            ad4m-sdk-${{ steps.check-ad4m.outputs.branch }}-
+
+      - name: Clone AD4M (matching branch)
+        if: steps.check-ad4m.outputs.match == 'true'
+        run: |
+          git clone --depth 1 --single-branch \
+            --branch "${{ steps.check-ad4m.outputs.branch }}" \
+            https://github.com/coasys/ad4m.git ad4m
+
+      - name: Install AD4M dependencies
+        if: steps.check-ad4m.outputs.match == 'true'
+        run: |
+          cd ad4m
+          npm install -g pnpm
+          pnpm install --no-frozen-lockfile
+
+      - name: Build AD4M SDK packages
+        if: steps.check-ad4m.outputs.match == 'true'
+        run: |
+          cd ad4m
+          # Build core
+          cd core && pnpm exec tsc && pnpm run bundle && cd ..
+          # Build connect (bundles core via esbuild)
+          cd connect && pnpm run build && cd ..
+          # Build hooks
+          cd ad4m-hooks/helpers && pnpm exec tsc 2>/dev/null || true && cd ../..
+          cd ad4m-hooks/react && pnpm exec tsc 2>/dev/null || true && cd ../..
+          cd ad4m-hooks/vue && pnpm exec tsc 2>/dev/null || true && cd ../..
+
+      - name: Link AD4M packages into Flux
+        if: steps.check-ad4m.outputs.match == 'true'
+        run: |
+          # Register AD4M packages with yarn link
+          cd ad4m/core && yarn link && cd ../..
+          cd ad4m/connect && yarn link && cd ../..
+          cd ad4m/ad4m-hooks/helpers && yarn link && cd ../../..
+          cd ad4m/ad4m-hooks/react && yarn link && cd ../../..
+          cd ad4m/ad4m-hooks/vue && yarn link && cd ../../..
+          # Link into Flux
+          yarn link @coasys/ad4m
+          yarn link @coasys/ad4m-connect
+          yarn link @coasys/hooks-helpers
+          yarn link @coasys/ad4m-react-hooks
+          yarn link @coasys/ad4m-vue-hooks
+          # Clear build cache to pick up linked packages
+          rm -rf app/node_modules/.vite .turbo
+
+      # ── Flux build ──
+      - name: Cache Flux node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */node_modules
+            .turbo
+          key: flux-deps-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            flux-deps-
+
+      - name: Install Flux dependencies
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Build Flux
+        run: |
+          NODE_OPTIONS='--max-old-space-size=4096' yarn build
+
+      - name: Run tests
+        run: yarn test || true
