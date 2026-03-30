@@ -47,7 +47,7 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const subgroupsResult = await this.perspective.querySurrealDB(subgroupsQuery);
+      const subgroupsResult = await this.perspective.querySparql(subgroupsQuery);
       const totalSubgroups = subgroupsResult?.length || 0;
 
       // Use maintained participants Collection instead of expensive queries
@@ -79,7 +79,7 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
@@ -126,7 +126,7 @@ export class Conversation extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by id
       const subgroupMap = new Map<string, any>();
@@ -157,7 +157,7 @@ export class Conversation extends Ad4mModel {
             ORDER BY ?channelTs
           `;
 
-          const timestampResults = await this.perspective.querySurrealDB(timestampQuery);
+          const timestampResults = await this.perspective.querySparql(timestampQuery);
 
           // Filter out null/undefined timestamps and convert to numeric timestamps
           const timestamps = (timestampResults || [])

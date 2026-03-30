@@ -39,7 +39,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const itemsResult = await this.perspective.querySurrealDB(itemsQuery);
+      const itemsResult = await this.perspective.querySparql(itemsQuery);
       const totalItems = itemsResult?.length || 0;
 
       // Use maintained participants Collection
@@ -66,7 +66,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
@@ -112,7 +112,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Collect items — keep duplicate IDs so the view can detect and clean them up
       const items: any[] = [];
@@ -197,7 +197,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();

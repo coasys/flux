@@ -73,7 +73,7 @@ export class Channel extends Ad4mModel {
   async allItems(): Promise<SynergyItem[]> {
     // Get all items (messages, posts, tasks) in the channel
     try {
-      const surrealQuery = `
+      const sparqlQuery = `
         SELECT
           out.uri AS id,
           author,
@@ -90,9 +90,9 @@ export class Channel extends Ad4mModel {
         ORDER BY timestamp ASC
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
-      return (surrealResult || []).map((item: any) => {
+      return (sparqlResult || []).map((item: any) => {
         let text = '';
         let type = '';
 
@@ -143,7 +143,7 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by id
       const itemMap = new Map<string, any>();
@@ -197,7 +197,7 @@ export class Channel extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySurrealDB(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
       const countValue = sparqlResult?.[0]?.count?.value;
       return countValue ? parseInt(countValue, 10) : 0;
     } catch (error) {
