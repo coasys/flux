@@ -1,7 +1,6 @@
 [build]
-  command = "npx pnpm install --frozen-lockfile && npx pnpm build"
+  command = "NODE_OPTIONS='--max-old-space-size=4096' pnpm build"
   publish = "app/dist"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
-  PNPM_VERSION = "9.15.0"
