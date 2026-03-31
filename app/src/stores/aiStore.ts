@@ -74,6 +74,20 @@ export const useAiStore = defineStore(
 
     const aiEnabled = computed(() => Boolean(defaultLLM.value && llmLoadingStatus.value?.status === 'Ready'));
 
+    const whisperModelId = computed(() => {
+      const model = allModels.value.find(
+        (m) => m.modelType === 'TRANSCRIPTION' && !m.local?.fileName?.includes('tiny'),
+      );
+      return model?.id ?? 'Whisper';
+    });
+
+    const tinyWhisperModelId = computed(() => {
+      const model = allModels.value.find(
+        (m) => m.modelType === 'TRANSCRIPTION' && m.local?.fileName?.includes('tiny'),
+      );
+      return model?.id ?? 'whisper_tiny_quantized';
+    });
+
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
     }
@@ -364,6 +378,8 @@ export const useAiStore = defineStore(
       llmLoadingStatus,
       whisperLoadingStatus,
       whisperTinyLoadingStatus,
+      whisperModelId,
+      tinyWhisperModelId,
       transcriptionEnabled,
       transcriptionModel,
       transcriptionPreviewTimeout,

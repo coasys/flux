@@ -47,7 +47,10 @@
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
+import { useAiStore } from '@/stores';
 import { ref, onUnmounted } from 'vue';
+
+const aiStore = useAiStore();
 
 const props = defineProps<{
   client: Ad4mClient;
@@ -123,13 +126,13 @@ async function startRecording() {
     
     // Open transcription streams (final + preview)
     transcriptionStreamId = await props.client.ai.openTranscriptionStream(
-      'Whisper',
+      aiStore.whisperModelId,
       handleTranscriptionText,
       { startThreshold: 0.8 }
     );
     
     fastTranscriptionStreamId = await props.client.ai.openTranscriptionStream(
-      'whisper_tiny_quantized',
+      aiStore.tinyWhisperModelId,
       (text: string) => { previewText.value = text; },
       {
         startThreshold: 0.5,
