@@ -1,2 +1,7 @@
+[build]
+  command = "npx pnpm install --frozen-lockfile && npx pnpm build"
+  publish = "app/dist"
+
 [build.environment]
   NODE_VERSION = "20.10.0"
+  PNPM_VERSION = "9.15.0"
