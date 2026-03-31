@@ -10,7 +10,7 @@ This project requires AD4M! The easiest way to have an AD4M runtime operating, i
 
 ### Compiles and hot-reloads for development
 
-```
+```bash
 pnpm run dev
 ```
 
@@ -27,12 +27,12 @@ These DNA's come bundled with the builtin languages, links above are provided fo
 
 ### Compiles and minifies for production
 
-```
+```bash
 pnpm run build
 ```
 
 ### Lints and fixes files
 
-```
+```bash
 pnpm run lint
 ```

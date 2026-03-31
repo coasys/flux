@@ -6,7 +6,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    
+    "prepack": "pnpm run build",
     "release": "np --no-2fa --no-tests --tag=latest",
     "release:beta": "np --no-2fa --no-tests --tag=beta",
     "start": "run-p dev:*",
