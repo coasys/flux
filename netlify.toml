@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' pnpm run build"
+  command = "pnpm install --no-frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' npx turbo run build --filter=flux"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
