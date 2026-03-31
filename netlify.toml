@@ -1,6 +1,5 @@
 [build]
-  command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' pnpm build"
-  publish = "app/dist"
+  command = "npm i -g pnpm@9.15.0 && pnpm install --no-frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' pnpm run build"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
