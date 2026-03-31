@@ -1,5 +1,5 @@
 [build]
-  command = "NODE_OPTIONS='--max-old-space-size=4096' pnpm build"
+  command = "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' pnpm build"
   publish = "app/dist"
 
 [build.environment]
