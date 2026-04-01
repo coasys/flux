@@ -82,9 +82,10 @@ jobs:
 
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
-        env:
-          COREPACK_ENABLE_STRICT: "0"
         run: |
+          # Remove packageManager field from AD4M's package.json so yarn link works
+          # (AD4M uses pnpm but we need yarn link for Flux compatibility)
+          node -e "const p=require('./ad4m/package.json'); delete p.packageManager; require('fs').writeFileSync('./ad4m/package.json', JSON.stringify(p, null, 2)+'\n')"
           (cd ad4m/core && yarn link)
           (cd ad4m/connect && yarn link)
           # Link hooks only if they were built (have a lib/ directory)
