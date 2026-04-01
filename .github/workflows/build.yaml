@@ -11,9 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'pnpm'
 
       - name: Detect branch
         id: branch
@@ -82,11 +88,11 @@ jobs:
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          cd ad4m/core && yarn link
-          cd ../connect && yarn link
-          cd ../ad4m-hooks/helpers && yarn link
-          cd ../../ad4m-hooks/react && yarn link
-          cd ../../ad4m-hooks/vue && yarn link
+          cd ad4m/core && pnpm link --global
+          cd ../connect && pnpm link --global
+          cd ../ad4m-hooks/helpers && pnpm link --global
+          cd ../../ad4m-hooks/react && pnpm link --global
+          cd ../../ad4m-hooks/vue && pnpm link --global
           cd ../../..
 
       # --- Flux build ---
@@ -98,16 +104,16 @@ jobs:
             node_modules
             */node_modules
             !ad4m/node_modules
-          key: flux-deps-${{ hashFiles('yarn.lock') }}
+          key: flux-deps-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Flux dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Link AD4M packages into Flux
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          yarn link @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+          pnpm link --global @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
           rm -rf app/node_modules/.vite .turbo
 
       - name: Build
-        run: NODE_OPTIONS='--max-old-space-size=4096' yarn build
+        run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
