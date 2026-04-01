@@ -32,7 +32,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const itemsQuery = `
         PREFIX ad4m: <ad4m://ontology/>
-        SELECT ?item WHERE {
+        SELECT DISTINCT ?item WHERE {
           ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?item .
           ?link2 a ad4m:Link ; ad4m:source ?item ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type .
           FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
@@ -123,8 +123,19 @@ export default class ConversationSubgroup extends Ad4mModel {
 
         // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
         if (seen.has(id)) {
-          // Duplicate id — add reference to items but don't overwrite coalesced data
-          items.push(seen.get(id));
+          // Merge optional fields from this binding into the existing item
+          const existing = seen.get(id);
+          const transcriptStart = parseLit(binding.transcriptStart?.value);
+          const channelTs = binding.channelTs?.value;
+          const fallbackTs = binding.timestamp?.value;
+          if (!existing.channelTimestamp) {
+            existing.channelTimestamp = transcriptStart || channelTs || fallbackTs;
+          }
+          if (!existing.messageBody) existing.messageBody = parseLit(binding.body?.value);
+          if (!existing.postTitle) existing.postTitle = parseLit(binding.title?.value);
+          if (!existing.taskName) existing.taskName = parseLit(binding.taskName?.value);
+          if (!existing.type) existing.type = binding.type?.value;
+          if (!existing.author) existing.author = binding.author?.value;
           continue;
         }
 

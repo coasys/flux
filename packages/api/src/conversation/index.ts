@@ -143,7 +143,7 @@ export class Conversation extends Ad4mModel {
       }
 
       // Get timestamps for each subgroup separately
-      return await Promise.all(
+      const subgroups = await Promise.all(
         Array.from(subgroupMap.values()).map(async (subgroup: any) => {
           // SPARQL migration - get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
@@ -167,7 +167,8 @@ export class Conversation extends Ad4mModel {
             })
             .filter((ts) => ts != null && ts !== '')
             .map((ts) => new Date(ts).getTime())
-            .filter((time) => !isNaN(time));
+            .filter((time) => !isNaN(time))
+            .sort((a, b) => a - b);
 
           const start = timestamps.length > 0 ? timestamps[0] : 0;
           const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
