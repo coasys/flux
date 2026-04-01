@@ -22,7 +22,7 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm@9.15.0
       - name: Install modules
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
     # - name: Run lint
     #   run: yarn run lint
     # - name: Run tests
