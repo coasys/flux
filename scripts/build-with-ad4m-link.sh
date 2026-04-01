@@ -24,20 +24,27 @@ if git ls-remote --exit-code --heads \
   echo "==> Building @coasys/ad4m-connect"
   cd connect && pnpm run build && cd ..
 
-  echo "==> Building hooks"
-  cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..
-  cd ad4m-hooks/react && pnpm exec tsc && cd ../..
-  cd ad4m-hooks/vue && pnpm exec tsc && cd ../..
+  echo "==> Building hooks (if tsconfig.json exists)"
+  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/helpers (no tsconfig.json)"
+  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/react (no tsconfig.json)"
+  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/vue (no tsconfig.json)"
 
-  # Yarn link each package
-  cd core && yarn link && cd ..
-  cd connect && yarn link && cd ..
-  cd ad4m-hooks/helpers && yarn link && cd ../..
-  cd ad4m-hooks/react && yarn link && cd ../..
-  cd ad4m-hooks/vue && yarn link && cd ../..
+  # Strip packageManager field so yarn link works (AD4M uses pnpm, Flux uses yarn)
+  node -e "const p=require('./package.json'); delete p.packageManager; require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2)+'\n')"
+
+  # Yarn link each package (using subshells to avoid cd chain issues)
+  (cd core && yarn link)
+  (cd connect && yarn link)
+  [ -d ad4m-hooks/helpers/lib ] && (cd ad4m-hooks/helpers && yarn link) || true
+  [ -d ad4m-hooks/react/lib ] && (cd ad4m-hooks/react && yarn link) || true
+  [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && yarn link) || true
   cd ..
 
-  yarn link @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+  # Link core packages into Flux (always link core + connect, hooks only if built)
+  yarn link @coasys/ad4m @coasys/ad4m-connect
+  [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
+  [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
+  [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
   rm -rf app/node_modules/.vite .turbo
 
   echo "==> AD4M packages linked successfully"
