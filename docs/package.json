@@ -13,8 +13,8 @@
   },
   "keywords": [],
   "dependencies": {
-    "@coasys/flux-container": "0.11.0",
-    "@coasys/flux-ui": "0.11.0",
+    "@coasys/flux-container": "workspace:*",
+    "@coasys/flux-ui": "workspace:*",
     "eventsource-parser": "^1.0.0",
     "vitepress": "1.0.0-alpha.75"
   },

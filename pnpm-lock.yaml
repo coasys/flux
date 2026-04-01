@@ -83,29 +83,29 @@ importers:
         specifier: workspace:*
         version: link:../packages/api
       '@coasys/flux-chat-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))
+        specifier: workspace:*
+        version: link:../views/chat-view
       '@coasys/flux-graph-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.150.1)
+        specifier: workspace:*
+        version: link:../views/graph-view
       '@coasys/flux-kanban-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/kanban-view
       '@coasys/flux-kanban-view-simple':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/kanban-view-simple
       '@coasys/flux-poll-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/poll-view
       '@coasys/flux-post-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/post-view
       '@coasys/flux-synergy-demo-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/synergy-demo-view
       '@coasys/flux-table-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/table-view
       '@coasys/flux-types':
         specifier: workspace:*
         version: link:../packages/types
@@ -119,11 +119,11 @@ importers:
         specifier: workspace:*
         version: link:../packages/vue
       '@coasys/flux-webrtc-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../views/webrtc-view
       '@coasys/nillion-file-store':
-        specifier: 0.11.0
-        version: 0.11.0(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@3.30.0)(starknet@8.9.2)(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
+        specifier: workspace:*
+        version: link:../views/nillion-file-store
       '@metamask/jazzicon':
         specifier: ^2.0.0
         version: 2.0.0
@@ -610,7 +610,7 @@ importers:
         version: 2.2.3
       lodash:
         specifier: ^4.17.21
-        version: 4.17.21
+        version: 4.17.23
       openai:
         specifier: ^4.55.5
         version: 4.104.0(encoding@0.1.13)(ws@8.20.0)
@@ -1080,8 +1080,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       '@coasys/flux-webrtc-view':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: workspace:*
+        version: link:../webrtc-view
       preact:
         specifier: ^10.13.1
         version: 10.29.0
@@ -2046,38 +2046,8 @@ packages:
   '@coasys/ad4m@0.12.0':
     resolution: {integrity: sha512-2HRReBN6GbON0U+zTX0KfD8QzdcIMV72pVHF9ziK3iMIs/w2ONId3XwhL3jyrZwRtcyF3c3gHeStNhqPcKI7Iw==}
 
-  '@coasys/flux-chat-view@0.11.0':
-    resolution: {integrity: sha512-UTEkoaGtD4EA205d9mHp8MZzNoIYlmgUrn7bEkuQxu0jgSisWtx5vo2yk8RXZgk/CIK/qDtzd/e+6b6zeOPWRg==}
-
-  '@coasys/flux-graph-view@0.11.0':
-    resolution: {integrity: sha512-jhpNDWwcH14xo9eT5rwB/ZJJlch1OSkAtqFk1f0Y+Ily8Ufs8LtLKYuY0RQwqIhaicYTucJndvsraYZCM2S8hg==}
-
-  '@coasys/flux-kanban-view-simple@0.11.0':
-    resolution: {integrity: sha512-qD8ndXPggBEfkU5tN52uZNFXTsReAdRrwr8uPOTL349xCv/xCvlaJkMQgyiG4vg5pnEOJY3S+p8b4yqxDCTG0g==}
-
-  '@coasys/flux-kanban-view@0.11.0':
-    resolution: {integrity: sha512-ZWKyGHnoAfqtyC3ch3rDNuxU3/mO2Bwa+bcqUU5AfjvPe8gMmJvw9ITiqpRxYYewIq9z0P+qP2yyMRvePpG2Bw==}
-
-  '@coasys/flux-poll-view@0.11.0':
-    resolution: {integrity: sha512-JDm7fAB2/g0xmwHsahQe770emEACaRJ8iN6js+yURnp+TK4VQhRc7y2UwZUw7uz0tLKAvGc0IPHr6NJC6olB/A==}
-
-  '@coasys/flux-post-view@0.11.0':
-    resolution: {integrity: sha512-uKqIlBdzIpFngw0Ein/n8NPCKbRNI+0tmzYTOvpp1Dpbxx+K0dVWtYr1hN6x50bSedRbUmM0QLIrKKsL6zkNfg==}
-
-  '@coasys/flux-synergy-demo-view@0.11.0':
-    resolution: {integrity: sha512-rVsITKCVUE8VCLBB6+MYrJvnpKYFKVX1enFfNZf5v5LBf6947EEb+UQp7SG9k4w8QzX+UzaNfafHdUhk73Q1xw==}
-
-  '@coasys/flux-table-view@0.11.0':
-    resolution: {integrity: sha512-YtJt9NsG36QmSvK1UltMC0v1oUjtRpg12iybjsPTsUGa21VI90wpBtBK6SVrdOuatoMvDoS+j86kJ0N5Y18cXQ==}
-
-  '@coasys/flux-webrtc-view@0.11.0':
-    resolution: {integrity: sha512-04OGUVpkX5gx5C6Gdt8ntcYySw/YUQ2iFG6M858gjSB1j528FFMe3C3KQz3f1BQYJ7FeC/6AmKi2O2u1biBjeA==}
-
   '@coasys/hooks-helpers@0.12.0':
     resolution: {integrity: sha512-C9IFU81YDhGGREWkjDv+92NJZknFYjypPKpWrbiWdCaXLzMSAUj1uuLEgYmuIDyXmfPh+BFt5PAuiNli0OL8oA==}
-
-  '@coasys/nillion-file-store@0.11.0':
-    resolution: {integrity: sha512-0yc3z3TDdVsAX6sgg+Hct09w7mO3NL2TV1cqsZoBRtCekt8cbiR9Lc0s5OIlSGRyDtr5fWUXNhpgR3mqGWUxMg==}
 
   '@confio/ics23@0.6.8':
     resolution: {integrity: sha512-wB6uo+3A50m0sW/EWcU64xpV/8wShZ6bMTa7pF8eYsTrSkQA7oLUIJcs/wb8g4y2Oyq701BaGiO6n/ak5WXO1w==}
@@ -7724,8 +7694,8 @@ packages:
   lodash.zip@4.2.0:
     resolution: {integrity: sha512-C7IOaBBK/0gMORRBd8OETNx3kmOkgIWIPvyDpZSCTwUrpYmgZwJkjZeOD8ww4xbOUOs4/attY+pciKvadNfFbg==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   log-symbols@1.0.2:
     resolution: {integrity: sha512-mmPrW0Fh2fxOzdBbFv4g1m6pR72haFLPJ2G5SJEELf1y+iaQrDG6cWCPjy54RHYbZAt7X+ls690Kw62AdWXBzQ==}
@@ -10889,24 +10859,6 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
 
-  '@apollo/client@3.6.9(graphql@15.7.2)(react@18.3.1)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@15.7.2)
-      '@wry/context': 0.6.1
-      '@wry/equality': 0.5.7
-      '@wry/trie': 0.3.2
-      graphql: 15.7.2
-      graphql-tag: 2.12.6(graphql@15.7.2)
-      hoist-non-react-statics: 3.3.2
-      optimism: 0.16.2
-      prop-types: 15.8.1
-      symbol-observable: 4.0.0
-      ts-invariant: 0.10.3
-      tslib: 2.8.1
-      zen-observable-ts: 1.2.5
-    optionalDependencies:
-      react: 18.3.1
-
   '@apollo/client@3.7.10(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@15.7.2)
@@ -11874,205 +11826,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@coasys/flux-chat-view@0.11.0(react-dom@18.3.1(react@18.3.1))':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-constants': link:packages/constants
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-editor': link:packages/flux-editor
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-types': link:packages/types
-      '@coasys/flux-ui': link:packages/ui
-      '@coasys/flux-utils': link:packages/utils
-      preact: 10.29.0
-      react: 18.3.1
-      react-virtuoso: 4.18.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react-dom
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-graph-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.150.1)':
-    dependencies:
-      3d-force-graph: 1.79.1
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      preact: 10.29.0
-      three-spritetext: 1.10.0(three@0.150.1)
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - subscriptions-transport-ws
-      - supports-color
-      - three
-      - utf-8-validate
-
-  '@coasys/flux-kanban-view-simple@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-comment-section': link:packages/comment-section
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-types': link:packages/types
-      fractional-indexing: 3.2.0
-      preact: 10.29.0
-      react-beautiful-dnd: 13.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - react-native
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-kanban-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-comment-section': link:packages/comment-section
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-types': link:packages/types
-      fractional-indexing: 3.2.0
-      preact: 10.29.0
-      react-beautiful-dnd: 13.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - react-native
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-poll-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-react-web': link:packages/react-web
-      d3: 7.9.0
-      preact: 10.29.0
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-post-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-comment-section': link:packages/comment-section
-      '@coasys/flux-editor': link:packages/flux-editor
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-ui': link:packages/ui
-      '@coasys/flux-utils': link:packages/utils
-      classnames: 2.5.1
-      date-fns: 2.30.0
-      emoji-picker-element: 1.29.1
-      emoji-short-name: 2.1.0
-      node-emoji: 1.11.0
-      preact: 10.29.0
-      react-dropzone: 14.4.1(react@18.3.1)
-      react-hint: 3.2.1
-      react-virtuoso: 3.1.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      tippy.js: 6.3.7
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-synergy-demo-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-utils': link:packages/utils
-      '@coasys/flux-webrtc-view': 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      preact: 10.29.0
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - react-native-b4a
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-table-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-comment-section': link:packages/comment-section
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      preact: 10.29.0
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
-  '@coasys/flux-webrtc-view@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      '@coasys/flux-utils': link:packages/utils
-      '@coasys/flux-webrtc': link:packages/webrtc
-      '@types/simple-peer': 9.11.9
-      '@xenova/transformers': 2.17.2
-      classnames: 2.5.1
-      emoji-picker-element: 1.29.1
-      hark: 1.2.3
-      howler: 2.2.4
-      npm-run-all: 4.1.5
-      preact: 10.29.0
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - bufferutil
-      - graphql-ws
-      - react
-      - react-dom
-      - react-native-b4a
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-
   '@coasys/hooks-helpers@0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -12085,54 +11838,6 @@ snapshots:
       - subscriptions-transport-ws
       - supports-color
       - utf-8-validate
-
-  '@coasys/nillion-file-store@0.11.0(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@3.30.0)(starknet@8.9.2)(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))':
-    dependencies:
-      '@apollo/client': 3.6.9(graphql@15.7.2)(react@18.3.1)
-      '@coasys/ad4m': 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/ad4m-react-hooks': 0.12.0(preact@10.29.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coasys/flux-api': link:packages/api
-      '@coasys/flux-container': link:packages/flux-container
-      '@coasys/flux-react-web': link:packages/react-web
-      '@cosmjs/proto-signing': 0.32.4
-      '@cosmjs/stargate': 0.32.4
-      '@keplr-wallet/cosmos': 0.12.313(bitcoinjs-lib@6.1.7)(starknet@8.9.2)
-      '@keplr-wallet/types': 0.12.313(starknet@8.9.2)
-      '@nillion/client-web': 0.6.0
-      '@tsconfig/recommended': 1.0.13
-      '@vitejs/plugin-basic-ssl': 1.2.0(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))
-      crypto-browserify: 3.12.1
-      css-loader: 7.1.4(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
-      dotenv: 16.6.1
-      file-loader: 6.2.0(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
-      patch-package: 8.0.1
-      preact: 10.29.0
-      stream-browserify: 3.0.0
-      style-loader: 4.0.0(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
-      ts-loader: 9.5.4(typescript@5.9.3)(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
-      typescript: 5.9.3
-      uuid: 9.0.1
-      vite-plugin-static-copy: 1.0.6(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))
-      vite-plugin-top-level-await: 1.6.0(rollup@3.30.0)(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))
-      vite-plugin-wasm: 3.6.0(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1))
-      vm-browserify: 1.1.2
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - '@swc/helpers'
-      - bitcoinjs-lib
-      - bufferutil
-      - debug
-      - graphql
-      - graphql-ws
-      - react
-      - react-dom
-      - rollup
-      - starknet
-      - subscriptions-transport-ws
-      - supports-color
-      - utf-8-validate
-      - vite
-      - webpack
 
   '@confio/ics23@0.6.8':
     dependencies:
@@ -12320,7 +12025,7 @@ snapshots:
       got: 11.8.6
       interpret: 3.1.1
       listr2: 5.0.8(enquirer@2.4.1)
-      lodash: 4.17.21
+      lodash: 4.17.23
       log-symbols: 4.1.0
       node-fetch: 2.7.0(encoding@0.1.13)
       progress: 2.0.3
@@ -13523,10 +13228,6 @@ snapshots:
     optionalDependencies:
       rollup: 3.30.0
 
-  '@rollup/plugin-virtual@3.0.2(rollup@3.30.0)':
-    optionalDependencies:
-      rollup: 3.30.0
-
   '@rollup/plugin-virtual@3.0.2(rollup@4.60.1)':
     optionalDependencies:
       rollup: 4.60.1
@@ -13933,7 +13634,7 @@ snapshots:
       gradle-to-js: 2.0.1
       ini: 2.0.0
       kleur: 4.1.5
-      lodash: 4.17.21
+      lodash: 4.17.23
       mergexml: 1.2.4
       plist: 3.1.0
       prettier: 2.8.8
@@ -15596,7 +15297,7 @@ snapshots:
   conventional-changelog-conventionalcommits@4.6.3:
     dependencies:
       compare-func: 2.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       q: 1.5.1
 
   conventional-changelog-core@4.2.4:
@@ -15609,7 +15310,7 @@ snapshots:
       git-raw-commits: 2.0.11
       git-remote-origin-url: 2.0.0
       git-semver-tags: 4.1.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       normalize-package-data: 3.0.3
       q: 1.5.1
       read-pkg: 3.0.0
@@ -15645,7 +15346,7 @@ snapshots:
       dateformat: 3.0.3
       handlebars: 4.7.9
       json-stringify-safe: 5.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       meow: 8.1.2
       semver: 6.3.1
       split: 1.0.1
@@ -15674,7 +15375,7 @@ snapshots:
     dependencies:
       JSONStream: 1.3.5
       is-text-path: 1.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       meow: 8.1.2
       split2: 3.2.2
       through2: 4.0.2
@@ -15791,19 +15492,6 @@ snapshots:
   css-box-model@1.2.1:
     dependencies:
       tiny-invariant: 1.3.3
-
-  css-loader@7.1.4(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)):
-    dependencies:
-      icss-utils: 5.1.0(postcss@8.5.8)
-      postcss: 8.5.8
-      postcss-modules-extract-imports: 3.1.0(postcss@8.5.8)
-      postcss-modules-local-by-default: 4.2.0(postcss@8.5.8)
-      postcss-modules-scope: 3.2.1(postcss@8.5.8)
-      postcss-modules-values: 4.0.0(postcss@8.5.8)
-      postcss-value-parser: 4.2.0
-      semver: 7.7.4
-    optionalDependencies:
-      webpack: 5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)
 
   css-loader@7.1.4(webpack@5.105.4):
     dependencies:
@@ -16295,7 +15983,7 @@ snapshots:
       debug: 4.4.3
       fs-extra: 9.1.0
       glob: 7.2.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       parse-author: 2.0.0
       semver: 7.7.4
       tmp-promise: 3.0.3
@@ -16312,7 +16000,7 @@ snapshots:
       electron-installer-common: 0.10.4
       fs-extra: 9.1.0
       get-folder-size: 2.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       word-wrap: 1.2.5
       yargs: 16.2.0
     transitivePeerDependencies:
@@ -16335,7 +16023,7 @@ snapshots:
       debug: 4.4.3
       electron-installer-common: 0.10.4
       fs-extra: 9.1.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       word-wrap: 1.2.5
       yargs: 16.2.0
     transitivePeerDependencies:
@@ -16379,7 +16067,7 @@ snapshots:
       '@electron/asar': 3.4.1
       debug: 4.4.3
       fs-extra: 7.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       temp: 0.9.4
     optionalDependencies:
       '@electron/windows-sign': 1.2.2
@@ -17284,12 +16972,6 @@ snapshots:
     dependencies:
       flat-cache: 3.2.0
 
-  file-loader@6.2.0(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)):
-    dependencies:
-      loader-utils: 2.0.4
-      schema-utils: 3.3.0
-      webpack: 5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)
-
   file-loader@6.2.0(webpack@5.105.4):
     dependencies:
       loader-utils: 2.0.4
@@ -17578,7 +17260,7 @@ snapshots:
   git-raw-commits@2.0.11:
     dependencies:
       dargs: 7.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       meow: 8.1.2
       split2: 3.2.2
       through2: 4.0.2
@@ -18002,7 +17684,7 @@ snapshots:
       cli-width: 2.2.1
       external-editor: 3.1.0
       figures: 2.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mute-stream: 0.0.7
       run-async: 2.4.1
       rxjs: 6.6.7
@@ -18018,7 +17700,7 @@ snapshots:
       cli-width: 3.0.0
       external-editor: 3.1.0
       figures: 3.2.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mute-stream: 0.0.8
       run-async: 2.4.1
       rxjs: 6.6.7
@@ -19009,7 +18691,7 @@ snapshots:
 
   lodash.zip@4.2.0: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   log-symbols@1.0.2:
     dependencies:
@@ -19430,7 +19112,7 @@ snapshots:
 
   node-emoji@1.11.0:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
 
   node-exports-info@1.6.0:
     dependencies:
@@ -21210,10 +20892,6 @@ snapshots:
     dependencies:
       escape-string-regexp: 1.0.5
 
-  style-loader@4.0.0(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)):
-    dependencies:
-      webpack: 5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)
-
   style-loader@4.0.0(webpack@5.105.4):
     dependencies:
       webpack: 5.105.4
@@ -21368,17 +21046,6 @@ snapshots:
     dependencies:
       ansi-escapes: 4.3.2
       supports-hyperlinks: 2.3.0
-
-  terser-webpack-plugin@5.4.0(@swc/core@1.15.21)(esbuild@0.14.54)(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
-      jest-worker: 27.5.1
-      schema-utils: 4.3.3
-      terser: 5.46.1
-      webpack: 5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)
-    optionalDependencies:
-      '@swc/core': 1.15.21
-      esbuild: 0.14.54
 
   terser-webpack-plugin@5.4.0(webpack@5.105.4):
     dependencies:
@@ -21548,22 +21215,12 @@ snapshots:
       jest: 29.7.0(@types/node@25.5.0)(ts-node@10.9.2(@swc/core@1.15.21)(@swc/wasm@1.15.21)(@types/node@25.5.0)(typescript@5.9.3))
       jest-util: 26.6.2
       json5: 2.2.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       make-error: 1.3.6
       mkdirp: 1.0.4
       semver: 7.7.4
       typescript: 5.9.3
       yargs-parser: 20.2.9
-
-  ts-loader@9.5.4(typescript@5.9.3)(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)):
-    dependencies:
-      chalk: 4.1.2
-      enhanced-resolve: 5.20.1
-      micromatch: 4.0.8
-      semver: 7.7.4
-      source-map: 0.7.6
-      typescript: 5.9.3
-      webpack: 5.105.4(@swc/core@1.15.21)(esbuild@0.14.54)
 
   ts-loader@9.5.4(typescript@5.9.3)(webpack@5.105.4):
     dependencies:
@@ -21912,17 +21569,6 @@ snapshots:
       picocolors: 1.1.1
       vite: 4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1)
 
-  vite-plugin-top-level-await@1.6.0(rollup@3.30.0)(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1)):
-    dependencies:
-      '@rollup/plugin-virtual': 3.0.2(rollup@3.30.0)
-      '@swc/core': 1.15.21
-      '@swc/wasm': 1.15.21
-      uuid: 10.0.0
-      vite: 4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1)
-    transitivePeerDependencies:
-      - '@swc/helpers'
-      - rollup
-
   vite-plugin-top-level-await@1.6.0(rollup@4.60.1)(vite@4.5.14(@types/node@25.5.0)(sass@1.98.0)(terser@5.46.1)):
     dependencies:
       '@rollup/plugin-virtual': 3.0.2(rollup@4.60.1)
@@ -22031,7 +21677,7 @@ snapshots:
       eslint-visitor-keys: 1.3.0
       espree: 6.2.1
       esquery: 1.7.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
@@ -22044,7 +21690,7 @@ snapshots:
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
       esquery: 1.7.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
@@ -22119,38 +21765,6 @@ snapshots:
       schema-utils: 4.3.3
       tapable: 2.3.2
       terser-webpack-plugin: 5.4.0(webpack@5.105.4)
-      watchpack: 2.5.1
-      webpack-sources: 3.3.4
-    transitivePeerDependencies:
-      - '@swc/core'
-      - esbuild
-      - uglify-js
-
-  webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54):
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.8
-      '@types/json-schema': 7.0.15
-      '@webassemblyjs/ast': 1.14.1
-      '@webassemblyjs/wasm-edit': 1.14.1
-      '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.16.0
-      acorn-import-phases: 1.0.4(acorn@8.16.0)
-      browserslist: 4.28.2
-      chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.20.1
-      es-module-lexer: 2.0.0
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.1
-      mime-types: 2.1.35
-      neo-async: 2.6.2
-      schema-utils: 4.3.3
-      tapable: 2.3.2
-      terser-webpack-plugin: 5.4.0(@swc/core@1.15.21)(esbuild@0.14.54)(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.14.54))
       watchpack: 2.5.1
       webpack-sources: 3.3.4
     transitivePeerDependencies:
@@ -22258,7 +21872,7 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       fs-extra: 9.1.0
       glob: 7.2.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       pretty-bytes: 5.6.0
       rollup: 2.80.0
       rollup-plugin-terser: 7.0.2(rollup@2.80.0)
