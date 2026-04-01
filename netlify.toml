@@ -1,5 +1,6 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && NODE_OPTIONS='--max-old-space-size=4096' npx turbo run build --filter=flux"
+  command = "bash scripts/build-with-ad4m-link.sh"
+  publish = "app/dist"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
