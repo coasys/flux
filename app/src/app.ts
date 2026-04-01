@@ -1,5 +1,5 @@
-import { useAppStore, useRouteMemoryStore } from '@/stores';
-import { getAd4mClient, isEmbedded } from '@coasys/ad4m-connect';
+import { useAppStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { getAd4mConnect, isEmbedded } from '@coasys/ad4m-connect';
 import { createPinia, storeToRefs } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
@@ -38,6 +38,9 @@ const vueApp = createApp({ render: () => h(App) })
 const appStore = useAppStore(pinia);
 const routeMemoryStore = useRouteMemoryStore(pinia);
 
+// Tracks the route the user was on when credits ran out, so we can return them after topping up
+let savedPreCreditRoute: typeof routeMemoryStore.currentRoute | null = null;
+
 // Store the last saved route and current params before mounting the app
 const savedRoute = { ...routeMemoryStore.currentRoute };
 const currentParams = router.resolve(window.location.hash.slice(1) || '/').params;
@@ -49,7 +52,7 @@ vueApp.mount('#app');
 (async () => {
   try {
     // Initialize Ad4m client
-    const ad4mClient = await getAd4mClient({
+    const { client } = getAd4mConnect({
       appInfo: {
         name: 'Flux',
         description: 'A Social Toolkit for the New Internet',
@@ -58,7 +61,30 @@ vueApp.mount('#app');
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
       multiUser: true,
+      onCreditsDepleted: () => {
+        // Leave any active call first so the transcription widget is cleaned up
+        const webrtcStore = useWebrtcStore();
+        if (webrtcStore.inCall) webrtcStore.leaveRoom();
+
+        // Save current route once per depletion session, then retreat to the splash/home screen.
+        // The community views, signalling heartbeats, and AI task loops all stop naturally
+        // because nothing is mounted at /home.
+        if (!savedPreCreditRoute) {
+          savedPreCreditRoute = { ...routeMemoryStore.currentRoute };
+        }
+        routeMemoryStore.setCurrentRoute({});
+        router.push('/home');
+      },
+      onUseApp: () => {
+        // User explicitly clicked "Use App" after topping up — navigate back to where they were.
+        if (savedPreCreditRoute?.communityId) {
+          const lastRoute = routeMemoryStore.getLastCommunityRoute(savedPreCreditRoute.communityId as string);
+          router.push(lastRoute?.path || '/home');
+        }
+        savedPreCreditRoute = null;
+      },
     });
+    const ad4mClient = await client;
 
     if (!ad4mClient) throw new Error('Ad4mClient not available');
 
