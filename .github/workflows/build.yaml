@@ -83,12 +83,12 @@ jobs:
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          cd ad4m/core && yarn link && cd ..
-          cd connect && yarn link && cd ..
+          (cd ad4m/core && yarn link)
+          (cd ad4m/connect && yarn link)
           # Link hooks only if they were built (have a lib/ directory)
-          [ -d ad4m-hooks/helpers/lib ] && (cd ad4m-hooks/helpers && yarn link && cd ../..) || true
-          [ -d ad4m-hooks/react/lib ] && (cd ad4m-hooks/react && yarn link && cd ../..) || true
-          [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && yarn link && cd ../..) || true
+          [ -d ad4m/ad4m-hooks/helpers/lib ] && (cd ad4m/ad4m-hooks/helpers && yarn link) || true
+          [ -d ad4m/ad4m-hooks/react/lib ] && (cd ad4m/ad4m-hooks/react && yarn link) || true
+          [ -d ad4m/ad4m-hooks/vue/lib ] && (cd ad4m/ad4m-hooks/vue && yarn link) || true
 
       # --- Flux build ---
 
