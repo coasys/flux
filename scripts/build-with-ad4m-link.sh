@@ -52,10 +52,32 @@ yarn install --frozen-lockfile || yarn install
 
 # Link AD4M packages AFTER install (install would overwrite links)
 if [ "$AD4M_LINKED" = true ]; then
+  echo "==> Linking AD4M packages into Flux workspaces"
+  
+  # Yarn link at root level
   yarn link @coasys/ad4m @coasys/ad4m-connect
   [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
   [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
   [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
+  
+  # Also replace any workspace-local copies (yarn workspaces hoist to root,
+  # but some packages may have their own node_modules/@coasys/ad4m copies
+  # that take precedence over the root-level yarn link)
+  AD4M_CORE_PATH="$(cd ad4m/core && pwd)"
+  AD4M_CONNECT_PATH="$(cd ad4m/connect && pwd)"
+  for pkg_nm in packages/*/node_modules/@coasys app/node_modules/@coasys; do
+    if [ -d "$pkg_nm/ad4m" ]; then
+      rm -rf "$pkg_nm/ad4m"
+      ln -s "$AD4M_CORE_PATH" "$pkg_nm/ad4m"
+      echo "  Linked $pkg_nm/ad4m -> $AD4M_CORE_PATH"
+    fi
+    if [ -d "$pkg_nm/ad4m-connect" ]; then
+      rm -rf "$pkg_nm/ad4m-connect"
+      ln -s "$AD4M_CONNECT_PATH" "$pkg_nm/ad4m-connect"
+      echo "  Linked $pkg_nm/ad4m-connect -> $AD4M_CONNECT_PATH"
+    fi
+  done
+  
   rm -rf app/node_modules/.vite .turbo
   echo "==> AD4M packages linked successfully"
 fi
