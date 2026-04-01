@@ -75,19 +75,20 @@ jobs:
 
           cd core && pnpm exec tsc && pnpm run bundle && cd ..
           cd connect && pnpm run build && cd ..
-          cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..
-          cd ad4m-hooks/react && pnpm exec tsc && cd ../..
-          cd ad4m-hooks/vue && pnpm exec tsc && cd ../..
+          # Build hooks only if tsconfig.json exists (not all branches have them configured)
+          [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/helpers (no tsconfig.json)"
+          [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/react (no tsconfig.json)"
+          [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/vue (no tsconfig.json)"
 
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          cd ad4m/core && yarn link
-          cd ../connect && yarn link
-          cd ../ad4m-hooks/helpers && yarn link
-          cd ../../ad4m-hooks/react && yarn link
-          cd ../../ad4m-hooks/vue && yarn link
-          cd ../../..
+          cd ad4m/core && yarn link && cd ..
+          cd connect && yarn link && cd ..
+          # Link hooks only if they were built (have a lib/ directory)
+          [ -d ad4m-hooks/helpers/lib ] && (cd ad4m-hooks/helpers && yarn link && cd ../..) || true
+          [ -d ad4m-hooks/react/lib ] && (cd ad4m-hooks/react && yarn link && cd ../..) || true
+          [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && yarn link && cd ../..) || true
 
       # --- Flux build ---
 
@@ -106,7 +107,12 @@ jobs:
       - name: Link AD4M packages into Flux
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          yarn link @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+          # Always link core and connect
+          yarn link @coasys/ad4m @coasys/ad4m-connect
+          # Link hooks only if they were built
+          [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
+          [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
+          [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
           rm -rf app/node_modules/.vite .turbo
 
       - name: Build
