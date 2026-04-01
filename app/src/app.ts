@@ -63,7 +63,7 @@ vueApp.mount('#app');
       multiUser: true,
       onCreditsDepleted: () => {
         // Leave any active call first so the transcription widget is cleaned up
-        const webrtcStore = useWebrtcStore();
+        const webrtcStore = useWebrtcStore(pinia);
         if (webrtcStore.inCall) webrtcStore.leaveRoom();
 
         // Save current route once per depletion session, then retreat to the splash/home screen.
