@@ -1,2 +1,6 @@
+[build]
+  command = "bash scripts/build-with-ad4m-link.sh"
+  publish = "app/dist"
+
 [build.environment]
   NODE_VERSION = "20.10.0"
