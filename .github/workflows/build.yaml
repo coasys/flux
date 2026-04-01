@@ -82,6 +82,8 @@ jobs:
 
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
+        env:
+          COREPACK_ENABLE_STRICT: "0"
         run: |
           (cd ad4m/core && yarn link)
           (cd ad4m/connect && yarn link)
