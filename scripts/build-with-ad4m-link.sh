@@ -40,18 +40,24 @@ if git ls-remote --exit-code --heads \
   [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && yarn link) || true
   cd ..
 
-  # Link core packages into Flux (always link core + connect, hooks only if built)
+  AD4M_LINKED=true
+  echo "==> AD4M packages registered for linking"
+else
+  AD4M_LINKED=false
+  echo "==> No matching AD4M branch — using published npm packages"
+fi
+
+# Install Flux dependencies first
+yarn install --frozen-lockfile || yarn install
+
+# Link AD4M packages AFTER install (install would overwrite links)
+if [ "$AD4M_LINKED" = true ]; then
   yarn link @coasys/ad4m @coasys/ad4m-connect
   [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
   [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
   [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
   rm -rf app/node_modules/.vite .turbo
-
   echo "==> AD4M packages linked successfully"
-else
-  echo "==> No matching AD4M branch — using published npm packages"
 fi
 
-# Install and build Flux
-yarn install --frozen-lockfile || yarn install
 NODE_OPTIONS='--max-old-space-size=4096' yarn build
