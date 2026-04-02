@@ -16,10 +16,10 @@
   ],
   "keywords": [],
   "dependencies": {
-    "@coasys/flux-api": "0.11.0",
-    "@coasys/flux-constants": "0.11.0",
-    "@coasys/flux-types": "0.11.0",
-    "@coasys/flux-utils": "0.11.0"
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-constants": "workspace:*",
+    "@coasys/flux-types": "workspace:*",
+    "@coasys/flux-utils": "workspace:*"
   },
   "peerDependencies": {
     "@coasys/ad4m": "0.11.1",

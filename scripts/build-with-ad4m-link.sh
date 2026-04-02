@@ -41,43 +41,32 @@ if git ls-remote --exit-code --heads \
   [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
   [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
 
+  # pnpm link each package
+  cd core && pnpm link --global && cd ..
+  cd connect && pnpm link --global && cd ..
+  [ -d ad4m-hooks/helpers/lib ] && (cd ad4m-hooks/helpers && pnpm link --global) || true
+  [ -d ad4m-hooks/react/lib ] && (cd ad4m-hooks/react && pnpm link --global) || true
+  [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && pnpm link --global) || true
   cd ..
+
   AD4M_LINKED=true
-  echo "==> AD4M build complete"
+  echo "==> AD4M packages built and registered for linking"
 else
   AD4M_LINKED=false
   echo "==> No matching AD4M branch — using published npm packages"
 fi
 
 # Install Flux dependencies
-yarn install --frozen-lockfile || yarn install
+pnpm install --frozen-lockfile || pnpm install
 
-# Replace ALL copies of @coasys/ad4m with the branch-built version
+# Link AD4M packages AFTER install
 if [ "$AD4M_LINKED" = true ]; then
-  echo "==> Replacing @coasys/ad4m in all node_modules locations"
-
-  AD4M_CORE_SRC="$(pwd)/ad4m/core"
-  AD4M_CONNECT_SRC="$(pwd)/ad4m/connect"
-
-  # Replace every instance (root + workspace-local, directories + symlinks)
-  find . -path '*/node_modules/@coasys/ad4m' \( -type d -o -type l \) ! -path './ad4m/*' | while read -r target; do
-    echo "  Replacing $target"
-    rm -rf "$target"
-    cp -R "$AD4M_CORE_SRC" "$target"
-  done
-
-  find . -path '*/node_modules/@coasys/ad4m-connect' \( -type d -o -type l \) ! -path './ad4m/*' | while read -r target; do
-    echo "  Replacing $target"
-    rm -rf "$target"
-    cp -R "$AD4M_CONNECT_SRC" "$target"
-  done
-
-  # Clear all build caches
-  find . -name '.turbo' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
-  find . -path '*/node_modules/.vite' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
-  find . -path '*/node_modules/.cache' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
-
-  echo "==> AD4M packages replaced"
+  pnpm link --global @coasys/ad4m @coasys/ad4m-connect
+  pnpm link --global @coasys/hooks-helpers 2>/dev/null || true
+  pnpm link --global @coasys/ad4m-react-hooks 2>/dev/null || true
+  pnpm link --global @coasys/ad4m-vue-hooks 2>/dev/null || true
+  rm -rf app/node_modules/.vite .turbo
+  echo "==> AD4M packages linked successfully"
 fi
 
-NODE_OPTIONS='--max-old-space-size=4096' yarn build
+NODE_OPTIONS='--max-old-space-size=4096' pnpm build

@@ -11,9 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'pnpm'
 
       - name: Detect branch
         id: branch
@@ -83,6 +89,7 @@ jobs:
       - name: Register AD4M packages for linking
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
+<<<<<<< HEAD
           # Remove packageManager field from AD4M's package.json so yarn link works
           # (AD4M uses pnpm but we need yarn link for Flux compatibility)
           node -e "const p=require('./ad4m/package.json'); delete p.packageManager; require('fs').writeFileSync('./ad4m/package.json', JSON.stringify(p, null, 2)+'\n')"
@@ -92,6 +99,14 @@ jobs:
           [ -d ad4m/ad4m-hooks/helpers/lib ] && (cd ad4m/ad4m-hooks/helpers && yarn link) || true
           [ -d ad4m/ad4m-hooks/react/lib ] && (cd ad4m/ad4m-hooks/react && yarn link) || true
           [ -d ad4m/ad4m-hooks/vue/lib ] && (cd ad4m/ad4m-hooks/vue && yarn link) || true
+=======
+          cd ad4m/core && pnpm link --global
+          cd ../connect && pnpm link --global
+          cd ../ad4m-hooks/helpers && pnpm link --global
+          cd ../../ad4m-hooks/react && pnpm link --global
+          cd ../../ad4m-hooks/vue && pnpm link --global
+          cd ../../..
+>>>>>>> origin/dev
 
       # --- Flux build ---
 
@@ -102,21 +117,25 @@ jobs:
             node_modules
             */node_modules
             !ad4m/node_modules
-          key: flux-deps-${{ hashFiles('yarn.lock') }}
+          key: flux-deps-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Flux dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Link AD4M packages into Flux
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
+<<<<<<< HEAD
           # Always link core and connect
           yarn link @coasys/ad4m @coasys/ad4m-connect
           # Link hooks only if they were built
           [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
           [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
           [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
+=======
+          pnpm link --global @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+>>>>>>> origin/dev
           rm -rf app/node_modules/.vite .turbo
 
       - name: Build
-        run: NODE_OPTIONS='--max-old-space-size=4096' yarn build
+        run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build

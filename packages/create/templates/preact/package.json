@@ -29,8 +29,8 @@
   "dependencies": {
     "@coasys/ad4m": "0.11.1",
     "@coasys/ad4m-react-hooks": "0.11.1",
-    "@coasys/flux-api": "0.11.0",
-    "@coasys/flux-container": "0.11.0",
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-container": "workspace:*",
     "preact": "^10.13.1"
   },
   "devDependencies": {
