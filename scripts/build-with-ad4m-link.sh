@@ -74,8 +74,12 @@ if [ "$AD4M_LINKED" = true ]; then
     cp -R "$AD4M_CONNECT_SRC" "$target"
   done
   
-  # Clear caches
+  # Clear ALL caches — turbo, vite, and node_modules caches
   rm -rf app/node_modules/.vite .turbo node_modules/.cache
+  # Also clear turbo cache in every workspace package
+  find . -name '.turbo' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
+  find . -path '*/node_modules/.vite' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
+  find . -path '*/node_modules/.cache' -type d ! -path './ad4m/*' -exec rm -rf {} + 2>/dev/null || true
   
   # Verify the replacement worked
   COUNT=$(find . -path '*/node_modules/@coasys/ad4m' ! -path './ad4m/*' | wc -l | tr -d ' ')
