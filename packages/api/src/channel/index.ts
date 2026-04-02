@@ -74,43 +74,41 @@ export class Channel extends Ad4mModel {
     // Get all items (messages, posts, tasks) in the channel
     try {
       const sparqlQuery = `
-        SELECT
-          out.uri AS id,
-          author,
-          timestamp,
-          out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
-        FROM link
-        WHERE in.uri = '${this.id}'
-          AND predicate = 'ad4m://has_child'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri
-              IN ['flux://has_message', 'flux://has_post', 'flux://has_task']
-        ORDER BY timestamp ASC
+        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+          GRAPH ?link { <${this.id}> <ad4m://has_child> ?id . }
+          ?link <ad4m://ontology/timestamp> ?timestamp .
+          ?link <ad4m://ontology/author> ?author .
+          ?id <flux://entry_type> ?type .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
+        }
+        ORDER BY ?timestamp
       `;
 
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
-      return (sparqlResult || []).map((item: any) => {
+      return (sparqlResult || []).map((binding: any) => {
         let text = '';
         let type = '';
+        const itemType = binding.type?.value;
 
-        if (item.type === 'flux://has_message') {
-          text = item.messageBody || '';
+        if (itemType === 'flux://has_message') {
+          text = parseLit(binding.body?.value);
           type = 'Message';
-        } else if (item.type === 'flux://has_post') {
-          text = item.postTitle || '';
+        } else if (itemType === 'flux://has_post') {
+          text = parseLit(binding.title?.value);
           type = 'Post';
-        } else if (item.type === 'flux://has_task') {
-          text = item.taskName || '';
+        } else if (itemType === 'flux://has_task') {
+          text = parseLit(binding.taskName?.value);
           type = 'Task';
         }
 
         return {
-          id: item.id,
-          author: item.author,
-          timestamp: new Date(item.timestamp).toISOString(),
+          id: binding.id?.value,
+          author: binding.author?.value,
+          timestamp: new Date(binding.timestamp?.value).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
@@ -127,18 +125,19 @@ export class Channel extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
-          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "ad4m://has_child" ; ad4m:target ?id ; ad4m:author ?author ; ad4m:timestamp ?timestamp .
-          ?typeLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type .
-          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
+          GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
+          ?link1 <ad4m://ontology/author> ?author .
+          ?link1 <ad4m://ontology/timestamp> ?timestamp .
+          ?id <flux://entry_type> ?type .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
           FILTER NOT EXISTS {
-            ?sgLink a ad4m:Link ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?id ; ad4m:source ?sg .
-            ?sgTypeLink a ad4m:Link ; ad4m:source ?sg ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://conversation_subgroup" .
+            GRAPH ?sgLink { ?sg <${SUBGROUP_ITEM}> ?id . }
+            ?sg <flux://entry_type> <flux://conversation_subgroup> .
           }
-          OPTIONAL { ?bodyLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://body" ; ad4m:target ?body . }
-          OPTIONAL { ?titleLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://title" ; ad4m:target ?title . }
-          OPTIONAL { ?taskNameLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://name" ; ad4m:target ?taskName . }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
         }
         ORDER BY ?timestamp
       `;
@@ -189,11 +188,10 @@ export class Channel extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT (COUNT(DISTINCT ?id) AS ?count) WHERE {
-          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "ad4m://has_child" ; ad4m:target ?id .
-          ?typeLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type .
-          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
+          <${this.id}> <ad4m://has_child> ?id .
+          ?id <flux://entry_type> ?type .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
 
