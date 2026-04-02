@@ -40,6 +40,16 @@ fi
 # Install Flux dependencies
 yarn install --frozen-lockfile || yarn install
 
+
+# DIAGNOSTIC: Write AD4M link status to a file we can check
+mkdir -p app/dist
+echo "AD4M_LINKED=$AD4M_LINKED" > app/dist/ad4m-link-status.txt
+echo "BRANCH=$BRANCH" >> app/dist/ad4m-link-status.txt
+echo "node_modules/@coasys/ad4m exists: $([ -e node_modules/@coasys/ad4m ] && echo YES || echo NO)" >> app/dist/ad4m-link-status.txt
+echo "node_modules/@coasys/ad4m type: $(file node_modules/@coasys/ad4m 2>/dev/null || echo MISSING)" >> app/dist/ad4m-link-status.txt
+echo "find results:" >> app/dist/ad4m-link-status.txt
+find . -path "*/node_modules/@coasys/ad4m" ! -path "./ad4m/*" >> app/dist/ad4m-link-status.txt 2>&1
+echo "---" >> app/dist/ad4m-link-status.txt
 # Replace ALL copies of @coasys/ad4m with the branch-built version
 if [ "$AD4M_LINKED" = true ]; then
   echo "==> Replacing @coasys/ad4m in all node_modules locations"
@@ -90,9 +100,25 @@ if [ "$AD4M_LINKED" = true ]; then
     echo "==> ✅ Verified: root node_modules/@coasys/ad4m has Model export"
   else
     echo "==> ❌ ERROR: root node_modules/@coasys/ad4m MISSING Model export!"
-    echo "==> Contents of node_modules/@coasys/ad4m/lib/:"
-    ls -la node_modules/@coasys/ad4m/lib/ 2>/dev/null || echo "  lib/ directory not found"
-    exit 1
+    echo "==> Diagnostics:"
+    echo "  node_modules/@coasys/ad4m exists: $([ -e node_modules/@coasys/ad4m ] && echo YES || echo NO)"
+    echo "  node_modules/@coasys/ad4m is symlink: $([ -L node_modules/@coasys/ad4m ] && echo YES || echo NO)"
+    echo "  node_modules/@coasys/ad4m/lib exists: $([ -d node_modules/@coasys/ad4m/lib ] && echo YES || echo NO)"
+    echo "  node_modules/@coasys/ad4m/lib/index.js exists: $([ -f node_modules/@coasys/ad4m/lib/index.js ] && echo YES || echo NO)"
+    ls -la node_modules/@coasys/ad4m/ 2>/dev/null || echo "  Cannot list directory"
+    ls -la node_modules/@coasys/ad4m/lib/ 2>/dev/null || echo "  Cannot list lib/"
+    echo "  AD4M_CORE_SRC contents:"
+    ls -la "$AD4M_CORE_SRC/lib/" 2>/dev/null | head -5
+    # Write diagnostics to a file that will be in the deploy output
+    mkdir -p app/dist
+    echo "AD4M LINK DIAGNOSTICS" > app/dist/ad4m-diag.txt
+    echo "root nm exists: $([ -e node_modules/@coasys/ad4m ] && echo YES || echo NO)" >> app/dist/ad4m-diag.txt
+    echo "root nm is symlink: $([ -L node_modules/@coasys/ad4m ] && echo YES || echo NO)" >> app/dist/ad4m-diag.txt
+    echo "root nm/lib exists: $([ -d node_modules/@coasys/ad4m/lib ] && echo YES || echo NO)" >> app/dist/ad4m-diag.txt
+    echo "root nm/lib/index.js exists: $([ -f node_modules/@coasys/ad4m/lib/index.js ] && echo YES || echo NO)" >> app/dist/ad4m-diag.txt
+    find . -path '*/node_modules/@coasys/ad4m' ! -path './ad4m/*' >> app/dist/ad4m-diag.txt 2>&1
+    echo "Model in lib/index.js: $(grep -c 'Model' node_modules/@coasys/ad4m/lib/index.js 2>/dev/null || echo 0)" >> app/dist/ad4m-diag.txt
+    # DON'T exit — let the build continue so we can see what vite sees
   fi
 fi
 
