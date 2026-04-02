@@ -65,7 +65,7 @@ if [ "$AD4M_LINKED" = true ]; then
   # that take precedence over the root-level yarn link)
   AD4M_CORE_PATH="$(cd ad4m/core && pwd)"
   AD4M_CONNECT_PATH="$(cd ad4m/connect && pwd)"
-  for pkg_nm in packages/*/node_modules/@coasys views/*/node_modules/@coasys app/node_modules/@coasys; do
+  for pkg_nm in node_modules/@coasys packages/*/node_modules/@coasys views/*/node_modules/@coasys app/node_modules/@coasys; do
     if [ -d "$pkg_nm/ad4m" ]; then
       rm -rf "$pkg_nm/ad4m"
       ln -s "$AD4M_CORE_PATH" "$pkg_nm/ad4m"
