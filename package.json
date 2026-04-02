@@ -7,14 +7,14 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "postinstall": "patch-package",
-    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && rm -f yarn.lock && yarn cache clean",
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && rm -f pnpm-lock.yaml && pnpm store prune",
     "bump-flux": "node scripts/monorepo-version.js bump",
     "bump-ad4m": "node scripts/monorepo-version.js bump-ad4m",
     "publish:dry-run": "node scripts/monorepo-version.js dry-run",
     "publish:all": "node scripts/monorepo-version.js publish",
     "format": "prettier --write ."
   },
-  "packageManager": "yarn@1.22.1",
+  "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=18.16.0"
   },
@@ -28,28 +28,25 @@
     "turbo": "latest",
     "prettier-plugin-sort-package-json": "latest"
   },
-  "workspaces": {
-    "packages": [
-      "packages/**/*",
-      "views/**/*",
-      "app",
-      "docs"
-    ],
-    "nohoist": [
-      "**/electron",
-      "**/electron/**",
-      "**/electron-squirrel-startup",
-      "**/electron-squirrel-startup/**",
-      "**/@electron-forge",
-      "**/@electron-forge/**"
-    ]
-  },
-  "resolutions": {
-    "@coasys/ad4m": "0.12.0",
-    "@coasys/ad4m-connect": "0.12.0",
-    "@coasys/ad4m-vue-hooks": "0.12.0",
-    "@coasys/ad4m-react-hooks": "0.12.0",
-    "@coasys/hooks-helpers": "0.12.0",
-    "@preact/preset-vite": "2.9.4"
+  "pnpm": {
+    "overrides": {
+      "@coasys/ad4m": "0.12.0",
+      "@coasys/ad4m-connect": "0.12.0",
+      "@coasys/ad4m-vue-hooks": "0.12.0",
+      "@coasys/ad4m-react-hooks": "0.12.0",
+      "@coasys/hooks-helpers": "0.12.0",
+      "@preact/preset-vite": "2.9.4",
+      "@coasys/flux-api": "workspace:*",
+      "@coasys/flux-comment-section": "workspace:*",
+      "@coasys/flux-constants": "workspace:*",
+      "@coasys/flux-container": "workspace:*",
+      "@coasys/flux-editor": "workspace:*",
+      "@coasys/flux-react-web": "workspace:*",
+      "@coasys/flux-types": "workspace:*",
+      "@coasys/flux-ui": "workspace:*",
+      "@coasys/flux-utils": "workspace:*",
+      "@coasys/flux-vue": "workspace:*",
+      "@coasys/flux-webrtc": "workspace:*"
+    }
   }
 }

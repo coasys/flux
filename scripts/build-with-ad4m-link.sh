@@ -29,15 +29,15 @@ if git ls-remote --exit-code --heads \
   cd ad4m-hooks/react && pnpm exec tsc && cd ../..
   cd ad4m-hooks/vue && pnpm exec tsc && cd ../..
 
-  # Yarn link each package
-  cd core && yarn link && cd ..
-  cd connect && yarn link && cd ..
-  cd ad4m-hooks/helpers && yarn link && cd ../..
-  cd ad4m-hooks/react && yarn link && cd ../..
-  cd ad4m-hooks/vue && yarn link && cd ../..
+  # pnpm link each package
+  cd core && pnpm link --global && cd ..
+  cd connect && pnpm link --global && cd ..
+  cd ad4m-hooks/helpers && pnpm link --global && cd ../..
+  cd ad4m-hooks/react && pnpm link --global && cd ../..
+  cd ad4m-hooks/vue && pnpm link --global && cd ../..
   cd ..
 
-  yarn link @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+  pnpm link --global @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
   rm -rf app/node_modules/.vite .turbo
 
   echo "==> AD4M packages linked successfully"
@@ -46,5 +46,5 @@ else
 fi
 
 # Install and build Flux
-yarn install --frozen-lockfile || yarn install
-NODE_OPTIONS='--max-old-space-size=4096' yarn build
+pnpm install --frozen-lockfile || pnpm install
+NODE_OPTIONS='--max-old-space-size=4096' pnpm build

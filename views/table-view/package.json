@@ -29,10 +29,10 @@
   "dependencies": {
     "@coasys/ad4m": "0.11.1",
     "@coasys/ad4m-react-hooks": "0.11.1",
-    "@coasys/flux-react-web": "0.11.0",
-    "@coasys/flux-api": "0.11.0",
-    "@coasys/flux-comment-section": "0.11.0",
-    "@coasys/flux-container": "0.11.0",
+    "@coasys/flux-react-web": "workspace:*",
+    "@coasys/flux-api": "workspace:*",
+    "@coasys/flux-comment-section": "workspace:*",
+    "@coasys/flux-container": "workspace:*",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },

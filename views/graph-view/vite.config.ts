@@ -12,6 +12,11 @@ export default defineConfig({
     }),
     cssInjectedByJsPlugin(),
   ],
+  resolve: {
+    alias: {
+      'three/webgpu': resolve(__dirname, './src/three-webgpu-stub.js'),
+    },
+  },
   build: {
     emptyOutDir: false,
     lib: {
