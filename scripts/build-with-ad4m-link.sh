@@ -5,10 +5,10 @@ set -euo pipefail
 BRANCH="${BRANCH:-${HEAD:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}}}"
 echo "==> Detected branch: $BRANCH"
 
-# Check if coasys/ad4m has a matching branch (git ls-remote handles slashes natively)
+# Check if coasys/ad4m has a matching branch
 if git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
-  echo "==> Found matching AD4M branch '$BRANCH' — cloning and linking"
+  echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
 
   git clone --depth 1 --single-branch --branch "$BRANCH" \
     https://github.com/coasys/ad4m.git ad4m
@@ -25,61 +25,45 @@ if git ls-remote --exit-code --heads \
   cd connect && pnpm run build && cd ..
 
   echo "==> Building hooks (if tsconfig.json exists)"
-  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/helpers (no tsconfig.json)"
-  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/react (no tsconfig.json)"
-  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc && cd ../..) || echo "Skipping ad4m-hooks/vue (no tsconfig.json)"
+  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
 
-  # Strip packageManager field so yarn link works (AD4M uses pnpm, Flux uses yarn)
-  node -e "const p=require('./package.json'); delete p.packageManager; require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2)+'\n')"
-
-  # Yarn link each package (using subshells to avoid cd chain issues)
-  (cd core && yarn link)
-  (cd connect && yarn link)
-  [ -d ad4m-hooks/helpers/lib ] && (cd ad4m-hooks/helpers && yarn link) || true
-  [ -d ad4m-hooks/react/lib ] && (cd ad4m-hooks/react && yarn link) || true
-  [ -d ad4m-hooks/vue/lib ] && (cd ad4m-hooks/vue && yarn link) || true
   cd ..
-
   AD4M_LINKED=true
-  echo "==> AD4M packages registered for linking"
+  echo "==> AD4M build complete"
 else
   AD4M_LINKED=false
   echo "==> No matching AD4M branch — using published npm packages"
 fi
 
-# Install Flux dependencies first
+# Install Flux dependencies
 yarn install --frozen-lockfile || yarn install
 
-# Link AD4M packages AFTER install (install would overwrite links)
+# Replace ALL copies of @coasys/ad4m with the branch-built version
 if [ "$AD4M_LINKED" = true ]; then
-  echo "==> Linking AD4M packages into Flux workspaces"
+  echo "==> Replacing @coasys/ad4m in all node_modules locations"
   
-  # Yarn link at root level
-  yarn link @coasys/ad4m @coasys/ad4m-connect
-  [ -d ad4m/ad4m-hooks/helpers/lib ] && yarn link @coasys/hooks-helpers || true
-  [ -d ad4m/ad4m-hooks/react/lib ] && yarn link @coasys/ad4m-react-hooks || true
-  [ -d ad4m/ad4m-hooks/vue/lib ] && yarn link @coasys/ad4m-vue-hooks || true
+  AD4M_CORE_SRC="$(pwd)/ad4m/core"
+  AD4M_CONNECT_SRC="$(pwd)/ad4m/connect"
   
-  # Also replace any workspace-local copies (yarn workspaces hoist to root,
-  # but some packages may have their own node_modules/@coasys/ad4m copies
-  # that take precedence over the root-level yarn link)
-  AD4M_CORE_PATH="$(cd ad4m/core && pwd)"
-  AD4M_CONNECT_PATH="$(cd ad4m/connect && pwd)"
-  for pkg_nm in node_modules/@coasys packages/*/node_modules/@coasys views/*/node_modules/@coasys app/node_modules/@coasys; do
-    if [ -d "$pkg_nm/ad4m" ]; then
-      rm -rf "$pkg_nm/ad4m"
-      ln -s "$AD4M_CORE_PATH" "$pkg_nm/ad4m"
-      echo "  Linked $pkg_nm/ad4m -> $AD4M_CORE_PATH"
-    fi
-    if [ -d "$pkg_nm/ad4m-connect" ]; then
-      rm -rf "$pkg_nm/ad4m-connect"
-      ln -s "$AD4M_CONNECT_PATH" "$pkg_nm/ad4m-connect"
-      echo "  Linked $pkg_nm/ad4m-connect -> $AD4M_CONNECT_PATH"
-    fi
+  # Find and replace EVERY instance of @coasys/ad4m in node_modules
+  find . -path '*/node_modules/@coasys/ad4m' -type d ! -path './ad4m/*' | while read -r target; do
+    echo "  Replacing $target"
+    rm -rf "$target"
+    cp -R "$AD4M_CORE_SRC" "$target"
   done
   
-  rm -rf app/node_modules/.vite .turbo
-  echo "==> AD4M packages linked successfully"
+  # Same for @coasys/ad4m-connect
+  find . -path '*/node_modules/@coasys/ad4m-connect' -type d ! -path './ad4m/*' | while read -r target; do
+    echo "  Replacing $target"
+    rm -rf "$target"
+    cp -R "$AD4M_CONNECT_SRC" "$target"
+  done
+  
+  # Clear caches
+  rm -rf app/node_modules/.vite .turbo node_modules/.cache
+  echo "==> AD4M packages replaced in $(find . -path '*/node_modules/@coasys/ad4m' ! -path './ad4m/*' | wc -l | tr -d ' ') locations"
 fi
 
 NODE_OPTIONS='--max-old-space-size=4096' yarn build
