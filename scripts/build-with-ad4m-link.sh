@@ -47,15 +47,28 @@ if [ "$AD4M_LINKED" = true ]; then
   AD4M_CORE_SRC="$(pwd)/ad4m/core"
   AD4M_CONNECT_SRC="$(pwd)/ad4m/connect"
   
-  # Find and replace EVERY instance of @coasys/ad4m in node_modules
-  find . -path '*/node_modules/@coasys/ad4m' -type d ! -path './ad4m/*' | while read -r target; do
+  # Explicitly replace the root-level copy first (most critical)
+  if [ -e node_modules/@coasys/ad4m ]; then
+    echo "  Replacing root node_modules/@coasys/ad4m"
+    rm -rf node_modules/@coasys/ad4m
+    cp -R "$AD4M_CORE_SRC" node_modules/@coasys/ad4m
+  fi
+  if [ -e node_modules/@coasys/ad4m-connect ]; then
+    echo "  Replacing root node_modules/@coasys/ad4m-connect"
+    rm -rf node_modules/@coasys/ad4m-connect
+    cp -R "$AD4M_CONNECT_SRC" node_modules/@coasys/ad4m-connect
+  fi
+  
+  # Find and replace EVERY other instance in nested node_modules
+  # Use -type d OR -type l to catch both real directories and symlinks
+  find . -path '*/node_modules/@coasys/ad4m' \( -type d -o -type l \) ! -path './ad4m/*' | while read -r target; do
     echo "  Replacing $target"
     rm -rf "$target"
     cp -R "$AD4M_CORE_SRC" "$target"
   done
   
   # Same for @coasys/ad4m-connect
-  find . -path '*/node_modules/@coasys/ad4m-connect' -type d ! -path './ad4m/*' | while read -r target; do
+  find . -path '*/node_modules/@coasys/ad4m-connect' \( -type d -o -type l \) ! -path './ad4m/*' | while read -r target; do
     echo "  Replacing $target"
     rm -rf "$target"
     cp -R "$AD4M_CONNECT_SRC" "$target"
@@ -63,7 +76,20 @@ if [ "$AD4M_LINKED" = true ]; then
   
   # Clear caches
   rm -rf app/node_modules/.vite .turbo node_modules/.cache
-  echo "==> AD4M packages replaced in $(find . -path '*/node_modules/@coasys/ad4m' ! -path './ad4m/*' | wc -l | tr -d ' ') locations"
+  
+  # Verify the replacement worked
+  COUNT=$(find . -path '*/node_modules/@coasys/ad4m' ! -path './ad4m/*' | wc -l | tr -d ' ')
+  echo "==> AD4M packages replaced in $COUNT locations"
+  
+  # Verify the root copy has Model export
+  if grep -q 'Model' node_modules/@coasys/ad4m/lib/index.js 2>/dev/null; then
+    echo "==> ✅ Verified: root node_modules/@coasys/ad4m has Model export"
+  else
+    echo "==> ❌ ERROR: root node_modules/@coasys/ad4m MISSING Model export!"
+    echo "==> Contents of node_modules/@coasys/ad4m/lib/:"
+    ls -la node_modules/@coasys/ad4m/lib/ 2>/dev/null || echo "  lib/ directory not found"
+    exit 1
+  fi
 fi
 
 NODE_OPTIONS='--max-old-space-size=4096' yarn build
