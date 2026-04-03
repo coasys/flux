@@ -31,11 +31,10 @@ export default class ConversationSubgroup extends Ad4mModel {
     try {
       // SPARQL migration
       const itemsQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT DISTINCT ?item WHERE {
-          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?item .
-          ?link2 a ad4m:Link ; ad4m:source ?item ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type .
-          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
+          <${this.id}> <${SUBGROUP_ITEM}> ?item .
+          ?item <flux://entry_type> ?type .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
 
@@ -56,13 +55,12 @@ export default class ConversationSubgroup extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT ?topicBase ?topicNameRaw WHERE {
-          ?tagLink a ad4m:Link ; ad4m:predicate "flux://has_tag" ; ad4m:source ?semRel ; ad4m:target ?topicBase .
-          ?exprLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_expression" ; ad4m:target "${this.id}" .
-          ?typeLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_semantic_relationship" .
-          ?topicTypeLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_topic" .
-          OPTIONAL { ?topicNameLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://topic" ; ad4m:target ?topicNameRaw . }
+          ?semRel <flux://has_tag> ?topicBase .
+          ?semRel <flux://has_expression> <${this.id}> .
+          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
+          ?topicBase <flux://entry_type> <flux://has_topic> .
+          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
         }
       `;
 
@@ -97,17 +95,19 @@ export default class ConversationSubgroup extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT ?id ?type ?author ?timestamp ?body ?title ?taskName ?transcriptStart ?channelTs WHERE {
-          ?link1 a ad4m:Link ; ad4m:source "${this.id}" ; ad4m:predicate "${SUBGROUP_ITEM}" ; ad4m:target ?id ; ad4m:timestamp ?timestamp .
-          ?typeLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://entry_type" ; ad4m:target ?type ; ad4m:author ?author .
-          FILTER(?type IN ("flux://has_message", "flux://has_post", "flux://has_task"))
-          OPTIONAL { ?bodyLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://body" ; ad4m:target ?body . }
-          OPTIONAL { ?titleLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://title" ; ad4m:target ?title . }
-          OPTIONAL { ?taskNameLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://name" ; ad4m:target ?taskName . }
-          OPTIONAL { ?tsLink a ad4m:Link ; ad4m:source ?id ; ad4m:predicate "flux://transcript_started_at" ; ad4m:target ?transcriptStart . }
-          OPTIONAL { ?chLink a ad4m:Link ; ad4m:predicate "ad4m://has_child" ; ad4m:target ?id ; ad4m:source ?chSrc ; ad4m:timestamp ?channelTs .
-                     ?chTypeLink a ad4m:Link ; ad4m:source ?chSrc ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_channel" . }
+          GRAPH ?link1 { <${this.id}> <${SUBGROUP_ITEM}> ?id . }
+          ?link1 <ad4m://ontology/timestamp> ?timestamp .
+          GRAPH ?typeLink { ?id <flux://entry_type> ?type . }
+          ?typeLink <ad4m://ontology/author> ?author .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
+          OPTIONAL { GRAPH ?chLink { ?chSrc <ad4m://has_child> ?id . }
+                     ?chLink <ad4m://ontology/timestamp> ?channelTs .
+                     ?chSrc <flux://entry_type> <flux://has_channel> . }
         }
         ORDER BY ?timestamp
       `;
@@ -197,14 +197,13 @@ export default class ConversationSubgroup extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
-        PREFIX ad4m: <ad4m://ontology/>
         SELECT ?topicBase ?topicNameRaw ?relevanceRaw WHERE {
-          ?tagLink a ad4m:Link ; ad4m:predicate "flux://has_tag" ; ad4m:source ?semRel ; ad4m:target ?topicBase .
-          ?exprLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_expression" ; ad4m:target "${this.id}" .
-          ?typeLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_semantic_relationship" .
-          ?topicTypeLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://entry_type" ; ad4m:target "flux://has_topic" .
-          OPTIONAL { ?topicNameLink a ad4m:Link ; ad4m:source ?topicBase ; ad4m:predicate "flux://topic" ; ad4m:target ?topicNameRaw . }
-          OPTIONAL { ?relLink a ad4m:Link ; ad4m:source ?semRel ; ad4m:predicate "flux://has_relevance" ; ad4m:target ?relevanceRaw . }
+          ?semRel <flux://has_tag> ?topicBase .
+          ?semRel <flux://has_expression> <${this.id}> .
+          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
+          ?topicBase <flux://entry_type> <flux://has_topic> .
+          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
+          OPTIONAL { ?semRel <flux://has_relevance> ?relevanceRaw . }
         }
       `;
 
