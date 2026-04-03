@@ -12,7 +12,8 @@
     "bump-ad4m": "node scripts/monorepo-version.js bump-ad4m",
     "publish:dry-run": "node scripts/monorepo-version.js dry-run",
     "publish:all": "node scripts/monorepo-version.js publish",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {
@@ -22,11 +23,12 @@
     "graphql": "^15.7.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "eslint-config-custom": "*",
     "patch-package": "*",
     "prettier": "latest",
-    "turbo": "latest",
-    "prettier-plugin-sort-package-json": "latest"
+    "prettier-plugin-sort-package-json": "latest",
+    "turbo": "latest"
   },
   "pnpm": {
     "overrides": {
