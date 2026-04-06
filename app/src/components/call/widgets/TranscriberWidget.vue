@@ -476,7 +476,7 @@ async function startLocalTransciption(stream: MediaStream) {
   // Set up audio context & worklet node
   const moreDemaningParams = { startThreshold: 0.8 };
   streamId.value = await appStore.ad4mClient.ai.openTranscriptionStream(
-    'Whisper',
+    aiStore.whisperModelId,
     handleTranscriptionText,
     moreDemaningParams,
   );
@@ -490,7 +490,7 @@ async function startLocalTransciption(stream: MediaStream) {
   };
 
   fastStreamId.value = await appStore.ad4mClient.ai.openTranscriptionStream(
-    'whisper_tiny_quantized',
+    aiStore.tinyWhisperModelId,
     handleTranscriptionPreview,
     wordByWordParams,
   );

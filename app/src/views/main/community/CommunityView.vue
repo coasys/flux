@@ -15,7 +15,9 @@
       </KeepAlive>
     </RouterView>
 
-    <Modals />
+    <Teleport to="body">
+      <Modals />
+    </Teleport>
 
     <!-- TODO: Move the logic below into seperate componenets -->
 

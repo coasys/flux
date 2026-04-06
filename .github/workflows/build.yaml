@@ -1,0 +1,119 @@
+name: Build
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'pnpm'
+
+      - name: Detect branch
+        id: branch
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads \
+            https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
+            echo "ad4m_match=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Found matching AD4M branch: $BRANCH"
+          else
+            echo "ad4m_match=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No matching AD4M branch — using published packages"
+          fi
+
+      # --- AD4M linked build (only when matching branch exists) ---
+
+      - name: Clone AD4M branch
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          git clone --depth 1 --single-branch \
+            --branch "${{ steps.branch.outputs.name }}" \
+            https://github.com/coasys/ad4m.git ad4m
+
+      - name: Hash AD4M source
+        if: steps.branch.outputs.ad4m_match == 'true'
+        id: ad4m-hash
+        run: |
+          HASH=$(
+            {
+              find ad4m/core ad4m/connect ad4m/ad4m-hooks -type f \( -name '*.ts' -o -name '*.json' \)
+              for file in ad4m/package.json ad4m/pnpm-lock.yaml ad4m/pnpm-workspace.yaml; do
+                [ -f "$file" ] && printf '%s\n' "$file"
+              done
+            } | sort | xargs sha256sum | sha256sum | cut -d' ' -f1
+          )
+          echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+
+      - name: Cache AD4M built outputs
+        if: steps.branch.outputs.ad4m_match == 'true'
+        id: ad4m-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ad4m/node_modules
+            ad4m/core/lib
+            ad4m/connect/dist
+            ad4m/ad4m-hooks/helpers/lib
+            ad4m/ad4m-hooks/react/lib
+            ad4m/ad4m-hooks/vue/lib
+          key: ad4m-sdk-${{ steps.branch.outputs.name }}-${{ steps.ad4m-hash.outputs.hash }}
+
+      - name: Install & build AD4M packages
+        if: steps.branch.outputs.ad4m_match == 'true' && steps.ad4m-cache.outputs.cache-hit != 'true'
+        run: |
+          cd ad4m
+          npm i -g pnpm
+          pnpm install --no-frozen-lockfile
+
+          cd core && pnpm exec tsc && pnpm run bundle && cd ..
+          cd connect && pnpm run build && cd ..
+          cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..
+          cd ad4m-hooks/react && pnpm exec tsc && cd ../..
+          cd ad4m-hooks/vue && pnpm exec tsc && cd ../..
+
+      - name: Register AD4M packages for linking
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          cd ad4m/core && pnpm link --global
+          cd ../connect && pnpm link --global
+          cd ../ad4m-hooks/helpers && pnpm link --global
+          cd ../../ad4m-hooks/react && pnpm link --global
+          cd ../../ad4m-hooks/vue && pnpm link --global
+          cd ../../..
+
+      # --- Flux build ---
+
+      - name: Cache Flux dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */node_modules
+            !ad4m/node_modules
+          key: flux-deps-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Flux dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Link AD4M packages into Flux
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          pnpm link --global @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
+          rm -rf app/node_modules/.vite .turbo
+
+      - name: Build
+        run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build

@@ -47,7 +47,10 @@
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
+import { useAiStore } from '@/stores';
 import { ref, onUnmounted } from 'vue';
+
+const aiStore = useAiStore();
 
 const props = defineProps<{
   client: Ad4mClient;
@@ -123,13 +126,13 @@ async function startRecording() {
     
     // Open transcription streams (final + preview)
     transcriptionStreamId = await props.client.ai.openTranscriptionStream(
-      'Whisper',
+      aiStore.whisperModelId,
       handleTranscriptionText,
       { startThreshold: 0.8 }
     );
     
     fastTranscriptionStreamId = await props.client.ai.openTranscriptionStream(
-      'whisper_tiny_quantized',
+      aiStore.tinyWhisperModelId,
       (text: string) => { previewText.value = text; },
       {
         startThreshold: 0.5,
@@ -185,12 +188,13 @@ async function stopRecording() {
   const text = finalText.value.trim();
   if (text) {
     try {
-      const message = new Message(props.perspective, undefined, props.source);
-      message.body = text;
+      const messageData: any = { body: text };
       if (transcriptTimestamp.value) {
-        message.transcriptStartedAt = transcriptTimestamp.value.toISOString();
+        messageData.transcriptStartedAt = transcriptTimestamp.value.toISOString();
       }
-      await message.save();
+      await Message.create(props.perspective, messageData, {
+        parent: { id: props.source, predicate: 'ad4m://has_child' },
+      });
     } catch (e) {
       console.error('Failed to save voice message:', e);
     }

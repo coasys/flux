@@ -178,7 +178,10 @@ function stripHtml(html: string): string {
 function formatTimestamp(ts: string): string {
   try {
     const date = new Date(ts);
-    return date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+    return date
+      .toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d+Z$/, ' UTC');
   } catch {
     return ts;
   }
@@ -319,7 +322,7 @@ async function getData(firstRun?: boolean): Promise<void> {
 
     // If this is not the first run and AI is enabled, check if we should process tasks
     if (firstRun || !aiEnabled.value) return;
-    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
     if (shouldProcess) {
       const channel = new Channel(perspective, channelUrl);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);

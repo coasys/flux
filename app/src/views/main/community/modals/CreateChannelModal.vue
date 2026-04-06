@@ -3,8 +3,8 @@
     :open="modalStore.showCreateChannel"
     @toggle="(e: any) => (e.target.open ? (modalStore.showCreateChannel = true) : modalStore.hideCreateChannelModal())"
   >
-    <j-box p="800">
-      <j-flex direction="column" gap="700">
+    <j-box :p="isMobile ? '500' : '800'">
+      <j-flex direction="column" :gap="isMobile ? '500' : '700'">
         <div>
           <j-text v-if="createChannelParent" variant="heading-sm">
             Create a sub-channel in #{{ createChannelParent.name }}
@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
-import { useModalStore } from '@/stores';
+import { useModalStore, useUiStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
 import { stripChannelPrefix } from '@/utils/routeUtils';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
@@ -126,6 +126,8 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const modalStore = useModalStore();
+const uiStore = useUiStore();
+const { isMobile } = storeToRefs(uiStore);
 
 const { createChannelParent } = storeToRefs(modalStore);
 
@@ -283,5 +285,15 @@ j-tabs::part(base) {
 
 j-tab-item::part(base) {
   padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .app-grid {
+    gap: var(--j-space-300);
+    max-height: 300px;
+  }
+  .app-card {
+    padding: var(--j-space-400);
+  }
 }
 </style>
