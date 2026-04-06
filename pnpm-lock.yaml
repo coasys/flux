@@ -26,10 +26,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      graphql:
-        specifier: ^15.7.2
-        version: 15.10.2
     devDependencies:
       eslint-config-custom:
         specifier: '*'
