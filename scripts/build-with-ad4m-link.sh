@@ -58,10 +58,14 @@ pnpm install --frozen-lockfile || pnpm install
 # Link AD4M packages AFTER install using direct path link
 if [ "$AD4M_LINKED" = true ]; then
   pnpm link ./ad4m/core ./ad4m/connect
-  # Clear ALL build caches so views rebuild with the linked SDK
+  # Clear ALL build caches AND pre-built view bundles so everything rebuilds with the linked SDK
   rm -rf app/node_modules/.vite .turbo node_modules/.cache
   find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
-  echo "==> AD4M packages linked, all build caches cleared"
+  # Remove pre-built view dist directories — they inline the SDK and must be rebuilt
+  find views -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
+  find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
+  rm -rf app/dist
+  echo "==> AD4M packages linked, all caches + dist directories cleared"
 fi
 
 NODE_OPTIONS='--max-old-space-size=4096' pnpm build
