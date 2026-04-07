@@ -103,7 +103,9 @@ jobs:
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
           pnpm link ./ad4m/core ./ad4m/connect
-          rm -rf app/node_modules/.vite .turbo
+          # Clear ALL build caches so views rebuild with linked SDK
+          rm -rf app/node_modules/.vite .turbo node_modules/.cache
+          find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
 
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
