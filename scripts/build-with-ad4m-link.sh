@@ -53,19 +53,28 @@ else
 fi
 
 # Install Flux dependencies
-pnpm install --frozen-lockfile || pnpm install
-
-# Link AD4M packages AFTER install using direct path link
+# If AD4M was linked, override the pnpm overrides to use the local build
 if [ "$AD4M_LINKED" = true ]; then
-  pnpm link ./ad4m/core ./ad4m/connect
+  echo "==> Overriding @coasys/ad4m and @coasys/ad4m-connect with local builds"
+  node -e "
+    const pkg = require('./package.json');
+    pkg.pnpm = pkg.pnpm || {};
+    pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+    pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
+    pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+    require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+  "
+fi
+pnpm install --no-frozen-lockfile 2>&1 | tail -5
+
+if [ "$AD4M_LINKED" = true ]; then
   # Clear ALL build caches AND pre-built view bundles so everything rebuilds with the linked SDK
   rm -rf app/node_modules/.vite .turbo node_modules/.cache
   find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
-  # Remove pre-built view dist directories — they inline the SDK and must be rebuilt
   find views -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
   find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
   rm -rf app/dist
-  echo "==> AD4M packages linked, all caches + dist directories cleared"
+  echo "==> All caches + dist directories cleared"
 fi
 
 NODE_OPTIONS='--max-old-space-size=4096' pnpm build

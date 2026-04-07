@@ -90,14 +90,24 @@ jobs:
             !ad4m/node_modules
           key: flux-deps-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Flux dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Link AD4M packages into Flux
+      - name: Override AD4M packages with local builds
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          pnpm link ./ad4m/core ./ad4m/connect
-          # Clear ALL build caches so views rebuild with linked SDK
+          node -e "
+            const pkg = require('./package.json');
+            pkg.pnpm = pkg.pnpm || {};
+            pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+            pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
+            pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Install Flux dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Clear build caches for linked SDK
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
           rm -rf app/node_modules/.vite .turbo node_modules/.cache
           find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
 
