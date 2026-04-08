@@ -21,3 +21,7 @@ dev-dist
 cachedb
 # Local Netlify folder
 .netlify
+
+# Test artifacts
+e2e/screenshots/
+test-results/
