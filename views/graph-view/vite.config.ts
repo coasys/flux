@@ -13,6 +13,7 @@ export default defineConfig({
     cssInjectedByJsPlugin(),
   ],
   resolve: {
+    dedupe: ['preact', 'preact/hooks', 'preact/compat', 'react', 'react-dom'],
     alias: {
       'three/webgpu': resolve(__dirname, './src/three-webgpu-stub.js'),
     },

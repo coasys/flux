@@ -13,6 +13,9 @@ export default defineConfig({
     ,
     cssInjectedByJsPlugin(),
   ],
+  resolve: {
+    dedupe: ['preact', 'preact/hooks', 'preact/compat', 'react', 'react-dom'],
+  },
   build: {
     lib: {
       entry: resolve(__dirname, './src/main.ts'),

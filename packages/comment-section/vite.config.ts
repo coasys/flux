@@ -12,6 +12,9 @@ export default defineConfig({
     }),
     cssInjectedByJsPlugin(),
   ],
+  resolve: {
+    dedupe: ["preact", "preact/hooks", "preact/compat", "react", "react-dom"],
+  },
   build: {
     emptyOutDir: false,
     lib: {
