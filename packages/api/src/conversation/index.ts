@@ -41,8 +41,8 @@ export class Conversation extends Ad4mModel {
       // SPARQL migration
       const subgroupsQuery = `
         SELECT ?sg WHERE {
-          <${this.id}> <ad4m://has_child> ?sg .
-          ?sg <flux://entry_type> <flux://conversation_subgroup> .
+          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?sg . }
+          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
         }
       `;
 
@@ -64,16 +64,16 @@ export class Conversation extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw WHERE {
-          ?semRel <flux://has_tag> ?topicBase .
-          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
-          ?topicBase <flux://entry_type> <flux://has_topic> .
-          ?semRel <flux://has_expression> ?expr .
+          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
+          GRAPH ?g2 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
+          GRAPH ?g3 { ?topicBase <flux://entry_type> <flux://has_topic> . }
+          GRAPH ?g4 { ?semRel <flux://has_expression> ?expr . }
           {
             FILTER(?expr = <${this.id}>)
           } UNION {
-            <${this.id}> <ad4m://has_child> ?expr .
+            GRAPH ?g5 { <${this.id}> <ad4m://has_child> ?expr . }
           }
-          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
+          OPTIONAL { GRAPH ?g6 { ?topicBase <flux://topic> ?topicNameRaw . } }
         }
       `;
 
@@ -117,9 +117,9 @@ export class Conversation extends Ad4mModel {
         SELECT ?id ?timestamp ?nameRaw ?summaryRaw WHERE {
           GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
           ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          ?id <flux://entry_type> <flux://conversation_subgroup> .
-          OPTIONAL { ?id <flux://has_name> ?nameRaw . }
-          OPTIONAL { ?id <flux://has_summary> ?summaryRaw . }
+          GRAPH ?g2 { ?id <flux://entry_type> <flux://conversation_subgroup> . }
+          OPTIONAL { GRAPH ?g3 { ?id <flux://has_name> ?nameRaw . } }
+          OPTIONAL { GRAPH ?g4 { ?id <flux://has_summary> ?summaryRaw . } }
         }
         ORDER BY ?timestamp
       `;
@@ -146,11 +146,11 @@ export class Conversation extends Ad4mModel {
           // SPARQL migration - get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
           const timestampQuery = `
             SELECT ?transcriptStart ?channelTs WHERE {
-              <${subgroup.id}> <flux://has_item> ?item .
+              GRAPH ?g1 { <${subgroup.id}> <flux://has_item> ?item . }
               GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
               ?chLink <ad4m://ontology/timestamp> ?channelTs .
-              ?chSrc <flux://entry_type> <flux://has_channel> .
-              OPTIONAL { ?item <flux://transcript_started_at> ?transcriptStart . }
+              GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
+              OPTIONAL { GRAPH ?g3 { ?item <flux://transcript_started_at> ?transcriptStart . } }
             }
             ORDER BY ?channelTs
           `;

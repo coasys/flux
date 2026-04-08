@@ -32,8 +32,8 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const itemsQuery = `
         SELECT DISTINCT ?item WHERE {
-          <${this.id}> <${SUBGROUP_ITEM}> ?item .
-          ?item <flux://entry_type> ?type .
+          GRAPH ?g1 { <${this.id}> <${SUBGROUP_ITEM}> ?item . }
+          GRAPH ?g2 { ?item <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -56,11 +56,11 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw WHERE {
-          ?semRel <flux://has_tag> ?topicBase .
-          ?semRel <flux://has_expression> <${this.id}> .
-          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
-          ?topicBase <flux://entry_type> <flux://has_topic> .
-          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
+          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
+          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
+          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
+          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
+          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
         }
       `;
 
@@ -101,13 +101,13 @@ export default class ConversationSubgroup extends Ad4mModel {
           GRAPH ?typeLink { ?id <flux://entry_type> ?type . }
           ?typeLink <ad4m://ontology/author> ?author .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { ?id <flux://body> ?body . }
-          OPTIONAL { ?id <flux://title> ?title . }
-          OPTIONAL { ?id <flux://name> ?taskName . }
-          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
+          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
+          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
+          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { GRAPH ?g6 { ?id <flux://transcript_started_at> ?transcriptStart . } }
           OPTIONAL { GRAPH ?chLink { ?chSrc <ad4m://has_child> ?id . }
                      ?chLink <ad4m://ontology/timestamp> ?channelTs .
-                     ?chSrc <flux://entry_type> <flux://has_channel> . }
+                     GRAPH ?g7 { ?chSrc <flux://entry_type> <flux://has_channel> . } }
         }
         ORDER BY ?timestamp
       `;
@@ -198,12 +198,12 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw ?relevanceRaw WHERE {
-          ?semRel <flux://has_tag> ?topicBase .
-          ?semRel <flux://has_expression> <${this.id}> .
-          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
-          ?topicBase <flux://entry_type> <flux://has_topic> .
-          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
-          OPTIONAL { ?semRel <flux://has_relevance> ?relevanceRaw . }
+          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
+          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
+          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
+          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
+          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
+          OPTIONAL { GRAPH ?g6 { ?semRel <flux://has_relevance> ?relevanceRaw . } }
         }
       `;
 

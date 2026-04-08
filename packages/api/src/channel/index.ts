@@ -78,11 +78,11 @@ export class Channel extends Ad4mModel {
           GRAPH ?link { <${this.id}> <ad4m://has_child> ?id . }
           ?link <ad4m://ontology/timestamp> ?timestamp .
           ?link <ad4m://ontology/author> ?author .
-          ?id <flux://entry_type> ?type .
+          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { ?id <flux://body> ?body . }
-          OPTIONAL { ?id <flux://title> ?title . }
-          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
+          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
+          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
         }
         ORDER BY ?timestamp
       `;
@@ -129,15 +129,15 @@ export class Channel extends Ad4mModel {
           GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
           ?link1 <ad4m://ontology/author> ?author .
           ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          ?id <flux://entry_type> ?type .
+          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
           FILTER NOT EXISTS {
             GRAPH ?sgLink { ?sg <${SUBGROUP_ITEM}> ?id . }
-            ?sg <flux://entry_type> <flux://conversation_subgroup> .
+            GRAPH ?g3 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
           }
-          OPTIONAL { ?id <flux://body> ?body . }
-          OPTIONAL { ?id <flux://title> ?title . }
-          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { GRAPH ?g4 { ?id <flux://body> ?body . } }
+          OPTIONAL { GRAPH ?g5 { ?id <flux://title> ?title . } }
+          OPTIONAL { GRAPH ?g6 { ?id <flux://name> ?taskName . } }
         }
         ORDER BY ?timestamp
       `;
@@ -189,8 +189,8 @@ export class Channel extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT (COUNT(DISTINCT ?id) AS ?count) WHERE {
-          <${this.id}> <ad4m://has_child> ?id .
-          ?id <flux://entry_type> ?type .
+          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
+          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
