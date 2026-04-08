@@ -5,25 +5,20 @@ import { Ad4mClient } from '@coasys/ad4m';
 
 const APP_NAME = 'Flux';
 const DESCRIPTION = 'Mobile push notifications for @-mentions';
-function notificationConfig(perspectiveIds: string[], webhookAuth: string) {
+function notificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
   return {
     appName: APP_NAME,
     description: DESCRIPTION,
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
-    trigger: `
-      SELECT
-        in.uri as message_id,
-        fn::parse_literal(out.uri) as body_literal,
-        fn::json_path(fn::parse_literal(out.uri), 'data') as message_content,
-        fn::strip_html(fn::json_path(fn::parse_literal(out.uri), 'data')) as description,
-        $agentDid as mentioned_agent
-      FROM link
-      WHERE predicate = 'msg://body'
-      AND fn::contains(
-        fn::json_path(fn::parse_literal(out.uri), 'data'),
-        'data-type="mention" href="' + $agentDid + '"'
-      )`,
+    trigger: `SELECT ?source ?predicate ?target WHERE {
+      GRAPH ?g { ?source ?predicate ?target . }
+      FILTER(?predicate = <msg://body>)
+      FILTER(CONTAINS(
+        LCASE(STR(<ad4m://fn/parse_literal>(?target))),
+        LCASE('data-type="mention" href="${agentDid}"')
+      ))
+    }`,
     perspectiveIds,
     webhookUrl: 'http://push-notifications.ad4m.dev:13000/notification',
     webhookAuth,
@@ -93,6 +88,7 @@ export async function registerNotification(client: Ad4mClient) {
   }
 
   if (foundNotifications.length == 0) {
-    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth));
+    const agentStatus = await client.agent.status();
+    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth, agentStatus.did!));
   }
 }
