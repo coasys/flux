@@ -3,7 +3,11 @@ import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m
 // SPARQL migration helper
 function parseLit(val: string | undefined): string {
   if (!val) return '';
-  try { return Literal.fromUrl(val).get(); } catch { return val; }
+  try {
+    const result = Literal.fromUrl(val).get();
+    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
+    return result;
+  } catch { return val; }
 }
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
@@ -69,11 +73,11 @@ export default class ConversationSubgroup extends Ad4mModel {
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const topicBase = binding.topicBase?.value;
+        const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw?.value),
+            topicName: parseLit(binding.topicNameRaw),
           });
         }
       }
@@ -118,40 +122,40 @@ export default class ConversationSubgroup extends Ad4mModel {
       const items: any[] = [];
       const seen = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const id = binding.id?.value;
+        const id = binding.id;
         if (!id) continue;
 
         // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
         if (seen.has(id)) {
           // Merge optional fields from this binding into the existing item
           const existing = seen.get(id);
-          const transcriptStart = parseLit(binding.transcriptStart?.value);
-          const channelTs = binding.channelTs?.value;
-          const fallbackTs = binding.timestamp?.value;
+          const transcriptStart = parseLit(binding.transcriptStart);
+          const channelTs = binding.channelTs;
+          const fallbackTs = binding.timestamp;
           if (!existing.channelTimestamp) {
             existing.channelTimestamp = transcriptStart || channelTs || fallbackTs;
           }
-          if (!existing.messageBody) existing.messageBody = parseLit(binding.body?.value);
-          if (!existing.postTitle) existing.postTitle = parseLit(binding.title?.value);
-          if (!existing.taskName) existing.taskName = parseLit(binding.taskName?.value);
-          if (!existing.type) existing.type = binding.type?.value;
-          if (!existing.author) existing.author = binding.author?.value;
+          if (!existing.messageBody) existing.messageBody = parseLit(binding.body);
+          if (!existing.postTitle) existing.postTitle = parseLit(binding.title);
+          if (!existing.taskName) existing.taskName = parseLit(binding.taskName);
+          if (!existing.type) existing.type = binding.type;
+          if (!existing.author) existing.author = binding.author;
           continue;
         }
 
-        const transcriptStart = parseLit(binding.transcriptStart?.value);
-        const channelTs = binding.channelTs?.value;
-        const fallbackTs = binding.timestamp?.value;
+        const transcriptStart = parseLit(binding.transcriptStart);
+        const channelTs = binding.channelTs;
+        const fallbackTs = binding.timestamp;
         const channelTimestamp = transcriptStart || channelTs || fallbackTs;
 
         const item = {
           id,
-          type: binding.type?.value,
-          author: binding.author?.value,
+          type: binding.type,
+          author: binding.author,
           channelTimestamp,
-          messageBody: parseLit(binding.body?.value),
-          postTitle: parseLit(binding.title?.value),
-          taskName: parseLit(binding.taskName?.value),
+          messageBody: parseLit(binding.body),
+          postTitle: parseLit(binding.title),
+          taskName: parseLit(binding.taskName),
         };
         seen.set(id, item);
         items.push(item);
@@ -212,12 +216,12 @@ export default class ConversationSubgroup extends Ad4mModel {
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const topicBase = binding.topicBase?.value;
+        const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw?.value),
-            relevance: parseLit(binding.relevanceRaw?.value),
+            topicName: parseLit(binding.topicNameRaw),
+            relevance: parseLit(binding.relevanceRaw),
           });
         }
       }

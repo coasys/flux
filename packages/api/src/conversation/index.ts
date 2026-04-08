@@ -3,7 +3,11 @@ import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Mo
 // SPARQL migration helper
 function parseLit(val: string | undefined): string {
   if (!val) return '';
-  try { return Literal.fromUrl(val).get(); } catch { return val; }
+  try {
+    const result = Literal.fromUrl(val).get();
+    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
+    return result;
+  } catch { return val; }
 }
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
@@ -82,11 +86,11 @@ export class Conversation extends Ad4mModel {
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const topicBase = binding.topicBase?.value;
+        const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw?.value),
+            topicName: parseLit(binding.topicNameRaw),
           });
         }
       }
@@ -129,13 +133,13 @@ export class Conversation extends Ad4mModel {
       // Deduplicate by id
       const subgroupMap = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const id = binding.id?.value;
+        const id = binding.id;
         if (id && !subgroupMap.has(id)) {
           subgroupMap.set(id, {
             id,
-            timestamp: binding.timestamp?.value,
-            name: parseLit(binding.nameRaw?.value),
-            summary: parseLit(binding.summaryRaw?.value),
+            timestamp: binding.timestamp,
+            name: parseLit(binding.nameRaw),
+            summary: parseLit(binding.summaryRaw),
           });
         }
       }
@@ -160,7 +164,7 @@ export class Conversation extends Ad4mModel {
           // Filter out null/undefined timestamps and convert to numeric timestamps
           const timestamps = (timestampResults || [])
             .map((r: any) => {
-              const ts = parseLit(r.transcriptStart?.value) || r.channelTs?.value;
+              const ts = parseLit(r.transcriptStart) || r.channelTs;
               return ts;
             })
             .filter((ts) => ts != null && ts !== '')

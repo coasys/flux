@@ -3,7 +3,11 @@ import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property } fr
 // SPARQL migration helper
 function parseLit(val: string | undefined): string {
   if (!val) return '';
-  try { return Literal.fromUrl(val).get(); } catch { return val; }
+  try {
+    const result = Literal.fromUrl(val).get();
+    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
+    return result;
+  } catch { return val; }
 }
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
@@ -92,23 +96,23 @@ export class Channel extends Ad4mModel {
       return (sparqlResult || []).map((binding: any) => {
         let text = '';
         let type = '';
-        const itemType = binding.type?.value;
+        const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
-          text = parseLit(binding.body?.value);
+          text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title?.value);
+          text = parseLit(binding.title);
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName?.value);
+          text = parseLit(binding.taskName);
           type = 'Task';
         }
 
         return {
-          id: binding.id?.value,
-          author: binding.author?.value,
-          timestamp: new Date(binding.timestamp?.value).toISOString(),
+          id: binding.id,
+          author: binding.author,
+          timestamp: new Date(binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
@@ -147,7 +151,7 @@ export class Channel extends Ad4mModel {
       // Deduplicate by id
       const itemMap = new Map<string, any>();
       for (const binding of sparqlResult || []) {
-        const id = binding.id?.value;
+        const id = binding.id;
         if (!id || itemMap.has(id)) continue;
         itemMap.set(id, binding);
       }
@@ -155,23 +159,23 @@ export class Channel extends Ad4mModel {
       return Array.from(itemMap.values()).map((binding: any) => {
         let text = '';
         let type = '';
-        const itemType = binding.type?.value;
+        const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
-          text = parseLit(binding.body?.value);
+          text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title?.value);
+          text = parseLit(binding.title);
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName?.value);
+          text = parseLit(binding.taskName);
           type = 'Task';
         }
 
         return {
-          id: binding.id?.value,
-          author: binding.author?.value,
-          timestamp: new Date(binding.timestamp?.value).toISOString(),
+          id: binding.id,
+          author: binding.author,
+          timestamp: new Date(binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
@@ -196,7 +200,7 @@ export class Channel extends Ad4mModel {
       `;
 
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
-      const countValue = sparqlResult?.[0]?.count?.value;
+      const countValue = sparqlResult?.[0]?.count;
       return countValue ? parseInt(countValue, 10) : 0;
     } catch (error) {
       console.error('Error getting total item count:', error);
