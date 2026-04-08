@@ -57,10 +57,5 @@ export async function createNeighbourhoodMeta(
   //Get the signed links back
   const perspectiveSnapshot = await client.perspective.snapshotByUUID(perspective.uuid);
   await client.perspective.remove(perspective.uuid);
-  const links = [] as LinkExpression[];
-  for (const link in perspectiveSnapshot!.links) {
-    links.push(perspectiveSnapshot!.links[link]);
-  }
-  return links;
-  return links;
+  return Object.values(perspectiveSnapshot!.links);
 }
