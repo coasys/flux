@@ -44,19 +44,13 @@ jobs:
             --branch "${{ steps.branch.outputs.name }}" \
             https://github.com/coasys/ad4m.git ad4m
 
-      - name: Hash AD4M source
+      - name: Get AD4M commit hash
         if: steps.branch.outputs.ad4m_match == 'true'
         id: ad4m-hash
         run: |
-          HASH=$(
-            {
-              find ad4m/core ad4m/connect ad4m/ad4m-hooks -type f \( -name '*.ts' -o -name '*.json' \)
-              for file in ad4m/package.json ad4m/pnpm-lock.yaml ad4m/pnpm-workspace.yaml; do
-                [ -f "$file" ] && printf '%s\n' "$file"
-              done
-            } | sort | xargs sha256sum | sha256sum | cut -d' ' -f1
-          )
+          HASH=$(cd ad4m && git rev-parse HEAD)
           echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+          echo "AD4M commit: $HASH"
 
       - name: Cache AD4M built outputs
         if: steps.branch.outputs.ad4m_match == 'true'
@@ -70,30 +64,20 @@ jobs:
             ad4m/ad4m-hooks/helpers/lib
             ad4m/ad4m-hooks/react/lib
             ad4m/ad4m-hooks/vue/lib
-          key: ad4m-sdk-${{ steps.branch.outputs.name }}-${{ steps.ad4m-hash.outputs.hash }}
+          key: ad4m-sdk-${{ steps.ad4m-hash.outputs.hash }}
 
       - name: Install & build AD4M packages
         if: steps.branch.outputs.ad4m_match == 'true' && steps.ad4m-cache.outputs.cache-hit != 'true'
         run: |
           cd ad4m
-          npm i -g pnpm
+          npm i -g pnpm 2>/dev/null || true
           pnpm install --no-frozen-lockfile
 
           cd core && pnpm exec tsc && pnpm run bundle && cd ..
           cd connect && pnpm run build && cd ..
-          cd ad4m-hooks/helpers && pnpm exec tsc && cd ../..
-          cd ad4m-hooks/react && pnpm exec tsc && cd ../..
-          cd ad4m-hooks/vue && pnpm exec tsc && cd ../..
-
-      - name: Register AD4M packages for linking
-        if: steps.branch.outputs.ad4m_match == 'true'
-        run: |
-          cd ad4m/core && pnpm link --global
-          cd ../connect && pnpm link --global
-          cd ../ad4m-hooks/helpers && pnpm link --global
-          cd ../../ad4m-hooks/react && pnpm link --global
-          cd ../../ad4m-hooks/vue && pnpm link --global
-          cd ../../..
+          [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+          [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+          [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
 
       # --- Flux build ---
 
@@ -106,14 +90,26 @@ jobs:
             !ad4m/node_modules
           key: flux-deps-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Flux dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Link AD4M packages into Flux
+      - name: Override AD4M packages with local builds
         if: steps.branch.outputs.ad4m_match == 'true'
         run: |
-          pnpm link --global @coasys/ad4m @coasys/ad4m-connect @coasys/hooks-helpers @coasys/ad4m-react-hooks @coasys/ad4m-vue-hooks
-          rm -rf app/node_modules/.vite .turbo
+          node -e "
+            const pkg = require('./package.json');
+            pkg.pnpm = pkg.pnpm || {};
+            pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+            pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
+            pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Install Flux dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Clear build caches for linked SDK
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          rm -rf app/node_modules/.vite .turbo node_modules/.cache
+          find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
 
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build

@@ -20,13 +20,13 @@ export class Message extends Ad4mModel {
 
   @Property({
     through: HAS_REPLY,
-    getter: `(<-link[WHERE predicate = '${HAS_REPLY}'].in.uri)[0]`,
+    getter: `SELECT ?target WHERE { ?target <${HAS_REPLY}> ?source . } LIMIT 1`,
   })
   replyingTo?: string;
 
   @Property({
     through: 'flux://is_popular',
-    getter: `count(<-link[WHERE predicate = '${REACTION}' AND out.uri = 'emoji://1f44d']) > 5`,
+    getter: `ASK WHERE { SELECT (COUNT(DISTINCT ?reactor) AS ?count) WHERE { ?reactor <${REACTION}> ?source . FILTER(?reactor = <emoji://1f44d>) } HAVING(?count > 5) }`,
     readOnly: true,
   })
   isPopular: boolean = false;

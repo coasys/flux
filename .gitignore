@@ -21,3 +21,6 @@ dev-dist
 cachedb
 # Local Netlify folder
 .netlify
+test-results/
+e2e/screenshots/
+ad4m

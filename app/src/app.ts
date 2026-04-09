@@ -60,7 +60,7 @@ vueApp.mount('#app');
         iconPath: window.location.origin + '/icon.png',
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-      multiUser: true,
+      hosting: true,
       onCreditsDepleted: () => {
         // Leave any active call first so the transcription widget is cleaned up
         const webrtcStore = useWebrtcStore(pinia);

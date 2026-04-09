@@ -229,7 +229,7 @@ async function removeProof(proof: EntanglementProof) {
       me.value?.perspective?.links.filter((l: any) => {
         return (
           l.data.predicate === 'ad4m://entanglement_proof' &&
-          l.data.target.startsWith('literal://') &&
+          l.data.target.startsWith('literal:') &&
           Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
         );
       }) || [];
