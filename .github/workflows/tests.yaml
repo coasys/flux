@@ -3,30 +3,93 @@ name: Tests
 on:
   push:
   pull_request:
-    branches:
-      - 'test/setup'
-      # - '*'
-      # - '*/*'
-      # - '**'
-      # - '!master'
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.16.0
+          node-version: "20"
           cache: 'pnpm'
-      - name: Install modules
-        run: pnpm install --frozen-lockfile
-    # - name: Run lint
-    #   run: yarn run lint
-    # - name: Run tests
-    #   run: yarn run test
+
+      - name: Detect branch
+        id: branch
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads \
+            https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
+            echo "ad4m_match=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Found matching AD4M branch: $BRANCH"
+          else
+            echo "ad4m_match=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No matching AD4M branch — using published packages"
+          fi
+
+      - name: Clone AD4M branch
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          git clone --depth 1 --single-branch \
+            --branch "${{ steps.branch.outputs.name }}" \
+            https://github.com/coasys/ad4m.git ad4m
+
+      - name: Get AD4M commit hash
+        if: steps.branch.outputs.ad4m_match == 'true'
+        id: ad4m-hash
+        run: |
+          HASH=$(cd ad4m && git rev-parse HEAD)
+          echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+
+      - name: Cache AD4M built outputs
+        if: steps.branch.outputs.ad4m_match == 'true'
+        id: ad4m-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ad4m/node_modules
+            ad4m/core/lib
+            ad4m/connect/dist
+            ad4m/ad4m-hooks/helpers/lib
+            ad4m/ad4m-hooks/react/lib
+            ad4m/ad4m-hooks/vue/lib
+          key: ad4m-sdk-${{ steps.ad4m-hash.outputs.hash }}
+
+      - name: Install & build AD4M packages
+        if: steps.branch.outputs.ad4m_match == 'true' && steps.ad4m-cache.outputs.cache-hit != 'true'
+        run: |
+          cd ad4m
+          npm i -g pnpm 2>/dev/null || true
+          pnpm install --no-frozen-lockfile
+
+          cd core && pnpm exec tsc && pnpm run bundle && cd ..
+          cd connect && pnpm run build && cd ..
+          [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+          [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+          [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
+
+      - name: Override AD4M packages with local builds
+        if: steps.branch.outputs.ad4m_match == 'true'
+        run: |
+          node -e "
+            const pkg = require('./package.json');
+            pkg.pnpm = pkg.pnpm || {};
+            pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+            pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
+            pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run lint
+        run: pnpm run lint
