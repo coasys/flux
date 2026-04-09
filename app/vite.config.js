@@ -22,6 +22,8 @@ function copyNillionFileStore() {
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
   const isDeployPreview = process.env.CONTEXT === 'deploy-preview';
+  const isProductionDeploy = process.env.CONTEXT === 'production';
+  const enableSourceMaps = !isProductionDeploy; // source maps for dev, local builds, and branch deploys
 
   return defineConfig({
     base: process.env.VITE_BASE || '/',
@@ -124,7 +126,7 @@ export default ({ mode }) => {
       basicSsl(),
     ],
     build: {
-      sourcemap: isDeployPreview,
+      sourcemap: enableSourceMaps,
       rollupOptions: {
         external: ['@coasys/nillion-file-store', '@nillion/client-web'],
       },
