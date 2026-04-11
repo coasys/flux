@@ -33,13 +33,13 @@
     "@coasys/flux-api": "workspace:*",
     "@coasys/flux-comment-section": "workspace:*",
     "@coasys/flux-container": "workspace:*",
-    "preact": "^10.13.1",
+    "preact": "^10.29.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.21.0",
-    "@preact/preset-vite": "^2.5.0",
+    "@babel/plugin-proposal-decorators": "^7.29.0",
+    "@preact/preset-vite": "^2.10.5",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"
   },
