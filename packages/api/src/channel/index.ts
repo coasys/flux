@@ -137,14 +137,18 @@ export class Channel extends Ad4mModel {
         }
       `;
 
-      // Query 2: Get all processed item IDs (items already in a subgroup)
+      // Query 2: Get processed item IDs scoped to THIS channel's subgroups only
       const processedQuery = `
         SELECT ?id WHERE {
+          GRAPH ?g0 { <${this.id}> <ad4m://has_child> ?sg . }
           GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
           GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
         }
       `;
 
+      // NOTE: Race window — links added between these two queries could cause
+      // an item to appear in allItems but not processedSet (or vice-versa).
+      // The final VALUES query re-verifies channel membership to mitigate this.
       const [allItemsResult, processedResult] = await Promise.all([
         this.perspective.querySparql(allItemsQuery),
         this.perspective.querySparql(processedQuery),
