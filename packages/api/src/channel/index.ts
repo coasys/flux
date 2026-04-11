@@ -125,20 +125,48 @@ export class Channel extends Ad4mModel {
   }
 
   async unprocessedItems(): Promise<SynergyItem[]> {
-    // Get all unprocessed items in the channel
+    // Get all unprocessed items in the channel using set-difference approach
+    // instead of FILTER NOT EXISTS (which is O(N²) in Oxigraph)
     try {
-      // SPARQL migration
-      const sparqlQuery = `
+      // Query 1: Get all item IDs in channel
+      const allItemsQuery = `
+        SELECT ?id WHERE {
+          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
+          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+        }
+      `;
+
+      // Query 2: Get all processed item IDs (items already in a subgroup)
+      const processedQuery = `
+        SELECT ?id WHERE {
+          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
+          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
+        }
+      `;
+
+      const [allItemsResult, processedResult] = await Promise.all([
+        this.perspective.querySparql(allItemsQuery),
+        this.perspective.querySparql(processedQuery),
+      ]);
+
+      const processedSet = new Set((processedResult || []).map((r: any) => r.id));
+      const unprocessedIds = (allItemsResult || [])
+        .map((r: any) => r.id)
+        .filter((id: string) => id && !processedSet.has(id));
+
+      if (unprocessedIds.length === 0) return [];
+
+      // Query 3: Get full data only for unprocessed items using VALUES clause
+      const valuesClause = unprocessedIds.map((id: string) => `<${id}>`).join(' ');
+      const dataQuery = `
         SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+          VALUES ?id { ${valuesClause} }
           GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
           ?link1 <ad4m://ontology/author> ?author .
           ?link1 <ad4m://ontology/timestamp> ?timestamp .
           GRAPH ?g2 { ?id <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          FILTER NOT EXISTS {
-            GRAPH ?sgLink { ?sg <${SUBGROUP_ITEM}> ?id . }
-            GRAPH ?g3 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
-          }
           OPTIONAL { GRAPH ?g4 { ?id <flux://body> ?body . } }
           OPTIONAL { GRAPH ?g5 { ?id <flux://title> ?title . } }
           OPTIONAL { GRAPH ?g6 { ?id <flux://name> ?taskName . } }
@@ -146,7 +174,7 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(dataQuery);
 
       // Deduplicate by id
       const itemMap = new Map<string, any>();

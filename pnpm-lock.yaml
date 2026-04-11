@@ -947,8 +947,6 @@ importers:
         specifier: ^3.1.0
         version: 3.5.2(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
 
-  views/nillion-file-store/dist: {}
-
   views/poll-view:
     dependencies:
       '@coasys/ad4m':

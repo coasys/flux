@@ -144,46 +144,52 @@ export class Conversation extends Ad4mModel {
         }
       }
 
-      // Get timestamps for each subgroup separately
-      const subgroups = await Promise.all(
-        Array.from(subgroupMap.values()).map(async (subgroup: any) => {
-          // SPARQL migration - get creation timestamps from channel→item links, not grouping timestamps from subgroup→item links
-          const timestampQuery = `
-            SELECT ?transcriptStart ?channelTs WHERE {
-              GRAPH ?g1 { <${subgroup.id}> <flux://has_item> ?item . }
-              GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
-              ?chLink <ad4m://ontology/timestamp> ?channelTs .
-              GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
-              OPTIONAL { GRAPH ?g3 { ?item <flux://transcript_started_at> ?transcriptStart . } }
-            }
-            ORDER BY ?channelTs
-          `;
+      const subgroupIds = Array.from(subgroupMap.keys());
+      if (subgroupIds.length === 0) return [];
 
-          const timestampResults = await this.perspective.querySparql(timestampQuery);
+      // Batch query: get timestamps for ALL subgroups in a single query
+      // instead of one query per subgroup (N+1 → 1)
+      const valuesClause = subgroupIds.map(id => `<${id}>`).join(' ');
+      const batchTimestampQuery = `
+        SELECT ?sg ?transcriptStart ?channelTs WHERE {
+          VALUES ?sg { ${valuesClause} }
+          GRAPH ?g1 { ?sg <flux://has_item> ?item . }
+          GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
+          ?chLink <ad4m://ontology/timestamp> ?channelTs .
+          GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
+          OPTIONAL { GRAPH ?g3 { ?item <flux://transcript_started_at> ?transcriptStart . } }
+        }
+      `;
 
-          // Filter out null/undefined timestamps and convert to numeric timestamps
-          const timestamps = (timestampResults || [])
-            .map((r: any) => {
-              const ts = parseLit(r.transcriptStart) || r.channelTs;
-              return ts;
-            })
-            .filter((ts) => ts != null && ts !== '')
-            .map((ts) => new Date(ts).getTime())
-            .filter((time) => !isNaN(time))
-            .sort((a, b) => a - b);
+      const batchResults = await this.perspective.querySparql(batchTimestampQuery);
 
-          const start = timestamps.length > 0 ? timestamps[0] : 0;
-          const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
+      // Group timestamps by subgroup ID
+      const timestampsBySg = new Map<string, number[]>();
+      for (const r of batchResults || []) {
+        const sgId = r.sg;
+        if (!sgId) continue;
+        const ts = parseLit(r.transcriptStart) || r.channelTs;
+        if (ts == null || ts === '') continue;
+        const time = new Date(ts).getTime();
+        if (isNaN(time)) continue;
+        if (!timestampsBySg.has(sgId)) timestampsBySg.set(sgId, []);
+        timestampsBySg.get(sgId)!.push(time);
+      }
 
-          return {
-            id: subgroup.id,
-            name: subgroup.name || '',
-            summary: subgroup.summary || '',
-            start,
-            end,
-          };
-        }),
-      );
+      const subgroups = Array.from(subgroupMap.values()).map((subgroup: any) => {
+        const timestamps = (timestampsBySg.get(subgroup.id) || []).sort((a, b) => a - b);
+        const start = timestamps.length > 0 ? timestamps[0] : 0;
+        const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
+
+        return {
+          id: subgroup.id,
+          name: subgroup.name || '',
+          summary: subgroup.summary || '',
+          timestamp: subgroup.timestamp || '',
+          start,
+          end,
+        };
+      });
 
       // Sort by actual content start time, not link creation time
       return subgroups.sort((a, b) => a.start - b.start);
