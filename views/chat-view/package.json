@@ -37,14 +37,14 @@
     "@coasys/flux-types": "workspace:*",
     "@coasys/flux-ui": "workspace:*",
     "@coasys/flux-utils": "workspace:*",
-    "preact": "^10.13.1",
+    "preact": "^10.29.1",
     "react": "*",
-    "react-virtuoso": "^4.3.6"
+    "react-virtuoso": "^4.18.4"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.21.0",
-    "@preact/preset-vite": "^2.5.0",
+    "@babel/plugin-proposal-decorators": "^7.29.0",
+    "@preact/preset-vite": "^2.10.5",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"
   },

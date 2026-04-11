@@ -20,8 +20,8 @@ overrides:
   '@coasys/flux-utils': workspace:*
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
-  '@coasys/ad4m': 0.13.0-test-2
-  '@coasys/ad4m-connect': 0.13.0-test-2
+  '@coasys/ad4m': file:./ad4m/core
+  '@coasys/ad4m-connect': file:./ad4m/connect
 
 importers:
 
@@ -38,7 +38,7 @@ importers:
         specifier: '*'
         version: 0.0.0(eslint@7.32.0)(typescript@5.9.3)
       patch-package:
-        specifier: '*'
+        specifier: ^8.0.1
         version: 8.0.1
       prettier:
         specifier: latest
@@ -74,11 +74,11 @@ importers:
         specifier: ^7.0.5
         version: 7.0.6(@capacitor/core@7.6.1)
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(esbuild@0.14.54)
+        specifier: file:../ad4m/connect
+        version: file:ad4m/connect(esbuild@0.14.54)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -149,16 +149,16 @@ importers:
         specifier: ^3.1.30
         version: 3.3.11
       pinia:
-        specifier: ^3.0.2
+        specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3))
       pinia-plugin-persistedstate:
-        specifier: ^4.3.0
+        specifier: ^4.7.1
         version: 4.7.1(pinia@3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)))
       sass:
-        specifier: ^1.55.0
+        specifier: ^1.99.0
         version: 1.99.0
       semver:
-        specifier: ^7.3.8
+        specifier: ^7.7.4
         version: 7.7.4
       simple-peer:
         specifier: ^9.11.1
@@ -176,10 +176,10 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       vue:
-        specifier: ^3.0.0
+        specifier: ^3.5.32
         version: 3.5.32(typescript@5.9.3)
       vue-advanced-cropper:
-        specifier: ^2.3.1
+        specifier: ^2.8.9
         version: 2.8.9(vue@3.5.32(typescript@5.9.3))
       vue-router:
         specifier: ^4.0.0-0
@@ -189,10 +189,10 @@ importers:
         version: 7.4.0
     devDependencies:
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.20.13
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@babel/plugin-transform-class-properties':
-        specifier: ^7.25.4
+        specifier: ^7.28.6
         version: 7.28.6(@babel/core@7.29.0)
       '@capacitor/assets':
         specifier: ^3.0.5
@@ -207,8 +207,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.3
       '@types/mocha':
-        specifier: ^8.2.1
-        version: 8.2.3
+        specifier: ^10.0.10
+        version: 10.0.10
       '@types/three':
         specifier: ^0.150.0
         version: 0.150.2
@@ -237,7 +237,7 @@ importers:
         specifier: ^8.3.0
         version: 8.10.2(eslint@7.32.0)
       eslint-plugin-import:
-        specifier: ^2.26.0
+        specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0)
       eslint-plugin-prettier:
         specifier: ^3.4.0
@@ -258,14 +258,14 @@ importers:
         specifier: ^26.0.0
         version: 26.5.6(jest@29.7.0(@types/node@25.5.2)(ts-node@10.9.2(@swc/core@1.15.24)(@swc/wasm@1.15.24)(@types/node@25.5.2)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
-        specifier: ^5.0.4
+        specifier: ^5.8.0
         version: 5.9.3
       vite:
         specifier: ^4.3.5
         version: 4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1)
       vite-plugin-babel-compiler:
-        specifier: ^0.3.0
-        version: 0.3.0(@babel/core@7.29.0)(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
+        specifier: ^0.4.1
+        version: 0.4.1(@babel/core@7.29.0)(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       vite-plugin-pwa:
         specifier: ^0.14.7
         version: 0.14.7(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))(workbox-build@6.6.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
@@ -326,8 +326,8 @@ importers:
   packages/api:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -353,7 +353,7 @@ importers:
         specifier: workspace:*
         version: link:../ui
       preact:
-        specifier: ^10.11.3
+        specifier: ^10.29.1
         version: 10.29.1
     devDependencies:
       '@coasys/flux-container':
@@ -383,8 +383,8 @@ importers:
   packages/create/templates/preact:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -417,8 +417,8 @@ importers:
   packages/create/templates/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -451,11 +451,11 @@ importers:
   packages/flux-container:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(esbuild@0.21.5)
+        specifier: file:../../ad4m/connect
+        version: file:ad4m/connect(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -467,7 +467,7 @@ importers:
         version: 2.5.1
     devDependencies:
       typescript:
-        specifier: ^5.0.4
+        specifier: ^5.8.0
         version: 5.9.3
       vite:
         specifier: ^4.3.5
@@ -479,11 +479,11 @@ importers:
   packages/flux-editor:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(esbuild@0.21.5)
+        specifier: file:../../ad4m/connect
+        version: file:ad4m/connect(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -516,7 +516,7 @@ importers:
         version: 2.5.1
     devDependencies:
       typescript:
-        specifier: ^5.0.4
+        specifier: ^5.8.0
         version: 5.9.3
       vite:
         specifier: ^4.3.5
@@ -528,8 +528,8 @@ importers:
   packages/react-web:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -557,16 +557,16 @@ importers:
         specifier: workspace:*
         version: link:../utils
       '@popperjs/core':
-        specifier: ^2.11.7
+        specifier: ^2.11.8
         version: 2.11.8
       construct-style-sheets-polyfill:
         specifier: ^3.1.0
         version: 3.1.0
       emoji-mart:
-        specifier: ^5.5.2
+        specifier: ^5.6.0
         version: 5.6.0
       jdenticon:
-        specifier: ^3.2.0
+        specifier: ^3.3.0
         version: 3.3.0
       lit:
         specifier: ^2.7.3
@@ -597,11 +597,11 @@ importers:
   packages/utils:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(esbuild@0.21.5)
+        specifier: file:../../ad4m/connect
+        version: file:ad4m/connect(esbuild@0.21.5)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -621,8 +621,8 @@ importers:
   packages/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -642,8 +642,8 @@ importers:
   packages/webrtc:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -651,8 +651,8 @@ importers:
   views/chat-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -681,20 +681,20 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
       react:
         specifier: '*'
         version: 18.3.1
       react-virtuoso:
-        specifier: ^4.3.6
+        specifier: ^4.18.4
         version: 4.18.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -709,11 +709,11 @@ importers:
   views/graph-view:
     dependencies:
       3d-force-graph:
-        specifier: ^1.70.19
+        specifier: ^1.80.0
         version: 1.80.0
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -721,10 +721,10 @@ importers:
         specifier: workspace:*
         version: link:../../packages/react-web
       preact:
-        specifier: ^10.11.3
+        specifier: ^10.29.1
         version: 10.29.1
       three-spritetext:
-        specifier: ^1.6.5
+        specifier: ^1.10.0
         version: 1.10.0(three@0.183.2)
     devDependencies:
       '@preact/preset-vite':
@@ -743,8 +743,8 @@ importers:
   views/kanban-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -767,7 +767,7 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
       react-beautiful-dnd:
         specifier: ^13.1.1
@@ -777,7 +777,7 @@ importers:
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -792,8 +792,8 @@ importers:
   views/kanban-view-simple:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -816,7 +816,7 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
       react-beautiful-dnd:
         specifier: ^13.1.1
@@ -826,7 +826,7 @@ importers:
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -844,8 +844,8 @@ importers:
         specifier: '=3.6.9'
         version: 3.6.9(graphql@15.10.2)(react@18.3.1)
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -874,16 +874,16 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@tsconfig/recommended':
-        specifier: ^1.0.6
+        specifier: ^1.0.13
         version: 1.0.13
       '@vitejs/plugin-basic-ssl':
         specifier: ^1.1.0
         version: 1.2.0(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       crypto-browserify:
-        specifier: ^3.12.0
+        specifier: ^3.12.1
         version: 3.12.1
       css-loader:
-        specifier: ^7.1.2
+        specifier: ^7.1.4
         version: 7.1.4(webpack@5.106.0)
       dotenv:
         specifier: ^16.4.5
@@ -892,10 +892,10 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0(webpack@5.106.0)
       patch-package:
-        specifier: ^8.0.0
+        specifier: ^8.0.1
         version: 8.0.1
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
       stream-browserify:
         specifier: ^3.0.0
@@ -904,10 +904,10 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.106.0)
       ts-loader:
-        specifier: ^9.5.1
+        specifier: ^9.5.7
         version: 9.5.7(typescript@5.9.3)(webpack@5.106.0)
       typescript:
-        specifier: ^5.5.3
+        specifier: ^5.8.0
         version: 5.9.3
       uuid:
         specifier: ^9.0.1
@@ -916,10 +916,10 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       vite-plugin-top-level-await:
-        specifier: ^1.4.1
+        specifier: ^1.6.0
         version: 1.6.0(rollup@4.60.1)(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       vite-plugin-wasm:
-        specifier: ^3.3.0
+        specifier: ^3.6.0
         version: 3.6.0(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))
       vm-browserify:
         specifier: ^1.1.2
@@ -929,7 +929,7 @@ importers:
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -952,8 +952,8 @@ importers:
   views/poll-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -967,14 +967,14 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
     devDependencies:
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -989,8 +989,8 @@ importers:
   views/post-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1013,22 +1013,22 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       classnames:
-        specifier: ^2.3.2
+        specifier: ^2.5.1
         version: 2.5.1
       date-fns:
         specifier: ^2.24.0
         version: 2.30.0
       emoji-picker-element:
-        specifier: ^1.14.0
+        specifier: ^1.29.1
         version: 1.29.1
       emoji-short-name:
-        specifier: ^2.0.0
+        specifier: ^2.1.0
         version: 2.1.0
       node-emoji:
         specifier: ^1.11.0
         version: 1.11.0
       preact:
-        specifier: ^10.5.14
+        specifier: ^10.29.1
         version: 10.29.1
       react-dropzone:
         specifier: ^14.2.3
@@ -1037,10 +1037,10 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
       react-virtuoso:
-        specifier: ^3.1.1
-        version: 3.1.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.18.4
+        version: 4.18.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tippy.js:
-        specifier: ^6.3.1
+        specifier: ^6.3.7
         version: 6.3.7
     devDependencies:
       '@coasys/flux-container':
@@ -1068,8 +1068,8 @@ importers:
   views/synergy-demo-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1086,14 +1086,14 @@ importers:
         specifier: workspace:*
         version: link:../webrtc-view
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
     devDependencies:
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -1108,8 +1108,8 @@ importers:
   views/table-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1126,7 +1126,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/react-web
       preact:
-        specifier: ^10.13.1
+        specifier: ^10.29.1
         version: 10.29.1
       uuid:
         specifier: ^9.0.0
@@ -1136,7 +1136,7 @@ importers:
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.29.0)
       '@babel/plugin-proposal-decorators':
-        specifier: ^7.21.0
+        specifier: ^7.29.0
         version: 7.29.0(@babel/core@7.29.0)
       '@preact/preset-vite':
         specifier: 2.9.4
@@ -1166,25 +1166,25 @@ importers:
         specifier: workspace:*
         version: link:../../packages/webrtc
       classnames:
-        specifier: ^2.3.2
+        specifier: ^2.5.1
         version: 2.5.1
       date-fns:
         specifier: ^2.29.3
         version: 2.30.0
       emoji-picker-element:
-        specifier: ^1.14.0
+        specifier: ^1.29.1
         version: 1.29.1
       hark:
         specifier: ^1.2.3
         version: 1.2.3
       howler:
-        specifier: ^2.2.3
+        specifier: ^2.2.4
         version: 2.2.4
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
       preact:
-        specifier: ^10.11.3
+        specifier: ^10.29.1
         version: 10.29.1
     devDependencies:
       '@preact/preset-vite':
@@ -1200,8 +1200,8 @@ importers:
   views/webrtc-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-test-2
-        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: file:../../ad4m/core
+        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1218,28 +1218,28 @@ importers:
         specifier: workspace:*
         version: link:../../packages/webrtc
       '@types/simple-peer':
-        specifier: ^9.11.8
+        specifier: ^9.11.9
         version: 9.11.9
       '@xenova/transformers':
         specifier: ^2.17.2
         version: 2.17.2
       classnames:
-        specifier: ^2.3.2
+        specifier: ^2.5.1
         version: 2.5.1
       emoji-picker-element:
-        specifier: ^1.14.0
+        specifier: ^1.29.1
         version: 1.29.1
       hark:
         specifier: ^1.2.3
         version: 1.2.3
       howler:
-        specifier: ^2.2.3
+        specifier: ^2.2.4
         version: 2.2.4
       npm-run-all:
         specifier: ^4.1.5
         version: 4.1.5
       preact:
-        specifier: ^10.11.3
+        specifier: ^10.29.1
         version: 10.29.1
     devDependencies:
       '@preact/preset-vite':
@@ -2032,8 +2032,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@0.13.0-test-2':
-    resolution: {integrity: sha512-6xFMOpBmczbUMCQsGJn9wvTep9V927DL639n+dfPPT7kG79x02Fas32edZrZYi6iKd1oKhNZJeae+JknwADs8g==}
+  '@coasys/ad4m-connect@file:ad4m/connect':
+    resolution: {directory: ad4m/connect, type: directory}
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2':
     resolution: {integrity: sha512-fMlqdDJmviYQaMOoZ5Zgin1FcuN1iZqOmzhOlAbt2MsEXQap4SVIAKokCHCvNIXcsoEqEC68P1XoDdJGZx/CRA==}
@@ -2046,8 +2046,8 @@ packages:
     peerDependencies:
       vue: ^3.2.47
 
-  '@coasys/ad4m@0.13.0-test-2':
-    resolution: {integrity: sha512-dmLG2bouheIQqZNtmxyhcLoLW0GklEvxyABfn+/3NKXMv6S3bFX0ZcItgPV/CNy1lUg7+/fiaYNaVv8iTRKvPQ==}
+  '@coasys/ad4m@file:ad4m/core':
+    resolution: {directory: ad4m/core, type: directory}
 
   '@coasys/hooks-helpers@0.13.0-test-2':
     resolution: {integrity: sha512-uIgawUKJZNpoSxXiyoMLCWs0yTUxJmP0MNi0C+698CTCNtmMRr5iSqFxC4MmH1QxjNqnoU1hCsorVeTPy/97rg==}
@@ -3761,8 +3761,8 @@ packages:
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
 
-  '@types/mocha@8.2.3':
-    resolution: {integrity: sha512-ekGvFhFgrc2zYQoX4JeZPmVzZxw6Dtllga7iGHzfbYIYkAMUx/sAFP2GdFpLff+vdHXu5fl7WX9AT+TtqYcsyw==}
+  '@types/mocha@10.0.10':
+    resolution: {integrity: sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==}
 
   '@types/node-fetch@2.6.13':
     resolution: {integrity: sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==}
@@ -3843,6 +3843,9 @@ packages:
 
   '@types/valid-url@1.0.7':
     resolution: {integrity: sha512-tgsWVG80dM5PVEBSbXUttPJTBCOo0IKbBh4R4z/SHsC5C81A3aaUH4fsbj+JYk7fopApU/Mao1c0EWTE592TSg==}
+
+  '@types/validator@13.15.10':
+    resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -3925,15 +3928,6 @@ packages:
 
   '@undecaf/zbar-wasm@0.9.16':
     resolution: {integrity: sha512-T5PcT6g+tLScGjR4WmnRErNvfKqEc3kRg2ux14wHmIDNbvNeXa0BkFK19PRK/jb6zGy5NyWtn4ko6KeNuZc/fQ==}
-
-  '@virtuoso.dev/react-urx@0.2.13':
-    resolution: {integrity: sha512-MY0ugBDjFb5Xt8v2HY7MKcRGqw/3gTpMlLXId2EwQvYJoC8sP7nnXjAxcBtTB50KTZhO0SbzsFimaZ7pSdApwA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16'
-
-  '@virtuoso.dev/urx@0.2.13':
-    resolution: {integrity: sha512-iirJNv92A1ZWxoOHHDYW/1KPoi83939o83iUBQHIim0i3tMeSKEh+bxhJdTHQ86Mr4uXx9xGUTq69cp52ZP8Xw==}
 
   '@vitejs/plugin-basic-ssl@1.2.0':
     resolution: {integrity: sha512-mkQnxTkcldAzIsomk1UuLfAu9n+kpQ3JbHcpCp7d2Oo6ITtji8pHS3QToOWjhPFvNQSnhlkAjmGbhv2QvwO/7Q==}
@@ -4600,8 +4594,8 @@ packages:
   bn.js@5.2.3:
     resolution: {integrity: sha512-EAcmnPkxpntVL+DS7bO1zhcZNvCkxqtkd0ZY53h06GNQ3DEkkGZ/gKgmDv6DdZQGj9BgfSPKtJJ7Dp1GPP8f7w==}
 
-  body-parser@1.20.1:
-    resolution: {integrity: sha512-jWi7abTbYwajOytWCQc37VulmWiRae5RyTpaCyDcS5/lMdtwSz5lOpDE67srw/HYe35f1z3fDQw+3txg7gNtWw==}
+  body-parser@1.20.3:
+    resolution: {integrity: sha512-7rAxByjUMqQ3/bHJy7D6OGXvx/MMc4IqBn/X0fcM1QUcAItpZrBEYhWGem+tzXH90c+G01ypMcYJBO9Y30203g==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
   body-scroll-lock@4.0.0-beta.0:
@@ -4854,8 +4848,8 @@ packages:
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
 
-  class-validator@0.13.2:
-    resolution: {integrity: sha512-yBUcQy07FPlGzUjoLuUfIOXzgynnQPPruyK1Ge2B74k9ROwnle1E+NxLWnUv5OLU8hA/qL5leAE9XnXq3byaBw==}
+  class-validator@0.14.4:
+    resolution: {integrity: sha512-AwNusCCam51q703dW82x95tOqQp6oC9HNUl724KxJJOfnKscI8dOloXFgyez7LbTTKWuRBA37FScqVbJEoq8Yw==}
 
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
@@ -5094,8 +5088,8 @@ packages:
   cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
-  cookie@0.5.0:
-    resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
+  cookie@0.7.1:
+    resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
     engines: {node: '>= 0.6'}
 
   copy-anything@4.0.5:
@@ -5707,6 +5701,10 @@ packages:
     resolution: {integrity: sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==}
     engines: {node: '>= 0.8'}
 
+  encodeurl@2.0.0:
+    resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
+    engines: {node: '>= 0.8'}
+
   encoding-down@7.1.0:
     resolution: {integrity: sha512-ky47X5jP84ryk5EQmvedQzELwVJPjCgXDQZGeb9F6r4PdChByCGHTBrVcF3h8ynKVJ1wVbkxTsDC8zBROPypgQ==}
     engines: {node: '>=10'}
@@ -6208,8 +6206,8 @@ packages:
   exponential-backoff@3.1.3:
     resolution: {integrity: sha512-ZgEeZXj30q+I0EN+CbSSpIyPaJ5HVQD18Z1m+u1FXbAeT94mr1zw50q4q6jiiC447Nl/YTcIYSAftiGqetwXCA==}
 
-  express@4.18.2:
-    resolution: {integrity: sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==}
+  express@4.21.2:
+    resolution: {integrity: sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==}
     engines: {node: '>= 0.10.0'}
 
   external-editor@3.1.0:
@@ -6308,8 +6306,8 @@ packages:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
 
-  finalhandler@1.2.0:
-    resolution: {integrity: sha512-5uXcUVftlQMFnWC9qu/svkWv3GTd2PfUhK/3PLkYNAe7FbqJMt3515HaxE6eRL74GdsriiwujiawdaB1BpEISg==}
+  finalhandler@1.3.1:
+    resolution: {integrity: sha512-6BN9trH7bp3qvnrRyzsBz+g3lZxTNZTbVO2EV1CS0WIcDbawYVdYvGflME/9QP0h0pYlCDBCTjYa9nZzMDpyxQ==}
     engines: {node: '>= 0.8'}
 
   find-up@2.1.0:
@@ -7859,8 +7857,8 @@ packages:
     resolution: {integrity: sha512-r85E3NdZ+mpYk1C6RjPFEMSE+s1iZMuHtsHAqY0DT3jZczl0diWUZ8g6oU7h0M9cD2EL+PzaYghhCLzR0ZNn5Q==}
     engines: {node: '>=10'}
 
-  merge-descriptors@1.0.1:
-    resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
+  merge-descriptors@1.0.3:
+    resolution: {integrity: sha512-gaNvAS7TZ897/rVaZ0nMtAyxNyi/pdbjbAwUpFQpN70GqnVfOiXpeUUMKRBmzXaSQ8DdTX4/0ms62r2K+hE6mQ==}
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
@@ -8515,8 +8513,8 @@ packages:
     resolution: {integrity: sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==}
     engines: {node: 18 || 20 || >=22}
 
-  path-to-regexp@0.1.7:
-    resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}
+  path-to-regexp@0.1.12:
+    resolution: {integrity: sha512-RA1GjUVMnvYFxuqovrEqZoxxW5NUZqbwKtYz/Tt7nXerk0LbLblQmrsgdeOxV5SFHf0UDggjS/bSeOZwt1pmEQ==}
 
   path-type@2.0.0:
     resolution: {integrity: sha512-dUnb5dXUf+kzhC/W/F4e5/SkluXIFf5VUHolW1Eg1irn1hGWjPGdsRcvYJ1nD6lhk8Ir7VM0bHJKsYTx8Jx9OQ==}
@@ -8869,8 +8867,8 @@ packages:
 
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
-  qs@6.11.0:
-    resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
+  qs@6.13.0:
+    resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
 
   queue-microtask@1.2.3:
@@ -8900,8 +8898,8 @@ packages:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
 
-  raw-body@2.5.1:
-    resolution: {integrity: sha512-qqJBtEyVgS0ZmPGdCFPWJ3FreoqvG4MVQln/kCgF7Olq95IbOp0/BWyMwbdtn4VTvkM8Y7khCQ2Xgk/tcrCXig==}
+  raw-body@2.5.2:
+    resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
 
   rc@1.2.8:
@@ -8954,13 +8952,6 @@ packages:
         optional: true
       react-native:
         optional: true
-
-  react-virtuoso@3.1.5:
-    resolution: {integrity: sha512-Dwf7SGr73UAahfcQNIND+c+MtCb0PeHu+QTZ5ptR7oXxQkupfHXEKGwEDF5lDkLqdGxm+yH4uh/IFCqMKxudJw==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16 || >=17 || >= 18'
-      react-dom: '>=16 || >=17 || >= 18'
 
   react-virtuoso@4.18.4:
     resolution: {integrity: sha512-DNM4Wy2tMA/J6ejMaDdqecOug31rOwgSRg4C/Dw6Iox4dJe9qwcx32M8HdhkE5uHEVVZh7h0koYwAsCSNdxGfQ==}
@@ -9032,8 +9023,8 @@ packages:
   redux@4.2.1:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
 
-  reflect-metadata@0.1.14:
-    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
+  reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -9312,8 +9303,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  send@0.18.0:
-    resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
+  send@0.19.0:
+    resolution: {integrity: sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw==}
     engines: {node: '>= 0.8.0'}
 
   serialize-error@7.0.1:
@@ -9323,8 +9314,8 @@ packages:
   serialize-javascript@4.0.0:
     resolution: {integrity: sha512-GaNA54380uFefWghODBWEGisLZFj00nS5ACs6yHa9nLqlLpVLO8ChDGeKRjZnV4Nh4n0Qi7nhYZD/9fCPzEqkw==}
 
-  serve-static@1.15.0:
-    resolution: {integrity: sha512-XGuRDNjXUijsUL0vl6nSD7cwURuzEgglbOaFuZM9g3kwDXOWVTck0jLzjPzGD+TazWbboZYu52/9/XPdUgne9g==}
+  serve-static@1.16.2:
+    resolution: {integrity: sha512-VqpjJZKadQB/PEbEwvFdO43Ax5dFBZ2UECszz8bQ7pi7wt//PWe1P6MN7eCnjsatYtBT6EuiClbjSWP2WrIoTw==}
     engines: {node: '>= 0.8.0'}
 
   set-blocking@2.0.0:
@@ -10253,11 +10244,11 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vite-plugin-babel-compiler@0.3.0:
-    resolution: {integrity: sha512-X2IUJZorGRnZPERRhPKfGzzV+ycD/Whsl8mhSKixm1Ypmvo9DEGjWigRhn5iH2CsOiJGOCmQxBYg+BZkFpDEZw==}
+  vite-plugin-babel-compiler@0.4.1:
+    resolution: {integrity: sha512-gx0NcpuuOnuv0+QPLhpmgHf5aafb7XGTRI6X7xmSUe/4Yp14/gXnLQ0TG3bVpfDyOVEL6UFqCssXb4FojZ4IJA==}
     peerDependencies:
       '@babel/core': ^7.17.9
-      vite: ^3.1.0
+      vite: '>=2.0.0'
 
   vite-plugin-bundle@1.1.1:
     resolution: {integrity: sha512-8KVDo0L81R74cRHI8EGrivCn/CH9B1CodikubAm0By2Y/GhYopA+NTHR9fiHXF5BYGa3BxX7mSEZHcmk5PvESQ==}
@@ -11782,7 +11773,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.1
 
-  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.14.54)':
+  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.14.54)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11793,7 +11784,7 @@ snapshots:
     transitivePeerDependencies:
       - esbuild
 
-  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.21.5)':
+  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.21.5)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11806,7 +11797,7 @@ snapshots:
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
@@ -11822,7 +11813,7 @@ snapshots:
 
   '@coasys/ad4m-vue-hooks@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))':
     dependencies:
-      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       vue: 3.5.32(typescript@5.9.3)
     transitivePeerDependencies:
@@ -11834,16 +11825,16 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@coasys/ad4m@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@coasys/ad4m@file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@apollo/client': 3.7.10(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@holochain/client': 0.16.0
       base64-js: 1.5.1
-      class-validator: 0.13.2
-      express: 4.18.2
+      class-validator: 0.14.4
+      express: 4.21.2
       graphql: 15.7.2
       pako: 2.1.0
-      reflect-metadata: 0.1.14
+      reflect-metadata: 0.2.2
     transitivePeerDependencies:
       - bufferutil
       - graphql-ws
@@ -11855,7 +11846,7 @@ snapshots:
 
   '@coasys/hooks-helpers@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       uuid: 9.0.1
     transitivePeerDependencies:
       - bufferutil
@@ -12644,7 +12635,7 @@ snapshots:
     dependencies:
       '@ionic/utils-object': 2.1.6
       '@ionic/utils-terminal': 2.3.4
-      debug: 4.3.4
+      debug: 4.4.3
       signal-exit: 3.0.7
       tree-kill: 1.2.2
       tslib: 2.6.2
@@ -12664,7 +12655,7 @@ snapshots:
 
   '@ionic/utils-stream@3.1.6':
     dependencies:
-      debug: 4.3.4
+      debug: 4.4.3
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
@@ -12684,7 +12675,7 @@ snapshots:
       '@ionic/utils-stream': 3.1.6
       '@ionic/utils-terminal': 2.3.4
       cross-spawn: 7.0.6
-      debug: 4.3.4
+      debug: 4.4.3
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
@@ -12705,7 +12696,7 @@ snapshots:
   '@ionic/utils-terminal@2.3.4':
     dependencies:
       '@types/slice-ansi': 4.0.0
-      debug: 4.3.4
+      debug: 4.4.3
       signal-exit: 3.0.7
       slice-ansi: 4.0.0
       string-width: 4.2.3
@@ -13849,7 +13840,7 @@ snapshots:
 
   '@types/minimist@1.2.5': {}
 
-  '@types/mocha@8.2.3': {}
+  '@types/mocha@10.0.10': {}
 
   '@types/node-fetch@2.6.13':
     dependencies:
@@ -13936,6 +13927,8 @@ snapshots:
   '@types/uuid@8.3.4': {}
 
   '@types/valid-url@1.0.7': {}
+
+  '@types/validator@13.15.10': {}
 
   '@types/web-bluetooth@0.0.20': {}
 
@@ -14047,13 +14040,6 @@ snapshots:
   '@undecaf/zbar-wasm@0.9.16':
     dependencies:
       jschardet: 3.1.4
-
-  '@virtuoso.dev/react-urx@0.2.13(react@18.3.1)':
-    dependencies:
-      '@virtuoso.dev/urx': 0.2.13
-      react: 18.3.1
-
-  '@virtuoso.dev/urx@0.2.13': {}
 
   '@vitejs/plugin-basic-ssl@1.2.0(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))':
     dependencies:
@@ -14816,7 +14802,7 @@ snapshots:
 
   bn.js@5.2.3: {}
 
-  body-parser@1.20.1:
+  body-parser@1.20.3:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
@@ -14826,8 +14812,8 @@ snapshots:
       http-errors: 2.0.0
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.11.0
-      raw-body: 2.5.1
+      qs: 6.13.0
+      raw-body: 2.5.2
       type-is: 1.6.18
       unpipe: 1.0.0
     transitivePeerDependencies:
@@ -15153,8 +15139,9 @@ snapshots:
 
   cjs-module-lexer@1.4.3: {}
 
-  class-validator@0.13.2:
+  class-validator@0.14.4:
     dependencies:
+      '@types/validator': 13.15.10
       libphonenumber-js: 1.12.41
       validator: 13.15.35
 
@@ -15415,7 +15402,7 @@ snapshots:
 
   cookie-signature@1.0.6: {}
 
-  cookie@0.5.0: {}
+  cookie@0.7.1: {}
 
   copy-anything@4.0.5:
     dependencies:
@@ -16150,6 +16137,8 @@ snapshots:
     optional: true
 
   encodeurl@1.0.2: {}
+
+  encodeurl@2.0.0: {}
 
   encoding-down@7.1.0:
     dependencies:
@@ -16896,34 +16885,34 @@ snapshots:
 
   exponential-backoff@3.1.3: {}
 
-  express@4.18.2:
+  express@4.21.2:
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.1
+      body-parser: 1.20.3
       content-disposition: 0.5.4
       content-type: 1.0.5
-      cookie: 0.5.0
+      cookie: 0.7.1
       cookie-signature: 1.0.6
       debug: 2.6.9
       depd: 2.0.0
-      encodeurl: 1.0.2
+      encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
-      finalhandler: 1.2.0
+      finalhandler: 1.3.1
       fresh: 0.5.2
       http-errors: 2.0.0
-      merge-descriptors: 1.0.1
+      merge-descriptors: 1.0.3
       methods: 1.1.2
       on-finished: 2.4.1
       parseurl: 1.3.3
-      path-to-regexp: 0.1.7
+      path-to-regexp: 0.1.12
       proxy-addr: 2.0.7
-      qs: 6.11.0
+      qs: 6.13.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
-      send: 0.18.0
-      serve-static: 1.15.0
+      send: 0.19.0
+      serve-static: 1.16.2
       setprototypeof: 1.2.0
       statuses: 2.0.1
       type-is: 1.6.18
@@ -17031,10 +17020,10 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  finalhandler@1.2.0:
+  finalhandler@1.3.1:
     dependencies:
       debug: 2.6.9
-      encodeurl: 1.0.2
+      encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
       parseurl: 1.3.3
@@ -18896,7 +18885,7 @@ snapshots:
       type-fest: 0.18.1
       yargs-parser: 20.2.9
 
-  merge-descriptors@1.0.1: {}
+  merge-descriptors@1.0.3: {}
 
   merge-stream@2.0.0: {}
 
@@ -19619,7 +19608,7 @@ snapshots:
       lru-cache: 11.3.3
       minipass: 7.1.3
 
-  path-to-regexp@0.1.7: {}
+  path-to-regexp@0.1.12: {}
 
   path-type@2.0.0:
     dependencies:
@@ -19992,7 +19981,7 @@ snapshots:
 
   q@1.5.1: {}
 
-  qs@6.11.0:
+  qs@6.13.0:
     dependencies:
       side-channel: 1.1.0
 
@@ -20021,7 +20010,7 @@ snapshots:
 
   range-parser@1.2.1: {}
 
-  raw-body@2.5.1:
+  raw-body@2.5.2:
     dependencies:
       bytes: 3.1.2
       http-errors: 2.0.0
@@ -20084,13 +20073,6 @@ snapshots:
       react: 18.3.1
       react-is: 17.0.2
     optionalDependencies:
-      react-dom: 18.3.1(react@18.3.1)
-
-  react-virtuoso@3.1.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@virtuoso.dev/react-urx': 0.2.13(react@18.3.1)
-      '@virtuoso.dev/urx': 0.2.13
-      react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
   react-virtuoso@4.18.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
@@ -20184,7 +20166,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.2
 
-  reflect-metadata@0.1.14: {}
+  reflect-metadata@0.2.2: {}
 
   reflect.getprototypeof@1.0.10:
     dependencies:
@@ -20493,7 +20475,7 @@ snapshots:
 
   semver@7.7.4: {}
 
-  send@0.18.0:
+  send@0.19.0:
     dependencies:
       debug: 2.6.9
       depd: 2.0.0
@@ -20520,12 +20502,12 @@ snapshots:
     dependencies:
       randombytes: 2.1.0
 
-  serve-static@1.15.0:
+  serve-static@1.16.2:
     dependencies:
-      encodeurl: 1.0.2
+      encodeurl: 2.0.0
       escape-html: 1.0.3
       parseurl: 1.3.3
-      send: 0.18.0
+      send: 0.19.0
     transitivePeerDependencies:
       - supports-color
 
@@ -21569,7 +21551,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-plugin-babel-compiler@0.3.0(@babel/core@7.29.0)(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1)):
+  vite-plugin-babel-compiler@0.4.1(@babel/core@7.29.0)(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1)):
     dependencies:
       '@babel/core': 7.29.0
       vite: 4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1)
