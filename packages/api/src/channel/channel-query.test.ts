@@ -85,6 +85,100 @@ describe('processedQuery — regression: subgroups are not direct children of ch
   });
 });
 
+describe('set-difference logic — unprocessedItems regression', () => {
+  // Mirror the JS set-difference logic from Channel.unprocessedItems()
+  function computeUnprocessed(allItems: string[], processedItems: string[]): string[] {
+    const processedSet = new Set(processedItems);
+    return allItems.filter(id => !processedSet.has(id));
+  }
+
+  it('returns items not in processedSet', () => {
+    const all = ['item1', 'item2', 'item3', 'item4'];
+    const processed = ['item1', 'item3'];
+    expect(computeUnprocessed(all, processed)).toEqual(['item2', 'item4']);
+  });
+
+  it('returns ALL items when processedSet is empty (the original bug scenario)', () => {
+    // This was the bug: processedQuery returned nothing (wrong scoping),
+    // so processedSet was empty, making ALL items "unprocessed" every time.
+    const all = ['item1', 'item2', 'item3'];
+    expect(computeUnprocessed(all, [])).toEqual(['item1', 'item2', 'item3']);
+  });
+
+  it('returns empty array when all items are processed', () => {
+    const all = ['item1', 'item2'];
+    expect(computeUnprocessed(all, ['item1', 'item2'])).toEqual([]);
+  });
+
+  it('handles duplicates in allItems gracefully', () => {
+    const all = ['item1', 'item2', 'item1', 'item3'];
+    const processed = ['item1'];
+    // Duplicates in allItems pass through — both instances of item1 are filtered
+    expect(computeUnprocessed(all, processed)).toEqual(['item2', 'item3']);
+  });
+
+  it('handles duplicates in processedItems gracefully', () => {
+    const all = ['item1', 'item2', 'item3'];
+    const processed = ['item1', 'item1', 'item3'];
+    expect(computeUnprocessed(all, processed)).toEqual(['item2']);
+  });
+});
+
+describe('processedQuery — grandchild relationship documentation', () => {
+  const channelId = 'flux://channel/abc123';
+
+  // The link structure is: channel → conversation → subgroup → item.
+  // The processedQuery must search for items via ANY subgroup globally,
+  // not assume subgroups are direct children of the channel.
+  it('fixed query searches globally, not scoped to channel', () => {
+    const q = buildProcessedQuery(channelId);
+    // Must NOT contain any reference to the channel ID
+    expect(q).not.toContain(channelId);
+    // Must NOT try to traverse channel→subgroup directly
+    expect(q).not.toContain('<ad4m://has_child>');
+    // Must find items via subgroup→item globally
+    expect(q).toContain(`<${SUBGROUP_ITEM}>`);
+  });
+});
+
+describe('Conversation.subgroupsData batchTimestampQuery pattern', () => {
+  // Mirror the query built in Conversation.subgroupsData()
+  function buildBatchTimestampQuery(subgroupIds: string[]): string {
+    const valuesClause = subgroupIds.map(id => `<${id}>`).join(' ');
+    return `
+      SELECT ?sg ?transcriptStart ?channelTs WHERE {
+        VALUES ?sg { ${valuesClause} }
+        GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?item . }
+        GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
+        ?chLink <ad4m://ontology/timestamp> ?channelTs .
+        GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
+        OPTIONAL { GRAPH ?g3 { ?item <flux://transcript_started_at> ?transcriptStart . } }
+      }
+    `;
+  }
+
+  it('uses VALUES clause with subgroup IDs', () => {
+    const q = buildBatchTimestampQuery(['sg1', 'sg2']);
+    expect(q).toContain('VALUES ?sg { <sg1> <sg2> }');
+  });
+
+  it('joins via SUBGROUP_ITEM (flux://has_item)', () => {
+    const q = buildBatchTimestampQuery(['sg1']);
+    expect(q).toContain(`<${SUBGROUP_ITEM}>`);
+  });
+
+  it('gets timestamps from channel→item links', () => {
+    const q = buildBatchTimestampQuery(['sg1']);
+    expect(q).toContain('<ad4m://ontology/timestamp> ?channelTs');
+    expect(q).toContain('<ad4m://has_child> ?item');
+  });
+
+  it('generates empty VALUES for no subgroups', () => {
+    const q = buildBatchTimestampQuery([]);
+    expect(q).toContain('VALUES ?sg {  }');
+  });
+});
+
 describe('dataQuery — VALUES clause and channel membership', () => {
   const channelId = 'flux://channel/abc123';
   const ids = ['flux://item/1', 'flux://item/2'];

@@ -1,14 +1,6 @@
 import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property } from '@coasys/ad4m';
 
-// SPARQL migration helper
-function parseLit(val: string | undefined): string {
-  if (!val) return '';
-  try {
-    const result = Literal.fromUrl(val).get();
-    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
-    return result;
-  } catch { return val; }
-}
+import { parseLit } from '../utils/parseLit';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
@@ -153,7 +145,7 @@ export class Conversation extends Ad4mModel {
       const batchTimestampQuery = `
         SELECT ?sg ?transcriptStart ?channelTs WHERE {
           VALUES ?sg { ${valuesClause} }
-          GRAPH ?g1 { ?sg <flux://has_item> ?item . }
+          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?item . }
           GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
           ?chLink <ad4m://ontology/timestamp> ?channelTs .
           GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
