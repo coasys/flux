@@ -1,31 +1,38 @@
 /**
  * Tests for the SPARQL query fixes in channel/index.ts.
  *
- * These validate that:
- * 1. The processedQuery is scoped to the channel (includes channel ID in the query)
- * 2. The final VALUES query re-verifies channel membership (includes channel join)
+ * Validates that:
+ * 1. The processedQuery does NOT scope subgroups as direct children of the channel
+ *    (bug: subgroups are grandchildren via conversations, so channel→subgroup never matched)
+ * 2. The processedQuery finds items globally via any conversation_subgroup
+ * 3. The final VALUES query re-verifies channel membership
  *
  * Run: npx tsx packages/api/src/channel/channel-query.test.ts
  */
 
-// Replicate the query construction logic from Channel.unprocessedItems()
-// to validate SPARQL correctness without needing a full AD4M runtime.
+const SUBGROUP_ITEM = 'flux://has_item';
 
-function buildAllItemsQuery(channelId: string): string {
+// --- Query builders (mirror the logic in Channel.unprocessedItems()) ---
+
+function buildProcessedQuery_BROKEN(channelId: string): string {
+  // OLD (buggy): assumes subgroups are direct children of the channel
   return `
     SELECT ?id WHERE {
-      GRAPH ?g1 { <${channelId}> <ad4m://has_child> ?id . }
-      GRAPH ?g2 { ?id <flux://entry_type> ?type . }
-      FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+      GRAPH ?g0 { <${channelId}> <ad4m://has_child> ?sg . }
+      GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
+      GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
     }
   `;
 }
 
 function buildProcessedQuery(channelId: string): string {
+  // FIXED: find items in ANY conversation_subgroup globally.
+  // Subgroups are grandchildren of channels (channel → conversation → subgroup),
+  // so scoping through channel never matched. Items are unique to channels anyway.
+  void channelId; // not used — intentionally global
   return `
     SELECT ?id WHERE {
-      GRAPH ?g0 { <${channelId}> <ad4m://has_child> ?sg . }
-      GRAPH ?g1 { ?sg <${'flux://has_subgroup_item'}> ?id . }
+      GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
       GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
     }
   `;
@@ -49,7 +56,7 @@ function buildDataQuery(channelId: string, unprocessedIds: string[]): string {
   `;
 }
 
-// --- Tests ---
+// --- Test runner ---
 let passed = 0;
 let failed = 0;
 
@@ -63,15 +70,41 @@ function assert(condition: boolean, msg: string) {
   }
 }
 
-console.log('processedQuery scoped to channel');
+// --- Tests ---
+
+console.log('BUG: old processedQuery wrongly scoped subgroups as channel children');
+{
+  const channelId = 'flux://channel/abc123';
+  const q = buildProcessedQuery_BROKEN(channelId);
+  // This pattern is the bug — it assumes channel → has_child → subgroup
+  assert(
+    q.includes(`<${channelId}> <ad4m://has_child> ?sg`),
+    'broken query links channel directly to subgroup (the bug)'
+  );
+}
+
+console.log('\nFIX: processedQuery finds items via any subgroup globally');
 {
   const channelId = 'flux://channel/abc123';
   const q = buildProcessedQuery(channelId);
-  assert(q.includes(channelId), 'processedQuery includes channel ID');
-  assert(q.includes('<ad4m://has_child>'), 'processedQuery joins via has_child from channel');
-  assert(!q.includes('SELECT ?id WHERE {\n      GRAPH ?g1 { ?sg'), 'processedQuery is not a global scan — scoped via channel→subgroup');
-  // Verify it starts from the channel, not from all subgroups globally
-  assert(q.includes(`<${channelId}> <ad4m://has_child> ?sg`), 'processedQuery starts traversal from channel ID');
+  // Must NOT contain the channel→subgroup direct link
+  assert(
+    !q.includes(`<${channelId}>`),
+    'fixed query does NOT reference channel ID (global scan)'
+  );
+  assert(
+    !q.includes('<ad4m://has_child>'),
+    'fixed query does NOT use has_child (no channel scoping)'
+  );
+  // Must still find items via subgroups
+  assert(
+    q.includes(`<${SUBGROUP_ITEM}>`),
+    'fixed query includes SUBGROUP_ITEM predicate'
+  );
+  assert(
+    q.includes('<flux://entry_type> <flux://conversation_subgroup>'),
+    'fixed query filters for conversation_subgroup type'
+  );
 }
 
 console.log('\nfinal VALUES query re-verifies channel membership');
@@ -81,9 +114,10 @@ console.log('\nfinal VALUES query re-verifies channel membership');
   const q = buildDataQuery(channelId, ids);
   assert(q.includes('VALUES ?id'), 'dataQuery uses VALUES clause');
   assert(q.includes(channelId), 'dataQuery includes channel ID');
-  assert(q.includes(`<${channelId}> <ad4m://has_child> ?id`), 'dataQuery re-verifies channel membership via has_child join');
-  // This is the key fix: the final query doesn't just trust the item IDs,
-  // it re-joins with the channel to confirm membership (race condition mitigation)
+  assert(
+    q.includes(`<${channelId}> <ad4m://has_child> ?id`),
+    'dataQuery re-verifies channel membership via has_child join'
+  );
   assert(!q.includes('FILTER NOT EXISTS'), 'dataQuery avoids O(N²) FILTER NOT EXISTS');
 }
 

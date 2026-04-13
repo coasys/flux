@@ -137,10 +137,16 @@ export class Channel extends Ad4mModel {
         }
       `;
 
-      // Query 2: Get processed item IDs scoped to THIS channel's subgroups only
+      // Query 2: Get all item IDs that have been placed into ANY conversation subgroup.
+      // NOTE: We do NOT scope this through the channel because subgroups are
+      // *grandchildren* of channels (channel → conversation → subgroup), not
+      // direct children.  The previous channel-scoped query assumed
+      //   channel --has_child--> subgroup
+      // which never matched, so processedSet was always empty and every item
+      // appeared unprocessed on every poll.  Scoping globally is correct
+      // because items are unique to channels anyway.
       const processedQuery = `
         SELECT ?id WHERE {
-          GRAPH ?g0 { <${this.id}> <ad4m://has_child> ?sg . }
           GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
           GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
         }
