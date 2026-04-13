@@ -1,13 +1,11 @@
 /**
- * Tests for the SPARQL query fixes in channel/index.ts.
+ * Tests for the SPARQL queries in Channel.unprocessedItems().
  *
  * Validates that:
  * 1. The processedQuery does NOT scope subgroups as direct children of the channel
  *    (bug: subgroups are grandchildren via conversations, so channel→subgroup never matched)
  * 2. The processedQuery finds items globally via any conversation_subgroup
  * 3. The final VALUES query re-verifies channel membership
- *
- * Run: npx tsx packages/api/src/channel/channel-query.test.ts
  */
 
 const SUBGROUP_ITEM = 'flux://has_item';
@@ -39,7 +37,7 @@ function buildProcessedQuery(channelId: string): string {
 }
 
 function buildDataQuery(channelId: string, unprocessedIds: string[]): string {
-  const valuesClause = unprocessedIds.map(id => `<${id}>`).join(' ');
+  const valuesClause = unprocessedIds.map((id) => `<${id}>`).join(' ');
   return `
     SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
       VALUES ?id { ${valuesClause} }
@@ -56,70 +54,55 @@ function buildDataQuery(channelId: string, unprocessedIds: string[]): string {
   `;
 }
 
-// --- Test runner ---
-let passed = 0;
-let failed = 0;
-
-function assert(condition: boolean, msg: string) {
-  if (condition) {
-    passed++;
-    console.log(`  ✓ ${msg}`);
-  } else {
-    failed++;
-    console.error(`  ✗ ${msg}`);
-  }
-}
-
-// --- Tests ---
-
-console.log('BUG: old processedQuery wrongly scoped subgroups as channel children');
-{
+describe('processedQuery — regression: subgroups are not direct children of channels', () => {
   const channelId = 'flux://channel/abc123';
-  const q = buildProcessedQuery_BROKEN(channelId);
-  // This pattern is the bug — it assumes channel → has_child → subgroup
-  assert(
-    q.includes(`<${channelId}> <ad4m://has_child> ?sg`),
-    'broken query links channel directly to subgroup (the bug)'
-  );
-}
 
-console.log('\nFIX: processedQuery finds items via any subgroup globally');
-{
-  const channelId = 'flux://channel/abc123';
-  const q = buildProcessedQuery(channelId);
-  // Must NOT contain the channel→subgroup direct link
-  assert(
-    !q.includes(`<${channelId}>`),
-    'fixed query does NOT reference channel ID (global scan)'
-  );
-  assert(
-    !q.includes('<ad4m://has_child>'),
-    'fixed query does NOT use has_child (no channel scoping)'
-  );
-  // Must still find items via subgroups
-  assert(
-    q.includes(`<${SUBGROUP_ITEM}>`),
-    'fixed query includes SUBGROUP_ITEM predicate'
-  );
-  assert(
-    q.includes('<flux://entry_type> <flux://conversation_subgroup>'),
-    'fixed query filters for conversation_subgroup type'
-  );
-}
+  it('old (broken) query wrongly links channel directly to subgroup', () => {
+    const q = buildProcessedQuery_BROKEN(channelId);
+    // This pattern is the bug — it assumes channel → has_child → subgroup
+    // which never matches because the real structure is channel → conversation → subgroup
+    expect(q).toContain(`<${channelId}> <ad4m://has_child> ?sg`);
+  });
 
-console.log('\nfinal VALUES query re-verifies channel membership');
-{
+  it('fixed query does NOT reference channel ID (global scan)', () => {
+    const q = buildProcessedQuery(channelId);
+    expect(q).not.toContain(`<${channelId}>`);
+  });
+
+  it('fixed query does NOT use has_child (no channel scoping)', () => {
+    const q = buildProcessedQuery(channelId);
+    expect(q).not.toContain('<ad4m://has_child>');
+  });
+
+  it('fixed query includes SUBGROUP_ITEM predicate', () => {
+    const q = buildProcessedQuery(channelId);
+    expect(q).toContain(`<${SUBGROUP_ITEM}>`);
+  });
+
+  it('fixed query filters for conversation_subgroup type', () => {
+    const q = buildProcessedQuery(channelId);
+    expect(q).toContain('<flux://entry_type> <flux://conversation_subgroup>');
+  });
+});
+
+describe('dataQuery — VALUES clause and channel membership', () => {
   const channelId = 'flux://channel/abc123';
   const ids = ['flux://item/1', 'flux://item/2'];
-  const q = buildDataQuery(channelId, ids);
-  assert(q.includes('VALUES ?id'), 'dataQuery uses VALUES clause');
-  assert(q.includes(channelId), 'dataQuery includes channel ID');
-  assert(
-    q.includes(`<${channelId}> <ad4m://has_child> ?id`),
-    'dataQuery re-verifies channel membership via has_child join'
-  );
-  assert(!q.includes('FILTER NOT EXISTS'), 'dataQuery avoids O(N²) FILTER NOT EXISTS');
-}
 
-console.log(`\n${passed} passed, ${failed} failed`);
-process.exit(failed > 0 ? 1 : 0);
+  it('uses VALUES clause for unprocessed IDs', () => {
+    const q = buildDataQuery(channelId, ids);
+    expect(q).toContain('VALUES ?id');
+    expect(q).toContain('<flux://item/1>');
+    expect(q).toContain('<flux://item/2>');
+  });
+
+  it('re-verifies channel membership via has_child join', () => {
+    const q = buildDataQuery(channelId, ids);
+    expect(q).toContain(`<${channelId}> <ad4m://has_child> ?id`);
+  });
+
+  it('avoids O(N²) FILTER NOT EXISTS', () => {
+    const q = buildDataQuery(channelId, ids);
+    expect(q).not.toContain('FILTER NOT EXISTS');
+  });
+});
