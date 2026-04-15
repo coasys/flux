@@ -93,3 +93,6 @@ jobs:
 
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
+
+      - name: Test
+        run: pnpm test --filter @coasys/flux-api

@@ -1,14 +1,5 @@
 import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property } from '@coasys/ad4m';
-
-// SPARQL migration helper
-function parseLit(val: string | undefined): string {
-  if (!val) return '';
-  try {
-    const result = Literal.fromUrl(val).get();
-    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
-    return result;
-  } catch { return val; }
-}
+import { parseLit } from '../utils/parseLit';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
@@ -125,20 +116,58 @@ export class Channel extends Ad4mModel {
   }
 
   async unprocessedItems(): Promise<SynergyItem[]> {
-    // Get all unprocessed items in the channel
+    // Get all unprocessed items in the channel using set-difference approach
+    // instead of FILTER NOT EXISTS (which is O(N²) in Oxigraph)
     try {
-      // SPARQL migration
-      const sparqlQuery = `
+      // Query 1: Get all item IDs in channel
+      const allItemsQuery = `
+        SELECT ?id WHERE {
+          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
+          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+        }
+      `;
+
+      // Query 2: Get all item IDs that have been placed into ANY conversation subgroup.
+      // NOTE: We do NOT scope this through the channel because subgroups are
+      // *grandchildren* of channels (channel → conversation → subgroup), not
+      // direct children.  The previous channel-scoped query assumed
+      //   channel --has_child--> subgroup
+      // which never matched, so processedSet was always empty and every item
+      // appeared unprocessed on every poll.  Scoping globally is correct
+      // because items are unique to channels anyway.
+      const processedQuery = `
+        SELECT ?id WHERE {
+          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
+          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
+        }
+      `;
+
+      // NOTE: Race window — links added between these two queries could cause
+      // an item to appear in allItems but not processedSet (or vice-versa).
+      // The final VALUES query re-verifies channel membership to mitigate this.
+      const [allItemsResult, processedResult] = await Promise.all([
+        this.perspective.querySparql(allItemsQuery),
+        this.perspective.querySparql(processedQuery),
+      ]);
+
+      const processedSet = new Set((processedResult || []).map((r: any) => r.id));
+      const unprocessedIds = (allItemsResult || [])
+        .map((r: any) => r.id)
+        .filter((id: string) => id && !processedSet.has(id));
+
+      if (unprocessedIds.length === 0) return [];
+
+      // Query 3: Get full data only for unprocessed items using VALUES clause
+      const valuesClause = unprocessedIds.map((id: string) => `<${id}>`).join(' ');
+      const dataQuery = `
         SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+          VALUES ?id { ${valuesClause} }
           GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
           ?link1 <ad4m://ontology/author> ?author .
           ?link1 <ad4m://ontology/timestamp> ?timestamp .
           GRAPH ?g2 { ?id <flux://entry_type> ?type . }
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          FILTER NOT EXISTS {
-            GRAPH ?sgLink { ?sg <${SUBGROUP_ITEM}> ?id . }
-            GRAPH ?g3 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
-          }
           OPTIONAL { GRAPH ?g4 { ?id <flux://body> ?body . } }
           OPTIONAL { GRAPH ?g5 { ?id <flux://title> ?title . } }
           OPTIONAL { GRAPH ?g6 { ?id <flux://name> ?taskName . } }
@@ -146,7 +175,7 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(dataQuery);
 
       // Deduplicate by id
       const itemMap = new Map<string, any>();

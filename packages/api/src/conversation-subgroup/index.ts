@@ -1,14 +1,5 @@
 import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
-
-// SPARQL migration helper
-function parseLit(val: string | undefined): string {
-  if (!val) return '';
-  try {
-    const result = Literal.fromUrl(val).get();
-    if (result && typeof result === 'object') return result.data ?? JSON.stringify(result);
-    return result;
-  } catch { return val; }
-}
+import { parseLit } from '../utils/parseLit';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
