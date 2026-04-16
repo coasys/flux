@@ -117,6 +117,8 @@ import { useRouteParams } from '@/composables/useRouteParams';
 import { useModalStore, useUiStore } from '@/stores';
 import fetchFluxApp from '@/utils/fetchFluxApp';
 import { stripChannelPrefix } from '@/utils/routeUtils';
+import { upsertById } from '@/utils/upsertById';
+import { buildChannelParentLink } from './createChannelLinks';
 import { App, Channel, FluxApp, generateWCName, getAllFluxApps, getOfflineFluxApps } from '@coasys/flux-api';
 import { Link } from '@coasys/ad4m';
 import { storeToRefs } from 'pinia';
@@ -131,7 +133,7 @@ const { isMobile } = storeToRefs(uiStore);
 
 const { createChannelParent } = storeToRefs(modalStore);
 
-const { perspective } = useCommunityService();
+const { perspective, allChannels } = useCommunityService();
 const { communityId } = useRouteParams();
 
 const tab = ref<'official' | 'community'>('official');
@@ -181,13 +183,8 @@ async function createChannel() {
     channel.isPinned = false;
     await channel.save();
     console.log('Channel created with ID:', channel.id);
-    if (createChannelParent.value?.id) {
-      await perspective.add(
-        new Link({ source: createChannelParent.value.id, predicate: 'ad4m://has_child', target: channel.id }),
-      );
-    } else {
-      await perspective.add(new Link({ source: 'ad4m://self', predicate: 'ad4m://has_child', target: channel.id }));
-    }
+    await perspective.add(buildChannelParentLink(createChannelParent.value?.id, channel.id));
+    allChannels.value = upsertById(allChannels.value, channel);
 
     await Promise.all(
       selectedPlugins.value.map(async (app) => {

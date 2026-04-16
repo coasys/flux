@@ -1,6 +1,7 @@
 import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
+import { upsertById } from '@/utils/upsertById';
 import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
@@ -360,6 +361,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       await perspective.add(
         new Link({ source: parentChannelId || 'ad4m://self', predicate: CHANNEL, target: channel.id }),
       );
+      allChannels.value = upsertById(allChannels.value, channel);
 
       // Create the first placeholder conversation
       await Conversation.create(
