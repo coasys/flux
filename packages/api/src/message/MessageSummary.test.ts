@@ -1,62 +1,37 @@
-/**
- * Tests for MessageSummary — lightweight Message model without SPARQL getters.
- *
- * Validates via source inspection:
- * 1. MessageSummary does NOT have SPARQL getter properties (replyingTo, isPopular)
- * 2. MessageSummary retains simple @HasMany relations (reactions, thread, replies)
- * 3. No `getter:` SPARQL strings appear in the source
- */
+import { describe, it, expect } from 'vitest';
+import { MessageSummary } from './MessageSummary';
 
-import * as fs from 'fs';
-import * as path from 'path';
-
-const summaryPath = path.resolve(__dirname, 'MessageSummary.ts');
-let sourceCode: string;
-
-beforeAll(() => {
-  sourceCode = fs.readFileSync(summaryPath, 'utf-8');
-});
-
-describe('MessageSummary (lightweight read model)', () => {
-  // Strip comments to avoid false positives from doc text
-  let codeOnly: string;
-  beforeAll(() => {
-    codeOnly = sourceCode
-      .replace(/\/\/.*$/gm, '')
-      .replace(/\/\*[\s\S]*?\*\//g, '');
+describe('MessageSummary', () => {
+  it('has model metadata with Message class name', () => {
+    const metadata = MessageSummary.getModelMetadata();
+    expect(metadata.className).toBe('Message');
   });
 
-  it('does NOT have a replyingTo property', () => {
-    expect(codeOnly).not.toContain('replyingTo');
+  it('has no getter properties (no SPARQL-backed getters)', () => {
+    const metadata = MessageSummary.getModelMetadata();
+    const getterProps = Object.entries(metadata.properties)
+      .filter(([, meta]) => meta.getter);
+    expect(getterProps).toHaveLength(0);
   });
 
-  it('does NOT have an isPopular property', () => {
-    expect(codeOnly).not.toContain('isPopular');
+  it('has expected scalar properties', () => {
+    const metadata = MessageSummary.getModelMetadata();
+    const propNames = Object.keys(metadata.properties);
+    expect(propNames).toContain('body');
   });
 
-  it('does NOT contain any SPARQL getter strings', () => {
-    expect(codeOnly).not.toContain('getter:');
-    expect(codeOnly).not.toContain('SELECT ?target WHERE');
-    expect(codeOnly).not.toContain('ASK WHERE');
+  it('has reaction, thread, and replies relations', () => {
+    const metadata = MessageSummary.getModelMetadata();
+    const relNames = Object.keys(metadata.relations);
+    expect(relNames).toContain('reactions');
+    expect(relNames).toContain('thread');
+    expect(relNames).toContain('replies');
   });
 
-  it('retains @HasMany for simple relations', () => {
-    expect(sourceCode).toContain('@HasMany');
-    expect(sourceCode).toContain('REACTION');
-    expect(sourceCode).toContain('MESSAGE_THREAD');
-    expect(sourceCode).toContain('HAS_REPLY');
-  });
-
-  it('has body @Property', () => {
-    expect(sourceCode).toContain('@Property({ through: BODY })');
-    expect(sourceCode).toContain('body: string');
-  });
-
-  it('uses @Model decorator with Message name', () => {
-    expect(sourceCode).toContain("@Model({ name: 'Message' })");
-  });
-
-  it('extends Ad4mModel', () => {
-    expect(sourceCode).toContain('extends Ad4mModel');
+  it('has a type flag property', () => {
+    const metadata = MessageSummary.getModelMetadata();
+    const typeProp = metadata.properties['type'];
+    expect(typeProp).toBeDefined();
+    expect(typeProp.flag).toBe(true);
   });
 });
