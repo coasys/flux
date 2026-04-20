@@ -302,37 +302,57 @@ async function getUnprocessedItems() {
 // Reactive data loading driven by the scoped conversation subscription.
 // When conversations change under this channel, the watch fires and refreshes
 // both conversation metadata and unprocessed items.
+let refreshInFlight: Promise<void> | null = null;
+let refreshPending = false;
+
 async function refreshAllData(isFirstRun: boolean = false): Promise<void> {
+  if (refreshInFlight) {
+    refreshPending = true;
+    return refreshInFlight;
+  }
+
+  refreshInFlight = (async () => {
+    try {
+      const [newConversations, newUnprocessedItems] = await Promise.all([
+        getConversations(),
+        getUnprocessedItems(),
+      ]);
+
+      // Update sidebar items if the conversation name has changed
+      if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
+        getPinnedConversations();
+        getRecentConversations();
+        getChannelsWithConversations();
+      }
+
+      conversations.value = newConversations;
+      unprocessedItems.value = newUnprocessedItems;
+      if (isFirstRun) loading.value = false;
+
+      // Trigger a refresh in child components
+      refreshTrigger.value = refreshTrigger.value + 1;
+
+      // Check if we should process tasks
+      if (isFirstRun || !aiEnabled.value) return;
+      const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
+      if (shouldProcess) {
+        const channel = new Channel(perspective, channelUrl);
+        aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
+      }
+    } catch (error) {
+      console.error('Error refreshing timeline data:', error);
+      if (isFirstRun) loading.value = false;
+    }
+  })();
+
   try {
-    const [newConversations, newUnprocessedItems] = await Promise.all([
-      getConversations(),
-      getUnprocessedItems(),
-    ]);
-
-    // Update sidebar items if the conversation name has changed
-    if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
-      getPinnedConversations();
-      getRecentConversations();
-      getChannelsWithConversations();
+    await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
+    if (refreshPending) {
+      refreshPending = false;
+      void refreshAllData();
     }
-
-    conversations.value = newConversations;
-    unprocessedItems.value = newUnprocessedItems;
-    if (isFirstRun) loading.value = false;
-
-    // Trigger a refresh in child components
-    refreshTrigger.value = refreshTrigger.value + 1;
-
-    // Check if we should process tasks
-    if (isFirstRun || !aiEnabled.value) return;
-    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
-    if (shouldProcess) {
-      const channel = new Channel(perspective, channelUrl);
-      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
-    }
-  } catch (error) {
-    console.error('Error refreshing timeline data:', error);
-    if (isFirstRun) loading.value = false;
   }
 }
 
