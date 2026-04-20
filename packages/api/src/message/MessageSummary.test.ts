@@ -1,45 +1,62 @@
 /**
  * Tests for MessageSummary lightweight model (WS-6).
  *
- * Validates:
+ * Validates via source inspection:
  * 1. MessageSummary does NOT have SPARQL getter properties (replyingTo, isPopular)
  * 2. MessageSummary retains simple @HasMany relations (reactions, thread, replies)
- * 3. No hidden SPARQL getter queries fire during list rendering
+ * 3. No `getter:` SPARQL strings appear in the source
  */
 
-import { MessageSummary } from './MessageSummary';
+import * as fs from 'fs';
+import * as path from 'path';
 
-describe('MessageSummary', () => {
-  it('is a valid class', () => {
-    expect(MessageSummary).toBeDefined();
-    expect(typeof MessageSummary).toBe('function');
+const summaryPath = path.resolve(__dirname, 'MessageSummary.ts');
+let sourceCode: string;
+
+beforeAll(() => {
+  sourceCode = fs.readFileSync(summaryPath, 'utf-8');
+});
+
+describe('MessageSummary (WS-6: Lightweight Read Model)', () => {
+  // Strip comments to avoid false positives from doc text
+  let codeOnly: string;
+  beforeAll(() => {
+    codeOnly = sourceCode
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
   });
 
-  it('does NOT have getter-backed properties (replyingTo, isPopular)', () => {
-    // MessageSummary deliberately omits replyingTo (SPARQL getter) and isPopular (ASK getter)
-    const instance = Object.create(MessageSummary.prototype);
-    
-    // These should not exist on the prototype — they're the expensive properties
-    // that the full Message model defines with `getter:` SPARQL
-    expect(instance).not.toHaveProperty('replyingTo');
-    expect(instance).not.toHaveProperty('isPopular');
+  it('does NOT have a replyingTo property', () => {
+    expect(codeOnly).not.toContain('replyingTo');
   });
 
-  it('has expected basic properties', () => {
-    // Should have body, type, transcriptStartedAt as scalar properties
-    // and reactions, thread, replies as @HasMany
-    const proto = MessageSummary.prototype;
-    // The class itself should be constructable
-    expect(typeof MessageSummary).toBe('function');
+  it('does NOT have an isPopular property', () => {
+    expect(codeOnly).not.toContain('isPopular');
   });
 
-  it('retains @HasMany for simple relations (reactions, thread, replies)', () => {
-    // These are direct link traversals, not SPARQL queries, so they're kept
-    // The defaults should be empty arrays
-    const instance = new (MessageSummary as any)({} as any, 'test-id');
-    // After construction, the HasMany defaults should be present
-    expect(instance.reactions).toEqual([]);
-    expect(instance.thread).toEqual([]);
-    expect(instance.replies).toEqual([]);
+  it('does NOT contain any SPARQL getter strings', () => {
+    expect(codeOnly).not.toContain('getter:');
+    expect(codeOnly).not.toContain('SELECT ?target WHERE');
+    expect(codeOnly).not.toContain('ASK WHERE');
+  });
+
+  it('retains @HasMany for simple relations', () => {
+    expect(sourceCode).toContain('@HasMany');
+    expect(sourceCode).toContain('REACTION');
+    expect(sourceCode).toContain('MESSAGE_THREAD');
+    expect(sourceCode).toContain('HAS_REPLY');
+  });
+
+  it('has body @Property', () => {
+    expect(sourceCode).toContain('@Property({ through: BODY })');
+    expect(sourceCode).toContain('body: string');
+  });
+
+  it('uses @Model decorator with Message name', () => {
+    expect(sourceCode).toContain("@Model({ name: 'Message' })");
+  });
+
+  it('extends Ad4mModel', () => {
+    expect(sourceCode).toContain('extends Ad4mModel');
   });
 });

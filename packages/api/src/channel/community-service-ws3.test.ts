@@ -48,8 +48,10 @@ describe('useCommunityService.ts (WS-3: Fix Query Scoping)', () => {
       /async function getPinnedConversations\(\)[\s\S]*?(?=\n  async function|\n  function|\n  \/\/.*\n  async)/,
     );
     if (pinnedMatch) {
-      expect(pinnedMatch[0]).not.toContain('channel.get({ conversations: true })');
-      expect(pinnedMatch[0]).not.toContain('.map(async (channel: Channel)');
+      // Strip comments before checking — the old pattern may appear in comments
+      const codeOnly = pinnedMatch[0].replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+      expect(codeOnly).not.toContain('channel.get({ conversations: true })');
+      expect(codeOnly).not.toContain('.map(async (channel: Channel)');
     }
   });
 

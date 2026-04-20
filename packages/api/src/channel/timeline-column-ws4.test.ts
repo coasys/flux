@@ -26,32 +26,42 @@ beforeAll(() => {
 });
 
 describe('TimelineColumn.vue (WS-4: Replace Raw Listeners)', () => {
+  // Helper: strip comments from source to avoid false positives from
+  // comment text like "// WS-4: ... replaces perspective.addListener(...)"
+  let executableCode: string;
+  beforeAll(() => {
+    executableCode = sourceCode
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/<!--[\s\S]*?-->/g, '');
+  });
+
   it('does NOT use perspective.addListener("link-added", ...)', () => {
-    expect(sourceCode).not.toContain("perspective.addListener('link-added'");
-    expect(sourceCode).not.toContain('perspective.addListener("link-added"');
+    expect(executableCode).not.toContain("perspective.addListener('link-added'");
+    expect(executableCode).not.toContain('perspective.addListener("link-added"');
   });
 
   it('does NOT use perspective.removeListener("link-added", ...)', () => {
-    expect(sourceCode).not.toContain("perspective.removeListener('link-added'");
-    expect(sourceCode).not.toContain('perspective.removeListener("link-added"');
+    expect(executableCode).not.toContain("perspective.removeListener('link-added'");
+    expect(executableCode).not.toContain('perspective.removeListener("link-added"');
   });
 
   it('does NOT define handleLinkAdded function', () => {
-    expect(sourceCode).not.toContain('function handleLinkAdded');
+    expect(executableCode).not.toContain('function handleLinkAdded');
   });
 
   it('does NOT define getDataFull function', () => {
-    expect(sourceCode).not.toContain('function getDataFull');
+    expect(executableCode).not.toContain('function getDataFull');
   });
 
   it('does NOT define getDataIncremental function', () => {
-    expect(sourceCode).not.toContain('function getDataIncremental');
+    expect(executableCode).not.toContain('function getDataIncremental');
   });
 
   it('does NOT use LINK_ADDED_TIMEOUT debounce pattern', () => {
-    expect(sourceCode).not.toContain('LINK_ADDED_TIMEOUT');
-    expect(sourceCode).not.toContain('linkAddedTimeout');
-    expect(sourceCode).not.toContain('linkUpdatesQueued');
+    expect(executableCode).not.toContain('LINK_ADDED_TIMEOUT');
+    expect(executableCode).not.toContain('linkAddedTimeout');
+    expect(executableCode).not.toContain('linkUpdatesQueued');
   });
 
   it('uses useLiveQuery with parent scope for conversations', () => {
