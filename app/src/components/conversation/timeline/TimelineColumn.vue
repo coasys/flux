@@ -132,10 +132,11 @@ import { llmProcessingSteps, useAiStore, useAppStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
 import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Channel, Conversation } from '@coasys/flux-api';
+import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 interface Props {
@@ -144,8 +145,6 @@ interface Props {
 }
 
 defineProps<Props>();
-
-const LINK_ADDED_TIMEOUT = 2000;
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -158,15 +157,19 @@ const { signallingService, perspective, getRecentConversations, getPinnedConvers
 
 const channelUrl = restoreChannelPrefix(route.params.channelId as string);
 
+// WS-4: Scoped live query replaces perspective.addListener('link-added', handleLinkAdded).
+// This subscription only fires when Conversation instances under this channel change,
+// not on every link change in the entire perspective.
+const { data: conversationInstances } = useLiveQuery(Conversation, perspective, {
+  parent: { model: Channel, id: channelUrl },
+});
+
 const conversations = ref<SynergyGroup[]>([]);
 const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
 const selectedItemId = ref('');
 const zoom = ref<GroupingOption>(groupingOptions[0]);
 const refreshTrigger = ref(0);
-const gettingData = ref(false);
-const linkAddedTimeout = ref<any>(null);
-const linkUpdatesQueued = ref<any>(null);
 const loading = ref(true);
 const exporting = ref(false);
 const exportingFlat = ref(false);
@@ -296,162 +299,59 @@ async function getUnprocessedItems() {
   return await channel.unprocessedItems();
 }
 
-// Predicates that indicate conversation metadata changes (require full refresh)
-const CONVERSATION_META_PREDICATES = ['flux://has_name', 'flux://has_summary', 'flux://has_child'];
-// Predicates that indicate new messages (only need unprocessed items refresh)
-const MESSAGE_PREDICATES = ['flux://has_expression', 'ad4m://has_child'];
-
-function isConversationMetaPredicate(predicate: string | undefined): boolean {
-  return !!predicate && CONVERSATION_META_PREDICATES.some(p => predicate.includes(p));
-}
-
-function isMessagePredicate(predicate: string | undefined): boolean {
-  // If predicate is unknown, treat as message (safe default — just refreshes unprocessed)
-  return !predicate || MESSAGE_PREDICATES.some(p => predicate.includes(p));
-}
-
-async function getData(firstRun?: boolean): Promise<void> {
-  return getDataFull(firstRun);
-}
-
-async function getDataFull(firstRun?: boolean): Promise<void> {
-  if (gettingData.value) return;
-
-  gettingData.value = true;
-
+// WS-4: Reactive data loading driven by the scoped useLiveQuery subscription.
+// When conversations change under this channel, the watch fires and refreshes
+// both conversation metadata and unprocessed items.
+async function refreshAllData(isFirstRun: boolean = false): Promise<void> {
   try {
-    const [newConversations, newUnprocessedItems] = await Promise.all([getConversations(), getUnprocessedItems()]);
+    const [newConversations, newUnprocessedItems] = await Promise.all([
+      getConversations(),
+      getUnprocessedItems(),
+    ]);
 
-    // Update sidebar items if the conversations name has changed
+    // Update sidebar items if the conversation name has changed
     if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
       getPinnedConversations();
       getRecentConversations();
       getChannelsWithConversations();
     }
 
-    // Update state
     conversations.value = newConversations;
     unprocessedItems.value = newUnprocessedItems;
-    gettingData.value = false;
-    if (firstRun) loading.value = false;
-
-    // Trigger a refresh in child components
-    refreshTrigger.value = refreshTrigger.value + 1;
-
-    // If this is not the first run and AI is enabled, check if we should process tasks
-    if (firstRun || !aiEnabled.value) return;
-    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
-    if (shouldProcess) {
-      const channel = new Channel(perspective, channelUrl);
-      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
-    }
-  } catch (error) {
-    console.error('Error fetching conversations or unprocessed items:', error);
-    gettingData.value = false;
-  }
-}
-
-async function getDataIncremental(): Promise<void> {
-  if (gettingData.value) return;
-
-  gettingData.value = true;
-
-  try {
-    // Only refresh unprocessed items — conversations haven't changed
-    const newUnprocessedItems = await getUnprocessedItems();
-    unprocessedItems.value = newUnprocessedItems;
-    gettingData.value = false;
+    if (isFirstRun) loading.value = false;
 
     // Trigger a refresh in child components
     refreshTrigger.value = refreshTrigger.value + 1;
 
     // Check if we should process tasks
-    if (!aiEnabled.value) return;
+    if (isFirstRun || !aiEnabled.value) return;
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
     if (shouldProcess) {
       const channel = new Channel(perspective, channelUrl);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
     }
   } catch (error) {
-    console.error('Error fetching unprocessed items:', error);
-    gettingData.value = false;
+    console.error('Error refreshing timeline data:', error);
+    if (isFirstRun) loading.value = false;
   }
-}
-
-async function refreshConversations(): Promise<void> {
-  try {
-    const newConversations = await getConversations();
-    if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
-      getPinnedConversations();
-      getRecentConversations();
-      getChannelsWithConversations();
-    }
-    conversations.value = newConversations;
-    refreshTrigger.value = refreshTrigger.value + 1;
-  } catch (error) {
-    console.error('Error refreshing conversations:', error);
-  }
-}
-
-// TODO: Remove this if we can achieve the same with subscriptions. Currently inspects link predicates.
-function handleLinkAdded(link?: any) {
-  const predicate = link?.data?.predicate;
-
-  // Determine which refresh path to take
-  const needsFullRefresh = isConversationMetaPredicate(predicate);
-  const refreshFn = needsFullRefresh ? getDataFull : getDataIncremental;
-
-  // Debounced with LINK_ADDED_TIMEOUT to avoid concurrent data fetches
-
-  // If in cooldown period, just mark that we've seen a new event and exit
-  // If any event during cooldown needs full refresh, upgrade the queued refresh
-  if (linkAddedTimeout.value) {
-    linkUpdatesQueued.value = true;
-    if (needsFullRefresh) (linkUpdatesQueued as any)._needsFull = true;
-    return null;
-  }
-
-  // Otherwise get new data immediately
-  refreshFn();
-  linkUpdatesQueued.value = false;
-  (linkUpdatesQueued as any)._needsFull = false;
-
-  // Set cooldown period with callback that checks for queued updates
-  linkAddedTimeout.value = setTimeout(() => {
-    linkAddedTimeout.value = null;
-
-    // If new events came in during cooldown, process them now
-    if (linkUpdatesQueued.value) {
-      const fn = (linkUpdatesQueued as any)._needsFull ? getDataFull : getDataIncremental;
-      fn();
-      linkUpdatesQueued.value = false;
-      (linkUpdatesQueued as any)._needsFull = false;
-    }
-  }, LINK_ADDED_TIMEOUT);
-
-  return null;
 }
 
 function setSelectedItemId(id: string | null) {
   selectedItemId.value = id || '';
 }
 
-onMounted(() => {
-  // Wait until appstore & signallingService are available before initializing
-  if (signallingService) {
-    getData(true);
-
-    // Listen for link-added events from the perspective
-    perspective.addListener('link-added', handleLinkAdded);
-  }
+// WS-4: Watch the scoped conversation subscription instead of raw link listeners.
+// The useLiveQuery subscription only fires when Conversation instances under
+// this channel's parent scope actually change — not on every perspective link.
+watch(conversationInstances, () => {
+  refreshAllData();
 });
 
-onUnmounted(() => {
-  // Remove the link-added listener when the component is unmounted
-  if (signallingService) perspective.removeListener('link-added', handleLinkAdded);
-
-  // Clear timeouts
-  if (linkAddedTimeout.value) clearTimeout(linkAddedTimeout.value);
+onMounted(() => {
+  // Initial data load
+  if (signallingService) {
+    refreshAllData(true);
+  }
 });
 
 watch(
