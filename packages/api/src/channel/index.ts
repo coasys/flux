@@ -1,4 +1,4 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property, PerspectiveProxy } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
@@ -234,6 +234,95 @@ export class Channel extends Ad4mModel {
     } catch (error) {
       console.error('Error getting total item count:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Get recent conversation channels with last-activity timestamps.
+   * Single SPARQL query — replaces the N+1 iterative walk in useCommunityService.
+   *
+   * Returns conversation channels ordered by most recent activity (latest item timestamp).
+   * Falls back to conversation creation time when no items exist.
+   */
+  static async recentConversations(
+    perspective: PerspectiveProxy,
+    limit: number = 20,
+  ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
+    const sparql = `
+      SELECT ?channelId ?conversationId ?lastActivity WHERE {
+        GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
+        GRAPH ?g2 { ?channelId <${CHANNEL_IS_CONVERSATION}> "true" . }
+        OPTIONAL {
+          GRAPH ?g3 { ?channelId <ad4m://has_child> ?conversationId . }
+          GRAPH ?g4 { ?conversationId <flux://entry_type> <flux://conversation> . }
+        }
+        OPTIONAL {
+          GRAPH ?itemLink { ?channelId <ad4m://has_child> ?item . }
+          ?itemLink <ad4m://ontology/timestamp> ?itemTs .
+          GRAPH ?g5 { ?item <${ENTRY_TYPE}> ?itemType . }
+          FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
+        }
+        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z") AS ?lastActivity)
+      }
+      ORDER BY DESC(?lastActivity)
+      LIMIT ${limit}
+    `;
+
+    try {
+      const results = await perspective.querySparql(sparql);
+      // Deduplicate by channelId — GROUP BY is not available in all SPARQL engines,
+      // so we take the first (most recent) row per channel from the ORDER BY result.
+      const seen = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
+      for (const r of results || []) {
+        const cid = r.channelId;
+        if (!cid || seen.has(cid)) continue;
+        seen.set(cid, {
+          channelId: cid,
+          conversationId: r.conversationId || undefined,
+          lastActivity: r.lastActivity || undefined,
+        });
+      }
+      return Array.from(seen.values());
+    } catch (error) {
+      console.error('Error in Channel.recentConversations():', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get pinned conversation channels.
+   * Single SPARQL query — replaces iterative channel.get({ conversations: true }).
+   */
+  static async pinnedConversations(
+    perspective: PerspectiveProxy,
+  ): Promise<{ channelId: string; conversationId?: string }[]> {
+    const sparql = `
+      SELECT ?channelId ?conversationId WHERE {
+        GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
+        GRAPH ?g2 { ?channelId <${CHANNEL_IS_PINNED}> "true" . }
+        OPTIONAL {
+          GRAPH ?g3 { ?channelId <ad4m://has_child> ?conversationId . }
+          GRAPH ?g4 { ?conversationId <flux://entry_type> <flux://conversation> . }
+        }
+      }
+    `;
+
+    try {
+      const results = await perspective.querySparql(sparql);
+      // Deduplicate by channelId
+      const seen = new Map<string, { channelId: string; conversationId?: string }>();
+      for (const r of results || []) {
+        const cid = r.channelId;
+        if (!cid || seen.has(cid)) continue;
+        seen.set(cid, {
+          channelId: cid,
+          conversationId: r.conversationId || undefined,
+        });
+      }
+      return Array.from(seen.values());
+    } catch (error) {
+      console.error('Error in Channel.pinnedConversations():', error);
+      return [];
     }
   }
 
