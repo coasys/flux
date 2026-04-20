@@ -2,7 +2,7 @@ import { PerspectiveProxy } from '@coasys/ad4m';
 import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Channel, Message } from '@coasys/flux-api';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Virtuoso } from 'react-virtuoso';
 import MessageItem from '../MessageItem';
 import styles from './MessageList.module.css';
@@ -52,6 +52,29 @@ export default function MessageList({
     // Reverse order after pagination for inverted message scrolling
     return entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [entries]);
+
+  // WS-3: Lazy getter evaluation for visible messages.
+  // After WS-2 (deepQuery inversion), collection queries skip SPARQL getters
+  // by default. Evaluate `replyingTo` on demand for the current message batch
+  // so MessageItem can render reply previews.
+  const evaluatedIdsRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (messages.length === 0) return;
+    // Only evaluate getters for messages we haven't already processed
+    const unevaluated = messages.filter((m) => !evaluatedIdsRef.current.has(m.id));
+    if (unevaluated.length === 0) return;
+
+    // Mark as in-progress to avoid duplicate evaluation
+    for (const m of unevaluated) evaluatedIdsRef.current.add(m.id);
+
+    // Fire and forget — Message.evaluateGetters mutates the instances in-place.
+    // Preact will re-render when the message props change.
+    Message.evaluateGetters(unevaluated, perspective, ['replyingTo']).catch((err) => {
+      console.warn('Failed to evaluate message getters:', err);
+      // Remove from evaluated set so retry is possible on next render
+      for (const m of unevaluated) evaluatedIdsRef.current.delete(m.id);
+    });
+  }, [messages, perspective]);
 
   function differenceInMinutes(createdAt1: string | number | Date, createdAt2: string | number | Date): number {
     const date1 = new Date(createdAt1);
