@@ -47,12 +47,11 @@ describe('useCommunityService.ts (scoped queries)', () => {
     const pinnedMatch = sourceCode.match(
       /async function getPinnedConversations\(\)[\s\S]*?(?=\n  async function|\n  function|\n  \/\/.*\n  async)/,
     );
-    if (pinnedMatch) {
-      // Strip comments before checking — the old pattern may appear in comments
-      const codeOnly = pinnedMatch[0].replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-      expect(codeOnly).not.toContain('channel.get({ conversations: true })');
-      expect(codeOnly).not.toContain('.map(async (channel: Channel)');
-    }
+    expect(pinnedMatch).not.toBeNull();
+    // Strip comments before checking — the old pattern may appear in comments
+    const codeOnly = pinnedMatch![0].replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(codeOnly).not.toContain('channel.get({ conversations: true })');
+    expect(codeOnly).not.toContain('.map(async (channel: Channel)');
   });
 
   it('does NOT use iterative channel.get({ conversations: true }) in getRecentConversations', () => {
@@ -60,10 +59,11 @@ describe('useCommunityService.ts (scoped queries)', () => {
     const recentMatch = sourceCode.match(
       /async function getRecentConversations\(\)[\s\S]*?(?=\n  async function|\n  function|\n  \/\/.*\n  async)/,
     );
-    if (recentMatch) {
-      expect(recentMatch[0]).not.toContain('channel.get({ conversations: true })');
-      expect(recentMatch[0]).not.toContain('.map(async (channel: Channel)');
-    }
+    expect(recentMatch).not.toBeNull();
+    // Strip comments before checking — the old pattern may appear in comments
+    const codeOnly = recentMatch![0].replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(codeOnly).not.toContain('channel.get({ conversations: true })');
+    expect(codeOnly).not.toContain('.map(async (channel: Channel)');
   });
 
   it('does NOT contain N+1 conversation/subgroup/items walk', () => {
