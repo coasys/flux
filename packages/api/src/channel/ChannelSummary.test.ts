@@ -1,5 +1,5 @@
 /**
- * Tests for ChannelSummary lightweight model (WS-6).
+ * Tests for ChannelSummary — lightweight Channel model without @HasMany relations.
  *
  * Validates via source inspection:
  * 1. ChannelSummary has no @HasMany decorators (no getter/relation queries fire)
@@ -17,7 +17,7 @@ beforeAll(() => {
   sourceCode = fs.readFileSync(summaryPath, 'utf-8');
 });
 
-describe('ChannelSummary (WS-6: Lightweight Read Model)', () => {
+describe('ChannelSummary (lightweight read model)', () => {
   // Strip comments to avoid false positives from doc text
   let codeOnly: string;
   beforeAll(() => {

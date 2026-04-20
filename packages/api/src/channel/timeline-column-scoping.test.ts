@@ -1,5 +1,5 @@
 /**
- * Tests for TimelineColumn WS-4 changes.
+ * Tests for TimelineColumn — scoped subscriptions replacing raw listeners.
  *
  * Validates:
  * 1. TimelineColumn.vue no longer uses perspective.addListener('link-added', ...)
@@ -25,9 +25,9 @@ beforeAll(() => {
   sourceCode = fs.readFileSync(timelineColumnPath, 'utf-8');
 });
 
-describe('TimelineColumn.vue (WS-4: Replace Raw Listeners)', () => {
+describe('TimelineColumn.vue (scoped subscriptions)', () => {
   // Helper: strip comments from source to avoid false positives from
-  // comment text like "// WS-4: ... replaces perspective.addListener(...)"
+  // comment text describing scoped subscription replacing raw listeners
   let executableCode: string;
   beforeAll(() => {
     executableCode = sourceCode

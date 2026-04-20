@@ -1,5 +1,5 @@
 /**
- * Tests for MessageSummary lightweight model (WS-6).
+ * Tests for MessageSummary — lightweight Message model without SPARQL getters.
  *
  * Validates via source inspection:
  * 1. MessageSummary does NOT have SPARQL getter properties (replyingTo, isPopular)
@@ -17,7 +17,7 @@ beforeAll(() => {
   sourceCode = fs.readFileSync(summaryPath, 'utf-8');
 });
 
-describe('MessageSummary (WS-6: Lightweight Read Model)', () => {
+describe('MessageSummary (lightweight read model)', () => {
   // Strip comments to avoid false positives from doc text
   let codeOnly: string;
   beforeAll(() => {

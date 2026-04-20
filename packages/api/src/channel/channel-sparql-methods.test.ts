@@ -1,6 +1,6 @@
 /**
  * Tests for Channel.recentConversations() and Channel.pinnedConversations()
- * (WS-5: Replace N+1 Graph Walks with SPARQL Model Methods)
+ * — single SPARQL queries replacing N+1 graph walks.
  *
  * Validates via source inspection:
  * 1. recentConversations() static method exists and uses single SPARQL query
@@ -19,7 +19,7 @@ beforeAll(() => {
   sourceCode = fs.readFileSync(channelPath, 'utf-8');
 });
 
-describe('Channel.recentConversations() (WS-5)', () => {
+describe('Channel.recentConversations()', () => {
   it('defines a static async recentConversations method', () => {
     expect(sourceCode).toContain('static async recentConversations(');
   });
@@ -93,7 +93,7 @@ describe('Channel.recentConversations() (WS-5)', () => {
   });
 });
 
-describe('Channel.pinnedConversations() (WS-5)', () => {
+describe('Channel.pinnedConversations()', () => {
   it('defines a static async pinnedConversations method', () => {
     expect(sourceCode).toContain('static async pinnedConversations(');
   });

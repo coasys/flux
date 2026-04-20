@@ -130,9 +130,9 @@ export async function createCommunityService(): Promise<CommunityService> {
   const signallingService = useSignallingService(neighbourhood);
 
   // Model subscriptions
-  // WS-3: Community query is perspective-scoped (typically one per perspective — low cost).
-  // WS-6: Use ChannelSummary for allChannels — lightweight model without @HasMany relations.
-  // Getters are already skipped by default on collection queries (WS-2 deepQuery inversion).
+  // Community query is perspective-scoped (typically one per perspective — low cost).
+  // Use ChannelSummary — lightweight model without @HasMany relations.
+  // Getters are skipped by default on collection queries (deepQuery inversion).
   const { data: communities } = useLiveQuery(Community, perspective);
   const { data: allChannels } = useLiveQuery(ChannelSummary, perspective);
 
@@ -235,7 +235,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     pinnedConversationsLoading.value = true;
 
     try {
-      // WS-5: Single SPARQL query replaces N+1 iterative channel.get({ conversations: true })
+      // Single SPARQL query — avoids iterative channel.get({ conversations: true })
       const results = await Channel.pinnedConversations(perspective);
 
       // Populate conversation cache for any conversations found
@@ -266,7 +266,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     recentConversationsLoading.value = true;
 
     try {
-      // WS-5: Single SPARQL query replaces N×M×K iterative graph walk
+      // Single SPARQL query — avoids N×M×K iterative graph walk
       // (was: for each channel → get conversations → unprocessedItems → subgroups → items)
       const results = await Channel.recentConversations(perspective, 20);
 
@@ -298,7 +298,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     channelsWithConversationsLoading.value = true;
 
     try {
-      // WS-5: Replace N+1 iterative channel.get({ conversations: true }) with
+      // Single SPARQL query — avoids N+1 iterative channel.get({ conversations: true }).
       // link queries and lightweight lookups
       channelsWithConversations.value = await Promise.all(
         spaceChannels.value.map(async (channel) => {
@@ -462,7 +462,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     const channel = allChannels.value.find((c) => c.id === channelId);
     if (!channel) return null;
 
-    // WS-6: allChannels now uses ChannelSummary (no @HasMany participants).
+    // allChannels uses ChannelSummary (no @HasMany participants).
     // Add participant link unconditionally — addLinks is idempotent and the
     // perspective will deduplicate if the link already exists.
     perspective

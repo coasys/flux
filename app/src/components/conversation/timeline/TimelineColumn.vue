@@ -157,7 +157,7 @@ const { signallingService, perspective, getRecentConversations, getPinnedConvers
 
 const channelUrl = restoreChannelPrefix(route.params.channelId as string);
 
-// WS-4: Scoped live query replaces perspective.addListener('link-added', handleLinkAdded).
+// Scoped live query — only fires when conversations under this channel change.
 // This subscription only fires when Conversation instances under this channel change,
 // not on every link change in the entire perspective.
 const { data: conversationInstances } = useLiveQuery(Conversation, perspective, {
@@ -299,7 +299,7 @@ async function getUnprocessedItems() {
   return await channel.unprocessedItems();
 }
 
-// WS-4: Reactive data loading driven by the scoped useLiveQuery subscription.
+// Reactive data loading driven by the scoped conversation subscription.
 // When conversations change under this channel, the watch fires and refreshes
 // both conversation metadata and unprocessed items.
 async function refreshAllData(isFirstRun: boolean = false): Promise<void> {
@@ -340,7 +340,7 @@ function setSelectedItemId(id: string | null) {
   selectedItemId.value = id || '';
 }
 
-// WS-4: Watch the scoped conversation subscription instead of raw link listeners.
+// Watch the scoped conversation subscription for reactive updates.
 // The useLiveQuery subscription only fires when Conversation instances under
 // this channel's parent scope actually change — not on every perspective link.
 watch(conversationInstances, () => {

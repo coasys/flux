@@ -1,5 +1,5 @@
 /**
- * Tests for useCommunityService WS-3 changes (Fix Query Scoping in Composables).
+ * Tests for useCommunityService — scoped queries and lightweight models.
  *
  * Validates:
  * 1. useCommunityService uses ChannelSummary (lightweight model) instead of Channel for allChannels
@@ -24,7 +24,7 @@ beforeAll(() => {
   sourceCode = fs.readFileSync(composablePath, 'utf-8');
 });
 
-describe('useCommunityService.ts (WS-3: Fix Query Scoping)', () => {
+describe('useCommunityService.ts (scoped queries)', () => {
   it('uses ChannelSummary for the allChannels live query', () => {
     expect(sourceCode).toContain('useLiveQuery(ChannelSummary, perspective)');
   });

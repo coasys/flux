@@ -53,8 +53,8 @@ export default function MessageList({
     return entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [entries]);
 
-  // WS-3: Lazy getter evaluation for visible messages.
-  // After WS-2 (deepQuery inversion), collection queries skip SPARQL getters
+  // Lazy getter evaluation for visible messages.
+  // Collection queries skip SPARQL getters by default (deepQuery inversion)
   // by default. Evaluate `replyingTo` on demand for the current message batch
   // so MessageItem can render reply previews.
   const evaluatedIdsRef = useRef(new Set<string>());
