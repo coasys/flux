@@ -70,7 +70,6 @@
           :data="conversation"
           :timeline-index="0"
           :zoom="zoom"
-          :refresh-trigger="refreshTrigger"
           :selected-topic-id="selectedTopicId"
           :selected-item-id="selectedItemId"
           :set-selected-item-id="setSelectedItemId"
@@ -136,7 +135,7 @@ import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 
 interface Props {
@@ -169,7 +168,6 @@ const unprocessedItems = ref<SynergyItem[]>([]);
 const processingState = ref<ProcessingState | null>(null);
 const selectedItemId = ref('');
 const zoom = ref<GroupingOption>(groupingOptions[0]);
-const refreshTrigger = ref(0);
 const loading = ref(true);
 const exporting = ref(false);
 const exportingFlat = ref(false);
@@ -289,90 +287,62 @@ async function exportTranscript() {
   }
 }
 
-async function getConversations() {
-  const channel = await Channel.findOne(perspective, { where: { id: channelUrl }, include: { conversations: true } });
-  return channel?.conversationsData() ?? [];
-}
+// Reactive conversations — derived directly from the scoped useLiveQuery subscription.
+// No imperative fetch needed; conversationInstances updates trigger a synchronous re-map.
+watchEffect(() => {
+  const instances = conversationInstances.value;
+  conversations.value = (instances || []).map(conv => ({
+    id: conv.id,
+    name: conv.conversationName || '',
+    summary: conv.summary || '',
+    timestamp: conv.createdAt || '',
+  }));
+  if (loading.value) loading.value = false;
+});
 
-async function getUnprocessedItems() {
-  const channel = new Channel(perspective, channelUrl);
-  return await channel.unprocessedItems();
-}
-
-// Reactive data loading driven by the scoped conversation subscription.
-// When conversations change under this channel, the watch fires and refreshes
-// both conversation metadata and unprocessed items.
-let refreshInFlight: Promise<void> | null = null;
-let refreshPending = false;
-
-async function refreshAllData(isFirstRun: boolean = false): Promise<void> {
-  if (refreshInFlight) {
-    refreshPending = true;
-    return refreshInFlight;
-  }
-
-  refreshInFlight = (async () => {
-    try {
-      const [newConversations, newUnprocessedItems] = await Promise.all([
-        getConversations(),
-        getUnprocessedItems(),
-      ]);
-
-      // Update sidebar items if the conversation name has changed
-      if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
-        getPinnedConversations();
-        getRecentConversations();
-        getChannelsWithConversations();
-      }
-
-      conversations.value = newConversations;
-      unprocessedItems.value = newUnprocessedItems;
-      if (isFirstRun) loading.value = false;
-
-      // Trigger a refresh in child components
-      refreshTrigger.value = refreshTrigger.value + 1;
-
-      // Check if we should process tasks
-      if (isFirstRun || !aiEnabled.value) return;
-      const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
-      if (shouldProcess) {
-        const channel = new Channel(perspective, channelUrl);
-        aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
-      }
-    } catch (error) {
-      console.error('Error refreshing timeline data:', error);
-      if (isFirstRun) loading.value = false;
-    }
-  })();
-
+// Unprocessed items — re-fetched whenever the conversation subscription fires.
+// Tracks conversationInstances as a reactive dependency so changes to conversations
+// (e.g. a new subgroup absorbing items) trigger a fresh unprocessed-items query.
+watchEffect(async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ = conversationInstances.value;
   try {
-    await refreshInFlight;
-  } finally {
-    refreshInFlight = null;
-    if (refreshPending) {
-      refreshPending = false;
-      void refreshAllData();
+    const channel = new Channel(perspective, channelUrl);
+    unprocessedItems.value = await channel.unprocessedItems();
+  } catch (error) {
+    console.error('Error fetching unprocessed items:', error);
+  }
+});
+
+// Sidebar refresh when the most-recent conversation's name changes
+watch(
+  () => conversations.value[0]?.name,
+  (newName, oldName) => {
+    if (oldName && newName !== oldName) {
+      getPinnedConversations();
+      getRecentConversations();
+      getChannelsWithConversations();
     }
   }
-}
+);
+
+// AI task check — runs when unprocessed items change (skips initial empty state)
+watch(unprocessedItems, async (items) => {
+  if (!aiEnabled.value || !items.length) return;
+  try {
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(items, signallingService, channelUrl);
+    if (shouldProcess) {
+      const channel = new Channel(perspective, channelUrl);
+      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
+    }
+  } catch (error) {
+    console.error('Error checking AI tasks:', error);
+  }
+});
 
 function setSelectedItemId(id: string | null) {
   selectedItemId.value = id || '';
 }
-
-// Watch the scoped conversation subscription for reactive updates.
-// The useLiveQuery subscription only fires when Conversation instances under
-// this channel's parent scope actually change — not on every perspective link.
-watch(conversationInstances, () => {
-  refreshAllData();
-});
-
-onMounted(() => {
-  // Initial data load
-  if (signallingService) {
-    refreshAllData(true);
-  }
-});
 
 watch(
   signallingService.agents.value,
