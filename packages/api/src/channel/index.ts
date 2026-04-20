@@ -249,12 +249,12 @@ export class Channel extends Ad4mModel {
     limit: number = 20,
   ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
     const sparql = `
-      SELECT ?channelId ?conversationId ?lastActivity WHERE {
+      SELECT ?channelId (SAMPLE(?cId) AS ?conversationId) (MAX(?ts) AS ?lastActivity) WHERE {
         GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
         GRAPH ?g2 { ?channelId <${CHANNEL_IS_CONVERSATION}> "true" . }
         OPTIONAL {
-          GRAPH ?g3 { ?channelId <ad4m://has_child> ?conversationId . }
-          GRAPH ?g4 { ?conversationId <flux://entry_type> <flux://conversation> . }
+          GRAPH ?g3 { ?channelId <ad4m://has_child> ?cId . }
+          GRAPH ?g4 { ?cId <flux://entry_type> <flux://conversation> . }
         }
         OPTIONAL {
           GRAPH ?itemLink { ?channelId <ad4m://has_child> ?item . }
@@ -262,16 +262,17 @@ export class Channel extends Ad4mModel {
           GRAPH ?g5 { ?item <${ENTRY_TYPE}> ?itemType . }
           FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
         }
-        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z") AS ?lastActivity)
+        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z") AS ?ts)
       }
+      GROUP BY ?channelId
       ORDER BY DESC(?lastActivity)
       LIMIT ${limit}
     `;
 
     try {
       const results = await perspective.querySparql(sparql);
-      // Deduplicate by channelId — GROUP BY is not available in all SPARQL engines,
-      // so we take the first (most recent) row per channel from the ORDER BY result.
+      // Safety-net dedup by channelId — the SPARQL GROUP BY should already
+      // return one row per channel, but guard against engine quirks.
       const seen = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
       for (const r of results || []) {
         const cid = r.channelId;
