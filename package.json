@@ -47,8 +47,8 @@
       "@coasys/flux-utils": "workspace:*",
       "@coasys/flux-vue": "workspace:*",
       "@coasys/flux-webrtc": "workspace:*",
-      "@coasys/ad4m": "file:./ad4m/core",
-      "@coasys/ad4m-connect": "file:./ad4m/connect"
+      "@coasys/ad4m": "0.13.0-test-2",
+      "@coasys/ad4m-connect": "0.13.0-test-2"
     }
   }
 }
