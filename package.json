@@ -19,7 +19,10 @@
   "engines": {
     "node": ">=18.16.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@capgo/capacitor-audio-session": "7.1.11",
+    "graphql": "^15.7.2"
+  },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "eslint-config-custom": "*",
