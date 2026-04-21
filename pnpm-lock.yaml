@@ -20,8 +20,8 @@ overrides:
   '@coasys/flux-utils': workspace:*
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
-  '@coasys/ad4m': file:./ad4m/core
-  '@coasys/ad4m-connect': file:./ad4m/connect
+  '@coasys/ad4m': 0.13.0-test-2
+  '@coasys/ad4m-connect': 0.13.0-test-2
 
 importers:
 
@@ -74,11 +74,11 @@ importers:
         specifier: ^7.0.5
         version: 7.0.6(@capacitor/core@7.6.1)
       '@coasys/ad4m':
-        specifier: file:../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.14.54)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.14.54)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -326,8 +326,8 @@ importers:
   packages/api:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -387,8 +387,8 @@ importers:
   packages/create/templates/preact:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -421,8 +421,8 @@ importers:
   packages/create/templates/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -455,11 +455,11 @@ importers:
   packages/flux-container:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -483,11 +483,11 @@ importers:
   packages/flux-editor:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -532,8 +532,8 @@ importers:
   packages/react-web:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -601,11 +601,11 @@ importers:
   packages/utils:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -625,8 +625,8 @@ importers:
   packages/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -646,8 +646,8 @@ importers:
   packages/webrtc:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -655,8 +655,8 @@ importers:
   views/chat-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -716,8 +716,8 @@ importers:
         specifier: ^1.70.19
         version: 1.80.0
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -747,8 +747,8 @@ importers:
   views/kanban-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -796,8 +796,8 @@ importers:
   views/kanban-view-simple:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -848,8 +848,8 @@ importers:
         specifier: '=3.6.9'
         version: 3.6.9(graphql@15.10.2)(react@18.3.1)
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -956,8 +956,8 @@ importers:
   views/poll-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -993,8 +993,8 @@ importers:
   views/post-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1072,8 +1072,8 @@ importers:
   views/synergy-demo-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1112,8 +1112,8 @@ importers:
   views/table-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1204,8 +1204,8 @@ importers:
   views/webrtc-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2036,8 +2036,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@file:ad4m/connect':
-    resolution: {directory: ad4m/connect, type: directory}
+  '@coasys/ad4m-connect@0.13.0-test-2':
+    resolution: {integrity: sha512-6xFMOpBmczbUMCQsGJn9wvTep9V927DL639n+dfPPT7kG79x02Fas32edZrZYi6iKd1oKhNZJeae+JknwADs8g==}
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2':
     resolution: {integrity: sha512-fMlqdDJmviYQaMOoZ5Zgin1FcuN1iZqOmzhOlAbt2MsEXQap4SVIAKokCHCvNIXcsoEqEC68P1XoDdJGZx/CRA==}
@@ -2050,8 +2050,8 @@ packages:
     peerDependencies:
       vue: ^3.2.47
 
-  '@coasys/ad4m@file:ad4m/core':
-    resolution: {directory: ad4m/core, type: directory}
+  '@coasys/ad4m@0.13.0-test-2':
+    resolution: {integrity: sha512-dmLG2bouheIQqZNtmxyhcLoLW0GklEvxyABfn+/3NKXMv6S3bFX0ZcItgPV/CNy1lUg7+/fiaYNaVv8iTRKvPQ==}
 
   '@coasys/hooks-helpers@0.13.0-test-2':
     resolution: {integrity: sha512-uIgawUKJZNpoSxXiyoMLCWs0yTUxJmP0MNi0C+698CTCNtmMRr5iSqFxC4MmH1QxjNqnoU1hCsorVeTPy/97rg==}
@@ -11929,7 +11929,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.1
 
-  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.14.54)':
+  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.14.54)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11940,7 +11940,7 @@ snapshots:
     transitivePeerDependencies:
       - esbuild
 
-  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.21.5)':
+  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.21.5)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11953,7 +11953,7 @@ snapshots:
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
@@ -11969,7 +11969,7 @@ snapshots:
 
   '@coasys/ad4m-vue-hooks@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       vue: 3.5.32(typescript@5.9.3)
     transitivePeerDependencies:
@@ -11981,7 +11981,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@coasys/ad4m@file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@coasys/ad4m@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@apollo/client': 3.7.10(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@holochain/client': 0.16.0
@@ -12002,7 +12002,7 @@ snapshots:
 
   '@coasys/hooks-helpers@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       uuid: 9.0.1
     transitivePeerDependencies:
       - bufferutil
