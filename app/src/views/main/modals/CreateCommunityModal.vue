@@ -207,8 +207,9 @@ const langMeta = ref<any>(null);
 
 const nonFluxCommunities = computed((): Record<string, PerspectiveProxy> => {
   return myPerspectives.value.reduce((acc, perspective) => {
-    const perspectiveIsCommunity = Object.keys(myCommunities.value).some((id) => perspective.sharedUrl === id);
-    if (!perspectiveIsCommunity && perspective.sharedUrl) return { ...acc, [perspective.sharedUrl]: perspective };
+    const key = perspective.sharedUrl || perspective.uuid;
+    const perspectiveIsCommunity = Object.keys(myCommunities.value).some((id) => key === id);
+    if (!perspectiveIsCommunity) return { ...acc, [key]: perspective };
     return acc;
   }, {});
 });
