@@ -157,7 +157,7 @@ watch(tempProfileImage, (newValue) => emit('hide', newValue !== null));
   display: flex;
   flex-direction: column;
   border-radius: 4px;
-  z-index: 999;
+  z-index: 9999999;
 
   @media screen and (max-width: 768px) {
     min-height: auto;
