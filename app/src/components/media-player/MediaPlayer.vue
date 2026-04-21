@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { CallEmoji, MediaState, useAppStore, useModalStore, useUiStore } from '@/stores';
+import { CallEmoji, MediaState, useAppStore, useMediaDevicesStore, useModalStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Profile } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -97,8 +97,10 @@ const { did, stream } = toRefs(props);
 const appStore = useAppStore();
 const uiStore = useUiStore();
 const modalStore = useModalStore();
+const mediaDevicesStore = useMediaDevicesStore();
 
 const { callWindowFullscreen, isMobile } = storeToRefs(uiStore);
+const { activeAudioOutputId } = storeToRefs(mediaDevicesStore);
 
 const profile = ref<Profile>();
 const videoElement = ref<HTMLVideoElement>();
@@ -111,6 +113,20 @@ const loadingMessage = computed(() => {
   else if (props.screenShareState === 'loading') return 'Screenshare loading...';
   return '';
 });
+
+// Apply audio output device (setSinkId) to video element — Chrome/Firefox only
+async function applySinkId() {
+  const el = videoElement.value as any;
+  if (!el || !el.setSinkId || !activeAudioOutputId.value) return;
+  try {
+    await el.setSinkId(activeAudioOutputId.value);
+  } catch (e) {
+    console.warn('setSinkId failed:', e);
+  }
+}
+
+// Re-apply sink when audio output device changes
+watch(activeAudioOutputId, () => applySinkId());
 
 // Watch for stream changes and properly attach them to the video element
 watch(
@@ -134,6 +150,8 @@ watch(
         if (videoElement.value && !videoElement.value.paused) return;
 
         await videoElement.value.play();
+        // Apply audio output routing after stream starts
+        await applySinkId();
       }
     } catch (error) {
       console.warn('Error setting video stream:', error);

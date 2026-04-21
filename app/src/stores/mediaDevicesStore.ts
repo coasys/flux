@@ -2,6 +2,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useAppStore } from './appStore';
+// Note: iOS audio routing (AirPods/Bluetooth) is handled natively in AppDelegate.swift
+// via AVAudioSession configuration. For desktop browsers, setSinkId provides output switching.
 
 // TODO: create return type for store?
 
@@ -37,6 +39,7 @@ export const useMediaDevicesStore = defineStore(
     const mediaPermissions = ref<MediaPermissions>(defaultMediaPermissions);
     const activeCameraId = ref<string | null>(null);
     const activeMicrophoneId = ref<string | null>(null);
+    const activeAudioOutputId = ref<string | null>(null);
     const availableDevices = ref<MediaDeviceInfo[]>([]);
     const stream = ref<MediaStream | null>(null);
     const streamLoading = ref(false);
@@ -49,6 +52,7 @@ export const useMediaDevicesStore = defineStore(
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === 'videoinput'));
     const microphones = computed(() => availableDevices.value.filter((device) => device.kind === 'audioinput'));
+    const audioOutputs = computed(() => availableDevices.value.filter((device) => device.kind === 'audiooutput'));
     const mediaSettings = computed<MediaSettings>(() => ({
       audioEnabled: audioEnabled.value,
       videoEnabled: videoEnabled.value,
@@ -95,6 +99,7 @@ export const useMediaDevicesStore = defineStore(
 
     async function findAvailableDevices() {
       try {
+        const previousOutputIds = new Set(audioOutputs.value.map((d) => d.deviceId));
         availableDevices.value = await navigator.mediaDevices.enumerateDevices();
 
         // Set default devices if not already set
@@ -104,6 +109,20 @@ export const useMediaDevicesStore = defineStore(
 
         if (microphones.value.length > 0 && !activeMicrophoneId.value) {
           activeMicrophoneId.value = microphones.value[0].deviceId;
+        }
+
+        // Auto-switch to newly connected audio output (e.g. AirPods just connected)
+        if (audioOutputs.value.length > 0) {
+          if (!activeAudioOutputId.value) {
+            activeAudioOutputId.value = audioOutputs.value[0].deviceId;
+          } else {
+            // Detect newly added output device and auto-switch to it
+            const newOutput = audioOutputs.value.find((d) => !previousOutputIds.has(d.deviceId));
+            if (newOutput) {
+              console.log('🎧 New audio output detected, auto-switching to:', newOutput.label);
+              switchAudioOutput(newOutput.deviceId);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to get device list:', err);
@@ -253,6 +272,32 @@ export const useMediaDevicesStore = defineStore(
       } catch (error) {
         console.error('❌ Failed to switch microphone:', error);
         activeMicrophoneId.value = previousId;
+      }
+    }
+
+    // Switch audio output device (Chrome/Firefox only — setSinkId not available in Safari/iOS WebKit)
+    // On iOS, audio routing is handled natively via AVAudioSession in AppDelegate.swift
+    async function switchAudioOutput(deviceId: string) {
+      activeAudioOutputId.value = deviceId;
+
+      // setSinkId is only available in Chrome/Firefox, not Safari
+      // On iOS native app, AVAudioSession handles routing automatically
+      if (typeof HTMLMediaElement.prototype.setSinkId === 'undefined') {
+        console.log('ℹ️ setSinkId not supported — audio routing handled by OS');
+        return;
+      }
+
+      // Apply to all video/audio elements playing remote streams
+      try {
+        const mediaElements = document.querySelectorAll('video, audio');
+        for (const element of mediaElements) {
+          if ((element as any).setSinkId) {
+            await (element as any).setSinkId(deviceId);
+          }
+        }
+        console.log('✅ Switched audio output to:', deviceId);
+      } catch (error) {
+        console.error('❌ Failed to switch audio output:', error);
       }
     }
 
@@ -485,6 +530,7 @@ export const useMediaDevicesStore = defineStore(
       mediaPermissions,
       activeCameraId,
       activeMicrophoneId,
+      activeAudioOutputId,
       availableDevices,
       stream,
       streamLoading,
@@ -494,12 +540,14 @@ export const useMediaDevicesStore = defineStore(
       // Computed
       cameras,
       microphones,
+      audioOutputs,
       mediaSettings,
 
       // Methods
       createStream,
       switchCamera,
       switchMicrophone,
+      switchAudioOutput,
       resetMediaDevices,
       findAvailableDevices,
       toggleAudio,

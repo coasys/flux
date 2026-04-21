@@ -28,6 +28,17 @@
         @change="(e: any) => mediaDevicesStore.switchMicrophone(e.target.value)"
       />
     </j-box>
+
+    <j-box v-if="audioOutputOptions.length > 0" :pt="500">
+      <Select
+        name="audio-output-device"
+        label="Audio output device"
+        placeholder="Select device"
+        :selected="activeAudioOutputId || ''"
+        :options="audioOutputOptions"
+        @change="(e: any) => mediaDevicesStore.switchAudioOutput(e.target.value)"
+      />
+    </j-box>
   </div>
 </template>
 
@@ -39,8 +50,9 @@ import Select from './Select.vue';
 
 const mediaDevicesStore = useMediaDevicesStore();
 
-const { cameras, microphones, activeCameraId, activeMicrophoneId } = storeToRefs(mediaDevicesStore);
+const { cameras, microphones, audioOutputs, activeCameraId, activeMicrophoneId, activeAudioOutputId } = storeToRefs(mediaDevicesStore);
 
 const videoDeviceOptions = computed(() => cameras.value.map((v) => ({ text: v.label, value: v.deviceId })));
 const audioDeviceOptions = computed(() => microphones.value.map((v) => ({ text: v.label, value: v.deviceId })));
+const audioOutputOptions = computed(() => audioOutputs.value.map((v) => ({ text: v.label || 'Default', value: v.deviceId })));
 </script>
