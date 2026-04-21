@@ -4,11 +4,13 @@ import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } fro
 import { Ad4mClient } from '@coasys/ad4m';
 
 const APP_NAME = 'Flux';
-const DESCRIPTION = 'Mobile push notifications for @-mentions';
-function notificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
+const WEBHOOK_URL = 'https://push.ad4m.dev/notification';
+
+const MENTION_DESCRIPTION = 'Mobile push notifications for @-mentions';
+function mentionNotificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
   return {
     appName: APP_NAME,
-    description: DESCRIPTION,
+    description: MENTION_DESCRIPTION,
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
     trigger: `SELECT ?source ?predicate ?target WHERE {
@@ -20,7 +22,26 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string, agent
       ))
     }`,
     perspectiveIds,
-    webhookUrl: 'http://push-notifications.ad4m.dev:13000/notification',
+    webhookUrl: WEBHOOK_URL,
+    webhookAuth,
+  };
+}
+
+const CALL_DESCRIPTION = 'Mobile push notifications for calls';
+function callNotificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
+  return {
+    appName: APP_NAME,
+    description: CALL_DESCRIPTION,
+    appUrl: window.location.origin,
+    appIconPath: window.location.origin + '/icon.png',
+    trigger: `SELECT ?source ?predicate ?target WHERE {
+      GRAPH ?g { ?source ?predicate ?target . }
+      FILTER(?predicate = <agent/new-state>)
+      FILTER(CONTAINS(STR(?source), '"inCall":true'))
+      FILTER(!CONTAINS(STR(?source), '"${agentDid}"'))
+    }`,
+    perspectiveIds,
+    webhookUrl: WEBHOOK_URL,
     webhookAuth,
   };
 }
@@ -71,24 +92,40 @@ export async function registerNotification(client: Ad4mClient) {
     });
   }
 
+  const agentStatus = await client.agent.status();
+  const agentDid = agentStatus.did!;
+
   let notifications = await client.runtime.notifications();
-  let foundNotifications = notifications.filter(
+
+  await ensureNotification(client, notifications, MENTION_DESCRIPTION, perspectiveIds, webhookAuth, agentDid, mentionNotificationConfig);
+  await ensureNotification(client, notifications, CALL_DESCRIPTION, perspectiveIds, webhookAuth, agentDid, callNotificationConfig);
+}
+
+async function ensureNotification(
+  client: Ad4mClient,
+  notifications: any[],
+  description: string,
+  perspectiveIds: string[],
+  webhookAuth: string,
+  agentDid: string,
+  configFn: (perspectiveIds: string[], webhookAuth: string, agentDid: string) => any,
+) {
+  let found = notifications.filter(
     (n) =>
       n.appName == APP_NAME &&
-      n.description == DESCRIPTION &&
+      n.description == description &&
       perspectiveIds.every((p) => n.perspectiveIds.includes(p)) &&
       n.granted &&
       n.webhookAuth == webhookAuth,
   );
 
-  if (foundNotifications.length > 1) {
-    for (let i = 1; i < foundNotifications.length; i++) {
-      await client.runtime.removeNotification(foundNotifications[i].id);
+  if (found.length > 1) {
+    for (let i = 1; i < found.length; i++) {
+      await client.runtime.removeNotification(found[i].id);
     }
   }
 
-  if (foundNotifications.length == 0) {
-    const agentStatus = await client.agent.status();
-    await client.runtime.requestInstallNotification(notificationConfig(perspectiveIds, webhookAuth, agentStatus.did!));
+  if (found.length == 0) {
+    await client.runtime.requestInstallNotification(configFn(perspectiveIds, webhookAuth, agentDid));
   }
 }

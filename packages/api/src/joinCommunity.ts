@@ -27,17 +27,18 @@ export default async ({ joiningLink, client }: Payload): Promise<Community> => {
     await client.perspective.update(perspective.uuid, neighbourhoodMeta.name);
 
     const notifications = await client.runtime.notifications();
+    const fluxNotifications = notifications.filter((n) => n.appName === 'Flux');
 
-    const notification = notifications.find((notification) => notification.appName === 'Flux');
+    for (const notification of fluxNotifications) {
+      const notificationId = notification.id;
+      delete notification.granted;
+      delete notification.id;
 
-    const notificationId = notification.id;
-    delete notification.granted;
-    delete notification.id;
-
-    await client.runtime.updateNotification(notificationId, {
-      ...notification,
-      perspectiveIds: [...notification.perspectiveIds, perspective.uuid],
-    });
+      await client.runtime.updateNotification(notificationId, {
+        ...notification,
+        perspectiveIds: [...(notification.perspectiveIds || []), perspective.uuid],
+      });
+    }
 
     return {
       uuid: perspective!.uuid,
