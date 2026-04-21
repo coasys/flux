@@ -1,3 +1,3 @@
-export const FILE_STORAGE_LANGUAGE = 'QmzSYwdjqeP9D13Sfmyc5HcabM9jL3DtPyhadnF6dQXu4FjVSbQ';
+export const FILE_STORAGE_LANGUAGE = 'QmzSYwddqhm49PrRMzSrJf3AvmmreXMKtr1u56nbTjBFVmCzS8N';
 
-export const EMBEDDING_VECTOR_LANGUAGE = 'QmzSYwdbqjGGbYbWJvdKA4WnuFwmMx3AsTfgg7EwbeNUGyE555c';
+export const EMBEDDING_VECTOR_LANGUAGE = 'QmzSYwdePqDwYwVj2ChhMnyD5Z3Zxue916dUFrptLhhQv3AqUDR';

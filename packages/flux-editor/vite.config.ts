@@ -8,6 +8,7 @@ export default defineConfig({
   // @ts-ignore
   plugins: [cssInjectedByJsPlugin()],
   build: {
+    sourcemap: true,
     lib: {
       entry: resolve(__dirname, 'src/flux-editor.ts'),
       name: 'FluxEditor',

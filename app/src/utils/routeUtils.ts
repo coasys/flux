@@ -14,13 +14,13 @@ export function restoreNeighbourhoodPrefix(communityId: string): string {
   return `neighbourhood://${communityId}`;
 }
 
-// Strips literal://string: prefix from channel ID
+// Strips literal:string: prefix from channel ID
 export function stripChannelPrefix(channelId: string): string {
-  const prefix = 'literal://string:';
-  return channelId.startsWith(prefix) ? channelId.slice(prefix.length) : channelId;
+  if (channelId.startsWith('literal:string:')) return channelId.slice('literal:string:'.length);
+  return channelId;
 }
 
-// Restores literal://string: prefix to channel ID
+// Restores literal:string: prefix to channel ID
 export function restoreChannelPrefix(channelId: string): string {
-  return `literal://string:${channelId}`;
+  return `literal:string:${channelId}`;
 }

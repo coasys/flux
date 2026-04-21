@@ -1,4 +1,5 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, escapeSurrealString } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
+import { parseLit } from '../utils/parseLit';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
@@ -23,20 +24,16 @@ export default class ConversationSubgroup extends Ad4mModel {
   async stats(): Promise<{ totalItems: number; participants: string[] }> {
     // find the total item count and the dids of participants in the subgroup
     try {
-      // Count items by getting all matching URIs and counting them
+      // SPARQL migration
       const itemsQuery = `
-        SELECT VALUE out.uri
-        FROM link
-        WHERE in.uri = '${escapeSurrealString(this.id)}'
-          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
+        SELECT DISTINCT ?item WHERE {
+          GRAPH ?g1 { <${this.id}> <${SUBGROUP_ITEM}> ?item . }
+          GRAPH ?g2 { ?item <flux://entry_type> ?type . }
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+        }
       `;
 
-      const itemsResult = await this.perspective.querySurrealDB(itemsQuery);
+      const itemsResult = await this.perspective.querySparql(itemsQuery);
       const totalItems = itemsResult?.length || 0;
 
       // Use maintained participants Collection
@@ -51,24 +48,28 @@ export default class ConversationSubgroup extends Ad4mModel {
   async topics(): Promise<SynergyTopic[]> {
     // find the subgroups topics
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS topicBase,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName
-        FROM link
-        WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
-          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+      // SPARQL migration
+      const sparqlQuery = `
+        SELECT ?topicBase ?topicNameRaw WHERE {
+          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
+          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
+          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
+          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
+          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
+        }
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
-      for (const topic of surrealResult || []) {
-        if (!uniqueTopics.has(topic.topicBase)) {
-          uniqueTopics.set(topic.topicBase, topic);
+      for (const binding of sparqlResult || []) {
+        const topicBase = binding.topicBase;
+        if (topicBase && !uniqueTopics.has(topicBase)) {
+          uniqueTopics.set(topicBase, {
+            topicBase,
+            topicName: parseLit(binding.topicNameRaw),
+          });
         }
       }
 
@@ -87,34 +88,77 @@ export default class ConversationSubgroup extends Ad4mModel {
   async itemsData(): Promise<SynergyItem[]> {
     // find the necissary data to render the subgroups items in timeline components
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS id,
-          (
-            fn::parse_literal(out->link[WHERE predicate = 'flux://transcript_started_at'][0].out.uri)
-            ?? out<-link[WHERE predicate = 'ad4m://has_child' AND in->link[WHERE predicate = 'flux://entry_type' AND out.uri = 'flux://has_channel'][0] IS NOT NONE][0].timestamp
-            ?? out->link[WHERE predicate = 'flux://entry_type'][0].timestamp
-            ?? timestamp
-          ) AS channelTimestamp,
-          out->link[WHERE predicate = 'flux://entry_type'][0].author AS author,
-          out->link[WHERE predicate = 'flux://entry_type'][0].out.uri AS type,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://body'][0].out.uri) AS messageBody,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://title'][0].out.uri) AS postTitle,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://name'][0].out.uri) AS taskName
-        FROM link
-        WHERE in.uri = '${escapeSurrealString(this.id)}'
-          AND predicate = '${escapeSurrealString(SUBGROUP_ITEM)}'
-          AND (
-            out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_message'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_post'
-            OR out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_task'
-          )
-        ORDER BY channelTimestamp ASC
+      // SPARQL migration
+      const sparqlQuery = `
+        SELECT ?id ?type ?author ?timestamp ?body ?title ?taskName ?transcriptStart ?channelTs WHERE {
+          GRAPH ?link1 { <${this.id}> <${SUBGROUP_ITEM}> ?id . }
+          ?link1 <ad4m://ontology/timestamp> ?timestamp .
+          GRAPH ?typeLink { ?id <flux://entry_type> ?type . }
+          ?typeLink <ad4m://ontology/author> ?author .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
+          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
+          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { GRAPH ?g6 { ?id <flux://transcript_started_at> ?transcriptStart . } }
+          OPTIONAL { GRAPH ?chLink { ?chSrc <ad4m://has_child> ?id . }
+                     ?chLink <ad4m://ontology/timestamp> ?channelTs .
+                     GRAPH ?g7 { ?chSrc <flux://entry_type> <flux://has_channel> . } }
+        }
+        ORDER BY ?timestamp
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
-      return (surrealResult || []).map((item: any) => {
+      // Collect items — keep duplicate IDs so the view can detect and clean them up
+      const items: any[] = [];
+      const seen = new Map<string, any>();
+      for (const binding of sparqlResult || []) {
+        const id = binding.id;
+        if (!id) continue;
+
+        // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
+        if (seen.has(id)) {
+          // Merge optional fields from this binding into the existing item
+          const existing = seen.get(id);
+          const transcriptStart = parseLit(binding.transcriptStart);
+          const channelTs = binding.channelTs;
+          const fallbackTs = binding.timestamp;
+          if (!existing.channelTimestamp) {
+            existing.channelTimestamp = transcriptStart || channelTs || fallbackTs;
+          }
+          if (!existing.messageBody) existing.messageBody = parseLit(binding.body);
+          if (!existing.postTitle) existing.postTitle = parseLit(binding.title);
+          if (!existing.taskName) existing.taskName = parseLit(binding.taskName);
+          if (!existing.type) existing.type = binding.type;
+          if (!existing.author) existing.author = binding.author;
+          continue;
+        }
+
+        const transcriptStart = parseLit(binding.transcriptStart);
+        const channelTs = binding.channelTs;
+        const fallbackTs = binding.timestamp;
+        const channelTimestamp = transcriptStart || channelTs || fallbackTs;
+
+        const item = {
+          id,
+          type: binding.type,
+          author: binding.author,
+          channelTimestamp,
+          messageBody: parseLit(binding.body),
+          postTitle: parseLit(binding.title),
+          taskName: parseLit(binding.taskName),
+        };
+        seen.set(id, item);
+        items.push(item);
+      }
+
+      // Sort by the effective timestamp (transcriptStart || channelTs || fallback)
+      const sorted = items.sort((a: any, b: any) => {
+        const tsA = a.channelTimestamp || '';
+        const tsB = b.channelTimestamp || '';
+        return tsA < tsB ? -1 : tsA > tsB ? 1 : 0;
+      });
+      return sorted.map((item: any) => {
         let text = '';
         let type = '';
 
@@ -144,28 +188,32 @@ export default class ConversationSubgroup extends Ad4mModel {
     }
   }
 
-  // todo: investigate why deduplication is necessary (just to handle errors?)
   async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
     try {
-      const surrealQuery = `
-        SELECT
-          out.uri AS topicBase,
-          fn::parse_literal(out->link[WHERE predicate = 'flux://topic'][0].out.uri) AS topicName,
-          fn::parse_literal(in->link[WHERE predicate = 'flux://has_relevance'][0].out.uri) AS relevance
-        FROM link
-        WHERE predicate = 'flux://has_tag'
-          AND in->link[WHERE predicate = 'flux://has_expression'][0].out.uri = '${escapeSurrealString(this.id)}'
-          AND in->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_semantic_relationship'
-          AND out->link[WHERE predicate = 'flux://entry_type'][0].out.uri = 'flux://has_topic'
+      // SPARQL migration
+      const sparqlQuery = `
+        SELECT ?topicBase ?topicNameRaw ?relevanceRaw WHERE {
+          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
+          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
+          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
+          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
+          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
+          OPTIONAL { GRAPH ?g6 { ?semRel <flux://has_relevance> ?relevanceRaw . } }
+        }
       `;
 
-      const surrealResult = await this.perspective.querySurrealDB(surrealQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, any>();
-      for (const topic of surrealResult || []) {
-        if (!uniqueTopics.has(topic.topicBase)) {
-          uniqueTopics.set(topic.topicBase, topic);
+      for (const binding of sparqlResult || []) {
+        const topicBase = binding.topicBase;
+        if (topicBase && !uniqueTopics.has(topicBase)) {
+          uniqueTopics.set(topicBase, {
+            topicBase,
+            topicName: parseLit(binding.topicNameRaw),
+            relevance: parseLit(binding.relevanceRaw),
+          });
         }
       }
 

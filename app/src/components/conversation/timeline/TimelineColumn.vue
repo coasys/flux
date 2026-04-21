@@ -178,7 +178,10 @@ function stripHtml(html: string): string {
 function formatTimestamp(ts: string): string {
   try {
     const date = new Date(ts);
-    return date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+    return date
+      .toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d+Z$/, ' UTC');
   } catch {
     return ts;
   }
@@ -293,7 +296,25 @@ async function getUnprocessedItems() {
   return await channel.unprocessedItems();
 }
 
+// Predicates that indicate conversation metadata changes (require full refresh)
+const CONVERSATION_META_PREDICATES = ['flux://has_name', 'flux://has_summary', 'flux://has_child'];
+// Predicates that indicate new messages (only need unprocessed items refresh)
+const MESSAGE_PREDICATES = ['flux://has_expression', 'ad4m://has_child'];
+
+function isConversationMetaPredicate(predicate: string | undefined): boolean {
+  return !!predicate && CONVERSATION_META_PREDICATES.some(p => predicate.includes(p));
+}
+
+function isMessagePredicate(predicate: string | undefined): boolean {
+  // If predicate is unknown, treat as message (safe default — just refreshes unprocessed)
+  return !predicate || MESSAGE_PREDICATES.some(p => predicate.includes(p));
+}
+
 async function getData(firstRun?: boolean): Promise<void> {
+  return getDataFull(firstRun);
+}
+
+async function getDataFull(firstRun?: boolean): Promise<void> {
   if (gettingData.value) return;
 
   gettingData.value = true;
@@ -319,7 +340,7 @@ async function getData(firstRun?: boolean): Promise<void> {
 
     // If this is not the first run and AI is enabled, check if we should process tasks
     if (firstRun || !aiEnabled.value) return;
-    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService);
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
     if (shouldProcess) {
       const channel = new Channel(perspective, channelUrl);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
@@ -330,19 +351,70 @@ async function getData(firstRun?: boolean): Promise<void> {
   }
 }
 
-// TODO: Remove this if we can achieve the same with subscriptions. Currently indiscriminate about link types.
-function handleLinkAdded() {
+async function getDataIncremental(): Promise<void> {
+  if (gettingData.value) return;
+
+  gettingData.value = true;
+
+  try {
+    // Only refresh unprocessed items — conversations haven't changed
+    const newUnprocessedItems = await getUnprocessedItems();
+    unprocessedItems.value = newUnprocessedItems;
+    gettingData.value = false;
+
+    // Trigger a refresh in child components
+    refreshTrigger.value = refreshTrigger.value + 1;
+
+    // Check if we should process tasks
+    if (!aiEnabled.value) return;
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(newUnprocessedItems, signallingService, channelUrl);
+    if (shouldProcess) {
+      const channel = new Channel(perspective, channelUrl);
+      aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
+    }
+  } catch (error) {
+    console.error('Error fetching unprocessed items:', error);
+    gettingData.value = false;
+  }
+}
+
+async function refreshConversations(): Promise<void> {
+  try {
+    const newConversations = await getConversations();
+    if (conversations.value[0] && newConversations[0] && conversations.value[0].name !== newConversations[0].name) {
+      getPinnedConversations();
+      getRecentConversations();
+      getChannelsWithConversations();
+    }
+    conversations.value = newConversations;
+    refreshTrigger.value = refreshTrigger.value + 1;
+  } catch (error) {
+    console.error('Error refreshing conversations:', error);
+  }
+}
+
+// TODO: Remove this if we can achieve the same with subscriptions. Currently inspects link predicates.
+function handleLinkAdded(link?: any) {
+  const predicate = link?.data?.predicate;
+
+  // Determine which refresh path to take
+  const needsFullRefresh = isConversationMetaPredicate(predicate);
+  const refreshFn = needsFullRefresh ? getDataFull : getDataIncremental;
+
   // Debounced with LINK_ADDED_TIMEOUT to avoid concurrent data fetches
 
   // If in cooldown period, just mark that we've seen a new event and exit
+  // If any event during cooldown needs full refresh, upgrade the queued refresh
   if (linkAddedTimeout.value) {
     linkUpdatesQueued.value = true;
+    if (needsFullRefresh) (linkUpdatesQueued as any)._needsFull = true;
     return null;
   }
 
   // Otherwise get new data immediately
-  getData();
+  refreshFn();
   linkUpdatesQueued.value = false;
+  (linkUpdatesQueued as any)._needsFull = false;
 
   // Set cooldown period with callback that checks for queued updates
   linkAddedTimeout.value = setTimeout(() => {
@@ -350,8 +422,10 @@ function handleLinkAdded() {
 
     // If new events came in during cooldown, process them now
     if (linkUpdatesQueued.value) {
-      getData();
+      const fn = (linkUpdatesQueued as any)._needsFull ? getDataFull : getDataIncremental;
+      fn();
       linkUpdatesQueued.value = false;
+      (linkUpdatesQueued as any)._needsFull = false;
     }
   }, LINK_ADDED_TIMEOUT);
 

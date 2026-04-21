@@ -12,7 +12,11 @@ export default defineConfig({
     }),
     cssInjectedByJsPlugin(),
   ],
+  resolve: {
+    dedupe: ["preact", "preact/hooks", "preact/compat", "react", "react-dom"],
+  },
   build: {
+    sourcemap: true,
     emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, './src/main.ts'),

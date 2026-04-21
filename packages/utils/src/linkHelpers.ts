@@ -34,11 +34,11 @@ export function mapLiteralLinks(links: LinkExpression[] | undefined, map: Proper
     if (link) {
       let data;
 
-      if (link.data.target.startsWith('literal://string:')) {
+      if (link.data.target.startsWith('literal:string:')) {
         data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith('literal://number:')) {
+      } else if (link.data.target.startsWith('literal:number:')) {
         data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith('literal://json:')) {
+      } else if (link.data.target.startsWith('literal:json:')) {
         data = Literal.fromUrl(link.data.target).get().data;
       } else {
         data = link.data.target;

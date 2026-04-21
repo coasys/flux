@@ -12,7 +12,14 @@ export default defineConfig({
     }),
     cssInjectedByJsPlugin(),
   ],
+  resolve: {
+    dedupe: ['preact', 'preact/hooks', 'preact/compat', 'react', 'react-dom'],
+    alias: {
+      'three/webgpu': resolve(__dirname, './src/three-webgpu-stub.js'),
+    },
+  },
   build: {
+    sourcemap: true,
     emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, './src/main.ts'),

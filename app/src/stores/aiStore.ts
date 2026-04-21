@@ -43,6 +43,7 @@ export const llmProcessingSteps = [
 export const MIN_ITEMS_TO_PROCESS = 5;
 export const MAX_ITEMS_TO_PROCESS = 10;
 export const PROCESSING_ITEMS_DELAY = 3;
+export const PROCESSING_STALE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export type ProcessingQueueItem = { communityId: string; channel: Partial<Channel> };
 
@@ -73,6 +74,20 @@ export const useAiStore = defineStore(
     const transcriptionMaxChars = ref(1000);
 
     const aiEnabled = computed(() => Boolean(defaultLLM.value && llmLoadingStatus.value?.status === 'Ready'));
+
+    const whisperModelId = computed(() => {
+      const model = allModels.value.find(
+        (m) => m.modelType === 'TRANSCRIPTION' && !m.local?.fileName?.includes('tiny'),
+      );
+      return model?.id ?? 'Whisper';
+    });
+
+    const tinyWhisperModelId = computed(() => {
+      const model = allModels.value.find(
+        (m) => m.modelType === 'TRANSCRIPTION' && m.local?.fileName?.includes('tiny'),
+      );
+      return model?.id ?? 'whisper_tiny_quantized';
+    });
 
     function setTranscriptionEnabled(payload: boolean): void {
       transcriptionEnabled.value = payload;
@@ -141,7 +156,27 @@ export const useAiStore = defineStore(
       return checkItemsForResponsibility(signallingService, items, increment + 1);
     }
 
-    async function checkIfWeShouldProcessTask(unprocessedItems: SynergyItem[], signallingService: SignallingService) {
+    function isAnotherPeerProcessingChannel(signallingService: SignallingService, channelId: string): boolean {
+      const now = Date.now();
+      const agents = signallingService.agents.value;
+      if (!agents) return false;
+      return Object.entries(agents).some(([did, state]) => {
+        if (did === me.value.did) return false;
+        if (!state.processing || state.processing.channelId !== channelId) return false;
+        // Ignore stale processing states (peer may have crashed/disconnected)
+        const age = now - state.lastUpdate;
+        return age < PROCESSING_STALE_TIMEOUT;
+      });
+    }
+
+    async function checkIfWeShouldProcessTask(
+      unprocessedItems: SynergyItem[],
+      signallingService: SignallingService,
+      channelId: string,
+    ) {
+      // Skip if another peer is already processing this channel
+      if (isAnotherPeerProcessingChannel(signallingService, channelId)) return false;
+
       // Skip if not enough unprocessed items
       const enoughItems = unprocessedItems.length >= MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;
       if (!enoughItems) return false;
@@ -163,8 +198,14 @@ export const useAiStore = defineStore(
       const tasks = await Promise.all(
         unref(communityService.recentConversationsWithAgents).map(async (conversationData) => {
           if (!conversationData.channel) return null;
-          const unprocessedItems = await toRaw(conversationData.channel).unprocessedItems();
-          const shouldProcess = await checkIfWeShouldProcessTask(unprocessedItems, communityService.signallingService);
+          const rawChannel = toRaw(conversationData.channel);
+          if (!rawChannel.id) return null;
+          const unprocessedItems = await rawChannel.unprocessedItems();
+          const shouldProcess = await checkIfWeShouldProcessTask(
+            unprocessedItems,
+            communityService.signallingService,
+            rawChannel.id,
+          );
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
         }),
       );
@@ -238,6 +279,13 @@ export const useAiStore = defineStore(
         // Skip if no items to process (can happen if task was queued but items were processed by another agent)
         if (itemsToProcess.length === 0) {
           console.log('🤖 No items to process, removing task from queue');
+          processingQueue.value.shift();
+          return;
+        }
+
+        // Re-check signalling guard before starting LLM work (another peer may have started since this task was queued)
+        if (isAnotherPeerProcessingChannel(communityService.signallingService, rawChannel.id!)) {
+          console.log('🤖 Another peer is already processing this channel, skipping');
           processingQueue.value.shift();
           return;
         }
@@ -364,6 +412,8 @@ export const useAiStore = defineStore(
       llmLoadingStatus,
       whisperLoadingStatus,
       whisperTinyLoadingStatus,
+      whisperModelId,
+      tinyWhisperModelId,
       transcriptionEnabled,
       transcriptionModel,
       transcriptionPreviewTimeout,
