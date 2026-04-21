@@ -1,4 +1,4 @@
-import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { useAiStore, useAppStore, useMediaDevicesStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from '@/stores';
 import { stripChannelPrefix } from '@/utils/routeUtils';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Link, NeighbourhoodProxy, PerspectiveExpression } from '@coasys/ad4m';
@@ -12,6 +12,7 @@ const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
 const ASLEEP_THRESHOLD = 30000; // 30 seconds before "asleep"
 const MAX_AGE = 60000; // 60 seconds before "offline"
 const NEW_STATE = 'agent/new-state';
+const CALL_INVITE = 'flux://call_invite';
 
 export function useSignallingService(neighbourhood: NeighbourhoodProxy): SignallingService {
   const tabCoordinator = useTabCoordinator();
@@ -200,6 +201,19 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
 
     const { author, data } = link;
     const { source, predicate, target } = data;
+
+    // Handle call invites targeted at this agent
+    if (predicate === CALL_INVITE && target === me.value.did && author !== me.value.did) {
+      getCachedAgentProfile(author, appStore.ad4mClient).then((profile) => {
+        const name = profile?.username || author.slice(0, 12);
+        appStore.showSuccessToast({ message: `📞 ${name} invited you to a call` });
+      });
+      // Open the call window so the user can easily join
+      if (!webrtcStore.inCall) {
+        const uiStore = useUiStore();
+        if (!uiStore.callWindowOpen) uiStore.setCallWindowOpen(true);
+      }
+    }
 
     if (predicate === NEW_STATE && link.author !== me.value.did) {
       // If this is their first broadcast, immediately broadcast my state so they dont have to wait for my next heartbeat

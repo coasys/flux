@@ -92,6 +92,8 @@
       </j-menu>
     </j-popover>
 
+    <InviteToCallPopover v-if="!isMobile" />
+
     <j-tooltip placement="top" :title="hasCopiedLink ? 'Copied!' : 'Copy invite link'">
       <j-button @click="webrtcStore.copyCallLink" square circle :size="isMobile ? 'md' : 'lg'">
         <j-icon
@@ -131,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+import InviteToCallPopover from './InviteToCallPopover.vue';
 import TranscriptionIcon from '@/components/icons/TranscriptionIcon.vue';
 import {
   useAiStore,

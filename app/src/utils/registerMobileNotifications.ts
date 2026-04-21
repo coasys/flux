@@ -46,6 +46,24 @@ function callNotificationConfig(perspectiveIds: string[], webhookAuth: string, a
   };
 }
 
+const CALL_INVITE_DESCRIPTION = 'Mobile push notifications for call invites';
+function callInviteNotificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
+  return {
+    appName: APP_NAME,
+    description: CALL_INVITE_DESCRIPTION,
+    appUrl: window.location.origin,
+    appIconPath: window.location.origin + '/icon.png',
+    trigger: `SELECT ?source ?predicate ?target WHERE {
+      GRAPH ?g { ?source ?predicate ?target . }
+      FILTER(?predicate = <flux://call_invite>)
+      FILTER(STR(?target) = "${agentDid}")
+    }`,
+    perspectiveIds,
+    webhookUrl: WEBHOOK_URL,
+    webhookAuth,
+  };
+}
+
 export async function registerNotification(client: Ad4mClient) {
   const perspctives = await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
@@ -99,6 +117,7 @@ export async function registerNotification(client: Ad4mClient) {
 
   await ensureNotification(client, notifications, MENTION_DESCRIPTION, perspectiveIds, webhookAuth, agentDid, mentionNotificationConfig);
   await ensureNotification(client, notifications, CALL_DESCRIPTION, perspectiveIds, webhookAuth, agentDid, callNotificationConfig);
+  await ensureNotification(client, notifications, CALL_INVITE_DESCRIPTION, perspectiveIds, webhookAuth, agentDid, callInviteNotificationConfig);
 }
 
 async function ensureNotification(

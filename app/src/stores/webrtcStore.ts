@@ -5,7 +5,7 @@ import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
 import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
-import { PerspectiveExpression } from '@coasys/ad4m';
+import { Link, PerspectiveExpression } from '@coasys/ad4m';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
 import { Howl } from 'howler';
 import { defineStore, storeToRefs } from 'pinia';
@@ -18,7 +18,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
-import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -26,6 +26,7 @@ export const WEBRTC_STREAM_REQUEST = 'webrtc/stream-request';
 export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
+export const CALL_INVITE = 'flux://call_invite';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -689,6 +690,33 @@ export const useWebrtcStore = defineStore(
       }
     }
 
+    function sendCallInvite(dids: string[]): void {
+      if (!signallingService.value || !callRoute.value.channelId) return;
+      const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+      const perspective = communityService.value?.perspective;
+
+      for (const did of dids) {
+        // Broadcast signal for real-time notification (when recipient is online)
+        signallingService.value.sendSignal({
+          source: channelUrl,
+          predicate: CALL_INVITE,
+          target: did,
+        });
+
+        // Persist link for AD4M push notification trigger (when recipient is offline)
+        if (perspective) {
+          perspective
+            .add(new Link({ source: channelUrl, predicate: CALL_INVITE, target: did }))
+            .catch((error) => console.error('Failed to persist call invite link:', error));
+        }
+      }
+
+      const count = dids.length;
+      appStore.showSuccessToast({
+        message: `Call invite sent to ${count} member${count > 1 ? 's' : ''}`,
+      });
+    }
+
     // Close the call window on route param changes if not in a call or a channel
     watch(
       () => route.params,
@@ -812,6 +840,7 @@ export const useWebrtcStore = defineStore(
       signalAgentsInCall,
       displayEmoji,
       copyCallLink,
+      sendCallInvite,
     };
   },
   { persist: false },
