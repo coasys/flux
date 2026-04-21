@@ -27,6 +27,9 @@ importers:
 
   .:
     dependencies:
+      '@capgo/capacitor-audio-session':
+        specifier: 7.1.11
+        version: 7.1.11(@capacitor/core@7.6.1)
       graphql:
         specifier: ^15.7.2
         version: 15.10.2
@@ -2039,6 +2042,11 @@ packages:
 
   '@capacitor/status-bar@7.0.6':
     resolution: {integrity: sha512-7AVqj46b26QikImQzWfsJmzG8NUJZBGkrVSuoeTo+SX/YH3hXH0MqwwFgMqMGHfa/BICDgSvTjM9miVFlq0+RQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capgo/capacitor-audio-session@7.1.11':
+    resolution: {integrity: sha512-4Czks39FIEUfrlnbrCPc6W/WBHsGtInyFqUDJ7fwd0Whk4lUyqLEMT2qUyAUtSR6Lm0CUWZ0jEbMWrGmTRoKlA==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
@@ -11804,6 +11812,10 @@ snapshots:
       '@capacitor/core': 7.6.1
 
   '@capacitor/status-bar@7.0.6(@capacitor/core@7.6.1)':
+    dependencies:
+      '@capacitor/core': 7.6.1
+
+  '@capgo/capacitor-audio-session@7.1.11(@capacitor/core@7.6.1)':
     dependencies:
       '@capacitor/core': 7.6.1
 
