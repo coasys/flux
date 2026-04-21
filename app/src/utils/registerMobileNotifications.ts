@@ -129,22 +129,40 @@ async function ensureNotification(
   agentDid: string,
   configFn: (perspectiveIds: string[], webhookAuth: string, agentDid: string) => any,
 ) {
-  let found = notifications.filter(
+  // Find all Flux notifications matching this description
+  const allMatching = notifications.filter((n) => n.appName == APP_NAME && n.description == description);
+
+  // Check if any fully match the current config
+  const fullyMatching = allMatching.filter(
     (n) =>
-      n.appName == APP_NAME &&
-      n.description == description &&
-      perspectiveIds.every((p) => n.perspectiveIds.includes(p)) &&
+      perspectiveIds.every((p) => (n.perspectiveIds || []).includes(p)) &&
       n.granted &&
       n.webhookAuth == webhookAuth,
   );
 
-  if (found.length > 1) {
-    for (let i = 1; i < found.length; i++) {
-      await client.runtime.removeNotification(found[i].id);
+  // Remove duplicates, keeping only the first fully matching one
+  if (fullyMatching.length > 1) {
+    for (let i = 1; i < fullyMatching.length; i++) {
+      await client.runtime.removeNotification(fullyMatching[i].id);
     }
   }
 
-  if (found.length == 0) {
-    await client.runtime.requestInstallNotification(configFn(perspectiveIds, webhookAuth, agentDid));
+  if (fullyMatching.length > 0) return;
+
+  // If we have an existing notification with stale config, update it
+  if (allMatching.length > 0) {
+    const existing = allMatching[0];
+    const config = configFn(perspectiveIds, webhookAuth, agentDid);
+    delete config.granted;
+    await client.runtime.updateNotification(existing.id, config);
+
+    // Remove any other duplicates
+    for (let i = 1; i < allMatching.length; i++) {
+      await client.runtime.removeNotification(allMatching[i].id);
+    }
+    return;
   }
+
+  // No existing notification at all — install a new one
+  await client.runtime.requestInstallNotification(configFn(perspectiveIds, webhookAuth, agentDid));
 }
