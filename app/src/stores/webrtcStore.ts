@@ -633,12 +633,16 @@ export const useWebrtcStore = defineStore(
         // If nobody else is in the call, persist a flux://call_started link so the
         // AD4M notification trigger fires a push notification for the neighbourhood.
         // Only the initiator emits this — late joiners don't, to avoid duplicate pushes.
+        // The link is cleaned up in leaveRoom() to prevent stale triggers.
         if (agentsInCall.value.length === 0 && callRoute.value.channelId) {
           const perspective = communityService.value?.perspective;
           const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
           if (perspective) {
             perspective
               .add(new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl }))
+              .then(() => {
+                persistedCallStartedLink.value = { source: channelUrl, target: channelUrl };
+              })
               .catch((error) => console.error('Failed to persist call_started link:', error));
           }
         }
@@ -659,6 +663,7 @@ export const useWebrtcStore = defineStore(
 
         // Clean up persisted call invite links to prevent stale notifications
         cleanupInviteLinks();
+        cleanupCallStartedLink();
 
         // Close all peer connections
         peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
@@ -709,6 +714,7 @@ export const useWebrtcStore = defineStore(
 
     // Track persisted invite links so we can clean them up when leaving the call
     const persistedInviteLinks = ref<Array<{ source: string; target: string }>>([]);
+    const persistedCallStartedLink = ref<{ source: string; target: string } | null>(null);
 
     function sendCallInvite(dids: string[]): void {
       if (!signallingService.value || !callRoute.value.channelId) return;
@@ -748,6 +754,17 @@ export const useWebrtcStore = defineStore(
           .catch((error) => console.error('Failed to remove call invite link:', error));
       }
       persistedInviteLinks.value = [];
+    }
+
+    function cleanupCallStartedLink(): void {
+      const perspective = communityService.value?.perspective;
+      const link = persistedCallStartedLink.value;
+      if (!perspective || !link) return;
+
+      perspective
+        .remove(new Link({ source: link.source, predicate: CALL_STARTED, target: link.target }))
+        .catch((error) => console.error('Failed to remove call_started link:', error));
+      persistedCallStartedLink.value = null;
     }
 
     // Close the call window on route param changes if not in a call or a channel
