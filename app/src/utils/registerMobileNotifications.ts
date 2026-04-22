@@ -28,17 +28,18 @@ function mentionNotificationConfig(perspectiveIds: string[], webhookAuth: string
 }
 
 const CALL_DESCRIPTION = 'Mobile push notifications for calls';
-function callNotificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
+function callNotificationConfig(perspectiveIds: string[], webhookAuth: string, _agentDid: string) {
   return {
     appName: APP_NAME,
     description: CALL_DESCRIPTION,
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
+    // Matches the persisted link emitted by webrtcStore.joinRoom() when the call
+    // initiator enters an empty room. AD4M's notification runtime skips
+    // self-authored links, so we don't need an explicit author filter here.
     trigger: `SELECT ?source ?predicate ?target WHERE {
       GRAPH ?g { ?source ?predicate ?target . }
-      FILTER(?predicate = <agent/new-state>)
-      FILTER(CONTAINS(STR(?source), '"inCall":true'))
-      FILTER(!CONTAINS(STR(?source), '"${agentDid}"'))
+      FILTER(?predicate = <flux://call_started>)
     }`,
     perspectiveIds,
     webhookUrl: WEBHOOK_URL,

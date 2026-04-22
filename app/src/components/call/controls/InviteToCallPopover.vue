@@ -60,20 +60,27 @@
 </template>
 
 <script setup lang="ts">
-import { useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useWebrtcStore } from '@/stores';
 import { useUiStore } from '@/stores';
 import { storeToRefs } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, unref, watch } from 'vue';
 
 const appStore = useAppStore();
 const webrtcStore = useWebrtcStore();
 const uiStore = useUiStore();
 
 const { me } = storeToRefs(appStore);
-const { agentsInCall } = storeToRefs(webrtcStore);
+const { agentsInCall, communityService } = storeToRefs(webrtcStore);
 const { isMobile } = storeToRefs(uiStore);
-const { members, getMembers } = useCommunityService();
+
+// Resolve members via the community of the active call, not the current route.
+// InviteToCallPopover renders inside CallContainer (sibling of RouterView in MainView),
+// so Vue inject() cannot reach CommunityView's provider. unref() handles the case
+// where Pinia's reactive proxy auto-unwraps the nested members ref.
+const members = computed(() => unref(communityService.value?.members) ?? []);
+function getMembers() {
+  communityService.value?.getMembers();
+}
 
 const popover = ref<HTMLElement | null>(null);
 const searchInput = ref('');

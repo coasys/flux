@@ -27,6 +27,7 @@ export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 export const CALL_INVITE = 'flux://call_invite';
+export const CALL_STARTED = 'flux://call_started';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -627,6 +628,19 @@ export const useWebrtcStore = defineStore(
         // Set the video layout to focused on mobile for better experience
         if (uiStore.isLandscapeMobile) {
           uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' });
+        }
+
+        // If nobody else is in the call, persist a flux://call_started link so the
+        // AD4M notification trigger fires a push notification for the neighbourhood.
+        // Only the initiator emits this — late joiners don't, to avoid duplicate pushes.
+        if (agentsInCall.value.length === 0 && callRoute.value.channelId) {
+          const perspective = communityService.value?.perspective;
+          const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+          if (perspective) {
+            perspective
+              .add(new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl }))
+              .catch((error) => console.error('Failed to persist call_started link:', error));
+          }
         }
 
         inCall.value = true;
