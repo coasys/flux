@@ -93,7 +93,7 @@ router.beforeEach(async (to, from, next) => {
     const communityId = to.params.communityId;
     if (communityId && to.name !== 'join-community') {
       const neighbourhoodUrl = restoreNeighbourhoodPrefix(communityId as string);
-      const isMember = appStore.myPerspectives.some((p) => p.sharedUrl === neighbourhoodUrl);
+      const isMember = appStore.myPerspectives.some((p) => p.sharedUrl === neighbourhoodUrl || p.uuid === communityId);
       if (!isMember) {
         next({ name: 'join-community', params: { communityId }, query: { redirect: to.fullPath } });
         return;

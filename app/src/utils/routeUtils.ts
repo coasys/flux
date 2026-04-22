@@ -6,7 +6,10 @@
 // Strips neighbourhood URL prefix to get clean community ID
 export function stripNeighbourhoodPrefix(neighbourhoodUrl: string): string {
   const prefix = 'neighbourhood://';
-  return neighbourhoodUrl.startsWith(prefix) ? neighbourhoodUrl.slice(prefix.length) : neighbourhoodUrl;
+  const privatePrefix = 'private://';
+  if (neighbourhoodUrl.startsWith(prefix)) return neighbourhoodUrl.slice(prefix.length);
+  if (neighbourhoodUrl.startsWith(privatePrefix)) return neighbourhoodUrl.slice(privatePrefix.length);
+  return neighbourhoodUrl;
 }
 
 // Restores neighbourhood URL prefix from clean community ID

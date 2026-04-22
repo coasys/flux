@@ -24,7 +24,7 @@ import { community as communityPredicates } from '@coasys/flux-constants';
 const { CHANNEL } = communityPredicates;
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
+import { computed, ComputedRef, inject, InjectionKey, markRaw, ref, Ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { HEARTBEAT_INTERVAL, useSignallingService } from './useSignallingService';
 
@@ -51,7 +51,7 @@ export interface ChannelDataWithAgents {
 export interface CommunityService {
   perspective: PerspectiveProxy;
   neighbourhood: NeighbourhoodProxy;
-  signallingService: SignallingService;
+  signallingService: SignallingService | null;
   isSynced: Ref<boolean>;
   isAuthor: ComputedRef<boolean>;
   community: ComputedRef<Community>;
@@ -96,7 +96,10 @@ export async function createCommunityService(): Promise<CommunityService> {
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const maybePerspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string));
+  const communityIdParam = route.params.communityId as string;
+  // Try neighbourhood:// first, then private:// for local-only perspectives
+  const maybePerspective = appStore.getPerspective(restoreNeighbourhoodPrefix(communityIdParam))
+    || appStore.getPerspective(`private://${communityIdParam}`);
   if (!maybePerspective) {
     const communityId = route.params.communityId as string;
     console.error(`Failed to get perspective for community: ${communityId}`);
@@ -105,8 +108,10 @@ export async function createCommunityService(): Promise<CommunityService> {
     );
   }
   // Narrowed to PerspectiveProxy — TypeScript does not narrow through closures so we reassign explicitly
-  const perspective: PerspectiveProxy = maybePerspective;
-  const neighbourhood = perspective.getNeighbourhoodProxy();
+  // markRaw prevents Vue from wrapping PerspectiveProxy in a reactive Proxy, which breaks
+  // TypeScript #private fields (WeakMap lookup fails when 'this' is a Proxy).
+  const perspective: PerspectiveProxy = markRaw(maybePerspective);
+  const neighbourhood = perspective.getNeighbourhoodProxy?.() || null;
 
   // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
   for (const Model of [
@@ -127,14 +132,14 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   // Initialise the signalling service for the community
-  const signallingService = useSignallingService(neighbourhood);
+  const signallingService = neighbourhood ? useSignallingService(neighbourhood) : null;
 
   // Model subscriptions
   // Community query is perspective-scoped (typically one per perspective — low cost).
   // Use ChannelSummary — lightweight model without @HasMany relations.
   // Getters are skipped by default on collection queries (deepQuery inversion).
-  const { data: communities } = useLiveQuery(Community, perspective);
-  const { data: allChannels } = useLiveQuery(ChannelSummary, perspective);
+  const { data: communities, loading: communitiesLoading, error: communitiesError } = useLiveQuery(Community, perspective);
+  const { data: allChannels, loading: channelsLoading, error: channelsError } = useLiveQuery(ChannelSummary, perspective);
 
   // Cache for conversation instances — populated during data fetching, looked up in computeds.
   // Plain Map (not reactive) is sufficient: updates always precede the ref changes that trigger re-computation.
@@ -163,8 +168,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children: undefined,
     }));
   });
@@ -173,8 +178,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children: undefined,
     }));
   });
@@ -183,15 +188,15 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children:
         data.children?.map((child) => ({
           ...child,
           channel: allChannels.value.find((c) => c.id === child.channelId),
           conversation: child.conversationId ? conversationCache.get(child.conversationId) : undefined,
-          agentsInChannel: signallingService.getAgentsInChannel(child.channelId).value,
-          agentsInCall: signallingService.getAgentsInCall(child.channelId).value,
+          agentsInChannel: signallingService?.getAgentsInChannel(child.channelId).value,
+          agentsInCall: signallingService?.getAgentsInCall(child.channelId).value,
           children: undefined,
         })) || [],
     }));
@@ -238,19 +243,7 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Single SPARQL query — avoids iterative channel.get({ conversations: true })
       const results = await Channel.pinnedConversations(perspective);
 
-      // Populate conversation cache for any conversations found
-      for (const result of results) {
-        if (result.conversationId) {
-          try {
-            const conversation = await Conversation.findOne(perspective, {
-              where: { id: result.conversationId },
-            });
-            if (conversation) conversationCache.set(conversation.id, conversation);
-          } catch (e) {
-            // Non-critical — sidebar still renders without conversation metadata
-          }
-        }
-      }
+      // Conversation cache population skipped — see getRecentConversations comment
 
       pinnedConversations.value = results;
     } catch (error) {
@@ -270,19 +263,9 @@ export async function createCommunityService(): Promise<CommunityService> {
       // (was: for each channel → get conversations → unprocessedItems → subgroups → items)
       const results = await Channel.recentConversations(perspective, 20);
 
-      // Populate conversation cache for resolved conversations
-      for (const result of results) {
-        if (result.conversationId) {
-          try {
-            const conversation = await Conversation.findOne(perspective, {
-              where: { id: result.conversationId },
-            });
-            if (conversation) conversationCache.set(conversation.id, conversation);
-          } catch (e) {
-            // Non-critical — sidebar still renders without conversation metadata
-          }
-        }
-      }
+      // Conversation cache population skipped for now — findOne hangs on perspectives
+      // without a link language (LinkLanguageFailedToInstall). Sidebar still renders with
+      // channelId + lastActivity; conversation names are a nice-to-have.
 
       recentConversations.value = results as ChannelData[];
     } catch (error) {
@@ -496,12 +479,12 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   getMembers();
 
-  watch(pinnedChannelsSignature, getPinnedConversations);
+  watch(pinnedChannelsSignature, getPinnedConversations, { immediate: true });
   watch(conversationChannelsSignature, () => {
     getRecentConversations();
     getChannelsWithConversations();
-  });
-  watch(spaceChannels, getChannelsWithConversations);
+  }, { immediate: true });
+  watch(spaceChannels, getChannelsWithConversations, { immediate: true });
 
   // Find processing tasks in the community when the conversations first load
   watch(recentConversations, () => {

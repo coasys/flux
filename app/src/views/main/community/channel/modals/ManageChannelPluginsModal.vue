@@ -126,8 +126,8 @@ watch(
   async (newChannel) => {
     if (newChannel) {
       await newChannel.get({ views: true });
-      views.value = newChannel.views;
-      selectedPlugins.value = newChannel.views;
+      views.value = newChannel.views || [];
+      selectedPlugins.value = newChannel.views || [];
     } else {
       views.value = [];
     }

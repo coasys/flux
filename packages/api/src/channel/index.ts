@@ -251,7 +251,8 @@ export class Channel extends Ad4mModel {
     const sparql = `
       SELECT ?channelId (SAMPLE(?cId) AS ?conversationId) (MAX(?ts) AS ?lastActivity) WHERE {
         GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
-        GRAPH ?g2 { ?channelId <${CHANNEL_IS_CONVERSATION}> "true" . }
+        GRAPH ?g2 { ?channelId <${CHANNEL_IS_CONVERSATION}> ?_isConv . }
+        FILTER(STR(<ad4m://fn/parse_literal>(?_isConv)) = "true")
         OPTIONAL {
           GRAPH ?g3 { ?channelId <ad4m://has_child> ?cId . }
           GRAPH ?g4 { ?cId <flux://entry_type> <flux://conversation> . }
@@ -300,7 +301,8 @@ export class Channel extends Ad4mModel {
     const sparql = `
       SELECT ?channelId ?conversationId WHERE {
         GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
-        GRAPH ?g2 { ?channelId <${CHANNEL_IS_PINNED}> "true" . }
+        GRAPH ?g2 { ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned . }
+        FILTER(STR(<ad4m://fn/parse_literal>(?_isPinned)) = "true")
         OPTIONAL {
           GRAPH ?g3 { ?channelId <ad4m://has_child> ?conversationId . }
           GRAPH ?g4 { ?conversationId <flux://entry_type> <flux://conversation> . }
