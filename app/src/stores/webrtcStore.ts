@@ -643,6 +643,9 @@ export const useWebrtcStore = defineStore(
         // Signal all peers that we're leaving the call
         signalPeers(WEBRTC_LEAVING_CALL);
 
+        // Clean up persisted call invite links to prevent stale notifications
+        cleanupInviteLinks();
+
         // Close all peer connections
         peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
 
@@ -690,6 +693,9 @@ export const useWebrtcStore = defineStore(
       }
     }
 
+    // Track persisted invite links so we can clean them up when leaving the call
+    const persistedInviteLinks = ref<Array<{ source: string; target: string }>>([]);
+
     function sendCallInvite(dids: string[]): void {
       if (!signallingService.value || !callRoute.value.channelId) return;
       const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
@@ -707,6 +713,7 @@ export const useWebrtcStore = defineStore(
         if (perspective) {
           perspective
             .add(new Link({ source: channelUrl, predicate: CALL_INVITE, target: did }))
+            .then(() => persistedInviteLinks.value.push({ source: channelUrl, target: did }))
             .catch((error) => console.error('Failed to persist call invite link:', error));
         }
       }
@@ -715,6 +722,18 @@ export const useWebrtcStore = defineStore(
       appStore.showSuccessToast({
         message: `Call invite sent to ${count} member${count > 1 ? 's' : ''}`,
       });
+    }
+
+    function cleanupInviteLinks(): void {
+      const perspective = communityService.value?.perspective;
+      if (!perspective || !persistedInviteLinks.value.length) return;
+
+      for (const invite of persistedInviteLinks.value) {
+        perspective
+          .remove(new Link({ source: invite.source, predicate: CALL_INVITE, target: invite.target }))
+          .catch((error) => console.error('Failed to remove call invite link:', error));
+      }
+      persistedInviteLinks.value = [];
     }
 
     // Close the call window on route param changes if not in a call or a channel

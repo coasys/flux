@@ -21,6 +21,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   const mediaDevicesStore = useMediaDevicesStore();
   const routeMemoryStore = useRouteMemoryStore();
   const aiStore = useAiStore();
+  const uiStore = useUiStore();
 
   const { me } = storeToRefs(appStore);
   const { inCall, callRoute, myAgentStatus } = storeToRefs(webrtcStore);
@@ -210,7 +211,6 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
       });
       // Open the call window so the user can easily join
       if (!webrtcStore.inCall) {
-        const uiStore = useUiStore();
         if (!uiStore.callWindowOpen) uiStore.setCallWindowOpen(true);
       }
     }
