@@ -62,9 +62,9 @@
             <button
               v-for="channelData in channelsWithConversations"
               class="channel-card"
-              @click="() => navigateToChannel(channelData.channel.id)"
+              @click="() => navigateToChannel(channelData.channel?.id)"
             >
-              # {{ channelData.channel.name }}
+              # {{ channelData.channel?.name }}
             </button>
           </div>
         </j-flex>

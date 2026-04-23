@@ -243,8 +243,8 @@ export const useAiStore = defineStore(
             const { channelId, communityId } = currentRoute.value;
 
             // Current channel gets highest priority
-            if (a.channel.id! === channelId && b.channel.id! !== channelId) return -1;
-            if (b.channel.id! === channelId && a.channel.id! !== channelId) return 1;
+            if (a.channel?.id === channelId && b.channel?.id !== channelId) return -1;
+            if (b.channel?.id === channelId && a.channel?.id !== channelId) return 1;
 
             // Current community gets second priority
             if (a.communityId === communityId && b.communityId !== communityId) return -1;
