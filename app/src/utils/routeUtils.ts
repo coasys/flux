@@ -14,6 +14,8 @@ export function stripNeighbourhoodPrefix(neighbourhoodUrl: string): string {
 
 // Restores neighbourhood URL prefix from clean community ID
 export function restoreNeighbourhoodPrefix(communityId: string): string {
+  // If the communityId already has a protocol prefix, return as-is
+  if (communityId.includes('://')) return communityId;
   return `neighbourhood://${communityId}`;
 }
 
