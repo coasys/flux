@@ -12,7 +12,7 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string, agent
     appUrl: window.location.origin,
     appIconPath: window.location.origin + '/icon.png',
     trigger: `SELECT ?source ?predicate ?target WHERE {
-      GRAPH ?g { ?source ?predicate ?target . }
+      ?source ?predicate ?target .
       FILTER(?predicate = <msg://body>)
       FILTER(CONTAINS(
         LCASE(STR(<ad4m://fn/parse_literal>(?target))),

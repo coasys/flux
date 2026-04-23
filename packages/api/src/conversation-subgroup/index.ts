@@ -27,8 +27,8 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const itemsQuery = `
         SELECT DISTINCT ?item WHERE {
-          GRAPH ?g1 { <${this.id}> <${SUBGROUP_ITEM}> ?item . }
-          GRAPH ?g2 { ?item <flux://entry_type> ?type . }
+          <${this.id}> <${SUBGROUP_ITEM}> ?item .
+          ?item <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -51,11 +51,11 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw WHERE {
-          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
-          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
-          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
-          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
-          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
+          ?semRel <flux://has_tag> ?topicBase .
+          ?semRel <flux://has_expression> <${this.id}> .
+          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
+          ?topicBase <flux://entry_type> <flux://has_topic> .
+          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
         }
       `;
 
@@ -90,19 +90,23 @@ export default class ConversationSubgroup extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT ?id ?type ?author ?timestamp ?body ?title ?taskName ?transcriptStart ?channelTs WHERE {
-          GRAPH ?link1 { <${this.id}> <${SUBGROUP_ITEM}> ?id . }
-          ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          GRAPH ?typeLink { ?id <flux://entry_type> ?type . }
-          ?typeLink <ad4m://ontology/author> ?author .
+          <${this.id}> <${SUBGROUP_ITEM}> ?id .
+          ?_sgReifier rdf:reifies <<( <${this.id}> <${SUBGROUP_ITEM}> ?id )>> .
+          ?_sgReifier <ad4m://ontology/timestamp> ?timestamp .
+          ?id <flux://entry_type> ?type .
+          ?_typeReifier rdf:reifies <<( ?id <flux://entry_type> ?type )>> .
+          ?_typeReifier <ad4m://ontology/author> ?author .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
-          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
-          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
-          OPTIONAL { GRAPH ?g6 { ?id <flux://transcript_started_at> ?transcriptStart . } }
-          OPTIONAL { GRAPH ?chLink { ?chSrc <ad4m://has_child> ?id . }
-                     ?chLink <ad4m://ontology/timestamp> ?channelTs .
-                     GRAPH ?g7 { ?chSrc <flux://entry_type> <flux://has_channel> . } }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
+          OPTIONAL { ?chSrc <ad4m://has_child> ?id .
+                     ?_chReifier rdf:reifies <<( ?chSrc <ad4m://has_child> ?id )>> .
+                     ?_chReifier <ad4m://ontology/timestamp> ?channelTs .
+                     ?chSrc <flux://entry_type> <flux://has_channel> . }
         }
         ORDER BY ?timestamp
       `;
@@ -193,12 +197,12 @@ export default class ConversationSubgroup extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw ?relevanceRaw WHERE {
-          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
-          GRAPH ?g2 { ?semRel <flux://has_expression> <${this.id}> . }
-          GRAPH ?g3 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
-          GRAPH ?g4 { ?topicBase <flux://entry_type> <flux://has_topic> . }
-          OPTIONAL { GRAPH ?g5 { ?topicBase <flux://topic> ?topicNameRaw . } }
-          OPTIONAL { GRAPH ?g6 { ?semRel <flux://has_relevance> ?relevanceRaw . } }
+          ?semRel <flux://has_tag> ?topicBase .
+          ?semRel <flux://has_expression> <${this.id}> .
+          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
+          ?topicBase <flux://entry_type> <flux://has_topic> .
+          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
+          OPTIONAL { ?semRel <flux://has_relevance> ?relevanceRaw . }
         }
       `;
 

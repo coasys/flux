@@ -37,8 +37,8 @@ export class Conversation extends Ad4mModel {
       // SPARQL migration
       const subgroupsQuery = `
         SELECT ?sg WHERE {
-          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?sg . }
-          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
+          <${this.id}> <ad4m://has_child> ?sg .
+          ?sg <flux://entry_type> <flux://conversation_subgroup> .
         }
       `;
 
@@ -60,16 +60,16 @@ export class Conversation extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT ?topicBase ?topicNameRaw WHERE {
-          GRAPH ?g1 { ?semRel <flux://has_tag> ?topicBase . }
-          GRAPH ?g2 { ?semRel <flux://entry_type> <flux://has_semantic_relationship> . }
-          GRAPH ?g3 { ?topicBase <flux://entry_type> <flux://has_topic> . }
-          GRAPH ?g4 { ?semRel <flux://has_expression> ?expr . }
+          ?semRel <flux://has_tag> ?topicBase .
+          ?semRel <flux://entry_type> <flux://has_semantic_relationship> .
+          ?topicBase <flux://entry_type> <flux://has_topic> .
+          ?semRel <flux://has_expression> ?expr .
           {
             FILTER(?expr = <${this.id}>)
           } UNION {
-            GRAPH ?g5 { <${this.id}> <ad4m://has_child> ?expr . }
+            <${this.id}> <ad4m://has_child> ?expr .
           }
-          OPTIONAL { GRAPH ?g6 { ?topicBase <flux://topic> ?topicNameRaw . } }
+          OPTIONAL { ?topicBase <flux://topic> ?topicNameRaw . }
         }
       `;
 
@@ -110,12 +110,14 @@ export class Conversation extends Ad4mModel {
     try {
       // SPARQL migration
       const sparqlQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT ?id ?timestamp ?nameRaw ?summaryRaw WHERE {
-          GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
-          ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          GRAPH ?g2 { ?id <flux://entry_type> <flux://conversation_subgroup> . }
-          OPTIONAL { GRAPH ?g3 { ?id <flux://has_name> ?nameRaw . } }
-          OPTIONAL { GRAPH ?g4 { ?id <flux://has_summary> ?summaryRaw . } }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
+          ?_reifier <ad4m://ontology/timestamp> ?timestamp .
+          ?id <flux://entry_type> <flux://conversation_subgroup> .
+          OPTIONAL { ?id <flux://has_name> ?nameRaw . }
+          OPTIONAL { ?id <flux://has_summary> ?summaryRaw . }
         }
         ORDER BY ?timestamp
       `;
@@ -143,13 +145,15 @@ export class Conversation extends Ad4mModel {
       // instead of one query per subgroup (N+1 → 1)
       const valuesClause = subgroupIds.map(id => `<${id}>`).join(' ');
       const batchTimestampQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT ?sg ?transcriptStart ?channelTs WHERE {
           VALUES ?sg { ${valuesClause} }
-          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?item . }
-          GRAPH ?chLink { ?chSrc <ad4m://has_child> ?item . }
-          ?chLink <ad4m://ontology/timestamp> ?channelTs .
-          GRAPH ?g2 { ?chSrc <flux://entry_type> <flux://has_channel> . }
-          OPTIONAL { GRAPH ?g3 { ?item <flux://transcript_started_at> ?transcriptStart . } }
+          ?sg <${SUBGROUP_ITEM}> ?item .
+          ?chSrc <ad4m://has_child> ?item .
+          ?_chReifier rdf:reifies <<( ?chSrc <ad4m://has_child> ?item )>> .
+          ?_chReifier <ad4m://ontology/timestamp> ?channelTs .
+          ?chSrc <flux://entry_type> <flux://has_channel> .
+          OPTIONAL { ?item <flux://transcript_started_at> ?transcriptStart . }
         }
       `;
 

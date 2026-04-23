@@ -69,15 +69,17 @@ export class Channel extends Ad4mModel {
     // Get all items (messages, posts, tasks) in the channel
     try {
       const sparqlQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
-          GRAPH ?link { <${this.id}> <ad4m://has_child> ?id . }
-          ?link <ad4m://ontology/timestamp> ?timestamp .
-          ?link <ad4m://ontology/author> ?author .
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
+          ?_reifier <ad4m://ontology/timestamp> ?timestamp .
+          ?_reifier <ad4m://ontology/author> ?author .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
-          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
-          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
         }
         ORDER BY ?timestamp
       `;
@@ -122,8 +124,8 @@ export class Channel extends Ad4mModel {
       // Query 1: Get all item IDs in channel
       const allItemsQuery = `
         SELECT ?id WHERE {
-          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -138,8 +140,8 @@ export class Channel extends Ad4mModel {
       // because items are unique to channels anyway.
       const processedQuery = `
         SELECT ?id WHERE {
-          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
-          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
+          ?sg <${SUBGROUP_ITEM}> ?id .
+          ?sg <flux://entry_type> <flux://conversation_subgroup> .
         }
       `;
 
@@ -161,16 +163,18 @@ export class Channel extends Ad4mModel {
       // Query 3: Get full data only for unprocessed items using VALUES clause
       const valuesClause = unprocessedIds.map((id: string) => `<${id}>`).join(' ');
       const dataQuery = `
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
           VALUES ?id { ${valuesClause} }
-          GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
-          ?link1 <ad4m://ontology/author> ?author .
-          ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
+          ?_reifier <ad4m://ontology/author> ?author .
+          ?_reifier <ad4m://ontology/timestamp> ?timestamp .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { GRAPH ?g4 { ?id <flux://body> ?body . } }
-          OPTIONAL { GRAPH ?g5 { ?id <flux://title> ?title . } }
-          OPTIONAL { GRAPH ?g6 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
         }
         ORDER BY ?timestamp
       `;
@@ -222,8 +226,8 @@ export class Channel extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT (COUNT(DISTINCT ?id) AS ?count) WHERE {
-          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -249,18 +253,20 @@ export class Channel extends Ad4mModel {
     limit: number = 20,
   ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
     const sparql = `
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
       SELECT ?channelId (SAMPLE(?cId) AS ?conversationId) (MAX(?ts) AS ?lastActivity) WHERE {
-        GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
-        GRAPH ?g2 { ?channelId <${CHANNEL_IS_CONVERSATION}> ?_isConv . }
+        ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
+        ?channelId <${CHANNEL_IS_CONVERSATION}> ?_isConv .
         FILTER(STR(<ad4m://fn/parse_literal>(?_isConv)) = "true")
         OPTIONAL {
-          GRAPH ?g3 { ?channelId <ad4m://has_child> ?cId . }
-          GRAPH ?g4 { ?cId <flux://entry_type> <flux://conversation> . }
+          ?channelId <ad4m://has_child> ?cId .
+          ?cId <flux://entry_type> <flux://conversation> .
         }
         OPTIONAL {
-          GRAPH ?itemLink { ?channelId <ad4m://has_child> ?item . }
-          ?itemLink <ad4m://ontology/timestamp> ?itemTs .
-          GRAPH ?g5 { ?item <${ENTRY_TYPE}> ?itemType . }
+          ?channelId <ad4m://has_child> ?item .
+          ?_itemReifier rdf:reifies <<( ?channelId <ad4m://has_child> ?item )>> .
+          ?_itemReifier <ad4m://ontology/timestamp> ?itemTs .
+          ?item <${ENTRY_TYPE}> ?itemType .
           FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
         }
         BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z") AS ?ts)
@@ -300,12 +306,12 @@ export class Channel extends Ad4mModel {
   ): Promise<{ channelId: string; conversationId?: string }[]> {
     const sparql = `
       SELECT ?channelId ?conversationId WHERE {
-        GRAPH ?g1 { ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> . }
-        GRAPH ?g2 { ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned . }
+        ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
+        ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned .
         FILTER(STR(<ad4m://fn/parse_literal>(?_isPinned)) = "true")
         OPTIONAL {
-          GRAPH ?g3 { ?channelId <ad4m://has_child> ?conversationId . }
-          GRAPH ?g4 { ?conversationId <flux://entry_type> <flux://conversation> . }
+          ?channelId <ad4m://has_child> ?conversationId .
+          ?conversationId <flux://entry_type> <flux://conversation> .
         }
       }
     `;
