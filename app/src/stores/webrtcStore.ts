@@ -10,7 +10,7 @@ import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coas
 import { Howl } from 'howler';
 import { defineStore, storeToRefs } from 'pinia';
 import type { Instance } from 'simple-peer';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from './appStore';
 import { useCommunityServiceStore } from './communityServiceStore';
@@ -635,21 +635,15 @@ export const useWebrtcStore = defineStore(
         // Only the initiator emits this — late joiners don't, to avoid duplicate pushes.
         // The link is cleaned up in leaveRoom() to prevent stale triggers.
         if (agentsInCall.value.length === 0 && callRoute.value.channelId) {
-          const perspective = communityService.value?.perspective;
+          const perspective = toRaw(communityService.value?.perspective);
           const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
-          console.log('[DIAG call_started] communityService:', !!communityService.value, 'perspective:', !!perspective, 'uuid:', perspective?.uuid, 'channelUrl:', channelUrl);
           if (perspective) {
-            const link = new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl });
-            console.log('[DIAG call_started] adding link:', JSON.stringify(link));
             perspective
-              .add(link)
-              .then((result) => {
-                console.log('[DIAG call_started] add() resolved:', JSON.stringify(result));
+              .add(new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl }))
+              .then(() => {
                 persistedCallStartedLink.value = { source: channelUrl, target: channelUrl };
               })
-              .catch((error) => console.error('[DIAG call_started] add() REJECTED:', error));
-          } else {
-            console.warn('[DIAG call_started] perspective is falsy — link NOT written. communityId:', callRoute.value.communityId);
+              .catch((error) => console.error('Failed to persist call_started link:', error));
           }
         }
 
@@ -725,8 +719,7 @@ export const useWebrtcStore = defineStore(
     function sendCallInvite(dids: string[]): void {
       if (!signallingService.value || !callRoute.value.channelId) return;
       const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
-      const perspective = communityService.value?.perspective;
-      console.log('[DIAG call_invite] communityService:', !!communityService.value, 'perspective:', !!perspective, 'uuid:', perspective?.uuid, 'channelUrl:', channelUrl, 'dids:', dids);
+      const perspective = toRaw(communityService.value?.perspective);
 
       for (const did of dids) {
         // Broadcast signal for real-time notification (when recipient is online)
@@ -738,17 +731,10 @@ export const useWebrtcStore = defineStore(
 
         // Persist link for AD4M push notification trigger (when recipient is offline)
         if (perspective) {
-          const link = new Link({ source: channelUrl, predicate: CALL_INVITE, target: did });
-          console.log('[DIAG call_invite] adding link:', JSON.stringify(link));
           perspective
-            .add(link)
-            .then((result) => {
-              console.log('[DIAG call_invite] add() resolved:', JSON.stringify(result));
-              persistedInviteLinks.value.push({ source: channelUrl, target: did });
-            })
-            .catch((error) => console.error('[DIAG call_invite] add() REJECTED:', error));
-        } else {
-          console.warn('[DIAG call_invite] perspective is falsy — link NOT written. communityId:', callRoute.value.communityId);
+            .add(new Link({ source: channelUrl, predicate: CALL_INVITE, target: did }))
+            .then(() => persistedInviteLinks.value.push({ source: channelUrl, target: did }))
+            .catch((error) => console.error('Failed to persist call invite link:', error));
         }
       }
 
@@ -759,7 +745,7 @@ export const useWebrtcStore = defineStore(
     }
 
     function cleanupInviteLinks(): void {
-      const perspective = communityService.value?.perspective;
+      const perspective = toRaw(communityService.value?.perspective);
       if (!perspective || !persistedInviteLinks.value.length) return;
 
       for (const invite of persistedInviteLinks.value) {
@@ -771,7 +757,7 @@ export const useWebrtcStore = defineStore(
     }
 
     function cleanupCallStartedLink(): void {
-      const perspective = communityService.value?.perspective;
+      const perspective = toRaw(communityService.value?.perspective);
       const link = persistedCallStartedLink.value;
       if (!perspective || !link) return;
 
