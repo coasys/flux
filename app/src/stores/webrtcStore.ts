@@ -637,13 +637,19 @@ export const useWebrtcStore = defineStore(
         if (agentsInCall.value.length === 0 && callRoute.value.channelId) {
           const perspective = communityService.value?.perspective;
           const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+          console.log('[DIAG call_started] communityService:', !!communityService.value, 'perspective:', !!perspective, 'uuid:', perspective?.uuid, 'channelUrl:', channelUrl);
           if (perspective) {
+            const link = new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl });
+            console.log('[DIAG call_started] adding link:', JSON.stringify(link));
             perspective
-              .add(new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl }))
-              .then(() => {
+              .add(link)
+              .then((result) => {
+                console.log('[DIAG call_started] add() resolved:', JSON.stringify(result));
                 persistedCallStartedLink.value = { source: channelUrl, target: channelUrl };
               })
-              .catch((error) => console.error('Failed to persist call_started link:', error));
+              .catch((error) => console.error('[DIAG call_started] add() REJECTED:', error));
+          } else {
+            console.warn('[DIAG call_started] perspective is falsy — link NOT written. communityId:', callRoute.value.communityId);
           }
         }
 
@@ -720,6 +726,7 @@ export const useWebrtcStore = defineStore(
       if (!signallingService.value || !callRoute.value.channelId) return;
       const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
       const perspective = communityService.value?.perspective;
+      console.log('[DIAG call_invite] communityService:', !!communityService.value, 'perspective:', !!perspective, 'uuid:', perspective?.uuid, 'channelUrl:', channelUrl, 'dids:', dids);
 
       for (const did of dids) {
         // Broadcast signal for real-time notification (when recipient is online)
@@ -731,10 +738,17 @@ export const useWebrtcStore = defineStore(
 
         // Persist link for AD4M push notification trigger (when recipient is offline)
         if (perspective) {
+          const link = new Link({ source: channelUrl, predicate: CALL_INVITE, target: did });
+          console.log('[DIAG call_invite] adding link:', JSON.stringify(link));
           perspective
-            .add(new Link({ source: channelUrl, predicate: CALL_INVITE, target: did }))
-            .then(() => persistedInviteLinks.value.push({ source: channelUrl, target: did }))
-            .catch((error) => console.error('Failed to persist call invite link:', error));
+            .add(link)
+            .then((result) => {
+              console.log('[DIAG call_invite] add() resolved:', JSON.stringify(result));
+              persistedInviteLinks.value.push({ source: channelUrl, target: did });
+            })
+            .catch((error) => console.error('[DIAG call_invite] add() REJECTED:', error));
+        } else {
+          console.warn('[DIAG call_invite] perspective is falsy — link NOT written. communityId:', callRoute.value.communityId);
         }
       }
 
