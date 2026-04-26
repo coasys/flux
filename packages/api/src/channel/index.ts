@@ -70,7 +70,7 @@ export class Channel extends Ad4mModel {
     try {
       const sparqlQuery = `
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName ?transcriptStart WHERE {
           <${this.id}> <ad4m://has_child> ?id .
           ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
           ?_reifier <ad4m://ontology/timestamp> ?timestamp .
@@ -80,6 +80,7 @@ export class Channel extends Ad4mModel {
           OPTIONAL { ?id <flux://body> ?body . }
           OPTIONAL { ?id <flux://title> ?title . }
           OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
         }
         ORDER BY ?timestamp
       `;
@@ -105,7 +106,7 @@ export class Channel extends Ad4mModel {
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(binding.timestamp).toISOString(),
+          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
@@ -164,7 +165,7 @@ export class Channel extends Ad4mModel {
       const valuesClause = unprocessedIds.map((id: string) => `<${id}>`).join(' ');
       const dataQuery = `
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName ?transcriptStart WHERE {
           VALUES ?id { ${valuesClause} }
           <${this.id}> <ad4m://has_child> ?id .
           ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
@@ -175,6 +176,7 @@ export class Channel extends Ad4mModel {
           OPTIONAL { ?id <flux://body> ?body . }
           OPTIONAL { ?id <flux://title> ?title . }
           OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
         }
         ORDER BY ?timestamp
       `;
@@ -208,7 +210,7 @@ export class Channel extends Ad4mModel {
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(binding.timestamp).toISOString(),
+          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
