@@ -153,7 +153,7 @@ function selectImage() {
   display: flex;
   flex-direction: column;
   border-radius: 4px;
-  z-index: 999;
+  z-index: 9999999;
 
   @media screen and (max-width: 768px) {
     width: calc(100vw - 32px);

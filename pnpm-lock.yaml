@@ -20,13 +20,16 @@ overrides:
   '@coasys/flux-utils': workspace:*
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
-  '@coasys/ad4m': file:./ad4m/core
-  '@coasys/ad4m-connect': file:./ad4m/connect
+  '@coasys/ad4m': 0.13.0-test-2
+  '@coasys/ad4m-connect': 0.13.0-test-2
 
 importers:
 
   .:
     dependencies:
+      '@capgo/capacitor-audio-session':
+        specifier: 7.1.11
+        version: 7.1.11(@capacitor/core@7.6.1)
       graphql:
         specifier: ^15.7.2
         version: 15.10.2
@@ -42,13 +45,13 @@ importers:
         version: 8.0.1
       prettier:
         specifier: latest
-        version: 3.8.3
+        version: 3.8.1
       prettier-plugin-sort-package-json:
         specifier: latest
-        version: 1.1.0(prettier@3.8.3)
+        version: 1.1.0(prettier@3.8.1)
       turbo:
         specifier: latest
-        version: 2.9.6
+        version: 2.9.5
 
   app:
     dependencies:
@@ -74,11 +77,11 @@ importers:
         specifier: ^7.0.5
         version: 7.0.6(@capacitor/core@7.6.1)
       '@coasys/ad4m':
-        specifier: file:../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.14.54)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.14.54)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -223,7 +226,7 @@ importers:
         version: 4.6.2(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))(vue@3.5.32(typescript@5.9.3))
       '@vue/eslint-config-prettier':
         specifier: ^6.0.0
-        version: 6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3))(eslint@7.32.0)(prettier@3.8.3)
+        version: 6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1))(eslint@7.32.0)(prettier@3.8.1)
       '@vue/eslint-config-typescript':
         specifier: ^11.0.3
         version: 11.0.3(eslint-plugin-vue@7.20.0(eslint@7.32.0))(eslint@7.32.0)(typescript@5.9.3)
@@ -241,7 +244,7 @@ importers:
         version: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0)
       eslint-plugin-prettier:
         specifier: ^3.4.0
-        version: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3)
+        version: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1)
       eslint-plugin-vue:
         specifier: ^7.10.0
         version: 7.20.0(eslint@7.32.0)
@@ -326,8 +329,8 @@ importers:
   packages/api:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -387,8 +390,8 @@ importers:
   packages/create/templates/preact:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -421,8 +424,8 @@ importers:
   packages/create/templates/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))
@@ -455,11 +458,11 @@ importers:
   packages/flux-container:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -483,11 +486,11 @@ importers:
   packages/flux-editor:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -532,8 +535,8 @@ importers:
   packages/react-web:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -601,11 +604,11 @@ importers:
   packages/utils:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-connect':
-        specifier: file:../../ad4m/connect
-        version: file:ad4m/connect(esbuild@0.21.5)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(esbuild@0.21.5)
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -625,8 +628,8 @@ importers:
   packages/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -646,8 +649,8 @@ importers:
   packages/webrtc:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -655,8 +658,8 @@ importers:
   views/chat-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -716,8 +719,8 @@ importers:
         specifier: ^1.70.19
         version: 1.80.0
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -747,8 +750,8 @@ importers:
   views/kanban-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -796,8 +799,8 @@ importers:
   views/kanban-view-simple:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -848,8 +851,8 @@ importers:
         specifier: '=3.6.9'
         version: 3.6.9(graphql@15.10.2)(react@18.3.1)
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -956,8 +959,8 @@ importers:
   views/poll-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -993,8 +996,8 @@ importers:
   views/post-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1072,8 +1075,8 @@ importers:
   views/synergy-demo-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1112,8 +1115,8 @@ importers:
   views/table-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1204,8 +1207,8 @@ importers:
   views/webrtc-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: file:../../ad4m/core
-        version: file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.13.0-test-2
+        version: 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-2
         version: 0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2036,8 +2039,13 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@file:ad4m/connect':
-    resolution: {directory: ad4m/connect, type: directory}
+  '@capgo/capacitor-audio-session@7.1.11':
+    resolution: {integrity: sha512-4Czks39FIEUfrlnbrCPc6W/WBHsGtInyFqUDJ7fwd0Whk4lUyqLEMT2qUyAUtSR6Lm0CUWZ0jEbMWrGmTRoKlA==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@coasys/ad4m-connect@0.13.0-test-2':
+    resolution: {integrity: sha512-6xFMOpBmczbUMCQsGJn9wvTep9V927DL639n+dfPPT7kG79x02Fas32edZrZYi6iKd1oKhNZJeae+JknwADs8g==}
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2':
     resolution: {integrity: sha512-fMlqdDJmviYQaMOoZ5Zgin1FcuN1iZqOmzhOlAbt2MsEXQap4SVIAKokCHCvNIXcsoEqEC68P1XoDdJGZx/CRA==}
@@ -2050,8 +2058,8 @@ packages:
     peerDependencies:
       vue: ^3.2.47
 
-  '@coasys/ad4m@file:ad4m/core':
-    resolution: {directory: ad4m/core, type: directory}
+  '@coasys/ad4m@0.13.0-test-2':
+    resolution: {integrity: sha512-dmLG2bouheIQqZNtmxyhcLoLW0GklEvxyABfn+/3NKXMv6S3bFX0ZcItgPV/CNy1lUg7+/fiaYNaVv8iTRKvPQ==}
 
   '@coasys/hooks-helpers@0.13.0-test-2':
     resolution: {integrity: sha512-uIgawUKJZNpoSxXiyoMLCWs0yTUxJmP0MNi0C+698CTCNtmMRr5iSqFxC4MmH1QxjNqnoU1hCsorVeTPy/97rg==}
@@ -3621,33 +3629,33 @@ packages:
   '@tsconfig/recommended@1.0.13':
     resolution: {integrity: sha512-sySRuBfMKyKO/j2ZAhR8kSembhjuPEV4Ra3AHtmWLq51+iGaudr45crPSzNC5b7/Ctrh9dfUpBuTlYrH6rM58Q==}
 
-  '@turbo/darwin-64@2.9.6':
-    resolution: {integrity: sha512-X/56SnVXIQZBLKwniGTwEQTGmtE5brSACnKMBWpY3YafuxVYefrC2acamfjgxP7BG5w3I+6jf0UrLoSzgPcSJg==}
+  '@turbo/darwin-64@2.9.5':
+    resolution: {integrity: sha512-qPxhKsLMQP+9+dsmPgAGidi5uNifD4AoAOnEnljab3Qgn0QZRR31Hp+/CgW3Ia5AanWj6JuLLTBYvuQj4mqTWg==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.9.6':
-    resolution: {integrity: sha512-aalBeSl4agT/QtYGDyf/XLajedWzUC9Vg/pm/YO6QQ93vkQ91Vz5uK1ta5RbVRDozQSz4njxUNqRNmOXDzW+qw==}
+  '@turbo/darwin-arm64@2.9.5':
+    resolution: {integrity: sha512-vkF/9F/l3aWd4bHxTui5Hh0F5xrTZ4e3rbBsc57zA6O8gNbmHN3B6eZ5psAIP2CnJRZ8ZxRjV3WZHeNXMXkPBw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.9.6':
-    resolution: {integrity: sha512-YKi05jnNHaD7vevgYwahpzGwbsNNTwzU2c7VZdmdFm7+cGDP4oREUWSsainiMfRqjRuolQxBwRn8wf1jmu+YZA==}
+  '@turbo/linux-64@2.9.5':
+    resolution: {integrity: sha512-z/Get5NUaUxm5HSGFqVMICDRjFNsCUhSc4wnFa/PP1QD0NXCjr7bu9a2EM6md/KMCBW0Qe393Ac+UM7/ryDDTw==}
     cpu: [x64]
     os: [linux]
 
-  '@turbo/linux-arm64@2.9.6':
-    resolution: {integrity: sha512-02o/ZS69cOYEDczXvOB2xmyrtzjQ2hVFtWZK1iqxXUfzMmTjZK4UumrfNnjckSg+gqeBfnPRHa0NstA173Ik3g==}
+  '@turbo/linux-arm64@2.9.5':
+    resolution: {integrity: sha512-jyBifaNoI5/NheyswomiZXJvjdAdvT7hDRYzQ4meP0DKGvpXUjnqsD+4/J2YSDQ34OHxFkL30FnSCUIVOh2PHw==}
     cpu: [arm64]
     os: [linux]
 
-  '@turbo/windows-64@2.9.6':
-    resolution: {integrity: sha512-wVdQjvnBI15wB6JrA+43CtUtagjIMmX6XYO758oZHAsCNSxqRlJtdyujih0D8OCnwCRWiGWGI63zAxR0hO6s9g==}
+  '@turbo/windows-64@2.9.5':
+    resolution: {integrity: sha512-ph24K5uPtvo7UfuyDXnBiB/8XvrO+RQWbbw5zkA/bVNoy9HDiNoIJJj3s62MxT9tjEb6DnPje5PXSz1UR7QAyg==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.9.6':
-    resolution: {integrity: sha512-1XUUyWW0W6FTSqGEhU8RHVqb2wP1SPkr7hIvBlMEwH9jr+sJQK5kqeosLJ/QaUv4ecSAd1ZhIrLoW7qslAzT4A==}
+  '@turbo/windows-arm64@2.9.5':
+    resolution: {integrity: sha512-6c5RccT/+iR39SdT1G5HyZaD2n57W77o+l0TTfxG/cVlhV94Acyg2gTQW7zUOhW1BeQpBjHzu9x8yVBZwrHh7g==}
     cpu: [arm64]
     os: [win32]
 
@@ -4127,7 +4135,6 @@ packages:
   '@xmldom/xmldom@0.8.12':
     resolution: {integrity: sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==}
     engines: {node: '>=10.0.0'}
-    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -8774,8 +8781,8 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  prettier@3.8.3:
-    resolution: {integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==}
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -10112,8 +10119,8 @@ packages:
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
 
-  turbo@2.9.6:
-    resolution: {integrity: sha512-+v2QJey7ZUeUiuigkU+uFfklvNUyPI2VO2vBpMYJA+a1hKFLFiKtUYlRHdb3P9CrAvMzi0upbjI4WT+zKtqkBg==}
+  turbo@2.9.5:
+    resolution: {integrity: sha512-JXNkRe6H6MjSlk5UQRTjyoKX5YN2zlc2632xcSlSFBao5yvbMWTpv9SNolOZlZmUlcDOHuszPLItbKrvcXnnZA==}
     hasBin: true
 
   type-check@0.4.0:
@@ -11929,7 +11936,11 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.1
 
-  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.14.54)':
+  '@capgo/capacitor-audio-session@7.1.11(@capacitor/core@7.6.1)':
+    dependencies:
+      '@capacitor/core': 7.6.1
+
+  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.14.54)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11940,7 +11951,7 @@ snapshots:
     transitivePeerDependencies:
       - esbuild
 
-  '@coasys/ad4m-connect@file:ad4m/connect(esbuild@0.21.5)':
+  '@coasys/ad4m-connect@0.13.0-test-2(esbuild@0.21.5)':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
@@ -11953,7 +11964,7 @@ snapshots:
 
   '@coasys/ad4m-react-hooks@0.13.0-test-2(preact@10.29.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
@@ -11969,7 +11980,7 @@ snapshots:
 
   '@coasys/ad4m-vue-hooks@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vue@3.5.32(typescript@5.9.3))':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@coasys/hooks-helpers': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       vue: 3.5.32(typescript@5.9.3)
     transitivePeerDependencies:
@@ -11981,7 +11992,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@coasys/ad4m@file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@coasys/ad4m@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@apollo/client': 3.7.10(graphql@15.7.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@holochain/client': 0.16.0
@@ -12002,7 +12013,7 @@ snapshots:
 
   '@coasys/hooks-helpers@0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': file:ad4m/core(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@coasys/ad4m': 0.13.0-test-2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       uuid: 9.0.1
     transitivePeerDependencies:
       - bufferutil
@@ -12791,7 +12802,7 @@ snapshots:
     dependencies:
       '@ionic/utils-object': 2.1.6
       '@ionic/utils-terminal': 2.3.4
-      debug: 4.4.3
+      debug: 4.3.4
       signal-exit: 3.0.7
       tree-kill: 1.2.2
       tslib: 2.6.2
@@ -12811,7 +12822,7 @@ snapshots:
 
   '@ionic/utils-stream@3.1.6':
     dependencies:
-      debug: 4.4.3
+      debug: 4.3.4
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
@@ -12831,7 +12842,7 @@ snapshots:
       '@ionic/utils-stream': 3.1.6
       '@ionic/utils-terminal': 2.3.4
       cross-spawn: 7.0.6
-      debug: 4.4.3
+      debug: 4.3.4
       tslib: 2.6.2
     transitivePeerDependencies:
       - supports-color
@@ -12852,7 +12863,7 @@ snapshots:
   '@ionic/utils-terminal@2.3.4':
     dependencies:
       '@types/slice-ansi': 4.0.0
-      debug: 4.4.3
+      debug: 4.3.4
       signal-exit: 3.0.7
       slice-ansi: 4.0.0
       string-width: 4.2.3
@@ -13337,7 +13348,7 @@ snapshots:
   '@prettier/plugin-xml@2.2.0':
     dependencies:
       '@xml-tools/parser': 1.0.11
-      prettier: 3.8.3
+      prettier: 3.8.1
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -13834,22 +13845,22 @@ snapshots:
 
   '@tsconfig/recommended@1.0.13': {}
 
-  '@turbo/darwin-64@2.9.6':
+  '@turbo/darwin-64@2.9.5':
     optional: true
 
-  '@turbo/darwin-arm64@2.9.6':
+  '@turbo/darwin-arm64@2.9.5':
     optional: true
 
-  '@turbo/linux-64@2.9.6':
+  '@turbo/linux-64@2.9.5':
     optional: true
 
-  '@turbo/linux-arm64@2.9.6':
+  '@turbo/linux-arm64@2.9.5':
     optional: true
 
-  '@turbo/windows-64@2.9.6':
+  '@turbo/windows-64@2.9.5':
     optional: true
 
-  '@turbo/windows-arm64@2.9.6':
+  '@turbo/windows-arm64@2.9.5':
     optional: true
 
   '@tweenjs/tween.js@25.0.0': {}
@@ -14294,12 +14305,12 @@ snapshots:
     dependencies:
       rfdc: 1.4.1
 
-  '@vue/eslint-config-prettier@6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3))(eslint@7.32.0)(prettier@3.8.3)':
+  '@vue/eslint-config-prettier@6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1))(eslint@7.32.0)(prettier@3.8.1)':
     dependencies:
       eslint: 7.32.0
       eslint-config-prettier: 6.15.0(eslint@7.32.0)
-      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3)
-      prettier: 3.8.3
+      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1)
+      prettier: 3.8.1
 
   '@vue/eslint-config-typescript@11.0.3(eslint-plugin-vue@7.20.0(eslint@7.32.0))(eslint@7.32.0)(typescript@5.9.3)':
     dependencies:
@@ -16863,10 +16874,10 @@ snapshots:
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
 
-  eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3):
+  eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1):
     dependencies:
       eslint: 7.32.0
-      prettier: 3.8.3
+      prettier: 3.8.1
       prettier-linter-helpers: 1.0.1
     optionalDependencies:
       eslint-config-prettier: 8.10.2(eslint@7.32.0)
@@ -19969,15 +19980,15 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier-plugin-sort-package-json@1.1.0(prettier@3.8.3):
+  prettier-plugin-sort-package-json@1.1.0(prettier@3.8.1):
     dependencies:
-      prettier: 3.8.3
+      prettier: 3.8.1
 
   prettier@2.8.8: {}
 
   prettier@3.3.3: {}
 
-  prettier@3.8.3: {}
+  prettier@3.8.1: {}
 
   pretty-bytes@5.6.0: {}
 
@@ -21565,14 +21576,14 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  turbo@2.9.6:
+  turbo@2.9.5:
     optionalDependencies:
-      '@turbo/darwin-64': 2.9.6
-      '@turbo/darwin-arm64': 2.9.6
-      '@turbo/linux-64': 2.9.6
-      '@turbo/linux-arm64': 2.9.6
-      '@turbo/windows-64': 2.9.6
-      '@turbo/windows-arm64': 2.9.6
+      '@turbo/darwin-64': 2.9.5
+      '@turbo/darwin-arm64': 2.9.5
+      '@turbo/linux-64': 2.9.5
+      '@turbo/linux-arm64': 2.9.5
+      '@turbo/windows-64': 2.9.5
+      '@turbo/windows-arm64': 2.9.5
 
   type-check@0.4.0:
     dependencies:

@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import Firebase
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -10,7 +11,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         FirebaseApp.configure()
+        
+        // Configure audio session for WebRTC calls with Bluetooth support
+        configureAudioSession()
+        
         return true
+    }
+    
+    private func configureAudioSession() {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            // playAndRecord: enables simultaneous input/output (required for calls)
+            // allowBluetooth: routes to HFP Bluetooth devices (AirPods calls)
+            // allowBluetoothA2DP: routes to A2DP Bluetooth devices (AirPods media)
+            // defaultToSpeaker: falls back to speaker when no headphones connected
+            try audioSession.setCategory(
+                .playAndRecord,
+                mode: .voiceChat,
+                options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker]
+            )
+            try audioSession.setActive(true)
+            print("✅ Audio session configured for WebRTC with Bluetooth support")
+        } catch {
+            print("❌ Failed to configure audio session: \(error)")
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
