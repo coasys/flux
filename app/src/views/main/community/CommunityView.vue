@@ -144,6 +144,7 @@ const {
 } = communityService;
 
 function navigateToChannel(channelId?: string) {
+  if (!channelId) return;
   router.push({ name: 'channel', params: { communityId, channelId } });
 }
 

@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Conversation } from './index';
 import ConversationSubgroup from '../conversation-subgroup';
 
+// Mock LLMutils — must be vi.mock (hoisted) so static imports in Conversation pick it up
+vi.mock('./LLMutils', () => ({
+  ensureLLMTasks: vi.fn().mockResolvedValue({ conversation: 'conversation-task' }),
+  LLMTaskWithExpectedOutputs: vi.fn().mockResolvedValue({ n: 'Test Conversation', s: 'Overall summary' }),
+}));
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -277,14 +283,6 @@ describe('Conversation.processNewExpressions()', () => {
       participants: [],
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
-    // Mock ensureLLMTasks for conversation naming
-    const mockLLMResult = { n: 'Test Conversation', s: 'Overall summary' };
-    vi.doMock('./LLMutils', () => ({
-      ensureLLMTasks: vi.fn().mockResolvedValue({
-        conversation: 'conversation-task',
-      }),
-      LLMTaskWithExpectedOutputs: vi.fn().mockResolvedValue(mockLLMResult),
-    }));
 
     const updateState = vi.fn();
     try {
@@ -362,10 +360,9 @@ describe('Conversation.processNewExpressions()', () => {
 
     // Verify items had null text replaced with ''
     const detectCall = (conv['detectNewGroup'] as any).mock.calls[0];
-    if (detectCall) {
-      const items = detectCall[1];
-      expect(items.every((item: any) => item.text === '')).toBe(true);
-    }
+    expect(detectCall, 'expected detectNewGroup to be called').toBeDefined();
+    const items = detectCall[1];
+    expect(items.every((item: any) => item.text === '')).toBe(true);
   });
 
   it('sorts items into current subgroup when no new group detected', async () => {
@@ -402,11 +399,10 @@ describe('Conversation.processNewExpressions()', () => {
     const itemLinks = addLinksCalls.find(
       (call) => Array.isArray(call[0]) && call[0].some((l: any) => l.predicate === 'flux://has_item'),
     );
-    if (itemLinks) {
-      const links = itemLinks[0];
-      expect(links.every((l: any) => l.source === 'sg-current')).toBe(true);
-      expect(links).toHaveLength(3);
-    }
+    expect(itemLinks, 'expected addLinks to be called with flux://has_item links').toBeDefined();
+    const links = itemLinks![0];
+    expect(links.every((l: any) => l.source === 'sg-current')).toBe(true);
+    expect(links).toHaveLength(3);
   });
 
   it('splits items between current and new subgroup at firstItemId boundary', async () => {
@@ -449,17 +445,16 @@ describe('Conversation.processNewExpressions()', () => {
     const itemLinksCall = addLinksCalls.find(
       (call) => Array.isArray(call[0]) && call[0].some((l: any) => l.predicate === 'flux://has_item'),
     );
-    if (itemLinksCall) {
-      const links = itemLinksCall[0];
-      // msg-1 → sg-current (before firstItemId 'msg-2')
-      const currentLinks = links.filter((l: any) => l.source === 'sg-current');
-      // msg-2, msg-3 → sg-new (at and after firstItemId 'msg-2')
-      const newLinks = links.filter((l: any) => l.source === 'sg-new');
-      expect(currentLinks).toHaveLength(1);
-      expect(currentLinks[0].target).toBe('msg-1');
-      expect(newLinks).toHaveLength(2);
-      expect(newLinks.map((l: any) => l.target)).toEqual(['msg-2', 'msg-3']);
-    }
+    expect(itemLinksCall, 'expected addLinks to be called with flux://has_item links').toBeDefined();
+    const links = itemLinksCall![0];
+    // msg-1 → sg-current (before firstItemId 'msg-2')
+    const currentLinks = links.filter((l: any) => l.source === 'sg-current');
+    // msg-2, msg-3 → sg-new (at and after firstItemId 'msg-2')
+    const newLinks = links.filter((l: any) => l.source === 'sg-new');
+    expect(currentLinks).toHaveLength(1);
+    expect(currentLinks[0].target).toBe('msg-1');
+    expect(newLinks).toHaveLength(2);
+    expect(newLinks.map((l: any) => l.target)).toEqual(['msg-2', 'msg-3']);
   });
 
   it('handles empty conversation (no current subgroup) by creating new group', async () => {

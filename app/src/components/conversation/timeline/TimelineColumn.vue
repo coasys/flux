@@ -130,7 +130,7 @@ import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { llmProcessingSteps, useAiStore, useAppStore } from '@/stores';
 import { closeMenu } from '@/utils/helperFunctions';
 import { restoreChannelPrefix, stripNeighbourhoodPrefix } from '@/utils/routeUtils';
-import { Channel, Conversation } from '@coasys/flux-api';
+import { Channel, ChannelSummary, Conversation } from '@coasys/flux-api';
 import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
@@ -180,6 +180,7 @@ const exportingFlat = ref(false);
 // on every link in the entire perspective.
 let unprocessedItemsTimer: ReturnType<typeof setTimeout> | null = null;
 let channelItemsSub: { dispose: () => void } | null = null;
+let isUnmounted = false;
 
 async function refreshUnprocessedItems() {
   try {
@@ -204,6 +205,10 @@ function scheduleUnprocessedItemsRefresh() {
     const sub = await perspective.subscribeQuery(`
       SELECT ?id WHERE { <${channelUrl}> <ad4m://has_child> ?id . }
     `);
+    if (isUnmounted) {
+      sub.dispose();
+      return;
+    }
     channelItemsSub = sub;
     sub.onResult(() => {
       scheduleUnprocessedItemsRefresh();
@@ -214,6 +219,7 @@ function scheduleUnprocessedItemsRefresh() {
 })();
 
 onUnmounted(() => {
+  isUnmounted = true;
   if (unprocessedItemsTimer) clearTimeout(unprocessedItemsTimer);
   channelItemsSub?.dispose();
 });
@@ -373,7 +379,7 @@ watch(unprocessedItems, async (items) => {
   try {
     const shouldProcess = await aiStore.checkIfWeShouldProcessTask(items, signallingService, channelUrl);
     if (shouldProcess) {
-      const channel = new Channel(perspective, channelUrl);
+      const channel = new ChannelSummary(perspective, channelUrl);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
     }
   } catch (error) {

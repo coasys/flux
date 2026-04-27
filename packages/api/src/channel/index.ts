@@ -87,7 +87,7 @@ export class Channel extends Ad4mModel {
 
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
-      return (sparqlResult || []).map((binding: any) => {
+      const mapped = (sparqlResult || []).map((binding: any) => {
         let text = '';
         let type = '';
         const itemType = binding.type;
@@ -112,6 +112,8 @@ export class Channel extends Ad4mModel {
           icon: icons[type] ? icons[type] : 'question',
         };
       });
+      // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
+      return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
       console.error('Error getting all channel items:', error);
       return [];
@@ -191,7 +193,7 @@ export class Channel extends Ad4mModel {
         itemMap.set(id, binding);
       }
 
-      return Array.from(itemMap.values()).map((binding: any) => {
+      const mapped = Array.from(itemMap.values()).map((binding: any) => {
         let text = '';
         let type = '';
         const itemType = binding.type;
@@ -216,6 +218,8 @@ export class Channel extends Ad4mModel {
           icon: icons[type] ? icons[type] : 'question',
         };
       });
+      // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
+      return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
       console.error('Error getting channel items:', error);
       return [];
@@ -271,7 +275,7 @@ export class Channel extends Ad4mModel {
           ?item <${ENTRY_TYPE}> ?itemType .
           FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
         }
-        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z") AS ?ts)
+        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
       }
       GROUP BY ?channelId
       ORDER BY DESC(?lastActivity)

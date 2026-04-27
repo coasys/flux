@@ -151,50 +151,41 @@ describe('unprocessed items refresh — debouncing', () => {
     handler.cleanup();
   });
 
-  it('debounces rapid subscription updates into a single refresh', (done) => {
+  it('debounces rapid subscription updates into a single refresh', async () => {
     // Simulate a batch commit triggering multiple subscription updates
     handler.scheduleRefresh();
     handler.scheduleRefresh();
     handler.scheduleRefresh();
 
-    setTimeout(() => {
-      expect(handler.refreshCallCount).toBe(1);
-      done();
-    }, 100);
+    await new Promise((r) => setTimeout(r, 100));
+    expect(handler.refreshCallCount).toBe(1);
   });
 
-  it('fires separate refreshes for updates after debounce window', (done) => {
+  it('fires separate refreshes for updates after debounce window', async () => {
     handler.scheduleRefresh();
 
     // Wait for debounce to complete, then trigger another
-    setTimeout(() => {
-      handler.scheduleRefresh();
+    await new Promise((r) => setTimeout(r, 100));
+    handler.scheduleRefresh();
 
-      setTimeout(() => {
-        expect(handler.refreshCallCount).toBe(2);
-        done();
-      }, 100);
-    }, 100);
+    await new Promise((r) => setTimeout(r, 100));
+    expect(handler.refreshCallCount).toBe(2);
   });
 
-  it('resets the debounce timer on each call', (done) => {
+  it('resets the debounce timer on each call', async () => {
     handler.scheduleRefresh();
 
     // Call again before debounce expires — should reset the timer
-    setTimeout(() => {
-      handler.scheduleRefresh();
-    }, 30);
+    await new Promise((r) => setTimeout(r, 30));
+    handler.scheduleRefresh();
 
-    // At 80ms from start: first timer (50ms) would have fired, but it was reset at 30ms
+    // At 60ms from start: first timer (50ms) would have fired, but it was reset at 30ms
     // So only the second timer (30ms + 50ms = 80ms) fires
-    setTimeout(() => {
-      expect(handler.refreshCallCount).toBe(0); // Not yet fired
-    }, 60);
+    await new Promise((r) => setTimeout(r, 30));
+    expect(handler.refreshCallCount).toBe(0); // Not yet fired
 
-    setTimeout(() => {
-      expect(handler.refreshCallCount).toBe(1); // Now fired
-      done();
-    }, 120);
+    await new Promise((r) => setTimeout(r, 60));
+    expect(handler.refreshCallCount).toBe(1); // Now fired
   });
 });
 
