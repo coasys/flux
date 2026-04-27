@@ -71,8 +71,8 @@ export async function registerNotification(client: Ad4mClient) {
     });
   }
 
-  let notifications = await client.runtime.notifications();
-  let foundNotifications = notifications.filter(
+  const notifications = await client.runtime.notifications();
+  const foundNotifications = notifications.filter(
     (n) =>
       n.appName == APP_NAME &&
       n.description == DESCRIPTION &&

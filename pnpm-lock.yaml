@@ -45,13 +45,13 @@ importers:
         version: 8.0.1
       prettier:
         specifier: latest
-        version: 3.8.1
+        version: 3.8.3
       prettier-plugin-sort-package-json:
         specifier: latest
-        version: 1.1.0(prettier@3.8.1)
+        version: 1.1.0(prettier@3.8.3)
       turbo:
         specifier: latest
-        version: 2.9.5
+        version: 2.9.6
 
   app:
     dependencies:
@@ -226,7 +226,7 @@ importers:
         version: 4.6.2(vite@4.5.14(@types/node@25.5.2)(sass@1.99.0)(terser@5.46.1))(vue@3.5.32(typescript@5.9.3))
       '@vue/eslint-config-prettier':
         specifier: ^6.0.0
-        version: 6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1))(eslint@7.32.0)(prettier@3.8.1)
+        version: 6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3))(eslint@7.32.0)(prettier@3.8.3)
       '@vue/eslint-config-typescript':
         specifier: ^11.0.3
         version: 11.0.3(eslint-plugin-vue@7.20.0(eslint@7.32.0))(eslint@7.32.0)(typescript@5.9.3)
@@ -244,7 +244,7 @@ importers:
         version: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0)
       eslint-plugin-prettier:
         specifier: ^3.4.0
-        version: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1)
+        version: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3)
       eslint-plugin-vue:
         specifier: ^7.10.0
         version: 7.20.0(eslint@7.32.0)
@@ -278,6 +278,9 @@ importers:
       vue-devtools:
         specifier: ^5.1.4
         version: 5.1.4
+      vue-tsc:
+        specifier: ^3.2.7
+        version: 3.2.7(typescript@5.9.3)
 
   docs:
     dependencies:
@@ -3629,33 +3632,33 @@ packages:
   '@tsconfig/recommended@1.0.13':
     resolution: {integrity: sha512-sySRuBfMKyKO/j2ZAhR8kSembhjuPEV4Ra3AHtmWLq51+iGaudr45crPSzNC5b7/Ctrh9dfUpBuTlYrH6rM58Q==}
 
-  '@turbo/darwin-64@2.9.5':
-    resolution: {integrity: sha512-qPxhKsLMQP+9+dsmPgAGidi5uNifD4AoAOnEnljab3Qgn0QZRR31Hp+/CgW3Ia5AanWj6JuLLTBYvuQj4mqTWg==}
+  '@turbo/darwin-64@2.9.6':
+    resolution: {integrity: sha512-X/56SnVXIQZBLKwniGTwEQTGmtE5brSACnKMBWpY3YafuxVYefrC2acamfjgxP7BG5w3I+6jf0UrLoSzgPcSJg==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.9.5':
-    resolution: {integrity: sha512-vkF/9F/l3aWd4bHxTui5Hh0F5xrTZ4e3rbBsc57zA6O8gNbmHN3B6eZ5psAIP2CnJRZ8ZxRjV3WZHeNXMXkPBw==}
+  '@turbo/darwin-arm64@2.9.6':
+    resolution: {integrity: sha512-aalBeSl4agT/QtYGDyf/XLajedWzUC9Vg/pm/YO6QQ93vkQ91Vz5uK1ta5RbVRDozQSz4njxUNqRNmOXDzW+qw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.9.5':
-    resolution: {integrity: sha512-z/Get5NUaUxm5HSGFqVMICDRjFNsCUhSc4wnFa/PP1QD0NXCjr7bu9a2EM6md/KMCBW0Qe393Ac+UM7/ryDDTw==}
+  '@turbo/linux-64@2.9.6':
+    resolution: {integrity: sha512-YKi05jnNHaD7vevgYwahpzGwbsNNTwzU2c7VZdmdFm7+cGDP4oREUWSsainiMfRqjRuolQxBwRn8wf1jmu+YZA==}
     cpu: [x64]
     os: [linux]
 
-  '@turbo/linux-arm64@2.9.5':
-    resolution: {integrity: sha512-jyBifaNoI5/NheyswomiZXJvjdAdvT7hDRYzQ4meP0DKGvpXUjnqsD+4/J2YSDQ34OHxFkL30FnSCUIVOh2PHw==}
+  '@turbo/linux-arm64@2.9.6':
+    resolution: {integrity: sha512-02o/ZS69cOYEDczXvOB2xmyrtzjQ2hVFtWZK1iqxXUfzMmTjZK4UumrfNnjckSg+gqeBfnPRHa0NstA173Ik3g==}
     cpu: [arm64]
     os: [linux]
 
-  '@turbo/windows-64@2.9.5':
-    resolution: {integrity: sha512-ph24K5uPtvo7UfuyDXnBiB/8XvrO+RQWbbw5zkA/bVNoy9HDiNoIJJj3s62MxT9tjEb6DnPje5PXSz1UR7QAyg==}
+  '@turbo/windows-64@2.9.6':
+    resolution: {integrity: sha512-wVdQjvnBI15wB6JrA+43CtUtagjIMmX6XYO758oZHAsCNSxqRlJtdyujih0D8OCnwCRWiGWGI63zAxR0hO6s9g==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.9.5':
-    resolution: {integrity: sha512-6c5RccT/+iR39SdT1G5HyZaD2n57W77o+l0TTfxG/cVlhV94Acyg2gTQW7zUOhW1BeQpBjHzu9x8yVBZwrHh7g==}
+  '@turbo/windows-arm64@2.9.6':
+    resolution: {integrity: sha512-1XUUyWW0W6FTSqGEhU8RHVqb2wP1SPkr7hIvBlMEwH9jr+sJQK5kqeosLJ/QaUv4ecSAd1ZhIrLoW7qslAzT4A==}
     cpu: [arm64]
     os: [win32]
 
@@ -3989,6 +3992,15 @@ packages:
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
 
+  '@volar/language-core@2.4.28':
+    resolution: {integrity: sha512-w4qhIJ8ZSitgLAkVay6AbcnC7gP3glYM3fYwKV3srj8m494E3xtrCv6E+bWviiK/8hs6e6t1ij1s2Endql7vzQ==}
+
+  '@volar/source-map@2.4.28':
+    resolution: {integrity: sha512-yX2BDBqJkRXfKw8my8VarTyjv48QwxdJtvRgUpNE5erCsgEUdI2DsLbpa+rOQVAJYshY99szEcRDmyHbF10ggQ==}
+
+  '@volar/typescript@2.4.28':
+    resolution: {integrity: sha512-Ja6yvWrbis2QtN4ClAKreeUZPVYMARDYZl9LMEv1iQ1QdepB6wn0jTRxA9MftYmYa4DQ4k/DaSZpFPUfxl8giw==}
+
   '@vue/compiler-core@3.5.32':
     resolution: {integrity: sha512-4x74Tbtqnda8s/NSD6e1Dr5p1c8HdMU5RWSjMSUzb8RTcUQqevDCxVAitcLBKT+ie3o0Dl9crc/S/opJM7qBGQ==}
 
@@ -4030,6 +4042,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@vue/language-core@3.2.7':
+    resolution: {integrity: sha512-Gn4q/tRxbpVGLEuARQ43p3YELlNAFgRUVCgW9U5Cr+5q4vfD2bWDWpl3ABbJMXUt5xlE1dF8dkigg2aUq7JYYw==}
 
   '@vue/reactivity@3.5.32':
     resolution: {integrity: sha512-/ORasxSGvZ6MN5gc+uE364SxFdJ0+WqVG0CENXaGW58TOCdrAW76WWaplDtECeS1qphvtBZtR+3/o1g1zL4xPQ==}
@@ -4135,6 +4150,7 @@ packages:
   '@xmldom/xmldom@0.8.12':
     resolution: {integrity: sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -4244,6 +4260,9 @@ packages:
   algoliasearch@5.50.1:
     resolution: {integrity: sha512-/bwdue1/8LWELn/DBalGRfuLsXBLXULJo/yOeavJtDu8rBwxIzC6/Rz9Jg19S21VkJvRuZO1k8CZXBMS73mYbA==}
     engines: {node: '>= 14.0.0'}
+
+  alien-signals@3.1.2:
+    resolution: {integrity: sha512-d9dYqZTS90WLiU0I5c6DHj/HcKkF8ZyGN3G5x8wSbslulz70KOxaqCT0hQCo9KOyhVqzqGojvNdJXoTumZOtcw==}
 
   ansi-align@3.0.1:
     resolution: {integrity: sha512-IOfwwBF5iczOjp/WeY4YxyjqAFMQoZufdQWDd19SEExbVLNXqvpzSJ/M7Za4/sCPmQ0+GRquoA7bGcINcxew6w==}
@@ -8103,6 +8122,9 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  muggle-string@0.4.1:
+    resolution: {integrity: sha512-VNTrAak/KhO2i8dqqnqnAHOa3cYBwXEZe9h+D5h/1ZqFSTEFHdM65lR7RoIqq3tBBYavsOXV84NoHXZ0AkPyqQ==}
+
   murmur-32@0.2.0:
     resolution: {integrity: sha512-ZkcWZudylwF+ir3Ld1n7gL6bI2mQAzXvSobPwVtu8aYi2sbXeipeSkdcanRLzIofLcM5F53lGaKm2dk7orBi7Q==}
 
@@ -8546,6 +8568,9 @@ packages:
     engines: {node: '>=14', npm: '>5'}
     hasBin: true
 
+  path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
+
   path-exists@3.0.0:
     resolution: {integrity: sha512-bpC7GYwiDYQ4wYLe+FA8lhRjhQCMcQGuSgGGqDkg/QerRWw9CmGRT0iSOVRSZJ29NMLZgIzqaljJ63oaL4NIJQ==}
     engines: {node: '>=4'}
@@ -8781,8 +8806,8 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  prettier@3.8.1:
-    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
+  prettier@3.8.3:
+    resolution: {integrity: sha512-7igPTM53cGHMW8xWuVTydi2KO233VFiTNyF5hLJqpilHfmn8C8gPf+PS7dUT64YcXFbiMGZxS9pCSxL/Dxm/Jw==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -10119,8 +10144,8 @@ packages:
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
 
-  turbo@2.9.5:
-    resolution: {integrity: sha512-JXNkRe6H6MjSlk5UQRTjyoKX5YN2zlc2632xcSlSFBao5yvbMWTpv9SNolOZlZmUlcDOHuszPLItbKrvcXnnZA==}
+  turbo@2.9.6:
+    resolution: {integrity: sha512-+v2QJey7ZUeUiuigkU+uFfklvNUyPI2VO2vBpMYJA+a1hKFLFiKtUYlRHdb3P9CrAvMzi0upbjI4WT+zKtqkBg==}
     hasBin: true
 
   type-check@0.4.0:
@@ -10526,6 +10551,9 @@ packages:
   vscode-textmate@8.0.0:
     resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
 
+  vscode-uri@3.1.0:
+    resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
+
   vue-advanced-cropper@2.8.9:
     resolution: {integrity: sha512-1jc5gO674kVGpJKekoaol6ZlwaF5VYDLSBwBOUpViW0IOrrRsyLw6XNszjEqgbavvqinlKNS6Kqlom3B5M72Tw==}
     engines: {node: '>=8', npm: '>=5'}
@@ -10566,6 +10594,12 @@ packages:
     resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
     peerDependencies:
       vue: ^3.5.0
+
+  vue-tsc@3.2.7:
+    resolution: {integrity: sha512-zc1tL3HoQni1zGTGrwBVRQb7rGP5SWdu/m4rGB6JcnAC5MT5LFZIxF7Y+EJEnt4hGF23d60rXH7gRjHGb5KQQQ==}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.0.0'
 
   vue@3.5.32:
     resolution: {integrity: sha512-vM4z4Q9tTafVfMAK7IVzmxg34rSzTFMyIe0UUEijUCkn9+23lj0WRfA83dg7eQZIUlgOSGrkViIaCfqSAUXsMw==}
@@ -13348,7 +13382,7 @@ snapshots:
   '@prettier/plugin-xml@2.2.0':
     dependencies:
       '@xml-tools/parser': 1.0.11
-      prettier: 3.8.1
+      prettier: 3.8.3
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -13845,22 +13879,22 @@ snapshots:
 
   '@tsconfig/recommended@1.0.13': {}
 
-  '@turbo/darwin-64@2.9.5':
+  '@turbo/darwin-64@2.9.6':
     optional: true
 
-  '@turbo/darwin-arm64@2.9.5':
+  '@turbo/darwin-arm64@2.9.6':
     optional: true
 
-  '@turbo/linux-64@2.9.5':
+  '@turbo/linux-64@2.9.6':
     optional: true
 
-  '@turbo/linux-arm64@2.9.5':
+  '@turbo/linux-arm64@2.9.6':
     optional: true
 
-  '@turbo/windows-64@2.9.5':
+  '@turbo/windows-64@2.9.6':
     optional: true
 
-  '@turbo/windows-arm64@2.9.5':
+  '@turbo/windows-arm64@2.9.6':
     optional: true
 
   '@tweenjs/tween.js@25.0.0': {}
@@ -14255,6 +14289,18 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 1.2.0
 
+  '@volar/language-core@2.4.28':
+    dependencies:
+      '@volar/source-map': 2.4.28
+
+  '@volar/source-map@2.4.28': {}
+
+  '@volar/typescript@2.4.28':
+    dependencies:
+      '@volar/language-core': 2.4.28
+      path-browserify: 1.0.1
+      vscode-uri: 3.1.0
+
   '@vue/compiler-core@3.5.32':
     dependencies:
       '@babel/parser': 7.29.2
@@ -14305,12 +14351,12 @@ snapshots:
     dependencies:
       rfdc: 1.4.1
 
-  '@vue/eslint-config-prettier@6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1))(eslint@7.32.0)(prettier@3.8.1)':
+  '@vue/eslint-config-prettier@6.0.0(eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3))(eslint@7.32.0)(prettier@3.8.3)':
     dependencies:
       eslint: 7.32.0
       eslint-config-prettier: 6.15.0(eslint@7.32.0)
-      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1)
-      prettier: 3.8.1
+      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3)
+      prettier: 3.8.3
 
   '@vue/eslint-config-typescript@11.0.3(eslint-plugin-vue@7.20.0(eslint@7.32.0))(eslint@7.32.0)(typescript@5.9.3)':
     dependencies:
@@ -14323,6 +14369,16 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
+
+  '@vue/language-core@3.2.7':
+    dependencies:
+      '@volar/language-core': 2.4.28
+      '@vue/compiler-dom': 3.5.32
+      '@vue/shared': 3.5.32
+      alien-signals: 3.1.2
+      muggle-string: 0.4.1
+      path-browserify: 1.0.1
+      picomatch: 4.0.4
 
   '@vue/reactivity@3.5.32':
     dependencies:
@@ -14606,6 +14662,8 @@ snapshots:
       '@algolia/requester-browser-xhr': 5.50.1
       '@algolia/requester-fetch': 5.50.1
       '@algolia/requester-node-http': 5.50.1
+
+  alien-signals@3.1.2: {}
 
   ansi-align@3.0.1:
     dependencies:
@@ -16874,10 +16932,10 @@ snapshots:
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
 
-  eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.1):
+  eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.10.2(eslint@7.32.0))(eslint@7.32.0)(prettier@3.8.3):
     dependencies:
       eslint: 7.32.0
-      prettier: 3.8.1
+      prettier: 3.8.3
       prettier-linter-helpers: 1.0.1
     optionalDependencies:
       eslint-config-prettier: 8.10.2(eslint@7.32.0)
@@ -19255,6 +19313,8 @@ snapshots:
 
   ms@2.1.3: {}
 
+  muggle-string@0.4.1: {}
+
   murmur-32@0.2.0:
     dependencies:
       encode-utf8: 1.0.3
@@ -19800,6 +19860,8 @@ snapshots:
       tmp: 0.2.5
       yaml: 2.8.3
 
+  path-browserify@1.0.1: {}
+
   path-exists@3.0.0: {}
 
   path-exists@4.0.0: {}
@@ -19980,15 +20042,15 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier-plugin-sort-package-json@1.1.0(prettier@3.8.1):
+  prettier-plugin-sort-package-json@1.1.0(prettier@3.8.3):
     dependencies:
-      prettier: 3.8.1
+      prettier: 3.8.3
 
   prettier@2.8.8: {}
 
   prettier@3.3.3: {}
 
-  prettier@3.8.1: {}
+  prettier@3.8.3: {}
 
   pretty-bytes@5.6.0: {}
 
@@ -21576,14 +21638,14 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  turbo@2.9.5:
+  turbo@2.9.6:
     optionalDependencies:
-      '@turbo/darwin-64': 2.9.5
-      '@turbo/darwin-arm64': 2.9.5
-      '@turbo/linux-64': 2.9.5
-      '@turbo/linux-arm64': 2.9.5
-      '@turbo/windows-64': 2.9.5
-      '@turbo/windows-arm64': 2.9.5
+      '@turbo/darwin-64': 2.9.6
+      '@turbo/darwin-arm64': 2.9.6
+      '@turbo/linux-64': 2.9.6
+      '@turbo/linux-arm64': 2.9.6
+      '@turbo/windows-64': 2.9.6
+      '@turbo/windows-arm64': 2.9.6
 
   type-check@0.4.0:
     dependencies:
@@ -21982,6 +22044,8 @@ snapshots:
 
   vscode-textmate@8.0.0: {}
 
+  vscode-uri@3.1.0: {}
+
   vue-advanced-cropper@2.8.9(vue@3.5.32(typescript@5.9.3)):
     dependencies:
       classnames: 2.5.1
@@ -22027,6 +22091,12 @@ snapshots:
     dependencies:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.32(typescript@5.9.3)
+
+  vue-tsc@3.2.7(typescript@5.9.3):
+    dependencies:
+      '@volar/typescript': 2.4.28
+      '@vue/language-core': 3.2.7
+      typescript: 5.9.3
 
   vue@3.5.32(typescript@5.9.3):
     dependencies:

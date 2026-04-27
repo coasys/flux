@@ -49,7 +49,7 @@ function gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
   // TODO: Update channel to say it has a new message
   const expression = Literal.fromUrl(link.data.target).get();
   const expressionDate = new Date(expression.timestamp);
-  let minuteAgo = new Date();
+  const minuteAgo = new Date();
   minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
   if (expressionDate > minuteAgo) {
     // TODO: Show message notification

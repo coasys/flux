@@ -16,6 +16,7 @@
     "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
+    "typecheck": "vue-tsc --noEmit",
     "test": "jest --env=jsdom"
   },
   "main": "background.js",
@@ -95,6 +96,7 @@
     "vite-plugin-babel-compiler": "^0.3.0",
     "vite-plugin-pwa": "^0.14.7",
     "vite-plugin-worker": "^1.0.5",
-    "vue-devtools": "^5.1.4"
+    "vue-devtools": "^5.1.4",
+    "vue-tsc": "^3.2.7"
   }
 }
