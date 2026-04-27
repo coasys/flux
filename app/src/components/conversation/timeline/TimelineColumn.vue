@@ -135,7 +135,7 @@ import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import { ProcessingState } from '@coasys/flux-types';
 import { GroupingOption, groupingOptions, SearchType, SynergyGroup, SynergyItem } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
-import { ref, watch, watchEffect } from 'vue';
+import { onUnmounted, ref, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 
 interface Props {
@@ -171,6 +171,52 @@ const zoom = ref<GroupingOption>(groupingOptions[0]);
 const loading = ref(true);
 const exporting = ref(false);
 const exportingFlat = ref(false);
+
+// --- Unprocessed items refresh ---
+// The conversation subscription (useLiveQuery) only fires when Conversation entities
+// change (name, summary, subgroups). New messages are children of the Channel, not
+// Conversation changes. We use a targeted SPARQL subscription that only fires when
+// THIS channel's children change, rather than addListener('link-added') which fires
+// on every link in the entire perspective.
+let unprocessedItemsTimer: ReturnType<typeof setTimeout> | null = null;
+let channelItemsSub: { dispose: () => void } | null = null;
+
+async function refreshUnprocessedItems() {
+  try {
+    const channel = new Channel(perspective, channelUrl);
+    unprocessedItems.value = await channel.unprocessedItems();
+  } catch (error) {
+    console.error('Error fetching unprocessed items:', error);
+  }
+}
+
+function scheduleUnprocessedItemsRefresh() {
+  // Debounce: batch commits can trigger multiple subscription updates in succession
+  if (unprocessedItemsTimer) clearTimeout(unprocessedItemsTimer);
+  unprocessedItemsTimer = setTimeout(refreshUnprocessedItems, 500);
+}
+
+// SPARQL subscription: fires only when items are added/removed from THIS channel.
+// The query tracks all ad4m://has_child links from this channel — when the result
+// set changes (new message, post, or task added), the subscription callback fires.
+(async () => {
+  try {
+    const sub = await perspective.subscribeQuery(`
+      SELECT ?id WHERE { <${channelUrl}> <ad4m://has_child> ?id . }
+    `);
+    channelItemsSub = sub;
+    sub.onResult(() => {
+      scheduleUnprocessedItemsRefresh();
+    });
+  } catch (error) {
+    console.error('Failed to subscribe to channel items:', error);
+  }
+})();
+
+onUnmounted(() => {
+  if (unprocessedItemsTimer) clearTimeout(unprocessedItemsTimer);
+  channelItemsSub?.dispose();
+});
 
 function stripHtml(html: string): string {
   return html?.replace(/<[^>]*>/g, '')?.trim() || '';
@@ -300,18 +346,13 @@ watchEffect(() => {
   if (loading.value) loading.value = false;
 });
 
-// Unprocessed items — re-fetched whenever the conversation subscription fires.
-// Tracks conversationInstances as a reactive dependency so changes to conversations
-// (e.g. a new subgroup absorbing items) trigger a fresh unprocessed-items query.
+// Unprocessed items — re-fetched when conversation subscription fires
+// (e.g. after processing updates conversation name/summary/subgroups).
+// Also triggered by the link-added listener above for new messages.
 watchEffect(async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _ = conversationInstances.value;
-  try {
-    const channel = new Channel(perspective, channelUrl);
-    unprocessedItems.value = await channel.unprocessedItems();
-  } catch (error) {
-    console.error('Error fetching unprocessed items:', error);
-  }
+  await refreshUnprocessedItems();
 });
 
 // Sidebar refresh when the most-recent conversation's name changes
