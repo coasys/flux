@@ -7,21 +7,23 @@ const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 const showLogs = false; // Set to true to enable debug logs
 
 async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
-  const result = await perspective.infer(`
-    findall(Relationship, (
-      % 1. Find SemanticRelationship connected to item
-      subject_class("SemanticRelationship", SR),
-      instance(SR, Relationship),
-      property_getter(SR, Relationship, "expression", "${itemId}"),
-      
-      % 2. Get tag and check it's an Embedding
-      property_getter(SR, Relationship, "tag", TagId),
-      subject_class("Embedding", E),
-      instance(E, TagId)
-    ), [Result]).
-  `);
+  try {
+    const sparqlQuery = `
+      SELECT ?relationship WHERE {
+        ?relationship <flux://entry_type> <flux://has_semantic_relationship> .
+        ?relationship <flux://has_expression> <${itemId}> .
+        ?relationship <flux://has_tag> ?tagId .
+        ?tagId <flux://entry_type> <flux://has_embedding> .
+      }
+      LIMIT 1
+    `;
 
-  return result[0]?.Result || null;
+    const sparqlResult = await perspective.querySparql(sparqlQuery);
+    return sparqlResult?.[0]?.relationship || null;
+  } catch (error) {
+    console.error('Error finding embedding SR:', error);
+    return null;
+  }
 }
 
 export async function removeEmbedding(perspective, itemId, batchId: string): Promise<void> {

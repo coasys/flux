@@ -1,29 +1,12 @@
-import { Model, Ad4mModel, Flag, Property, Literal } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
+import { parseLit } from '../utils/parseLit';
 import { SynergyMatch } from '@coasys/flux-utils';
 
-
-const CHANNEL_FROM_ITEM = `
-  % Find Channel that owns this Item
-  subject_class("Channel", CH),
-  instance(CH, ChannelId),
-  triple(ChannelId, "ad4m://has_child", ItemId),
-  property_getter(CH, ChannelId, "name", ChannelName),
-`;
-
-const SEMANTIC_RELATIONSHIP_FOR_ITEM = `
-  % Find SemanticRelationship for Item
-  subject_class("SemanticRelationship", SR),
-  instance(SR, SemanticRelationship),
-  property_getter(SR, SemanticRelationship, "expression", ItemId),
-`;
-
-const EMBEDDING_FROM_SEMANTIC_RELATIONSHIP = `
-  % Get Embedding from SemanticRelationship
-  property_getter(SR, SemanticRelationship, "tag", EmbeddingId),
-  subject_class("Embedding", E),
-  instance(E, EmbeddingId),
-  property_getter(E, EmbeddingId, "embedding", Embedding)
-`;
+const TYPE_MAP: Record<string, string> = {
+  Message: 'flux://has_message',
+  Post: 'flux://has_post',
+  Task: 'flux://has_task',
+};
 
 @Model({ name: 'SemanticRelationship' })
 export default class SemanticRelationship extends Ad4mModel {
@@ -40,18 +23,23 @@ export default class SemanticRelationship extends Ad4mModel {
   relevance: number; // 0 - 100
 
   async itemEmbedding(itemId: string): Promise<number[]> {
-    // get the embedding of a specific item
     try {
-      const result = await this.perspective.infer(`
-        ${SEMANTIC_RELATIONSHIP_FOR_ITEM.replace('ItemId', `"${itemId}"`)}
-        ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}.
-      `);
+      const sparqlQuery = `
+        SELECT ?embedding WHERE {
+          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
+          ?sr <flux://has_expression> <${itemId}> .
+          ?sr <flux://has_tag> ?embeddingId .
+          ?embeddingId <flux://entry_type> <flux://has_embedding> .
+          ?embeddingId <flux://embedding> ?embedding .
+        }
+        LIMIT 1
+      `;
 
-      if (!result?.[0]?.Embedding) return [];
-      else {
-        const embeddingExpression = await this.perspective.getExpression(result[0].Embedding);
-        return JSON.parse(embeddingExpression.data);
-      }
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      if (!sparqlResult?.[0]?.embedding) return [];
+
+      const embeddingExpression = await this.perspective.getExpression(sparqlResult[0].embedding);
+      return JSON.parse(embeddingExpression.data);
     } catch (error) {
       console.error('Error getting items embedding', error);
       return [];
@@ -59,29 +47,32 @@ export default class SemanticRelationship extends Ad4mModel {
   }
 
   async allConversationEmbeddings(): Promise<SynergyMatch[]> {
-    // get all conversation embeddings in the perspective
     try {
-      const result = await this.perspective.infer(`
-        findall([ItemId, Embedding, ChannelId, ChannelName], (
-          % 1. Find all Conversations
-          subject_class("Conversation", Conversation),
-          instance(Conversation, ItemId),
+      const sparqlQuery = `
+        SELECT ?itemId ?embedding ?channelId ?channelName WHERE {
+          ?itemId <flux://entry_type> <flux://conversation> .
+          ?channelId <ad4m://has_child> ?itemId .
+          ?channelId <flux://entry_type> <flux://has_channel> .
+          ?channelId <flux://has_channel_name> ?channelName .
+          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
+          ?sr <flux://has_expression> ?itemId .
+          ?sr <flux://has_tag> ?embeddingId .
+          ?embeddingId <flux://entry_type> <flux://has_embedding> .
+          ?embeddingId <flux://embedding> ?embedding .
+        }
+      `;
 
-          ${CHANNEL_FROM_ITEM}
-          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
-          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
-        ), Embeddings).
-      `);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-          const embeddingExpression = await this.perspective.getExpression(embedding);
+        (sparqlResult || []).map(async (binding) => {
+          const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
-            baseExpression,
+            baseExpression: binding.itemId,
             type: 'Conversation',
             embedding: JSON.parse(embeddingExpression.data),
-            channelId,
-            channelName: Literal.fromUrl(channelName).get().data,
+            channelId: binding.channelId,
+            channelName: parseLit(binding.channelName),
           };
         }),
       );
@@ -92,116 +83,126 @@ export default class SemanticRelationship extends Ad4mModel {
   }
 
   async allSubgroupEmbeddings(): Promise<SynergyMatch[]> {
-    // get all subgroup embeddings in the perspective
     try {
-      const result = await this.perspective.infer(`
-        findall([ItemId, Embedding, ChannelId, ChannelName], (
-          % 1. Find all Subgroups
-          subject_class("ConversationSubgroup", Subgroup),
-          instance(Subgroup, ItemId),
+      const sparqlQuery = `
+        SELECT ?itemId ?embedding ?channelId ?channelName WHERE {
+          ?itemId <flux://entry_type> <flux://conversation_subgroup> .
+          ?conv <ad4m://has_child> ?itemId .
+          ?conv <flux://entry_type> <flux://conversation> .
+          ?channelId <ad4m://has_child> ?conv .
+          ?channelId <flux://entry_type> <flux://has_channel> .
+          ?channelId <flux://has_channel_name> ?channelName .
+          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
+          ?sr <flux://has_expression> ?itemId .
+          ?sr <flux://has_tag> ?embeddingId .
+          ?embeddingId <flux://entry_type> <flux://has_embedding> .
+          ?embeddingId <flux://embedding> ?embedding .
+        }
+      `;
 
-          % 2. Find the parent Conversation
-          subject_class("Conversation", CC),
-          instance(CC, Conversation),
-          triple(Conversation, "ad4m://has_child", ItemId),
-
-          ${CHANNEL_FROM_ITEM.replace('ItemId', 'Conversation')}
-          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
-          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
-        ), Embeddings).
-      `);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-          const embeddingExpression = await this.perspective.getExpression(embedding);
+        (sparqlResult || []).map(async (binding) => {
+          const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
-            baseExpression,
+            baseExpression: binding.itemId,
             type: 'Subgroup',
             embedding: JSON.parse(embeddingExpression.data),
-            channelId,
-            channelName: Literal.fromUrl(channelName).get().data,
+            channelId: binding.channelId,
+            channelName: parseLit(binding.channelName),
           };
         }),
       );
     } catch (error) {
-      console.error('Error getting all conversation embedding', error);
+      console.error('Error getting all subgroup embedding', error);
       return [];
     }
   }
 
   async allItemEmbeddings(): Promise<SynergyMatch[]> {
-    // get all item embeddings in the perspective
     try {
-      const result = await this.perspective.infer(`
-        findall([ItemId, Type, Embedding, ChannelId, ChannelName], (
-          % 1. Find all items of valid type
-          (
-            Type = "Message",
-            subject_class("Message", MC),
-            instance(MC, ItemId)
-            ;
-            Type = "Post",
-            subject_class("Post", PC),
-            instance(PC, ItemId)
-            ;
-            Type = "Task",
-            subject_class("Task", TC),
-            instance(TC, ItemId)
-          ),
+      const sparqlQuery = `
+        SELECT ?itemId ?type ?embedding ?channelId ?channelName WHERE {
+          ?itemId <flux://entry_type> ?type .
+          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
+          ?channelId <ad4m://has_child> ?itemId .
+          ?channelId <flux://entry_type> <flux://has_channel> .
+          ?channelId <flux://has_channel_name> ?channelName .
+          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
+          ?sr <flux://has_expression> ?itemId .
+          ?sr <flux://has_tag> ?embeddingId .
+          ?embeddingId <flux://entry_type> <flux://has_embedding> .
+          ?embeddingId <flux://embedding> ?embedding .
+        }
+      `;
 
-          ${CHANNEL_FROM_ITEM}
-          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
-          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
-        ), Embeddings).
-      `);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+
+      const typeNameMap: Record<string, string> = {
+        'flux://has_message': 'Message',
+        'flux://has_post': 'Post',
+        'flux://has_task': 'Task',
+      };
 
       return Promise.all(
-        (result[0]?.Embeddings || []).map(async ([baseExpression, type, embedding, channelId, channelName]) => {
-          const embeddingExpression = await this.perspective.getExpression(embedding);
+        (sparqlResult || []).map(async (binding) => {
+          const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
-            baseExpression,
-            type,
+            baseExpression: binding.itemId,
+            type: typeNameMap[binding.type] || binding.type,
             embedding: JSON.parse(embeddingExpression.data),
-            channelId,
-            channelName: Literal.fromUrl(channelName).get().data,
+            channelId: binding.channelId,
+            channelName: parseLit(binding.channelName),
           };
         }),
       );
     } catch (error) {
-      console.error('Error getting all conversation embedding', error);
+      console.error('Error getting all item embedding', error);
       return [];
     }
   }
 
   async allItemEmbeddingsByType(itemType: string): Promise<SynergyMatch[]> {
-    // get all item embeddings by type in the perspective
-    try {
-      const result = await this.perspective.infer(`
-        findall([ItemId, Embedding, ChannelId, ChannelName], (
-          % 1. Find all items of valid type
-          subject_class("${itemType.slice(0, -1)}", TypeClass),
-          instance(TypeClass, ItemId),
+    // itemType is plural like "Messages", "Posts", "Tasks"
+    const singular = itemType.slice(0, -1); // "Message", "Post", "Task"
+    const typeUri = TYPE_MAP[singular];
+    if (!typeUri) {
+      console.error(`Unknown item type: ${itemType}`);
+      return [];
+    }
 
-          ${CHANNEL_FROM_ITEM}
-          ${SEMANTIC_RELATIONSHIP_FOR_ITEM}
-          ${EMBEDDING_FROM_SEMANTIC_RELATIONSHIP}
-        ), Embeddings).
-      `);
+    try {
+      const sparqlQuery = `
+        SELECT ?itemId ?embedding ?channelId ?channelName WHERE {
+          ?itemId <flux://entry_type> <${typeUri}> .
+          ?channelId <ad4m://has_child> ?itemId .
+          ?channelId <flux://entry_type> <flux://has_channel> .
+          ?channelId <flux://has_channel_name> ?channelName .
+          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
+          ?sr <flux://has_expression> ?itemId .
+          ?sr <flux://has_tag> ?embeddingId .
+          ?embeddingId <flux://entry_type> <flux://has_embedding> .
+          ?embeddingId <flux://embedding> ?embedding .
+        }
+      `;
+
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (result[0]?.Embeddings || []).map(async ([baseExpression, embedding, channelId, channelName]) => {
-          const embeddingExpression = await this.perspective.getExpression(embedding);
+        (sparqlResult || []).map(async (binding) => {
+          const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
-            baseExpression,
+            baseExpression: binding.itemId,
             type: itemType,
             embedding: JSON.parse(embeddingExpression.data),
-            channelId,
-            channelName: Literal.fromUrl(channelName).get().data,
+            channelId: binding.channelId,
+            channelName: parseLit(binding.channelName),
           };
         }),
       );
     } catch (error) {
-      console.error('Error getting all conversation embedding', error);
+      console.error('Error getting item embeddings by type', error);
       return [];
     }
   }
