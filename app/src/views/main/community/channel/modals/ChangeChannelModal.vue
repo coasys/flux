@@ -35,14 +35,23 @@ const { perspective, allChannels } = useCommunityService();
 const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId.value)));
 
 const views = ref<App[]>([]);
+let channelLoadSeq = 0;
 watch(
   channel,
   async (newChannel) => {
-    if (newChannel && perspective) {
+    const seq = ++channelLoadSeq;
+    if (!newChannel || !perspective) {
+      views.value = [];
+      return;
+    }
+
+    try {
       const fullChannel = new Channel(perspective, newChannel.id);
       await fullChannel.get({ views: true });
-      views.value = fullChannel.views || [];
-    } else {
+      if (seq !== channelLoadSeq) return;
+      views.value = fullChannel.views ?? [];
+    } catch {
+      if (seq !== channelLoadSeq) return;
       views.value = [];
     }
   },

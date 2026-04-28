@@ -121,16 +121,28 @@ const filteredPackages = computed((): FluxApp[] =>
 );
 
 const views = ref<App[]>([]);
+let viewsLoadSeq = 0;
 watch(
   channel,
   async (newChannel) => {
-    if (newChannel && perspective) {
+    const seq = ++viewsLoadSeq;
+    if (!newChannel || !perspective) {
+      views.value = [];
+      selectedPlugins.value = [];
+      return;
+    }
+
+    try {
       const fullChannel = new Channel(perspective, newChannel.id);
       await fullChannel.get({ views: true });
-      views.value = fullChannel.views || [];
-      selectedPlugins.value = fullChannel.views || [];
-    } else {
+      if (seq !== viewsLoadSeq) return;
+      const nextViews = fullChannel.views ?? [];
+      views.value = nextViews;
+      selectedPlugins.value = [...nextViews];
+    } catch {
+      if (seq !== viewsLoadSeq) return;
       views.value = [];
+      selectedPlugins.value = [];
     }
   },
   { immediate: true },
