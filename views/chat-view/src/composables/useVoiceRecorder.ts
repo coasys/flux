@@ -35,7 +35,7 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   const fastTranscriptionStreamIdRef = useRef<string | null>(null);
 
   const handleTranscriptionText = useCallback((text: string) => {
-    // Final transcription - append to final, clear preview
+    console.log('[VoiceRecorder] FINAL transcription:', text);
     setFinalText((prev) => {
       const updated = prev + text;
       finalTextRef.current = updated;
@@ -46,38 +46,39 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
   }, []);
 
   const handleTranscriptionPreview = useCallback((text: string) => {
-    // Preview transcription - update preview only
+    console.log('[VoiceRecorder] preview transcription:', text);
     previewTextRef.current = text;
     setPreviewText(text);
   }, []);
 
   const startRecording = async () => {
-    // Guard: prevent multiple concurrent recordings
     if (isRecording || audioContextRef.current) {
-      console.warn('Recording already in progress');
+      console.warn('[VoiceRecorder] already recording');
       return;
     }
 
     try {
-      // Reset state
       setFinalText('');
       finalTextRef.current = '';
       previewTextRef.current = '';
       setPreviewText('');
-      
-      // Get microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { echoCancellation: true, noiseSuppression: true } 
+
+      console.log('[VoiceRecorder] requesting microphone...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true }
       });
       streamRef.current = stream;
-      
-      // Open transcription streams (final + preview)
+      console.log('[VoiceRecorder] microphone granted, tracks:', stream.getAudioTracks().length);
+
+      console.log('[VoiceRecorder] opening transcription stream (Whisper)...');
       transcriptionStreamIdRef.current = await client.ai.openTranscriptionStream(
         'Whisper',
         handleTranscriptionText,
         { startThreshold: 0.8 }
       );
-      
+      console.log('[VoiceRecorder] Whisper stream:', transcriptionStreamIdRef.current);
+
+      console.log('[VoiceRecorder] opening transcription stream (whisper_tiny_quantized)...');
       fastTranscriptionStreamIdRef.current = await client.ai.openTranscriptionStream(
         'whisper_tiny_quantized',
         handleTranscriptionPreview,
@@ -89,36 +90,41 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
           timeBeforeSpeech: 20,
         }
       );
-      
-      // Set up AudioContext and Worklet for raw PCM capture
+      console.log('[VoiceRecorder] fast stream:', fastTranscriptionStreamIdRef.current);
+
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = audioContext;
-      
-      // Load the audio worklet processor
+
+      console.log('[VoiceRecorder] loading audio worklet from /audio-processor.js ...');
       await audioContext.audioWorklet.addModule('/audio-processor.js');
-      
+      console.log('[VoiceRecorder] audio worklet loaded, sampleRate:', audioContext.sampleRate);
+
       const mediaStreamSource = audioContext.createMediaStreamSource(stream);
       const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
       workletNodeRef.current = workletNode;
-      
-      // Handle audio data from worklet
+
+      let msgCount = 0;
       workletNode.port.onmessage = (event) => {
         if (isRecordingRef.current) {
+          msgCount++;
+          if (msgCount % 50 === 1) {
+            console.log(`[VoiceRecorder] worklet message #${msgCount}, samples: ${event.data.length}`);
+          }
           const audioData = Array.from(event.data);
-          // Feed to both transcription streams
           client.ai.feedTranscriptionStream(
-            [fastTranscriptionStreamIdRef.current!, transcriptionStreamIdRef.current!], 
+            [fastTranscriptionStreamIdRef.current!, transcriptionStreamIdRef.current!],
             audioData as any
           );
         }
       };
-      
+
       mediaStreamSource.connect(workletNode);
       workletNode.connect(audioContext.destination);
-      
+
       setIsRecording(true);
+      console.log('[VoiceRecorder] recording started');
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      console.error('[VoiceRecorder] failed to start:', error);
       onError?.(error as Error);
       await cleanup();
     }

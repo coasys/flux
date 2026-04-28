@@ -154,15 +154,15 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
     }, messageTimeout * 1000);
   }
 
-  // function fires every time a new chunk of text is sent back from the AI service
   async function handleTranscriptionText(text: string) {
-    // Clear preview text when we get final text
+    console.log('[Transcriber] FINAL transcription:', text);
     setPreviewText('');
     addCurrentTranscript(text);
     resetSaveTimeout();
   }
 
   async function handleTranscriptionPreview(text: string) {
+    console.log('[Transcriber] preview transcription:', text);
     addCurrentTranscript();
     setPreviewText((prevText) => prevText + text);
     resetSaveTimeout();
@@ -262,27 +262,38 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
   }
 
   async function startLocalTransciption(stream: MediaStream) {
-    // set up audio context & worklet node
+    console.log('[Transcriber] starting local transcription...');
     const moreDemaningParams = { startThreshold: 0.8 };
     streamId.current = await client.ai.openTranscriptionStream('Whisper', handleTranscriptionText, moreDemaningParams);
+    console.log('[Transcriber] Whisper stream:', streamId.current);
     const wordByWordParams = {
-      startThreshold: 0.5, // Lower threshold to detect softer speech
-      startWindow: 80, // Quick start detection
-      endThreshold: 0.1, // Lower threshold to detect end of words
-      endWindow: 50, // Short pause between words (100ms)
-      timeBeforeSpeech: 20, // Include minimal context before speech
+      startThreshold: 0.5,
+      startWindow: 80,
+      endThreshold: 0.1,
+      endWindow: 50,
+      timeBeforeSpeech: 20,
     };
     fastStreamId.current = await client.ai.openTranscriptionStream(
       'whisper_tiny_quantized',
       handleTranscriptionPreview,
       wordByWordParams,
     );
+    console.log('[Transcriber] fast stream:', fastStreamId.current);
+
+    console.log('[Transcriber] loading audio worklet from /audio-processor.js ...');
     await audioContext.current.audioWorklet.addModule('/audio-processor.js');
+    console.log('[Transcriber] audio worklet loaded, sampleRate:', audioContext.current.sampleRate);
+
     const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
     mediaStreamSource.connect(workletNode);
+    let msgCount = 0;
     workletNode.port.onmessage = (event) => {
       if (listening.current) {
+        msgCount++;
+        if (msgCount % 50 === 1) {
+          console.log(`[Transcriber] worklet message #${msgCount}, samples: ${event.data.length}`);
+        }
         const audioData = Array.from(event.data);
         client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData as any);
       }
@@ -291,28 +302,32 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
   }
 
   function startListening() {
+    console.log('[Transcriber] startListening, useRemoteService:', useRemoteService);
     listening.current = true;
     navigator.mediaDevices
       .getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
       })
       .then(async (stream) => {
+        console.log('[Transcriber] microphone granted, tracks:', stream.getAudioTracks().length);
         audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         if (useRemoteService) startRemoteTranscription();
         else startLocalTransciption(stream);
-        // set up analyser to render volume
         analyser.current = audioContext.current.createAnalyser();
         sourceNode.current = audioContext.current.createMediaStreamSource(stream);
         sourceNode.current.connect(analyser.current);
         analyser.current.fftSize = 2048;
         dataArray.current = new Uint8Array(analyser.current.fftSize);
         renderVolume();
+      })
+      .catch((err) => {
+        console.error('[Transcriber] microphone error:', err);
       });
   }
 
   async function stopListening() {
+    console.log('[Transcriber] stopListening, streamId:', streamId.current, 'fastStreamId:', fastStreamId.current);
     listening.current = false;
-    // Stop and cleanup all media tracks
     if (sourceNode.current?.mediaStream) {
       sourceNode.current.mediaStream.getTracks().forEach((track) => {
         track.stop();
@@ -329,6 +344,7 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
       streamId.current = null;
       fastStreamId.current = null;
     }
+    console.log('[Transcriber] stopped');
   }
 
   return (
