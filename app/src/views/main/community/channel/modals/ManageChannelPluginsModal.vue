@@ -124,10 +124,11 @@ const views = ref<App[]>([]);
 watch(
   channel,
   async (newChannel) => {
-    if (newChannel) {
-      await newChannel.get({ views: true });
-      views.value = newChannel.views || [];
-      selectedPlugins.value = newChannel.views || [];
+    if (newChannel && perspective) {
+      const fullChannel = new Channel(perspective, newChannel.id);
+      await fullChannel.get({ views: true });
+      views.value = fullChannel.views || [];
+      selectedPlugins.value = fullChannel.views || [];
     } else {
       views.value = [];
     }
