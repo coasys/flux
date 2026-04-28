@@ -243,11 +243,21 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Single SPARQL query — avoids iterative channel.get({ conversations: true })
       const results = await Channel.pinnedConversations(perspective);
 
-      for (const r of results) {
-        if (r.conversationId && !conversationCache.has(r.conversationId)) {
-          conversationCache.set(r.conversationId, new Conversation(perspective, r.conversationId));
-        }
-      }
+      // Hydrate conversations so properties like conversationName are available
+      const newPinnedIds = results
+        .filter((r) => r.conversationId && !conversationCache.has(r.conversationId))
+        .map((r) => r.conversationId!);
+      await Promise.all(
+        newPinnedIds.map(async (id) => {
+          const conv = new Conversation(perspective, id);
+          try {
+            await conv.get();
+          } catch {
+            /* ignore */
+          }
+          conversationCache.set(id, conv);
+        }),
+      );
 
       pinnedConversations.value = results;
     } catch (error) {
@@ -267,15 +277,22 @@ export async function createCommunityService(): Promise<CommunityService> {
       // (was: for each channel → get conversations → unprocessedItems → subgroups → items)
       const results = await Channel.recentConversations(perspective, 20);
 
-      // Populate conversation cache for any results that include a conversationId.
-      // We instantiate Conversation directly (cheap — just sets perspective + id)
-      // instead of calling Conversation.findOne() which can hang on perspectives
-      // without a link language.
-      for (const r of results) {
-        if (r.conversationId && !conversationCache.has(r.conversationId)) {
-          conversationCache.set(r.conversationId, new Conversation(perspective, r.conversationId));
-        }
-      }
+      // Populate conversation cache — hydrate with .get() so properties like
+      // conversationName are available for display in the sidebar.
+      const newConvIds = results
+        .filter((r) => r.conversationId && !conversationCache.has(r.conversationId))
+        .map((r) => r.conversationId!);
+      await Promise.all(
+        newConvIds.map(async (id) => {
+          const conv = new Conversation(perspective, id);
+          try {
+            await conv.get();
+          } catch {
+            /* hydration failure — stub will lack properties but won't break rendering */
+          }
+          conversationCache.set(id, conv);
+        }),
+      );
 
       recentConversations.value = results as ChannelData[];
     } catch (error) {
@@ -363,8 +380,8 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       await App.create(perspective, { name, description, icon, pkg }, { parent: { model: Channel, id: channel.id } });
 
-      // Update the recent conversations
-      getRecentConversations();
+      // Update the recent conversations — await so sidebar reflects the new entry before navigation
+      await getRecentConversations();
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;

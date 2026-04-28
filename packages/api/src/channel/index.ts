@@ -275,7 +275,11 @@ export class Channel extends Ad4mModel {
           ?item <${ENTRY_TYPE}> ?itemType .
           FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
         }
-        BIND(COALESCE(?itemTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
+        OPTIONAL {
+          ?_chanReifier rdf:reifies <<( ?_parent <flux://has_channel> ?channelId )>> .
+          ?_chanReifier <ad4m://ontology/timestamp> ?chanCreatedTs .
+        }
+        BIND(COALESCE(?itemTs, ?chanCreatedTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
       }
       GROUP BY ?channelId
       ORDER BY DESC(?lastActivity)
