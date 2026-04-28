@@ -243,7 +243,11 @@ export async function createCommunityService(): Promise<CommunityService> {
       // Single SPARQL query — avoids iterative channel.get({ conversations: true })
       const results = await Channel.pinnedConversations(perspective);
 
-      // Conversation cache population skipped — see getRecentConversations comment
+      for (const r of results) {
+        if (r.conversationId && !conversationCache.has(r.conversationId)) {
+          conversationCache.set(r.conversationId, new Conversation(perspective, r.conversationId));
+        }
+      }
 
       pinnedConversations.value = results;
     } catch (error) {
@@ -263,9 +267,15 @@ export async function createCommunityService(): Promise<CommunityService> {
       // (was: for each channel → get conversations → unprocessedItems → subgroups → items)
       const results = await Channel.recentConversations(perspective, 20);
 
-      // Conversation cache population skipped for now — findOne hangs on perspectives
-      // without a link language (LinkLanguageFailedToInstall). Sidebar still renders with
-      // channelId + lastActivity; conversation names are a nice-to-have.
+      // Populate conversation cache for any results that include a conversationId.
+      // We instantiate Conversation directly (cheap — just sets perspective + id)
+      // instead of calling Conversation.findOne() which can hang on perspectives
+      // without a link language.
+      for (const r of results) {
+        if (r.conversationId && !conversationCache.has(r.conversationId)) {
+          conversationCache.set(r.conversationId, new Conversation(perspective, r.conversationId));
+        }
+      }
 
       recentConversations.value = results as ChannelData[];
     } catch (error) {

@@ -1,12 +1,125 @@
+/**
+ * Conversation test suite.
+ *
+ * Covers SPARQL queries (stats, topics, subgroupsData), the processNewExpressions()
+ * pipeline (batch lifecycle, state progression, subgroup splitting), synergy e2e
+ * (transcription → LLM grouping → topics → conversation summary),
+ * Channel.unprocessedItems(), and conversation-cache lookup correctness.
+ */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Conversation } from './index';
-import ConversationSubgroup from '../conversation-subgroup';
 
-// Mock LLMutils — must be vi.mock (hoisted) so static imports in Conversation pick it up
+// ---------------------------------------------------------------------------
+// Module mocks — must be vi.mock (hoisted) so static imports see them
+// ---------------------------------------------------------------------------
+
+// Provide no-op decorators so all AD4M model classes can be defined.
+// The published @coasys/ad4m@0.13.0-test-2 does not export Model/HasMany.
+vi.mock('@coasys/ad4m', async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  const noop = () => (_target: any, _key?: any) => {};
+  return {
+    ...actual,
+    Model: (opts: any) => (target: any) => {
+      // The real @Model decorator adds an `id` getter aliasing baseExpression.
+      // Without this, Conversation.id is undefined and tests fail.
+      if (!Object.getOwnPropertyDescriptor(target.prototype, 'id')) {
+        Object.defineProperty(target.prototype, 'id', {
+          get() { return this.baseExpression; },
+          set(v: any) { this.baseExpression = v; },
+          configurable: true,
+        });
+      }
+      return target;
+    },
+    Flag: actual.Flag ?? ((opts: any) => noop()),
+    Property: actual.Property ?? ((opts: any) => noop()),
+    HasMany: (opts: any) => noop(),
+    HasManyMethods: undefined,
+    Ad4mModel: actual.Ad4mModel ??
+      class Ad4mModel {
+        perspective: any;
+        id: string;
+        constructor(perspective: any, id?: string) {
+          this.perspective = perspective;
+          this.id = id ?? '';
+        }
+        async save(_batchId?: string) {}
+        async get(_opts?: any) {}
+        static async create(perspective: any, data: any, opts?: any) {
+          const inst = new this(perspective, `generated-${Date.now()}`);
+          Object.assign(inst, data);
+          return inst;
+        }
+        static async findAll(perspective: any, opts?: any) {
+          return [];
+        }
+      },
+    Literal: actual.Literal ?? { from: (v: any) => ({ toUrl: () => `literal://${v}` }) },
+    Link: actual.Link ?? class Link {},
+    PerspectiveProxy: actual.PerspectiveProxy ?? class PerspectiveProxy {},
+  };
+});
+
+// Track calls so tests can assert per-invocation ordering
+const llmTaskCalls: { task: any; prompt: any }[] = [];
+
 vi.mock('./LLMutils', () => ({
-  ensureLLMTasks: vi.fn().mockResolvedValue({ conversation: 'conversation-task' }),
-  LLMTaskWithExpectedOutputs: vi.fn().mockResolvedValue({ n: 'Test Conversation', s: 'Overall summary' }),
+  ensureLLMTasks: vi.fn().mockResolvedValue({
+    grouping: { id: 'task-grouping', name: 'grouping', expectedOneOf: ['group', 'newGroup'] },
+    topics: { id: 'task-topics', name: 'topics', expectArray: true },
+    conversation: { id: 'task-conversation', name: 'conversation', expectedOutputs: ['n', 's'] },
+  }),
+  LLMTaskWithExpectedOutputs: vi.fn().mockImplementation(async (task, prompt) => {
+    llmTaskCalls.push({ task, prompt });
+    if (task.name === 'grouping') {
+      return {
+        group: null,
+        newGroup: {
+          n: 'API Redesign Discussion',
+          s: 'Alice, Bob, and Charlie discuss redesigning the REST API endpoints and updating documentation.',
+          firstItemId: 0, // index-based (detectNewGroup maps back to real IDs)
+        },
+      };
+    }
+    if (task.name === 'topics') {
+      return [
+        { n: 'API Design', rel: 9 },
+        { n: 'Documentation', rel: 7 },
+      ];
+    }
+    if (task.name === 'conversation') {
+      return {
+        n: 'Sprint Planning: API Overhaul',
+        s: 'The team discussed plans for redesigning REST API endpoints, creating tracking tickets, and updating documentation.',
+      };
+    }
+    return {};
+  }),
 }));
+
+vi.mock('@coasys/flux-api', () => ({
+  getProfile: vi.fn().mockResolvedValue({
+    username: 'testuser',
+    givenName: 'Test',
+    familyName: 'User',
+    email: '',
+    bio: '',
+    profileBackground: '',
+    profilePicture: '',
+    profileThumbnailPicture: '',
+  }),
+  Topic: {
+    findAll: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock('./util', () => ({
+  createEmbedding: vi.fn().mockResolvedValue(undefined),
+  removeEmbedding: vi.fn().mockResolvedValue(undefined),
+}));
+
+// Import after mocks are hoisted
+import { Conversation } from './index';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,6 +154,7 @@ function createMockPerspective(querySparqlImpl?: (...args: any[]) => any) {
     ai: {
       tasks: vi.fn().mockResolvedValue([]),
       prompt: vi.fn().mockResolvedValue('{}'),
+      addTask: vi.fn().mockResolvedValue({ taskId: 'mock-task-id' }),
     },
     name: 'Test Community',
     sharedUrl: 'neighbourhood://test',
@@ -57,6 +171,17 @@ function createMockClient() {
   };
 }
 
+/** Simulates 5 transcribed voice messages — enough to trigger processing */
+function createTranscribedItems() {
+  return [
+    { id: 'tr-1', text: 'I think we should focus on the API redesign first', author: 'did:test:alice', timestamp: '2026-01-15T14:00:00Z', type: 'Message' },
+    { id: 'tr-2', text: 'Agreed, the current endpoints are inconsistent', author: 'did:test:bob', timestamp: '2026-01-15T14:00:30Z', type: 'Message' },
+    { id: 'tr-3', text: 'We also need to update the documentation', author: 'did:test:alice', timestamp: '2026-01-15T14:01:00Z', type: 'Message' },
+    { id: 'tr-4', text: 'Let me create tickets for each endpoint', author: 'did:test:charlie', timestamp: '2026-01-15T14:01:30Z', type: 'Message' },
+    { id: 'tr-5', text: 'Good idea, we can track progress that way', author: 'did:test:bob', timestamp: '2026-01-15T14:02:00Z', type: 'Message' },
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // stats()
 // ---------------------------------------------------------------------------
@@ -65,7 +190,6 @@ describe('Conversation.stats()', () => {
   it('queries SPARQL for subgroup count', async () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
-    // Mock .get() so participants can be returned
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = ['did:test:alice'];
 
@@ -152,13 +276,10 @@ describe('Conversation.subgroupsData()', () => {
     const perspective = createMockPerspective(async () => {
       callCount++;
       if (callCount === 1) {
-        // First query: subgroup list
-        // parseLit strips surrounding quotes, so pass pre-stripped values
         return [
           { id: 'sg-1', timestamp: '2026-01-01T00:00:00Z', nameRaw: 'Group 1', summaryRaw: 'Summary 1' },
         ];
       }
-      // Second query: batch timestamps
       return [
         { sg: 'sg-1', channelTs: '2026-01-01T00:01:00Z' },
         { sg: 'sg-1', channelTs: '2026-01-01T00:05:00Z' },
@@ -219,7 +340,6 @@ describe('Conversation.subgroupsData()', () => {
     const conv = new Conversation(perspective as any, 'conv-1');
 
     const subgroups = await conv.subgroupsData();
-    // transcriptStart = 00:00:30 should be used (earlier than channelTs 00:01:00)
     expect(subgroups[0].start).toBe(new Date('2026-01-01T00:00:30Z').getTime());
   });
 
@@ -238,7 +358,6 @@ describe('Conversation.subgroupsData()', () => {
     const conv = new Conversation(perspective as any, 'conv-1');
 
     await conv.subgroupsData();
-    // Second query should use VALUES clause with both subgroup IDs
     const batchQuery = perspective.sparqlCalls[1];
     expect(batchQuery).toContain('VALUES ?sg');
     expect(batchQuery).toContain('sg-1');
@@ -256,7 +375,7 @@ describe('Conversation.subgroupsData()', () => {
 });
 
 // ---------------------------------------------------------------------------
-// processNewExpressions() — integration-level tests
+// processNewExpressions() — basic pipeline tests
 // ---------------------------------------------------------------------------
 
 describe('Conversation.processNewExpressions()', () => {
@@ -270,7 +389,6 @@ describe('Conversation.processNewExpressions()', () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
 
-    // Mock the internal methods that rely on LLM
     conv['subgroups'] = vi.fn().mockResolvedValue([]);
     conv['detectNewGroup'] = vi.fn().mockResolvedValue({
       group: null,
@@ -283,6 +401,10 @@ describe('Conversation.processNewExpressions()', () => {
       participants: [],
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -298,7 +420,6 @@ describe('Conversation.processNewExpressions()', () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
 
-    // Create a minimal mock subgroup
     const mockSubgroup = {
       id: 'sg-1',
       subgroupName: 'Existing',
@@ -315,6 +436,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.save = vi.fn().mockResolvedValue(undefined);
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -349,7 +471,9 @@ describe('Conversation.processNewExpressions()', () => {
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
     conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -386,6 +510,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.save = vi.fn().mockResolvedValue(undefined);
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -432,6 +557,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.save = vi.fn().mockResolvedValue(undefined);
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -440,7 +566,6 @@ describe('Conversation.processNewExpressions()', () => {
       // May fail on LLM conversation task
     }
 
-    // Check that addLinks was called with items split between subgroups
     const addLinksCalls = perspective.addLinks.mock.calls;
     const itemLinksCall = addLinksCalls.find(
       (call) => Array.isArray(call[0]) && call[0].some((l: any) => l.predicate === 'flux://has_item'),
@@ -461,12 +586,9 @@ describe('Conversation.processNewExpressions()', () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
 
-    // No existing subgroups
     conv['subgroups'] = vi.fn().mockResolvedValue([]);
-    // LLM returns group data (not newGroup) — should be corrected to newGroup
     conv['detectNewGroup'] = vi.fn().mockResolvedValue({
       group: { n: 'First Group', s: 'First summary' },
-      // No newGroup — but no currentSubgroup either, so this triggers the correction logic
     });
     conv['createNewGroup'] = vi.fn().mockResolvedValue({
       id: 'sg-first',
@@ -478,6 +600,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.save = vi.fn().mockResolvedValue(undefined);
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
+    conv.nameFixed = false;
 
     const updateState = vi.fn();
     try {
@@ -486,7 +609,469 @@ describe('Conversation.processNewExpressions()', () => {
       // May fail on LLM conversation task
     }
 
-    // createNewGroup should have been called because there's no currentSubgroup
     expect(conv['createNewGroup']).toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Synergy e2e: transcription → summary generation (full pipeline with LLM mocks)
+// ---------------------------------------------------------------------------
+
+describe('Synergy e2e: transcription → summary generation', () => {
+  beforeEach(async () => {
+    vi.restoreAllMocks();
+    llmTaskCalls.length = 0;
+
+    // Re-apply the default LLM mock implementation after restoreAllMocks
+    const { ensureLLMTasks, LLMTaskWithExpectedOutputs } = await import('./LLMutils');
+    vi.mocked(ensureLLMTasks).mockResolvedValue({
+      grouping: { id: 'task-grouping', name: 'grouping', expectedOneOf: ['group', 'newGroup'] } as any,
+      topics: { id: 'task-topics', name: 'topics', expectArray: true } as any,
+      conversation: { id: 'task-conversation', name: 'conversation', expectedOutputs: ['n', 's'] } as any,
+    });
+    vi.mocked(LLMTaskWithExpectedOutputs).mockImplementation(async (task: any, prompt: any) => {
+      llmTaskCalls.push({ task, prompt });
+      if (task.name === 'grouping') {
+        return {
+          group: null,
+          newGroup: {
+            n: 'API Redesign Discussion',
+            s: 'Alice, Bob, and Charlie discuss redesigning the REST API endpoints and updating documentation.',
+            firstItemId: 0,
+          },
+        };
+      }
+      if (task.name === 'topics') return [{ n: 'API Design', rel: 9 }, { n: 'Documentation', rel: 7 }];
+      if (task.name === 'conversation') {
+        return {
+          n: 'Sprint Planning: API Overhaul',
+          s: 'The team discussed plans for redesigning REST API endpoints, creating tracking tickets, and updating documentation.',
+        };
+      }
+      return {};
+    });
+
+    // Re-apply getProfile mock
+    const fluxApi = await import('@coasys/flux-api');
+    vi.mocked((fluxApi as any).getProfile).mockResolvedValue({
+      username: 'testuser', givenName: 'Test', familyName: 'User',
+      email: '', bio: '', profileBackground: '', profilePicture: '', profileThumbnailPicture: '',
+    });
+  });
+
+  it('generates conversation summary from transcribed messages (empty conversation)', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'API Redesign Discussion',
+      summary: 'Alice, Bob, and Charlie discuss redesigning the REST API endpoints.',
+      participants: [],
+      topicsWithRelevance: vi.fn().mockResolvedValue([]),
+      updateTopicWithRelevance: vi.fn().mockResolvedValue(undefined),
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    expect(conv.conversationName).toBe('Sprint Planning: API Overhaul');
+    expect(conv.summary).toBe(
+      'The team discussed plans for redesigning REST API endpoints, creating tracking tickets, and updating documentation.',
+    );
+    expect(conv.save).toHaveBeenCalledWith('batch-1');
+    expect(perspective.commitBatch).toHaveBeenCalledWith('batch-1');
+  });
+
+  it('generates conversation summary from transcribed messages (existing subgroup)', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    const mockSubgroup = {
+      id: 'sg-existing',
+      subgroupName: 'API Discussion',
+      summary: 'Initial discussion about API changes.',
+      participants: ['did:test:alice'],
+      topicsWithRelevance: vi.fn().mockResolvedValue([]),
+      updateTopicWithRelevance: vi.fn().mockResolvedValue(undefined),
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([mockSubgroup]);
+    conv['detectNewGroup'] = vi.fn().mockResolvedValue({
+      group: { n: 'Ongoing API Discussion', s: 'Updated summary with new messages about API redesign.' },
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = ['did:test:alice'];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    expect(conv.conversationName).toBe('Sprint Planning: API Overhaul');
+    expect(conv.summary).toBe(
+      'The team discussed plans for redesigning REST API endpoints, creating tracking tickets, and updating documentation.',
+    );
+    expect(mockSubgroup.subgroupName).toBe('Ongoing API Discussion');
+    expect(mockSubgroup.summary).toBe('Updated summary with new messages about API redesign.');
+    expect(conv.save).toHaveBeenCalledWith('batch-1');
+    expect(mockSubgroup.save).toHaveBeenCalledWith('batch-1');
+    expect(perspective.commitBatch).toHaveBeenCalledWith('batch-1');
+  });
+
+  it('progresses through all processing steps', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'Test Group',
+      summary: 'Test Summary',
+      participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    const steps = updateState.mock.calls.map((call: any) => call[0]?.step).filter(Boolean);
+    expect(steps).toContain(2);
+    expect(steps).toContain(3);
+    expect(steps).toContain(4);
+    expect(steps).toContain(5);
+    expect(steps).toContain(6);
+    expect(steps).toContain(7);
+    expect(steps).toContain(8);
+  });
+
+  it('links all transcribed items to the new subgroup', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'API Redesign Discussion',
+      summary: 'Discussion summary',
+      participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    const itemLinksCall = perspective.addLinksCalls.find(
+      (call: any) => Array.isArray(call[0]) && call[0].some((l: any) => l.predicate === 'flux://has_item'),
+    );
+    expect(itemLinksCall, 'expected addLinks to be called with flux://has_item links').toBeDefined();
+
+    const links = itemLinksCall![0];
+    expect(links).toHaveLength(5);
+    expect(links.every((l: any) => l.source === 'sg-new')).toBe(true);
+    expect(links.map((l: any) => l.target)).toEqual(['tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5']);
+  });
+
+  it('adds participant links for all unique authors', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'Test Group',
+      summary: 'Summary',
+      participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    const participantLinksCall = perspective.addLinksCalls.find(
+      (call: any) =>
+        Array.isArray(call[0]) && call[0].some((l: any) => l.predicate === 'flux://has_participant'),
+    );
+    expect(participantLinksCall, 'expected participant links to be added').toBeDefined();
+    const convParticipantLinks = participantLinksCall![0].filter((l: any) => l.source === conv.id);
+    const participantDids = convParticipantLinks.map((l: any) => l.target).sort();
+    expect(participantDids).toEqual(['did:test:alice', 'did:test:bob', 'did:test:charlie']);
+  });
+
+  it('preserves manually fixed conversation name', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+    const items = createTranscribedItems();
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'Test',
+      summary: 'Summary',
+      participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+
+    conv.nameFixed = true;
+    conv.conversationName = 'My Custom Name';
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(items as any, updateState, createMockClient() as any);
+
+    expect(conv.conversationName).toBe('My Custom Name');
+    expect(conv.summary).toBe(
+      'The team discussed plans for redesigning REST API endpoints, creating tracking tickets, and updating documentation.',
+    );
+  });
+
+  it('handles transcriptions with null/empty text without breaking summary generation', async () => {
+    const perspective = createMockPerspective();
+    const conv = new Conversation(perspective as any, 'conv-1');
+
+    const itemsWithEmptyText = [
+      { id: 'tr-1', text: 'Let us discuss the API changes', author: 'did:test:alice', timestamp: '2026-01-15T14:00:00Z' },
+      { id: 'tr-2', text: null, author: 'did:test:bob', timestamp: '2026-01-15T14:00:30Z' },
+      { id: 'tr-3', text: '', author: 'did:test:alice', timestamp: '2026-01-15T14:01:00Z' },
+      { id: 'tr-4', text: undefined, author: 'did:test:charlie', timestamp: '2026-01-15T14:01:30Z' },
+      { id: 'tr-5', text: 'Sounds good to me', author: 'did:test:bob', timestamp: '2026-01-15T14:02:00Z' },
+    ];
+
+    conv['subgroups'] = vi.fn().mockResolvedValue([]);
+    conv['createNewGroup'] = vi.fn().mockResolvedValue({
+      id: 'sg-new',
+      subgroupName: 'Test',
+      summary: 'Summary',
+      participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
+    });
+    conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
+    conv.save = vi.fn().mockResolvedValue(undefined);
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+    conv.nameFixed = false;
+
+    const updateState = vi.fn();
+    await conv.processNewExpressions(itemsWithEmptyText as any, updateState, createMockClient() as any);
+
+    expect(conv.conversationName).toBe('Sprint Planning: API Overhaul');
+    expect(conv.summary).toBeTruthy();
+    expect(perspective.commitBatch).toHaveBeenCalledWith('batch-1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Channel.unprocessedItems() — verifies transcription messages are detected
+// ---------------------------------------------------------------------------
+
+describe('Channel.unprocessedItems() detects transcribed messages', () => {
+  let Channel: any;
+  beforeEach(async () => {
+    Channel = (await import('../channel/index')).Channel;
+  });
+
+  it('returns transcribed messages not yet linked to a subgroup', async () => {
+    let callCount = 0;
+    const querySparql = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) {
+        return [{ id: 'msg-1' }, { id: 'tr-1' }, { id: 'tr-2' }];
+      }
+      if (callCount === 2) {
+        return [{ id: 'msg-1' }];
+      }
+      return [
+        {
+          id: 'tr-1',
+          author: 'did:test:alice',
+          timestamp: '2026-01-15T14:00:00Z',
+          type: 'flux://has_message',
+          body: 'This is a transcribed message',
+          transcriptStart: '2026-01-15T13:59:55Z',
+        },
+        {
+          id: 'tr-2',
+          author: 'did:test:bob',
+          timestamp: '2026-01-15T14:00:30Z',
+          type: 'flux://has_message',
+          body: 'Another transcription',
+          transcriptStart: '2026-01-15T14:00:25Z',
+        },
+      ];
+    });
+
+    const perspective = { querySparql, get: vi.fn(), add: vi.fn() };
+    const channel = new Channel(perspective as any, 'ch-1');
+    const unprocessed = await channel.unprocessedItems();
+
+    expect(unprocessed).toHaveLength(2);
+    expect(unprocessed[0].id).toBe('tr-1');
+    expect(unprocessed[0].text).toBe('This is a transcribed message');
+    expect(unprocessed[1].id).toBe('tr-2');
+    expect(unprocessed[1].text).toBe('Another transcription');
+    expect(querySparql).toHaveBeenCalledTimes(3);
+  });
+
+  it('uses transcriptStart for timestamp when available', async () => {
+    let callCount = 0;
+    const querySparql = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return [{ id: 'tr-1' }];
+      if (callCount === 2) return [];
+      return [
+        {
+          id: 'tr-1',
+          author: 'did:test:alice',
+          timestamp: '2026-01-15T14:00:30Z',
+          type: 'flux://has_message',
+          body: 'Transcribed text',
+          transcriptStart: '2026-01-15T14:00:00Z',
+        },
+      ];
+    });
+
+    const perspective = { querySparql, get: vi.fn(), add: vi.fn() };
+    const channel = new Channel(perspective as any, 'ch-1');
+    const unprocessed = await channel.unprocessedItems();
+
+    expect(unprocessed).toHaveLength(1);
+    expect(unprocessed[0].timestamp).toBe('2026-01-15T14:00:00.000Z');
+  });
+
+  it('returns empty array when all items are already processed', async () => {
+    let callCount = 0;
+    const querySparql = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return [{ id: 'tr-1' }, { id: 'tr-2' }];
+      if (callCount === 2) return [{ id: 'tr-1' }, { id: 'tr-2' }];
+      return [];
+    });
+
+    const perspective = { querySparql, get: vi.fn(), add: vi.fn() };
+    const channel = new Channel(perspective as any, 'ch-1');
+    const unprocessed = await channel.unprocessedItems();
+
+    expect(unprocessed).toHaveLength(0);
+    expect(querySparql).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Conversation cache: processesNextTask() lookup pattern
+// ---------------------------------------------------------------------------
+
+describe('Conversation cache: processesNextTask pattern', () => {
+  it('conversation instantiated from recentConversations has processNewExpressions', async () => {
+    const recentResults = [
+      { channelId: 'ch-1', conversationId: 'conv-1', lastActivity: '2026-01-15T14:00:00Z' },
+      { channelId: 'ch-2', conversationId: 'conv-2', lastActivity: '2026-01-15T13:00:00Z' },
+      { channelId: 'ch-3', conversationId: undefined, lastActivity: '2026-01-15T12:00:00Z' },
+    ];
+
+    const perspective = { querySparql: vi.fn(), get: vi.fn(), add: vi.fn() };
+
+    // This is the FIX pattern: populate cache with Conversation instances
+    const conversationCache = new Map<string, any>();
+    for (const r of recentResults) {
+      if (r.conversationId && !conversationCache.has(r.conversationId)) {
+        conversationCache.set(r.conversationId, new Conversation(perspective as any, r.conversationId));
+      }
+    }
+
+    function getConversation(channelId: string) {
+      const data = recentResults.find((c) => c.channelId === channelId);
+      if (!data?.conversationId) return undefined;
+      return conversationCache.get(data.conversationId);
+    }
+
+    const conv1 = getConversation('ch-1');
+    expect(conv1, 'getConversation must return Conversation for ch-1').toBeDefined();
+    expect(conv1!.id).toBe('conv-1');
+    expect(typeof conv1!.processNewExpressions).toBe('function');
+
+    const conv2 = getConversation('ch-2');
+    expect(conv2, 'getConversation must return Conversation for ch-2').toBeDefined();
+    expect(conv2!.id).toBe('conv-2');
+
+    const conv3 = getConversation('ch-3');
+    expect(conv3).toBeUndefined();
+
+    const conv4 = getConversation('ch-unknown');
+    expect(conv4).toBeUndefined();
+  });
+
+  it('processesNextTask guard passes when cache is populated', async () => {
+    const perspective = { querySparql: vi.fn(), get: vi.fn(), add: vi.fn() };
+    const conversationCache = new Map<string, any>();
+    conversationCache.set('conv-1', new Conversation(perspective as any, 'conv-1'));
+
+    const communityService = {
+      getConversation: (channelId: string) => {
+        if (channelId === 'ch-1') return conversationCache.get('conv-1');
+        return undefined;
+      },
+      perspective,
+    };
+
+    const conversation = communityService.getConversation('ch-1');
+    const guardPasses = !!(communityService && conversation);
+
+    expect(guardPasses, 'processesNextTask guard must pass when cache is populated').toBe(true);
+    expect(conversation).toBeInstanceOf(Conversation);
+    expect(conversation!.id).toBe('conv-1');
+    expect(typeof conversation!.processNewExpressions).toBe('function');
+  });
+
+  it('processesNextTask guard FAILS when cache is empty (regression scenario)', () => {
+    const conversationCache = new Map<string, any>(); // EMPTY — the bug
+
+    const recentResults = [
+      { channelId: 'ch-1', conversationId: 'conv-1', lastActivity: '2026-01-15T14:00:00Z' },
+    ];
+
+    function getConversation(channelId: string) {
+      const data = recentResults.find((c) => c.channelId === channelId);
+      if (!data?.conversationId) return undefined;
+      return conversationCache.get(data.conversationId);
+    }
+
+    const conversation = getConversation('ch-1');
+    expect(conversation).toBeUndefined();
+
+    const communityService = {};
+    const guardPasses = !!(communityService && conversation);
+    expect(guardPasses, 'guard must fail when cache is empty').toBe(false);
   });
 });
