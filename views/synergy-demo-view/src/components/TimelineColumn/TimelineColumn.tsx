@@ -260,12 +260,18 @@ export default function TimelineColumn({
       const eventName = `${perspective.uuid}-new-agents-state`;
       window.addEventListener(eventName, handleNewAgentsState);
 
-      // Listen for link-added events from the perspective
-      perspective.addListener('link-added', handleLinkAdded);
+      // Use a targeted SPARQL subscription for channel children instead of
+      // firing on every link-added event in the perspective.
+      const sparql = `SELECT ?child WHERE { <${channelId}> <ad4m://has_child> ?child . }`;
+      let sub: any = null;
+      perspective.subscribeQuery(sparql).then((handle) => {
+        sub = handle;
+        handle.onResult(() => { handleLinkAdded(); });
+      });
 
       return () => {
         window.removeEventListener(eventName, handleNewAgentsState);
-        perspective.removeListener('link-added', handleLinkAdded);
+        sub?.dispose();
       };
     }
   }, [appStore, signallingService]);

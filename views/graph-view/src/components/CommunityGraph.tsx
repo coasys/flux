@@ -92,7 +92,7 @@ export default function CommunityOverview({ perspective, source }: { perspective
       setLinks(links);
     });
 
-    perspective?.addListener('link-added', (link) => {
+    const handler = (link) => {
       if (link.data.source === source || link.data.target === source) {
         fetchSnapShot(perspective, source).then(({ links, nodes }) => {
           setNodes(nodes);
@@ -100,7 +100,12 @@ export default function CommunityOverview({ perspective, source }: { perspective
         });
       }
       return null;
-    });
+    };
+    perspective?.addListener('link-added', handler);
+
+    return () => {
+      perspective?.removeListener('link-added', handler);
+    };
   }, [perspective.uuid, source]);
 
   // Setup graph

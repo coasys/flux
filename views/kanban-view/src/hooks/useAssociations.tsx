@@ -26,33 +26,19 @@ export function useAssociations({
     perspective.removeLinks(links);
   }
 
-  function handleLinkAdded(link: LinkExpression) {
-    if (link.data.source === source && link.data.predicate === predicate) {
-      setAssosiations((oldState) => [...oldState, link]);
-    }
-
-    return null;
-  }
-
-  function handleLinkRemoved(link: LinkExpression) {
-    if (link.data.source === source && link.data.predicate === predicate) {
-      setAssosiations((oldState) => {
-        return oldState.filter((l) => l.proof.target !== link.proof.target);
-      });
-    }
-
-    return null;
-  }
-
   useEffect(() => {
     fetchLinks();
 
-    perspective.addListener('link-added', handleLinkAdded);
-    perspective.addListener('link-removed', handleLinkRemoved);
+    // Use a targeted SPARQL subscription instead of global link listeners
+    const sparql = `SELECT ?target WHERE { <${source}> <${predicate}> ?target . }`;
+    let sub: any = null;
+    perspective.subscribeQuery(sparql).then((handle) => {
+      sub = handle;
+      handle.onResult(() => { fetchLinks(); });
+    });
 
     return () => {
-      perspective.removeListener('link-removed', handleLinkRemoved);
-      perspective.removeListener('link-added', handleLinkAdded);
+      sub?.dispose();
     };
   }, [perspective.uuid, source]);
 
