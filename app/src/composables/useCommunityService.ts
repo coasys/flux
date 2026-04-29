@@ -308,36 +308,44 @@ export async function createCommunityService(): Promise<CommunityService> {
     channelsWithConversationsLoading.value = true;
 
     try {
-      // Single SPARQL query — avoids N+1 iterative channel.get({ conversations: true }).
-      // link queries and lightweight lookups
-      channelsWithConversations.value = await Promise.all(
+      // Phase 1: Collect all child channel IDs per space channel (parallel link queries)
+      const channelChildMap = await Promise.all(
         spaceChannels.value.map(async (channel) => {
-          // Get all nested conversation channels — linked via CHANNEL predicate
           const links = await perspective.get(new LinkQuery({ source: channel.id, predicate: CHANNEL }));
           const childChannelIds = new Set(links.map((l) => l.data.target));
           const nestedConversationChannels = allChannels.value.filter(
             (ch) => ch.isConversation && childChannelIds.has(ch.id),
           );
-
-          // For each nested conversation channel, find its conversation via SPARQL
-          // instead of hydrating the full Channel model with all @HasMany relations
-          const conversations = await Promise.all(
-            nestedConversationChannels.map(async (childChannel) => {
-              try {
-                const conversation = await Conversation.findOne(perspective, {
-                  parent: { model: Channel, id: childChannel.id },
-                });
-                if (conversation) conversationCache.set(conversation.id, conversation);
-                return { channelId: childChannel.id, conversationId: conversation?.id };
-              } catch {
-                return { channelId: childChannel.id };
-              }
-            }),
-          );
-
-          return { channelId: channel.id, children: conversations };
+          return { channelId: channel.id, children: nestedConversationChannels };
         }),
       );
+
+      // Phase 2: Batch all conversation lookups into a single flat Promise.all
+      // instead of nested per-space-channel loops
+      const allConvChannels = channelChildMap.flatMap((entry) =>
+        entry.children.map((ch) => ({ spaceChannelId: entry.channelId, childChannel: ch })),
+      );
+
+      const conversationResults = await Promise.all(
+        allConvChannels.map(async ({ childChannel }) => {
+          try {
+            const conversation = await Conversation.findOne(perspective, {
+              parent: { model: Channel, id: childChannel.id },
+            });
+            if (conversation) conversationCache.set(conversation.id, conversation);
+            return { channelId: childChannel.id, conversationId: conversation?.id };
+          } catch {
+            return { channelId: childChannel.id };
+          }
+        }),
+      );
+
+      // Phase 3: Re-group results by space channel
+      const convByChildId = new Map(conversationResults.map((r) => [r.channelId, r]));
+      channelsWithConversations.value = channelChildMap.map((entry) => ({
+        channelId: entry.channelId,
+        children: entry.children.map((ch) => convByChildId.get(ch.id) || { channelId: ch.id }),
+      }));
     } catch (error) {
       console.error('Error loading channels with conversations:', error);
       channelsWithConversations.value = [];

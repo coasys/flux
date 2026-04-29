@@ -28,7 +28,10 @@ export default function PollCard(props: {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const { data: answers } = useLiveQuery(Answer, perspective, { parent: { model: Poll, id: poll.id } });
+  const { data: answers } = useLiveQuery(Answer, perspective, {
+    parent: { model: Poll, id: poll.id },
+    query: { include: { votes: true } },
+  });
 
   const colorScale = useMemo(() => {
     return d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
@@ -45,31 +48,26 @@ export default function PollCard(props: {
     let newTotalVotes = 0;
     let newTotalPoints = 0;
     const users = [];
-    const newAnswers = (await Promise.all(
-      answers.map(
-        (answer) =>
-          new Promise(async (resolve) => {
-            const votes = await Vote.findAll(perspective, { parent: { model: Answer, id: answer.id } });
-            const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-            newTotalVotes += votes.length;
-            let totalAnswerPoints = 0;
-            if (voteType === 'weighted-choice') {
-              totalAnswerPoints = votes.map((vote) => vote.score).reduce((a, b) => a + b, 0);
-              newTotalPoints += totalAnswerPoints;
-            }
-            users.push(...votes.map((v: any) => v.author));
-            resolve({
-              id: answer.id,
-              text: answer.text,
-              author: answer.author,
-              timestamp: answer.timestamp,
-              totalVotes: votes.length,
-              totalPoints: totalAnswerPoints,
-              myPoints: previousVote?.score || 0,
-            });
-          }),
-      ),
-    )) as any;
+    const newAnswers = answers.map((answer) => {
+      const votes = answer.votes || [];
+      const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
+      newTotalVotes += votes.length;
+      let totalAnswerPoints = 0;
+      if (voteType === 'weighted-choice') {
+        totalAnswerPoints = votes.map((vote) => vote.score).reduce((a, b) => a + b, 0);
+        newTotalPoints += totalAnswerPoints;
+      }
+      users.push(...votes.map((v: any) => v.author));
+      return {
+        id: answer.id,
+        text: answer.text,
+        author: answer.author,
+        timestamp: answer.timestamp,
+        totalVotes: votes.length,
+        totalPoints: totalAnswerPoints,
+        myPoints: previousVote?.score || 0,
+      };
+    }) as any;
     if (voteType === 'weighted-choice') newAnswers.sort((a, b) => b.totalPoints - a.totalPoints);
     else newAnswers.sort((a, b) => b.totalVotes - a.totalVotes);
     setTotalVotes(newTotalVotes);
@@ -81,7 +79,7 @@ export default function PollCard(props: {
   function removePreviousVotes() {
     return Promise.all(
       answers.map(async (answer) => {
-        const votes = await Vote.findAll(perspective, { parent: { model: Answer, id: answer.id } });
+        const votes = answer.votes || [];
         const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
         if (previousVote) await previousVote.delete();
       }),
