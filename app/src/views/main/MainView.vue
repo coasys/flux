@@ -28,9 +28,11 @@ import { usePerspectives } from '@coasys/flux-vue';
 import { ensureLLMTasks } from '@coasys/flux-api/src/conversation/LLMutils';
 import semver from 'semver';
 import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { dependencies } from '../../../package.json';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 
+const route = useRoute();
 const appStore = useAppStore();
 
 usePerspectives(appStore.ad4mClient);
