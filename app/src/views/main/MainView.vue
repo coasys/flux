@@ -24,37 +24,16 @@ import AppLayout from '@/layout/AppLayout.vue';
 import { useAppStore } from '@/stores';
 import Modals from '@/views/main/modals/Modals.vue';
 import Sidebar from '@/views/main/sidebar/Sidebar.vue';
-import { LinkExpression, Literal, PerspectiveProxy } from '@coasys/ad4m';
 import { usePerspectives } from '@coasys/flux-vue';
 import { ensureLLMTasks } from '@coasys/flux-api/src/conversation/LLMutils';
-import { EntryType } from '@coasys/flux-types';
 import semver from 'semver';
-import { onMounted, onUnmounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
 import { dependencies } from '../../../package.json';
 import { registerNotification } from '../../utils/registerMobileNotifications';
 
-const route = useRoute();
 const appStore = useAppStore();
 
-const { onLinkAdded } = usePerspectives(appStore.ad4mClient);
-let cleanupLinkAdded: (() => void) | undefined;
-
-function gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
-  const routeChannelId = route.params.channelId;
-  const channelId = link.data.source;
-  const isCurrentChannel = routeChannelId === channelId;
-  if (isCurrentChannel) return;
-
-  // TODO: Update channel to say it has a new message
-  const expression = Literal.fromUrl(link.data.target).get();
-  const expressionDate = new Date(expression.timestamp);
-  const minuteAgo = new Date();
-  minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-  if (expressionDate > minuteAgo) {
-    // TODO: Show message notification
-  }
-}
+usePerspectives(appStore.ad4mClient);
 
 // Todo: move this initialisation into a composable or higher component?
 async function initializeApp() {
@@ -70,12 +49,6 @@ async function initializeApp() {
   // Ensure LLM tasks are set up
   ensureLLMTasks(appStore.ad4mClient.ai);
 
-  // Listen for new messages (clean up previous listener if re-mounted)
-  cleanupLinkAdded?.();
-  cleanupLinkAdded = onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
-    if (link.data.predicate === EntryType.Message) gotNewMessage(p, link);
-  });
-
   // Todo: Version checking for ad4m / flux compatibility
   const { ad4mExecutorVersion } = await appStore.ad4mClient.runtime.info();
   const isIncompatible = semver.gt(dependencies['@coasys/ad4m'], ad4mExecutorVersion);
@@ -85,8 +58,4 @@ async function initializeApp() {
 }
 
 onMounted(async () => initializeApp());
-onUnmounted(() => {
-  cleanupLinkAdded?.();
-  cleanupLinkAdded = undefined;
-});
 </script>

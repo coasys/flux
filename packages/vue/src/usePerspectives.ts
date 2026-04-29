@@ -5,8 +5,6 @@ type UUID = string;
 
 const perspectives = shallowRef<{ [x: UUID]: PerspectiveProxy }>({});
 const neighbourhoods = shallowRef<{ [x: UUID]: PerspectiveProxy }>({});
-const onAddedLinkCbs = ref<Function[]>([]);
-const onRemovedLinkCbs = ref<Function[]>([]);
 const hasFetched = ref(false);
 
 watch(
@@ -26,24 +24,6 @@ watch(
   { immediate: true },
 );
 
-/** @deprecated Prefer per-perspective subscribeQuery() over global addListener.
- *  This function broadcasts all link events across all perspectives. */
-function addListeners(p: PerspectiveProxy) {
-  p.addListener('link-added', (link) => {
-    onAddedLinkCbs.value.forEach((cb) => {
-      cb(p, link);
-    });
-    return null;
-  });
-
-  p.addListener('link-removed', (link) => {
-    onRemovedLinkCbs.value.forEach((cb) => {
-      cb(p, link);
-    });
-    return null;
-  });
-}
-
 export function usePerspectives(client: Ad4mClient) {
   effect(async () => {
     if (hasFetched.value) return;
@@ -57,11 +37,6 @@ export function usePerspectives(client: Ad4mClient) {
     perspectives.value = allPerspectives.reduce((acc, p) => {
       return { ...acc, [p.uuid]: p };
     }, {});
-
-    // Add each perspective to our state
-    allPerspectives.forEach((p) => {
-      addListeners(p);
-    });
 
     client.perspective.addPerspectiveUpdatedListener((handle) => {
       client.perspective.byUUID(handle.uuid).then((perspective) => {
@@ -83,7 +58,6 @@ export function usePerspectives(client: Ad4mClient) {
             ...perspectives.value,
             [handle.uuid]: perspective,
           };
-          addListeners(perspective);
         }
       });
       return null;
@@ -99,23 +73,5 @@ export function usePerspectives(client: Ad4mClient) {
     });
   }, {});
 
-  function fetchPerspectives() {}
-
-  function onLinkAdded(cb: Function) {
-    onAddedLinkCbs.value.push(cb);
-    return () => {
-      const idx = onAddedLinkCbs.value.indexOf(cb);
-      if (idx !== -1) onAddedLinkCbs.value.splice(idx, 1);
-    };
-  }
-
-  function onLinkRemoved(cb: Function) {
-    onRemovedLinkCbs.value.push(cb);
-    return () => {
-      const idx = onRemovedLinkCbs.value.indexOf(cb);
-      if (idx !== -1) onRemovedLinkCbs.value.splice(idx, 1);
-    };
-  }
-
-  return { perspectives, neighbourhoods, onLinkAdded, onLinkRemoved };
+  return { perspectives, neighbourhoods };
 }
