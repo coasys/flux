@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { PerspectiveProxy, Literal } from '@coasys/ad4m';
-import { getEntry } from '../../utils';
+import { PerspectiveProxy, Literal, Link, LinkQuery } from '@coasys/ad4m';
 import DisplayValue from '../DisplayValue';
 import styles from './Entry.module.css';
 
@@ -11,7 +10,6 @@ type Props = {
 };
 
 export default function Entry({ perspective, source, onUrlClick = () => {} }: Props) {
-  const [proxy, setProxy] = useState();
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
 
@@ -20,15 +18,13 @@ export default function Entry({ perspective, source, onUrlClick = () => {} }: Pr
   }, [source, perspective.uuid]);
 
   async function fetchSourceClasses(source) {
-    const classResults = await perspective.infer(`subject_class(ClassName, C), instance(C, "${source}").`);
+    const classResults = await perspective.getInstanceClasses(source);
 
     if (classResults?.length > 0) {
-      setClasses([...new Set(classResults.map((c) => c.ClassName))]);
-      const className = classResults[0].ClassName;
-      const subjectProxy = await perspective.getSubjectProxy(source, className);
-      setProxy(subjectProxy);
-      const entry = await getEntry(subjectProxy);
-      setEntry(entry);
+      setClasses(classResults);
+      const className = classResults[0];
+      const data = await perspective.getSubjectData(className, source);
+      setEntry({ id: source, ...data });
     } else {
       setClasses([]);
       setEntry({ id: source });
@@ -36,12 +32,19 @@ export default function Entry({ perspective, source, onUrlClick = () => {} }: Pr
   }
 
   async function onUpdate(propName, value) {
-    if (proxy) {
-      await proxy.init();
-      const capitalized = propName.charAt(0).toUpperCase() + propName.slice(1);
-      await proxy[`set${capitalized}`](value);
-      const entry = await getEntry(proxy);
-      setEntry(entry);
+    const className = classes[0];
+    if (className) {
+      const shape = await perspective.getClassShape(className);
+      const prop = shape?.properties.find(p => p.name === propName);
+      if (prop) {
+        const oldLinks = await perspective.get(new LinkQuery({ source, predicate: prop.predicate }));
+        for (const link of oldLinks) {
+          await perspective.remove(link);
+        }
+        await perspective.add(new Link({ source, predicate: prop.predicate, target: value }));
+        const data = await perspective.getSubjectData(className, source);
+        setEntry({ id: source, ...data });
+      }
     }
   }
 
