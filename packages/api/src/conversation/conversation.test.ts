@@ -20,12 +20,13 @@ vi.mock('@coasys/ad4m', async (importOriginal) => {
   return {
     ...actual,
     Model: (opts: any) => (target: any) => {
-      // The real @Model decorator adds an `id` getter aliasing baseExpression.
-      // Without this, Conversation.id is undefined and tests fail.
-      if (!Object.getOwnPropertyDescriptor(target.prototype, 'id')) {
+      // The real @Model decorator adds an `id` getter aliasing _baseExpression.
+      // Only add one if the prototype chain doesn't already provide it
+      // (Ad4mModel.prototype has `get id()` → this._baseExpression).
+      if (!('id' in target.prototype)) {
         Object.defineProperty(target.prototype, 'id', {
-          get() { return this.baseExpression; },
-          set(v: any) { this.baseExpression = v; },
+          get() { return this._baseExpression; },
+          set(v: any) { this._baseExpression = v; },
           configurable: true,
         });
       }
@@ -59,6 +60,11 @@ vi.mock('@coasys/ad4m', async (importOriginal) => {
     PerspectiveProxy: actual.PerspectiveProxy ?? class PerspectiveProxy {},
   };
 });
+
+// CI debug: verify Ad4mModel has id getter
+import { Ad4mModel as _Ad4mModelDebug } from '@coasys/ad4m';
+console.log('[CI-DEBUG] Ad4mModel.prototype has id getter:', Object.getOwnPropertyDescriptor((_Ad4mModelDebug as any)?.prototype, 'id'));
+console.log('[CI-DEBUG] Ad4mModel exists:', !!_Ad4mModelDebug);
 
 // Track calls so tests can assert per-invocation ordering
 const llmTaskCalls: { task: any; prompt: any }[] = [];
@@ -190,6 +196,8 @@ describe('Conversation.stats()', () => {
   it('queries SPARQL for subgroup count', async () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
+    // CI debug: verify id is set after construction
+    console.log('[CI-DEBUG] conv.id:', conv.id, '_baseExpression:', (conv as any)._baseExpression, 'proto id desc:', Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Object.getPrototypeOf(conv)), 'id'));
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = ['did:test:alice'];
 
