@@ -1,10 +1,27 @@
+// Energy-based VAD AudioWorklet processor.
+// Accumulates speech utterances and posts them on silence gaps or max-length flush.
+// Posts Float32Array (16 kHz PCM) per utterance instead of fixed 512-sample chunks.
+
+// --- Tunable parameters ---
+const SPEECH_ONSET_THRESHOLD = 0.01;   // RMS above this = speech candidate
+const SILENCE_THRESHOLD = 0.008;       // RMS below this = silence candidate
+const ONSET_HOLD_FRAMES = 3;           // ~8ms/frame → ~24ms hold to avoid clicks
+const SILENCE_TIMEOUT_FRAMES = 188;    // ~500ms at 128-sample frames @ 48 kHz (~2.67ms/frame)
+const MAX_UTTERANCE_SAMPLES = 480000;  // 30s at 16 kHz
+
 class AudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.buffer = [];
-    this.chunkSize = 512;
     this.originalSampleRate = sampleRate;
     this.targetSampleRate = 16000;
+
+    // Utterance accumulation buffer (16 kHz samples)
+    this.utteranceBuffer = [];
+
+    // VAD state machine
+    this.state = 'SILENT'; // 'SILENT' | 'SPEAKING'
+    this.onsetCounter = 0;
+    this.silenceCounter = 0;
   }
 
   downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
@@ -29,24 +46,79 @@ class AudioProcessor extends AudioWorkletProcessor {
     return result;
   }
 
+  computeRMS(samples) {
+    let sum = 0;
+    for (let i = 0; i < samples.length; i++) {
+      sum += samples[i] * samples[i];
+    }
+    return Math.sqrt(sum / samples.length);
+  }
+
+  emitUtterance() {
+    if (this.utteranceBuffer.length > 0) {
+      const utterance = new Float32Array(this.utteranceBuffer);
+      this.port.postMessage(utterance);
+      this.utteranceBuffer = [];
+    }
+  }
+
   process(inputs, outputs, parameters) {
     const input = inputs[0];
-    if (input.length > 0) {
-      const channelData = input[0];
-      const downsampledData = this.downsampleBuffer(channelData, this.originalSampleRate, this.targetSampleRate);
+    if (input.length === 0) return true;
 
-      // Append the downsampled data to the buffer
-      this.buffer.push(...downsampledData);
+    const channelData = input[0];
+    const downsampled = this.downsampleBuffer(
+      channelData,
+      this.originalSampleRate,
+      this.targetSampleRate
+    );
 
-      // When the buffer reaches the chunk size, send the data
-      if (this.buffer.length >= this.chunkSize) {
-        const float32ArrayToSend = new Float32Array(this.buffer.slice(0, this.chunkSize));
-        this.port.postMessage(float32ArrayToSend);
+    const rms = this.computeRMS(channelData); // RMS on original-rate data for accuracy
 
-        // Remove the sent data from the buffer
-        this.buffer = this.buffer.slice(this.chunkSize);
+    if (this.state === 'SILENT') {
+      if (rms > SPEECH_ONSET_THRESHOLD) {
+        this.onsetCounter++;
+        if (this.onsetCounter >= ONSET_HOLD_FRAMES) {
+          // Transition to SPEAKING
+          this.state = 'SPEAKING';
+          this.silenceCounter = 0;
+          this.onsetCounter = 0;
+        }
+      } else {
+        this.onsetCounter = 0;
+      }
+
+      // If we just transitioned, start accumulating from this frame
+      if (this.state === 'SPEAKING') {
+        for (let i = 0; i < downsampled.length; i++) {
+          this.utteranceBuffer.push(downsampled[i]);
+        }
+      }
+    } else {
+      // SPEAKING state
+      for (let i = 0; i < downsampled.length; i++) {
+        this.utteranceBuffer.push(downsampled[i]);
+      }
+
+      if (rms < SILENCE_THRESHOLD) {
+        this.silenceCounter++;
+        if (this.silenceCounter >= SILENCE_TIMEOUT_FRAMES) {
+          // Silence gap detected — emit utterance
+          this.emitUtterance();
+          this.state = 'SILENT';
+          this.silenceCounter = 0;
+        }
+      } else {
+        this.silenceCounter = 0;
+      }
+
+      // Max utterance length guard (30s at 16 kHz)
+      if (this.utteranceBuffer.length >= MAX_UTTERANCE_SAMPLES) {
+        this.emitUtterance();
+        // Stay in SPEAKING — speaker hasn't paused
       }
     }
+
     return true;
   }
 }

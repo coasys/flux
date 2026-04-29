@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
+import { feedUtterance } from '@coasys/flux-utils';
 import { useAiStore } from '@/stores';
 import { ref, onUnmounted } from 'vue';
 
@@ -152,14 +153,13 @@ async function startRecording() {
     const mediaStreamSource = audioContext.createMediaStreamSource(stream);
     workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
     
-    // Handle audio data from worklet
-    workletNode.port.onmessage = (event) => {
+    // Handle utterances from VAD worklet
+    workletNode.port.onmessage = async (event) => {
       if (isRecording.value) {
-        const audioData = Array.from(event.data);
-        // Feed to both transcription streams
-        props.client.ai.feedTranscriptionStream(
-          [fastTranscriptionStreamId!, transcriptionStreamId!], 
-          audioData as any
+        await feedUtterance(
+          props.client,
+          [fastTranscriptionStreamId, transcriptionStreamId],
+          event.data
         );
       }
     };
