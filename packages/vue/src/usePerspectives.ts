@@ -26,6 +26,8 @@ watch(
   { immediate: true },
 );
 
+/** @deprecated Prefer per-perspective subscribeQuery() over global addListener.
+ *  This function broadcasts all link events across all perspectives. */
 function addListeners(p: PerspectiveProxy) {
   p.addListener('link-added', (link) => {
     onAddedLinkCbs.value.forEach((cb) => {

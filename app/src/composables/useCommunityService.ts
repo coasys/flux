@@ -471,31 +471,6 @@ export async function createCommunityService(): Promise<CommunityService> {
     return conversationCache.get(data.conversationId);
   }
 
-  // Track channel participants automatically
-  function handleParticipantTracking(link: any) {
-    if (link.data.predicate !== CHANNEL) return null;
-    if (!link.author) return null;
-
-    const channelId = link.data.source;
-    const channel = allChannels.value.find((c) => c.id === channelId);
-    if (!channel) return null;
-
-    // allChannels uses ChannelSummary (no @HasMany participants).
-    // Add participant link unconditionally — addLinks is idempotent and the
-    // perspective will deduplicate if the link already exists.
-    perspective
-      .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
-      .catch((error) => {
-        console.error('Failed to add participant to channel:', {
-          channelId,
-          author: link.author,
-          error,
-        });
-      });
-
-    return null;
-  }
-
   // Initialize sync state listener
   const syncStateListener = (state: PerspectiveState) => {
     // @ts-ignore
@@ -504,12 +479,34 @@ export async function createCommunityService(): Promise<CommunityService> {
   };
   perspective.addSyncStateChangeListener(syncStateListener);
 
-  // Initialize participant tracking
-  perspective.addListener('link-added', handleParticipantTracking);
+  // Initialize participant tracking via targeted subscription
+  const channelQuery = new LinkQuery({ predicate: CHANNEL });
+  const channelQuerySparql = `SELECT ?source ?target WHERE { ?source <${CHANNEL}> ?target . }`;
+  let participantSub: { cancel: () => void } | null = null;
+  perspective.subscribeQuery(channelQuery, channelQuerySparql, (added) => {
+    if (added) {
+      for (const link of added) {
+        if (!link.author) continue;
+        const channelId = link.data.source;
+        const channel = allChannels.value.find((c) => c.id === channelId);
+        if (!channel) continue;
+        perspective
+          .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+          .catch((error) => {
+            console.error('Failed to add participant to channel:', {
+              channelId,
+              author: link.author,
+              error,
+            });
+          });
+      }
+    }
+    return null;
+  }).then(sub => { participantSub = sub; });
 
   // Cleanup function to remove all listeners
   function cleanup() {
-    perspective.removeListener('link-added', handleParticipantTracking);
+    participantSub?.cancel();
   }
 
   getMembers();

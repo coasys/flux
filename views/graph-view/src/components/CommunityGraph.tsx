@@ -1,5 +1,5 @@
 import ForceGraph3D, { ForceGraph3DInstance } from '3d-force-graph';
-import { Literal, PerspectiveProxy } from '@coasys/ad4m';
+import { LinkQuery, Literal, PerspectiveProxy } from '@coasys/ad4m';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import SpriteText from 'three-spritetext';
 import styles from '../App.module.css';
@@ -84,7 +84,7 @@ export default function CommunityOverview({ perspective, source }: { perspective
     }
   }, [containerSize[0], containerSize[1]]);
 
-  // Fetch initial snapshot
+  // Fetch initial snapshot and subscribe to changes
   useEffect(() => {
     fetchSnapShot(perspective, source).then(({ links, nodes }) => {
       console.log(links, nodes);
@@ -92,19 +92,34 @@ export default function CommunityOverview({ perspective, source }: { perspective
       setLinks(links);
     });
 
-    const handler = (link) => {
-      if (link.data.source === source || link.data.target === source) {
-        fetchSnapShot(perspective, source).then(({ links, nodes }) => {
-          setNodes(nodes);
-          setLinks(links);
-        });
-      }
-      return null;
+    const refresh = () => {
+      fetchSnapShot(perspective, source).then(({ links, nodes }) => {
+        setNodes(nodes);
+        setLinks(links);
+      });
     };
-    perspective?.addListener('link-added', handler);
+
+    const sourceQuery = new LinkQuery({ source });
+    const sourceSparql = `SELECT ?source ?predicate ?target WHERE { <${source}> ?predicate ?target . }`;
+    const targetQuery = new LinkQuery({ target: source });
+    const targetSparql = `SELECT ?source ?predicate ?target WHERE { ?source ?predicate <${source}> . }`;
+
+    let sourceSub: { cancel: () => void } | null = null;
+    let targetSub: { cancel: () => void } | null = null;
+
+    perspective?.subscribeQuery(sourceQuery, sourceSparql, (added) => {
+      if (added && added.length > 0) refresh();
+      return null;
+    }).then(sub => { sourceSub = sub; });
+
+    perspective?.subscribeQuery(targetQuery, targetSparql, (added) => {
+      if (added && added.length > 0) refresh();
+      return null;
+    }).then(sub => { targetSub = sub; });
 
     return () => {
-      perspective?.removeListener('link-added', handler);
+      sourceSub?.cancel();
+      targetSub?.cancel();
     };
   }, [perspective.uuid, source]);
 
