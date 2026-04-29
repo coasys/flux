@@ -1,6 +1,6 @@
 import { Message } from '@coasys/flux-api';
 import { WebRTC } from '@coasys/flux-react-web';
-import { detectBrowser } from '@coasys/flux-utils';
+import { detectBrowser, feedUtterance } from '@coasys/flux-utils';
 import { Ad4mClient } from '@coasys/ad4m';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { v4 as uuidv4 } from 'uuid';
@@ -287,15 +287,13 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
     const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
     mediaStreamSource.connect(workletNode);
-    let msgCount = 0;
-    workletNode.port.onmessage = (event) => {
+    workletNode.port.onmessage = async (event) => {
       if (listening.current) {
-        msgCount++;
-        if (msgCount % 50 === 1) {
-          console.log(`[Transcriber] worklet message #${msgCount}, samples: ${event.data.length}`);
-        }
-        const audioData = Array.from(event.data);
-        client.ai.feedTranscriptionStream([fastStreamId.current, streamId.current], audioData as any);
+        await feedUtterance(
+          client,
+          [fastStreamId.current, streamId.current],
+          event.data
+        );
       }
     };
     workletNode.connect(audioContext.current.destination);

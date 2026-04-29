@@ -1,4 +1,5 @@
 import { Ad4mClient } from '@coasys/ad4m';
+import { feedUtterance } from '@coasys/flux-utils';
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 
 interface UseVoiceRecorderOptions {
@@ -103,17 +104,12 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
       workletNodeRef.current = workletNode;
 
-      let msgCount = 0;
-      workletNode.port.onmessage = (event) => {
+      workletNode.port.onmessage = async (event) => {
         if (isRecordingRef.current) {
-          msgCount++;
-          if (msgCount % 50 === 1) {
-            console.log(`[VoiceRecorder] worklet message #${msgCount}, samples: ${event.data.length}`);
-          }
-          const audioData = Array.from(event.data);
-          client.ai.feedTranscriptionStream(
-            [fastTranscriptionStreamIdRef.current!, transcriptionStreamIdRef.current!],
-            audioData as any
+          await feedUtterance(
+            client,
+            [fastTranscriptionStreamIdRef.current, transcriptionStreamIdRef.current],
+            event.data
           );
         }
       };

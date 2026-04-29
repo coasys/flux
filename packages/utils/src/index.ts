@@ -1,6 +1,7 @@
 export * from './asyncFilter';
 export * from './createNeighbourhoodMeta';
 export * from './expressionHelpers';
+export * from './feedUtterance';
 export * from './formatString';
 export * from './getDefaultIceServers';
 export * from './getImage';
