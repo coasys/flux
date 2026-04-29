@@ -479,34 +479,34 @@ export async function createCommunityService(): Promise<CommunityService> {
   };
   perspective.addSyncStateChangeListener(syncStateListener);
 
-  // Initialize participant tracking via targeted subscription
-  const channelQuery = new LinkQuery({ predicate: CHANNEL });
-  const channelQuerySparql = `SELECT ?source ?target WHERE { ?source <${CHANNEL}> ?target . }`;
-  let participantSub: { cancel: () => void } | null = null;
-  perspective.subscribeQuery(channelQuery, channelQuerySparql, (added) => {
-    if (added) {
-      for (const link of added) {
-        if (!link.author) continue;
-        const channelId = link.data.source;
-        const channel = allChannels.value.find((c) => c.id === channelId);
-        if (!channel) continue;
-        perspective
-          .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
-          .catch((error) => {
-            console.error('Failed to add participant to channel:', {
-              channelId,
-              author: link.author,
-              error,
-            });
-          });
-      }
-    }
+  // Track channel participants automatically.
+  // Uses addListener because participant tracking needs link.author metadata,
+  // which isn't available from SPARQL subscription results.
+  function handleParticipantTracking(link: any) {
+    if (link.data.predicate !== CHANNEL) return null;
+    if (!link.author) return null;
+
+    const channelId = link.data.source;
+    const channel = allChannels.value.find((c) => c.id === channelId);
+    if (!channel) return null;
+
+    perspective
+      .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+      .catch((error) => {
+        console.error('Failed to add participant to channel:', {
+          channelId,
+          author: link.author,
+          error,
+        });
+      });
+
     return null;
-  }).then(sub => { participantSub = sub; });
+  }
+  perspective.addListener('link-added', handleParticipantTracking);
 
   // Cleanup function to remove all listeners
   function cleanup() {
-    participantSub?.cancel();
+    perspective.removeListener('link-added', handleParticipantTracking);
   }
 
   getMembers();

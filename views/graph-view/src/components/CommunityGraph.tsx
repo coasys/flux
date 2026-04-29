@@ -1,5 +1,5 @@
 import ForceGraph3D, { ForceGraph3DInstance } from '3d-force-graph';
-import { LinkQuery, Literal, PerspectiveProxy } from '@coasys/ad4m';
+import { Literal, PerspectiveProxy } from '@coasys/ad4m';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import SpriteText from 'three-spritetext';
 import styles from '../App.module.css';
@@ -99,27 +99,25 @@ export default function CommunityOverview({ perspective, source }: { perspective
       });
     };
 
-    const sourceQuery = new LinkQuery({ source });
     const sourceSparql = `SELECT ?source ?predicate ?target WHERE { <${source}> ?predicate ?target . }`;
-    const targetQuery = new LinkQuery({ target: source });
     const targetSparql = `SELECT ?source ?predicate ?target WHERE { ?source ?predicate <${source}> . }`;
 
-    let sourceSub: { cancel: () => void } | null = null;
-    let targetSub: { cancel: () => void } | null = null;
+    let sourceSub: { dispose: () => void } | null = null;
+    let targetSub: { dispose: () => void } | null = null;
 
-    perspective?.subscribeQuery(sourceQuery, sourceSparql, (added) => {
-      if (added && added.length > 0) refresh();
-      return null;
-    }).then(sub => { sourceSub = sub; });
+    perspective?.subscribeQuery(sourceSparql).then(sub => {
+      sourceSub = sub;
+      sub.onResult(() => refresh());
+    }).catch(e => console.error('Source subscription error:', e));
 
-    perspective?.subscribeQuery(targetQuery, targetSparql, (added) => {
-      if (added && added.length > 0) refresh();
-      return null;
-    }).then(sub => { targetSub = sub; });
+    perspective?.subscribeQuery(targetSparql).then(sub => {
+      targetSub = sub;
+      sub.onResult(() => refresh());
+    }).catch(e => console.error('Target subscription error:', e));
 
     return () => {
-      sourceSub?.cancel();
-      targetSub?.cancel();
+      sourceSub?.dispose();
+      targetSub?.dispose();
     };
   }, [perspective.uuid, source]);
 

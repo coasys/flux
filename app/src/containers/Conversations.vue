@@ -70,6 +70,7 @@
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import { ChevronDownIcon } from '@/components/icons';
 import { useCommunityService } from '@/composables/useCommunityService';
+import { stripChannelPrefix } from '@/utils/routeUtils';
 import { Channel } from '@coasys/flux-api';
 import { SynergyGroup } from '@coasys/flux-utils';
 import { computed, ref } from 'vue';
@@ -104,14 +105,14 @@ const conversations = computed((): (SynergyGroup & { channelId: string })[] => {
       name: child.conversation!.conversationName,
       summary: child.conversation!.summary,
       timestamp: child.conversation!.createdAt,
-      channelId: child.channel!.id,
+      channelId: stripChannelPrefix(child.channel!.id),
     })) as (SynergyGroup & { channelId: string })[];
 });
 
 function navigateToConversation(channelId: string) {
   router.push({
     name: 'view',
-    params: { communityId: route.params.communityId, channelId, viewId: 'conversation' },
+    params: { communityId: route.params.communityId, channelId: stripChannelPrefix(channelId), viewId: 'conversation' },
   });
 }
 </script>
