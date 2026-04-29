@@ -286,6 +286,15 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
 
     const mediaStreamSource = audioContext.current.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.current, 'audio-processor');
+
+    // Configure VAD thresholds on the worklet to reject noise/clicks
+    workletNode.port.postMessage({
+      speechOnsetThreshold: 0.04,
+      silenceThreshold: 0.025,
+      onsetHoldFrames: 6,
+      minUtteranceSamples: 2400,
+    });
+
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = async (event) => {
       if (listening.current) {

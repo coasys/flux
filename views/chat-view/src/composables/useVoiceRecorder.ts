@@ -104,6 +104,14 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
       const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
       workletNodeRef.current = workletNode;
 
+      // Configure VAD thresholds on the worklet to reject noise/clicks
+      workletNode.port.postMessage({
+        speechOnsetThreshold: 0.04,
+        silenceThreshold: 0.025,
+        onsetHoldFrames: 6,
+        minUtteranceSamples: 2400,
+      });
+
       workletNode.port.onmessage = async (event) => {
         if (isRecordingRef.current) {
           await feedUtterance(

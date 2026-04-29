@@ -2,12 +2,15 @@
 // Accumulates speech utterances and posts them on silence gaps or max-length flush.
 // Posts Float32Array (16 kHz PCM) per utterance instead of fixed 512-sample chunks.
 
-// --- Tunable parameters ---
-const SPEECH_ONSET_THRESHOLD = 0.01;   // RMS above this = speech candidate
-const SILENCE_THRESHOLD = 0.008;       // RMS below this = silence candidate
-const ONSET_HOLD_FRAMES = 3;           // ~8ms/frame → ~24ms hold to avoid clicks
-const SILENCE_TIMEOUT_FRAMES = 188;    // ~500ms at 128-sample frames @ 48 kHz (~2.67ms/frame)
-const MAX_UTTERANCE_SAMPLES = 480000;  // 30s at 16 kHz
+// --- Default tunable parameters (can be overridden via port.postMessage) ---
+const DEFAULTS = {
+  speechOnsetThreshold: 0.04,    // RMS above this = speech candidate (raised to reject noise)
+  silenceThreshold: 0.025,       // RMS below this = silence candidate
+  onsetHoldFrames: 6,            // ~16ms at 2.67ms/frame — require sustained energy
+  silenceTimeoutFrames: 188,     // ~500ms at 128-sample frames @ 48 kHz
+  maxUtteranceSamples: 480000,   // 30s at 16 kHz
+  minUtteranceSamples: 2400,     // 150ms at 16 kHz — reject clicks/pops
+};
 
 class AudioProcessor extends AudioWorkletProcessor {
   constructor() {
@@ -22,6 +25,25 @@ class AudioProcessor extends AudioWorkletProcessor {
     this.state = 'SILENT'; // 'SILENT' | 'SPEAKING'
     this.onsetCounter = 0;
     this.silenceCounter = 0;
+
+    // Runtime-configurable thresholds (initialized from defaults)
+    this.speechOnsetThreshold = DEFAULTS.speechOnsetThreshold;
+    this.silenceThreshold = DEFAULTS.silenceThreshold;
+    this.onsetHoldFrames = DEFAULTS.onsetHoldFrames;
+    this.silenceTimeoutFrames = DEFAULTS.silenceTimeoutFrames;
+    this.maxUtteranceSamples = DEFAULTS.maxUtteranceSamples;
+    this.minUtteranceSamples = DEFAULTS.minUtteranceSamples;
+
+    // Accept runtime threshold updates from main thread
+    this.port.onmessage = (event) => {
+      const cfg = event.data;
+      if (cfg.speechOnsetThreshold !== undefined) this.speechOnsetThreshold = cfg.speechOnsetThreshold;
+      if (cfg.silenceThreshold !== undefined) this.silenceThreshold = cfg.silenceThreshold;
+      if (cfg.onsetHoldFrames !== undefined) this.onsetHoldFrames = cfg.onsetHoldFrames;
+      if (cfg.silenceTimeoutFrames !== undefined) this.silenceTimeoutFrames = cfg.silenceTimeoutFrames;
+      if (cfg.maxUtteranceSamples !== undefined) this.maxUtteranceSamples = cfg.maxUtteranceSamples;
+      if (cfg.minUtteranceSamples !== undefined) this.minUtteranceSamples = cfg.minUtteranceSamples;
+    };
   }
 
   downsampleBuffer(buffer, inputSampleRate, outputSampleRate) {
@@ -55,11 +77,11 @@ class AudioProcessor extends AudioWorkletProcessor {
   }
 
   emitUtterance() {
-    if (this.utteranceBuffer.length > 0) {
+    if (this.utteranceBuffer.length >= this.minUtteranceSamples) {
       const utterance = new Float32Array(this.utteranceBuffer);
       this.port.postMessage(utterance);
-      this.utteranceBuffer = [];
     }
+    this.utteranceBuffer = [];
   }
 
   process(inputs, outputs, parameters) {
@@ -76,9 +98,9 @@ class AudioProcessor extends AudioWorkletProcessor {
     const rms = this.computeRMS(channelData); // RMS on original-rate data for accuracy
 
     if (this.state === 'SILENT') {
-      if (rms > SPEECH_ONSET_THRESHOLD) {
+      if (rms > this.speechOnsetThreshold) {
         this.onsetCounter++;
-        if (this.onsetCounter >= ONSET_HOLD_FRAMES) {
+        if (this.onsetCounter >= this.onsetHoldFrames) {
           // Transition to SPEAKING
           this.state = 'SPEAKING';
           this.silenceCounter = 0;
@@ -100,9 +122,9 @@ class AudioProcessor extends AudioWorkletProcessor {
         this.utteranceBuffer.push(downsampled[i]);
       }
 
-      if (rms < SILENCE_THRESHOLD) {
+      if (rms < this.silenceThreshold) {
         this.silenceCounter++;
-        if (this.silenceCounter >= SILENCE_TIMEOUT_FRAMES) {
+        if (this.silenceCounter >= this.silenceTimeoutFrames) {
           // Silence gap detected — emit utterance
           this.emitUtterance();
           this.state = 'SILENT';
@@ -113,7 +135,7 @@ class AudioProcessor extends AudioWorkletProcessor {
       }
 
       // Max utterance length guard (30s at 16 kHz)
-      if (this.utteranceBuffer.length >= MAX_UTTERANCE_SAMPLES) {
+      if (this.utteranceBuffer.length >= this.maxUtteranceSamples) {
         this.emitUtterance();
         // Stay in SPEAKING — speaker hasn't paused
       }

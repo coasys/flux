@@ -499,6 +499,15 @@ async function startLocalTransciption(stream: MediaStream) {
     await audioContext.value.audioWorklet.addModule('/audio-processor.js');
     const mediaStreamSource = audioContext.value.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.value, 'audio-processor');
+
+    // Configure VAD thresholds on the worklet to reject noise/clicks
+    workletNode.port.postMessage({
+      speechOnsetThreshold: 0.04,
+      silenceThreshold: 0.025,
+      onsetHoldFrames: 6,
+      minUtteranceSamples: 2400,
+    });
+
     mediaStreamSource.connect(workletNode);
 
     workletNode.port.onmessage = async (event) => {

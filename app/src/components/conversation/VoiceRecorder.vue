@@ -153,6 +153,14 @@ async function startRecording() {
     const mediaStreamSource = audioContext.createMediaStreamSource(stream);
     workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
     
+    // Configure VAD thresholds on the worklet (more demanding = reject noise)
+    workletNode.port.postMessage({
+      speechOnsetThreshold: 0.04,
+      silenceThreshold: 0.025,
+      onsetHoldFrames: 6,
+      minUtteranceSamples: 2400,
+    });
+    
     // Handle utterances from VAD worklet
     workletNode.port.onmessage = async (event) => {
       if (isRecording.value) {
