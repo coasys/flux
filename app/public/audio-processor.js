@@ -10,6 +10,7 @@ const DEFAULTS = {
   silenceTimeoutFrames: 188,     // ~500ms at 128-sample frames @ 48 kHz
   maxUtteranceSamples: 480000,   // 30s at 16 kHz
   minUtteranceSamples: 8000,     // 500ms at 16 kHz — reject coughs/sighs/breaths
+  preRollSamples: 8000,          // 500ms at 16 kHz — match old Kalosm time_before_speech
 };
 
 class AudioProcessor extends AudioWorkletProcessor {
@@ -26,11 +27,13 @@ class AudioProcessor extends AudioWorkletProcessor {
     this.onsetCounter = 0;
     this.silenceCounter = 0;
 
-    // Pre-roll buffer: captures frames during onset detection so initial
-    // phonemes aren't clipped when transitioning to SPEAKING.
+    // Rolling pre-roll buffer: always captures recent audio so 500ms of
+    // context before speech onset is preserved (matches old Kalosm
+    // time_before_speech).  Trimmed to preRollSamples on every frame.
     this.preRollBuffer = [];
 
     // Runtime-configurable thresholds (initialized from defaults)
+    this.preRollSamples = DEFAULTS.preRollSamples;
     this.speechOnsetThreshold = DEFAULTS.speechOnsetThreshold;
     this.silenceThreshold = DEFAULTS.silenceThreshold;
     this.onsetHoldFrames = DEFAULTS.onsetHoldFrames;
@@ -47,6 +50,7 @@ class AudioProcessor extends AudioWorkletProcessor {
       if (cfg.silenceTimeoutFrames !== undefined) this.silenceTimeoutFrames = cfg.silenceTimeoutFrames;
       if (cfg.maxUtteranceSamples !== undefined) this.maxUtteranceSamples = cfg.maxUtteranceSamples;
       if (cfg.minUtteranceSamples !== undefined) this.minUtteranceSamples = cfg.minUtteranceSamples;
+      if (cfg.preRollSamples !== undefined) this.preRollSamples = cfg.preRollSamples;
     };
   }
 
@@ -121,24 +125,29 @@ class AudioProcessor extends AudioWorkletProcessor {
 
     const rms = this.computeRMS(channelData); // RMS on original-rate data for accuracy
 
+    // Always feed the rolling pre-roll buffer (keeps last 500ms of audio)
+    for (let i = 0; i < downsampled.length; i++) {
+      this.preRollBuffer.push(downsampled[i]);
+    }
+    if (this.preRollBuffer.length > this.preRollSamples) {
+      this.preRollBuffer = this.preRollBuffer.slice(
+        this.preRollBuffer.length - this.preRollSamples
+      );
+    }
+
     if (this.state === 'SILENT') {
       if (rms > this.speechOnsetThreshold) {
-        // Accumulate into pre-roll while waiting for onset confirmation
-        for (let i = 0; i < downsampled.length; i++) {
-          this.preRollBuffer.push(downsampled[i]);
-        }
         this.onsetCounter++;
         if (this.onsetCounter >= this.onsetHoldFrames) {
-          // Transition to SPEAKING — prepend pre-roll to preserve initial phonemes
+          // Transition to SPEAKING — prepend 500ms pre-roll for natural context
           this.state = 'SPEAKING';
           this.silenceCounter = 0;
           this.onsetCounter = 0;
-          this.utteranceBuffer = this.preRollBuffer.concat(this.utteranceBuffer);
+          this.utteranceBuffer = this.preRollBuffer.slice().concat(this.utteranceBuffer);
           this.preRollBuffer = [];
         }
       } else {
         this.onsetCounter = 0;
-        this.preRollBuffer = [];
       }
     } else {
       // SPEAKING state
