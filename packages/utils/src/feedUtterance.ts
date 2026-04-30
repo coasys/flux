@@ -5,6 +5,10 @@
  * The `await` provides natural backpressure — the next utterance waits for
  * the server to finish processing this one.
  *
+ * Errors are propagated to the caller so recording can be stopped on failure.
+ * Ordering is guaranteed by the AudioWorklet's single-threaded `onmessage`
+ * handler: each callback awaits `feedUtterance` before processing the next.
+ *
  * @param client - Ad4mClient instance (or any object with `client.ai.feedTranscriptionStream`)
  * @param streamIds - Active transcription stream IDs (fast + quality)
  * @param utterance - Raw 16 kHz PCM Float32Array from the AudioWorklet
@@ -17,9 +21,5 @@ export async function feedUtterance(
   const ids = streamIds.filter(Boolean) as string[];
   if (ids.length === 0 || utterance.length === 0) return;
 
-  try {
-    await client.ai.feedTranscriptionStream(ids, utterance);
-  } catch (e) {
-    console.error('[feedUtterance] error:', e);
-  }
+  await client.ai.feedTranscriptionStream(ids, utterance);
 }

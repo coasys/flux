@@ -114,11 +114,16 @@ export function useVoiceRecorder({ client, onTranscript, onError }: UseVoiceReco
 
       workletNode.port.onmessage = async (event) => {
         if (isRecordingRef.current) {
-          await feedUtterance(
-            client,
-            [fastTranscriptionStreamIdRef.current, transcriptionStreamIdRef.current],
-            event.data
-          );
+          try {
+            await feedUtterance(
+              client,
+              [fastTranscriptionStreamIdRef.current, transcriptionStreamIdRef.current],
+              event.data
+            );
+          } catch (e) {
+            console.error('[useVoiceRecorder] feed error, stopping:', e);
+            stopRecording();
+          }
         }
       };
 

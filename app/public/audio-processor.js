@@ -26,6 +26,10 @@ class AudioProcessor extends AudioWorkletProcessor {
     this.onsetCounter = 0;
     this.silenceCounter = 0;
 
+    // Pre-roll buffer: captures frames during onset detection so initial
+    // phonemes aren't clipped when transitioning to SPEAKING.
+    this.preRollBuffer = [];
+
     // Runtime-configurable thresholds (initialized from defaults)
     this.speechOnsetThreshold = DEFAULTS.speechOnsetThreshold;
     this.silenceThreshold = DEFAULTS.silenceThreshold;
@@ -86,7 +90,17 @@ class AudioProcessor extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters) {
     const input = inputs[0];
-    if (input.length === 0) return true;
+    if (input.length === 0) {
+      // Input went empty (mic disconnected / stream stopped) — flush any buffered speech
+      if (this.utteranceBuffer.length > 0) {
+        this.emitUtterance();
+      }
+      this.state = 'SILENT';
+      this.onsetCounter = 0;
+      this.silenceCounter = 0;
+      this.preRollBuffer = [];
+      return true;
+    }
 
     const channelData = input[0];
     const downsampled = this.downsampleBuffer(
@@ -99,22 +113,22 @@ class AudioProcessor extends AudioWorkletProcessor {
 
     if (this.state === 'SILENT') {
       if (rms > this.speechOnsetThreshold) {
+        // Accumulate into pre-roll while waiting for onset confirmation
+        for (let i = 0; i < downsampled.length; i++) {
+          this.preRollBuffer.push(downsampled[i]);
+        }
         this.onsetCounter++;
         if (this.onsetCounter >= this.onsetHoldFrames) {
-          // Transition to SPEAKING
+          // Transition to SPEAKING — prepend pre-roll to preserve initial phonemes
           this.state = 'SPEAKING';
           this.silenceCounter = 0;
           this.onsetCounter = 0;
+          this.utteranceBuffer = this.preRollBuffer.concat(this.utteranceBuffer);
+          this.preRollBuffer = [];
         }
       } else {
         this.onsetCounter = 0;
-      }
-
-      // If we just transitioned, start accumulating from this frame
-      if (this.state === 'SPEAKING') {
-        for (let i = 0; i < downsampled.length; i++) {
-          this.utteranceBuffer.push(downsampled[i]);
-        }
+        this.preRollBuffer = [];
       }
     } else {
       // SPEAKING state

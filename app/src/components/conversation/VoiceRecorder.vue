@@ -164,11 +164,16 @@ async function startRecording() {
     // Handle utterances from VAD worklet
     workletNode.port.onmessage = async (event) => {
       if (isRecording.value) {
-        await feedUtterance(
-          props.client,
-          [fastTranscriptionStreamId, transcriptionStreamId],
-          event.data
-        );
+        try {
+          await feedUtterance(
+            props.client,
+            [fastTranscriptionStreamId, transcriptionStreamId],
+            event.data
+          );
+        } catch (e) {
+          console.error('[VoiceRecorder] feed error, stopping:', e);
+          stopRecording();
+        }
       }
     };
     

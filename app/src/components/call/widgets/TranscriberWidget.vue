@@ -512,11 +512,15 @@ async function startLocalTransciption(stream: MediaStream) {
 
     workletNode.port.onmessage = async (event) => {
       if (listening.value) {
-        await feedUtterance(
-          appStore.ad4mClient,
-          [fastStreamId.value, streamId.value],
-          event.data,
-        );
+        try {
+          await feedUtterance(
+            appStore.ad4mClient,
+            [fastStreamId.value, streamId.value],
+            event.data,
+          );
+        } catch (e) {
+          console.error('[TranscriberWidget] feed error:', e);
+        }
       }
     };
 

@@ -298,11 +298,15 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
     mediaStreamSource.connect(workletNode);
     workletNode.port.onmessage = async (event) => {
       if (listening.current) {
-        await feedUtterance(
-          client,
-          [fastStreamId.current, streamId.current],
-          event.data
-        );
+        try {
+          await feedUtterance(
+            client,
+            [fastStreamId.current, streamId.current],
+            event.data
+          );
+        } catch (e) {
+          console.error('[Transcriber] feed error:', e);
+        }
       }
     };
     workletNode.connect(audioContext.current.destination);
@@ -329,6 +333,7 @@ export default function Transcriber({ source, perspective, webRTC, client }: Pro
       })
       .catch((err) => {
         console.error('[Transcriber] microphone error:', err);
+        listening.current = false;
       });
   }
 
