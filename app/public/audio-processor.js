@@ -6,10 +6,10 @@
 const DEFAULTS = {
   speechOnsetThreshold: 0.08,    // RMS above this = speech candidate (well above ambient noise floor)
   silenceThreshold: 0.05,        // RMS below this = silence candidate
-  onsetHoldFrames: 8,            // ~21ms at 2.67ms/frame — require sustained energy to reject transients
+  onsetHoldFrames: 12,           // ~32ms at 2.67ms/frame — reject coughs/transients (< 30ms burst)
   silenceTimeoutFrames: 188,     // ~500ms at 128-sample frames @ 48 kHz
   maxUtteranceSamples: 480000,   // 30s at 16 kHz
-  minUtteranceSamples: 4800,     // 300ms at 16 kHz — reject clicks/pops/breaths
+  minUtteranceSamples: 8000,     // 500ms at 16 kHz — reject coughs/sighs/breaths
 };
 
 class AudioProcessor extends AudioWorkletProcessor {
@@ -90,7 +90,7 @@ class AudioProcessor extends AudioWorkletProcessor {
         sum += buf[i] * buf[i];
       }
       const avgRms = Math.sqrt(sum / buf.length);
-      if (avgRms >= 0.02) {
+      if (avgRms >= 0.04) {
         const utterance = new Float32Array(buf);
         this.port.postMessage(utterance);
       }
