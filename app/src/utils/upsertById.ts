@@ -1,4 +1,4 @@
-export function upsertById<T extends { id: string }>(items: T[], next: T): T[] {
+export function upsertById<T extends { id: string }>(items: readonly T[], next: T): T[] {
   const index = items.findIndex((item) => item.id === next.id);
   if (index === -1) return [...items, next];
 
