@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { ifDefined } from 'lit-html/directives/if-defined.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import sharedStyles from '../../shared/styles';
 
 const styles = css`
