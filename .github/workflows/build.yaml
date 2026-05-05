@@ -105,6 +105,21 @@ jobs:
             require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
+      - name: Remove local AD4M link overrides
+        if: steps.branch.outputs.ad4m_match == 'false'
+        run: |
+          node -e "
+            const pkg = require('./package.json');
+            if (pkg.pnpm && pkg.pnpm.overrides) {
+              for (const [k, v] of Object.entries(pkg.pnpm.overrides)) {
+                if (typeof v === 'string' && v.startsWith('link:')) {
+                  delete pkg.pnpm.overrides[k];
+                }
+              }
+              require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+            }
+          "
+
       - name: Install Flux dependencies
         run: pnpm install --no-frozen-lockfile
 
