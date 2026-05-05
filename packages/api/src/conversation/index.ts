@@ -184,8 +184,8 @@ export class Conversation extends Ad4mModel {
 
       const subgroups = Array.from(subgroupMap.values()).map((subgroup: any) => {
         const timestamps = (timestampsBySg.get(subgroup.id) || []).sort((a: number, b: number) => a - b);
-        const start = timestamps.length > 0 ? String(timestamps[0]) : '';
-        const end = timestamps.length > 0 ? String(timestamps[timestamps.length - 1]) : '';
+        const start = timestamps.length > 0 ? timestamps[0] : 0;
+        const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
 
         return {
           id: subgroup.id,
