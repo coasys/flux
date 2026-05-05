@@ -100,8 +100,7 @@ jobs:
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
 
-      - name: Type check (informational)
-        continue-on-error: true
+      - name: Type check
         run: pnpm typecheck
 
       - name: Test

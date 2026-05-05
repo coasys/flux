@@ -55,7 +55,7 @@ const appStore = useAppStore();
 
 const {
   perspective,
-  recentConversations,
+  recentConversationsWithAgents: recentConversations,
   getPinnedConversations,
   getRecentConversations,
   getChannelsWithConversations,

@@ -560,7 +560,7 @@ export const useWebrtcStore = defineStore(
           if (!localStream.value || !peerConnection || !recipients.includes(me.value.did)) return;
 
           // Add local stream tracks to the peer connection
-          localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+          localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value!));
         } catch (e) {
           console.error(`❌ Error handling WebRTC stream request from ${author}:`, e);
         }

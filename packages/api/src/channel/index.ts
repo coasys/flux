@@ -2,7 +2,7 @@ import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property, Per
 import { parseLit } from '../utils/parseLit';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
-import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
+import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
 import App from '../app';
 import Conversation from '../conversation';
 import Message from '../message';
@@ -89,7 +89,7 @@ export class Channel extends Ad4mModel {
 
       const mapped = (sparqlResult || []).map((binding: any) => {
         let text = '';
-        let type = '';
+        let type: ItemType = 'Message';
         const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
@@ -109,11 +109,11 @@ export class Channel extends Ad4mModel {
           timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
-          icon: icons[type] ? icons[type] : 'question',
+          icon: icons[type] || 'question',
         };
       });
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
-      return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+      return mapped.sort((a: SynergyItem, b: SynergyItem) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
       console.error('Error getting all channel items:', error);
       return [];
@@ -195,7 +195,7 @@ export class Channel extends Ad4mModel {
 
       const mapped = Array.from(itemMap.values()).map((binding: any) => {
         let text = '';
-        let type = '';
+        let type: ItemType = 'Message';
         const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
@@ -215,7 +215,7 @@ export class Channel extends Ad4mModel {
           timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
-          icon: icons[type] ? icons[type] : 'question',
+          icon: icons[type] || 'question',
         };
       });
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp

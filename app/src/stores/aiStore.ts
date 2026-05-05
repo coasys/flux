@@ -194,9 +194,6 @@ export const useAiStore = defineStore(
       const communityService = communityServiceStore.getCommunityService(communityId);
       if (!communityService) return;
 
-      // signallingService is null for private perspectives — skip AI processing
-      if (!communityService.signallingService) return;
-
       // Search conversations for processing tasks we are responsible for
       const tasks = await Promise.all(
         unref(communityService.recentConversationsWithAgents).map(async (conversationData) => {
@@ -207,7 +204,7 @@ export const useAiStore = defineStore(
           const unprocessedItems = await fullChannel.unprocessedItems();
           const shouldProcess = await checkIfWeShouldProcessTask(
             unprocessedItems,
-            communityService.signallingService!,
+            communityService!.signallingService!,
             summaryChannel.id,
           );
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
@@ -289,7 +286,7 @@ export const useAiStore = defineStore(
         }
 
         // Re-check signalling guard before starting LLM work (another peer may have started since this task was queued)
-        if (communityService.signallingService && isAnotherPeerProcessingChannel(communityService.signallingService, rawChannel.id!)) {
+        if (isAnotherPeerProcessingChannel(communityService!.signallingService!, rawChannel.id!)) {
           console.log('🤖 Another peer is already processing this channel, skipping');
           processingQueue.value.shift();
           return;
@@ -303,7 +300,7 @@ export const useAiStore = defineStore(
           processingState.value = newState ? { ...processingState.value, ...newState } : null;
 
           // Update our processing state in the assosiated signalling service
-          communityService!.signallingService?.setProcessingState(newState);
+          communityService!.signallingService!.setProcessingState(newState);
         };
 
         // Set our initial processing state
@@ -332,7 +329,7 @@ export const useAiStore = defineStore(
       } finally {
         // Reset our processing state
         processingState.value = null;
-        if (communityService) communityService.signallingService?.setProcessingState(null);
+        if (communityService) communityService.signallingService!.setProcessingState(null);
         processing.value = false;
 
         // If there are more tasks in the queue, process the next one

@@ -25,7 +25,7 @@ export function usePerspective(client: Ad4mClient, uuid: string | Function) {
   );
 
   watch(
-    uuid,
+    uuidRef,
     (id) => {
       uuidRef.value = id as string;
     },

@@ -1,4 +1,22 @@
-import { IceServer, Settings } from 'utils/helpers/WebRTCManager';
+// Types for WebRTC settings that were previously imported from utils/helpers/WebRTCManager
+export interface IceServer {
+  urls: string;
+  username?: string;
+  credential?: string;
+}
+
+export interface Settings {
+  audio: boolean;
+  video: boolean;
+  screen: boolean;
+  iceServers?: IceServer[];
+  transcriber: {
+    on: boolean;
+    selectedModel: string;
+    previewTimeout: number;
+    messageTimeout: number;
+  };
+}
 
 const frameRate = {
   min: 5,
@@ -32,7 +50,7 @@ export const defaultSettings = {
     previewTimeout: 0.4,
     messageTimeout: 5,
   },
-} as Settings;
+} satisfies Settings;
 
 export const defaultIceServers = [
   {

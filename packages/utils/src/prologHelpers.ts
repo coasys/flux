@@ -1,15 +1,18 @@
 import { EntryType, ModelProperty, Entry } from '@coasys/flux-types';
 import { Ad4mClient, Literal } from '@coasys/ad4m';
 
-export function capitalizeFirstLetter(string) {
+/** Entry with dynamically-resolved model properties from prolog queries */
+type ResolvedEntry = Entry & Record<string, unknown>;
+
+export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function lowerCaseFirstLetter(string) {
+export function lowerCaseFirstLetter(string: string) {
   return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
-export function generateFindAll(propertyName, predicate) {
+export function generateFindAll(propertyName: string, predicate: string) {
   const name = capitalizeFirstLetter(propertyName);
   return `findall((${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }
@@ -77,7 +80,7 @@ export async function queryProlog({
   properties: {
     [x: string]: ModelProperty;
   };
-}): Promise<Entry[]> {
+}): Promise<ResolvedEntry[]> {
   const { query, assertQuery, assertEntry, retractQuery, retractEntry } = generatePrologQuery({
     id,
     type,
@@ -106,19 +109,19 @@ export async function queryProlog({
     ...Object.keys(properties).map((name) => capitalizeFirstLetter(name)),
   ]);
 
-  const result = await Promise.all(entries.map((entry) => resolveEntryWithLatestProperties(client, entry, properties)));
+  const result = await Promise.all(entries.map((entry: Record<string, unknown>) => resolveEntryWithLatestProperties(client, entry, properties)));
   return result;
 }
 
 export async function resolveEntryWithLatestProperties(
   client: Ad4mClient,
-  entry,
+  entry: Record<string, any>,
   properties: {
     [x: string]: ModelProperty;
   },
-): Promise<Entry> {
+): Promise<ResolvedEntry> {
   const propertyNames = Object.keys(entry);
-  let cleanedEntry = {} as Entry;
+  const cleanedEntry: ResolvedEntry = {} as ResolvedEntry;
 
   propertyNames.forEach(async (name) => {
     const lowerCaseName = lowerCaseFirstLetter(name);
@@ -126,7 +129,7 @@ export async function resolveEntryWithLatestProperties(
     const val = entry[name];
     const isArray = Array.isArray(val);
 
-    async function resolveExp(url) {
+    async function resolveExp(url: string) {
       return url.startsWith('literal:')
         ? Literal.fromUrl(url).get().data
         : (await client.expression.get(url)).data.replace(/['"]+/g, '');
@@ -151,7 +154,7 @@ export async function resolveEntryWithLatestProperties(
     }
 
     if (collection && isArray) {
-      cleanedEntry[lowerCaseName] = val.map((v) => v.content);
+      cleanedEntry[lowerCaseName] = val.map((v: { content: unknown }) => v.content);
     }
 
     if (collection && !isArray) {
@@ -177,7 +180,7 @@ export function extractPrologResults(prologResults: any, values: string[]): any[
   const results = [] as any[];
 
   for (const prologResult of prologResults) {
-    const result = {};
+    const result: Record<string, any> = {};
     for (const value of values) {
       const prologResultValue = prologResult[value];
 

@@ -377,7 +377,7 @@ watch(
 watch(unprocessedItems, async (items) => {
   if (!aiEnabled.value || !items.length) return;
   try {
-    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(items, signallingService, channelUrl);
+    const shouldProcess = await aiStore.checkIfWeShouldProcessTask(items, signallingService!, channelUrl);
     if (shouldProcess) {
       const channel = new ChannelSummary(perspective, channelUrl);
       aiStore.addTasksToProcessingQueue([{ communityId: perspective.sharedUrl!, channel }]);
@@ -392,7 +392,7 @@ function setSelectedItemId(id: string | null) {
 }
 
 watch(
-  signallingService.agents.value,
+  signallingService!.agents.value,
   (newAgents) => {
     // Search for any processing agents in the channel
     const processingAgents = Object.values(newAgents).filter(

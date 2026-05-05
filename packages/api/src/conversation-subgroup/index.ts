@@ -2,7 +2,7 @@ import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m
 import { parseLit } from '../utils/parseLit';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
-import { SynergyTopic, SynergyItem, icons } from '@coasys/flux-utils';
+import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
 import { community } from '@coasys/flux-constants';
 
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
@@ -173,7 +173,7 @@ export default class ConversationSubgroup extends Ad4mModel {
       });
       return sorted.map((item: any) => {
         let text = '';
-        let type = '';
+        let type: ItemType = 'Message';
 
         if (item.type === 'flux://has_message') {
           text = item.messageBody || '';

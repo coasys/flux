@@ -13,7 +13,7 @@ export default async function getAgentWebLinks(did: string, client: Ad4mClient):
   const webLinkAreas = agent.perspective.links.filter((l: LinkExpression) => l.data.predicate === AREA_WEBLINK);
 
   const webLinks = webLinkAreas.map((parentLink: any) => {
-    const associatedLinks = agent.perspective.links.filter(
+    const associatedLinks = agent.perspective!.links.filter(
       (link: LinkExpression) => link.data.source === parentLink.data.target,
     );
 
@@ -28,7 +28,7 @@ export default async function getAgentWebLinks(did: string, client: Ad4mClient):
       ...ogData,
       url: Literal.fromUrl(parentLink.data.target).get().data,
       id: parentLink.data.target,
-    };
+    } as WebLink;
   });
 
   return webLinks;
