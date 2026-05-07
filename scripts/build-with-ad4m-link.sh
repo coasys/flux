@@ -17,55 +17,39 @@ fi
 
 echo "==> Detected branch: $BRANCH"
 
-# Netlify deploy previews are sensitive to long/complex bootstrap paths.
-# Prefer published SDK packages there unless explicitly overridden.
-if [ "${NETLIFY:-}" = "true" ] && [ "${FORCE_AD4M_LINK:-0}" != "1" ]; then
-  AD4M_LINKED=false
-  echo "==> Netlify environment detected; using published AD4M packages"
-  rm -rf ad4m 2>/dev/null || true
+# Check if coasys/ad4m has a matching branch
+if git ls-remote --exit-code --heads \
+  https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
+  echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
+
+  rm -rf ad4m
+  git clone --depth 1 --single-branch --branch "$BRANCH" \
+    https://github.com/coasys/ad4m.git ad4m
+
+  npm i -g pnpm@9.15.0 2>/dev/null || true
+
+  cd ad4m
+  pnpm install --no-frozen-lockfile
+
+  echo "==> Building @coasys/ad4m (core)"
+  cd core && pnpm exec tsc && pnpm run bundle && cd ..
+
+  echo "==> Building @coasys/ad4m-connect"
+  cd connect && pnpm run build && cd ..
+
+  echo "==> Building hooks (if tsconfig.json exists)"
+  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
+
+  # Skip global link registration — will use direct pnpm link after install
+  cd ..
+
+  AD4M_LINKED=true
+  echo "==> AD4M packages built"
 else
-  # Check if coasys/ad4m has a matching branch
-  if git ls-remote --exit-code --heads \
-    https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
-    echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
-    if (
-      rm -rf ad4m
-      git clone --depth 1 --single-branch --branch "$BRANCH" \
-        https://github.com/coasys/ad4m.git ad4m
-
-      # Keep pnpm aligned with repo CI to avoid workspace parsing regressions.
-      npm i -g pnpm@9.15.0 2>/dev/null || true
-
-      cd ad4m
-      pnpm install --no-frozen-lockfile
-
-      echo "==> Building @coasys/ad4m (core)"
-      cd core && pnpm exec tsc && pnpm run bundle && cd ..
-
-      echo "==> Building @coasys/ad4m-connect"
-      cd connect && pnpm run build && cd ..
-
-      echo "==> Building hooks (if tsconfig.json exists)"
-      [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
-      [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
-      [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
-    ); then
-      # Skip global link registration — will use direct pnpm link after install
-      AD4M_LINKED=true
-      echo "==> AD4M packages built"
-    else
-      echo "==> AD4M branch build failed in this environment; falling back to published npm packages"
-      rm -rf ad4m
-      AD4M_LINKED=false
-    fi
-  else
-    AD4M_LINKED=false
-    echo "==> No matching AD4M branch — using published npm packages"
-  fi
-fi
-
-if [ "${AD4M_LINKED:-false}" != "true" ]; then
-  rm -rf ad4m 2>/dev/null || true
+  AD4M_LINKED=false
+  echo "==> No matching AD4M branch — using published npm packages"
 fi
 
 # Install Flux dependencies
@@ -78,16 +62,6 @@ if [ "$AD4M_LINKED" = true ]; then
     pkg.pnpm.overrides = pkg.pnpm.overrides || {};
     pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
     pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
-    require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
-  "
-else
-  echo "==> Using published @coasys/ad4m packages"
-  node -e "
-    const pkg = require('./package.json');
-    pkg.pnpm = pkg.pnpm || {};
-    pkg.pnpm.overrides = pkg.pnpm.overrides || {};
-    pkg.pnpm.overrides['@coasys/ad4m'] = process.env.AD4M_NPM_VERSION || '0.13.0-test-2';
-    pkg.pnpm.overrides['@coasys/ad4m-connect'] = process.env.AD4M_CONNECT_NPM_VERSION || '0.13.0-test-2';
     require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
   "
 fi
