@@ -4,9 +4,15 @@ set -euo pipefail
 # Detect branch (Netlify sets BRANCH / HEAD; GitHub Actions uses GITHUB_HEAD_REF / GITHUB_REF)
 BRANCH="${BRANCH:-${HEAD:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}}}"
 
+# Check for deploy preview BEFORE resolving branch name (so we can skip AD4M linking)
+IS_DEPLOY_PREVIEW=false
+if echo "$BRANCH" | grep -qE '^pull/[0-9]+/head$'; then
+  IS_DEPLOY_PREVIEW=true
+fi
+
 # Netlify PR deploy previews set branch to "pull/N/head" instead of the actual branch name.
 # Resolve the real branch name via the GitHub API.
-if echo "$BRANCH" | grep -qE '^pull/[0-9]+/head$'; then
+if [ "$IS_DEPLOY_PREVIEW" = true ]; then
   PR_NUM=$(echo "$BRANCH" | sed 's|pull/\([0-9]*\)/head|\1|')
   echo "==> PR deploy preview detected (PR #$PR_NUM), resolving branch name..."
   REAL_BRANCH=$(curl -sf "https://api.github.com/repos/coasys/flux/pulls/$PR_NUM" | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['ref'])" 2>/dev/null || true)
@@ -19,14 +25,11 @@ echo "==> Detected branch: $BRANCH"
 
 # For Netlify deploy previews, skip AD4M linking (pnpm v10 incompatibility with ad4m overrides)
 # Use published packages instead (more stable)
-SKIP_LINKED_BUILD=false
-if echo "$BRANCH" | grep -qE '^pull/[0-9]+/head$'; then
-  SKIP_LINKED_BUILD=true
-  echo "==> Deploy preview detected — using published npm packages (skipping AD4M linking)"
-fi
-
+if [ "$IS_DEPLOY_PREVIEW" = true ]; then
+  echo "==> Deploy preview mode — using published npm packages (skipping AD4M linking)"
+  AD4M_LINKED=false
 # Check if coasys/ad4m has a matching branch
-if [ "$SKIP_LINKED_BUILD" = false ] && git ls-remote --exit-code --heads \
+elif git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
 
