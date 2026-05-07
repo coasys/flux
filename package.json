@@ -21,8 +21,7 @@
     "node": ">=18.16.0"
   },
   "dependencies": {
-    "@capgo/capacitor-audio-session": "7.1.11",
-    "graphql": "^15.7.2"
+    "@capgo/capacitor-audio-session": "7.1.11"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
@@ -34,9 +33,9 @@
   },
   "pnpm": {
     "overrides": {
+      "@coasys/hooks-helpers": "link:../ad4m/ad4m-hooks/helpers",
       "@coasys/ad4m-vue-hooks": "0.13.0-test-2",
       "@coasys/ad4m-react-hooks": "0.13.0-test-2",
-      "@coasys/hooks-helpers": "link:../ad4m/ad4m-hooks/helpers",
       "@preact/preset-vite": "2.9.4",
       "@coasys/flux-api": "workspace:*",
       "@coasys/flux-comment-section": "workspace:*",
