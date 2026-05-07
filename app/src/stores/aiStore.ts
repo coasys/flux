@@ -1,7 +1,7 @@
 import { CommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from '@/stores';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
-import { AIModelLoadingStatus, AITask, Model } from '@coasys/ad4m';
+import { AIModelLoadingStatus, AITask, AIModel } from '@coasys/ad4m';
 import { Channel, ChannelSummary } from '@coasys/flux-api';
 import { ProcessingState, SignallingService } from '@coasys/flux-types';
 import { SynergyItem } from '@coasys/flux-utils';
@@ -60,9 +60,9 @@ export const useAiStore = defineStore(
     const processing = ref(false);
     const processingState = ref<Partial<ProcessingState> | null>(null);
     const processingQueue = ref<ProcessingQueueItem[]>([]);
-    const allModels = ref<Model[]>([]);
+    const allModels = ref<AIModel[]>([]);
     const allTasks = ref<AITask[]>([]);
-    const defaultLLM = ref<Model | null>(null);
+    const defaultLLM = ref<AIModel | null>(null);
     const llmLoadingStatus = ref<AIModelLoadingStatus | null>(null);
     const whisperLoadingStatus = ref<AIModelLoadingStatus | null>(null);
     const whisperTinyLoadingStatus = ref<AIModelLoadingStatus | null>(null);
