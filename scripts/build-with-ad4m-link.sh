@@ -26,7 +26,9 @@ if git ls-remote --exit-code --heads \
   git clone --depth 1 --single-branch --branch "$BRANCH" \
     https://github.com/coasys/ad4m.git ad4m
 
-  npm i -g pnpm@9.15.0 2>/dev/null || true
+  # Force pnpm v9 (v10 breaks ad4m workspace with "overrides.core: { hoist: false }" format)
+  npm install -g pnpm@9.15.0 || npm i -g pnpm@9.15.0 || corepack prepare pnpm@9.15.0 --activate || echo "Warning: pnpm v9 pin may not have applied"
+  pnpm --version
 
   cd ad4m
   
