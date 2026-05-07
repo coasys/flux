@@ -4,5 +4,4 @@
 
 [build.environment]
   NODE_VERSION = "20.10.0"
-  PNPM_VERSION = "9.15.0"
   PNPM_FLAGS = "--no-frozen-lockfile"
