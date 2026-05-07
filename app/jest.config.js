@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-const { pathsToModuleNameMapper } = require('ts-jest/utils');
+const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('./tsconfig');
 
 const esModules = ['runtime-dom', 'vue3-observe-visibility2', 'vue3-virtual-scroller'].join('|');

@@ -67,8 +67,10 @@ async function initializeApp() {
   // Register notification
   registerNotification(appStore.ad4mClient);
 
-  // Ensure LLM tasks are set up
-  ensureLLMTasks(appStore.ad4mClient.ai);
+  // Ensure LLM tasks are set up (non-fatal — AI features degrade gracefully)
+  ensureLLMTasks(appStore.ad4mClient.ai).catch((e: any) =>
+    console.warn('[Flux] LLM task setup failed (AI features may be unavailable):', e.message || e)
+  );
 
   // Listen for new messages (clean up previous listener if re-mounted)
   cleanupLinkAdded?.();

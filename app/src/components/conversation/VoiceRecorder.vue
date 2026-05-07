@@ -47,6 +47,7 @@
 <script setup lang="ts">
 import { Ad4mClient } from '@coasys/ad4m';
 import { Message } from '@coasys/flux-api';
+import { feedUtterance } from '@coasys/flux-utils';
 import { useAiStore } from '@/stores';
 import { ref, onUnmounted } from 'vue';
 
@@ -152,15 +153,27 @@ async function startRecording() {
     const mediaStreamSource = audioContext.createMediaStreamSource(stream);
     workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
     
-    // Handle audio data from worklet
-    workletNode.port.onmessage = (event) => {
+    // Configure VAD thresholds on the worklet (more demanding = reject noise)
+    workletNode.port.postMessage({
+      speechOnsetThreshold: 0.04,
+      silenceThreshold: 0.025,
+      onsetHoldFrames: 6,
+      minUtteranceSamples: 2400,
+    });
+    
+    // Handle utterances from VAD worklet
+    workletNode.port.onmessage = async (event) => {
       if (isRecording.value) {
-        const audioData = Array.from(event.data);
-        // Feed to both transcription streams
-        props.client.ai.feedTranscriptionStream(
-          [fastTranscriptionStreamId!, transcriptionStreamId!], 
-          audioData as any
-        );
+        try {
+          await feedUtterance(
+            props.client,
+            [fastTranscriptionStreamId, transcriptionStreamId],
+            event.data
+          );
+        } catch (e) {
+          console.error('[VoiceRecorder] feed error, stopping:', e);
+          stopRecording();
+        }
       }
     };
     

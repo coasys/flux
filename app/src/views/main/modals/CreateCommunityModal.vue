@@ -361,7 +361,18 @@ onMounted(async () => {
       return;
     }
     const langExpression = await ad4mClient.value.expression.getMany(linkLangs.map((l: string) => `lang://${l}`));
-    const langMetaData = langExpression.map((l: any) => JSON.parse(l.data));
+    const langMetaData = langExpression
+      .map((l: any) => {
+        const data = l?.data;
+        if (!data) return null;
+        if (typeof data !== 'string') return data;
+        try {
+          return JSON.parse(data);
+        } catch {
+          return null;
+        }
+      })
+      .filter((m: any) => m?.address);
     langMeta.value = langMetaData;
     selectedLang.value = langMetaData[0]?.address ?? null;
   } catch (error) {

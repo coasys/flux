@@ -63,7 +63,7 @@ export default ({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         devOptions: {
-          enabled: true,
+          enabled: false,
           /* other options */
         },
         workbox: {
@@ -157,6 +157,18 @@ export default ({ mode }) => {
       https: false,
       port: 3030,
       proxy: {
+        '/api/v1': {
+          target: 'http://127.0.0.1:12000',
+          changeOrigin: true,
+        },
+        '/health': {
+          target: 'http://127.0.0.1:12000',
+          changeOrigin: true,
+        },
+        '/events': {
+          target: 'http://127.0.0.1:12000',
+          changeOrigin: true,
+        },
         '/nilchain-proxy': {
           target: 'http://65.109.222.111:26657',
           rewrite: (path) => path.replace(/^\/nilchain-proxy/, ''),
@@ -170,10 +182,11 @@ export default ({ mode }) => {
           secure: false,
         },
       },
-      headers: {
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-        'Cross-Origin-Opener-Policy': 'same-origin',
-      },
+      // COEP/COOP disabled for local dev — they block proxied API requests
+      // headers: {
+      //   'Cross-Origin-Embedder-Policy': 'require-corp',
+      //   'Cross-Origin-Opener-Policy': 'same-origin',
+      // },
     },
   });
 };

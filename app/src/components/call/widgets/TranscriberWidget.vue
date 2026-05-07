@@ -210,7 +210,7 @@ import { Ad4mLogoIcon, RecordingIcon } from '@/components/icons';
 import { useAiStore, useAppStore, useMediaDevicesStore, useWebrtcStore } from '@/stores';
 import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { Message } from '@coasys/flux-api';
-import { detectBrowser } from '@coasys/flux-utils';
+import { detectBrowser, feedUtterance } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
@@ -499,15 +499,28 @@ async function startLocalTransciption(stream: MediaStream) {
     await audioContext.value.audioWorklet.addModule('/audio-processor.js');
     const mediaStreamSource = audioContext.value.createMediaStreamSource(stream);
     const workletNode = new AudioWorkletNode(audioContext.value, 'audio-processor');
+
+    // Configure VAD thresholds on the worklet to reject noise/clicks
+    workletNode.port.postMessage({
+      speechOnsetThreshold: 0.04,
+      silenceThreshold: 0.025,
+      onsetHoldFrames: 6,
+      minUtteranceSamples: 2400,
+    });
+
     mediaStreamSource.connect(workletNode);
 
     workletNode.port.onmessage = async (event) => {
       if (listening.value) {
-        const audioData = Array.from(event.data);
-        appStore.ad4mClient.ai.feedTranscriptionStream(
-          [fastStreamId.value, streamId.value].filter(Boolean) as string[],
-          audioData as any,
-        );
+        try {
+          await feedUtterance(
+            appStore.ad4mClient,
+            [fastStreamId.value, streamId.value],
+            event.data,
+          );
+        } catch (e) {
+          console.error('[TranscriberWidget] feed error:', e);
+        }
       }
     };
 
