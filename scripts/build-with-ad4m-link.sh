@@ -26,7 +26,8 @@ if git ls-remote --exit-code --heads \
   git clone --depth 1 --single-branch --branch "$BRANCH" \
     https://github.com/coasys/ad4m.git ad4m
 
-  npm i -g pnpm 2>/dev/null || true
+  # Keep pnpm aligned with repo CI to avoid workspace parsing regressions.
+  npm i -g pnpm@9.15.0 2>/dev/null || true
 
   cd ad4m
   pnpm install --no-frozen-lockfile
