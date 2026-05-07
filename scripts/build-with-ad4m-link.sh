@@ -68,6 +68,16 @@ if [ "$AD4M_LINKED" = true ]; then
     pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
     require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
   "
+else
+  echo "==> Using published @coasys/ad4m packages"
+  node -e "
+    const pkg = require('./package.json');
+    pkg.pnpm = pkg.pnpm || {};
+    pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+    pkg.pnpm.overrides['@coasys/ad4m'] = process.env.AD4M_NPM_VERSION || '0.13.0-test-2';
+    pkg.pnpm.overrides['@coasys/ad4m-connect'] = process.env.AD4M_CONNECT_NPM_VERSION || '0.13.0-test-2';
+    require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+  "
 fi
 pnpm install --no-frozen-lockfile 2>&1 | tail -5
 
