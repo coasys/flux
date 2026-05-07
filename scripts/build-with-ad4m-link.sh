@@ -29,24 +29,31 @@ if git ls-remote --exit-code --heads \
   npm i -g pnpm@9.15.0 2>/dev/null || true
 
   cd ad4m
-  pnpm install --no-frozen-lockfile
+  
+  if ! pnpm install --no-frozen-lockfile; then
+    echo "⚠️  AD4M install failed, will use published packages instead"
+    cd ..
+    AD4M_LINKED=false
+  elif ! (cd core && pnpm exec tsc && pnpm run bundle); then
+    echo "⚠️  AD4M core build failed, will use published packages instead"
+    cd ..
+    AD4M_LINKED=false
+  elif ! (cd connect && pnpm run build); then
+    echo "⚠️  AD4M connect build failed, will use published packages instead"
+    cd ..
+    AD4M_LINKED=false
+  else
+    echo "==> Building hooks (if tsconfig.json exists)"
+    [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+    [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+    [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
 
-  echo "==> Building @coasys/ad4m (core)"
-  cd core && pnpm exec tsc && pnpm run bundle && cd ..
+    # Skip global link registration — will use direct pnpm link after install
+    cd ..
 
-  echo "==> Building @coasys/ad4m-connect"
-  cd connect && pnpm run build && cd ..
-
-  echo "==> Building hooks (if tsconfig.json exists)"
-  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
-  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
-  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
-
-  # Skip global link registration — will use direct pnpm link after install
-  cd ..
-
-  AD4M_LINKED=true
-  echo "==> AD4M packages built"
+    AD4M_LINKED=true
+    echo "==> AD4M packages built successfully"
+  fi
 else
   AD4M_LINKED=false
   echo "==> No matching AD4M branch — using published npm packages"
