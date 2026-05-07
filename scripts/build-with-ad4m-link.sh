@@ -21,33 +21,36 @@ echo "==> Detected branch: $BRANCH"
 if git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
+  if (
+    rm -rf ad4m
+    git clone --depth 1 --single-branch --branch "$BRANCH" \
+      https://github.com/coasys/ad4m.git ad4m
 
-  rm -rf ad4m
-  git clone --depth 1 --single-branch --branch "$BRANCH" \
-    https://github.com/coasys/ad4m.git ad4m
+    # Keep pnpm aligned with repo CI to avoid workspace parsing regressions.
+    npm i -g pnpm@9.15.0 2>/dev/null || true
 
-  # Keep pnpm aligned with repo CI to avoid workspace parsing regressions.
-  npm i -g pnpm@9.15.0 2>/dev/null || true
+    cd ad4m
+    pnpm install --no-frozen-lockfile
 
-  cd ad4m
-  pnpm install --no-frozen-lockfile
+    echo "==> Building @coasys/ad4m (core)"
+    cd core && pnpm exec tsc && pnpm run bundle && cd ..
 
-  echo "==> Building @coasys/ad4m (core)"
-  cd core && pnpm exec tsc && pnpm run bundle && cd ..
+    echo "==> Building @coasys/ad4m-connect"
+    cd connect && pnpm run build && cd ..
 
-  echo "==> Building @coasys/ad4m-connect"
-  cd connect && pnpm run build && cd ..
-
-  echo "==> Building hooks (if tsconfig.json exists)"
-  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
-  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
-  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
-
-  # Skip global link registration — will use direct pnpm link after install
-  cd ..
-
-  AD4M_LINKED=true
-  echo "==> AD4M packages built"
+    echo "==> Building hooks (if tsconfig.json exists)"
+    [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+    [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+    [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
+  ); then
+    # Skip global link registration — will use direct pnpm link after install
+    AD4M_LINKED=true
+    echo "==> AD4M packages built"
+  else
+    echo "==> AD4M branch build failed in this environment; falling back to published npm packages"
+    rm -rf ad4m
+    AD4M_LINKED=false
+  fi
 else
   AD4M_LINKED=false
   echo "==> No matching AD4M branch — using published npm packages"
