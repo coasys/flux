@@ -17,8 +17,15 @@ fi
 
 echo "==> Detected branch: $BRANCH"
 
+# For Netlify deploy previews, always use published packages (more stable)
+SKIP_AD4M_LINK=false
+if echo "$BRANCH" | grep -qE '^pull/[0-9]+/head$'; then
+  SKIP_AD4M_LINK=true
+  echo "==> Netlify deploy preview detected — using published npm packages for stability"
+fi
+
 # Check if coasys/ad4m has a matching branch
-if git ls-remote --exit-code --heads \
+if [ "$SKIP_AD4M_LINK" = false ] && git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
 
