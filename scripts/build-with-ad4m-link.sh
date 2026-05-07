@@ -23,28 +23,26 @@ if git ls-remote --exit-code --heads \
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
 
   rm -rf ad4m
-  git clone --depth 1 --single-branch --branch "$BRANCH" \
-    https://github.com/coasys/ad4m.git ad4m
-
-  # Force pnpm v9 (v10 breaks ad4m workspace with "overrides.core: { hoist: false }" format)
-  npm install -g pnpm@9.15.0 || npm i -g pnpm@9.15.0 || corepack prepare pnpm@9.15.0 --activate || echo "Warning: pnpm v9 pin may not have applied"
-  pnpm --version
-
-  cd ad4m
-  
-  if ! pnpm install --no-frozen-lockfile; then
-    echo "⚠️  AD4M install failed, will use published packages instead"
-    cd ..
+  if ! git clone --depth 1 --single-branch --branch "$BRANCH" \
+    https://github.com/coasys/ad4m.git ad4m; then
+    echo "⚠️  AD4M clone failed, will use published packages instead"
     AD4M_LINKED=false
-  elif ! (cd core && pnpm exec tsc && pnpm run bundle); then
-    echo "⚠️  AD4M core build failed, will use published packages instead"
+  elif ! (
+    # Force pnpm v9 (v10 breaks ad4m workspace with "overrides.core: { hoist: false }" format)
+    npm install -g pnpm@9.15.0 || npm i -g pnpm@9.15.0 || corepack prepare pnpm@9.15.0 --activate || echo "Warning: pnpm v9 pin may not have applied"
+    pnpm --version
+
+    cd ad4m
+    pnpm install --no-frozen-lockfile && \
+    cd core && pnpm exec tsc && pnpm run bundle && cd .. && \
+    cd connect && pnpm run build && cd ..
+  ); then
+    echo "⚠️  AD4M build failed, will use published packages instead"
     cd ..
-    AD4M_LINKED=false
-  elif ! (cd connect && pnpm run build); then
-    echo "⚠️  AD4M connect build failed, will use published packages instead"
-    cd ..
+    rm -rf ad4m
     AD4M_LINKED=false
   else
+    cd ad4m
     echo "==> Building hooks (if tsconfig.json exists)"
     [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
     [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
