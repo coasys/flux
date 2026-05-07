@@ -1,8 +1,7 @@
 import { CommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from '@/stores';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
-import { AIModelLoadingStatus, AITask } from '@coasys/ad4m';
-import { Model } from '@coasys/ad4m/lib/src/ai/AIResolver';
+import { AIModelLoadingStatus, AITask, Model } from '@coasys/ad4m';
 import { Channel, ChannelSummary } from '@coasys/flux-api';
 import { ProcessingState, SignallingService } from '@coasys/flux-types';
 import { SynergyItem } from '@coasys/flux-utils';
