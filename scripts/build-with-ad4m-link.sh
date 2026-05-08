@@ -4,15 +4,9 @@ set -euo pipefail
 # Detect branch (Netlify sets BRANCH / HEAD; GitHub Actions uses GITHUB_HEAD_REF / GITHUB_REF)
 BRANCH="${BRANCH:-${HEAD:-${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}}}"
 
-# Check for deploy preview BEFORE resolving branch name (so we can skip AD4M linking)
-IS_DEPLOY_PREVIEW=false
+# For Netlify deploy previews, branch is set to "pull/N/head" instead of the actual branch name
+# Resolve the real branch name via the GitHub API
 if echo "$BRANCH" | grep -qE '^pull/[0-9]+/head$'; then
-  IS_DEPLOY_PREVIEW=true
-fi
-
-# Netlify PR deploy previews set branch to "pull/N/head" instead of the actual branch name.
-# Resolve the real branch name via the GitHub API.
-if [ "$IS_DEPLOY_PREVIEW" = true ]; then
   PR_NUM=$(echo "$BRANCH" | sed 's|pull/\([0-9]*\)/head|\1|')
   echo "==> PR deploy preview detected (PR #$PR_NUM), resolving branch name..."
   REAL_BRANCH=$(curl -sf "https://api.github.com/repos/coasys/flux/pulls/$PR_NUM" | python3 -c "import sys,json; print(json.load(sys.stdin)['head']['ref'])" 2>/dev/null || true)
@@ -23,13 +17,8 @@ fi
 
 echo "==> Detected branch: $BRANCH"
 
-# For Netlify deploy previews, skip AD4M linking (pnpm v10 incompatibility with ad4m overrides)
-# Use published packages instead (more stable)
-if [ "$IS_DEPLOY_PREVIEW" = true ]; then
-  echo "==> Deploy preview mode — using published npm packages (skipping AD4M linking)"
-  AD4M_LINKED=false
-# Check if coasys/ad4m has a matching branch
-elif git ls-remote --exit-code --heads \
+# Check if there's a matching AD4M branch
+if git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
   echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
 
@@ -37,7 +26,8 @@ elif git ls-remote --exit-code --heads \
   git clone --depth 1 --single-branch --branch "$BRANCH" \
     https://github.com/coasys/ad4m.git ad4m
 
-  npm i -g pnpm 2>/dev/null || true
+  # Pin pnpm to v9 for AD4M build (ad4m uses object-format workspace overrides which pnpm v10 rejects)
+  npm i -g pnpm@9.15.0 2>/dev/null || true
 
   cd ad4m
   pnpm install --no-frozen-lockfile
@@ -64,19 +54,29 @@ else
 fi
 
 # Install Flux dependencies
+# For deploy previews, restore package.json to its original state (remove AD4M overrides)
+if [ "$AD4M_LINKED" = false ]; then
+  echo "==> Restoring package.json to dev baseline (removing AD4M overrides)"
+  git checkout origin/dev -- package.json pnpm-workspace.yaml 2>/dev/null || true
+fi
+
 # If AD4M was linked, override the pnpm overrides to use the local build
 if [ "$AD4M_LINKED" = true ]; then
-  echo "==> Overriding @coasys/ad4m and @coasys/ad4m-connect with local builds"
+  echo "==> Overriding @coasys packages with local builds"
   node -e "
     const pkg = require('./package.json');
     pkg.pnpm = pkg.pnpm || {};
     pkg.pnpm.overrides = pkg.pnpm.overrides || {};
     pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
     pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+    // Also update hooks-helpers to use the local build if it exists
+    if (require('fs').existsSync('./ad4m/ad4m-hooks/helpers/package.json')) {
+      pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
+    }
     require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
   "
 fi
-pnpm install --no-frozen-lockfile 2>&1 | tail -5
+pnpm install --no-frozen-lockfile
 
 if [ "$AD4M_LINKED" = true ]; then
   # Clear ALL build caches AND pre-built view bundles so everything rebuilds with the linked SDK
