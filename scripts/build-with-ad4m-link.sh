@@ -69,10 +69,9 @@ if [ "$AD4M_LINKED" = true ]; then
     pkg.pnpm.overrides = pkg.pnpm.overrides || {};
     pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
     pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
-    // Also update hooks-helpers to use the local build if it exists
-    if (require('fs').existsSync('./ad4m/ad4m-hooks/helpers/package.json')) {
-      pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
-    }
+    pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
+    pkg.pnpm.overrides['@coasys/ad4m-react-hooks'] = 'file:./ad4m/ad4m-hooks/react';
+    pkg.pnpm.overrides['@coasys/ad4m-vue-hooks'] = 'file:./ad4m/ad4m-hooks/vue';
     require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
   "
 fi
