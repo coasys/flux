@@ -54,11 +54,9 @@ else
 fi
 
 # Install Flux dependencies
-# For deploy previews, restore package.json to its original state (remove AD4M overrides)
-if [ "$AD4M_LINKED" = false ]; then
-  echo "==> Restoring package.json to dev baseline (removing AD4M overrides)"
-  git checkout origin/dev -- package.json pnpm-workspace.yaml 2>/dev/null || true
-fi
+# When no matching AD4M branch exists, use the current branch's package.json as-is.
+# (Previously we restored from origin/dev here, but that caused installs to fail when
+# origin/dev references an unpublished ad4m pre-release version.)
 
 # If AD4M was linked, override the pnpm overrides to use the local build
 if [ "$AD4M_LINKED" = true ]; then
