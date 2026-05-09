@@ -12,6 +12,6 @@ export default class Task extends Ad4mModel {
   @HasMany({ through: 'flux://task_assignee' })
   assignees: string[] = [];
 
-  @HasMany(() => Message)
+  @HasMany(() => Message, { through: 'ad4m://has_child' })
   comments: Message[] = [];
 }

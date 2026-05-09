@@ -28,7 +28,7 @@ export class Conversation extends Ad4mModel {
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  @HasMany(() => ConversationSubgroup)
+  @HasMany(() => ConversationSubgroup, { through: 'ad4m://has_child' })
   subgroupEntities: ConversationSubgroup[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {

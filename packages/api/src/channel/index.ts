@@ -38,31 +38,31 @@ export class Channel extends Ad4mModel {
   @Property({ through: CHANNEL_IS_PINNED })
   isPinned: boolean;
 
-  @HasMany(() => App)
+  @HasMany(() => App, { through: 'ad4m://has_child' })
   views: App[] = [];
 
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  @HasMany(() => Message)
+  @HasMany(() => Message, { through: 'ad4m://has_child' })
   messages: Message[] = [];
 
-  @HasMany(() => Conversation)
+  @HasMany(() => Conversation, { through: 'ad4m://has_child' })
   conversations: Conversation[] = [];
 
-  @HasMany(() => Channel)
+  @HasMany(() => Channel, { through: 'ad4m://has_child' })
   childChannels: Channel[] = [];
 
-  @HasMany(() => TaskBoard)
+  @HasMany(() => TaskBoard, { through: 'ad4m://has_child' })
   boards: TaskBoard[] = [];
 
-  @HasMany(() => TaskColumn)
+  @HasMany(() => TaskColumn, { through: 'ad4m://has_child' })
   taskColumns: TaskColumn[] = [];
 
-  @HasMany(() => Task)
+  @HasMany(() => Task, { through: 'ad4m://has_child' })
   tasks: Task[] = [];
 
-  @HasMany(() => Post)
+  @HasMany(() => Post, { through: 'ad4m://has_child' })
   posts: Post[] = [];
 
   async allItems(): Promise<SynergyItem[]> {
