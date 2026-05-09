@@ -19,8 +19,8 @@
     "types"
   ],
   "dependencies": {
-    "@coasys/ad4m": "0.13.0-test-2",
-    "@coasys/ad4m-connect": "0.13.0-test-2",
+    "@coasys/ad4m": "0.13.0-test-4",
+    "@coasys/ad4m-connect": "0.13.0-test-4",
     "@coasys/flux-api": "workspace:*",
     "@coasys/flux-ui": "workspace:*",
     "lit-element": "^2.4.0"
