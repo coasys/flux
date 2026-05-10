@@ -127,6 +127,7 @@ export default ({ mode }) => {
     ],
     build: {
       sourcemap: enableSourceMaps,
+      minify: isProductionDeploy ? 'esbuild' : false,
       rollupOptions: {
         external: ['@coasys/nillion-file-store', '@nillion/client-web'],
       },
@@ -140,6 +141,9 @@ export default ({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        '@coasys/ad4m-connect': path.resolve(__dirname, '../../ad4m/connect'),
+        '@coasys/ad4m-vue-hooks': path.resolve(__dirname, '../../ad4m/ad4m-hooks/vue'),
+        '@coasys/ad4m': path.resolve(__dirname, '../../ad4m/core'),
         '@coasys/nillion-file-store': path.resolve(
           __dirname,
           '../node_modules/@coasys/nillion-file-store/dist/main.js',
@@ -156,6 +160,12 @@ export default ({ mode }) => {
     server: {
       https: false,
       port: 3030,
+      fs: {
+        allow: [
+          // Allow serving files from linked @coasys packages outside the workspace
+          path.resolve(__dirname, '../../..'),
+        ],
+      },
       proxy: {
         '/api/v1': {
           target: 'http://127.0.0.1:12000',
