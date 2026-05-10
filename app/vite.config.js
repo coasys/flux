@@ -19,6 +19,20 @@ function copyNillionFileStore() {
   };
 }
 
+// Detect linked @coasys packages (pnpm link: overrides create symlinks).
+// Vite needs server.fs.allow for symlink targets outside the project root.
+let ad4mRepoRoot = null;
+try {
+  const ad4mPkg = path.resolve(__dirname, 'node_modules/@coasys/ad4m');
+  const realPath = fs.realpathSync(ad4mPkg);
+  // Only set if symlink points outside node_modules (i.e. to a local checkout)
+  if (!realPath.includes('node_modules')) {
+    ad4mRepoRoot = path.resolve(realPath, '..');
+  }
+} catch {
+  //
+}
+
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
   const isDeployPreview = process.env.CONTEXT === 'deploy-preview';
@@ -141,9 +155,6 @@ export default ({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@coasys/ad4m-connect': path.resolve(__dirname, '../../ad4m/connect'),
-        '@coasys/ad4m-vue-hooks': path.resolve(__dirname, '../../ad4m/ad4m-hooks/vue'),
-        '@coasys/ad4m': path.resolve(__dirname, '../../ad4m/core'),
         '@coasys/nillion-file-store': path.resolve(
           __dirname,
           '../node_modules/@coasys/nillion-file-store/dist/main.js',
@@ -162,8 +173,10 @@ export default ({ mode }) => {
       port: 3030,
       fs: {
         allow: [
-          // Allow serving files from linked @coasys packages outside the workspace
-          path.resolve(__dirname, '../../..'),
+          // Vite defaults (searchForWorkspaceRoot) are dropped when `allow` is set explicitly
+          path.resolve(__dirname, '..'),  // flux monorepo root
+          // Allow Vite to serve files from pnpm-linked AD4M packages
+          ...(ad4mRepoRoot ? [ad4mRepoRoot] : []),
         ],
       },
       proxy: {
