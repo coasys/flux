@@ -8,8 +8,8 @@ const { BODY, ENTRY_TYPE, REACTION, TRANSCRIPT_STARTED_AT, MESSAGE_THREAD, HAS_R
  * Lightweight Message for list rendering.
  *
  * No SPARQL getters — `replyingTo` and `isPopular` are omitted entirely.
- * Use `Message.evaluateGetters()` on the full model to lazily resolve
- * getter-backed properties for visible items only.
+ * The full `Message` model evaluates getters automatically (deepQuery=true)
+ * via batched VALUES queries.
  *
  * Retains simple @HasMany relations (reactions, thread, replies) since
  * those are direct link traversals, not SPARQL queries.

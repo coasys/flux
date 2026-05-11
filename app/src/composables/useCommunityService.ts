@@ -138,7 +138,7 @@ export async function createCommunityService(): Promise<CommunityService> {
   // Model subscriptions
   // Community query is perspective-scoped (typically one per perspective — low cost).
   // Use ChannelSummary — lightweight model without @HasMany relations.
-  // Getters are skipped by default on collection queries (deepQuery inversion).
+  // Property getters run by default (deepQuery=true) via batched VALUES queries.
   const { data: communities, loading: communitiesLoading, error: communitiesError } = useLiveQuery(Community, perspective);
   const { data: allChannels, loading: channelsLoading, error: channelsError } = useLiveQuery(ChannelSummary, perspective);
 
