@@ -112,7 +112,11 @@ export async function createCommunityService(): Promise<CommunityService> {
   // markRaw prevents Vue from wrapping PerspectiveProxy in a reactive Proxy, which breaks
   // TypeScript #private fields (WeakMap lookup fails when 'this' is a Proxy).
   const perspective: PerspectiveProxy = markRaw(maybePerspective);
-  const neighbourhood = perspective.getNeighbourhoodProxy?.() || null;
+  // Only get neighbourhood proxy for shared perspectives — private perspectives
+  // have no sharedUrl and sendBroadcast will fail with error noise.
+  const neighbourhood = perspective.sharedUrl
+    ? (perspective.getNeighbourhoodProxy?.() || null)
+    : null;
 
   // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
   for (const Model of [
