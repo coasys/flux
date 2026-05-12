@@ -5,8 +5,8 @@ import { FluxLLMTask, synergyTasks } from './synergy-prompts';
 
 const showLogs = false; // Set to true to enable debug logs
 
-async function ensureLLMTask(task: FluxLLMTask, ai: AIClient): Promise<FluxLLMTask> {
-  const registeredTasks = await ai.tasks();
+async function ensureLLMTask(task: FluxLLMTask, ai: AIClient, registeredTasks: any[]): Promise<FluxLLMTask> {
+  // Use pre-fetched tasks list instead of calling ai.tasks() again
   let existingTask = registeredTasks.find((r) => r.name === task.name);
   if (!existingTask) existingTask = await ai.addTask(task.name, 'default', task.prompt, task.examples);
   task.id = existingTask!.taskId;
@@ -19,10 +19,11 @@ export async function ensureLLMTasks(ai: AIClient): Promise<{
   topics: FluxLLMTask;
   conversation: FluxLLMTask;
 }> {
+  const registeredTasks = await ai.tasks(); // ONE call instead of 3
   return {
-    grouping: await ensureLLMTask(synergyTasks.grouping, ai),
-    topics: await ensureLLMTask(synergyTasks.topics, ai),
-    conversation: await ensureLLMTask(synergyTasks.conversation, ai),
+    grouping: await ensureLLMTask(synergyTasks.grouping, ai, registeredTasks),
+    topics: await ensureLLMTask(synergyTasks.topics, ai, registeredTasks),
+    conversation: await ensureLLMTask(synergyTasks.conversation, ai, registeredTasks),
   };
 }
 
