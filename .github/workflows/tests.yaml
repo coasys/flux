@@ -85,14 +85,24 @@ jobs:
             pkg.pnpm.overrides = pkg.pnpm.overrides || {};
             pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
             pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+            pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
+            pkg.pnpm.overrides['@coasys/ad4m-react-hooks'] = 'file:./ad4m/ad4m-hooks/react';
+            pkg.pnpm.overrides['@coasys/ad4m-vue-hooks'] = 'file:./ad4m/ad4m-hooks/vue';
             require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
+
+      - name: Type check (informational)
+        continue-on-error: true
+        run: pnpm typecheck
 
       - name: Test
         run: pnpm test --filter @coasys/flux-api

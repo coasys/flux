@@ -7,6 +7,7 @@ import createCommunity from './createCommunity';
 import createProfile from './createProfile';
 import Embedding from './embedding';
 import Channel from './channel';
+import ChannelSummary from './channel/ChannelSummary';
 import getAd4mProfile from './getAd4mProfile';
 import getAgentLinks from './getAgentLinks';
 import getAgentWebLinks from './getAgentWebLinks';
@@ -16,6 +17,7 @@ import getPerspectiveMeta from './getPerspectiveMeta';
 import getProfile from './getProfile';
 import joinCommunity from './joinCommunity';
 import Message from './message';
+import MessageSummary from './message/MessageSummary';
 import Post from './post';
 import SemanticRelationship from './semantic-relationship';
 import subscribeToLinks from './subscribeToLinks';
@@ -30,6 +32,7 @@ export * from './npmApi';
 export {
   App,
   Channel,
+  ChannelSummary,
   Community,
   Conversation,
   ConversationSubgroup,
@@ -46,6 +49,7 @@ export {
   joinCommunity,
   Me,
   Message,
+  MessageSummary,
   Post,
   SemanticRelationship,
   subscribeToLinks,

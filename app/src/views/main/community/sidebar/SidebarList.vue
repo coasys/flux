@@ -21,7 +21,7 @@
       </div>
 
       <j-flex direction="column">
-        <SidebarItem v-for="item in displayedItems" :key="item.channel.id" :item="item" />
+        <SidebarItem v-for="item in displayedItems" :key="item.channel?.id ?? item.channelId" :item="item" />
       </j-flex>
 
       <button

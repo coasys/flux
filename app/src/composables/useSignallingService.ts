@@ -221,7 +221,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     signalHandlers.value.forEach((handler) => handler(signal));
   }
 
-  function broadcastState(target: string = ''): void {
+  function broadcastState(target = ''): void {
     if (!signalling.value) return;
     // Only the leader tab broadcasts to the network to prevent duplicate heartbeats
     if (!tabCoordinator.isLeader.value) return;

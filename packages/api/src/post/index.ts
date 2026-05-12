@@ -28,7 +28,7 @@ export class Post extends Ad4mModel {
   @Property({ through: URL })
   url: string;
 
-  @HasMany(() => Message)
+  @HasMany(() => Message, { through: 'ad4m://has_child' })
   comments: Message[] = [];
 }
 

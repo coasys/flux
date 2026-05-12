@@ -22,7 +22,7 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
-import { App } from '@coasys/flux-api';
+import { App, Channel } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -35,13 +35,23 @@ const { perspective, allChannels } = useCommunityService();
 const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId.value)));
 
 const views = ref<App[]>([]);
+let channelLoadSeq = 0;
 watch(
   channel,
   async (newChannel) => {
-    if (newChannel) {
-      await newChannel.get({ views: true });
-      views.value = newChannel.views;
-    } else {
+    const seq = ++channelLoadSeq;
+    if (!newChannel || !perspective) {
+      views.value = [];
+      return;
+    }
+
+    try {
+      const fullChannel = new Channel(perspective, newChannel.id);
+      await fullChannel.get({ views: true });
+      if (seq !== channelLoadSeq) return;
+      views.value = fullChannel.views ?? [];
+    } catch {
+      if (seq !== channelLoadSeq) return;
       views.value = [];
     }
   },

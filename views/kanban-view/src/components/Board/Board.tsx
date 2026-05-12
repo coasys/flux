@@ -17,9 +17,7 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import Card from '../Card';
 import CardDetails from '../CardDetails';
 import styles from './Board.module.css';
-
-// @ts-ignore
-import taskSDNA from './Task.pl?raw';
+import { Task } from './TaskModel';
 
 type BoardProps = {
   perspective: PerspectiveProxy;
@@ -59,16 +57,9 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     return transformData(tasks, selectedProperty, namedOptions[selectedProperty] || []);
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
-  async function setValue(model, property, value) {
-    const setter = `set${property.charAt(0).toUpperCase() + property.slice(1)}`;
-    await model[setter](value);
-  }
-
   async function createNewTodo(property, value) {
     const baseExpression = Literal.from(makeRandomPrologAtom(24)).toUrl();
-    //@ts-ignore
-    const model = (await perspective.createSubject(selectedClass, baseExpression)) as Ad4mModel;
-    await setValue(model, property, value);
+    await perspective.createSubject(selectedClass, baseExpression, { [property]: value });
     // link to channel
     await perspective.addLinks([{ source, predicate: 'ad4m://has_child', target: baseExpression }]);
   }
@@ -94,27 +85,14 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
       const newTasks = oldTasks.map((t) => (t.id === draggableId ? changedTask : t));
       return newTasks;
     });
-
-    // update state
-    const model = await perspective.getSubjectProxy(draggableId, selectedClass);
-    await setValue(model, selectedProperty, status);
   }
 
   async function addColumn() {
-    // Get the atom for the selected class ("Task", "Todo", etc.)
-    const res = await perspective.infer(`subject_class("${selectedClass}", Atom)`);
-    const atom = res?.[0]?.Atom;
-    if (atom) {
-      // Create a new column with the given name
-      const value = `task://${columnName.toLowerCase()}`;
-      const sdnaCode = `property_named_option(${atom}, "${selectedProperty}", "${value}", "${columnName}").`;
-      await perspective.addSdna(columnName, sdnaCode, 'custom');
+    const value = `task://${columnName.toLowerCase()}`;
+    await perspective.addNamedOption(selectedClass, selectedProperty, value, columnName);
 
-      // Reload the columns
-      loadColumns();
-    } else {
-      throw new Error(`No atom found for class "${selectedClass}"`);
-    }
+    // Reload the columns
+    loadColumns();
 
     // Reset the column name and hide the modal
     setColumnName('');
@@ -144,21 +122,8 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     };
   }
 
-  async function getNamedOptions(perspective, className): Promise<NamedOptions> {
-    return perspective
-      .infer(`subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`)
-      .then((res) => {
-        if (res?.length) {
-          const result = {};
-          res.forEach((option) => {
-            if (!result[option.Property]) result[option.Property] = [];
-            result[option.Property].push({ label: option.Label, value: option.Value });
-          });
-          return result;
-        } else {
-          return {};
-        }
-      });
+  async function getNamedOptions(perspective: PerspectiveProxy, className: string): Promise<NamedOptions> {
+    return perspective.getNamedOptions(className);
   }
 
   function loadColumns() {
@@ -182,17 +147,17 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     return result;
   }
 
-  function getClasses(perspective: PerspectiveProxy, source) {
-    return perspective
-      .infer(`subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`)
-      .then((result) => {
-        if (Array.isArray(result)) {
-          const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
-          return uniqueClasses;
-        } else {
-          return [];
-        }
-      });
+  async function getClasses(perspective: PerspectiveProxy): Promise<string[]> {
+    const allClasses = await perspective.listRegisteredClasses();
+    // Filter to classes that have at least one property with named options
+    const classesWithOptions: string[] = [];
+    for (const className of allClasses) {
+      const opts = await perspective.getNamedOptions(className);
+      if (Object.keys(opts).length > 0) {
+        classesWithOptions.push(className);
+      }
+    }
+    return classesWithOptions;
   }
 
   async function checkNeighbourhoodAuthor() {
@@ -204,12 +169,12 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
     // Check and display the add column button if we are the neighbourhood author
     checkNeighbourhoodAuthor();
 
-    // Add the Task SDNA if it doesn't exist
-    perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
-      if (!hasTask) {
+    // Register the Task SHACL shape if it doesn't exist
+    perspective.listRegisteredClasses().then((registeredClasses) => {
+      if (!registeredClasses.includes('Task')) {
         perspective
-          .addSdna('Task', taskSDNA, 'subject_class')
-          .then(() => getClasses(perspective, source).then(setClasses));
+          .ensureSDNASubjectClass(Task)
+          .then(() => getClasses(perspective).then(setClasses));
       }
     });
   }, [perspective.uuid]);
@@ -223,7 +188,7 @@ export default function Board({ perspective, source, agent, getProfile }: BoardP
   }, [JSON.stringify(entries), perspective.uuid]);
 
   useEffect(() => {
-    getClasses(perspective, source).then((classes) => setClasses(classes));
+    getClasses(perspective).then((classes) => setClasses(classes));
     loadColumns();
   }, [perspective.uuid, selectedClass]);
 

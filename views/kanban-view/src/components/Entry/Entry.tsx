@@ -13,18 +13,9 @@ export default function Entry({ perspective, task, selectedClass, onUrlClick = (
   const [namedOptions, setNamedOptions] = useState({});
 
   useEffect(() => {
-    perspective
-      .infer(`subject_class("${selectedClass}", Atom), property_named_option(Atom, Property, Value, Label).`)
-      .then((res) => {
-        if (res?.length) {
-          const options = res.reduce((acc, option) => {
-            if (!acc[option.Property]) acc[option.Property] = [];
-            acc[option.Property].push({ label: option.Label, value: option.Value });
-            return acc;
-          }, {});
-          setNamedOptions(options);
-        }
-      });
+    perspective.getNamedOptions(selectedClass).then((options) => {
+      setNamedOptions(options);
+    });
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {

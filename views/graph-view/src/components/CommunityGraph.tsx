@@ -84,7 +84,7 @@ export default function CommunityOverview({ perspective, source }: { perspective
     }
   }, [containerSize[0], containerSize[1]]);
 
-  // Fetch initial snapshot
+  // Fetch initial snapshot and subscribe to changes
   useEffect(() => {
     fetchSnapShot(perspective, source).then(({ links, nodes }) => {
       console.log(links, nodes);
@@ -92,15 +92,33 @@ export default function CommunityOverview({ perspective, source }: { perspective
       setLinks(links);
     });
 
-    perspective?.addListener('link-added', (link) => {
-      if (link.data.source === source || link.data.target === source) {
-        fetchSnapShot(perspective, source).then(({ links, nodes }) => {
-          setNodes(nodes);
-          setLinks(links);
-        });
-      }
-      return null;
-    });
+    const refresh = () => {
+      fetchSnapShot(perspective, source).then(({ links, nodes }) => {
+        setNodes(nodes);
+        setLinks(links);
+      });
+    };
+
+    const sourceSparql = `SELECT ?source ?predicate ?target WHERE { <${source}> ?predicate ?target . }`;
+    const targetSparql = `SELECT ?source ?predicate ?target WHERE { ?source ?predicate <${source}> . }`;
+
+    let sourceSub: { dispose: () => void } | null = null;
+    let targetSub: { dispose: () => void } | null = null;
+
+    perspective?.subscribeQuery(sourceSparql).then(sub => {
+      sourceSub = sub;
+      sub.onResult(() => refresh());
+    }).catch(e => console.error('Source subscription error:', e));
+
+    perspective?.subscribeQuery(targetSparql).then(sub => {
+      targetSub = sub;
+      sub.onResult(() => refresh());
+    }).catch(e => console.error('Target subscription error:', e));
+
+    return () => {
+      sourceSub?.dispose();
+      targetSub?.dispose();
+    };
   }, [perspective.uuid, source]);
 
   // Setup graph

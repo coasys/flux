@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import styles from './Table.module.css';
 import DisplayValue from '../DisplayValue';
-import { LinkQuery, PerspectiveProxy, Agent } from '@coasys/ad4m';
+import { Link, LinkQuery, PerspectiveProxy, Agent } from '@coasys/ad4m';
 
 type Props = {
   me: null | Agent;
@@ -24,19 +24,9 @@ export default function Table({
   const [selectedEntries, setSelected] = useState([]);
 
   useEffect(() => {
-    perspective
-      .infer(`subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Label).`)
-      .then((res) => {
-        if (res?.length) {
-          const options = res.reduce((acc, option) => {
-            return {
-              ...acc,
-              [option.Property]: [...(acc[option.Property] || []), { label: option.Label, value: option.Value }],
-            };
-          }, {});
-          setNamedOptions(options);
-        }
-      });
+    perspective.getNamedOptions(subjectClass).then((opts) => {
+      setNamedOptions(opts);
+    });
   }, [subjectClass]);
 
   const headers = Object.keys(entries[0]).filter((key, index) => {
@@ -44,10 +34,15 @@ export default function Table({
   });
 
   async function onUpdate(id, propName, value) {
-    const proxy = await perspective.getSubjectProxy(id, subjectClass);
-    await proxy.init();
-    const capitalized = propName.charAt(0).toUpperCase() + propName.slice(1);
-    proxy[`set${capitalized}`](value);
+    const shape = await perspective.getClassShape(subjectClass);
+    const prop = shape?.properties.find(p => p.name === propName);
+    if (prop) {
+      const oldLinks = await perspective.get(new LinkQuery({ source: id, predicate: prop.predicate }));
+      for (const link of oldLinks) {
+        await perspective.remove(link);
+      }
+      await perspective.add(new Link({ source: id, predicate: prop.predicate, target: value }));
+    }
   }
 
   function onDelete(id) {

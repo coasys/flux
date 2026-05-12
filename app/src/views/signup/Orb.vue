@@ -33,7 +33,7 @@ onMounted(() => {
 
   if (!el.value) return;
 
-  var renderer = new THREE.WebGLRenderer({
+  const renderer = new THREE.WebGLRenderer({
     canvas: el.value,
     antialias: true,
     alpha: true,
@@ -45,8 +45,8 @@ onMounted(() => {
   // set size of canvas within window //
   renderer.setSize(SIZE, SIZE);
 
-  var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(45, SIZE / SIZE, 0.1, 1000);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, SIZE / SIZE, 0.1, 1000);
   camera.position.z = 5;
 
   const material = new THREE.MeshPhongMaterial({
@@ -54,8 +54,8 @@ onMounted(() => {
     shininess: 40,
   });
 
-  var sphere_geometry = new THREE.SphereGeometry(1, 128, 128);
-  var sphere = new THREE.Mesh(sphere_geometry, material);
+  const sphere_geometry = new THREE.SphereGeometry(1, 128, 128);
+  const sphere = new THREE.Mesh(sphere_geometry, material);
   scene.add(sphere);
 
   const ambientLight = new THREE.AmbientLight(0x361d4d);
@@ -67,20 +67,20 @@ onMounted(() => {
 
   sphere.geometry.attributes.position.needsUpdate = true;
 
-  var update = function () {
+  const update = function () {
     // change '0.003' for more aggressive animation
-    var time = performance.now() * 0.002;
+    const time = performance.now() * 0.002;
     //console.log(time)
 
     //go through vertices here and reposition them
 
     // change 'k' value for more spikes
-    var k = 1;
-    var v3 = new THREE.Vector3();
+    const k = 1;
+    const v3 = new THREE.Vector3();
     const positions = sphere.geometry.attributes.position;
-    for (var i = 0; i < positions.count; i++) {
+    for (let i = 0; i < positions.count; i++) {
       v3.fromBufferAttribute(positions, i).setLength(k);
-      let n = perlin.perlin3(v3.x + time * 0.1, v3.y + time * 0.1, v3.z + time * 0.1);
+      const n = perlin.perlin3(v3.x + time * 0.1, v3.y + time * 0.1, v3.z + time * 0.1);
       v3.setLength(1 + 0.3 * n);
       positions.setXYZ(i, v3.x, v3.y, v3.z);
     }

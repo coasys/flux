@@ -109,7 +109,6 @@
           :match-indexes="matchIndexes"
           :set-match-indexes="setMatchIndexes"
           :zoom="zoom"
-          :refresh-trigger="refreshTrigger"
           :selected-topic-id="selectedTopicId"
           :selected-item-id="selectedItemId"
           :set-selected-item-id="setSelectedItemId"
@@ -197,7 +196,6 @@ interface Props {
   matchIndexes?: MatchIndexes;
   setMatchIndexes?: (indexes: MatchIndexes) => void;
   zoom?: GroupingOption;
-  refreshTrigger?: number;
   selectedItemId?: string;
   setSelectedItemId?: (id: string | null) => void;
   search?: (type: SearchType, itemId: string, topic?: SynergyTopic) => void;
@@ -411,9 +409,9 @@ function onGroupClick() {
   }
 }
 
-// Get stats on first load and whenever refresh triggered if last child
+// Get stats on first load and whenever data changes if last child
 watch(
-  () => props.refreshTrigger,
+  () => props.data,
   () => {
     if (firstLoad.value || props.lastChild) {
       firstLoad.value = false;
@@ -424,9 +422,9 @@ watch(
   { immediate: true },
 );
 
-// Get data when expanding children or refresh triggered & children expanded
+// Get data when expanding children or data changes while children expanded
 watch(
-  [() => showChildren.value, () => props.refreshTrigger],
+  [() => showChildren.value, () => props.data],
   () => {
     // False on first load. Updated when zoom useEffect below fires and later when children are expanded by user
     if (showChildren.value) {

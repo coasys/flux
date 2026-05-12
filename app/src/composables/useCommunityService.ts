@@ -7,6 +7,7 @@ import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
   App,
   Channel,
+  ChannelSummary,
   Community,
   Conversation,
   ConversationSubgroup,
@@ -24,7 +25,7 @@ import { community as communityPredicates } from '@coasys/flux-constants';
 const { CHANNEL } = communityPredicates;
 import { AgentData, Profile, SignallingService } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
-import { computed, ComputedRef, inject, InjectionKey, ref, Ref, watch } from 'vue';
+import { computed, ComputedRef, inject, InjectionKey, markRaw, ref, Ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { HEARTBEAT_INTERVAL, useSignallingService } from './useSignallingService';
 
@@ -39,7 +40,7 @@ export interface ChannelData {
 // Returned from computed — includes resolved model instances (ComputedRef does not apply deep unwrapping)
 export interface ChannelDataWithAgents {
   channelId: string;
-  channel?: Channel;
+  channel?: ChannelSummary;
   conversationId?: string;
   conversation?: Conversation;
   lastActivity?: string;
@@ -51,13 +52,13 @@ export interface ChannelDataWithAgents {
 export interface CommunityService {
   perspective: PerspectiveProxy;
   neighbourhood: NeighbourhoodProxy;
-  signallingService: SignallingService;
+  signallingService: SignallingService | null;
   isSynced: Ref<boolean>;
   isAuthor: ComputedRef<boolean>;
   community: ComputedRef<Community>;
   members: Ref<Partial<Profile>[]>;
   membersLoading: Ref<boolean>;
-  allChannels: Ref<Channel[]>;
+  allChannels: Ref<ChannelSummary[]>;
   pinnedConversations: Ref<ChannelData[]>;
   pinnedConversationsLoading: Ref<boolean>;
   pinnedConversationsWithAgents: ComputedRef<ChannelDataWithAgents[]>;
@@ -79,7 +80,7 @@ export interface CommunityService {
     newSpaceChannelId: string,
     conversationName?: string,
   ) => Promise<void>;
-  getParentChannel: (channelId: string) => Channel | undefined;
+  getParentChannel: (channelId: string) => ChannelSummary | undefined;
   getConversation: (channelId: string) => Conversation | undefined;
   cleanup: () => void;
 }
@@ -96,7 +97,10 @@ export async function createCommunityService(): Promise<CommunityService> {
   const { aiEnabled } = storeToRefs(aiStore);
 
   // Get the perspective and neighbourhood proxies
-  const maybePerspective = appStore.getPerspective(restoreNeighbourhoodPrefix(route.params.communityId as string));
+  const communityIdParam = route.params.communityId as string;
+  // Try neighbourhood:// first, then private:// for local-only perspectives
+  const maybePerspective = appStore.getPerspective(restoreNeighbourhoodPrefix(communityIdParam))
+    || appStore.getPerspective(`private://${communityIdParam}`);
   if (!maybePerspective) {
     const communityId = route.params.communityId as string;
     console.error(`Failed to get perspective for community: ${communityId}`);
@@ -105,8 +109,10 @@ export async function createCommunityService(): Promise<CommunityService> {
     );
   }
   // Narrowed to PerspectiveProxy — TypeScript does not narrow through closures so we reassign explicitly
-  const perspective: PerspectiveProxy = maybePerspective;
-  const neighbourhood = perspective.getNeighbourhoodProxy();
+  // markRaw prevents Vue from wrapping PerspectiveProxy in a reactive Proxy, which breaks
+  // TypeScript #private fields (WeakMap lookup fails when 'this' is a Proxy).
+  const perspective: PerspectiveProxy = markRaw(maybePerspective);
+  const neighbourhood = perspective.getNeighbourhoodProxy?.() || null;
 
   // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
   for (const Model of [
@@ -127,11 +133,14 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
 
   // Initialise the signalling service for the community
-  const signallingService = useSignallingService(neighbourhood);
+  const signallingService = neighbourhood ? useSignallingService(neighbourhood) : null;
 
   // Model subscriptions
-  const { data: communities } = useLiveQuery(Community, perspective);
-  const { data: allChannels } = useLiveQuery(Channel, perspective);
+  // Community query is perspective-scoped (typically one per perspective — low cost).
+  // Use ChannelSummary — lightweight model without @HasMany relations.
+  // Getters are skipped by default on collection queries (deepQuery inversion).
+  const { data: communities, loading: communitiesLoading, error: communitiesError } = useLiveQuery(Community, perspective);
+  const { data: allChannels, loading: channelsLoading, error: channelsError } = useLiveQuery(ChannelSummary, perspective);
 
   // Cache for conversation instances — populated during data fetching, looked up in computeds.
   // Plain Map (not reactive) is sufficient: updates always precede the ref changes that trigger re-computation.
@@ -160,8 +169,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children: undefined,
     }));
   });
@@ -170,8 +179,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children: undefined,
     }));
   });
@@ -180,15 +189,15 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
       children:
         data.children?.map((child) => ({
           ...child,
           channel: allChannels.value.find((c) => c.id === child.channelId),
           conversation: child.conversationId ? conversationCache.get(child.conversationId) : undefined,
-          agentsInChannel: signallingService.getAgentsInChannel(child.channelId).value,
-          agentsInCall: signallingService.getAgentsInCall(child.channelId).value,
+          agentsInChannel: signallingService?.getAgentsInChannel(child.channelId).value,
+          agentsInCall: signallingService?.getAgentsInCall(child.channelId).value,
           children: undefined,
         })) || [],
     }));
@@ -232,15 +241,26 @@ export async function createCommunityService(): Promise<CommunityService> {
     pinnedConversationsLoading.value = true;
 
     try {
-      // Loop through all the pinned channels and get the conversation data for each
-      pinnedConversations.value = await Promise.all(
-        pinnedChannels.value.map(async (channel: Channel) => {
-          await channel.get({ conversations: true });
-          const conversation = channel.conversations[0];
-          if (conversation) conversationCache.set(conversation.id, conversation);
-          return { channelId: channel.id, conversationId: conversation?.id };
+      // Single SPARQL query — avoids iterative channel.get({ conversations: true })
+      const results = await Channel.pinnedConversations(perspective);
+
+      // Hydrate conversations so properties like conversationName are available
+      const newPinnedIds = results
+        .filter((r) => r.conversationId && !conversationCache.has(r.conversationId))
+        .map((r) => r.conversationId!);
+      await Promise.all(
+        newPinnedIds.map(async (id) => {
+          const conv = new Conversation(perspective, id);
+          try {
+            await conv.get();
+          } catch {
+            /* ignore */
+          }
+          conversationCache.set(id, conv);
         }),
       );
+
+      pinnedConversations.value = results;
     } catch (error) {
       console.error('Error loading pinned conversations:', error);
       pinnedConversations.value = [];
@@ -254,55 +274,28 @@ export async function createCommunityService(): Promise<CommunityService> {
     recentConversationsLoading.value = true;
 
     try {
-      // Get the conversation data for each of the conversation channels and determine the last activity timestamp for each
-      const conversations = await Promise.all(
-        conversationChannels.value.map(async (channel: Channel) => {
-          await channel.get({ conversations: true });
-          const conversation = channel.conversations[0];
+      // Single SPARQL query — avoids N×M×K iterative graph walk
+      // (was: for each channel → get conversations → unprocessedItems → subgroups → items)
+      const results = await Channel.recentConversations(perspective, 20);
 
-          if (!conversation) return null;
-          conversationCache.set(conversation.id, conversation);
-
-          // If there are unprocessed items, use the latest unprocessed items timestamp
-          let lastActivity: string | null = null;
-          const unprocessedItems = await channel.unprocessedItems();
-          if (unprocessedItems.length) {
-            const lastUnprocessedItem = unprocessedItems.sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-            )[0];
-            lastActivity = lastUnprocessedItem.timestamp;
-          } else if (conversation.summary === 'Content will appear when the first items have been processed...') {
-            // If the conversation is an empty placeholder use the conversations timestamp
-            lastActivity = conversation.createdAt;
-          } else {
-            // If no subgroups exist, use the conversation timestamp
-            const subgroups = await conversation.subgroups();
-            if (!subgroups.length) lastActivity = conversation.createdAt;
-            else {
-              // If no items exist in the last subgroup, use the subgroup timestamp
-              const lastSubgroup = subgroups[subgroups.length - 1];
-              const items = await lastSubgroup.itemsData();
-              if (!items.length) lastActivity = lastSubgroup.createdAt;
-              else {
-                // Finally, use the timestamp of the last item in the last subgroup
-                const lastItem = items.sort(
-                  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-                )[0];
-                lastActivity = lastItem.timestamp;
-              }
-            }
+      // Populate conversation cache — hydrate with .get() so properties like
+      // conversationName are available for display in the sidebar.
+      const newConvIds = results
+        .filter((r) => r.conversationId && !conversationCache.has(r.conversationId))
+        .map((r) => r.conversationId!);
+      await Promise.all(
+        newConvIds.map(async (id) => {
+          const conv = new Conversation(perspective, id);
+          try {
+            await conv.get();
+          } catch {
+            /* hydration failure — stub will lack properties but won't break rendering */
           }
-
-          return { channelId: channel.id, conversationId: conversation.id, lastActivity };
+          conversationCache.set(id, conv);
         }),
       );
 
-      // Sort conversations by last activity timestamp
-      const conversationsSortedByLastActivity = conversations
-        .filter((c) => c !== null)
-        .sort((a, b) => new Date(b.lastActivity!).getTime() - new Date(a.lastActivity!).getTime());
-
-      recentConversations.value = conversationsSortedByLastActivity as ChannelData[];
+      recentConversations.value = results as ChannelData[];
     } catch (error) {
       console.error('Error loading recent conversations:', error);
       recentConversations.value = [];
@@ -316,29 +309,44 @@ export async function createCommunityService(): Promise<CommunityService> {
     channelsWithConversationsLoading.value = true;
 
     try {
-      // Loop through all the space channels and get the conversations in each
-      channelsWithConversations.value = await Promise.all(
-        spaceChannels.value.map(async (channel: Channel) => {
-          // Get all nested conversation channels — linked via CHANNEL predicate (same as startNewConversation)
+      // Phase 1: Collect all child channel IDs per space channel (parallel link queries)
+      const channelChildMap = await Promise.all(
+        spaceChannels.value.map(async (channel) => {
           const links = await perspective.get(new LinkQuery({ source: channel.id, predicate: CHANNEL }));
           const childChannelIds = new Set(links.map((l) => l.data.target));
           const nestedConversationChannels = allChannels.value.filter(
             (ch) => ch.isConversation && childChannelIds.has(ch.id),
           );
-
-          // Get the conversation data for each of the nested conversation channels
-          const conversations = await Promise.all(
-            nestedConversationChannels.map(async (childChannel: Channel) => {
-              await childChannel.get({ conversations: true });
-              const conversation = childChannel.conversations[0];
-              if (conversation) conversationCache.set(conversation.id, conversation);
-              return { channelId: childChannel.id, conversationId: conversation?.id };
-            }),
-          );
-
-          return { channelId: channel.id, children: conversations };
+          return { channelId: channel.id, children: nestedConversationChannels };
         }),
       );
+
+      // Phase 2: Batch all conversation lookups into a single flat Promise.all
+      // instead of nested per-space-channel loops
+      const allConvChannels = channelChildMap.flatMap((entry) =>
+        entry.children.map((ch) => ({ spaceChannelId: entry.channelId, childChannel: ch })),
+      );
+
+      const conversationResults = await Promise.all(
+        allConvChannels.map(async ({ childChannel }) => {
+          try {
+            const conversation = await Conversation.findOne(perspective, {
+              parent: { model: Channel, id: childChannel.id },
+            });
+            if (conversation) conversationCache.set(conversation.id, conversation);
+            return { channelId: childChannel.id, conversationId: conversation?.id };
+          } catch {
+            return { channelId: childChannel.id };
+          }
+        }),
+      );
+
+      // Phase 3: Re-group results by space channel
+      const convByChildId = new Map(conversationResults.map((r) => [r.channelId, r]));
+      channelsWithConversations.value = channelChildMap.map((entry) => ({
+        channelId: entry.channelId,
+        children: entry.children.map((ch) => convByChildId.get(ch.id) || { channelId: ch.id }),
+      }));
     } catch (error) {
       console.error('Error loading channels with conversations:', error);
       channelsWithConversations.value = [];
@@ -382,8 +390,8 @@ export async function createCommunityService(): Promise<CommunityService> {
 
       await App.create(perspective, { name, description, icon, pkg }, { parent: { model: Channel, id: channel.id } });
 
-      // Update the recent conversations
-      getRecentConversations();
+      // Update the recent conversations — await so sidebar reflects the new entry before navigation
+      await getRecentConversations();
 
       // Navigate to the new channel
       const communityId = route.params.communityId as string;
@@ -451,7 +459,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     }
   }
 
-  function getParentChannel(channelId: string): Channel | undefined {
+  function getParentChannel(channelId: string): ChannelSummary | undefined {
     const parentData = channelsWithConversations.value.find((c) =>
       c.children?.some((child) => child.channelId === channelId),
     );
@@ -465,7 +473,17 @@ export async function createCommunityService(): Promise<CommunityService> {
     return conversationCache.get(data.conversationId);
   }
 
-  // Track channel participants automatically
+  // Initialize sync state listener
+  const syncStateListener = (state: PerspectiveState) => {
+    // @ts-ignore
+    isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
+    return null;
+  };
+  perspective.addSyncStateChangeListener(syncStateListener);
+
+  // Track channel participants automatically.
+  // Uses addListener because participant tracking needs link.author metadata,
+  // which isn't available from SPARQL subscription results.
   function handleParticipantTracking(link: any) {
     if (link.data.predicate !== CHANNEL) return null;
     if (!link.author) return null;
@@ -474,9 +492,6 @@ export async function createCommunityService(): Promise<CommunityService> {
     const channel = allChannels.value.find((c) => c.id === channelId);
     if (!channel) return null;
 
-    if (channel.participants && channel.participants.includes(link.author)) return null;
-
-    // Add participant link
     perspective
       .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
       .catch((error) => {
@@ -489,16 +504,6 @@ export async function createCommunityService(): Promise<CommunityService> {
 
     return null;
   }
-
-  // Initialize sync state listener
-  const syncStateListener = (state: PerspectiveState) => {
-    // @ts-ignore
-    isSynced.value = state === PerspectiveState.Synced || state === '"Synced"'; // Todo: state should be "SYNCED" not ""Synced""
-    return null;
-  };
-  perspective.addSyncStateChangeListener(syncStateListener);
-
-  // Initialize participant tracking
   perspective.addListener('link-added', handleParticipantTracking);
 
   // Cleanup function to remove all listeners
@@ -508,12 +513,12 @@ export async function createCommunityService(): Promise<CommunityService> {
 
   getMembers();
 
-  watch(pinnedChannelsSignature, getPinnedConversations);
+  watch(pinnedChannelsSignature, getPinnedConversations, { immediate: true });
   watch(conversationChannelsSignature, () => {
     getRecentConversations();
     getChannelsWithConversations();
-  });
-  watch(spaceChannels, getChannelsWithConversations);
+  }, { immediate: true });
+  watch(spaceChannels, getChannelsWithConversations, { immediate: true });
 
   // Find processing tasks in the community when the conversations first load
   watch(recentConversations, () => {
