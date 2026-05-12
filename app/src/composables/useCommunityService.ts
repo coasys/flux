@@ -524,11 +524,21 @@ export async function createCommunityService(): Promise<CommunityService> {
   }, { immediate: true });
   watch(spaceChannels, getChannelsWithConversations, { immediate: true });
 
-  // Find processing tasks in the community when the conversations first load
-  watch(recentConversations, () => {
-    if (aiEnabled.value && !processingStateChecked.value) {
+  // Find processing tasks in the community when the conversations first load.
+  // Watch BOTH recentConversations and allChannels — findProcessingTasksInCommunity
+  // uses recentConversationsWithAgents, which joins the two. If we gate only on
+  // recentConversations, the one-shot processingStateChecked flag can close before
+  // allChannels loads, causing findProcessingTasksInCommunity to see all
+  // channel: undefined entries and silently skip every task.
+  watch([recentConversations, allChannels], () => {
+    if (
+      aiEnabled.value &&
+      !processingStateChecked.value &&
+      recentConversations.value.length > 0 &&
+      allChannels.value.length > 0
+    ) {
       processingStateChecked.value = true;
-      // Delay by heart beat interval to allow time for signals to arrive
+      // Delay by heartbeat interval to allow time for signals to arrive
       setTimeout(() => aiStore.findProcessingTasksInCommunity(perspective.sharedUrl || ''), HEARTBEAT_INTERVAL);
     }
   });

@@ -249,3 +249,146 @@ describe('AI processing trigger chain', () => {
     expect(weAuthoredNow).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests: processingStateChecked gate — race condition
+// ---------------------------------------------------------------------------
+
+describe('processingStateChecked gate race condition', () => {
+  /**
+   * Simulates the race condition in useCommunityService.ts where:
+   * 1. watch(recentConversations) fires before allChannels has loaded
+   * 2. processingStateChecked is set to true (gate closed)
+   * 3. findProcessingTasksInCommunity runs but recentConversationsWithAgents
+   *    has all channel: undefined entries → zero tasks queued
+   * 4. allChannels loads later, but the gate is already closed → never re-checked
+   *
+   * The fix: watch BOTH recentConversations AND allChannels, and require
+   * both to be non-empty before closing the gate.
+   */
+
+  // Simulates the OLD (broken) gate logic
+  function brokenGate(
+    recentConversations: { channelId: string }[],
+    _allChannels: { id: string }[],
+    aiEnabled: boolean,
+    processingStateChecked: { value: boolean },
+  ): boolean {
+    // OLD: only checks recentConversations
+    if (aiEnabled && !processingStateChecked.value) {
+      processingStateChecked.value = true;
+      return true; // would schedule findProcessingTasksInCommunity
+    }
+    return false;
+  }
+
+  // Simulates the NEW (fixed) gate logic
+  function fixedGate(
+    recentConversations: { channelId: string }[],
+    allChannels: { id: string }[],
+    aiEnabled: boolean,
+    processingStateChecked: { value: boolean },
+  ): boolean {
+    if (
+      aiEnabled &&
+      !processingStateChecked.value &&
+      recentConversations.length > 0 &&
+      allChannels.length > 0
+    ) {
+      processingStateChecked.value = true;
+      return true;
+    }
+    return false;
+  }
+
+  // Simulates recentConversationsWithAgents join
+  function joinWithChannels(
+    recentConversations: { channelId: string }[],
+    allChannels: { id: string }[],
+  ) {
+    return recentConversations.map((data) => ({
+      ...data,
+      channel: allChannels.find((c) => c.id === data.channelId),
+    }));
+  }
+
+  it('OLD gate: fires before allChannels loads → all channels undefined → zero tasks', () => {
+    const processingStateChecked = { value: false };
+    const recentConversations = [
+      { channelId: 'ch-1' },
+      { channelId: 'ch-2' },
+    ];
+    const allChannels: { id: string }[] = []; // Not loaded yet!
+
+    // Step 1: recentConversations loads first, gate fires
+    const fired = brokenGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(fired).toBe(true);
+    expect(processingStateChecked.value).toBe(true); // Gate closed!
+
+    // Step 2: findProcessingTasksInCommunity runs with empty allChannels
+    const joined = joinWithChannels(recentConversations, allChannels);
+    const tasksFound = joined.filter((d) => d.channel !== undefined);
+    expect(tasksFound).toHaveLength(0); // All channels undefined!
+
+    // Step 3: allChannels loads later
+    allChannels.push({ id: 'ch-1' }, { id: 'ch-2' });
+
+    // Step 4: gate is already closed — findProcessingTasksInCommunity never re-runs
+    const firedAgain = brokenGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(firedAgain).toBe(false); // Gate already closed!
+
+    // This is the BUG: tasks were never queued despite both data sources being ready
+  });
+
+  it('NEW gate: waits for both recentConversations AND allChannels', () => {
+    const processingStateChecked = { value: false };
+    const recentConversations = [
+      { channelId: 'ch-1' },
+      { channelId: 'ch-2' },
+    ];
+    const allChannels: { id: string }[] = []; // Not loaded yet!
+
+    // Step 1: recentConversations loads first — gate does NOT fire
+    const fired1 = fixedGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(fired1).toBe(false);
+    expect(processingStateChecked.value).toBe(false); // Gate still open!
+
+    // Step 2: allChannels loads
+    allChannels.push({ id: 'ch-1' }, { id: 'ch-2' });
+
+    // Step 3: watch fires again — NOW both are ready, gate fires
+    const fired2 = fixedGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(fired2).toBe(true);
+    expect(processingStateChecked.value).toBe(true);
+
+    // Step 4: findProcessingTasksInCommunity runs with populated allChannels
+    const joined = joinWithChannels(recentConversations, allChannels);
+    const tasksFound = joined.filter((d) => d.channel !== undefined);
+    expect(tasksFound).toHaveLength(2); // Both channels found!
+  });
+
+  it('NEW gate: handles allChannels loading first', () => {
+    const processingStateChecked = { value: false };
+    const recentConversations: { channelId: string }[] = [];
+    const allChannels = [{ id: 'ch-1' }];
+
+    // allChannels loads first — gate does NOT fire (no conversations yet)
+    const fired1 = fixedGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(fired1).toBe(false);
+
+    // recentConversations loads — now both ready
+    recentConversations.push({ channelId: 'ch-1' });
+    const fired2 = fixedGate(recentConversations, allChannels, true, processingStateChecked);
+    expect(fired2).toBe(true);
+  });
+
+  it('NEW gate: does not fire when AI is disabled', () => {
+    const processingStateChecked = { value: false };
+    const recentConversations = [{ channelId: 'ch-1' }];
+    const allChannels = [{ id: 'ch-1' }];
+
+    const fired = fixedGate(recentConversations, allChannels, false, processingStateChecked);
+    expect(fired).toBe(false);
+    expect(processingStateChecked.value).toBe(false);
+  });
+});
