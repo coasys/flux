@@ -18,6 +18,7 @@ import {
   TaskColumn,
   Topic,
   Task,
+  MemoryEntry,
 } from '@coasys/flux-api';
 import { community as communityPredicates } from '@coasys/flux-constants';
 
@@ -122,6 +123,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     TaskBoard,
     TaskColumn,
     Task,
+    MemoryEntry,
   ]) {
     await Model.register(perspective);
   }
