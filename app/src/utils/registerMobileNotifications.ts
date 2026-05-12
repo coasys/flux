@@ -25,8 +25,8 @@ function notificationConfig(perspectiveIds: string[], webhookAuth: string, agent
   };
 }
 
-export async function registerNotification(client: Ad4mClient) {
-  const perspctives = await client.perspective.all();
+export async function registerNotification(client: Ad4mClient, perspectives?: { uuid: string }[]) {
+  const perspctives = perspectives ?? await client.perspective.all();
   const perspectiveIds = perspctives.map((p) => p.uuid);
 
   let webhookAuth = '';

@@ -46,7 +46,7 @@ async function initializeApp() {
   });
 
   // Register notification
-  registerNotification(appStore.ad4mClient);
+  registerNotification(appStore.ad4mClient, appStore.myPerspectives);
 
   // Ensure LLM tasks are set up (non-fatal — AI features degrade gracefully)
   ensureLLMTasks(appStore.ad4mClient.ai).catch((e: any) =>
