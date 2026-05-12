@@ -93,10 +93,10 @@ export default async function createCommunity({
       }),
     });
 
-    // Update notifications to include the new community
+    // Update all Flux notifications to include the new community
     const notifications = await client.runtime.notifications();
-    const notification = notifications.find((n) => n.appName === 'Flux');
-    if (notification) {
+    const fluxNotifications = notifications.filter((n) => n.appName === 'Flux');
+    for (const notification of fluxNotifications) {
       const notificationId = notification.id;
       notification.granted = undefined;
       notification.id = undefined;

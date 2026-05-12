@@ -5,12 +5,12 @@ import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
 import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
-import { PerspectiveExpression } from '@coasys/ad4m';
+import { Link, PerspectiveExpression } from '@coasys/ad4m';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
 import { Howl } from 'howler';
 import { defineStore, storeToRefs } from 'pinia';
 import type { Instance } from 'simple-peer';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from './appStore';
 import { useCommunityServiceStore } from './communityServiceStore';
@@ -18,7 +18,7 @@ import { useMediaDevicesStore } from './mediaDevicesStore';
 import { useUiStore } from './uiStore';
 // @ts-ignore
 import SimplePeer from 'simple-peer/simplepeer.min.js';
-import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { restoreChannelPrefix, restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 
 export const CALL_HEALTH_CHECK_INTERVAL = 6000;
 export const WEBRTC_SIGNAL = 'webrtc/signal';
@@ -26,6 +26,8 @@ export const WEBRTC_STREAM_REQUEST = 'webrtc/stream-request';
 export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
+export const CALL_INVITE = 'flux://call_invite';
+export const CALL_STARTED = 'flux://call_started';
 const MAX_RECONNECTION_ATTEMPTS = 3;
 const defaultIceServers = [
   {
@@ -628,6 +630,23 @@ export const useWebrtcStore = defineStore(
           uiStore.setVideoLayout({ label: 'Focused', class: 'focused', icon: 'person-video2' });
         }
 
+        // If nobody else is in the call, persist a flux://call_started link so the
+        // AD4M notification trigger fires a push notification for the neighbourhood.
+        // Only the initiator emits this — late joiners don't, to avoid duplicate pushes.
+        // The link is cleaned up in leaveRoom() to prevent stale triggers.
+        if (agentsInCall.value.length === 0 && callRoute.value.channelId) {
+          const perspective = toRaw(communityService.value?.perspective);
+          const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+          if (perspective) {
+            perspective
+              .add(new Link({ source: channelUrl, predicate: CALL_STARTED, target: channelUrl }))
+              .then(() => {
+                persistedCallStartedLink.value = { source: channelUrl, target: channelUrl };
+              })
+              .catch((error) => console.error('Failed to persist call_started link:', error));
+          }
+        }
+
         inCall.value = true;
       } catch (error) {
         console.error('Error joining call:', error);
@@ -641,6 +660,10 @@ export const useWebrtcStore = defineStore(
       try {
         // Signal all peers that we're leaving the call
         signalPeers(WEBRTC_LEAVING_CALL);
+
+        // Clean up persisted call invite links to prevent stale notifications
+        cleanupInviteLinks();
+        cleanupCallStartedLink();
 
         // Close all peer connections
         peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
@@ -687,6 +710,61 @@ export const useWebrtcStore = defineStore(
         console.error('Failed to copy to clipboard:', error);
         appStore.showDangerToast({ message: 'Failed to copy link to clipboard' });
       }
+    }
+
+    // Track persisted invite links so we can clean them up when leaving the call
+    const persistedInviteLinks = ref<Array<{ source: string; target: string }>>([]);
+    const persistedCallStartedLink = ref<{ source: string; target: string } | null>(null);
+
+    function sendCallInvite(dids: string[]): void {
+      if (!signallingService.value || !callRoute.value.channelId) return;
+      const channelUrl = restoreChannelPrefix(callRoute.value.channelId);
+      const perspective = toRaw(communityService.value?.perspective);
+
+      for (const did of dids) {
+        // Broadcast signal for real-time notification (when recipient is online)
+        signallingService.value.sendSignal({
+          source: channelUrl,
+          predicate: CALL_INVITE,
+          target: did,
+        });
+
+        // Persist link for AD4M push notification trigger (when recipient is offline)
+        if (perspective) {
+          perspective
+            .add(new Link({ source: channelUrl, predicate: CALL_INVITE, target: did }))
+            .then(() => persistedInviteLinks.value.push({ source: channelUrl, target: did }))
+            .catch((error) => console.error('Failed to persist call invite link:', error));
+        }
+      }
+
+      const count = dids.length;
+      appStore.showSuccessToast({
+        message: `Call invite sent to ${count} member${count > 1 ? 's' : ''}`,
+      });
+    }
+
+    function cleanupInviteLinks(): void {
+      const perspective = toRaw(communityService.value?.perspective);
+      if (!perspective || !persistedInviteLinks.value.length) return;
+
+      for (const invite of persistedInviteLinks.value) {
+        perspective
+          .remove(new Link({ source: invite.source, predicate: CALL_INVITE, target: invite.target }))
+          .catch((error) => console.error('Failed to remove call invite link:', error));
+      }
+      persistedInviteLinks.value = [];
+    }
+
+    function cleanupCallStartedLink(): void {
+      const perspective = toRaw(communityService.value?.perspective);
+      const link = persistedCallStartedLink.value;
+      if (!perspective || !link) return;
+
+      perspective
+        .remove(new Link({ source: link.source, predicate: CALL_STARTED, target: link.target }))
+        .catch((error) => console.error('Failed to remove call_started link:', error));
+      persistedCallStartedLink.value = null;
     }
 
     // Close the call window on route param changes if not in a call or a channel
@@ -812,6 +890,7 @@ export const useWebrtcStore = defineStore(
       signalAgentsInCall,
       displayEmoji,
       copyCallLink,
+      sendCallInvite,
     };
   },
   { persist: false },
