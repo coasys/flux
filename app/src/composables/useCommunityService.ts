@@ -2,7 +2,7 @@ import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { upsertById } from '@/utils/upsertById';
-import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
+import { Ad4mModel, Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
   App,
@@ -118,8 +118,8 @@ export async function createCommunityService(): Promise<CommunityService> {
     ? (perspective.getNeighbourhoodProxy?.() || null)
     : null;
 
-  // Ensure all required SDNA is installed (sequential to avoid Rust concurrency issues)
-  for (const Model of [
+  // Ensure all required SDNA is installed (single batch RPC call)
+  await Ad4mModel.registerAll(perspective, [
     Community,
     Channel,
     App,
@@ -132,9 +132,7 @@ export async function createCommunityService(): Promise<CommunityService> {
     TaskBoard,
     TaskColumn,
     Task,
-  ]) {
-    await Model.register(perspective);
-  }
+  ]);
 
   // Initialise the signalling service for the community
   const signallingService = neighbourhood ? useSignallingService(neighbourhood) : null;
