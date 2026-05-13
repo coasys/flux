@@ -195,12 +195,14 @@ describe('Conversation.stats()', () => {
     conv.participants = ['did:test:alice'];
 
     const stats = await conv.stats();
-    expect(perspective.querySparql).toHaveBeenCalledTimes(1);
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('conv-1');
-    expect(query).toContain('ad4m://has_child');
-    expect(query).toContain('flux://conversation_subgroup');
-    expect(stats.participants).toEqual(['did:test:alice']);
+    expect(perspective.querySparql).toHaveBeenCalledTimes(2);
+    const subgroupsQuery = perspective.sparqlCalls[0];
+    expect(subgroupsQuery).toContain('conv-1');
+    expect(subgroupsQuery).toContain('ad4m://has_child');
+    expect(subgroupsQuery).toContain('flux://conversation_subgroup');
+    const participantsQuery = perspective.sparqlCalls[1];
+    expect(participantsQuery).toContain('conv-1');
+    expect(participantsQuery).toContain('flux://has_participant');
   });
 
   it('returns zero subgroups when query returns empty', async () => {
