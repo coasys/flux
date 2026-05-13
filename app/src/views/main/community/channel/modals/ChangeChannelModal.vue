@@ -34,6 +34,9 @@ const { perspective, allChannels } = useCommunityService();
 
 const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId.value)));
 
+const currentView = ref<string>('');
+const isChangeChannel = ref(false);
+
 const views = ref<App[]>([]);
 let channelLoadSeq = 0;
 watch(
@@ -62,9 +65,6 @@ watch(
   },
   { immediate: true },
 );
-
-const currentView = ref<string>('');
-const isChangeChannel = ref(false);
 
 function changeCurrentView(viewId: string) {
   const { communityId, channelId } = route.params;
