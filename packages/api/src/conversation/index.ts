@@ -42,12 +42,20 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const subgroupsResult = await this.perspective.querySparql(subgroupsQuery);
-      const totalSubgroups = subgroupsResult?.length || 0;
+      const participantsQuery = `
+        SELECT ?did WHERE {
+          <${this.id}> <${FLUX_PARTICIPANT}> ?did .
+        }
+      `;
 
-      // Use maintained participants Collection instead of expensive queries
-      await this.get();
-      return { totalSubgroups, participants: this.participants };
+      const [subgroupsResult, participantsResult] = await Promise.all([
+        this.perspective.querySparql(subgroupsQuery),
+        this.perspective.querySparql(participantsQuery),
+      ]);
+
+      const totalSubgroups = subgroupsResult?.length || 0;
+      const participants = (participantsResult || []).map((r: any) => r.did).filter(Boolean);
+      return { totalSubgroups, participants };
     } catch (error) {
       console.error('Error getting conversation stats:', error);
       return { totalSubgroups: 0, participants: [] };
@@ -100,9 +108,11 @@ export class Conversation extends Ad4mModel {
   }
 
   async subgroups(): Promise<ConversationSubgroup[]> {
-    // find the conversations subgroup entities
-    await this.get({ subgroupEntities: true });
-    return this.subgroupEntities as unknown as ConversationSubgroup[];
+    // find the conversations subgroup entities — use parent-scoped query
+    // instead of this.get() which fetches all Conversation triples
+    return ConversationSubgroup.findAll(this.perspective, {
+      parent: { model: Conversation, id: this.id },
+    }) as unknown as Promise<ConversationSubgroup[]>;
   }
 
   async subgroupsData(): Promise<SynergyGroup[]> {

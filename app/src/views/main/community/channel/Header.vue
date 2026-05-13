@@ -84,7 +84,7 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores';
 import { stripChannelPrefix } from '@/utils/routeUtils';
-import { App, Channel } from '@coasys/flux-api';
+import { App, Channel, ChannelSummary } from '@coasys/flux-api';
 import { storeToRefs } from 'pinia';
 import { computed, onActivated, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -124,11 +124,9 @@ watch(
   channel,
   async (newChannel) => {
     if (newChannel) {
-      const channelWithViews = await Channel.findOne(perspective, {
-        where: { id: newChannel.id },
-        include: { views: true },
+      views.value = await App.findAll(perspective, {
+        parent: { model: Channel, id: newChannel.id },
       });
-      views.value = channelWithViews?.views ?? [];
     } else {
       views.value = [];
     }
@@ -152,7 +150,7 @@ async function togglePinned() {
   if (!channel.value) return;
 
   try {
-    const channelModel = await Channel.findOne(perspective, { where: { id: channel.value.id } });
+    const channelModel = await ChannelSummary.findOne(perspective, { where: { id: channel.value.id } });
     if (!channelModel) return;
     channelModel.isPinned = !channel.value.isPinned;
     await channelModel.save();

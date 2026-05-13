@@ -50,10 +50,11 @@ watch(
     }
 
     try {
-      const fullChannel = new Channel(perspective, newChannel.id);
-      await fullChannel.get({ views: true });
+      const result = await App.findAll(perspective, {
+        parent: { model: Channel, id: newChannel.id },
+      });
       if (seq !== channelLoadSeq) return;
-      views.value = fullChannel.views ?? [];
+      views.value = result;
     } catch {
       if (seq !== channelLoadSeq) return;
       views.value = [];

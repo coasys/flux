@@ -33,12 +33,21 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const itemsResult = await this.perspective.querySparql(itemsQuery);
-      const totalItems = itemsResult?.length || 0;
+      // Use targeted SPARQL for participants instead of this.get() which fetches all triples
+      const participantsQuery = `
+        SELECT ?did WHERE {
+          <${this.id}> <${FLUX_PARTICIPANT}> ?did .
+        }
+      `;
 
-      // Use maintained participants Collection
-      await this.get();
-      return { totalItems, participants: this.participants };
+      const [itemsResult, participantsResult] = await Promise.all([
+        this.perspective.querySparql(itemsQuery),
+        this.perspective.querySparql(participantsQuery),
+      ]);
+
+      const totalItems = itemsResult?.length || 0;
+      const participants = (participantsResult || []).map((r: any) => r.did).filter(Boolean);
+      return { totalItems, participants };
     } catch (error) {
       console.error('Error getting subgroup stats:', error);
       return { totalItems: 0, participants: [] };
