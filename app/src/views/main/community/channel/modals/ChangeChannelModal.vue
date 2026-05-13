@@ -39,6 +39,10 @@ let channelLoadSeq = 0;
 watch(
   channel,
   async (newChannel) => {
+    // Only fetch when the modal is actually open — this modal mounts eagerly
+    // with ChannelView, so without this guard it fires a redundant Channel query
+    // on every channel navigation.
+    if (!isChangeChannel.value) return;
     const seq = ++channelLoadSeq;
     if (!newChannel || !perspective) {
       views.value = [];

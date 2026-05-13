@@ -123,8 +123,12 @@ const filteredPackages = computed((): FluxApp[] =>
 const views = ref<App[]>([]);
 let viewsLoadSeq = 0;
 watch(
-  channel,
-  async (newChannel) => {
+  [channel, () => modalStore.showManageChannelPluginsModal],
+  async ([newChannel, isOpen]) => {
+    // Only fetch when the modal is actually open — this modal mounts eagerly
+    // with ChannelView, so without this guard it fires a redundant Channel query
+    // on every channel navigation.
+    if (!isOpen) return;
     const seq = ++viewsLoadSeq;
     if (!newChannel || !perspective) {
       views.value = [];
