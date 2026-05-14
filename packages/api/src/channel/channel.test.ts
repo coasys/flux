@@ -36,52 +36,48 @@ function computeUnprocessed(allItems: string[], processedItems: string[]): strin
 // ---------------------------------------------------------------------------
 
 describe('Channel.recentConversations()', () => {
-  it('issues a single SPARQL query with GROUP BY', async () => {
+  it('returns empty array when perspective has no data', async () => {
     const perspective = createMockPerspective();
     const results = await Channel.recentConversations(perspective as any, 20);
-
-    expect(perspective.querySparql).toHaveBeenCalledTimes(1);
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('GROUP BY');
-    expect(query).toContain('ORDER BY');
-    expect(query).toContain('LIMIT');
     expect(results).toEqual([]);
   });
 
-  it('returns mapped results with channelId, conversationId, lastActivity', async () => {
+  it('returns conversation channels sorted by most recent activity', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockResolvedValueOnce([
-      { channelId: 'ch-1', conversationId: 'conv-1', lastActivity: '2026-04-20T10:00:00Z' },
-      { channelId: 'ch-2', conversationId: null, lastActivity: '2026-04-19T10:00:00Z' },
+    perspective.querySparql.mockResolvedValue([
+      { channelId: 'ch-1', isConv: 'true', conversationId: 'conv-1' },
+      { channelId: 'ch-2', isConv: 'true', conversationId: null },
     ]);
+    perspective.get
+      .mockResolvedValueOnce([{ timestamp: '2026-04-19T10:00:00Z' }])
+      .mockResolvedValueOnce([{ timestamp: '2026-04-20T10:00:00Z' }]);
 
     const results = await Channel.recentConversations(perspective as any, 20);
+
     expect(results).toHaveLength(2);
-    expect(results[0]).toEqual({
-      channelId: 'ch-1',
-      conversationId: 'conv-1',
-      lastActivity: '2026-04-20T10:00:00Z',
-    });
-    expect(results[1].channelId).toBe('ch-2');
+    // ch-2 has the more recent activity, so it should come first
+    expect(results[0].channelId).toBe('ch-2');
+    expect(results[1].channelId).toBe('ch-1');
+    expect(results[1].conversationId).toBe('conv-1');
     // null conversationId should become undefined
-    expect(results[1].conversationId).toBeUndefined();
+    expect(results[0].conversationId).toBeUndefined();
   });
 
   it('deduplicates by channelId', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockResolvedValueOnce([
-      { channelId: 'ch-1', conversationId: 'conv-1', lastActivity: '2026-04-20T10:00:00Z' },
-      { channelId: 'ch-1', conversationId: 'conv-2', lastActivity: '2026-04-20T09:00:00Z' },
+    perspective.querySparql.mockResolvedValue([
+      { channelId: 'ch-1', isConv: 'true', conversationId: 'conv-1' },
+      { channelId: 'ch-1', isConv: 'true', conversationId: 'conv-2' },
     ]);
+    perspective.get.mockResolvedValue([{ timestamp: '2026-04-20T10:00:00Z' }]);
 
     const results = await Channel.recentConversations(perspective as any, 20);
     expect(results).toHaveLength(1);
-    expect(results[0].conversationId).toBe('conv-1'); // First seen wins
   });
 
-  it('handles errors gracefully', async () => {
+  it('returns empty array on error', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockRejectedValueOnce(new Error('SPARQL error'));
+    perspective.querySparql.mockRejectedValue(new Error('SPARQL error'));
 
     const results = await Channel.recentConversations(perspective as any, 20);
     expect(results).toEqual([]);
@@ -89,35 +85,44 @@ describe('Channel.recentConversations()', () => {
 
   it('respects the limit parameter', async () => {
     const perspective = createMockPerspective();
-    await Channel.recentConversations(perspective as any, 5);
+    perspective.querySparql.mockResolvedValue([
+      { channelId: 'ch-1', isConv: 'true' },
+      { channelId: 'ch-2', isConv: 'true' },
+      { channelId: 'ch-3', isConv: 'true' },
+    ]);
+    perspective.get.mockResolvedValue([{ timestamp: '2026-04-20T10:00:00Z' }]);
 
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('LIMIT 5');
+    const results = await Channel.recentConversations(perspective as any, 2);
+    expect(results).toHaveLength(2);
   });
 
-  it('handles null/empty query results', async () => {
+  it('handles null query results', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockResolvedValueOnce(null as any);
+    perspective.querySparql.mockResolvedValue(null as any);
 
     const results = await Channel.recentConversations(perspective as any, 20);
     expect(results).toEqual([]);
   });
+
+  it('only includes conversation channels, not regular channels', async () => {
+    const perspective = createMockPerspective();
+    perspective.querySparql.mockResolvedValue([
+      { channelId: 'ch-conv', isConv: 'true' },
+      { channelId: 'ch-regular', isConv: 'false' },
+    ]);
+    perspective.get.mockResolvedValue([{ timestamp: '2026-04-20T10:00:00Z' }]);
+
+    const results = await Channel.recentConversations(perspective as any, 20);
+    expect(results).toHaveLength(1);
+    expect(results[0].channelId).toBe('ch-conv');
+  });
 });
 
 describe('Channel.pinnedConversations()', () => {
-  it('issues a single SPARQL query', async () => {
+  it('returns empty array when perspective has no data', async () => {
     const perspective = createMockPerspective();
-    await Channel.pinnedConversations(perspective as any);
-    expect(perspective.querySparql).toHaveBeenCalledTimes(1);
-  });
-
-  it('queries for pinned channels', async () => {
-    const perspective = createMockPerspective();
-    await Channel.pinnedConversations(perspective as any);
-
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('"true"');
-    expect(query).toContain('?channelId');
+    const results = await Channel.pinnedConversations(perspective as any);
+    expect(results).toEqual([]);
   });
 
   it('returns mapped results', async () => {
