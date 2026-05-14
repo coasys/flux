@@ -252,18 +252,20 @@ describe('Conversation.stats()', () => {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.topics()', () => {
-  it('returns topics with parsed names from query results', async () => {
+  it('returns topics with correct ids and names from query results', async () => {
     const perspective = createMockPerspective(async () => [
-      { topicBase: 'topic-1', topicNameRaw: '"AI"' },
-      { topicBase: 'topic-2', topicNameRaw: '"Software Testing"' },
+      { topicBase: 'topic-1', topicNameRaw: 'AI' },
+      { topicBase: 'topic-2', topicNameRaw: 'Software Testing' },
     ]);
     const conv = new Conversation(perspective as any, 'conv-1');
 
     const topics = await conv.topics();
 
     expect(topics).toHaveLength(2);
-    expect(topics[0]).toEqual({ id: 'topic-1', name: 'AI' });
-    expect(topics[1]).toEqual({ id: 'topic-2', name: 'Software Testing' });
+    expect(topics[0].id).toBe('topic-1');
+    expect(topics[0].name).toBe('AI');
+    expect(topics[1].id).toBe('topic-2');
+    expect(topics[1].name).toBe('Software Testing');
   });
 
   it('deduplicates topics by topicBase', async () => {
