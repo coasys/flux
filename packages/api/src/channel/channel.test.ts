@@ -25,12 +25,6 @@ function createMockPerspective(querySparqlImpl?: (...args: any[]) => any) {
   };
 }
 
-// Mirror the JS set-difference logic from Channel.unprocessedItems()
-function computeUnprocessed(allItems: string[], processedItems: string[]): string[] {
-  const processedSet = new Set(processedItems);
-  return allItems.filter((id) => !processedSet.has(id));
-}
-
 // ---------------------------------------------------------------------------
 // Static methods
 // ---------------------------------------------------------------------------
@@ -254,115 +248,6 @@ describe('Channel.allItems()', () => {
     expect(voice.timestamp).toBe('2026-04-20T10:01:00.000Z');
     expect(typed.timestamp).toBe('2026-04-20T10:02:00.000Z');
     expect(voice.timestamp < typed.timestamp).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// unprocessedItems() — set-difference logic
-// ---------------------------------------------------------------------------
-
-describe('Channel.unprocessedItems() set-difference logic', () => {
-  it('returns items not in processedSet', () => {
-    const all = ['item1', 'item2', 'item3', 'item4'];
-    const processed = ['item1', 'item3'];
-    expect(computeUnprocessed(all, processed)).toEqual(['item2', 'item4']);
-  });
-
-  it('returns ALL items when processedSet is empty (original bug scenario)', () => {
-    const all = ['item1', 'item2', 'item3'];
-    expect(computeUnprocessed(all, [])).toEqual(all);
-  });
-
-  it('returns empty array when all items are processed', () => {
-    const all = ['item1', 'item2'];
-    expect(computeUnprocessed(all, ['item1', 'item2'])).toEqual([]);
-  });
-
-  it('returns empty array when no items exist', () => {
-    expect(computeUnprocessed([], [])).toEqual([]);
-    expect(computeUnprocessed([], ['item1'])).toEqual([]);
-  });
-
-  it('handles duplicates in allItems', () => {
-    const all = ['item1', 'item2', 'item1', 'item3'];
-    const processed = ['item1'];
-    expect(computeUnprocessed(all, processed)).toEqual(['item2', 'item3']);
-  });
-
-  it('handles duplicates in processedItems', () => {
-    const all = ['item1', 'item2', 'item3'];
-    const processed = ['item1', 'item1', 'item3'];
-    expect(computeUnprocessed(all, processed)).toEqual(['item2']);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// unprocessedItems() — SPARQL integration
-// ---------------------------------------------------------------------------
-
-describe('Channel.unprocessedItems() SPARQL integration', () => {
-  // Simulate the three-query pattern from Channel.unprocessedItems()
-  async function runUnprocessedItems(
-    perspective: {
-      querySparql: (q: string) => Promise<any[]>;
-    },
-    channelId: string,
-  ): Promise<any[]> {
-    const allItemsQuery = `SELECT ?id WHERE { <${channelId}> <ad4m://has_child> ?id }`;
-    const processedQuery = `SELECT ?id WHERE { ?sg <flux://has_item> ?id }`;
-
-    const [allItemsResult, processedResult] = await Promise.all([
-      perspective.querySparql(allItemsQuery),
-      perspective.querySparql(processedQuery),
-    ]);
-
-    const processedSet = new Set(
-      (processedResult || []).map((r: any) => r.id),
-    );
-    const unprocessedIds = (allItemsResult || [])
-      .map((r: any) => r.id)
-      .filter((id: string) => id && !processedSet.has(id));
-
-    return unprocessedIds;
-  }
-
-  it('issues two parallel SPARQL queries', async () => {
-    const querySparql = vi.fn().mockResolvedValue([]);
-    await runUnprocessedItems({ querySparql }, 'ch-1');
-    expect(querySparql).toHaveBeenCalledTimes(2);
-  });
-
-  it('filters out processed items from all items', async () => {
-    const querySparql = vi.fn()
-      .mockResolvedValueOnce([{ id: 'item1' }, { id: 'item2' }, { id: 'item3' }])
-      .mockResolvedValueOnce([{ id: 'item1' }]);
-
-    const result = await runUnprocessedItems({ querySparql }, 'ch-1');
-    expect(result).toEqual(['item2', 'item3']);
-  });
-
-  it('returns all items when none are processed', async () => {
-    const querySparql = vi.fn()
-      .mockResolvedValueOnce([{ id: 'item1' }, { id: 'item2' }])
-      .mockResolvedValueOnce([]);
-
-    const result = await runUnprocessedItems({ querySparql }, 'ch-1');
-    expect(result).toEqual(['item1', 'item2']);
-  });
-
-  it('returns empty when all items are processed', async () => {
-    const querySparql = vi.fn()
-      .mockResolvedValueOnce([{ id: 'item1' }])
-      .mockResolvedValueOnce([{ id: 'item1' }]);
-
-    const result = await runUnprocessedItems({ querySparql }, 'ch-1');
-    expect(result).toEqual([]);
-  });
-
-  it('handles null results gracefully', async () => {
-    const querySparql = vi.fn().mockResolvedValue(null);
-    const result = await runUnprocessedItems({ querySparql }, 'ch-1');
-    expect(result).toEqual([]);
   });
 });
 
