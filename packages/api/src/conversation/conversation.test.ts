@@ -351,6 +351,7 @@ describe('Conversation.processNewExpressions()', () => {
       subgroupName: 'Test Group',
       summary: 'Summary',
       participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
     conv.save = vi.fn().mockResolvedValue(undefined);
@@ -359,13 +360,10 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
-    } catch {
-      // May throw due to mocking limitations — that's OK, we just check batch lifecycle
-    }
+    await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
 
     expect(perspective.createBatch).toHaveBeenCalledTimes(1);
+    expect(perspective.commitBatch).toHaveBeenCalledWith('batch-1');
   });
 
   it('calls updateProcessingState through all steps', async () => {
@@ -391,13 +389,8 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
-    } catch {
-      // May fail due to LLM task dependencies — check what steps were reached
-    }
+    await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
 
-    // Step 2 should always be called (after initial setup, before LLM tasks)
     expect(updateState).toHaveBeenCalledWith({ step: 2 });
   });
 
@@ -420,6 +413,7 @@ describe('Conversation.processNewExpressions()', () => {
       subgroupName: 'Group',
       summary: 'Summary',
       participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
     conv.save = vi.fn().mockResolvedValue(undefined);
@@ -428,11 +422,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(itemsWithNullText as any, updateState, createMockClient() as any);
-    } catch {
-      // May throw due to LLM mock — that's expected
-    }
+    await conv.processNewExpressions(itemsWithNullText as any, updateState, createMockClient() as any);
 
     // Verify items had null text replaced with ''
     const detectCall = (conv['detectNewGroup'] as any).mock.calls[0];
@@ -465,11 +455,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
-    } catch {
-      // May fail on LLM conversation task
-    }
+    await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
 
     // All items should be linked to sg-current via flux://has_item
     const addLinksCalls = perspective.addLinks.mock.calls;
@@ -504,6 +490,7 @@ describe('Conversation.processNewExpressions()', () => {
       subgroupName: 'New Topic',
       summary: 'New summary',
       participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
     conv.save = vi.fn().mockResolvedValue(undefined);
@@ -512,11 +499,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
-    } catch {
-      // May fail on LLM conversation task
-    }
+    await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
 
     const addLinksCalls = perspective.addLinks.mock.calls;
     const itemLinksCall = addLinksCalls.find(
@@ -547,6 +530,7 @@ describe('Conversation.processNewExpressions()', () => {
       subgroupName: 'First Group',
       summary: 'First summary',
       participants: [],
+      save: vi.fn().mockResolvedValue(undefined),
     });
     conv['updateGroupTopics'] = vi.fn().mockResolvedValue(undefined);
     conv.save = vi.fn().mockResolvedValue(undefined);
@@ -555,11 +539,7 @@ describe('Conversation.processNewExpressions()', () => {
     conv.nameFixed = false;
 
     const updateState = vi.fn();
-    try {
-      await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
-    } catch {
-      // May fail on LLM conversation task
-    }
+    await conv.processNewExpressions(mockItems as any, updateState, createMockClient() as any);
 
     expect(conv['createNewGroup']).toHaveBeenCalled();
   });
