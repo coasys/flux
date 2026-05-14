@@ -487,6 +487,9 @@ export async function createCommunityService(): Promise<CommunityService> {
   // Track channel participants automatically.
   // Uses addListener because participant tracking needs link.author metadata,
   // which isn't available from SPARQL subscription results.
+  // Local dedup set avoids redundant addLinks RPCs — ChannelSummary doesn't
+  // carry participants, so the old channel.participants.includes() check was lost.
+  const knownParticipants = new Set<string>();
   function handleParticipantTracking(link: any) {
     if (link.data.predicate !== CHANNEL) return null;
     if (!link.author) return null;
@@ -495,9 +498,14 @@ export async function createCommunityService(): Promise<CommunityService> {
     const channel = allChannels.value.find((c) => c.id === channelId);
     if (!channel) return null;
 
+    const key = `${channelId}::${link.author}`;
+    if (knownParticipants.has(key)) return null;
+    knownParticipants.add(key);
+
     perspective
       .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
       .catch((error) => {
+        knownParticipants.delete(key);
         console.error('Failed to add participant to channel:', {
           channelId,
           author: link.author,
