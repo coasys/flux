@@ -188,6 +188,43 @@ function createTranscribedItems() {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.stats()', () => {
+  it('returns correct subgroup count and participants from query results', async () => {
+    let callCount = 0;
+    const perspective = createMockPerspective(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // subgroups query
+        return [{ sg: 'sg-1' }, { sg: 'sg-2' }, { sg: 'sg-3' }];
+      }
+      // participants query
+      return [{ did: 'did:test:alice' }, { did: 'did:test:bob' }];
+    });
+    const conv = new Conversation(perspective as any, 'conv-1');
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+
+    const stats = await conv.stats();
+
+    expect(stats.totalSubgroups).toBe(3);
+    expect(stats.participants).toEqual(['did:test:alice', 'did:test:bob']);
+  });
+
+  it('filters out null/undefined participant dids', async () => {
+    let callCount = 0;
+    const perspective = createMockPerspective(async () => {
+      callCount++;
+      if (callCount === 1) return [];
+      return [{ did: 'did:test:alice' }, { did: null }, { did: undefined }, { did: 'did:test:bob' }];
+    });
+    const conv = new Conversation(perspective as any, 'conv-1');
+    conv.get = vi.fn().mockResolvedValue(undefined);
+    conv.participants = [];
+
+    const stats = await conv.stats();
+
+    expect(stats.participants).toEqual(['did:test:alice', 'did:test:bob']);
+  });
+
   it('returns zero subgroups when query returns empty', async () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
@@ -215,6 +252,20 @@ describe('Conversation.stats()', () => {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.topics()', () => {
+  it('returns topics with parsed names from query results', async () => {
+    const perspective = createMockPerspective(async () => [
+      { topicBase: 'topic-1', topicNameRaw: '"AI"' },
+      { topicBase: 'topic-2', topicNameRaw: '"Software Testing"' },
+    ]);
+    const conv = new Conversation(perspective as any, 'conv-1');
+
+    const topics = await conv.topics();
+
+    expect(topics).toHaveLength(2);
+    expect(topics[0]).toEqual({ id: 'topic-1', name: 'AI' });
+    expect(topics[1]).toEqual({ id: 'topic-2', name: 'Software Testing' });
+  });
+
   it('deduplicates topics by topicBase', async () => {
     const perspective = createMockPerspective(async () => [
       { topicBase: 'topic-1', topicNameRaw: '"AI"' },
@@ -314,6 +365,39 @@ describe('Conversation.subgroupsData()', () => {
 
     const subgroups = await conv.subgroupsData();
     expect(subgroups[0].start).toBe(new Date('2026-01-01T00:00:30Z').getTime());
+  });
+
+  it('computes start/end timestamps across multiple subgroups', async () => {
+    let callCount = 0;
+    const perspective = createMockPerspective(async () => {
+      callCount++;
+      if (callCount === 1) {
+        return [
+          { id: 'sg-1', timestamp: '2026-01-01T00:00:00Z', nameRaw: 'First', summaryRaw: 'Summary 1' },
+          { id: 'sg-2', timestamp: '2026-01-01T01:00:00Z', nameRaw: 'Second', summaryRaw: 'Summary 2' },
+        ];
+      }
+      // Batch timestamp query returns items for both subgroups
+      return [
+        { sg: 'sg-1', channelTs: '2026-01-01T00:01:00Z' },
+        { sg: 'sg-1', channelTs: '2026-01-01T00:10:00Z' },
+        { sg: 'sg-2', channelTs: '2026-01-01T01:01:00Z' },
+        { sg: 'sg-2', channelTs: '2026-01-01T01:30:00Z' },
+      ];
+    });
+    const conv = new Conversation(perspective as any, 'conv-1');
+
+    const subgroups = await conv.subgroupsData();
+
+    expect(subgroups).toHaveLength(2);
+    expect(subgroups[0].name).toBe('First');
+    expect(subgroups[1].name).toBe('Second');
+    // sg-1: start=00:01, end=00:10
+    expect(subgroups[0].start).toBe(new Date('2026-01-01T00:01:00Z').getTime());
+    expect(subgroups[0].end).toBe(new Date('2026-01-01T00:10:00Z').getTime());
+    // sg-2: start=01:01, end=01:30
+    expect(subgroups[1].start).toBe(new Date('2026-01-01T01:01:00Z').getTime());
+    expect(subgroups[1].end).toBe(new Date('2026-01-01T01:30:00Z').getTime());
   });
 
   it('handles query errors gracefully', async () => {

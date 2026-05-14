@@ -242,6 +242,111 @@ describe('Channel.allItems()', () => {
 });
 
 // ---------------------------------------------------------------------------
+// unprocessedItems() — set-difference filtering
+// ---------------------------------------------------------------------------
+
+describe('Channel.unprocessedItems() set-difference filtering', () => {
+  // Helper: mock perspective that returns different results per query call
+  // (unprocessedItems issues up to 3 queries: allItems, processed, data)
+  function createSequentialPerspective(responses: (() => any[])[]) {
+    let callCount = 0;
+    return createMockPerspective(async () => {
+      const response = responses[callCount] || (() => []);
+      callCount++;
+      return response();
+    });
+  }
+
+  it('returns only unprocessed items (filters out processed ones)', async () => {
+    const perspective = createSequentialPerspective([
+      // Query 1 (allItems): all channel children
+      () => [{ id: 'item1' }, { id: 'item2' }, { id: 'item3' }, { id: 'item4' }],
+      // Query 2 (processed): items already in a subgroup
+      () => [{ id: 'item1' }, { id: 'item3' }],
+      // Query 3 (data): full data for unprocessed items
+      () => [
+        { id: 'item2', author: 'did:test:alice', timestamp: '2026-01-01T00:01:00Z', type: 'flux://has_message', body: 'msg2' },
+        { id: 'item4', author: 'did:test:bob', timestamp: '2026-01-01T00:02:00Z', type: 'flux://has_message', body: 'msg4' },
+      ],
+    ]);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toHaveLength(2);
+    expect(items.map(i => i.id)).toEqual(['item2', 'item4']);
+  });
+
+  it('returns all items when none are processed', async () => {
+    const perspective = createSequentialPerspective([
+      () => [{ id: 'item1' }, { id: 'item2' }],
+      () => [],
+      () => [
+        { id: 'item1', author: 'did:test:alice', timestamp: '2026-01-01T00:01:00Z', type: 'flux://has_message', body: 'msg1' },
+        { id: 'item2', author: 'did:test:bob', timestamp: '2026-01-01T00:02:00Z', type: 'flux://has_message', body: 'msg2' },
+      ],
+    ]);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toHaveLength(2);
+  });
+
+  it('returns empty array when all items are processed', async () => {
+    const perspective = createSequentialPerspective([
+      () => [{ id: 'item1' }],
+      () => [{ id: 'item1' }],
+      // Query 3 should not be reached
+    ]);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toEqual([]);
+  });
+
+  it('returns empty array when no items exist', async () => {
+    const perspective = createSequentialPerspective([
+      () => [],
+      () => [],
+    ]);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toEqual([]);
+  });
+
+  it('handles null query results gracefully', async () => {
+    const perspective = createMockPerspective();
+    perspective.querySparql.mockResolvedValue(null as any);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toEqual([]);
+  });
+
+  it('deduplicates items by id in data results', async () => {
+    const perspective = createSequentialPerspective([
+      () => [{ id: 'item1' }],
+      () => [],
+      // Data query returns duplicates
+      () => [
+        { id: 'item1', author: 'did:test:alice', timestamp: '2026-01-01T00:01:00Z', type: 'flux://has_message', body: 'msg1' },
+        { id: 'item1', author: 'did:test:alice', timestamp: '2026-01-01T00:01:00Z', type: 'flux://has_message', body: 'msg1' },
+      ],
+    ]);
+
+    const channel = new Channel(perspective as any, 'channel-1');
+    const items = await channel.unprocessedItems();
+
+    expect(items).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // unprocessedItems() — transcript timestamp coalescing
 // ---------------------------------------------------------------------------
 
