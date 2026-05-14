@@ -274,12 +274,7 @@ export class Channel extends Ad4mModel {
     `;
 
     try {
-      console.debug('[recentConversations] SPARQL query:', sparql);
       const results = await perspective.querySparql(sparql);
-      console.debug('[recentConversations] SPARQL returned', results?.length ?? 0, 'rows');
-      if (results?.length > 0) {
-        console.debug('[recentConversations] first row:', JSON.stringify(results[0]));
-      }
 
       // Filter to only conversation channels and dedup
       const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
@@ -287,7 +282,6 @@ export class Channel extends Ad4mModel {
         const cid = r.channelId;
         if (!cid || channelMap.has(cid)) continue;
         const parsed = parseLit(r.isConv);
-        console.debug('[recentConversations] channel', cid, 'isConv raw:', r.isConv, '-> parsed:', parsed, 'type:', typeof parsed);
         if (String(parsed) !== 'true') continue;
         channelMap.set(cid, {
           channelId: cid,
@@ -295,7 +289,6 @@ export class Channel extends Ad4mModel {
         });
       }
 
-      console.debug('[recentConversations] matched', channelMap.size, 'conversation channels');
       if (channelMap.size === 0) return [];
 
       // Step 2: For each channel, get has_child links via native API to find latest timestamp.
@@ -306,7 +299,6 @@ export class Channel extends Ad4mModel {
             source: channelId,
             predicate: 'ad4m://has_child',
           });
-          console.debug('[recentConversations] channel', channelId, ':', links.length, 'has_child links');
           // Find the most recent link timestamp
           let latest = '';
           for (const link of links) {
@@ -320,7 +312,6 @@ export class Channel extends Ad4mModel {
       const sorted = Array.from(channelMap.values())
         .sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''))
         .slice(0, limit);
-      console.debug('[recentConversations] returning', sorted.length, 'channels');
       return sorted;
     } catch (error) {
       console.error('Error in Channel.recentConversations():', error);
