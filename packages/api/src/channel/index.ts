@@ -249,58 +249,68 @@ export class Channel extends Ad4mModel {
 
   /**
    * Get recent conversation channels with last-activity timestamps.
-   * Single SPARQL query — replaces the N+1 iterative walk in useCommunityService.
+   *
+   * Uses a lightweight SPARQL query (no reifier joins) to find conversation
+   * channels, then the native link API to get timestamps — avoiding the
+   * expensive triple-term pattern matching that caused 60s query times.
    *
    * Returns conversation channels ordered by most recent activity (latest item timestamp).
-   * Falls back to conversation creation time when no items exist.
+   * Falls back to channel creation time when no items exist.
    */
   static async recentConversations(
     perspective: PerspectiveProxy,
     limit: number = 20,
   ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
+    // Step 1: Find conversation channels + their conversation child (fast, no reifier joins)
     const sparql = `
-      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-      SELECT ?channelId (SAMPLE(?cId) AS ?conversationId) (MAX(?ts) AS ?lastActivity) WHERE {
+      SELECT ?channelId ?isConv ?conversationId WHERE {
         ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
-        ?channelId <${CHANNEL_IS_CONVERSATION}> ?_isConv .
-        FILTER(STR(<ad4m://fn/parse_literal>(?_isConv)) = "true")
+        ?channelId <${CHANNEL_IS_CONVERSATION}> ?isConv .
         OPTIONAL {
-          ?channelId <ad4m://has_child> ?cId .
-          ?cId <flux://entry_type> <flux://conversation> .
+          ?channelId <ad4m://has_child> ?conversationId .
+          ?conversationId <${ENTRY_TYPE}> <flux://conversation> .
         }
-        OPTIONAL {
-          ?channelId <ad4m://has_child> ?item .
-          ?_itemReifier rdf:reifies <<( ?channelId <ad4m://has_child> ?item )>> .
-          ?_itemReifier <ad4m://ontology/timestamp> ?itemTs .
-          ?item <${ENTRY_TYPE}> ?itemType .
-          FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
-        }
-        OPTIONAL {
-          ?_chanReifier rdf:reifies <<( ?_parent <flux://has_channel> ?channelId )>> .
-          ?_chanReifier <ad4m://ontology/timestamp> ?chanCreatedTs .
-        }
-        BIND(COALESCE(?itemTs, ?chanCreatedTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
       }
-      GROUP BY ?channelId
-      ORDER BY DESC(?lastActivity)
-      LIMIT ${limit}
     `;
 
     try {
       const results = await perspective.querySparql(sparql);
-      // Safety-net dedup by channelId — the SPARQL GROUP BY should already
-      // return one row per channel, but guard against engine quirks.
-      const seen = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
+
+      // Filter to only conversation channels and dedup
+      const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
       for (const r of results || []) {
         const cid = r.channelId;
-        if (!cid || seen.has(cid)) continue;
-        seen.set(cid, {
+        if (!cid || channelMap.has(cid)) continue;
+        if (parseLit(r.isConv) !== 'true') continue;
+        channelMap.set(cid, {
           channelId: cid,
           conversationId: r.conversationId || undefined,
-          lastActivity: r.lastActivity || undefined,
         });
       }
-      return Array.from(seen.values());
+
+      if (channelMap.size === 0) return [];
+
+      // Step 2: For each channel, get has_child links via native API to find latest timestamp.
+      // perspective.get() uses indexed lookups, not SPARQL reifier joins.
+      await Promise.all(
+        Array.from(channelMap.entries()).map(async ([channelId, entry]) => {
+          const links = await perspective.get({
+            source: channelId,
+            predicate: 'ad4m://has_child',
+          });
+          // Find the most recent link timestamp
+          let latest = '';
+          for (const link of links) {
+            if (link.timestamp > latest) latest = link.timestamp;
+          }
+          entry.lastActivity = latest || undefined;
+        }),
+      );
+
+      // Sort by lastActivity descending, take top N
+      return Array.from(channelMap.values())
+        .sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''))
+        .slice(0, limit);
     } catch (error) {
       console.error('Error in Channel.recentConversations():', error);
       return [];
