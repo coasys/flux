@@ -190,67 +190,6 @@ describe('unprocessed items refresh — debouncing', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests: AI processing trigger chain
-// ---------------------------------------------------------------------------
-
-describe('AI processing trigger chain', () => {
-  it('checkIfWeShouldProcessTask requires MIN_ITEMS + DELAY items', () => {
-    const MIN_ITEMS_TO_PROCESS = 5;
-    const PROCESSING_ITEMS_DELAY = 3;
-    const threshold = MIN_ITEMS_TO_PROCESS + PROCESSING_ITEMS_DELAY;
-
-    expect(7).toBeLessThan(threshold);
-    expect(threshold).toBe(8);
-    expect(9).toBeGreaterThan(threshold);
-  });
-
-  it('items-to-process count subtracts DELAY from total', () => {
-    const MAX_ITEMS_TO_PROCESS = 20;
-    const PROCESSING_ITEMS_DELAY = 3;
-
-    // Simulates the calculation in processesNextTask
-    const unprocessedCount = 10;
-    const numberOfItemsToProcess = Math.max(
-      0,
-      Math.min(MAX_ITEMS_TO_PROCESS, unprocessedCount - PROCESSING_ITEMS_DELAY),
-    );
-    expect(numberOfItemsToProcess).toBe(7); // 10 - 3 = 7
-
-    // Edge case: exactly at threshold
-    const atThreshold = 8;
-    const itemsAtThreshold = Math.max(
-      0,
-      Math.min(MAX_ITEMS_TO_PROCESS, atThreshold - PROCESSING_ITEMS_DELAY),
-    );
-    expect(itemsAtThreshold).toBe(5); // 8 - 3 = 5
-
-    // Edge case: below threshold (shouldn't reach processesNextTask, but test anyway)
-    const belowThreshold = 2;
-    const itemsBelow = Math.max(
-      0,
-      Math.min(MAX_ITEMS_TO_PROCESS, belowThreshold - PROCESSING_ITEMS_DELAY),
-    );
-    expect(itemsBelow).toBe(0); // max(0, 2-3) = 0
-  });
-
-  it('authorship check requires at least one item by the current user', () => {
-    const myDid = 'did:test:me';
-    const items = [
-      { id: 'msg-1', author: 'did:test:alice' },
-      { id: 'msg-2', author: 'did:test:bob' },
-    ];
-
-    const weAuthored = items.some((item) => item.author === myDid);
-    expect(weAuthored).toBe(false);
-
-    // Add one of our items
-    items.push({ id: 'msg-3', author: myDid });
-    const weAuthoredNow = items.some((item) => item.author === myDid);
-    expect(weAuthoredNow).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Tests: processingStateChecked gate — race condition
 // ---------------------------------------------------------------------------
 
