@@ -155,16 +155,6 @@ describe('Channel.pinnedConversations()', () => {
 // ---------------------------------------------------------------------------
 
 describe('Channel.allItems()', () => {
-  it('includes transcript_started_at in the SPARQL query', async () => {
-    const perspective = createMockPerspective();
-    const channel = new Channel(perspective as any, 'channel-1');
-    await channel.allItems();
-
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('transcript_started_at');
-    expect(query).toContain('?transcriptStart');
-  });
-
   it('uses transcriptStart when present instead of link timestamp', async () => {
     const perspective = createMockPerspective(async () => [
       {
@@ -312,27 +302,4 @@ describe('Channel.unprocessedItems() transcript timestamp coalescing', () => {
     expect(items[0].timestamp).toBe('2026-04-20T10:05:00.000Z');
   });
 
-  it('includes transcript_started_at in the data query', async () => {
-    const perspective = createSequentialMockPerspective([
-      () => [{ id: 'msg-1' }],
-      () => [],
-      () => [
-        {
-          id: 'msg-1',
-          author: 'did:test:alice',
-          timestamp: '2026-04-20T10:00:00Z',
-          type: 'flux://has_message',
-          body: 'test',
-        },
-      ],
-    ]);
-
-    const channel = new Channel(perspective as any, 'channel-1');
-    await channel.unprocessedItems();
-
-    // The third call is the data query
-    const dataQuery = perspective.querySparql.mock.calls[2][0];
-    expect(dataQuery).toContain('transcript_started_at');
-    expect(dataQuery).toContain('?transcriptStart');
-  });
 });

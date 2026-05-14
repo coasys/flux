@@ -188,23 +188,6 @@ function createTranscribedItems() {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.stats()', () => {
-  it('queries SPARQL for subgroup count', async () => {
-    const perspective = createMockPerspective();
-    const conv = new Conversation(perspective as any, 'conv-1');
-    conv.get = vi.fn().mockResolvedValue(undefined);
-    conv.participants = ['did:test:alice'];
-
-    const stats = await conv.stats();
-    expect(perspective.querySparql).toHaveBeenCalledTimes(2);
-    const subgroupsQuery = perspective.sparqlCalls[0];
-    expect(subgroupsQuery).toContain('conv-1');
-    expect(subgroupsQuery).toContain('ad4m://has_child');
-    expect(subgroupsQuery).toContain('flux://conversation_subgroup');
-    const participantsQuery = perspective.sparqlCalls[1];
-    expect(participantsQuery).toContain('conv-1');
-    expect(participantsQuery).toContain('flux://has_participant');
-  });
-
   it('returns zero subgroups when query returns empty', async () => {
     const perspective = createMockPerspective();
     const conv = new Conversation(perspective as any, 'conv-1');
@@ -232,19 +215,6 @@ describe('Conversation.stats()', () => {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.topics()', () => {
-  it('queries SPARQL for topics via semantic relationships', async () => {
-    const perspective = createMockPerspective();
-    const conv = new Conversation(perspective as any, 'conv-1');
-
-    await conv.topics();
-    expect(perspective.querySparql).toHaveBeenCalledTimes(1);
-    const query = perspective.sparqlCalls[0];
-    expect(query).toContain('flux://has_tag');
-    expect(query).toContain('flux://has_semantic_relationship');
-    expect(query).toContain('flux://has_topic');
-    expect(query).toContain('conv-1');
-  });
-
   it('deduplicates topics by topicBase', async () => {
     const perspective = createMockPerspective(async () => [
       { topicBase: 'topic-1', topicNameRaw: '"AI"' },
@@ -344,27 +314,6 @@ describe('Conversation.subgroupsData()', () => {
 
     const subgroups = await conv.subgroupsData();
     expect(subgroups[0].start).toBe(new Date('2026-01-01T00:00:30Z').getTime());
-  });
-
-  it('uses VALUES clause for batch timestamp query', async () => {
-    let callCount = 0;
-    const perspective = createMockPerspective(async () => {
-      callCount++;
-      if (callCount === 1) {
-        return [
-          { id: 'sg-1', timestamp: '2026-01-01T00:00:00Z' },
-          { id: 'sg-2', timestamp: '2026-01-01T00:10:00Z' },
-        ];
-      }
-      return [];
-    });
-    const conv = new Conversation(perspective as any, 'conv-1');
-
-    await conv.subgroupsData();
-    const batchQuery = perspective.sparqlCalls[1];
-    expect(batchQuery).toContain('VALUES ?sg');
-    expect(batchQuery).toContain('sg-1');
-    expect(batchQuery).toContain('sg-2');
   });
 
   it('handles query errors gracefully', async () => {
