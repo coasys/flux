@@ -13,6 +13,11 @@ const { BODY, ENTRY_TYPE, REACTION, TRANSCRIPT_STARTED_AT, MESSAGE_THREAD, HAS_R
  *
  * Retains simple @HasMany relations (reactions, thread, replies) since
  * those are direct link traversals, not SPARQL queries.
+ *
+ * Shares `@Model({ name: 'Message' })` with the full Message model intentionally —
+ * both query the same SDNA subject class but this model hydrates fewer properties.
+ * The full Message model must be registered first (via Ad4mModel.registerAll) to
+ * install the SDNA; MessageSummary piggybacks on that registration.
  */
 @Model({ name: 'Message' })
 export class MessageSummary extends Ad4mModel {

@@ -10,6 +10,11 @@ const { ENTRY_TYPE, CHANNEL_NAME, CHANNEL_DESCRIPTION, CHANNEL_IS_CONVERSATION, 
  * No @HasMany relations — no hidden graph exploration during hydration.
  * Use `Channel` (full model) only when you need to traverse relations
  * like `messages`, `conversations`, `views`, etc.
+ *
+ * Shares `@Model({ name: 'Channel' })` with the full Channel model intentionally —
+ * both query the same SDNA subject class but this model hydrates fewer properties.
+ * The full Channel model must be registered first (via Ad4mModel.registerAll) to
+ * install the SDNA; ChannelSummary piggybacks on that registration.
  */
 @Model({ name: 'Channel' })
 export class ChannelSummary extends Ad4mModel {
