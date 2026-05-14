@@ -255,8 +255,8 @@ export async function createCommunityService(): Promise<CommunityService> {
           const conv = new Conversation(perspective, id);
           try {
             await conv.get();
-          } catch {
-            /* ignore */
+          } catch (e) {
+            console.warn(`Failed to hydrate pinned conversation ${id}:`, e);
           }
           conversationCache.set(id, conv);
         }),
@@ -290,8 +290,8 @@ export async function createCommunityService(): Promise<CommunityService> {
           const conv = new Conversation(perspective, id);
           try {
             await conv.get();
-          } catch {
-            /* hydration failure — stub will lack properties but won't break rendering */
+          } catch (e) {
+            console.warn(`Failed to hydrate conversation ${id}:`, e);
           }
           conversationCache.set(id, conv);
         }),
@@ -337,7 +337,8 @@ export async function createCommunityService(): Promise<CommunityService> {
             });
             if (conversation) conversationCache.set(conversation.id, conversation);
             return { channelId: childChannel.id, conversationId: conversation?.id };
-          } catch {
+          } catch (e) {
+            console.warn(`Failed to find conversation for channel ${childChannel.id}:`, e);
             return { channelId: childChannel.id };
           }
         }),
