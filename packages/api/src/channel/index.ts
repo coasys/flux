@@ -258,76 +258,49 @@ export class Channel extends Ad4mModel {
     perspective: PerspectiveProxy,
     limit: number = 20,
   ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
-    // Step 1: Get conversation channel IDs (fast — no reifier joins)
-    const channelSparql = `
-      SELECT ?channelId ?conversationId WHERE {
+    const sparql = `
+      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+      SELECT ?channelId (SAMPLE(?cId) AS ?conversationId) (MAX(?ts) AS ?lastActivity) WHERE {
         ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
         ?channelId <${CHANNEL_IS_CONVERSATION}> ?_isConv .
-        FILTER(STR(?_isConv) IN ("literal:boolean:true", "true"))
+        FILTER(STR(<ad4m://fn/parse_literal>(?_isConv)) = "true")
         OPTIONAL {
-          ?channelId <ad4m://has_child> ?conversationId .
-          ?conversationId <${ENTRY_TYPE}> <flux://conversation> .
+          ?channelId <ad4m://has_child> ?cId .
+          ?cId <flux://entry_type> <flux://conversation> .
         }
+        OPTIONAL {
+          ?channelId <ad4m://has_child> ?item .
+          ?_itemReifier rdf:reifies <<( ?channelId <ad4m://has_child> ?item )>> .
+          ?_itemReifier <ad4m://ontology/timestamp> ?itemTs .
+          ?item <${ENTRY_TYPE}> ?itemType .
+          FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
+        }
+        OPTIONAL {
+          ?_chanReifier rdf:reifies <<( ?_parent <flux://has_channel> ?channelId )>> .
+          ?_chanReifier <ad4m://ontology/timestamp> ?chanCreatedTs .
+        }
+        BIND(COALESCE(?itemTs, ?chanCreatedTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
       }
+      GROUP BY ?channelId
+      ORDER BY DESC(?lastActivity)
+      LIMIT ${limit}
     `;
 
-    // Step 2: For matched channels, find latest item timestamps via reifier
-    // Uses VALUES to scope the reifier join to only the channels we care about
-    const buildTimestampSparql = (channelIds: string[]) => {
-      const values = channelIds.map((id) => `<${id}>`).join(' ');
-      return `
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        SELECT ?channelId (MAX(?ts) AS ?lastActivity) WHERE {
-          VALUES ?channelId { ${values} }
-          OPTIONAL {
-            ?channelId <ad4m://has_child> ?item .
-            ?_itemReifier rdf:reifies <<( ?channelId <ad4m://has_child> ?item )>> .
-            ?_itemReifier <ad4m://ontology/timestamp> ?itemTs .
-            ?item <${ENTRY_TYPE}> ?itemType .
-            FILTER(?itemType IN (<${EntryType.Message}>, <${EntryType.Post}>))
-          }
-          OPTIONAL {
-            ?_chanReifier rdf:reifies <<( ?_parent <flux://has_channel> ?channelId )>> .
-            ?_chanReifier <ad4m://ontology/timestamp> ?chanCreatedTs .
-          }
-          BIND(COALESCE(?itemTs, ?chanCreatedTs, "1970-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>) AS ?ts)
-        }
-        GROUP BY ?channelId
-        ORDER BY DESC(?lastActivity)
-        LIMIT ${limit}
-      `;
-    };
-
     try {
-      // Step 1: Get channels (fast — no reifier joins)
-      const channelResults = await perspective.querySparql(channelSparql);
-      const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
-      for (const r of channelResults || []) {
+      const results = await perspective.querySparql(sparql);
+      // Safety-net dedup by channelId — the SPARQL GROUP BY should already
+      // return one row per channel, but guard against engine quirks.
+      const seen = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
+      for (const r of results || []) {
         const cid = r.channelId;
-        if (!cid || channelMap.has(cid)) continue;
-        channelMap.set(cid, {
+        if (!cid || seen.has(cid)) continue;
+        seen.set(cid, {
           channelId: cid,
           conversationId: r.conversationId || undefined,
+          lastActivity: r.lastActivity || undefined,
         });
       }
-
-      if (channelMap.size === 0) return [];
-
-      // Step 2: Get timestamps (reifier joins scoped to matched channels via VALUES)
-      const tsResults = await perspective.querySparql(
-        buildTimestampSparql(Array.from(channelMap.keys())),
-      );
-      for (const r of tsResults || []) {
-        const entry = channelMap.get(r.channelId);
-        if (entry) entry.lastActivity = r.lastActivity || undefined;
-      }
-
-      // Sort by lastActivity descending, matching the SPARQL ORDER BY
-      return Array.from(channelMap.values()).sort((a, b) => {
-        const ta = a.lastActivity || '';
-        const tb = b.lastActivity || '';
-        return tb.localeCompare(ta);
-      }).slice(0, limit);
+      return Array.from(seen.values());
     } catch (error) {
       console.error('Error in Channel.recentConversations():', error);
       return [];
@@ -345,7 +318,7 @@ export class Channel extends Ad4mModel {
       SELECT ?channelId ?conversationId WHERE {
         ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
         ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned .
-        FILTER(STR(?_isPinned) IN ("literal:boolean:true", "true"))
+        FILTER(STR(<ad4m://fn/parse_literal>(?_isPinned)) = "true")
         OPTIONAL {
           ?channelId <ad4m://has_child> ?conversationId .
           ?conversationId <flux://entry_type> <flux://conversation> .
