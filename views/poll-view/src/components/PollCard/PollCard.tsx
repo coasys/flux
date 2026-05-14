@@ -104,12 +104,14 @@ export default function PollCard(props: {
     } else if (voteType === 'weighted-choice') {
       previousVote ? await updateVote(previousVote.id, value) : await createVote(answerId, value);
     }
-    buildAnswerData();
   }
 
   useEffect(() => {
     buildAnswerData();
-  }, [answers.map((a) => a.id).join(',')]);
+  }, [JSON.stringify(answers.map((a) => ({
+    id: a.id,
+    votes: (a.votes || []).map((v: any) => ({ id: v.id, author: v.author, score: v.score })),
+  })))]);
 
   return (
     <j-box p="600" className={styles.poll}>
