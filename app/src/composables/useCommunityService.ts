@@ -51,7 +51,7 @@ export interface ChannelDataWithAgents {
 
 export interface CommunityService {
   perspective: PerspectiveProxy;
-  neighbourhood: NeighbourhoodProxy;
+  neighbourhood: NeighbourhoodProxy | null;
   signallingService: SignallingService | null;
   isSynced: Ref<boolean>;
   isAuthor: ComputedRef<boolean>;
