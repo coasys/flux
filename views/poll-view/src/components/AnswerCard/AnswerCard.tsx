@@ -41,7 +41,9 @@ export default function AnswerCard(props: {
   }, []);
 
   useEffect(() => {
-    setHasVoted(!!votes.find((vote) => vote.author === myDid));
+    const voted = !!votes.find((vote) => vote.author === myDid);
+    console.debug(`[AnswerCard ${answer.id}] votes updated:`, votes.length, 'votes, hasVoted=', voted, votes.map((v: any) => ({ id: v.id, author: v.author })));
+    setHasVoted(voted);
   }, [votes]);
 
   return (
@@ -102,7 +104,7 @@ export default function AnswerCard(props: {
                   />
                 </j-flex>
               ) : (
-                <j-checkbox onChange={() => vote(answer.id)} checked={hasVoted} size="sm">
+                <j-checkbox onChange={() => { console.debug(`[AnswerCard ${answer.id}] checkbox clicked, hasVoted=`, hasVoted); vote(answer.id); }} checked={hasVoted} size="sm">
                   <j-icon slot="checkmark" size="xs" name="check" />
                 </j-checkbox>
               )}
