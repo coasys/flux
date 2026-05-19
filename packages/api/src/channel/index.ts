@@ -1,4 +1,4 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property, PerspectiveProxy } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
@@ -69,22 +69,25 @@ export class Channel extends Ad4mModel {
     // Get all items (messages, posts, tasks) in the channel
     try {
       const sparqlQuery = `
-        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
-          GRAPH ?link { <${this.id}> <ad4m://has_child> ?id . }
-          ?link <ad4m://ontology/timestamp> ?timestamp .
-          ?link <ad4m://ontology/author> ?author .
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName ?transcriptStart WHERE {
+          <${this.id}> <ad4m://has_child> ?id .
+          ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
+          ?_reifier <ad4m://ontology/timestamp> ?timestamp .
+          ?_reifier <ad4m://ontology/author> ?author .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { GRAPH ?g3 { ?id <flux://body> ?body . } }
-          OPTIONAL { GRAPH ?g4 { ?id <flux://title> ?title . } }
-          OPTIONAL { GRAPH ?g5 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
         }
         ORDER BY ?timestamp
       `;
 
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
-      return (sparqlResult || []).map((binding: any) => {
+      const mapped = (sparqlResult || []).map((binding: any) => {
         let text = '';
         let type = '';
         const itemType = binding.type;
@@ -103,12 +106,14 @@ export class Channel extends Ad4mModel {
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(binding.timestamp).toISOString(),
+          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
         };
       });
+      // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
+      return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
       console.error('Error getting all channel items:', error);
       return [];
@@ -122,8 +127,8 @@ export class Channel extends Ad4mModel {
       // Query 1: Get all item IDs in channel
       const allItemsQuery = `
         SELECT ?id WHERE {
-          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -138,8 +143,8 @@ export class Channel extends Ad4mModel {
       // because items are unique to channels anyway.
       const processedQuery = `
         SELECT ?id WHERE {
-          GRAPH ?g1 { ?sg <${SUBGROUP_ITEM}> ?id . }
-          GRAPH ?g2 { ?sg <flux://entry_type> <flux://conversation_subgroup> . }
+          ?sg <${SUBGROUP_ITEM}> ?id .
+          ?sg <flux://entry_type> <flux://conversation_subgroup> .
         }
       `;
 
@@ -161,16 +166,19 @@ export class Channel extends Ad4mModel {
       // Query 3: Get full data only for unprocessed items using VALUES clause
       const valuesClause = unprocessedIds.map((id: string) => `<${id}>`).join(' ');
       const dataQuery = `
-        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName WHERE {
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        SELECT ?id ?author ?timestamp ?type ?body ?title ?taskName ?transcriptStart WHERE {
           VALUES ?id { ${valuesClause} }
-          GRAPH ?link1 { <${this.id}> <ad4m://has_child> ?id . }
-          ?link1 <ad4m://ontology/author> ?author .
-          ?link1 <ad4m://ontology/timestamp> ?timestamp .
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?_reifier rdf:reifies <<( <${this.id}> <ad4m://has_child> ?id )>> .
+          ?_reifier <ad4m://ontology/author> ?author .
+          ?_reifier <ad4m://ontology/timestamp> ?timestamp .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-          OPTIONAL { GRAPH ?g4 { ?id <flux://body> ?body . } }
-          OPTIONAL { GRAPH ?g5 { ?id <flux://title> ?title . } }
-          OPTIONAL { GRAPH ?g6 { ?id <flux://name> ?taskName . } }
+          OPTIONAL { ?id <flux://body> ?body . }
+          OPTIONAL { ?id <flux://title> ?title . }
+          OPTIONAL { ?id <flux://name> ?taskName . }
+          OPTIONAL { ?id <flux://transcript_started_at> ?transcriptStart . }
         }
         ORDER BY ?timestamp
       `;
@@ -185,7 +193,7 @@ export class Channel extends Ad4mModel {
         itemMap.set(id, binding);
       }
 
-      return Array.from(itemMap.values()).map((binding: any) => {
+      const mapped = Array.from(itemMap.values()).map((binding: any) => {
         let text = '';
         let type = '';
         const itemType = binding.type;
@@ -204,12 +212,14 @@ export class Channel extends Ad4mModel {
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(binding.timestamp).toISOString(),
+          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] ? icons[type] : 'question',
         };
       });
+      // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
+      return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
       console.error('Error getting channel items:', error);
       return [];
@@ -222,8 +232,8 @@ export class Channel extends Ad4mModel {
       // SPARQL migration
       const sparqlQuery = `
         SELECT (COUNT(DISTINCT ?id) AS ?count) WHERE {
-          GRAPH ?g1 { <${this.id}> <ad4m://has_child> ?id . }
-          GRAPH ?g2 { ?id <flux://entry_type> ?type . }
+          <${this.id}> <ad4m://has_child> ?id .
+          ?id <flux://entry_type> ?type .
           FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
         }
       `;
@@ -234,6 +244,116 @@ export class Channel extends Ad4mModel {
     } catch (error) {
       console.error('Error getting total item count:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Get recent conversation channels with last-activity timestamps.
+   *
+   * Uses a lightweight SPARQL query (no reifier joins) to find conversation
+   * channels, then the native link API to get timestamps — avoiding the
+   * expensive triple-term pattern matching that caused 60s query times.
+   *
+   * Returns conversation channels ordered by most recent activity (latest item timestamp).
+   * Falls back to channel creation time when no items exist.
+   */
+  static async recentConversations(
+    perspective: PerspectiveProxy,
+    limit: number = 20,
+  ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
+    // Step 1: Find conversation channels + their conversation child (fast, no reifier joins)
+    const sparql = `
+      SELECT ?channelId ?isConv ?conversationId WHERE {
+        ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
+        ?channelId <${CHANNEL_IS_CONVERSATION}> ?isConv .
+        OPTIONAL {
+          ?channelId <ad4m://has_child> ?conversationId .
+          ?conversationId <${ENTRY_TYPE}> <flux://conversation> .
+        }
+      }
+    `;
+
+    try {
+      const results = await perspective.querySparql(sparql);
+
+      // Filter to only conversation channels and dedup
+      const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
+      for (const r of results || []) {
+        const cid = r.channelId;
+        if (!cid || channelMap.has(cid)) continue;
+        const parsed = parseLit(r.isConv);
+        if (String(parsed) !== 'true') continue;
+        channelMap.set(cid, {
+          channelId: cid,
+          conversationId: r.conversationId || undefined,
+        });
+      }
+
+      if (channelMap.size === 0) return [];
+
+      // Step 2: For each channel, get has_child links via native API to find latest timestamp.
+      // perspective.get() uses indexed lookups, not SPARQL reifier joins.
+      await Promise.all(
+        Array.from(channelMap.entries()).map(async ([channelId, entry]) => {
+          const links = await perspective.get({
+            source: channelId,
+            predicate: 'ad4m://has_child',
+          });
+          // Find the most recent link timestamp
+          let latest = '';
+          for (const link of links) {
+            if (link.timestamp > latest) latest = link.timestamp;
+          }
+          entry.lastActivity = latest || undefined;
+        }),
+      );
+
+      // Sort by lastActivity descending, take top N
+      const sorted = Array.from(channelMap.values())
+        .sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''))
+        .slice(0, limit);
+      return sorted;
+    } catch (error) {
+      console.error('Error in Channel.recentConversations():', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get pinned conversation channels.
+   * Single SPARQL query — replaces iterative channel.get({ conversations: true }).
+   */
+  static async pinnedConversations(
+    perspective: PerspectiveProxy,
+  ): Promise<{ channelId: string; conversationId?: string }[]> {
+    const sparql = `
+      SELECT ?channelId ?conversationId WHERE {
+        ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
+        ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned .
+        FILTER(STR(<ad4m://fn/parse_literal>(?_isPinned)) = "true")
+        OPTIONAL {
+          ?channelId <ad4m://has_child> ?conversationId .
+          ?conversationId <flux://entry_type> <flux://conversation> .
+        }
+      }
+    `;
+
+    try {
+      const results = await perspective.querySparql(sparql);
+      // Deduplicate by channelId
+      const seen = new Map<string, { channelId: string; conversationId?: string }>();
+      for (const r of results || []) {
+        const cid = r.channelId;
+        if (!cid || seen.has(cid)) continue;
+        seen.set(cid, {
+          channelId: cid,
+          conversationId: r.conversationId || undefined,
+        });
+      }
+      return Array.from(seen.values());
+    } catch (error) {
+      console.error('Error in Channel.pinnedConversations():', error);
+      return [];
     }
   }
 

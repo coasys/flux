@@ -84,9 +84,10 @@ import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores';
 import { stripChannelPrefix } from '@/utils/routeUtils';
-import { App, Channel } from '@coasys/flux-api';
+import { App, Channel, ChannelSummary } from '@coasys/flux-api';
+import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import { storeToRefs } from 'pinia';
-import { computed, onActivated, onMounted, ref, watch } from 'vue';
+import { computed, onActivated, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'Header' });
@@ -119,22 +120,9 @@ const conversation = computed(() =>
 const sameAgent = computed(() => channel.value?.author === me.value.did);
 const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId.value)?.value || []);
 
-const views = ref<App[]>([]);
-watch(
-  channel,
-  async (newChannel) => {
-    if (newChannel) {
-      const channelWithViews = await Channel.findOne(perspective, {
-        where: { id: newChannel.id },
-        include: { views: true },
-      });
-      views.value = channelWithViews?.views ?? [];
-    } else {
-      views.value = [];
-    }
-  },
-  { immediate: true },
-);
+const { data: views } = useLiveQuery(App, perspective, {
+  parent: { model: Channel, id: channel.value?.id ?? '' },
+});
 
 function manageChannelPlugins() {
   modalStore.showManageChannelPluginsModal = true;
@@ -152,7 +140,7 @@ async function togglePinned() {
   if (!channel.value) return;
 
   try {
-    const channelModel = await Channel.findOne(perspective, { where: { id: channel.value.id } });
+    const channelModel = await ChannelSummary.findOne(perspective, { where: { id: channel.value.id } });
     if (!channelModel) return;
     channelModel.isPinned = !channel.value.isPinned;
     await channelModel.save();

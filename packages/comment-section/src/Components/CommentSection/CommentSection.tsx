@@ -2,7 +2,7 @@ import CommentItem from '../CommentItem';
 import { useState, useRef, useEffect } from 'preact/hooks';
 import { Message } from '@coasys/flux-api';
 import { useMe } from '@coasys/flux-react-web';
-import { Link, LinkQuery, PerspectiveProxy } from '@coasys/ad4m';
+import { Link, PerspectiveProxy } from '@coasys/ad4m';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import styles from './CommentSection.module.css';
 import Avatar from '../Avatar';
@@ -23,25 +23,22 @@ export default function CommentSection({
   const [comments, setComments] = useState<Message[]>([]);
 
   async function loadComments() {
-    const links = await perspective.get(new LinkQuery({ source, predicate: 'ad4m://has_child' }));
-    const messages = await Promise.all(
-      links.map(async (link) => {
-        const msg = new Message(perspective, link.data.target);
-        await msg.get();
-        return msg;
-      }),
-    );
-    setComments(messages.filter((m) => m.body));
+    // Use findAll with parent scope instead of N × new Message().get() to avoid N+1 queries
+    const messages = await Message.findAll(perspective, { parent: { id: source, predicate: 'ad4m://has_child' } });
+    setComments(messages.filter((m: any) => m.body));
   }
 
   useEffect(() => {
     loadComments();
-    const handler = (link: any) => {
-      if (link.data?.source === source && link.data?.predicate === 'ad4m://has_child') loadComments();
-      return null;
-    };
-    perspective.addListener('link-added', handler);
-    return () => perspective.removeListener('link-added', handler);
+    // Use a targeted SPARQL subscription for child messages instead of
+    // firing on every link-added event in the entire perspective.
+    const sparql = `SELECT ?target WHERE { <${source}> <ad4m://has_child> ?target . ?target <flux://entry_type> <flux://has_message> . }`;
+    let sub: any = null;
+    perspective.subscribeQuery(sparql).then((handle) => {
+      sub = handle;
+      handle.onResult(() => { loadComments(); });
+    });
+    return () => { sub?.dispose(); };
   }, [source]);
 
   function onKeydown(e) {

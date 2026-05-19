@@ -3,7 +3,7 @@ import { useAppStore, useCommunityServiceStore, useRouteMemoryStore } from '@/st
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { AIModelLoadingStatus, AITask } from '@coasys/ad4m';
 import { Model } from '@coasys/ad4m/lib/src/ai/AIResolver';
-import { Channel } from '@coasys/flux-api';
+import { Channel, ChannelSummary } from '@coasys/flux-api';
 import { ProcessingState, SignallingService } from '@coasys/flux-types';
 import { SynergyItem } from '@coasys/flux-utils';
 import { defineStore, storeToRefs } from 'pinia';
@@ -45,7 +45,7 @@ export const MAX_ITEMS_TO_PROCESS = 10;
 export const PROCESSING_ITEMS_DELAY = 3;
 export const PROCESSING_STALE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
-export type ProcessingQueueItem = { communityId: string; channel: Partial<Channel> };
+export type ProcessingQueueItem = { communityId: string; channel: ChannelSummary };
 
 export const useAiStore = defineStore(
   'aiStore',
@@ -194,17 +194,21 @@ export const useAiStore = defineStore(
       const communityService = communityServiceStore.getCommunityService(communityId);
       if (!communityService) return;
 
+      // signallingService is null for private perspectives — skip AI processing
+      if (!communityService.signallingService) return;
+
       // Search conversations for processing tasks we are responsible for
       const tasks = await Promise.all(
         unref(communityService.recentConversationsWithAgents).map(async (conversationData) => {
           if (!conversationData.channel) return null;
-          const rawChannel = toRaw(conversationData.channel);
-          if (!rawChannel.id) return null;
-          const unprocessedItems = await rawChannel.unprocessedItems();
+          const summaryChannel = toRaw(conversationData.channel);
+          if (!summaryChannel.id) return null;
+          const fullChannel = new Channel(communityService!.perspective, summaryChannel.id);
+          const unprocessedItems = await fullChannel.unprocessedItems();
           const shouldProcess = await checkIfWeShouldProcessTask(
             unprocessedItems,
-            communityService.signallingService,
-            rawChannel.id,
+            communityService.signallingService!,
+            summaryChannel.id,
           );
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
         }),
@@ -243,8 +247,8 @@ export const useAiStore = defineStore(
             const { channelId, communityId } = currentRoute.value;
 
             // Current channel gets highest priority
-            if (a.channel.id! === channelId && b.channel.id! !== channelId) return -1;
-            if (b.channel.id! === channelId && a.channel.id! !== channelId) return 1;
+            if (a.channel?.id === channelId && b.channel?.id !== channelId) return -1;
+            if (b.channel?.id === channelId && a.channel?.id !== channelId) return 1;
 
             // Current community gets second priority
             if (a.communityId === communityId && b.communityId !== communityId) return -1;
@@ -268,8 +272,9 @@ export const useAiStore = defineStore(
         }
 
         // Get the items to process from the channel
-        console.log('🤖 Checking for unprocessed items in channel:', await rawChannel);
-        const unprocessedItems = await rawChannel.unprocessedItems!();
+        const fullChannel = new Channel(communityService.perspective, rawChannel.id!);
+        console.log('🤖 Checking for unprocessed items in channel:', rawChannel.id);
+        const unprocessedItems = await fullChannel.unprocessedItems();
         const numberOfItemsToProcess = Math.max(
           0,
           Math.min(MAX_ITEMS_TO_PROCESS, unprocessedItems.length - PROCESSING_ITEMS_DELAY),
@@ -284,7 +289,7 @@ export const useAiStore = defineStore(
         }
 
         // Re-check signalling guard before starting LLM work (another peer may have started since this task was queued)
-        if (isAnotherPeerProcessingChannel(communityService.signallingService, rawChannel.id!)) {
+        if (communityService.signallingService && isAnotherPeerProcessingChannel(communityService.signallingService, rawChannel.id!)) {
           console.log('🤖 Another peer is already processing this channel, skipping');
           processingQueue.value.shift();
           return;
@@ -293,13 +298,13 @@ export const useAiStore = defineStore(
         console.log('🤖 LLM processing started');
 
         // Create setProcessingState function to update processing state at each step
-        function setProcessingState(newState: Partial<ProcessingState> | null) {
+        const setProcessingState = (newState: Partial<ProcessingState> | null) => {
           // Update our app level processing state
           processingState.value = newState ? { ...processingState.value, ...newState } : null;
 
           // Update our processing state in the assosiated signalling service
-          communityService!.signallingService.setProcessingState(newState);
-        }
+          communityService!.signallingService?.setProcessingState(newState);
+        };
 
         // Set our initial processing state
         const itemIds = itemsToProcess.map((item) => item.id);
@@ -327,7 +332,7 @@ export const useAiStore = defineStore(
       } finally {
         // Reset our processing state
         processingState.value = null;
-        if (communityService) communityService.signallingService.setProcessingState(null);
+        if (communityService) communityService.signallingService?.setProcessingState(null);
         processing.value = false;
 
         // If there are more tasks in the queue, process the next one

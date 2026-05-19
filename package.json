@@ -32,7 +32,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@coasys/hooks-helpers": "0.13.0-test-2",
+      "@coasys/hooks-helpers": "0.13.0-test-4",
       "@preact/preset-vite": "2.9.4",
       "@coasys/flux-api": "workspace:*",
       "@coasys/flux-comment-section": "workspace:*",
@@ -45,10 +45,10 @@
       "@coasys/flux-utils": "workspace:*",
       "@coasys/flux-vue": "workspace:*",
       "@coasys/flux-webrtc": "workspace:*",
-    "@coasys/ad4m": "link:../ad4m/core",
-    "@coasys/ad4m-connect": "link:../ad4m/connect",
-      "@coasys/ad4m-vue-hooks": "0.13.0-test-2",
-      "@coasys/ad4m-react-hooks": "0.13.0-test-2"
+      "@coasys/ad4m": "link:../ad4m/core",
+      "@coasys/ad4m-connect": "0.13.0-test-4",
+      "@coasys/ad4m-vue-hooks": "0.13.0-test-4",
+      "@coasys/ad4m-react-hooks": "0.13.0-test-4"
     }
   }
 }

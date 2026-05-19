@@ -22,7 +22,7 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useRouteParams } from '@/composables/useRouteParams';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
-import { App } from '@coasys/flux-api';
+import { App, Channel } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -34,22 +34,37 @@ const { perspective, allChannels } = useCommunityService();
 
 const channel = computed(() => allChannels.value.find((c) => c.id === restoreChannelPrefix(channelId.value)));
 
+const currentView = ref<string>('');
+const isChangeChannel = ref(false);
+
 const views = ref<App[]>([]);
+let channelLoadSeq = 0;
 watch(
   channel,
   async (newChannel) => {
-    if (newChannel) {
-      await newChannel.get({ views: true });
-      views.value = newChannel.views;
-    } else {
+    // Only fetch when the modal is actually open — this modal mounts eagerly
+    // with ChannelView, so without this guard it fires a redundant Channel query
+    // on every channel navigation.
+    if (!isChangeChannel.value) return;
+    const seq = ++channelLoadSeq;
+    if (!newChannel || !perspective) {
+      views.value = [];
+      return;
+    }
+
+    try {
+      const result = await App.findAll(perspective, {
+        parent: { model: Channel, id: newChannel.id },
+      });
+      if (seq !== channelLoadSeq) return;
+      views.value = result;
+    } catch {
+      if (seq !== channelLoadSeq) return;
       views.value = [];
     }
   },
   { immediate: true },
 );
-
-const currentView = ref<string>('');
-const isChangeChannel = ref(false);
 
 function changeCurrentView(viewId: string) {
   const { communityId, channelId } = route.params;

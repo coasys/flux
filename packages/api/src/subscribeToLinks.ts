@@ -17,6 +17,10 @@ function removeListeners({ perspective, added, removed }) {
   }
 }
 
+/**
+ * @deprecated Use `perspective.subscribeQuery(sparql, callback)` for targeted
+ * SPARQL-based subscriptions instead of global link-added/link-removed listeners.
+ */
 export default async function ({ client, perspectiveUuid, added, removed }: Payload): Promise<Function> {
   try {
     const perspective = await client.perspective.byUUID(perspectiveUuid);

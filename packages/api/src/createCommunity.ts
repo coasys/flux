@@ -110,7 +110,7 @@ export default async function createCommunity({
       uuid: perspective.uuid,
       author: author,
       id: newCommunity.id,
-      timestamp: newCommunity.timestamp,
+      timestamp: newCommunity.createdAt,
       name: newCommunity.name,
       description: newCommunity.description || '',
       image: newCommunity.image,

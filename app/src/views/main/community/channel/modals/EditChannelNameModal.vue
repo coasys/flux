@@ -45,7 +45,7 @@
 import { useCommunityService } from '@/composables/useCommunityService';
 import { useAppStore, useModalStore } from '@/stores';
 import { restoreChannelPrefix } from '@/utils/routeUtils';
-import { Channel, Conversation } from '@coasys/flux-api';
+import { Channel, ChannelSummary, Conversation } from '@coasys/flux-api';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -97,7 +97,7 @@ async function updateChannel() {
       getChannelsWithConversations();
     } else {
       // Update the channel name directly
-      const channelModel = await Channel.findOne(perspective, { where: { id: channelId.value } });
+      const channelModel = await ChannelSummary.findOne(perspective, { where: { id: channelId.value } });
       if (!channelModel) throw new Error('Channel not found');
       channelModel.name = name.value;
       await channelModel.save();

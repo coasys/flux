@@ -128,7 +128,7 @@ function navigateToChannel() {
 function expandIfInNestedChannel() {
   // Expand the item when the user navigates to a channel included in its children
   const currentChannelId = route.params.channelId as string;
-  const inNestedChannel = item.children?.some((c: any) => stripChannelPrefix(c.channel.id) === currentChannelId);
+  const inNestedChannel = item.children?.some((c: any) => c.channel && stripChannelPrefix(c.channel.id) === currentChannelId);
   if (inNestedChannel) expanded.value = true;
 }
 

@@ -28,7 +28,10 @@ export default function PollCard(props: {
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const { data: answers } = useLiveQuery(Answer, perspective, { parent: { model: Poll, id: poll.id } });
+  const { data: answers } = useLiveQuery(Answer, perspective, {
+    parent: { model: Poll, id: poll.id },
+    query: { include: { votes: true } },
+  });
 
   const colorScale = useMemo(() => {
     return d3.scaleSequential().domain([0, answers.length]).interpolator(d3.interpolateViridis);
@@ -42,34 +45,31 @@ export default function PollCard(props: {
   }
 
   async function buildAnswerData() {
+    console.debug('[PollCard.buildAnswerData] called with', answers.length, 'answers');
     let newTotalVotes = 0;
     let newTotalPoints = 0;
     const users = [];
-    const newAnswers = (await Promise.all(
-      answers.map(
-        (answer) =>
-          new Promise(async (resolve) => {
-            const votes = await Vote.findAll(perspective, { parent: { model: Answer, id: answer.id } });
-            const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-            newTotalVotes += votes.length;
-            let totalAnswerPoints = 0;
-            if (voteType === 'weighted-choice') {
-              totalAnswerPoints = votes.map((vote) => vote.score).reduce((a, b) => a + b, 0);
-              newTotalPoints += totalAnswerPoints;
-            }
-            users.push(...votes.map((v: any) => v.author));
-            resolve({
-              id: answer.id,
-              text: answer.text,
-              author: answer.author,
-              timestamp: answer.timestamp,
-              totalVotes: votes.length,
-              totalPoints: totalAnswerPoints,
-              myPoints: previousVote?.score || 0,
-            });
-          }),
-      ),
-    )) as any;
+    const newAnswers = answers.map((answer) => {
+      const votes = answer.votes || [];
+      console.debug(`[PollCard.buildAnswerData]   answer ${answer.id}: ${votes.length} votes`, votes.map((v: any) => ({ id: v.id, author: v.author, score: v.score })));
+      const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
+      newTotalVotes += votes.length;
+      let totalAnswerPoints = 0;
+      if (voteType === 'weighted-choice') {
+        totalAnswerPoints = votes.map((vote) => vote.score).reduce((a, b) => a + b, 0);
+        newTotalPoints += totalAnswerPoints;
+      }
+      users.push(...votes.map((v: any) => v.author));
+      return {
+        id: answer.id,
+        text: answer.text,
+        author: answer.author,
+        timestamp: answer.timestamp,
+        totalVotes: votes.length,
+        totalPoints: totalAnswerPoints,
+        myPoints: previousVote?.score || 0,
+      };
+    }) as any;
     if (voteType === 'weighted-choice') newAnswers.sort((a, b) => b.totalPoints - a.totalPoints);
     else newAnswers.sort((a, b) => b.totalVotes - a.totalVotes);
     setTotalVotes(newTotalVotes);
@@ -79,39 +79,63 @@ export default function PollCard(props: {
   }
 
   function removePreviousVotes() {
+    console.debug('[PollCard.removePreviousVotes] scanning', answers.length, 'answers for votes by', myDid);
     return Promise.all(
       answers.map(async (answer) => {
-        const votes = await Vote.findAll(perspective, { parent: { model: Answer, id: answer.id } });
+        const votes = answer.votes || [];
         const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
-        if (previousVote) await previousVote.delete();
+        if (previousVote) {
+          console.debug('[PollCard.removePreviousVotes] deleting vote', previousVote.id, 'on answer', answer.id);
+          await previousVote.delete();
+        }
       }),
     );
   }
 
   async function createVote(answerId, score) {
+    console.debug('[PollCard.createVote] answerId=', answerId, 'score=', score);
     await Vote.create(perspective, { score }, { parent: { model: Answer, id: answerId } });
+    console.debug('[PollCard.createVote] done');
   }
 
   async function updateVote(voteId, score) {
+    console.debug('[PollCard.updateVote] voteId=', voteId, 'score=', score);
     await Vote.update(perspective, voteId, { score });
   }
 
   async function vote(answerId: string, value?: number) {
+    console.debug('[PollCard.vote] answerId=', answerId, 'value=', value, 'voteType=', voteType);
     const votes = await Vote.findAll(perspective, { parent: { model: Answer, id: answerId } });
+    console.debug('[PollCard.vote] found', votes.length, 'votes for answer', answerId, votes.map((v: any) => ({ id: v.id, author: v.author })));
     const previousVote = votes.find((vote: any) => vote.author === myDid) as any;
+    console.debug('[PollCard.vote] previousVote=', previousVote ? previousVote.id : 'none');
     if (voteType === 'single-choice') {
-      previousVote ? await previousVote.delete() : await removePreviousVotes().then(() => createVote(answerId, 100));
+      if (previousVote) {
+        console.debug('[PollCard.vote] single-choice: deleting existing vote on this answer');
+        await previousVote.delete();
+      } else {
+        console.debug('[PollCard.vote] single-choice: removing all previous votes, then creating new');
+        await removePreviousVotes();
+        await createVote(answerId, 100);
+      }
     } else if (voteType === 'multiple-choice') {
       previousVote ? await previousVote.delete() : await createVote(answerId, 100);
     } else if (voteType === 'weighted-choice') {
       previousVote ? await updateVote(previousVote.id, value) : await createVote(answerId, value);
     }
+    console.debug('[PollCard.vote] done, calling buildAnswerData for immediate UI update');
     buildAnswerData();
   }
 
+  const answerFingerprint = JSON.stringify(answers.map((a) => ({
+    id: a.id,
+    votes: (a.votes || []).map((v: any) => ({ id: v.id, author: v.author, score: v.score })),
+  })));
+
   useEffect(() => {
+    console.debug('[PollCard.useEffect] answerFingerprint changed, calling buildAnswerData');
     buildAnswerData();
-  }, [answers.map((a) => a.id).join(',')]);
+  }, [answerFingerprint]);
 
   return (
     <j-box p="600" className={styles.poll}>

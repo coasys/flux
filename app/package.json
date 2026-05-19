@@ -16,6 +16,7 @@
     "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
+    "typecheck": "vue-tsc --noEmit",
     "test": "jest --env=jsdom"
   },
   "main": "background.js",
@@ -27,9 +28,9 @@
     "@capacitor/ios": "^7.6.0",
     "@capacitor/push-notifications": "^7.0.6",
     "@capacitor/status-bar": "^7.0.5",
-    "@coasys/ad4m": "0.11.1",
-    "@coasys/ad4m-connect": "0.11.1",
-    "@coasys/ad4m-vue-hooks": "0.11.1",
+    "@coasys/ad4m": "0.13.0-test-4",
+    "@coasys/ad4m-connect": "0.13.0-test-4",
+    "@coasys/ad4m-vue-hooks": "0.13.0-test-4",
     "@coasys/flux-api": "workspace:*",
     "@coasys/flux-chat-view": "workspace:*",
     "@coasys/flux-graph-view": "workspace:*",
@@ -95,6 +96,7 @@
     "vite-plugin-babel-compiler": "^0.3.0",
     "vite-plugin-pwa": "^0.14.7",
     "vite-plugin-worker": "^1.0.5",
-    "vue-devtools": "^5.1.4"
+    "vue-devtools": "^5.1.4",
+    "vue-tsc": "^3.2.7"
   }
 }

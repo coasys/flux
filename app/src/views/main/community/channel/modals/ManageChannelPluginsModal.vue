@@ -121,15 +121,32 @@ const filteredPackages = computed((): FluxApp[] =>
 );
 
 const views = ref<App[]>([]);
+let viewsLoadSeq = 0;
 watch(
-  channel,
-  async (newChannel) => {
-    if (newChannel) {
-      await newChannel.get({ views: true });
-      views.value = newChannel.views;
-      selectedPlugins.value = newChannel.views;
-    } else {
+  [channel, () => modalStore.showManageChannelPluginsModal],
+  async ([newChannel, isOpen]) => {
+    // Only fetch when the modal is actually open — this modal mounts eagerly
+    // with ChannelView, so without this guard it fires a redundant Channel query
+    // on every channel navigation.
+    if (!isOpen) return;
+    const seq = ++viewsLoadSeq;
+    if (!newChannel || !perspective) {
       views.value = [];
+      selectedPlugins.value = [];
+      return;
+    }
+
+    try {
+      const nextViews = await App.findAll(perspective, {
+        parent: { model: Channel, id: newChannel.id },
+      });
+      if (seq !== viewsLoadSeq) return;
+      views.value = nextViews;
+      selectedPlugins.value = [...nextViews];
+    } catch {
+      if (seq !== viewsLoadSeq) return;
+      views.value = [];
+      selectedPlugins.value = [];
     }
   },
   { immediate: true },

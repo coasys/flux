@@ -71,7 +71,7 @@
 import TimelineBlock from '@/components/conversation/timeline/TimelineBlock.vue';
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
 import { useCommunityService } from '@/composables/useCommunityService';
-import { Channel } from '@coasys/flux-api';
+import { Channel, Conversation } from '@coasys/flux-api';
 import { GroupingOption, MatchIndexes, SynergyGroup, SynergyMatch } from '@coasys/flux-utils';
 import { computed, onMounted, ref } from 'vue';
 
@@ -116,11 +116,15 @@ const visibleConversations = computed(() =>
 
 async function getData() {
   try {
-    const channel = await Channel.findOne(perspective, {
-      where: { id: channelId.value },
-      include: { conversations: true },
+    const conversationModels = await Conversation.findAll(perspective, {
+      parent: { model: Channel, id: channelId.value },
     });
-    const newConversations = channel?.conversationsData() ?? [];
+    const newConversations = conversationModels.map((c) => ({
+      id: c.id,
+      name: c.conversationName,
+      summary: c.summary,
+      timestamp: c.createdAt,
+    }));
 
     // Find the conversation that contains the match
     newConversations.forEach((conversation, conversationIndex) => {

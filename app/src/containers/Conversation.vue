@@ -251,7 +251,7 @@ async function findTopicMatches(itemId: string, topicId: string): Promise<Synerg
   const { grouping } = filterSettings.value;
   // Todo: remove option for "Items" grouping so this isn't necessary
   // If the grouping is "Items", we need to change it to "Conversations" as topics no longer have topic tags
-  let currentGrouping = grouping === 'Items' ? 'Conversations' : grouping;
+  const currentGrouping = grouping === 'Items' ? 'Conversations' : grouping;
   if (grouping === 'Items') {
     filterSettings.value = { ...filterSettings.value, grouping: 'Conversations' };
   }

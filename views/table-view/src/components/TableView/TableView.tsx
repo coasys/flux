@@ -59,15 +59,9 @@ export default function TableView({ perspective, agent, source: initialSource }:
   }, [initialSource, perspective.uuid]);
 
   useEffect(() => {
-    perspective.infer(`subject_class(ClassName, C)`).then((result) => {
-      if (Array.isArray(result)) {
-        const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
-        setClasses(uniqueClasses);
-        setSelected(uniqueClasses[0] || '');
-      } else {
-        setClasses([]);
-        setSelected('');
-      }
+    perspective.listRegisteredClasses().then((result) => {
+      setClasses(result);
+      setSelected(result[0] || '');
     });
   }, [perspective.uuid]);
 
@@ -255,11 +249,9 @@ type CreatePops = {
 
 async function createEntry({ perspective, subjectClass, source }: CreatePops) {
   const uuid = Literal.from(uuidv4()).toUrl();
-  const instance = await perspective.createSubject(subjectClass, uuid);
+  await perspective.createSubject(subjectClass, uuid);
 
-  await instance.init();
-
-  const type = await perspective.add({
+  await perspective.add({
     source: source || 'ad4m://self',
     predicate: 'has_child',
     target: uuid,

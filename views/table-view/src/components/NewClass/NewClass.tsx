@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { PerspectiveProxy } from '@coasys/ad4m';
+import { PerspectiveProxy, SHACLShape } from '@coasys/ad4m';
 import styles from './NewClass.module.css';
 
 type Props = {
@@ -38,8 +38,8 @@ export default function NewClass({ perspective, onSaved }: Props) {
   });
 
   async function addClass() {
-    const sdna = await generateSDNA(name, columns, perspective);
-    await perspective.addSdna(sdna);
+    const shape = await buildSHACLShape(name, columns, perspective);
+    await perspective.addShacl(name, shape);
     onSaved();
   }
 
@@ -224,75 +224,54 @@ export default function NewClass({ perspective, onSaved }: Props) {
   );
 }
 
-async function generateSDNA(
+async function buildSHACLShape(
   name: string,
   columns: Record<string, Column>,
   perspective: PerspectiveProxy,
-): Promise<string> {
-  const atom = makeRandomPrologAtom(6);
-  let constructorActions = '';
-  let instancePredicates = '';
-  let propertiesString = '';
+): Promise<SHACLShape> {
+  const ns = `recipe://${name}`;
+  const shape = new SHACLShape(`${ns}Shape`, `${ns}#${name}`);
+  const constructorActions: Array<{ action: string; source: string; predicate: string; target: string }> = [];
 
-  for await (const column of Object.values(columns)) {
-    const { name: columnName, required, predicate, defaultValue, language } = column;
+  for (const column of Object.values(columns)) {
+    const { name: columnName, required, predicate, defaultValue, language, options } = column;
 
-    const expression = await perspective.createExpression(defaultValue, language);
+    const expression = defaultValue ? await perspective.createExpression(defaultValue, language) : undefined;
 
-    if (defaultValue) {
-      constructorActions += `{action: "addLink", source: "this", predicate: "${predicate}", target: "${expression}"},`;
+    const propShape: any = {
+      name: columnName,
+      path: predicate,
+      datatype: 'xsd://string',
+      minCount: required ? 1 : 0,
+      maxCount: 1,
+      writable: true,
+    };
+
+    if (language) {
+      propShape.resolveLanguage = language;
     }
 
-    if (required) {
-      instancePredicates += `triple(Base, "${predicate}", _),`;
+    if (options.length > 0) {
+      propShape.in = options.map((opt) => ({ value: opt.value, label: opt.name }));
     }
 
-    /*
-    if (required && column.options.length > 0) {
-      for (const option of column.options) {
-        instancePredicates += `triple(Base, "${predicate}", "${option.value}");`;
-      }
+    shape.addProperty(propShape);
+
+    // Build constructor action for default value
+    if (expression) {
+      constructorActions.push({
+        action: 'addLink',
+        source: 'this',
+        predicate,
+        target: expression,
+      });
     }
-    */
-
-    let namedOptionsString = '';
-
-    for (const option of column.options) {
-      namedOptionsString += `property_named_option(${atom}, "${columnName}", "${option.value}", "${option.name}").\n`;
-    }
-
-    propertiesString += `
-        property(${atom}, "${columnName}").
-        property_resolve(${atom}, "${columnName}").
-        property_resolve_language(${atom}, "${columnName}", "${language}").
-        property_getter(${atom}, Base, "${columnName}", Value) :- triple(Base, "${predicate}", Value).
-        property_setter(${atom}, "${columnName}", '[{action: "setSingleTarget", source: "this", predicate: "${predicate}", target: "value"}]').
-        ${namedOptionsString}
-    `;
   }
 
-  // Replace the last comma with a space to format the Prolog string properly
-  constructorActions = constructorActions.replace(/,*$/, '');
-  instancePredicates = instancePredicates.replace(/,*$/, '');
-  // Replace the or operator (;)
-  instancePredicates = instancePredicates.replace(/;*$/, '');
-
-  const prologString = `
-    subject_class("${name}", ${atom}).
-    constructor(${atom}, '[${constructorActions}]').
-    instance(${atom}, Base) :- ${instancePredicates}.
-    ${propertiesString}
-  `;
-
-  return prologString;
-}
-
-export function makeRandomPrologAtom(length: number): string {
-  let result = '';
-  let characters = 'abcdefghijklmnopqrstuvwxyz';
-  let charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  if (constructorActions.length > 0) {
+    shape.setConstructorActions(constructorActions);
   }
-  return result;
+
+  return shape;
 }
+

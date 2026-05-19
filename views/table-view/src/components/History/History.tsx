@@ -1,6 +1,5 @@
 import styles from './History.module.css';
 import { useEffect, useState } from 'preact/hooks';
-import { getEntry } from '../../utils';
 import { PerspectiveProxy, Literal } from '@coasys/ad4m';
 
 type Props = {
@@ -44,14 +43,13 @@ function HistoryItem({ isLast, source, perspective, onClick }: ItemProps) {
   }, [source, perspective.uuid]);
 
   async function fetchSourceClasses(source) {
-    const classResults = await perspective.infer(`subject_class(ClassName, C), instance(C, "${source}").`);
+    const classResults = await perspective.getInstanceClasses(source);
 
     if (classResults?.length > 0) {
-      setClasses(classResults.map((c) => c.ClassName));
-      const className = classResults[0].ClassName;
-      const subjectProxy = await perspective.getSubjectProxy(source, className);
-      const entry = await getEntry(subjectProxy);
-      setEntry(entry);
+      setClasses(classResults);
+      const className = classResults[0];
+      const data = await perspective.getSubjectData(className, source);
+      setEntry({ id: source, ...data });
     } else {
       setClasses([]);
       setEntry({ id: source });

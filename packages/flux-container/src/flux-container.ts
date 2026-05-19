@@ -195,12 +195,13 @@ export class MyElement extends LitElement {
 
     if (!this.listeners[perspective.uuid]) {
       this.listeners[perspective.uuid] = true;
-      perspective.addListener('link-added', async (link) => {
-        const isChannel = await perspective.isSubjectInstance(link.data.source, Channel.prototype.className);
-        if (isChannel) {
+      // Use a targeted SPARQL subscription for channel changes instead of
+      // firing on every link-added event in the perspective.
+      const channelSparql = `SELECT ?id WHERE { ?id <flux://entry_type> <flux://has_channel> . }`;
+      perspective.subscribeQuery(channelSparql).then((handle) => {
+        handle.onResult(async () => {
           this.channels = await Channel.findAll(perspective);
-        }
-        return null;
+        });
       });
     }
 

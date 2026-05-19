@@ -17,7 +17,7 @@ export const useAppStore = defineStore(
     const updateState = ref<UpdateState>('not-available');
     const toast = ref<ToastState>({ variant: undefined, message: '', open: false });
     const notification = ref<{ globalNotification: boolean }>({ globalNotification: true });
-    const myPerspectives = ref<PerspectiveProxy[]>([]);
+    const myPerspectives = shallowRef<PerspectiveProxy[]>([]);
     const myCommunities = ref<Record<string, Community>>({}); // Todo: store this as an array instead?
     const communitiesLoaded = ref<boolean>(false);
     const holochainRestarting = ref<boolean>(false);
@@ -92,14 +92,22 @@ export const useAppStore = defineStore(
         // Get all my perspectives
         myPerspectives.value = await ad4mClient.value.perspective.all();
 
-        // Filter perspectives that have a neighbourhood and map to community entries
+        // Filter perspectives that have a neighbourhood (or a community entry_type) and map to community entries
         const communityEntries = await Promise.all(
           toRaw(myPerspectives.value)
-            .filter((perspective) => perspective.neighbourhood)
             .map(async (perspective) => {
-              const community = (await Community.findAll(perspective as PerspectiveProxy))[0];
-              if (!community) return null;
-              return [perspective.sharedUrl, community] as const;
+              try {
+                // Ensure SDNA is installed before querying (needed for imported perspectives)
+                await (perspective as PerspectiveProxy).ensureSDNASubjectClass(Community);
+                const allCommunities = await Community.findAll(perspective as PerspectiveProxy);
+                const community = allCommunities[0];
+                if (!community) return null;
+                const key = perspective.sharedUrl || `private://${perspective.uuid}`;
+                return [key, community] as const;
+              } catch (e) {
+                console.warn(`Failed to load community from perspective ${perspective.uuid}:`, e);
+                return null;
+              }
             }),
         );
 
@@ -133,9 +141,14 @@ export const useAppStore = defineStore(
     }
 
     function getPerspective(neighbourhoodUrl: string): PerspectiveProxy | undefined {
-      const perspective = myPerspectives.value.find((p) => p.sharedUrl === neighbourhoodUrl) as
+      // Support both neighbourhood:// URLs and private:// UUID lookups
+      let perspective = myPerspectives.value.find((p) => p.sharedUrl === neighbourhoodUrl) as
         | PerspectiveProxy
         | undefined;
+      if (!perspective && neighbourhoodUrl.startsWith('private://')) {
+        const uuid = neighbourhoodUrl.slice('private://'.length);
+        perspective = myPerspectives.value.find((p) => p.uuid === uuid) as PerspectiveProxy | undefined;
+      }
       return toRaw(perspective);
     }
 
