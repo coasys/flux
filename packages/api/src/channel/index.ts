@@ -1,4 +1,4 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property, PerspectiveProxy } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
@@ -295,10 +295,9 @@ export class Channel extends Ad4mModel {
       // perspective.get() uses indexed lookups, not SPARQL reifier joins.
       await Promise.all(
         Array.from(channelMap.entries()).map(async ([channelId, entry]) => {
-          const links = await perspective.get({
-            source: channelId,
-            predicate: 'ad4m://has_child',
-          });
+          const links = await perspective.get(
+            new LinkQuery({ source: channelId, predicate: 'ad4m://has_child' }),
+          );
           // Find the most recent link timestamp
           let latest = '';
           for (const link of links) {
