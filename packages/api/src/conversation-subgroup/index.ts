@@ -1,11 +1,36 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
-import { parseLit } from '../utils/parseLit';
+import { Model, Ad4mModel, Flag, HasMany, Property, Literal, parseLit } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
 import { community } from '@coasys/flux-constants';
 
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
+
+// SPARQL binding shapes — typed via `querySparql<T>()`.
+interface ItemIdBinding { item: string }
+interface DidBinding { did: string }
+interface TopicBinding { topicBase: string; topicNameRaw?: string }
+interface TopicRelevanceBinding extends TopicBinding { relevanceRaw?: string }
+interface SubgroupItemBinding {
+  id: string;
+  type: string;
+  author: string;
+  timestamp: string;
+  body?: string;
+  title?: string;
+  taskName?: string;
+  transcriptStart?: string;
+  channelTs?: string;
+}
+interface SubgroupItem {
+  id: string;
+  type: string;
+  author: string;
+  channelTimestamp: string;
+  messageBody: string;
+  postTitle: string;
+  taskName: string;
+}
 
 @Model({ name: 'ConversationSubgroup' })
 export default class ConversationSubgroup extends Ad4mModel {
@@ -41,12 +66,12 @@ export default class ConversationSubgroup extends Ad4mModel {
       `;
 
       const [itemsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql(itemsQuery),
-        this.perspective.querySparql(participantsQuery),
+        this.perspective.querySparql<ItemIdBinding[]>(itemsQuery),
+        this.perspective.querySparql<DidBinding[]>(participantsQuery),
       ]);
 
       const totalItems = itemsResult?.length || 0;
-      const participants = (participantsResult || []).map((r: any) => r.did).filter(Boolean);
+      const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
       return { totalItems, participants };
     } catch (error) {
       console.error('Error getting subgroup stats:', error);
@@ -68,10 +93,10 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery);
 
       // Deduplicate by topicBase
-      const uniqueTopics = new Map<string, any>();
+      const uniqueTopics = new Map<string, { topicBase: string; topicName: string }>();
       for (const binding of sparqlResult || []) {
         const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
@@ -120,11 +145,11 @@ export default class ConversationSubgroup extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<SubgroupItemBinding[]>(sparqlQuery);
 
       // Collect items — keep duplicate IDs so the view can detect and clean them up
-      const items: any[] = [];
-      const seen = new Map<string, any>();
+      const items: SubgroupItem[] = [];
+      const seen = new Map<string, SubgroupItem>();
       for (const binding of sparqlResult || []) {
         const id = binding.id;
         if (!id) continue;
@@ -132,7 +157,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
         if (seen.has(id)) {
           // Merge optional fields from this binding into the existing item
-          const existing = seen.get(id);
+          const existing = seen.get(id)!;
           const transcriptStart = parseLit(binding.transcriptStart);
           const channelTs = binding.channelTs;
           const fallbackTs = binding.timestamp;
@@ -152,7 +177,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         const fallbackTs = binding.timestamp;
         const channelTimestamp = transcriptStart || channelTs || fallbackTs;
 
-        const item = {
+        const item: SubgroupItem = {
           id,
           type: binding.type,
           author: binding.author,
@@ -166,12 +191,12 @@ export default class ConversationSubgroup extends Ad4mModel {
       }
 
       // Sort by the effective timestamp (transcriptStart || channelTs || fallback)
-      const sorted = items.sort((a: any, b: any) => {
+      const sorted = items.sort((a, b) => {
         const tsA = a.channelTimestamp || '';
         const tsB = b.channelTimestamp || '';
         return tsA < tsB ? -1 : tsA > tsB ? 1 : 0;
       });
-      return sorted.map((item: any) => {
+      return sorted.map((item) => {
         let text = '';
         let type: ItemType = 'Message';
 
@@ -215,10 +240,10 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicRelevanceBinding[]>(sparqlQuery);
 
       // Deduplicate by topicBase
-      const uniqueTopics = new Map<string, any>();
+      const uniqueTopics = new Map<string, { topicBase: string; topicName: string; relevance: string }>();
       for (const binding of sparqlResult || []) {
         const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
