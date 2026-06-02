@@ -61,6 +61,10 @@ vueApp.mount('#app');
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
       hosting: true,
+      allowedOrigins: (import.meta.env.VITE_ALLOWED_ORIGINS as string | undefined)
+        ?.split(',')
+        .map((o) => o.trim())
+        .filter(Boolean),
       onCreditsDepleted: () => {
         // Leave any active call first so the transcription widget is cleaned up
         const webrtcStore = useWebrtcStore(pinia);
