@@ -19,7 +19,7 @@ overrides:
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
   '@coasys/ad4m': 0.13.0-postmessage-ws-proxy.3
-  '@coasys/ad4m-connect': 0.13.0-postmessage-ws-proxy.3
+  '@coasys/ad4m-connect': 0.13.0-postmessage-ws-proxy.4
   '@coasys/ad4m-vue-hooks': 0.13.0-test-4
   '@coasys/ad4m-react-hooks': 0.13.0-test-4
 
@@ -77,8 +77,8 @@ importers:
         specifier: 0.13.0-postmessage-ws-proxy.3
         version: 0.13.0-postmessage-ws-proxy.3
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.3
-        version: 0.13.0-postmessage-ws-proxy.3
+        specifier: 0.13.0-postmessage-ws-proxy.4
+        version: 0.13.0-postmessage-ws-proxy.4
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(vue@3.5.35(typescript@5.9.3))
@@ -464,8 +464,8 @@ importers:
         specifier: 0.13.0-postmessage-ws-proxy.3
         version: 0.13.0-postmessage-ws-proxy.3
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.3
-        version: 0.13.0-postmessage-ws-proxy.3
+        specifier: 0.13.0-postmessage-ws-proxy.4
+        version: 0.13.0-postmessage-ws-proxy.4
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -492,8 +492,8 @@ importers:
         specifier: 0.13.0-postmessage-ws-proxy.3
         version: 0.13.0-postmessage-ws-proxy.3
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.3
-        version: 0.13.0-postmessage-ws-proxy.3
+        specifier: 0.13.0-postmessage-ws-proxy.4
+        version: 0.13.0-postmessage-ws-proxy.4
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -610,8 +610,8 @@ importers:
         specifier: 0.13.0-postmessage-ws-proxy.3
         version: 0.13.0-postmessage-ws-proxy.3
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.3
-        version: 0.13.0-postmessage-ws-proxy.3
+        specifier: 0.13.0-postmessage-ws-proxy.4
+        version: 0.13.0-postmessage-ws-proxy.4
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -2035,8 +2035,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.3':
-    resolution: {integrity: sha512-CU9+2a0ijG/+zhADRgUWFPw/YT/2fDoLKv1jgekcCqa7cx67YD37dueUucwQwEMdpW2kepaotmkkx0yuFA21EQ==}
+  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.4':
+    resolution: {integrity: sha512-E0l9x/L0BVDl2Vi46S0MBPZez2orOAY6qHGM1R7dqOSjFvCpZVJWfelUKSWbO6QYYkkvFZb06tDOBk9bYS9TQQ==}
 
   '@coasys/ad4m-react-hooks@0.13.0-test-4':
     resolution: {integrity: sha512-t7A+G65gW7esaflbIVRi0oiEmnY0Vqbx5decrILr1OY2gZC+0P1WmPOLXDAeZOlCXWpzq383xdyPlyTWHQc0gA==}
@@ -11815,7 +11815,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.6
 
-  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.3':
+  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.4':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
