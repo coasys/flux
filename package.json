@@ -46,7 +46,7 @@
       "@coasys/flux-utils": "workspace:*",
       "@coasys/flux-vue": "workspace:*",
       "@coasys/flux-webrtc": "workspace:*",
-      "@coasys/ad4m": "link:../ad4m/core",
+      "@coasys/ad4m": "0.13.0-test-4",
       "@coasys/ad4m-connect": "0.13.0-test-4",
       "@coasys/ad4m-vue-hooks": "0.13.0-test-4",
       "@coasys/ad4m-react-hooks": "0.13.0-test-4"
