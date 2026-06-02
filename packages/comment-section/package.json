@@ -25,6 +25,7 @@
     "dist"
   ],
   "dependencies": {
+    "@coasys/ad4m": "0.11.1",
     "@coasys/flux-editor": "workspace:*",
     "@coasys/flux-types": "workspace:*",
     "@coasys/flux-ui": "workspace:*",
