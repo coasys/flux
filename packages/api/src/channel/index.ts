@@ -21,7 +21,7 @@ const {
   SUBGROUP_ITEM,
 } = community;
 
-@Model({ name: 'Channel' })
+@Model({ name: 'Channel', graph: true })
 export class Channel extends Ad4mModel {
   @Flag({ through: ENTRY_TYPE, value: EntryType.Channel })
   type: string;
