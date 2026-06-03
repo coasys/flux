@@ -201,9 +201,11 @@ export const useAiStore = defineStore(
           if (!summaryChannel.id) return null;
           const fullChannel = new Channel(communityService!.perspective, summaryChannel.id);
           const unprocessedItems = await fullChannel.unprocessedItems();
+          const signalling = communityService?.signallingService;
+          if (!signalling) return null;
           const shouldProcess = await checkIfWeShouldProcessTask(
             unprocessedItems,
-            communityService!.signallingService!,
+            signalling,
             summaryChannel.id,
           );
           return shouldProcess ? { communityId, channel: conversationData.channel } : null;
@@ -285,7 +287,8 @@ export const useAiStore = defineStore(
         }
 
         // Re-check signalling guard before starting LLM work (another peer may have started since this task was queued)
-        if (isAnotherPeerProcessingChannel(communityService!.signallingService!, rawChannel.id!)) {
+        const signalling = communityService.signallingService;
+        if (signalling && isAnotherPeerProcessingChannel(signalling, rawChannel.id!)) {
           console.log('🤖 Another peer is already processing this channel, skipping');
           processingQueue.value.shift();
           return;
@@ -298,8 +301,8 @@ export const useAiStore = defineStore(
           // Update our app level processing state
           processingState.value = newState ? { ...processingState.value, ...newState } : null;
 
-          // Update our processing state in the assosiated signalling service
-          communityService!.signallingService!.setProcessingState(newState);
+          // Update our processing state in the associated signalling service
+          signalling?.setProcessingState(newState);
         };
 
         // Set our initial processing state
@@ -328,7 +331,7 @@ export const useAiStore = defineStore(
       } finally {
         // Reset our processing state
         processingState.value = null;
-        if (communityService) communityService.signallingService!.setProcessingState(null);
+        if (communityService) communityService.signallingService?.setProcessingState(null);
         processing.value = false;
 
         // If there are more tasks in the queue, process the next one

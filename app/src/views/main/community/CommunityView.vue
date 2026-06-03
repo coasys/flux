@@ -148,9 +148,9 @@ function navigateToChannel(channelId?: string) {
   router.push({ name: 'channel', params: { communityId, channelId } });
 }
 
-onMounted(() => signallingService!.startSignalling());
+onMounted(() => signallingService?.startSignalling());
 onUnmounted(() => {
-  signallingService!.stopSignalling();
+  signallingService?.stopSignalling();
   communityService.cleanup();
 });
 </script>
