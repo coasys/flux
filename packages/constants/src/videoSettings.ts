@@ -1,21 +1,25 @@
-// Types for WebRTC settings that were previously imported from utils/helpers/WebRTCManager
+// Canonical WebRTC type definitions.  Re-exported by `@coasys/flux-webrtc` for
+// back-compat with existing consumers (which historically imported these from
+// the WebRTC package).
 export interface IceServer {
   urls: string;
   username?: string;
   credential?: string;
 }
 
+export interface Transcriber {
+  on: boolean;
+  selectedModel: string;
+  previewTimeout: number;
+  messageTimeout: number;
+}
+
 export interface Settings {
-  audio: boolean;
-  video: boolean;
+  audio: boolean | MediaTrackConstraints;
+  video: boolean | MediaTrackConstraints;
   screen: boolean;
   iceServers?: IceServer[];
-  transcriber: {
-    on: boolean;
-    selectedModel: string;
-    previewTimeout: number;
-    messageTimeout: number;
-  };
+  transcriber: Transcriber;
 }
 
 const frameRate = {
