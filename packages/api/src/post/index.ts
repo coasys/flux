@@ -1,4 +1,4 @@
-import { Ad4mModel, HasMany, Flag, Model, Property } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, Flag, Model, Property, fileToDataUri } from '@coasys/ad4m';
 import { community, languages } from '@coasys/flux-constants';
 
 import { EntryType } from '@coasys/flux-types';
@@ -21,7 +21,7 @@ export class Post extends Ad4mModel {
   @Property({
     through: IMAGE,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) => (data ? `data:image/png;base64,${data?.data_base64}` : undefined),
+    transform: fileToDataUri,
   })
   image: string;
 
