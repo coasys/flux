@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@coasys/hooks-helpers': 0.13.0-test-4
+  '@coasys/hooks-helpers': 0.13.0-test-8
   '@preact/preset-vite': 2.9.4
   '@coasys/flux-api': workspace:*
   '@coasys/flux-comment-section': workspace:*
@@ -18,10 +18,10 @@ overrides:
   '@coasys/flux-utils': workspace:*
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
-  '@coasys/ad4m': 0.13.0-postmessage-ws-proxy.5
-  '@coasys/ad4m-connect': 0.13.0-postmessage-ws-proxy.5
-  '@coasys/ad4m-vue-hooks': 0.13.0-test-4
-  '@coasys/ad4m-react-hooks': 0.13.0-test-4
+  '@coasys/ad4m': 0.13.0-test-8
+  '@coasys/ad4m-connect': 0.13.0-test-8
+  '@coasys/ad4m-vue-hooks': 0.13.0-test-8
+  '@coasys/ad4m-react-hooks': 0.13.0-test-8
 
 importers:
 
@@ -74,14 +74,14 @@ importers:
         specifier: ^7.0.5
         version: 7.0.6(@capacitor/core@7.6.6)
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-vue-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(vue@3.5.35(typescript@5.9.3))
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(vue@3.5.35(typescript@5.9.3))
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../packages/api
@@ -329,8 +329,8 @@ importers:
   packages/api:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -351,8 +351,8 @@ importers:
   packages/comment-section:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-editor':
         specifier: workspace:*
         version: link:../flux-editor
@@ -393,11 +393,11 @@ importers:
   packages/create/templates/preact:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../../api
@@ -427,11 +427,11 @@ importers:
   packages/create/templates/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-vue-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(vue@3.5.35(typescript@5.9.3))
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(vue@3.5.35(typescript@5.9.3))
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../../api
@@ -461,11 +461,11 @@ importers:
   packages/flux-container:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -489,11 +489,11 @@ importers:
   packages/flux-editor:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -538,8 +538,8 @@ importers:
   packages/react-web:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -607,11 +607,11 @@ importers:
   packages/utils:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -631,8 +631,8 @@ importers:
   packages/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -652,8 +652,8 @@ importers:
   packages/webrtc:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -661,11 +661,11 @@ importers:
   views/chat-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -722,8 +722,8 @@ importers:
         specifier: ^1.70.19
         version: 1.80.0
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -753,11 +753,11 @@ importers:
   views/kanban-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -781,7 +781,7 @@ importers:
         version: 10.29.2
       react-beautiful-dnd:
         specifier: ^13.1.1
-        version: 13.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 13.1.1(react-dom@19.2.7(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
@@ -802,11 +802,11 @@ importers:
   views/kanban-view-simple:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -830,7 +830,7 @@ importers:
         version: 10.29.2
       react-beautiful-dnd:
         specifier: ^13.1.1
-        version: 13.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 13.1.1(react-dom@19.2.7(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
@@ -854,11 +854,11 @@ importers:
         specifier: '=3.6.9'
         version: 3.6.9(graphql@16.14.1)(react@18.3.1)
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -962,11 +962,11 @@ importers:
   views/poll-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -999,11 +999,11 @@ importers:
   views/post-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -1078,11 +1078,11 @@ importers:
   views/synergy-demo-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -1118,11 +1118,11 @@ importers:
   views/table-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -1161,8 +1161,8 @@ importers:
   views/webrtc-debug:
     dependencies:
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -1210,11 +1210,11 @@ importers:
   views/webrtc-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: 0.13.0-postmessage-ws-proxy.5
-        version: 0.13.0-postmessage-ws-proxy.5
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8
       '@coasys/ad4m-react-hooks':
-        specifier: 0.13.0-test-4
-        version: 0.13.0-test-4(preact@10.29.2)(react@18.3.1)
+        specifier: 0.13.0-test-8
+        version: 0.13.0-test-8(preact@10.29.2)(react@18.3.1)
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -2035,25 +2035,25 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.5':
-    resolution: {integrity: sha512-BaDeGInDqHOAkPLSIQfKw2bHZiAvJZN4EXzCEPzCwaJhQfJl3lwsCTnrxXS8yy+ajBOcg9yP/QRWyjbU4ae7OA==}
+  '@coasys/ad4m-connect@0.13.0-test-8':
+    resolution: {integrity: sha512-/Fwy7zOa6vlgbZ1N4ZnR5aYApahxjRN9D3Vqlr4OIf8wBXIkSXjUejMhWMYhkm+5JdFwRmtB0gPI6VYNMmwP2g==}
 
-  '@coasys/ad4m-react-hooks@0.13.0-test-4':
-    resolution: {integrity: sha512-t7A+G65gW7esaflbIVRi0oiEmnY0Vqbx5decrILr1OY2gZC+0P1WmPOLXDAeZOlCXWpzq383xdyPlyTWHQc0gA==}
+  '@coasys/ad4m-react-hooks@0.13.0-test-8':
+    resolution: {integrity: sha512-FJ5xXByc2OTpjU2HZXdd23r+NoGyPSYRlwYTX8wgKMcN7I8PL3HNLk5dzidaz4v9bYn7Gh1CnyBvqUi8QUpCnw==}
     peerDependencies:
       preact: '*'
       react: '*'
 
-  '@coasys/ad4m-vue-hooks@0.13.0-test-4':
-    resolution: {integrity: sha512-VFnRF5Dfl+0v+dKuNuYH7Xd93A7p33tB7dcusxvZ65I/2Hd50Jq/S00EnoodupLVsfMl1b8/zINiMNWdobutmA==}
+  '@coasys/ad4m-vue-hooks@0.13.0-test-8':
+    resolution: {integrity: sha512-e3+9uOZ6jTNb9pj+0qK9r1BAteAb+bvwGFGq5WhtOdhx2pjoA6iiy6zvjsnKEsFPIAjTt35ODPeQJSy/2HNCkg==}
     peerDependencies:
       vue: ^3.2.47
 
-  '@coasys/ad4m@0.13.0-postmessage-ws-proxy.5':
-    resolution: {integrity: sha512-usJMhlWptMiEQCxkZqoj295vvWug0FB7P1caNYz8nbFX1K2crzJsDxoVAxcsFIsXeqXX39qJxma5sGNy30Ow/A==}
+  '@coasys/ad4m@0.13.0-test-8':
+    resolution: {integrity: sha512-ux0nJcFCd+otqjMJMAGlXPbtCCqcafYWL3fC+W83ry9sIT6iCTZNDtjdzb3F/tDoSl4qJi9f8GjuHsUEGkp4xA==}
 
-  '@coasys/hooks-helpers@0.13.0-test-4':
-    resolution: {integrity: sha512-we9v3CUEMmYTOpU355R7rP6Fpb6DfovP/X45H/ndBOBacTDUkdCLxqR5dKGjZpetiBYxMj4+ttOS29Ckz3uv5Q==}
+  '@coasys/hooks-helpers@0.13.0-test-8':
+    resolution: {integrity: sha512-cynJIZq3GDO/gs6RGHABYNioDKPb8I6ChsA0WRA72jpDZgpWMSzz3BdmuLgJPlsDlhFPNzgGkmY6pNXEJLssxA==}
 
   '@confio/ics23@0.6.8':
     resolution: {integrity: sha512-wB6uo+3A50m0sW/EWcU64xpV/8wShZ6bMTa7pF8eYsTrSkQA7oLUIJcs/wb8g4y2Oyq701BaGiO6n/ak5WXO1w==}
@@ -8857,11 +8857,6 @@ packages:
       react: ^16.8.5 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.5 || ^17.0.0 || ^18.0.0
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
-    peerDependencies:
-      react: ^18.3.1
-
   react-dom@19.2.7:
     resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
@@ -9208,9 +9203,6 @@ packages:
   sax@1.6.0:
     resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
     engines: {node: '>=11.0.0'}
-
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
@@ -11815,17 +11807,17 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.6
 
-  '@coasys/ad4m-connect@0.13.0-postmessage-ws-proxy.5':
+  '@coasys/ad4m-connect@0.13.0-test-8':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
       auto-bind: 5.0.1
       lit: 2.8.0
 
-  '@coasys/ad4m-react-hooks@0.13.0-test-4(preact@10.29.2)(react@18.3.1)':
+  '@coasys/ad4m-react-hooks@0.13.0-test-8(preact@10.29.2)(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': 0.13.0-postmessage-ws-proxy.5
-      '@coasys/hooks-helpers': 0.13.0-test-4
+      '@coasys/ad4m': 0.13.0-test-8
+      '@coasys/hooks-helpers': 0.13.0-test-8
       '@types/react': 18.3.30
       '@types/react-dom': 18.3.7(@types/react@18.3.30)
       preact: 10.29.2
@@ -11834,16 +11826,16 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@coasys/ad4m-vue-hooks@0.13.0-test-4(vue@3.5.35(typescript@5.9.3))':
+  '@coasys/ad4m-vue-hooks@0.13.0-test-8(vue@3.5.35(typescript@5.9.3))':
     dependencies:
-      '@coasys/ad4m': 0.13.0-postmessage-ws-proxy.5
-      '@coasys/hooks-helpers': 0.13.0-test-4
+      '@coasys/ad4m': 0.13.0-test-8
+      '@coasys/hooks-helpers': 0.13.0-test-8
       vue: 3.5.35(typescript@5.9.3)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@coasys/ad4m@0.13.0-postmessage-ws-proxy.5':
+  '@coasys/ad4m@0.13.0-test-8':
     dependencies:
       '@holochain/client': 0.16.0
       base64-js: 1.5.1
@@ -11852,9 +11844,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@coasys/hooks-helpers@0.13.0-test-4':
+  '@coasys/hooks-helpers@0.13.0-test-8':
     dependencies:
-      '@coasys/ad4m': 0.13.0-postmessage-ws-proxy.5
+      '@coasys/ad4m': 0.13.0-test-8
       uuid: 9.0.1
     transitivePeerDependencies:
       - bufferutil
@@ -19907,25 +19899,19 @@ snapshots:
     dependencies:
       cross-spawn-windows-exe: 1.2.0
 
-  react-beautiful-dnd@13.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-beautiful-dnd@13.1.1(react-dom@19.2.7(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.29.7
       css-box-model: 1.2.1
       memoize-one: 5.2.1
       raf-schd: 4.0.3
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      react-redux: 7.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-dom: 19.2.7(react@18.3.1)
+      react-redux: 7.2.9(react-dom@19.2.7(react@18.3.1))(react@18.3.1)
       redux: 4.2.1
       use-memo-one: 1.1.3(react@18.3.1)
     transitivePeerDependencies:
       - react-native
-
-  react-dom@18.3.1(react@18.3.1):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 18.3.1
-      scheduler: 0.23.2
 
   react-dom@19.2.7(react@18.3.1):
     dependencies:
@@ -19947,7 +19933,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-redux@7.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-redux@7.2.9(react-dom@19.2.7(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.29.7
       '@types/react-redux': 7.1.34
@@ -19957,7 +19943,7 @@ snapshots:
       react: 18.3.1
       react-is: 17.0.2
     optionalDependencies:
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.2.7(react@18.3.1)
 
   react-virtuoso@3.1.5(react-dom@19.2.7(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -20328,10 +20314,6 @@ snapshots:
   sax@1.1.4: {}
 
   sax@1.6.0: {}
-
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
 
   scheduler@0.27.0: {}
 
