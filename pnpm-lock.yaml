@@ -18,7 +18,7 @@ overrides:
   '@coasys/flux-utils': workspace:*
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
-  '@coasys/ad4m': link:../ad4m/core
+  '@coasys/ad4m': 0.13.0-test-4
   '@coasys/ad4m-connect': 0.13.0-test-4
   '@coasys/ad4m-vue-hooks': 0.13.0-test-4
   '@coasys/ad4m-react-hooks': 0.13.0-test-4
@@ -74,8 +74,8 @@ importers:
         specifier: ^7.0.5
         version: 7.0.6(@capacitor/core@7.6.1)
       '@coasys/ad4m':
-        specifier: link:../../ad4m/core
-        version: link:../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-connect':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4
@@ -329,8 +329,8 @@ importers:
   packages/api:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -350,6 +350,9 @@ importers:
 
   packages/comment-section:
     dependencies:
+      '@coasys/ad4m':
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/flux-editor':
         specifier: workspace:*
         version: link:../flux-editor
@@ -390,8 +393,8 @@ importers:
   packages/create/templates/preact:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../../../ad4m/core
-        version: link:../../../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -424,8 +427,8 @@ importers:
   packages/create/templates/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../../../ad4m/core
-        version: link:../../../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(vue@3.5.32(typescript@5.9.3))
@@ -458,8 +461,8 @@ importers:
   packages/flux-container:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-connect':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4
@@ -486,8 +489,8 @@ importers:
   packages/flux-editor:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-connect':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4
@@ -535,8 +538,8 @@ importers:
   packages/react-web:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -604,8 +607,8 @@ importers:
   packages/utils:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-connect':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4
@@ -628,8 +631,8 @@ importers:
   packages/vue:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -649,8 +652,8 @@ importers:
   packages/webrtc:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -658,8 +661,8 @@ importers:
   views/chat-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -719,8 +722,8 @@ importers:
         specifier: ^1.70.19
         version: 1.80.0
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/flux-container':
         specifier: workspace:*
         version: link:../../packages/flux-container
@@ -750,8 +753,8 @@ importers:
   views/kanban-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -799,8 +802,8 @@ importers:
   views/kanban-view-simple:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -851,8 +854,8 @@ importers:
         specifier: '=3.6.9'
         version: 3.6.9(graphql@15.10.2)(react@18.3.1)
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -959,8 +962,8 @@ importers:
   views/poll-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -996,8 +999,8 @@ importers:
   views/post-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -1075,8 +1078,8 @@ importers:
   views/synergy-demo-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -1115,8 +1118,8 @@ importers:
   views/table-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -1207,8 +1210,8 @@ importers:
   views/webrtc-view:
     dependencies:
       '@coasys/ad4m':
-        specifier: link:../../../ad4m/core
-        version: link:../../../ad4m/core
+        specifier: 0.13.0-test-4
+        version: 0.13.0-test-4
       '@coasys/ad4m-react-hooks':
         specifier: 0.13.0-test-4
         version: 0.13.0-test-4(preact@10.29.1)(react@18.3.1)
@@ -2040,6 +2043,9 @@ packages:
     peerDependencies:
       vue: ^3.2.47
 
+  '@coasys/ad4m@0.13.0-test-4':
+    resolution: {integrity: sha512-Th9AtAnWAiI8TKgTg9yDGcLuffRc2p8M/gCvTsesV4VtL9Ix7Imy/CMnAT3jvB83qLGca6fCUEd5Qhe9+m2a5w==}
+
   '@coasys/hooks-helpers@0.13.0-test-4':
     resolution: {integrity: sha512-we9v3CUEMmYTOpU355R7rP6Fpb6DfovP/X45H/ndBOBacTDUkdCLxqR5dKGjZpetiBYxMj4+ttOS29Ckz3uv5Q==}
 
@@ -2663,6 +2669,14 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
+  '@holochain/client@0.16.0':
+    resolution: {integrity: sha512-GJEl6F3OSlDX71H+rtyUXpEuor7O9MhvNIi+Tq6obrysu71JsbXfR1rtmSBiNb9fttHOZLW60EzY/Lj3I9dv8g==}
+    engines: {node: '>=16.0.0 || >=18.0.0'}
+
+  '@holochain/serialization@0.1.0-beta-rc.3':
+    resolution: {integrity: sha512-DJx4V2KXHVLciyOGjOYKTM/JLBpBEZ3RsPIRCgf7qmwhQdxXvhi2p+oFFRD51yUT5uC1/MzIVeJCl/R60PwFbw==}
+    deprecated: Holochain no longer requires canonical serialization of zome call payloads
+
   '@huggingface/jinja@0.2.2':
     resolution: {integrity: sha512-/KPde26khDUIPkTGU82jdtTW9UAuvUTumCAbFs/7giR0SxsvZC4hru51PBvpijH6BVkHcROcvZM/lpy5h1jRRA==}
     engines: {node: '>=18'}
@@ -2875,6 +2889,10 @@ packages:
   '@metamask/jazzicon@2.0.0':
     resolution: {integrity: sha512-7M+WSZWKcQAo0LEhErKf1z+D3YX0tEDAcGvcKbDyvDg34uvgeKR00mFNIYwAhdAS9t8YXxhxZgsrRBBg6X8UQg==}
 
+  '@msgpack/msgpack@2.8.0':
+    resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
+    engines: {node: '>= 10'}
+
   '@next/eslint-plugin-next@12.3.7':
     resolution: {integrity: sha512-L3WEJJBd1CUUsuxSEThheAV5Nh6/mzCagwj4LHaYlANBkW8Hmg8Ne8l/Vx/sPyfyE7FjuKyiNYWbSVpXRvrmaw==}
 
@@ -2888,6 +2906,9 @@ packages:
   '@noble/curves@1.9.7':
     resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@noble/ed25519@2.3.0':
+    resolution: {integrity: sha512-M7dvXL2B92/M7dw9+gzuydL8qn/jiqNHaoR3Q+cb1q1GHV7uwE17WCyFMG+Y+TZb5izcaXk5TdJRrDUxHXL78A==}
 
   '@noble/hashes@1.6.0':
     resolution: {integrity: sha512-YUULf0Uk4/mAA89w+k3+yUYh6NrEvxZa5T6SY3wlMvE2chHkxFUUIDI8/XW1QSC357iA5pSnqt7XEhvFOqmDyQ==}
@@ -3416,6 +3437,10 @@ packages:
   '@szmarczak/http-timer@4.0.6':
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
+
+  '@tauri-apps/api@1.6.0':
+    resolution: {integrity: sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==}
+    engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
 
   '@testing-library/dom@8.20.1':
     resolution: {integrity: sha512-/DiOQ5xBxgdYRC8LNk7U+RWat0S3qRLeIw3ZIkMQ9kkVlRmwD/Eg8k8CqIpD6GW7u20JIUOfMKbxtiLutpjQ4g==}
@@ -5658,6 +5683,10 @@ packages:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
     engines: {node: '>=12'}
 
+  emittery@1.2.1:
+    resolution: {integrity: sha512-sFz64DCRjirhwHLxofFqxYQm6DCp6o0Ix7jwKQvuCHPn4GMRZNuBZyLPu9Ccmk/QSCAMZt6FOUqA8JZCQvA9fw==}
+    engines: {node: '>=14.16'}
+
   emoji-mart@5.6.0:
     resolution: {integrity: sha512-eJp3QRe79pjwa+duv+n7+5YsNhRcMl812EcFVwrnRvYKoNPoQb5qxU8DG6Bgwji0akHdp6D4Ln6tYLG58MFSow==}
 
@@ -7127,6 +7156,11 @@ packages:
     peerDependencies:
       ws: '*'
 
+  isomorphic-ws@5.0.0:
+    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
+    peerDependencies:
+      ws: '*'
+
   issue-regex@3.1.0:
     resolution: {integrity: sha512-0RHjbtw9QXeSYnIEY5Yrp2QZrdtz21xBDV9C/GIlY2POmgoS6a7qjkYS5siRKXScnuAj5/SPv1C3YForNCHTJA==}
     engines: {node: '>=10'}
@@ -7315,6 +7349,9 @@ packages:
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
+
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-beautify@1.15.4:
     resolution: {integrity: sha512-9/KXeZUKKJwqCXUdBxFJ3vPh467OCckSBmYDwSK/EtV090K+iMJ7zx2S3HLVDIWFQdqMIsZWbnaGiba18aWhaA==}
@@ -7507,6 +7544,12 @@ packages:
 
   libsodium-wrappers-sumo@0.7.16:
     resolution: {integrity: sha512-gR0JEFPeN3831lB9+ogooQk0KH4K5LSMIO5Prd5Q5XYR2wHFtZfPg0eP7t1oJIWq+UIzlU4WVeBxZ97mt28tXw==}
+
+  libsodium-wrappers@0.7.16:
+    resolution: {integrity: sha512-Gtr/WBx4dKjvRL1pvfwZqu7gO6AfrQ0u9vFL+kXihtHf6NfkROR8pjYWn98MFDI3jN19Ii1ZUfPR9afGiPyfHg==}
+
+  libsodium@0.7.16:
+    resolution: {integrity: sha512-3HrzSPuzm6Yt9aTYCDxYEG8x8/6C0+ag655Y7rhhWZM9PT4NpdnbqlzXhGZlDnkgR6MeSTnOt/VIyHLs9aSf+Q==}
 
   lil-gui@0.17.0:
     resolution: {integrity: sha512-MVBHmgY+uEbmJNApAaPbtvNh1RCAeMnKym82SBjtp5rODTYKWtM+MXHCifLe2H2Ti1HuBGBtK/5SyG4ShQ3pUQ==}
@@ -11719,23 +11762,41 @@ snapshots:
 
   '@coasys/ad4m-react-hooks@0.13.0-test-4(preact@10.29.1)(react@18.3.1)':
     dependencies:
-      '@coasys/ad4m': link:../ad4m/core
+      '@coasys/ad4m': 0.13.0-test-4
       '@coasys/hooks-helpers': 0.13.0-test-4
       '@types/react': 18.3.28
       '@types/react-dom': 18.3.7(@types/react@18.3.28)
       preact: 10.29.1
       react: 18.3.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@coasys/ad4m-vue-hooks@0.13.0-test-4(vue@3.5.32(typescript@5.9.3))':
     dependencies:
-      '@coasys/ad4m': link:../ad4m/core
+      '@coasys/ad4m': 0.13.0-test-4
       '@coasys/hooks-helpers': 0.13.0-test-4
       vue: 3.5.32(typescript@5.9.3)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@coasys/ad4m@0.13.0-test-4':
+    dependencies:
+      '@holochain/client': 0.16.0
+      base64-js: 1.5.1
+      pako: 2.1.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@coasys/hooks-helpers@0.13.0-test-4':
     dependencies:
-      '@coasys/ad4m': link:../ad4m/core
+      '@coasys/ad4m': 0.13.0-test-4
       uuid: 9.0.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@confio/ics23@0.6.8':
     dependencies:
@@ -12444,6 +12505,24 @@ snapshots:
     dependencies:
       graphql: 15.10.2
 
+  '@holochain/client@0.16.0':
+    dependencies:
+      '@holochain/serialization': 0.1.0-beta-rc.3
+      '@msgpack/msgpack': 2.8.0
+      '@noble/ed25519': 2.3.0
+      '@tauri-apps/api': 1.6.0
+      emittery: 1.2.1
+      isomorphic-ws: 5.0.0(ws@8.20.0)
+      js-base64: 3.7.8
+      libsodium-wrappers: 0.7.16
+      lodash-es: 4.18.1
+      ws: 8.20.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@holochain/serialization@0.1.0-beta-rc.3': {}
+
   '@huggingface/jinja@0.2.2': {}
 
   '@humanwhocodes/config-array@0.5.0':
@@ -12872,6 +12951,8 @@ snapshots:
       color: 0.11.4
       mersenne-twister: 1.1.0
 
+  '@msgpack/msgpack@2.8.0': {}
+
   '@next/eslint-plugin-next@12.3.7':
     dependencies:
       glob: 7.1.7
@@ -12887,6 +12968,8 @@ snapshots:
   '@noble/curves@1.9.7':
     dependencies:
       '@noble/hashes': 1.8.0
+
+  '@noble/ed25519@2.3.0': {}
 
   '@noble/hashes@1.6.0': {}
 
@@ -13310,6 +13393,8 @@ snapshots:
   '@szmarczak/http-timer@4.0.6':
     dependencies:
       defer-to-connect: 2.0.1
+
+  '@tauri-apps/api@1.6.0': {}
 
   '@testing-library/dom@8.20.1':
     dependencies:
@@ -15994,6 +16079,8 @@ snapshots:
 
   emittery@0.13.1: {}
 
+  emittery@1.2.1: {}
+
   emoji-mart@5.6.0: {}
 
   emoji-picker-element@1.29.1: {}
@@ -17759,6 +17846,10 @@ snapshots:
     dependencies:
       ws: 7.5.10
 
+  isomorphic-ws@5.0.0(ws@8.20.0):
+    dependencies:
+      ws: 8.20.0
+
   issue-regex@3.1.0: {}
 
   istanbul-lib-coverage@3.2.2: {}
@@ -18152,6 +18243,8 @@ snapshots:
 
   joycon@3.1.1: {}
 
+  js-base64@3.7.8: {}
+
   js-beautify@1.15.4:
     dependencies:
       config-chain: 1.1.13
@@ -18329,6 +18422,12 @@ snapshots:
   libsodium-wrappers-sumo@0.7.16:
     dependencies:
       libsodium-sumo: 0.7.16
+
+  libsodium-wrappers@0.7.16:
+    dependencies:
+      libsodium: 0.7.16
+
+  libsodium@0.7.16: {}
 
   lil-gui@0.17.0: {}
 
@@ -21817,8 +21916,7 @@ snapshots:
 
   ws@7.5.10: {}
 
-  ws@8.20.0:
-    optional: true
+  ws@8.20.0: {}
 
   xcode@3.0.1:
     dependencies:
