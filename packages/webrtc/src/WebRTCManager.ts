@@ -55,25 +55,12 @@ export type Connection = {
   ad4mPeer: AD4MPeer;
 };
 
-type Transcriber = {
-  on: boolean;
-  selectedModel: string;
-  previewTimeout: number;
-  messageTimeout: number;
-};
-
-export type Settings = {
-  video: boolean | MediaTrackConstraints;
-  audio: boolean | MediaTrackConstraints;
-  screen: boolean;
-  transcriber: Transcriber;
-};
-
-export type IceServer = {
-  urls: string;
-  username?: string;
-  credential?: string;
-};
+// Re-exported from `@coasys/flux-constants` so existing consumers that
+// `import { IceServer, Settings, Transcriber } from '@coasys/flux-webrtc'`
+// keep working.  The canonical declarations live in
+// `packages/constants/src/videoSettings.ts`.
+import type { IceServer, Settings, Transcriber } from '@coasys/flux-constants';
+export type { IceServer, Settings, Transcriber };
 
 type Props = {
   agent: AgentClient;

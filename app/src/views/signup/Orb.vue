@@ -77,7 +77,7 @@ onMounted(() => {
     // change 'k' value for more spikes
     const k = 1;
     const v3 = new THREE.Vector3();
-    const positions = sphere.geometry.attributes.position;
+    const positions = sphere.geometry.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < positions.count; i++) {
       v3.fromBufferAttribute(positions, i).setLength(k);
       const n = perlin.perlin3(v3.x + time * 0.1, v3.y + time * 0.1, v3.z + time * 0.1);

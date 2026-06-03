@@ -171,8 +171,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value || [],
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value || [],
       children: undefined,
     }));
   });
@@ -181,8 +181,8 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value || [],
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value || [],
       children: undefined,
     }));
   });
@@ -191,15 +191,15 @@ export async function createCommunityService(): Promise<CommunityService> {
       ...data,
       channel: allChannels.value.find((c) => c.id === data.channelId),
       conversation: data.conversationId ? conversationCache.get(data.conversationId) : undefined,
-      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value,
-      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value,
+      agentsInChannel: signallingService?.getAgentsInChannel(data.channelId).value || [],
+      agentsInCall: signallingService?.getAgentsInCall(data.channelId).value || [],
       children:
         data.children?.map((child) => ({
           ...child,
           channel: allChannels.value.find((c) => c.id === child.channelId),
           conversation: child.conversationId ? conversationCache.get(child.conversationId) : undefined,
-          agentsInChannel: signallingService?.getAgentsInChannel(child.channelId).value,
-          agentsInCall: signallingService?.getAgentsInCall(child.channelId).value,
+          agentsInChannel: signallingService?.getAgentsInChannel(child.channelId).value || [],
+          agentsInCall: signallingService?.getAgentsInCall(child.channelId).value || [],
           children: undefined,
         })) || [],
     }));

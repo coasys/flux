@@ -15,14 +15,15 @@ const defaultProfile: Profile = {
 };
 
 const profileCache: Record<string, Profile> = {};
-const inflight: Record<string, Promise<Profile>> = {};
+const inflight: Record<string, Promise<Profile> | undefined> = {};
 
 export async function getCachedAgentProfile(did: string, client: Ad4mClient, refresh?: boolean): Promise<Profile> {
   // Return the cached profile if it already exists (skip when refreshing)
   if (!refresh && profileCache[did]) return profileCache[did];
 
   // Deduplicate concurrent requests for the same DID
-  if (!refresh && inflight[did]) return inflight[did];
+  const pending = inflight[did];
+  if (!refresh && pending) return pending;
 
   const promise = (async () => {
     try {

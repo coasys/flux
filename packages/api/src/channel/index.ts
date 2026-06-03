@@ -1,8 +1,7 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, Model, Property, PerspectiveProxy } from '@coasys/ad4m';
-import { parseLit } from '../utils/parseLit';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
-import { SynergyGroup, SynergyItem, icons } from '@coasys/flux-utils';
+import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
 import App from '../app';
 import Conversation from '../conversation';
 import Message from '../message';
@@ -20,6 +19,37 @@ const {
   FLUX_PARTICIPANT,
   SUBGROUP_ITEM,
 } = community;
+
+// ---------------------------------------------------------------------------
+// SPARQL binding shapes — typed via `querySparql<T>()` so call sites lose the
+// `binding: any` annotations and gain compile-time field checks.
+// ---------------------------------------------------------------------------
+
+interface IdBinding {
+  id: string;
+}
+
+interface ChannelItemBinding {
+  id: string;
+  author: string;
+  timestamp: string;
+  type: string;
+  body?: string;
+  title?: string;
+  taskName?: string;
+  transcriptStart?: string;
+}
+
+interface RecentConversationBinding {
+  channelId: string;
+  isConv: string;
+  conversationId?: string;
+}
+
+interface PinnedConversationBinding {
+  channelId: string;
+  conversationId?: string;
+}
 
 @Model({ name: 'Channel' })
 export class Channel extends Ad4mModel {
@@ -85,11 +115,11 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(sparqlQuery);
 
-      const mapped = (sparqlResult || []).map((binding: any) => {
+      const mapped = (sparqlResult || []).map((binding) => {
         let text = '';
-        let type = '';
+        let type: ItemType = 'Message';
         const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
@@ -109,7 +139,7 @@ export class Channel extends Ad4mModel {
           timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
-          icon: icons[type] ? icons[type] : 'question',
+          icon: icons[type] || 'question',
         };
       });
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
@@ -152,14 +182,14 @@ export class Channel extends Ad4mModel {
       // an item to appear in allItems but not processedSet (or vice-versa).
       // The final VALUES query re-verifies channel membership to mitigate this.
       const [allItemsResult, processedResult] = await Promise.all([
-        this.perspective.querySparql(allItemsQuery),
-        this.perspective.querySparql(processedQuery),
+        this.perspective.querySparql<IdBinding[]>(allItemsQuery),
+        this.perspective.querySparql<IdBinding[]>(processedQuery),
       ]);
 
-      const processedSet = new Set((processedResult || []).map((r: any) => r.id));
+      const processedSet = new Set((processedResult || []).map((r) => r.id));
       const unprocessedIds = (allItemsResult || [])
-        .map((r: any) => r.id)
-        .filter((id: string) => id && !processedSet.has(id));
+        .map((r) => r.id)
+        .filter((id) => id && !processedSet.has(id));
 
       if (unprocessedIds.length === 0) return [];
 
@@ -183,19 +213,19 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(dataQuery);
+      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(dataQuery);
 
       // Deduplicate by id
-      const itemMap = new Map<string, any>();
+      const itemMap = new Map<string, ChannelItemBinding>();
       for (const binding of sparqlResult || []) {
         const id = binding.id;
         if (!id || itemMap.has(id)) continue;
         itemMap.set(id, binding);
       }
 
-      const mapped = Array.from(itemMap.values()).map((binding: any) => {
+      const mapped = Array.from(itemMap.values()).map((binding) => {
         let text = '';
-        let type = '';
+        let type: ItemType = 'Message';
         const itemType = binding.type;
 
         if (itemType === 'flux://has_message') {
@@ -215,7 +245,7 @@ export class Channel extends Ad4mModel {
           timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
           text,
           type,
-          icon: icons[type] ? icons[type] : 'question',
+          icon: icons[type] || 'question',
         };
       });
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
@@ -238,9 +268,8 @@ export class Channel extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
-      const countValue = sparqlResult?.[0]?.count;
-      return countValue ? parseInt(countValue, 10) : 0;
+      const sparqlResult = await this.perspective.querySparql<CountBinding[]>(sparqlQuery);
+      return parseSparqlCount(sparqlResult);
     } catch (error) {
       console.error('Error getting total item count:', error);
       return 0;
@@ -274,7 +303,7 @@ export class Channel extends Ad4mModel {
     `;
 
     try {
-      const results = await perspective.querySparql(sparql);
+      const results = await perspective.querySparql<RecentConversationBinding[]>(sparql);
 
       // Filter to only conversation channels and dedup
       const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
@@ -295,10 +324,9 @@ export class Channel extends Ad4mModel {
       // perspective.get() uses indexed lookups, not SPARQL reifier joins.
       await Promise.all(
         Array.from(channelMap.entries()).map(async ([channelId, entry]) => {
-          const links = await perspective.get({
-            source: channelId,
-            predicate: 'ad4m://has_child',
-          });
+          const links = await perspective.get(
+            new LinkQuery({ source: channelId, predicate: 'ad4m://has_child' }),
+          );
           // Find the most recent link timestamp
           let latest = '';
           for (const link of links) {
@@ -339,7 +367,7 @@ export class Channel extends Ad4mModel {
     `;
 
     try {
-      const results = await perspective.querySparql(sparql);
+      const results = await perspective.querySparql<PinnedConversationBinding[]>(sparql);
       // Deduplicate by channelId
       const seen = new Map<string, { channelId: string; conversationId?: string }>();
       for (const r of results || []) {

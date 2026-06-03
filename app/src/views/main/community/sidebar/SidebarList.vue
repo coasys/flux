@@ -40,12 +40,12 @@
 
 <script setup lang="ts">
 import { ChevronDownIcon, ChevronUpIcon } from '@/components/icons';
-import { ChannelData } from '@/composables/useCommunityService';
+import { ChannelDataWithAgents } from '@/composables/useCommunityService';
 import { useModalStore } from '@/stores';
 import SidebarItem from '@/views/main/community/sidebar/SidebarItem.vue';
 import { computed, ref } from 'vue';
 
-type Props = { title: string; icon: string; loading: boolean; items: ChannelData[]; limitTo?: number };
+type Props = { title: string; icon: string; loading: boolean; items: ChannelDataWithAgents[]; limitTo?: number };
 const { title, icon, loading, items, limitTo } = defineProps<Props>();
 
 const modalsStore = useModalStore();

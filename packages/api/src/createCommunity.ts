@@ -41,6 +41,7 @@ export default async function createCommunity({
     const perspective = perspectiveUuid
       ? await client.perspective.byUUID(perspectiveUuid)
       : await client.perspective.add(name);
+    if (!perspective) throw new Error('Failed to create or retrieve perspective');
 
     // Add models to the perspectives SDNA
     await perspective.ensureSDNASubjectClass(Community);
@@ -98,11 +99,15 @@ export default async function createCommunity({
     const notification = notifications.find((n) => n.appName === 'Flux');
     if (notification) {
       const notificationId = notification.id;
-      notification.granted = undefined;
-      notification.id = undefined;
       await client.runtime.updateNotification(notificationId, {
-        ...notification,
+        description: notification.description,
+        appName: notification.appName,
+        appUrl: notification.appUrl,
+        appIconPath: notification.appIconPath,
+        trigger: notification.trigger,
         perspectiveIds: [...(notification.perspectiveIds || []), perspective.uuid],
+        webhookUrl: notification.webhookUrl,
+        webhookAuth: notification.webhookAuth,
       });
     }
 

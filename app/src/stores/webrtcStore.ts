@@ -6,6 +6,7 @@ import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
 import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { PerspectiveExpression } from '@coasys/ad4m';
+import { getDefaultIceServers, IceServer } from '@coasys/flux-utils';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
 import { Howl } from 'howler';
 import { defineStore, storeToRefs } from 'pinia';
@@ -27,26 +28,7 @@ export const WEBRTC_EMOJI = 'webrtc/emoji';
 export const WEBRTC_MEDIA_SETTINGS_CHANGED = 'webrtc/media-settings-changed';
 export const WEBRTC_LEAVING_CALL = 'webrtc/leaving-call';
 const MAX_RECONNECTION_ATTEMPTS = 3;
-const defaultIceServers = [
-  {
-    urls: 'stun:turn.ad4m.dev:3478',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'turns:turn.ad4m.dev:5349',
-    username: 'openrelay',
-    credential: 'openrelay',
-  },
-  {
-    urls: 'stun:stun.l.google.com:19302',
-  },
-  {
-    urls: 'stun:global.stun.twilio.com:3478',
-  },
-] as IceServer[];
 
-export type IceServer = { urls: string; username?: string; credential?: string };
 export type MediaState = 'on' | 'off' | 'loading';
 export type PeerConnection = {
   did: string;
@@ -91,7 +73,7 @@ export const useWebrtcStore = defineStore(
     const myAgentStatus = ref<AgentStatus>('active');
     const reconnectionAttempts = ref<Record<string, number>>({});
     const reconnectionTimeouts = ref<Record<string, NodeJS.Timeout>>({});
-    const iceServers = ref(defaultIceServers);
+    const iceServers = ref<IceServer[]>(getDefaultIceServers());
     const disconnectedAgents = ref<string[]>([]);
     const hasCopiedLink = ref(false);
     let copyLinkTimer: ReturnType<typeof setTimeout> | null = null;
@@ -560,7 +542,7 @@ export const useWebrtcStore = defineStore(
           if (!localStream.value || !peerConnection || !recipients.includes(me.value.did)) return;
 
           // Add local stream tracks to the peer connection
-          localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value));
+          localStream.value.getTracks().forEach((track) => peerConnection.peer.addTrack(track, localStream.value!));
         } catch (e) {
           console.error(`❌ Error handling WebRTC stream request from ${author}:`, e);
         }
@@ -589,7 +571,7 @@ export const useWebrtcStore = defineStore(
     }
 
     function resetIceServers() {
-      iceServers.value = defaultIceServers;
+      iceServers.value = getDefaultIceServers();
     }
 
     async function joinRoom() {

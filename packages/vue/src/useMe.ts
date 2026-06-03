@@ -31,8 +31,8 @@ export function useMe(client: AgentClient) {
 
         isListening.value = true;
 
-        client.addAgentStatusChangedListener(async (s: AgentStatus) => {
-          status.value = s;
+        client.addAgentStatusChangedListener(async (s: Agent) => {
+          status.value = s as unknown as AgentStatus;
         });
 
         client.addUpdatedListener(async (a: Agent) => {

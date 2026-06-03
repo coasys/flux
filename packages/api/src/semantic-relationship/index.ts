@@ -65,7 +65,7 @@ export default class SemanticRelationship extends Ad4mModel {
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (sparqlResult || []).map(async (binding) => {
+        (sparqlResult || []).map(async (binding: any) => {
           const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
             baseExpression: binding.itemId,
@@ -103,7 +103,7 @@ export default class SemanticRelationship extends Ad4mModel {
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (sparqlResult || []).map(async (binding) => {
+        (sparqlResult || []).map(async (binding: any) => {
           const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
             baseExpression: binding.itemId,
@@ -146,7 +146,7 @@ export default class SemanticRelationship extends Ad4mModel {
       };
 
       return Promise.all(
-        (sparqlResult || []).map(async (binding) => {
+        (sparqlResult || []).map(async (binding: any) => {
           const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
             baseExpression: binding.itemId,
@@ -190,7 +190,7 @@ export default class SemanticRelationship extends Ad4mModel {
       const sparqlResult = await this.perspective.querySparql(sparqlQuery);
 
       return Promise.all(
-        (sparqlResult || []).map(async (binding) => {
+        (sparqlResult || []).map(async (binding: any) => {
           const embeddingExpression = await this.perspective.getExpression(binding.embedding);
           return {
             baseExpression: binding.itemId,

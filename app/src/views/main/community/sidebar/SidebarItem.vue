@@ -106,11 +106,13 @@ function aggregateAgents(expanded: boolean, item: ChannelDataWithAgents, agentKe
 }
 
 function aggregateAllAuthors(expanded: boolean, item: ChannelDataWithAgents): string[] {
+  // ChannelSummary may carry participants at runtime when populated from full Channel queries
+  type ChannelWithParticipants = { participants?: string[] };
   if (!expanded && item.children?.length) {
-    const childAuthors = item.children.flatMap((child) => child.channel?.participants || []);
-    return [...new Set([...(item.channel?.participants || []), ...childAuthors])];
+    const childAuthors = item.children.flatMap((child) => (child.channel as ChannelWithParticipants)?.participants || []);
+    return [...new Set([...((item.channel as ChannelWithParticipants)?.participants || []), ...childAuthors])];
   }
-  return item.channel?.participants || [];
+  return (item.channel as ChannelWithParticipants)?.participants || [];
 }
 
 function navigateToChannel() {
