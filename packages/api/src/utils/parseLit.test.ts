@@ -27,10 +27,12 @@ describe('parseLit', () => {
     expect(parseLit(url)).toBe('hello world');
   });
 
-  it('extracts .data from JSON literal objects', () => {
+  it('JSON-stringifies objects that carry a data field', () => {
+    // Envelope semantics live in `unwrapLiteralValue` (flux-utils); parseLit
+    // returns the JSON shape verbatim and leaves shape decisions to callers.
     const { Literal } = require('@coasys/ad4m');
     const url = Literal.from({ data: 'extracted' }).toUrl();
-    expect(parseLit(url)).toBe('extracted');
+    expect(parseLit(url)).toBe(JSON.stringify({ data: 'extracted' }));
   });
 
   it('JSON-stringifies objects without .data field', () => {
