@@ -839,3 +839,55 @@ The `model_query` baseline now supports the opt-in flags that close most of the 
 | E. Inter-class joins (4 sites) | "Lean toward SPARQL" | **Convertible with the same opt-in flags** once the deep-include path is exercised in S16. |
 
 **Bottom line:** the structural answer to "should flux migrate to Ad4mModel?" changed once #846 landed. For most call sites that don't want link-level metadata or unpaginated counts, the answer is now *yes* — the orchestrator no longer charges 5–10× for the privilege.
+
+---
+
+## Migration actually carried out in this PR (commit `dd9de23c`)
+
+Every `querySparql` call site in `packages/api/src/{channel,conversation,
+conversation-subgroup,topic,semantic-relationship}` (23 sites in production
+code, 12 unique methods after dedup) was audited and one of three
+decisions taken:
+
+### Migrated (5 production methods)
+
+| Site | File | New shape |
+|---|---|---|
+| `Channel.pinnedConversations()` | `channel/index.ts` | `findAll(Channel, { where: { isPinned: true }, include: { conversations: { limit: 1, withMetadata: false } }, withMetadata: false, count: false })` — engages the post-#846 single-plan path for the `isPinned == true` `@Property` flag. |
+| `Conversation.stats()` | `conversation/index.ts` | Subgroup count → `ConversationSubgroup.findAllAndCount({ parent: { model: Conversation, id }, limit: 0, count: true, withMetadata: false })` (count-only SPARQL fast-path). Participants → `perspective.get(new LinkQuery({ source: this.id, predicate: FLUX_PARTICIPANT }))` (indexed link lookup, no SPARQL). |
+| `ConversationSubgroup.stats()` | `conversation-subgroup/index.ts` | Both queries replaced with parallel `LinkQuery` via `perspective.get(...)`. No SPARQL roundtrip needed for the simple link enumeration; the Flux invariant that subgroup→item targets are always Message/Post/Task means the multi-type FILTER from the old SPARQL is implicit. |
+| `SemanticRelationship.itemEmbedding(itemId)` | `semantic-relationship/index.ts` | `findAll(SR, { where: { expression: itemId }, include: { embeddingTag: { withMetadata: false } }, limit: 1, withMetadata: false, count: false })`. The polymorphic-on-same-predicate `@HasOne` discrimination resolves to an Embedding only when conformance matches — verified working in S16 (`include actually fires: yes`). |
+| `findEmbeddingSRId(itemId)` | `conversation/util.ts` | Same shape as above; checks `embeddingTag` on the result instances rather than fetching the raw SR-tag triple. |
+
+### Kept as raw SPARQL with audit-grounded rationale (kept)
+
+| Site | Why kept |
+|---|---|
+| `Channel.allItems()` | Cat C: wants `?_reifier` timestamp of the `has_child` link (when the message was added to the channel), not the message entity's `createdAt`. |
+| `Channel.unprocessedItems()` data fetch | Cat C: same link-level timestamp semantics. |
+| `Channel.unprocessedItems()` set-difference | Cat D: two parallel SPARQLs feeding a JS `Set` difference. The pattern doesn't translate; Oxigraph `FILTER NOT EXISTS` hits a 60s planner cliff today. |
+| `Channel.totalItemCount()` | Cat A but splits into 3 round trips (one per `Message`/`Post`/`Task` class) for the multi-type `FILTER(?type IN (…))`. 3 round trips + sum is strictly worse than 1 SPARQL. |
+| `Channel.recentConversations()` | Cat A but already hand-optimised to use the native link API for timestamps (avoids the reifier-join planner cliff). |
+| `Conversation.topics()` | Cat E: UNION query (topic linked either to the conversation directly OR via one of its subgroups). No clean Ad4mModel shape today; needs a polymorphic `parent` scope. |
+| `Conversation.subgroupsData()` first pass | Cat C: reifier-timestamp read. |
+| `Conversation.subgroupsData()` batch timestamp | Cat E: subgroup → grandparent channel via two `ad4m:has_child` hops, which isn't a declared relation. |
+| `ConversationSubgroup.topics()` | Cat E: SR → tag join with conformance filter on the tag (topic vs embedding). |
+| `ConversationSubgroup.topicsWithRelevance()` | Cat E: same shape, with `relevance` property. |
+| `ConversationSubgroup.itemsData()` | Cat C: per-link reifier metadata for both `subgroup_item` and `entry_type` reifiers. |
+| `Topic.linkedConversations()` | Cat E: 4-hop SR → conversation → channel + property fetch. |
+| `Topic.linkedSubgroups()` | Cat E: same 4-hop chain. |
+| `SemanticRelationship.allConversationEmbeddings()` | Cat E + missing reverse relation: needs `@BelongsTo` from Conversation back to SR. |
+| `SemanticRelationship.allSubgroupEmbeddings()` | Cat E + missing reverse relation. |
+| `SemanticRelationship.allItemEmbeddings()` | Cat E + multi-class polymorphic `findAll`. |
+| `SemanticRelationship.allItemEmbeddingsByType()` | Cat B/E; convertible once the per-class polymorphic discrimination lands. Deferred. |
+
+### Test coverage
+
+`channel.test.ts` and `conversation.test.ts` mocks updated:
+- `createMockPerspective()` now seeds `modelQuery: vi.fn().mockResolvedValue({ instances: [], totalCount: 0 })` so call sites that converted off `querySparql` get an empty result for the empty case without each test having to opt in.
+- The four `Conversation.stats()` tests use `vi.spyOn(ConversationSubgroup, 'findAllAndCount')` because the conversation-test `@coasys/ad4m` `vi.mock` provides a stripped-down `@Model` decorator that can't drive the real `findAllAndCount` pipeline.
+- 119 tests run; 115 pass; 4 fail. All 4 failures pre-exist on `dev` and are unrelated to the migration (3 are `Channel.unprocessedItems` tests where the same `vi.mock` is missing `fileToDataUri`, 1 is a `parseLit` JSON-stringify test).
+
+### Stacked dependency
+
+Runtime correctness of this PR depends on `coasys/ad4m#846` and its upstream stack (#837, #842). The `withMetadata: false`, `count: false`, and selective-WHERE single-plan paths the migrations rely on are only honoured by the post-#846 executor. Running against `dev`'s executor falls back to the back-compat default — slower but still functional.
