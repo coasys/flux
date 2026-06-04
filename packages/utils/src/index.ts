@@ -4,6 +4,7 @@ export * from './expressionHelpers';
 export * from './feedUtterance';
 export * from './formatString';
 export * from './getDefaultIceServers';
+export type { IceServer } from '@coasys/flux-constants';
 export * from './getImage';
 export * from './getNeighbourhoodMeta';
 export * from './languageHelpers';

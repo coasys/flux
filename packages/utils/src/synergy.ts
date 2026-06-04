@@ -20,8 +20,8 @@ export class SynergyGroup {
   timestamp: string;
   index?: number;
   parentIndex?: number;
-  end?: string;
-  start?: string;
+  end?: number;
+  start?: number;
 }
 
 export class SynergyItem {

@@ -1,4 +1,4 @@
-import { AIClient } from '@coasys/ad4m';
+import { AIClient, PerspectiveProxy } from '@coasys/ad4m';
 import { languages } from '@coasys/flux-constants';
 import Embedding from '../embedding';
 import SemanticRelationship from '../semantic-relationship';
@@ -6,7 +6,7 @@ import SemanticRelationship from '../semantic-relationship';
 const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 const showLogs = false; // Set to true to enable debug logs
 
-async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
+async function findEmbeddingSRId(perspective: PerspectiveProxy, itemId: string): Promise<string | null> {
   try {
     const sparqlQuery = `
       SELECT ?relationship WHERE {
@@ -26,26 +26,26 @@ async function findEmbeddingSRId(perspective, itemId): Promise<string | null> {
   }
 }
 
-export async function removeEmbedding(perspective, itemId, batchId: string): Promise<void> {
+export async function removeEmbedding(perspective: PerspectiveProxy, itemId: string, batchId: string): Promise<void> {
   const embeddingSRId = await findEmbeddingSRId(perspective, itemId);
   if (embeddingSRId) {
     if (showLogs) console.log('embeddingSRId found:', embeddingSRId);
     const semanticRelationship = await new SemanticRelationship(perspective, embeddingSRId);
     const { tag } = await semanticRelationship.get();
-    await Embedding.delete(perspective, tag, batchId);
-    await SemanticRelationship.delete(perspective, embeddingSRId, batchId);
+    await Embedding.delete(perspective, tag);
+    await SemanticRelationship.delete(perspective, embeddingSRId);
   }
 }
 
-function duration(start, end) {
+function duration(start: number, end: number) {
   return `${(end - start) / 1000} secs`;
 }
 
 // todo: use embedding language instead of stringifying
 export async function createEmbedding(
-  perspective,
-  text,
-  itemId,
+  perspective: PerspectiveProxy,
+  text: string,
+  itemId: string,
   ai: AIClient,
   batchId: string,
   index?: number,

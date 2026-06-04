@@ -17,74 +17,64 @@ fi
 
 echo "==> Detected branch: $BRANCH"
 
-# Check if there's a matching AD4M branch
+# Resolve which AD4M branch to clone: matching branch if available, otherwise dev.
+# Published @coasys/ad4m-* packages have broken workspace: refs and dev's package.json
+# pins @coasys/ad4m to link:../ad4m/core, so a local ad4m clone is always required.
 if git ls-remote --exit-code --heads \
   https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
-  echo "==> Found matching AD4M branch '$BRANCH' — cloning and building"
-
-  rm -rf ad4m
-  git clone --depth 1 --single-branch --branch "$BRANCH" \
-    https://github.com/coasys/ad4m.git ad4m
-
-  # Pin pnpm to v9 for AD4M build (ad4m uses object-format workspace overrides which pnpm v10 rejects)
-  npm i -g pnpm@9.15.0 2>/dev/null || true
-
-  cd ad4m
-  pnpm install --no-frozen-lockfile
-
-  echo "==> Building @coasys/ad4m (core)"
-  cd core && pnpm exec tsc && pnpm run bundle && cd ..
-
-  echo "==> Building @coasys/ad4m-connect"
-  cd connect && pnpm run build && cd ..
-
-  echo "==> Building hooks (if tsconfig.json exists)"
-  [ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
-  [ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
-  [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
-
-  # Skip global link registration — will use direct pnpm link after install
-  cd ..
-
-  AD4M_LINKED=true
-  echo "==> AD4M packages built"
+  AD4M_BRANCH="$BRANCH"
+  echo "==> Found matching AD4M branch '$BRANCH'"
 else
-  AD4M_LINKED=false
-  echo "==> No matching AD4M branch — using published npm packages"
+  AD4M_BRANCH="dev"
+  echo "==> No matching AD4M branch — falling back to 'dev'"
 fi
 
-# Install Flux dependencies
-# For deploy previews, restore package.json to its original state (remove AD4M overrides)
-if [ "$AD4M_LINKED" = false ]; then
-  echo "==> Restoring package.json to dev baseline (removing AD4M overrides)"
-  git checkout origin/dev -- package.json pnpm-workspace.yaml 2>/dev/null || true
-fi
+echo "==> Cloning AD4M branch '$AD4M_BRANCH'"
+rm -rf ad4m
+git clone --depth 1 --single-branch --branch "$AD4M_BRANCH" \
+  https://github.com/coasys/ad4m.git ad4m
 
-# If AD4M was linked, override the pnpm overrides to use the local build
-if [ "$AD4M_LINKED" = true ]; then
-  echo "==> Overriding @coasys packages with local builds"
-  node -e "
-    const pkg = require('./package.json');
-    pkg.pnpm = pkg.pnpm || {};
-    pkg.pnpm.overrides = pkg.pnpm.overrides || {};
-    pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
-    pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
-    pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
-    pkg.pnpm.overrides['@coasys/ad4m-react-hooks'] = 'file:./ad4m/ad4m-hooks/react';
-    pkg.pnpm.overrides['@coasys/ad4m-vue-hooks'] = 'file:./ad4m/ad4m-hooks/vue';
-    require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
-  "
-fi
+# Pin pnpm to v9 for AD4M build (ad4m uses object-format workspace overrides which pnpm v10 rejects)
+npm i -g pnpm@9.15.0 2>/dev/null || true
+
+cd ad4m
 pnpm install --no-frozen-lockfile
 
-if [ "$AD4M_LINKED" = true ]; then
-  # Clear ALL build caches AND pre-built view bundles so everything rebuilds with the linked SDK
-  rm -rf app/node_modules/.vite .turbo node_modules/.cache
-  find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
-  find views -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
-  find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
-  rm -rf app/dist
-  echo "==> All caches + dist directories cleared"
-fi
+echo "==> Building @coasys/ad4m (core)"
+cd core && pnpm exec tsc && pnpm run bundle && cd ..
+
+echo "==> Building @coasys/ad4m-connect"
+cd connect && pnpm run build && cd ..
+
+echo "==> Building hooks (if tsconfig.json exists)"
+[ -f ad4m-hooks/helpers/tsconfig.json ] && (cd ad4m-hooks/helpers && pnpm exec tsc) || echo "Skipping ad4m-hooks/helpers"
+[ -f ad4m-hooks/react/tsconfig.json ] && (cd ad4m-hooks/react && pnpm exec tsc) || echo "Skipping ad4m-hooks/react"
+[ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
+
+cd ..
+echo "==> AD4M packages built"
+
+echo "==> Overriding @coasys packages with local builds"
+node -e "
+  const pkg = require('./package.json');
+  pkg.pnpm = pkg.pnpm || {};
+  pkg.pnpm.overrides = pkg.pnpm.overrides || {};
+  pkg.pnpm.overrides['@coasys/ad4m'] = 'file:./ad4m/core';
+  pkg.pnpm.overrides['@coasys/ad4m-connect'] = 'file:./ad4m/connect';
+  pkg.pnpm.overrides['@coasys/hooks-helpers'] = 'file:./ad4m/ad4m-hooks/helpers';
+  pkg.pnpm.overrides['@coasys/ad4m-react-hooks'] = 'file:./ad4m/ad4m-hooks/react';
+  pkg.pnpm.overrides['@coasys/ad4m-vue-hooks'] = 'file:./ad4m/ad4m-hooks/vue';
+  require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+"
+
+pnpm install --no-frozen-lockfile
+
+# Clear ALL build caches AND pre-built view bundles so everything rebuilds with the linked SDK
+rm -rf app/node_modules/.vite .turbo node_modules/.cache
+find . -name '.turbo' -type d -not -path './ad4m/*' -not -path './node_modules/*' -exec rm -rf {} + 2>/dev/null || true
+find views -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
+find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true
+rm -rf app/dist
+echo "==> All caches + dist directories cleared"
 
 NODE_OPTIONS='--max-old-space-size=4096' pnpm build

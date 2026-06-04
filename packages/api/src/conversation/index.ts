@@ -1,15 +1,37 @@
-import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property, parseLit } from '@coasys/ad4m';
 
-import { parseLit } from '../utils/parseLit';
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
+import { TopicWithRelevance } from '../topic';
 import { formatTranscriptMarkdown } from './export';
 import { ensureLLMTasks, LLMTaskWithExpectedOutputs } from './LLMutils';
 import { createEmbedding, removeEmbedding } from './util';
 import { community } from '@coasys/flux-constants';
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
+
+// SPARQL binding shapes — typed via `querySparql<T>()`.
+interface SgBinding { sg: string }
+interface DidBinding { did: string }
+interface TopicBinding { topicBase: string; topicNameRaw?: string }
+interface SubgroupRowBinding {
+  id: string;
+  timestamp: string;
+  nameRaw?: string;
+  summaryRaw?: string;
+}
+interface SubgroupTimestampBinding {
+  sg: string;
+  transcriptStart?: string;
+  channelTs?: string;
+}
+interface SubgroupRow {
+  id: string;
+  timestamp: string;
+  name: string;
+  summary: string;
+}
 
 @Model({ name: 'Conversation' })
 export class Conversation extends Ad4mModel {
@@ -49,12 +71,12 @@ export class Conversation extends Ad4mModel {
       `;
 
       const [subgroupsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql(subgroupsQuery),
-        this.perspective.querySparql(participantsQuery),
+        this.perspective.querySparql<SgBinding[]>(subgroupsQuery),
+        this.perspective.querySparql<DidBinding[]>(participantsQuery),
       ]);
 
       const totalSubgroups = subgroupsResult?.length || 0;
-      const participants = (participantsResult || []).map((r: any) => r.did).filter(Boolean);
+      const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
       return { totalSubgroups, participants };
     } catch (error) {
       console.error('Error getting conversation stats:', error);
@@ -81,10 +103,10 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery);
 
       // Deduplicate by topicBase
-      const uniqueTopics = new Map<string, any>();
+      const uniqueTopics = new Map<string, { topicBase: string; topicName: string }>();
       for (const binding of sparqlResult || []) {
         const topicBase = binding.topicBase;
         if (topicBase && !uniqueTopics.has(topicBase)) {
@@ -132,10 +154,10 @@ export class Conversation extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<SubgroupRowBinding[]>(sparqlQuery);
 
       // Deduplicate by id
-      const subgroupMap = new Map<string, any>();
+      const subgroupMap = new Map<string, SubgroupRow>();
       for (const binding of sparqlResult || []) {
         const id = binding.id;
         if (id && !subgroupMap.has(id)) {
@@ -167,7 +189,7 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const batchResults = await this.perspective.querySparql(batchTimestampQuery);
+      const batchResults = await this.perspective.querySparql<SubgroupTimestampBinding[]>(batchTimestampQuery);
 
       // Group timestamps by subgroup ID
       const timestampsBySg = new Map<string, number[]>();
@@ -182,7 +204,7 @@ export class Conversation extends Ad4mModel {
         timestampsBySg.get(sgId)!.push(time);
       }
 
-      const subgroups = Array.from(subgroupMap.values()).map((subgroup: any) => {
+      const subgroups = Array.from(subgroupMap.values()).map((subgroup) => {
         const timestamps = (timestampsBySg.get(subgroup.id) || []).sort((a, b) => a - b);
         const start = timestamps.length > 0 ? timestamps[0] : 0;
         const end = timestamps.length > 0 ? timestamps[timestamps.length - 1] : 0;
@@ -198,7 +220,7 @@ export class Conversation extends Ad4mModel {
       });
 
       // Sort by actual content start time, not link creation time
-      return subgroups.sort((a, b) => a.start - b.start);
+      return subgroups.sort((a, b) => Number(a.start) - Number(b.start));
     } catch (error) {
       console.error('Error getting conversation subgroups:', error);
       return [];
@@ -210,7 +232,7 @@ export class Conversation extends Ad4mModel {
     unprocessedItems: SynergyItem[],
     client: Ad4mClient,
   ): Promise<{
-    group: { n: string; s: string };
+    group: { n: string; s: string } | null;
     newGroup?: { n: string; s: string; firstItemId: string };
   }> {
     const { grouping } = await ensureLLMTasks(this.perspective.ai);
@@ -222,14 +244,12 @@ export class Conversation extends Ad4mModel {
       })),
     );
 
-    let inputGroup;
+    let inputGroup: { n: string; s: string } | undefined;
     if (currentSubgroup) {
-      inputGroup = {};
-      inputGroup.n = currentSubgroup.subgroupName;
-      inputGroup.s = currentSubgroup.summary;
+      inputGroup = { n: currentSubgroup.subgroupName, s: currentSubgroup.summary };
     }
 
-    let idToBaseExpression = {};
+    let idToBaseExpression: Record<number, string> = {};
     let nextId = 0;
     for (const item of unprocessedItems) {
       idToBaseExpression[nextId] = item.id;
@@ -281,8 +301,9 @@ export class Conversation extends Ad4mModel {
     isNewGroup?: boolean,
   ) {
     const { topics } = await ensureLLMTasks(this.perspective.ai);
-    let currentTopics = (await group.topicsWithRelevance()) as any;
-    let currentNewTopics = await LLMTaskWithExpectedOutputs(
+    const currentTopics: TopicWithRelevance[] = await group.topicsWithRelevance();
+    interface LLMTopic { n: string; rel: number }
+    let currentNewTopics: LLMTopic[] = await LLMTaskWithExpectedOutputs(
       topics,
       {
         topics: currentTopics.map((t) => ({ n: t.name, rel: t.relevance })),
@@ -300,7 +321,7 @@ export class Conversation extends Ad4mModel {
     await Promise.all(
       currentNewTopics.map((topic) => {
         const existingTopic = topicMatches.find((t) => t.topic == topic.n);
-        return group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup, existingTopic, batchId);
+        return group.updateTopicWithRelevance(topic.n, topic.rel, isNewGroup ?? false, existingTopic ?? null, batchId);
       }),
     );
   }
@@ -321,7 +342,7 @@ export class Conversation extends Ad4mModel {
     client: Ad4mClient,
   ) {
     const showLogs = false; // Set to true to enable detailed logging
-    const duration = (start, end) => `${((end - start) / 1000).toFixed(1)} secs`;
+    const duration = (start: number, end: number) => `${((end - start) / 1000).toFixed(1)} secs`;
     const startProcessing = new Date().getTime();
 
     updateProcessingState({ step: 2 });
@@ -349,7 +370,7 @@ export class Conversation extends Ad4mModel {
 
     // Handle case where newGroup is present but properties are not set
     if (detectResult.newGroup && !(detectResult.newGroup.n?.length > 0) && !(detectResult.newGroup.s?.length > 0)) {
-      detectResult.newGroup = null;
+      detectResult.newGroup = undefined;
     }
 
     // Handle case where group and newGroup are present but properties are not set
@@ -361,12 +382,12 @@ export class Conversation extends Ad4mModel {
     }
 
     // create new subgroup if returned from LLM
-    let newSubgroupEntity;
-    let indexOfFirstItemInNewSubgroup;
+    let newSubgroupEntity: ConversationSubgroup | undefined;
+    let indexOfFirstItemInNewSubgroup: number | undefined;
     if (detectResult.newGroup) {
       newSubgroupEntity = await this.createNewGroup(detectResult.newGroup, batchId);
       indexOfFirstItemInNewSubgroup = unprocessedItems.findIndex(
-        (item) => item.id === detectResult.newGroup.firstItemId,
+        (item) => item.id === detectResult.newGroup!.firstItemId,
       );
     }
 
@@ -378,9 +399,9 @@ export class Conversation extends Ad4mModel {
     const newSubgroupParticipants = new Set<string>();
     const allNewParticipants = new Set<string>();
     for (const [itemIndex, item] of unprocessedItems.entries()) {
-      let itemsSubgroup;
-      if ((detectResult.newGroup && itemIndex >= indexOfFirstItemInNewSubgroup) || !currentSubgroup) {
-        itemsSubgroup = newSubgroupEntity;
+      let itemsSubgroup: ConversationSubgroup | null;
+      if ((detectResult.newGroup && indexOfFirstItemInNewSubgroup !== undefined && itemIndex >= indexOfFirstItemInNewSubgroup) || !currentSubgroup) {
+        itemsSubgroup = newSubgroupEntity ?? null;
         newGroupMessages.push(item.text);
         if (item.author) newSubgroupParticipants.add(item.author);
       } else {
@@ -390,7 +411,7 @@ export class Conversation extends Ad4mModel {
       }
       if (item.author) allNewParticipants.add(item.author);
       newLinks.push({
-        source: itemsSubgroup.id,
+        source: itemsSubgroup!.id,
         predicate: SUBGROUP_ITEM,
         target: item.id,
       });
@@ -404,7 +425,7 @@ export class Conversation extends Ad4mModel {
     updateProcessingState({ step: 4 });
     // Get update topic lists from LLM and save results
     if (currentSubgroup) await this.updateGroupTopics(currentSubgroup, currentNewMessages, batchId);
-    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity, newGroupMessages, batchId, true);
+    if (detectResult.newGroup) await this.updateGroupTopics(newSubgroupEntity!, newGroupMessages, batchId, true);
 
     const endTopicTask = new Date().getTime();
     if (showLogs) console.log(`🤖 2: LLM topic list updating complete! (${duration(startTopicTask, endTopicTask)})`);
@@ -489,7 +510,7 @@ export class Conversation extends Ad4mModel {
     // Set new subgroup participants
     if (newSubgroupEntity) {
       const participantLinks = Array.from(newSubgroupParticipants).map((author) => ({
-        source: newSubgroupEntity.id,
+        source: newSubgroupEntity!.id,
         predicate: 'flux://has_participant',
         target: author,
       }));

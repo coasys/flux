@@ -10,7 +10,7 @@ export async function getLanguageMeta(client: Ad4mClient, link: LinkExpression) 
 
 export function keyedLanguages(languages: LanguageMeta[]) {
   return languages.reduce((acc, lang) => {
-    let langName: string = lang.templateSourceLanguageAddress;
+    let langName: string = lang.templateSourceLanguageAddress || '';
 
     if (lang.name.endsWith(SHORT_FORM_EXPRESSION)) {
       langName = SHORT_FORM_EXPRESSION;

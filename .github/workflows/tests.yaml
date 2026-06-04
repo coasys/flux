@@ -28,29 +28,26 @@ jobs:
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
           if git ls-remote --exit-code --heads \
             https://github.com/coasys/ad4m.git "$BRANCH" >/dev/null 2>&1; then
-            echo "ad4m_match=true" >> "$GITHUB_OUTPUT"
+            echo "ad4m_branch=$BRANCH" >> "$GITHUB_OUTPUT"
             echo "✅ Found matching AD4M branch: $BRANCH"
           else
-            echo "ad4m_match=false" >> "$GITHUB_OUTPUT"
-            echo "ℹ️ No matching AD4M branch — using published packages"
+            echo "ad4m_branch=dev" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No matching AD4M branch — using dev"
           fi
 
-      - name: Clone AD4M branch
-        if: steps.branch.outputs.ad4m_match == 'true'
+      - name: Clone AD4M
         run: |
           git clone --depth 1 --single-branch \
-            --branch "${{ steps.branch.outputs.name }}" \
+            --branch "${{ steps.branch.outputs.ad4m_branch }}" \
             https://github.com/coasys/ad4m.git ad4m
 
       - name: Get AD4M commit hash
-        if: steps.branch.outputs.ad4m_match == 'true'
         id: ad4m-hash
         run: |
           HASH=$(cd ad4m && git rev-parse HEAD)
           echo "hash=$HASH" >> "$GITHUB_OUTPUT"
 
       - name: Cache AD4M built outputs
-        if: steps.branch.outputs.ad4m_match == 'true'
         id: ad4m-cache
         uses: actions/cache@v4
         with:
@@ -64,7 +61,7 @@ jobs:
           key: ad4m-sdk-${{ steps.ad4m-hash.outputs.hash }}
 
       - name: Install & build AD4M packages
-        if: steps.branch.outputs.ad4m_match == 'true' && steps.ad4m-cache.outputs.cache-hit != 'true'
+        if: steps.ad4m-cache.outputs.cache-hit != 'true'
         run: |
           cd ad4m
           npm i -g pnpm 2>/dev/null || true
@@ -77,7 +74,6 @@ jobs:
           [ -f ad4m-hooks/vue/tsconfig.json ] && (cd ad4m-hooks/vue && pnpm exec tsc) || echo "Skipping ad4m-hooks/vue"
 
       - name: Override AD4M packages with local builds
-        if: steps.branch.outputs.ad4m_match == 'true'
         run: |
           node -e "
             const pkg = require('./package.json');
@@ -100,8 +96,7 @@ jobs:
       - name: Build
         run: NODE_OPTIONS='--max-old-space-size=4096' pnpm build
 
-      - name: Type check (informational)
-        continue-on-error: true
+      - name: Type check
         run: pnpm typecheck
 
       - name: Test

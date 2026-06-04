@@ -1,19 +1,42 @@
 import { ref, watch, ShallowRef } from 'vue';
-import { getPerspectiveMeta } from '@coasys/flux-api';
-import { PerspectiveProxy } from '@coasys/ad4m';
+import { PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { Community } from '@coasys/flux-api';
+import { getMetaFromLinks } from '@coasys/flux-utils';
 
-async function getCommunity(p: PerspectiveProxy): Promise<Community> {
-  const results = await Community.findAll(p);
+/** Community data as stored by useCommunities — may be a real model instance or a fallback plain object */
+interface CommunityData {
+  id: string;
+  name: string;
+  description: string;
+  image: string | { data_base64: string; name: string; file_type: string };
+  thumbnail: string | { data_base64: string; name: string; file_type: string };
+  neighbourhoodUrl?: string;
+  uuid?: string;
+  author?: string;
+  timestamp?: Date;
+  state?: PerspectiveState | null;
+}
+
+function getNeighbourhoodMeta(p: PerspectiveProxy): { name: string; description: string } {
+  try {
+    const links = p.neighbourhood?.data?.meta?.links || [];
+    const meta = getMetaFromLinks(links);
+    return { name: meta.name || '', description: meta.description || '' };
+  } catch {
+    return { name: '', description: '' };
+  }
+}
+
+async function getCommunity(p: PerspectiveProxy): Promise<CommunityData> {
+  const results = await Community.findAll(p, {});
   if (results.length > 0) {
     return results[0];
   } else {
     try {
-      const meta = await getPerspectiveMeta(p.uuid);
+      const meta = getNeighbourhoodMeta(p);
       return {
-        // @ts-ignore
         uuid: p.uuid,
-        author: meta.author || '',
+        author: '',
         timestamp: new Date(),
         name: p.name || meta.name || 'Unkown Community',
         description: meta.description || '',
@@ -22,10 +45,9 @@ async function getCommunity(p: PerspectiveProxy): Promise<Community> {
         neighbourhoodUrl: p.sharedUrl!,
         id: '',
         state: p.state,
-      };
+      } as CommunityData;
     } catch (e) {
       return {
-        // @ts-ignore
         uuid: p.uuid,
         author: '',
         timestamp: new Date(),
@@ -36,7 +58,7 @@ async function getCommunity(p: PerspectiveProxy): Promise<Community> {
         neighbourhoodUrl: p.sharedUrl!,
         id: '',
         state: p.state,
-      };
+      } as CommunityData;
     }
   }
 }
@@ -46,7 +68,7 @@ export function useCommunities(
     [x: string]: PerspectiveProxy;
   }>,
 ) {
-  let communities = ref<{ [x: string]: Community }>({});
+  let communities = ref<{ [x: string]: CommunityData }>({});
 
   watch(
     neighbourhoods,
@@ -59,9 +81,11 @@ export function useCommunities(
       });
 
       Object.entries(newNeighbourhoods).forEach(async ([uuid, p]) => {
-        p.addSyncStateChangeListener(async (state) => {
-          const community = await getCommunity(p);
-          communities.value = { ...communities.value, [p.uuid]: community };
+        p.addSyncStateChangeListener((_state: PerspectiveState) => {
+          getCommunity(p).then((community) => {
+            communities.value = { ...communities.value, [p.uuid]: community };
+          });
+          return null;
         });
 
         const community = await getCommunity(p);

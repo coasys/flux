@@ -30,14 +30,19 @@ export default async ({ joiningLink, client }: Payload): Promise<Community> => {
 
     const notification = notifications.find((notification) => notification.appName === 'Flux');
 
-    const notificationId = notification.id;
-    delete notification.granted;
-    delete notification.id;
-
-    await client.runtime.updateNotification(notificationId, {
-      ...notification,
-      perspectiveIds: [...notification.perspectiveIds, perspective.uuid],
-    });
+    if (notification) {
+      const notificationId = notification.id;
+      await client.runtime.updateNotification(notificationId, {
+        description: notification.description,
+        appName: notification.appName,
+        appUrl: notification.appUrl,
+        appIconPath: notification.appIconPath,
+        trigger: notification.trigger,
+        perspectiveIds: [...(notification.perspectiveIds || []), perspective.uuid],
+        webhookUrl: notification.webhookUrl,
+        webhookAuth: notification.webhookAuth,
+      });
+    }
 
     return {
       uuid: perspective!.uuid,

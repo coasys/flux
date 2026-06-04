@@ -1,8 +1,8 @@
-export function getPrologQuery(query, variables) {
+export function getPrologQuery(query: string, variables: Record<string, string>) {
   const regEx = /\$\w+/g;
   const names = query.match(regEx);
   if (!names) return query;
-  return names.reduce((string, name) => {
+  return names.reduce((string: string, name: string) => {
     const variableName = name.replace('$', '');
     const value = variables[variableName];
     if (value === undefined) {
