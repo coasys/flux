@@ -332,3 +332,64 @@ natural next deliverable on this branch.
 - **Stage 5:** benchmark suite against `dev` to validate each conversion.
 - **Stage 6:** decide on per-link reifier `meta:` sidecar based on whether
   Category C sites are visibly slow in real Flux usage.
+
+---
+
+## Implementation log
+
+### 2026-06-04: AD4M decorator availability re-check
+
+While starting Stage 2, verified that `@coasys/ad4m`'s `core/src/model/decorators.ts` already exports `HasOne`, `BelongsToOne`, and `BelongsToMany`, with `where` + `filter` options on every relation. **This significantly re-scopes the recommendation table** — three of the six items I had marked as needing AD4M SDK work are actually feasible flux-side:
+
+| # | Recommendation | Original assumption | Re-checked status |
+|---|---|---|---|
+| 1 | `tag` as typed `@HasOne(Embedding \| Topic)` | flux-only | ✅ flux-only, confirmed |
+| 2 | `@BelongsTo()` / first-class reverse relations | needs AD4M SDK PR | ✅ **already in AD4M** as `@BelongsToOne` / `@BelongsToMany` — flux-only |
+| 3 | Multi-class polymorphic `findAll` | needs AD4M SDK PR | ❌ needs AD4M (target is `() => Ad4mModelLike`, a single class) |
+| 4 | Per-link reifier metadata sidecar | needs AD4M SDK PR | ❌ needs AD4M (no `meta:` projection on `include`) |
+| 5 | Nested `where` on relations | needs AD4M SDK PR | ✅ **already in AD4M** — `RelationOptions.where` is wired into `@HasOne`/`@HasMany`/`@BelongsTo*` |
+| 6 | UNION across query shapes | maybe AD4M | ❌ workaround via two `findAll`s + JS dedup |
+
+### Stage 2 commit (this branch)
+
+**Implemented:** `SemanticRelationship.tag` upgrade with two same-predicate `@HasOne` relations:
+
+```ts
+@HasOne(() => Embedding, { through: 'flux://has_tag' })
+embeddingTag?: Embedding;
+
+@HasOne(() => Topic, { through: 'flux://has_tag' })
+topicTag?: Topic;
+```
+
+The conformance filter on each target class's `@Flag` discriminates at hydration time — only Embedding instances bind to `embeddingTag`, only Topic instances bind to `topicTag`. The pre-existing `tag: string` `@Property` is kept for back-compat (callers that want the raw IRI).
+
+**Demonstrator conversion:** `SemanticRelationship.itemEmbeddingViaModel(itemId)` shows the converted shape side-by-side with the original raw-SPARQL `itemEmbedding(itemId)`. Behavioural parity caveat is documented in the method's TSDoc: the model variant returns the embedding-vector URL the same way the SPARQL variant does, then both call `perspective.getExpression()` for the actual vector — the model-query layer does not yet inline-resolve `resolveLanguage` properties on `@HasOne`-loaded instances.
+
+### Bench harness scaffolded
+
+`scripts/bench-sparql-vs-ad4m.ts` checked in as a documented skeleton: connection helper + `timeIt(label, fn, runs)` + the bench-case enumeration. **Seed + connection are stubs** — implementing them requires (a) a multi-user-mode executor running locally, (b) a JWT for that executor, (c) seed code that creates ~10 model classes' worth of related instances at scale. Estimated 200 LOC of additional work to make runnable. Tracked as Stage 5.
+
+### Why no perf numbers yet
+
+The benchmark depends on a running executor with the Flux subject classes registered + a sizeable seeded perspective. The wind-tunnel scenarios in `coasys/ad4m-wind-tunnel` are a heavier alternative (they would need to cross-import flux's `@coasys/flux-api`, which they currently don't). Three options for getting to numbers, in increasing order of work:
+
+1. **Manual bench**: spin a local executor, seed via a one-off script, run the bench harness above. ~1 hour wall clock per scale point.
+2. **Vitest-based integration test in flux**: extend `packages/api/src/conversation/conversation.test.ts`-style infrastructure to boot a real executor. ~half-day of test-infra plumbing.
+3. **New wind-tunnel scenario (s11) that cross-imports flux-api**: pleasant for repeat comparisons, but requires resolving the cross-repo dep + making the wind tunnel reproducibly drive an Ad4mModel-aware path. ~1-2 days.
+
+This PR leaves it at option 1 documented; the harness skeleton + the converted `itemEmbeddingViaModel` are enough to make the bench a copy-paste-and-run exercise once the seed is in place.
+
+### Remaining work in this branch's plan
+
+- **Stage 3 (next commit):** add `@BelongsToOne` / `@BelongsToMany` decorators to Channel, Conversation, Subgroup, Topic models for the reverse traversals that Synergy queries currently express via SPARQL. Unlocks 8 sites.
+- **Stage 4:** write `findAll`-shaped variants of `allConversationEmbeddings` / `allSubgroupEmbeddings` / `allItemEmbeddings` / `linkedConversations` using `embeddingTag`/`topicTag` + the new BelongsTo declarations.
+- **Stage 5:** flesh out the bench harness seed; run; record numbers per converted method; update this section with the table.
+- **Stage 6 (separate AD4M PR):** polymorphic `findAll` + per-link reifier `meta:` projection — unlocks the remaining sites.
+
+### Reading guide for reviewers
+
+If you only have 10 minutes:
+1. Read this implementation log section to see what's actually in the branch.
+2. Skim `packages/api/src/semantic-relationship/index.ts` for the @HasOne upgrade and the `*ViaModel` demonstrator.
+3. The categorisation table above is the load-bearing decision artifact — challenge it.

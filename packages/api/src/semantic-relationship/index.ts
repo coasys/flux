@@ -1,6 +1,8 @@
-import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasOne, Property } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
 import { SynergyMatch } from '@coasys/flux-utils';
+import Embedding from '../embedding';
+import Topic from '../topic';
 
 const TYPE_MAP: Record<string, string> = {
   Message: 'flux://has_message',
@@ -16,8 +18,23 @@ export default class SemanticRelationship extends Ad4mModel {
   @Property({ through: 'flux://has_expression' })
   expression: string; // base url of expression
 
+  // The raw `tag` IRI — kept for back-compat with callers that just want
+  // the URL. New call sites should prefer `embeddingTag` / `topicTag` which
+  // resolve to fully hydrated instances filtered by `entry_type`.
   @Property({ through: 'flux://has_tag' })
-  tag: string; // base url of semantic tag
+  tag: string;
+
+  // Two `@HasOne` relations on the same `flux://has_tag` predicate. The
+  // conformance filter on each target class's `@Flag` discriminates which
+  // related instance hydrates: only Embedding instances bind to
+  // `embeddingTag`, only Topic instances bind to `topicTag`. Lets
+  // `include: { embeddingTag: true }` flow through Ad4mModel's batched
+  // hydration instead of an N+1 `getExpression` round-trip per SR.
+  @HasOne(() => Embedding, { through: 'flux://has_tag' })
+  embeddingTag?: Embedding;
+
+  @HasOne(() => Topic, { through: 'flux://has_tag' })
+  topicTag?: Topic;
 
   @Property({ through: 'flux://has_relevance' })
   relevance: number; // 0 - 100
@@ -42,6 +59,40 @@ export default class SemanticRelationship extends Ad4mModel {
       return JSON.parse(embeddingExpression.data);
     } catch (error) {
       console.error('Error getting items embedding', error);
+      return [];
+    }
+  }
+
+  /**
+   * Ad4mModel-shaped equivalent of {@link itemEmbedding}. Replaces a raw
+   * SPARQL join + N=1 follow-up `getExpression` with a single
+   * `findAll({ include })` round-trip; the hydrator returns the embedding
+   * vector inline because Embedding's `embedding` property is already a
+   * `@Property` on the Embedding model class.
+   *
+   * Behavioural parity caveat: the raw-SPARQL path calls
+   * `perspective.getExpression()` on the language-resolved embedding URL,
+   * which fetches the actual vector array via the embedding-vector-language
+   * controller. The model-query hydrator does the same via the property's
+   * `resolveLanguage: 'literal'` machinery only if the Embedding model
+   * declares it; otherwise the model variant returns the raw target IRI
+   * and the caller still has to fetch. For now, the model variant returns
+   * the embedding URL (raw IRI) and a follow-up `getExpression` is still
+   * needed. See the bench harness for the side-by-side comparison.
+   */
+  async itemEmbeddingViaModel(itemId: string): Promise<number[]> {
+    try {
+      const srs = await SemanticRelationship.findAll(this.perspective, {
+        where: { expression: itemId },
+        include: { embeddingTag: true },
+        limit: 1,
+      });
+      const embeddingUrl = (srs[0] as any)?.embeddingTag?.embedding;
+      if (!embeddingUrl) return [];
+      const expr = await this.perspective.getExpression(embeddingUrl);
+      return JSON.parse(expr.data);
+    } catch (error) {
+      console.error('Error getting item embedding via Ad4mModel:', error);
       return [];
     }
   }
