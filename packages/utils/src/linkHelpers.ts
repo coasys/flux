@@ -1,5 +1,5 @@
 import { Ad4mClient, Link, LinkInput } from '@coasys/ad4m';
-import { LinkExpression, Literal } from '@coasys/ad4m';
+import { LinkExpression } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
 import { unwrapLiteralValue } from './unwrapLiteralValue';

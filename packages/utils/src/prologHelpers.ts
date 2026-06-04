@@ -1,5 +1,5 @@
 import { EntryType, ModelProperty, Entry } from '@coasys/flux-types';
-import { Ad4mClient, Literal } from '@coasys/ad4m';
+import { Ad4mClient } from '@coasys/ad4m';
 import { unwrapLiteralValue } from './unwrapLiteralValue';
 
 /** Entry with dynamically-resolved model properties from prolog queries */
