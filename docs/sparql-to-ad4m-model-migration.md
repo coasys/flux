@@ -756,3 +756,54 @@ Each PR adds (or extends) one S16 case so the regression gate sees the ratio col
 - G → s16 `class_with_ask_getter`
 - H → s16 `class_with_projections`
 - I → s16 `deep_include_3_levels`
+
+---
+
+### Realised wins — [`coasys/ad4m#846`](https://github.com/coasys/ad4m/pull/846) landed A/B/C/D/E/F/G/J/K
+
+The orchestrator overhaul shipped in a single PR rather than the eleven-PR sequence the audit sketched. Items A–G + J + K all land together; H (projection inlining) and I (CONSTRUCT subgraph hydration) are deferred.
+
+S16 ratios — `dev` vs the PR branch (`refactor/sparql-pushdown-last-write-wins`). 10 runs/case + warm-up, Apple Silicon, cached release executors. Improvement = `dev_ratio / branch_ratio`.
+
+#### Medium tier (1000 items, 10151 links)
+
+| Case | dev | #846 | improvement |
+|---|---:|---:|---:|
+| `sr_by_expression_limit1` | 4.8× | 4.5× | 1.08× |
+| `sr_by_expression_with_include` | 5.2× | 4.6× | 1.14× |
+| `sr_all` | 9.1× | 8.5× | 1.08× |
+| `embeddings_all` | 10.9× | 8.8× | 1.24× |
+| `topics_all` | 26.0× | 29.7× | 0.88× — raw is sub-ms, RPC floor dominates |
+| `embeddings_all_no_metadata` (A) | 10.0× | **3.7×** | **2.71× ✅** |
+| `sr_by_expression_limit1_no_count` (B) | 4.9× | **2.8×** | **1.76× ✅** |
+| `sr_by_id_single_plan` (C + A + B) | 4.2× | **1.2×** | **3.45× ✅** |
+| `sr_all_no_metadata_no_count` (A + B) | 8.7× | **3.3×** | **2.63× ✅** |
+
+#### Small tier (100 items, 1051 links)
+
+| Case | dev | #846 | improvement |
+|---|---:|---:|---:|
+| `embeddings_all_no_metadata` (A) | 8.7× | **3.3×** | **2.63× ✅** |
+| `sr_by_id_single_plan` (C + A + B) | 2.2× | **1.3×** | **1.71× ✅** |
+| `sr_all_no_metadata_no_count` (A + B) | 9.4× | **2.8×** | **3.40× ✅** |
+| (other six cases) | — | — | within ±10% noise — back-compat preserved |
+
+#### Takeaways
+
+- **Opt-in cases see 1.7–3.4× ratio improvement** across both tiers. `sr_by_id_single_plan` at medium drops from 4.2× to 1.2× — essentially parity with raw SPARQL on a single-row lookup.
+- **Back-compat cases stay within run-to-run noise** of `dev`. The cheaper paths only engage when the caller passes the new flags (`withMetadata: false`, `count: false`, or a uniquely-selective `id` equality WHERE).
+- The remaining 3–5× residual on the scan-all cases is what audit items **H** and **I** would close. H (projection inlining) and I (CONSTRUCT-based subgraph hydration) are deferred for a follow-up PR — the diff for I is large enough that landing it on top of clean A–G/J/K orchestrator changes is the cleaner path.
+
+#### Per-site verdict — final post-PR state
+
+The `model_query` baseline now supports the opt-in flags that close most of the original 5–25× gap on the convert-candidate sites. Re-reading the per-category table with #846 in hand:
+
+| Category | Pre-#846 verdict | Post-#846 verdict |
+|---|---|---|
+| A. Trivially convertible (5 sites) | "Major perf regression — 5–10× slower" | **Convertible with `withMetadata: false` + `count: false`.** Expected ratio 1.5–3×, in line with the per-call RPC floor. |
+| B. Convertible with new features (10 sites) | "Plausibly a wash or win" | **Convert + opt out of metadata** for the read-only branches. Continued unverified for the `BelongsTo` traversals — that's an S16 follow-up case. |
+| C. Reifier-metadata reads (4 sites) | "Keep as SPARQL" | Reaffirmed — these sites *want* metadata, so the opt-in toggle doesn't help. |
+| D. Set-difference (2 sites) | "Keep as SPARQL" | Reaffirmed. |
+| E. Inter-class joins (4 sites) | "Lean toward SPARQL" | **Convertible with the same opt-in flags** once the deep-include path is exercised in S16. |
+
+**Bottom line:** the structural answer to "should flux migrate to Ad4mModel?" changed once #846 landed. For most call sites that don't want link-level metadata or unpaginated counts, the answer is now *yes* — the orchestrator no longer charges 5–10× for the privilege.
