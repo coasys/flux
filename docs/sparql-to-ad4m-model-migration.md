@@ -763,35 +763,67 @@ Each PR adds (or extends) one S16 case so the regression gate sees the ratio col
 
 The orchestrator overhaul shipped in a single PR rather than the eleven-PR sequence the audit sketched. Items A–G + J + K all land together; H (projection inlining) and I (CONSTRUCT subgraph hydration) are deferred.
 
-S16 ratios — `dev` vs the PR branch (`refactor/sparql-pushdown-last-write-wins`). 10 runs/case + warm-up, Apple Silicon, cached release executors. Improvement = `dev_ratio / branch_ratio`.
+S16 ratios — fresh `dev` (HEAD `1f29d0b1`) vs `refactor/sparql-pushdown-last-write-wins` (HEAD `376d4b1b`). 10 runs/case + warm-up, Apple Silicon, both binaries built from the same Rust toolchain into a shared `CARGO_TARGET_DIR`. Improvement = `dev_ratio / branch_ratio`.
+
+> Earlier (now-superseded) numbers in this section used a stale dev binary cached at `~/workspaces/coasys/ad4m/target/release/ad4m-executor` from 2026-05-22 (`test-2`). The fresh-vs-fresh comparison below is what the PR ships against.
 
 #### Medium tier (1000 items, 10151 links)
 
-| Case | dev | #846 | improvement |
-|---|---:|---:|---:|
-| `sr_by_expression_limit1` | 4.8× | 4.5× | 1.08× |
-| `sr_by_expression_with_include` | 5.2× | 4.6× | 1.14× |
-| `sr_all` | 9.1× | 8.5× | 1.08× |
-| `embeddings_all` | 10.9× | 8.8× | 1.24× |
-| `topics_all` | 26.0× | 29.7× | 0.88× — raw is sub-ms, RPC floor dominates |
-| `embeddings_all_no_metadata` (A) | 10.0× | **3.7×** | **2.71× ✅** |
-| `sr_by_expression_limit1_no_count` (B) | 4.9× | **2.8×** | **1.76× ✅** |
-| `sr_by_id_single_plan` (C + A + B) | 4.2× | **1.2×** | **3.45× ✅** |
-| `sr_all_no_metadata_no_count` (A + B) | 8.7× | **3.3×** | **2.63× ✅** |
+| Case | dev model avg | #846 model avg | dev ratio | #846 ratio | improvement |
+|---|---:|---:|---:|---:|---:|
+| `sr_by_expression_limit1` | 3.96 ms | 4.36 ms | 4.6× | 4.5× | 1.03× |
+| `sr_by_expression_with_include` | 4.02 ms | 4.28 ms | 4.8× | 4.6× | 1.05× |
+| `sr_all` | 107.21 ms | 103.11 ms | 9.0× | 8.5× | 1.06× |
+| `embeddings_all` | 68.79 ms | 68.98 ms | 8.7× | 8.8× | 0.98× |
+| `topics_all` | 14.63 ms | 14.96 ms | 25.1× | 29.7× | 0.85× — raw is sub-ms, RPC floor dominates |
+| `embeddings_all_no_metadata` (A) | 69.60 ms | **28.09 ms** | 9.0× | **3.7×** | **2.44× ✅** |
+| `sr_by_expression_limit1_no_count` (B) | 3.49 ms | **2.46 ms** | 4.1× | **2.8×** | **1.47× ✅** |
+| `sr_by_id_single_plan` (C + A + B) | 0.98 ms | **0.26 ms** | 4.1× | **1.2×** | **3.36× ✅** |
+| `sr_all_no_metadata_no_count` (A + B) | 115.42 ms | **38.40 ms** | 9.3× | **3.3×** | **2.80× ✅** |
 
 #### Small tier (100 items, 1051 links)
 
-| Case | dev | #846 | improvement |
+| Case | dev ratio | #846 ratio | improvement |
 |---|---:|---:|---:|
-| `embeddings_all_no_metadata` (A) | 8.7× | **3.3×** | **2.63× ✅** |
-| `sr_by_id_single_plan` (C + A + B) | 2.2× | **1.3×** | **1.71× ✅** |
-| `sr_all_no_metadata_no_count` (A + B) | 9.4× | **2.8×** | **3.40× ✅** |
-| (other six cases) | — | — | within ±10% noise — back-compat preserved |
+| `embeddings_all_no_metadata` (A) | 7.0× | **3.3×** | **2.11× ✅** |
+| `sr_by_id_single_plan` (C + A + B) | 2.5× | **1.3×** | **1.97× ✅** |
+| `sr_all_no_metadata_no_count` (A + B) | 7.6× | **2.8×** | **2.74× ✅** |
+| `sr_by_expression_limit1_no_count` (B) | 2.4× | 1.8× | 1.32× |
+| (other five cases) | — | — | parity (within ±15% noise — back-compat preserved) |
+
+#### Cross-scenario regression check (S5 + S8)
+
+To confirm the orchestrator changes don't regress paths that *don't* opt in, ran S5 (`queryLinks` scaling) and S8 (raw `querySparql` over a 58k-link Flux community graph). Both use legacy code paths the orchestrator surface doesn't touch directly, but they share the underlying `SparqlStore` whose `query` helper now delegates to `query_values` (audit item K).
+
+**S5 — `queryLinks` at 100/500/1000 links:**
+
+| dataSize | queryAll dev | queryAll #846 | ratio | queryBySource dev | queryBySource #846 | ratio |
+|---:|---:|---:|---:|---:|---:|---:|
+| 100 | 4.11 ms | 3.75 ms | 0.91× | 4.11 ms | 3.70 ms | 0.90× |
+| 500 | 22.39 ms | 19.46 ms | 0.87× | 22.21 ms | 19.44 ms | 0.88× |
+| 1000 | 46.43 ms | 45.48 ms | 0.98× | 46.55 ms | 45.40 ms | 0.98× |
+
+**S8 — Flux community graph (small = 1865 links):**
+
+| Query | dev avg | #846 avg | ratio |
+|---|---:|---:|---:|
+| `totalItemCount` | 0.51 ms | 0.44 ms | 0.86× |
+| `allItems` | 1.86 ms | 1.67 ms | 0.90× |
+| `unprocessedItems` | 0.72 ms | 0.62 ms | 0.86× |
+| `recentConversations` | 0.42 ms | 0.30 ms | 0.71× |
+| `pinnedConversations` | 0.18 ms | 0.15 ms | 0.83× |
+| `subgroupItemsData` | 0.36 ms | 0.29 ms | 0.81× |
+| `subgroupTopics` | 0.24 ms | 0.23 ms | 0.96× |
+| `messageHydration` | 0.21 ms | 0.19 ms | 0.90× |
+| `paginatedMessages` | 1.98 ms | 1.76 ms | 0.89× |
+
+**S8 — medium = 58460 links:** every query within ±8% of dev — parity dominates as per-call SPARQL execution cost dwarfs per-RPC overhead.
 
 #### Takeaways
 
-- **Opt-in cases see 1.7–3.4× ratio improvement** across both tiers. `sr_by_id_single_plan` at medium drops from 4.2× to 1.2× — essentially parity with raw SPARQL on a single-row lookup.
-- **Back-compat cases stay within run-to-run noise** of `dev`. The cheaper paths only engage when the caller passes the new flags (`withMetadata: false`, `count: false`, or a uniquely-selective `id` equality WHERE).
+- **Opt-in cases see 1.5–3.4× ratio improvement** across both tiers in S16. `sr_by_id_single_plan` at medium drops from 4.1× to 1.2× — essentially parity with raw SPARQL on a single-row lookup.
+- **Back-compat S16 cases stay within run-to-run noise** of `dev`. The cheaper paths only engage when the caller passes the new flags (`withMetadata: false`, `count: false`, or a uniquely-selective `id` equality WHERE).
+- **Pre-existing query paths are unaffected** at large data sizes (S8 medium tier within ±8%) and see incidental 5–30% wins at small sizes (S5 100/500 + S8 small) where K's `Solutions → Vec<Value>` cuts a JSON serialise+parse round trip that was a meaningful fraction of total latency.
 - The remaining 3–5× residual on the scan-all cases is what audit items **H** and **I** would close. H (projection inlining) and I (CONSTRUCT-based subgraph hydration) are deferred for a follow-up PR — the diff for I is large enough that landing it on top of clean A–G/J/K orchestrator changes is the cleaner path.
 
 #### Per-site verdict — final post-PR state
