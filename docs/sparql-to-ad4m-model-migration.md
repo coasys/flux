@@ -409,72 +409,94 @@ cd ad4m-wind-tunnel
 # S16_RUNS=N overrides per-case runs (default 10).
 ```
 
+> **Correction.** A first v1 of S16 reported "include doesn't fire" and 14–150× ratios — those numbers are now superseded. The SHACL JSON the scenario sent to the executor put `@HasOne` relations in a separate top-level `relations: []` array, which Rust's `SHACLShape` deserializer silently dropped, so the relation was never registered and `resolve_includes_recursive` had nothing to do. Once relations are emitted inside `properties:` with `relation_kind: "hasOne"` (the canonical form from `@coasys/ad4m`'s `SHACLShape.toJSON()`), include fires and the ratios collapse 3–10×. Both the old and new numbers are kept below for the review trail; treat the post-fix numbers as the ground truth.
+
 Results below are 10 runs/case (+ 1 warm-up each), Apple Silicon (48 GB / 14 CPU), against `dev` (`1f29d0b17 fix(ci): clear stale bootstrap-language build cache before rebuild`).
 
-#### Small tier — 100 items, 1051 links
+#### Small tier — 100 items, 1051 links — `include actually fires: yes`
 
-| Case | raw SPARQL avg | `modelQuery` avg | ratio |
-|---|---:|---:|---:|
-| `sr_by_expression_limit1` (single-row, `WHERE expression=…` + LIMIT 1) | 0.24 ms | 3.43 ms | **14.2×** |
-| `sr_by_expression_with_include` (same + `include: { embeddingTag }`) | 0.22 ms | 3.38 ms | **15.0×** |
-| `sr_all` (scan all SRs, no where) | 0.67 ms | 14.39 ms | **21.5×** |
-| `embeddings_all` (scan all embeddings) | 0.55 ms | 8.50 ms | **15.5×** |
-| `topics_all` (scan all topics — smallest set) | 0.21 ms | 6.70 ms | **31.1×** |
+| Case | raw SPARQL avg | `modelQuery` avg | ratio | (was, pre-fix) |
+|---|---:|---:|---:|---:|
+| `sr_by_expression_limit1` (1-row, `WHERE expression=…` + LIMIT 1) | 0.23 ms | 0.56 ms | **2.4×** | 14.2× |
+| `sr_by_expression_with_include` (same + `include: { embeddingTag }`) | 0.22 ms | 0.69 ms | **3.1×** | 15.0× |
+| `sr_all` (scan all SRs, no where) | 0.62 ms | 5.25 ms | **8.5×** | 21.5× |
+| `embeddings_all` (scan all embeddings) | 0.41 ms | 3.57 ms | **8.8×** | 15.5× |
+| `topics_all` (scan all topics — smallest set) | 0.17 ms | 0.95 ms | **5.7×** | 31.1× |
 
-#### Medium tier — 1000 items, 10151 links
+#### Medium tier — 1000 items, 10151 links — `include actually fires: yes`
 
-| Case | raw SPARQL avg | `modelQuery` avg | ratio |
-|---|---:|---:|---:|
-| `sr_by_expression_limit1` | 0.52 ms | 28.86 ms | **56.0×** |
-| `sr_by_expression_with_include` | 0.51 ms | 28.38 ms | **55.5×** |
-| `sr_all` | 7.57 ms | 155.18 ms | **20.5×** |
-| `embeddings_all` | 4.93 ms | 90.46 ms | **18.4×** |
-| `topics_all` | 0.47 ms | 71.13 ms | **150.7×** |
+| Case | raw SPARQL avg | `modelQuery` avg | ratio | (was, pre-fix) |
+|---|---:|---:|---:|---:|
+| `sr_by_expression_limit1` | 0.51 ms | 2.58 ms | **5.0×** | 56.0× |
+| `sr_by_expression_with_include` | 0.55 ms | 2.99 ms | **5.5×** | 55.5× |
+| `sr_all` | 7.29 ms | 68.25 ms | **9.4×** | 20.5× |
+| `embeddings_all` | 4.09 ms | 43.29 ms | **10.6×** | 18.4× |
+| `topics_all` | 0.28 ms | 7.08 ms | **25.0×** | 150.7× |
 
-**Three concrete findings — each materially changes the categorisation in the inventory above:**
+### What the remaining 5–25× gap is
 
-#### 1. The `@HasOne` "polymorphic on same predicate" trick doesn't work
+Re-ran S16 against an executor patched with `MODEL_QUERY_PROFILE=1` instrumentation that emits per-phase wall-clock timings + the literal SPARQL strings (patch lives at `query.rs` in a throwaway temp clone — not part of any PR; intended to graduate into a `tracing` span scaffolding follow-up). The patch times each step in `execute_model_query_inner`: SPARQL build, two-phase pagination subquery exec, properties subquery exec, count exec, hydration, language transforms, getters, recursive includes.
 
-`include: { embeddingTag: true }` and `include: {}` produce timings within noise at both scales (e.g. 28.86 vs 28.38 ms at medium). S16 explicitly flags this with `include actually fires: false` in its summary when the two model timings agree to within 5 %. Two `@HasOne` decorators on the same `flux://has_tag` predicate (one targeting Embedding, one targeting Topic) cannot both fire from a single model query as implemented today — the runtime path is dead.
+#### Per-call breakdown — medium tier (1000 items)
 
-This **invalidates Stage 2's central assumption** and **invalidates recommendation #1** in the prioritised additions table. The block isn't in flux — it's in the Rust model-query implementation in `coasys/ad4m`. Whoever picks this up needs to either:
+`sr_by_expression_with_include` (model 2.99 ms end-to-end; raw 0.55 ms):
 
-- Add support for multiple relations sharing a predicate, with conformance dispatch at query time.
-- Land "multi-class polymorphic findAll" (recommendation #3) and rebuild `embeddingTag` as a discriminator on top.
+| phase | ms | what |
+|---|---:|---|
+| `build_instance_sparql` | 0.002 | string concatenation |
+| `twophase-pagination-exec` | 0.164 | `SELECT ?source ?_first_ts … ORDER BY ?_first_ts LIMIT 1` |
+| `twophase-properties-exec` | 0.101 | `VALUES ?source { … } VALUES ?predicate { 4 props } … + reifier metadata` (3 rows) |
+| `count-exec` | 0.118 | `SELECT COUNT(DISTINCT ?source)` — fired unconditionally when pagination is on |
+| Rust orchestration (group + hydrate + lang transforms) | ~0.01 | trivial |
+| include sub-query (`Embedding @d1`, single-instance + recursive overhead) | 0.741 | 2-row SPARQL + `resolve_includes_recursive` |
+| **sum of `model_query` work** | **~1.13** | |
+| RPC roundtrip + JSON marshalling | **~1.86** | WS frame, capability check, perspective lookup, outer JSON serialize |
 
-#### 2. `findAll` overhead scales linearly with corpus size regardless of `LIMIT 1`
+`sr_all` (model 68.25 ms; raw 7.29 ms):
 
-`findAll(SR, { where: { expression: id }, limit: 1 })` costs 3.43 ms at small (100 items) and **28.86 ms at medium (1000 items)** — an 8.4× slowdown for a 10× corpus growth. Raw SPARQL with the same `LIMIT 1` stays at 0.24 vs 0.52 ms across the same range (~2×, in line with index lookup cost). The conformance scan and/or property-fetch isn't being short-circuited by the LIMIT.
+| phase | ms | what |
+|---|---:|---|
+| `single-instance-exec` | ~65 | One big SPARQL fetching 3090 rows (1030 SRs × 3 properties). Per-row work is *~3.4× heavier* than raw because the reifier-metadata pattern adds 3 triple-pattern matches per result row (`rdf:reifies` + `author` + `timestamp`). |
+| Rust orchestration (group + hydrate) | ~1.5 | |
+| RPC + marshal | ~1.7 | |
 
-This **invalidates the Category A "trivially convertible" assumption** that the model-query builder's overhead was a constant tax. It isn't — it's a linear-in-N tax. Converting `Channel.totalItemCount` or `Channel.pinnedConversations` to `Ad4mModel.findAll` would visibly regress as Flux communities grow.
+The SPARQL emitted by `build_instance_sparql` for the Single-plan branch always selects `?source ?predicate ?target ?author ?timestamp` and joins each property row against its RDF 1.2 reifier metadata — unconditionally, so that hydration can compute `author` / `createdAt` / `updatedAt` and apply last-write-wins. The join adds 3–5× work *per row* over the raw SPARQL equivalent that selects only `?source ?value`.
 
-#### 3. Even when `findAll` is doing the *right* work, it's an order of magnitude slower than raw SPARQL doing more work
+#### What to push into SPARQL (and where it can land)
 
-Raw SPARQL is performing a 4-hop join (SR → Embedding → entry_type filter → embedding URL) and returning the surfaced embedding URL. Ad4mModel is returning the SR base entity only (no embedding URL surfaced — see finding #1). Ad4mModel doing *less* work is still 14× slower at small and 56× slower at medium for the single-row case, and 150× slower for the small-result topics scan.
+The current upstream stack ([#837](https://github.com/coasys/ad4m/pull/837), [#842](https://github.com/coasys/ad4m/pull/842), [#846](https://github.com/coasys/ad4m/pull/846)) pushes `WHERE` conditions into SPARQL — that has expanded the envelope substantially for filter pushdown. But the remaining ratios are not about `WHERE` evaluation; they're about three things the model-query orchestrator does unconditionally that the caller may not need. All three are reachable from the same family of PRs:
 
-The gap is not in the SPARQL execution — it's in the model-query orchestration layer: SHACL shape resolution + conformance pattern emission + result hydration. None of which carries weight when the answer is a single row.
+1. **Make the reifier-metadata join opt-in.** S16 shows it accounts for ~3.4× the per-row SPARQL cost on scan-all queries. Gate behind a `with_metadata: bool` (or "include keys" intersection with `{author, createdAt, updatedAt, timestamp}`) on `ModelQueryInput`. When omitted, emit:
+    ```sparql
+    SELECT ?source ?predicate ?target WHERE { conformance + where + ?source ?predicate ?target . }
+    ```
+    Drops the `?_reifier reifies + author + timestamp` triples entirely. Expected impact: ~10× → ~2× on scan-all queries.
+2. **Skip the COUNT query unless the caller reads `total_count`.** Currently fired any time `sparql_pagination.is_some()`. ~0.12 ms per call on medium today (4–6 % of `sr_by_expression_limit1`'s budget) but unbounded as the perspective grows. Same shape as the aggregate work in [#846](https://github.com/coasys/ad4m/pull/846)'s scaffolded `build_aggregate_sparql` — wire `count` to fire only when requested.
+3. **Collapse two-phase pagination into a single plan when the `WHERE` filter is already selective enough.** For `sr_by_expression_limit1`, the where clause restricts to exactly 1 row before ORDER BY — there's nothing for the timestamp probe to sort over, so phase 1 is wasted. Heuristic: if `WHERE` includes an equality on a flag/unique property, skip the timestamp probe and emit a Single plan with the property-filter `VALUES` clause. Saves ~0.16 ms per call (~6 % of the single-row case).
+
+None of these are SPARQL-language extensions — they're orchestrator changes that *reduce* SPARQL work. Natural follow-up PR to [#846](https://github.com/coasys/ad4m/pull/846).
 
 #### Re-scoped recommendations
 
-Given the empirical data, the prioritised additions table should be re-read as:
+Given the post-fix data:
 
 | Original rank | Reality | What it actually means |
 |---|---|---|
-| #1 tag as `@HasOne` polymorphic | **Doesn't work** without AD4M-side multi-relation-per-predicate dispatch | Becomes a recommendation against the executor's model_query layer, not flux |
-| #2 `@BelongsTo` | Decorators exist; **runtime behaviour unverified** at scale | Bench before relying on it for any conversion |
-| #3 Polymorphic `findAll` | Confirmed AD4M-side need | Reaffirmed |
+| #1 tag as `@HasOne` polymorphic | **Works** with canonical SHACL emission | Update flux's `SemanticRelationship` decorators to emit the canonical form — the executor's polymorphic-on-same-predicate path is fine |
+| #2 `@BelongsTo` | Decorators exist; **runtime behaviour unverified** at scale | Bench before relying on it for any conversion (S16 follow-up case) |
+| #3 Polymorphic `findAll` | Independent need | Reaffirmed |
 | #4 Per-link reifier `meta:` | Confirmed AD4M-side need | Reaffirmed |
 | #5 Nested `where` on relations | Decorator option exists; **runtime not benched** | Same caveat as #2 |
 | #6 UNION across queries | Not blocking | Same |
 
-And the per-site verdict:
+Per-site verdict:
 
-| Category | Original verdict | Bench-grounded verdict |
+| Category | Original verdict | Bench-grounded verdict (post-fix) |
 |---|---|---|
-| A. Trivially convertible (5 sites) | "Slight perf regression, trade-off for type safety" | **Major perf regression — 14–150× slower. Keep as raw SPARQL.** |
-| B. Convertible with new features (10 sites) | "Likely a perf win because it collapses N+1" | **Unverified.** The N+1 in flux is `await Promise.all(rows.map(getExpression))` after one SPARQL call — getExpression hits a language-controller cache, so the cost is data-dependent. Adding more S16 cases that drive multi-row hydration + `BelongsTo` traversal (next iteration) would settle this; the current numbers say the model-query layer's per-row overhead alone (3-28 ms) already exceeds the SPARQL-then-cached-getExpression baseline for any realistic N. |
+| A. Trivially convertible (5 sites) | "Slight perf regression, trade-off for type safety" | **Modest perf regression (5–10×).** Acceptable in isolation; problematic at scale. Worth converting *if* the three model_query orchestrator fixes above land first. |
+| B. Convertible with new features (10 sites) | "Likely a perf win because it collapses N+1" | Plausibly a wash or win once the reifier-metadata join is opt-in. Need bench cases that drive multi-row hydration + `@BelongsTo` traversal (next S16 iteration). |
 | C. Reifier-metadata reads (4 sites) | "Keep as SPARQL" | Reaffirmed |
 | D. Set-difference (2 sites) | "Keep as SPARQL" | Reaffirmed |
-| E. Inter-class joins (4 sites) | "Mixed" | Lean further toward SPARQL given Cat A perf result |
+| E. Inter-class joins (4 sites) | "Mixed" | Lean toward SPARQL until the orchestrator fixes are wired |
 
 **Bottom line for this PR's stated goal — "convert flux raw SPARQL to Ad4mModel where possible":** the bench data argues against most conversions until the AD4M-side `model_query` layer's per-instance overhead is brought down. The right work isn't migrating call sites in flux — it's investigating *why* `findAll` is 14-150× slower than raw SPARQL even for a single-row lookup, and fixing it in `coasys/ad4m`. S16 will land as a regression gate against that work: any future `model_query` change can re-run it and watch the ratios collapse toward 1×.
