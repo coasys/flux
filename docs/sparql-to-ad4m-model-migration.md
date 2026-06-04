@@ -500,3 +500,259 @@ Per-site verdict:
 | E. Inter-class joins (4 sites) | "Mixed" | Lean toward SPARQL until the orchestrator fixes are wired |
 
 **Bottom line for this PR's stated goal — "convert flux raw SPARQL to Ad4mModel where possible":** the bench data argues against most conversions until the AD4M-side `model_query` layer's per-instance overhead is brought down. The right work isn't migrating call sites in flux — it's investigating *why* `findAll` is 14-150× slower than raw SPARQL even for a single-row lookup, and fixing it in `coasys/ad4m`. S16 will land as a regression gate against that work: any future `model_query` change can re-run it and watch the ratios collapse toward 1×.
+
+---
+
+## Why is `model_query` complex Rust at all? — single-SPARQL elegance audit
+
+The remaining 5–25× gap (and the orchestrator overhead generally) comes from a fan-out pattern: one `perspective.modelQuery` RPC dispatches **1 + N + M + K SPARQL queries** through the same `SparqlEvaluator`, with most of the tree-shaping work happening between queries in Rust rather than inside SPARQL. This section enumerates every fan-out site, explains why each one exists, and proposes how it could collapse into either (a) a single SPARQL query or (b) a streaming subgraph extraction.
+
+### Inventory: every `store.query` call site in `model_query`
+
+(All counts at `dev`@`1f29d0b17`. "Why separate" = the reason it isn't already fused into the main instance query.)
+
+| # | Phase | Site | Fires when | Cost in S16 | Why separate today |
+|---|---|---|---:|---:|---|
+| 1 | Shape resolution | `shape.rs:61, 116, 327, 340` | First-ever query for a class in this perspective | cold-miss only | Shape is cached `Arc<ModelShape>` per `(perspective, class)`; queries run *before* the main query because the SPARQL builder needs the shape. |
+| 2 | Main instance — Single plan | `query.rs:187` | No `limit`/`offset` | 65 ms (`sr_all` med) | The main query. Where the bulk of work happens. |
+| 3 | Main instance — TwoPhase phase 1 (pagination) | `query.rs:203` | `limit`/`offset` set | 0.16 ms (`sr_by_expr_limit1` med) | Need an `ORDER BY ?_first_ts` so the limit cuts the right rows. The timestamp probe joins reifier metadata; can't be combined with phase 2 because phase 2's `VALUES ?source` is *driven by* phase 1's `?source` bindings. |
+| 4 | Main instance — TwoPhase phase 2 (properties) | `query.rs:236` | After phase 1 returns ≥1 source | 0.10 ms | Same reason — `VALUES ?source { … }` is the dynamic bridge between the two phases. |
+| 5 | Total count | `query.rs:109` (fast path) / `query.rs:290` | `limit==0` OR `sparql_pagination.is_some()` | 0.12 ms | `COUNT(DISTINCT ?source)` needs aggregation; the planner can't fold it into a `SELECT` that also returns rows without grouping artefacts. **Fires unconditionally whenever a `limit` is set, even if the caller never reads `total_count`.** |
+| 6 | Reverse relations (`@BelongsTo`) | `relations.rs:69` | shape has reverse-direction properties | varies per relation | Each reverse predicate runs its own batched `VALUES ?target { … } ?source <pred> ?target`. Could be fused via UNION but the planner pays for the extra branches. |
+| 7 | Include sub-query (forward) | recursive `execute_model_query_inner` via `relations.rs:200` | `include: { rel: … }` | 0.74 ms (`@d1` med) | Forward includes call the whole pipeline recursively on the target class with `where: { id: [collected target IRIs] }`. **Each level of nesting fires its own 1–4 queries.** |
+| 8 | Reverse include lookup | `relations.rs:297` | `include: { reverseRel: … }` | n/a in S16 (no `@BelongsTo`) | One `?source <pred> ?target` lookup to find the source IRIs, *then* a recursive `execute_model_query_inner` on those sources. **Doubles the round-trips of forward includes.** |
+| 9 | ASK getters | `getters.rs:226` | shape has properties with `ASK { … }` getters | per-property | Each getter expression is translated to a batched `SELECT` with `VALUES ?source { … }`. Could lift into the main query as `BIND(EXISTS { … } AS ?<name>)` but the executor never tries. |
+| 10 | SELECT getters | `getters.rs:255` | shape has properties with `SELECT { … }` getters | per-property | Each one fires its own batched `SELECT`. Lifting into the main query would need careful subquery composition. |
+| 11 | Relation `where_filter` | `getters.rs:403` | shape relation has `where_filter` | per filter predicate | For each predicate in the filter, one batched `SELECT ?source ?val WHERE { VALUES ?source { … } ?source <pred> ?val }` — then Rust matches per-target. **N filter predicates → N round-trips.** |
+| 12 | Projection (`count`) | `projection.rs:115` | `projections: { $foo: { count: true, … } }` | per projection | One `SELECT ?parent (COUNT(DISTINCT ?t) AS ?n) GROUP BY ?parent`. |
+| 13 | Projection (`list`) | `projection.rs:159` | `projections: { $foo: { count: false, … } }` | per projection | One `SELECT ?parent ?t WHERE { … } ORDER BY … LIMIT …` per projection. If `target_class_name` is set, *also* recurses into `execute_model_query_inner`. |
+
+Plus **one non-SPARQL fan-out:**
+
+| # | Phase | Site | Fires when |
+|---|---|---|---|
+| 14 | `resolveLanguage` transforms | `query.rs:412` (`resolve_language_transforms`) | shape has properties with `resolve_language` set | One `LanguageController.get_expression(...)` Holochain RPC *per instance × per resolveLanguage prop*, **sequentially**. This is not SPARQL because the expression data lives outside the perspective. |
+
+**Total round-trip count for a non-trivial `findAll`:**
+
+- Cold first call: 1 shape query + 1–3 main + 1 count + R reverse + I include sub-queries + G getters + F filter predicates + P projections
+- Warm: same minus the shape query
+- For a query that hydrates 1 SR via `include: { embeddingTag: true }` on `dev` today: shape (warm cache) + 2 main (TwoPhase) + 1 count + 1 nested include (Embedding) = 4 SPARQL round-trips.
+- For a query like `Conversation.findAll({ include: { subgroups: { include: { items: true, $topicCount: { count: true } } } } })`: ~10–15 round-trips per outer call.
+
+This is the real reason `model_query` ratios don't collapse all the way to 1×. The SPARQL inside each query is fast; the **fan-out** is what costs.
+
+### Why each fan-out exists — and what would let it collapse
+
+Going site-by-site:
+
+#### Reifier metadata (already covered above)
+
+Unconditional join in the main instance query for `author` + `timestamp` + `rdf:reifies` triple. Cost: ~3.4× per-row SPARQL overhead on scan-all queries. Fix: gate on `with_metadata: bool` in `ModelQueryInput`. Easy, ~50 LOC PR.
+
+#### COUNT fires unconditionally with pagination
+
+Even when the caller doesn't use `total_count`, `query.rs:290` runs a separate `SELECT (COUNT(DISTINCT ?source) AS ?cnt) …`. Currently gated only on `sparql_pagination.is_some()`. Fix: thread a `count: bool` flag through `ModelQueryInput` and skip the query unless it's truthy *or* the caller explicitly asks for `total_count`. Easy, ~30 LOC PR.
+
+#### TwoPhase plan when WHERE is already selective
+
+`sr_by_expression_limit1` has `where: { expression: id }` which restricts to *exactly one row*. The TwoPhase plan still emits `ORDER BY ?_first_ts LIMIT 1` over a reifier-metadata-joined subquery — wasted work because there's nothing to sort. Fix: heuristic — when WHERE includes equality on a unique property (id, base, flag-target), skip the timestamp probe and emit Single with the equality `VALUES`. Medium, ~80 LOC PR with a new test.
+
+#### Reverse relations + reverse includes — fused single SPARQL via UNION
+
+A model with multiple `@BelongsTo` relations fires one batched lookup per reverse predicate. These can fuse into a single SPARQL with one `?source ?p ?target` row per matched edge:
+
+```sparql
+SELECT ?target ?predicate ?source WHERE {
+  VALUES ?target { … instance IRIs … }
+  VALUES ?predicate { <pred1> <pred2> … }
+  ?source ?predicate ?target .
+}
+```
+
+Then Rust splits by `?predicate` post-hoc. **Saves R-1 round-trips** for shapes with R reverse predicates. Easy, ~60 LOC PR.
+
+#### Forward includes — collapse via SPARQL CONSTRUCT or subgraph extraction
+
+This is the structurally interesting one. Today `include: { embeddingTag: true }` causes a *full pipeline recursion* on the target class — meaning the include's own SPARQL queries (main + count + maybe its own includes) fire as a separate fan-out. The recursion is what makes deep includes (`include: { a: { include: { b: { include: { c: true } } } } }`) blow up.
+
+Two paths to fix:
+
+a) **Lift the include into the main query**. Replace `?source ?predicate ?target` (returning IRIs) with a wider main query that also drags in target properties:
+   ```sparql
+   SELECT ?source ?predicate ?target ?author ?timestamp
+          ?target_predicate ?target_value WHERE {
+     # … conformance + where + property fetch as today …
+     OPTIONAL {
+       ?target ?target_predicate ?target_value .
+       VALUES ?target_predicate { … target's predicates … }
+     }
+   }
+   ```
+   Then group + hydrate the target in the same pass. Works for shallow (depth-1) includes. Saves 1 SPARQL per included relation per level.
+
+b) **Use SPARQL CONSTRUCT** to return the entire subgraph in one query, then re-shape the resulting triples into a JSON tree in Rust:
+   ```sparql
+   CONSTRUCT {
+     ?source ?p ?o .
+     ?source <ad4m:include/tag> ?tag .
+     ?tag ?tp ?to .
+   } WHERE {
+     # main conformance + where + property fetch + include traversal
+   }
+   ```
+   The CONSTRUCT returns a Graph (subset of triples); a generic `subgraph → tree` algorithm walks the shape and lifts it to JSON. Works for arbitrary depth. Single SPARQL round-trip regardless of include depth. This is the **elegant pipeline endpoint** — see "What the perfectly elegant pipeline looks like" below.
+
+#### Getters lifted into the main SELECT
+
+Today each getter — `ASK { … }` or `SELECT { … }` — fires its own batched-`VALUES` query. The transformation that's actually wanted:
+
+- `ASK { ?source <flag-pred> <flag-value> }` getter → `BIND(EXISTS { ?source <flag-pred> <flag-value> } AS ?<getterName>)` inside the main SELECT
+- `SELECT ?value WHERE { ?source <pred> ?value }` getter → `OPTIONAL { ?source <pred> ?<getterName> }` (or a subquery if the getter is multi-row)
+
+Folding M getters into the main SELECT saves M round-trips. Medium-effort PR (need a getter→SPARQL-fragment compiler). Open question: does Oxigraph's planner cope well with many BIND/EXISTS clauses? Worth benching before committing.
+
+#### Relation `where_filter` — push to SPARQL
+
+`getters.rs:apply_where_filter_to_relation` is a textbook N+1 case: for each predicate in `where_filter`, fetch target's value, then filter targets in Rust. The SPARQL equivalent already exists — just push the filter clauses into the original include's WHERE block:
+
+```sparql
+?source <relPred> ?target .
+?target <filterPred1> ?v1 . FILTER(?v1 = "X") .
+?target <filterPred2> ?v2 . FILTER(?v2 > 5) .
+```
+
+Easy, ~100 LOC PR. Removes the entire `apply_where_filter_to_relation` helper.
+
+#### Projections — fold into main as subqueries
+
+Each projection key fires its own grouped SPARQL. SPARQL 1.1 supports subqueries with their own ORDER BY + LIMIT, so a projection can fold in as:
+
+```sparql
+SELECT ?source ?topicCount WHERE {
+  # main conformance + where …
+  {
+    SELECT ?source (COUNT(DISTINCT ?t) AS ?topicCount) WHERE {
+      ?source <topicPred> ?t .
+    } GROUP BY ?source
+  }
+}
+```
+
+Saves P round-trips for queries with P projections. Medium PR.
+
+#### resolveLanguage — the only path that genuinely can't be SPARQL
+
+This calls `LanguageController.get_expression(lang, expr_addr)` which dispatches a Holochain RPC to fetch expression data from outside the perspective. **The data doesn't live in the RDF store; it lives in the language's Holochain cell.** No SPARQL extension can reach it.
+
+But the orchestration *is* fixable:
+- Today the implementation is sequential per-instance per-property (`query.rs:432–438` walks instances in a `for` loop, awaits each `controller.get_expression(...)` call).
+- Could be batched: collect all (lang, expr_addr) pairs across all instances, fire them in parallel via `futures::join_all` or `tokio::spawn`-fan-out, then map results back.
+- For repeated lookups in the same query, deduplicate by expression URL first.
+
+This is the only correct "Rust orchestration" cost. Even there, parallelism would save 5–50× on workloads with many resolveLanguage properties.
+
+### Post-hydration paths that can collapse
+
+#### `matches_where` post-hydration filter (`filtering.rs:22`)
+
+Used when `all_where_pushable` returns false. The remaining cases — after #842 / #846 — are: `Ops` conditions on getter-derived properties, and conditions on collection counts. The first can be pushed once getters are inlined (above). The second is a `HAVING` clause on a `GROUP BY ?source`.
+
+#### Multi-key sort (`filtering.rs:sort_instances`)
+
+The pagination plan only pushes the *first* sort key to SPARQL. Multi-key sort happens in Rust. SPARQL supports `ORDER BY key1 ASC, key2 DESC` natively — the limit is the `build_query_patterns` builder, not the language. Easy PR.
+
+### Read into the original recommendations table — what's still open?
+
+Quick audit of the six prioritised additions vs current state and what new evidence S16 surfaces:
+
+| Rank | Recommendation | Status now | What S16 / profile data adds |
+|---|---|---|---|
+| #1 | `tag` as typed `@HasOne` polymorphic | **Works at the executor level** (s16 confirmed include fires for two `@HasOne` on the same predicate, conformance-discriminated). Open in flux: emit canonical SHACL in `SemanticRelationship`. | False alarm in v1 — the runtime path was always there; only flux's decorator emission was wrong (or wrong in the s16 mirror). Doc still flags it as flux-side work. |
+| #2 | `@BelongsTo()` cleaner reverse-relation decorator | Decorators exist in `@coasys/ad4m`. Runtime behaviour benched only indirectly via include. | **Not yet covered by S16.** Next S16 case (`belongsto_traversal`) to add. |
+| #3 | Multi-class polymorphic `findAll` | Not implemented. | Reaffirmed by `allItemEmbeddings()` (sites 22+23). |
+| #4 | Per-link reifier metadata sidecar | Not implemented; today's metadata join is unconditional on **instance** rows but absent on **relation target** rows. | Profile data adds urgency — the unconditional metadata join is what makes scan-all queries 3.4× slower per row. Making it opt-in is the same fix from two angles. |
+| #5 | Nested `where` on relations | Decorators exist (`where_filter` + `where_predicates` plumbed through SHACL parser → shape loader → `apply_where_filter_to_relation`). Runtime is N+1 SPARQL today (one query per filter predicate). | **Not benched.** Next S16 case (`relation_where_filter`) to add. Pushdown into main SPARQL is the elegant fix. |
+| #6 | UNION across query shapes | Not blocking. | No change. |
+
+**What was NOT in the original list and is now clearly open:**
+
+7. **Opt-in reifier-metadata join** (orchestrator change, ~50 LOC). New from profile data.
+8. **Opt-in `total_count`** (orchestrator change, ~30 LOC). New from profile data.
+9. **Single-plan when WHERE is selective** (orchestrator change, ~80 LOC). New from profile data.
+10. **Reverse-relation UNION fusion** (orchestrator change, ~60 LOC). Surfaced by inventory audit.
+11. **Forward-include collapse via SPARQL CONSTRUCT or subgraph extraction** (the big one, ~500 LOC). Surfaced by inventory audit.
+12. **Getter pushdown via `BIND(EXISTS {...})`** (medium PR, depends on Oxigraph planner behaviour). Surfaced by inventory audit.
+13. **Relation `where_filter` pushdown** (~100 LOC). Surfaced by inventory audit.
+14. **Projection inlining via SPARQL subqueries** (medium PR). Surfaced by inventory audit.
+15. **Multi-key sort pushdown** (small PR). Surfaced by inventory audit.
+16. **Parallel resolveLanguage batching** (~100 LOC, not SPARQL). Surfaced by inventory audit.
+17. **JSON streaming or `Solutions` → `Value` direct** (small refactor in `sparql_store.rs:query`). Surfaced by inventory audit.
+
+### What the perfectly elegant `Ad4mModel` → SPARQL pipeline looks like
+
+The endpoint is a **single SPARQL CONSTRUCT round-trip per model query**, regardless of include depth or projection count. The orchestrator:
+
+1. Walks the model's `ModelShape` and the query's `ModelQueryInput.include` to build a *single* SPARQL CONSTRUCT query that materialises the entire subgraph needed — instance triples, included relations, getters lifted into `BIND` / `EXISTS`, projections folded into subqueries, where-clauses inlined into the WHERE block.
+2. Fires that one query against the store.
+3. The store returns a graph of triples (Oxigraph supports this natively as `QueryResults::Graph`).
+4. A `subgraph → tree` walker in Rust consumes the triples and emits the JSON tree the TS client wants, using the model's `ModelShape` as the schema for the walk.
+5. If the shape has `resolve_language` properties, fire a parallel batched `LanguageController` fetch over all (lang, addr) pairs — *after* the SPARQL phase, but in a single concurrent batch.
+6. Serialize the final tree once and ship over the WS RPC.
+
+Round-trip count: **1 SPARQL + 1 batched RPC (if applicable)**, total — independent of N, M, K, include depth, or model complexity.
+
+What this requires:
+
+- **Subgraph CONSTRUCT planner in the model_query builder.** Rewrite `build_instance_sparql` to emit a CONSTRUCT that captures the entire requested tree. The shape + query input together determine which triples to materialise.
+- **Tree-shape walker in hydration.** Replace `group_results_by_source` + `hydrate_instances` + `resolve_includes_recursive` with a single walker that takes the triple graph + shape and emits the JSON tree directly.
+- **Streaming where possible.** Use Oxigraph's `QuerySolutionIter` directly rather than the current "materialise to JSON string, parse it back" round-trip in `sparql_store.rs:query`.
+- **Holochain expression-resolution batching.** Add a `LanguageController::get_expressions_batch(pairs: Vec<(lang, addr)>) → HashMap<addr, ExprJson>` and use it in `resolve_language_transforms`.
+- **Reified `?author` / `?timestamp` as opt-in `meta:` projections** (recommendation #4). Same fix as the opt-in reifier metadata above but applied recursively to relation target instances.
+
+The result is a pipeline that:
+- Hydrates one row in 1 round-trip (current: 3–4 round-trips).
+- Hydrates a 3-deep include tree in 1 round-trip (current: ~10 round-trips).
+- Doesn't pay reifier overhead unless the client asks for metadata.
+- Doesn't pay COUNT overhead unless the client asks for total_count.
+- Scales linearly with result-set size, not query-plan complexity.
+
+Expected post-state in S16:
+
+| Case | dev today (medium) | with all fixes | reason |
+|---|---:|---:|---|
+| `sr_by_expression_limit1` | 5.0× | ~1.5× | Drop count, single-plan, RPC roundtrip floor |
+| `sr_by_expression_with_include` | 5.5× | ~1.5× | Same + include via CONSTRUCT subgraph |
+| `sr_all` (no metadata requested) | 9.4× | ~2× | Drop reifier-metadata join |
+| `embeddings_all` (no metadata) | 10.6× | ~2× | Same |
+| `topics_all` | 25× | ~3× | Same; RPC floor dominates because raw is sub-ms |
+
+### PR sequence to land it
+
+Ordered by impact-per-LOC; each builds on the previous:
+
+| PR | Scope | Effort | Expected ratio change |
+|---|---|---|---|
+| A. Opt-in reifier metadata | Add `with_metadata: bool` to `ModelQueryInput`, gate the `?_reifier reifies + author + timestamp` clauses in `build_instance_sparql`. | ~50 LOC + tests | 9–25× → ~2–3× on scan-all |
+| B. Opt-in `total_count` | Add `count: bool`, gate the COUNT query. | ~30 LOC + tests | -0.1ms per call (small but free) |
+| C. Single-plan when WHERE selective | Heuristic in `query.rs` to skip TwoPhase when WHERE includes equality on a unique property. | ~80 LOC + tests | 5× → 3.5× on `sr_by_expression_limit1` |
+| D. Reverse-relation UNION fusion | Rewrite `resolve_reverse_relations` to emit one UNION SPARQL. | ~60 LOC + tests | -R round-trips per call |
+| E. Multi-key sort pushdown | Extend `build_instance_sparql` to emit multi-key `ORDER BY`. | ~40 LOC + tests | Eliminates a Rust sort phase |
+| F. Relation `where_filter` pushdown | Push `apply_where_filter_to_relation` into the include's SPARQL WHERE. | ~100 LOC + tests | -F round-trips |
+| G. Getter inlining | Compile ASK getters into `BIND(EXISTS{…})`, SELECT getters into `OPTIONAL{…}` in main query. | ~200 LOC + tests | -G round-trips |
+| H. Projection subquery inlining | Fold projections into main query as sub-SELECTs. | ~150 LOC + tests | -P round-trips |
+| I. CONSTRUCT-based hydration | Replace the current SELECT + recursive include pipeline with a single CONSTRUCT + subgraph walker. | ~500 LOC + tests + reshape `hydration.rs` and `relations.rs` | Constant 1 round-trip regardless of include depth |
+| J. Parallel resolveLanguage batching | Add batched `LanguageController::get_expressions_batch`, use in `resolve_language_transforms`. | ~100 LOC + Holochain plumbing | Eliminates N×k sequential `get_expression` await chain |
+| K. Streaming Solutions → Value | Replace `sparql_store::query`'s "Solutions → String → from_str → Vec<Value>" with direct `Solutions → Vec<Value>`. | ~50 LOC + tests | -1 JSON parse round-trip per SPARQL call |
+
+A through F are pure quick wins (~360 LOC across six small PRs). G through K are the structural rebuild. The investigation argues that A+B+C alone would close 60–80% of the S16 gap; G+I would close the rest.
+
+Each PR adds (or extends) one S16 case so the regression gate sees the ratio collapse cleanly:
+
+- A → s16 `embeddings_all_no_metadata`
+- C → s16 `sr_by_expression_eq_no_orderby`
+- D → s16 `multi_reverse_relations`
+- F → s16 `relation_where_filter`
+- G → s16 `class_with_ask_getter`
+- H → s16 `class_with_projections`
+- I → s16 `deep_include_3_levels`
