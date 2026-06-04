@@ -1,5 +1,4 @@
-import { Ad4mClient, Link, LinkInput } from '@coasys/ad4m';
-import { LinkExpression } from '@coasys/ad4m';
+import { Ad4mClient, Link, LinkInput, LinkExpression, Literal } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
 import { unwrapLiteralValue } from './unwrapLiteralValue';
@@ -43,20 +42,15 @@ export function mapLiteralLinks(links: LinkExpression[] | undefined, map: Proper
   }, {});
 }
 
-export async function createLiteralLinks(client: Ad4mClient, source: string, map: PredicateMap) {
-  const targets = Object.keys(map);
-
-  const promises = targets
-    .filter((predicate: any) => {
-      return typeof map[predicate] === 'string';
-    })
-    .map(async (predicate: string) => {
-      const message = map[predicate];
-      const exp = await client.expression.create(message, 'literal');
-      return new Link({ source, predicate, target: exp });
+export async function createLiteralLinks(_client: Ad4mClient, source: string, map: PredicateMap) {
+  // Values land as deterministic `literal:string:` targets — the link reifier
+  // carries the author/timestamp/proof for the write itself.
+  return Object.keys(map)
+    .filter((predicate) => typeof map[predicate] === 'string')
+    .map((predicate) => {
+      const target = Literal.from(map[predicate] as string).toUrl();
+      return new Link({ source, predicate, target });
     });
-
-  return Promise.all(promises);
 }
 
 //function to create links from a map of predicates to targets
@@ -83,15 +77,19 @@ export async function createLiteralObject(
   client: Ad4mClient,
   { parent, children }: { parent: LinkInput; children: PredicateMap },
 ) {
-  const expUrl = await client.expression.create(parent.target, 'literal');
+  // The deterministic literal URL doubles as a stable entity identity for
+  // the children to attach to — two calls with the same `parent.target`
+  // resolve to the same parent IRI, which is the intended semantics for
+  // value-keyed entities like web links.
+  const parentTarget = Literal.from(parent.target).toUrl();
 
   const parentLink = new Link({
     source: parent.source,
     predicate: parent.predicate,
-    target: expUrl,
+    target: parentTarget,
   });
 
-  const childrenLinks = await createLiteralLinks(client, expUrl, children);
+  const childrenLinks = await createLiteralLinks(client, parentTarget, children);
 
   return [parentLink, ...childrenLinks];
 }
