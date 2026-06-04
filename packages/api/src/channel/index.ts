@@ -349,36 +349,32 @@ export class Channel extends Ad4mModel {
 
   /**
    * Get pinned conversation channels.
-   * Single SPARQL query — replaces iterative channel.get({ conversations: true }).
+   *
+   * Converted from raw SPARQL → `Channel.findAll` post-#846.  The query
+   * shape (`isPinned == true`, optional child conversation) is a textbook
+   * Category B candidate from `docs/sparql-to-ad4m-model-migration.md`:
+   * a `Where` on a scalar plus a HasMany include with `limit: 1`.
+   *
+   * Trade-off vs the raw SPARQL: the executor still has to fan out one
+   * include sub-query for the `conversations` relation, but with
+   * `withMetadata: false` the per-row reifier-metadata join is dropped
+   * and the round-trip count remains 2 (main + include) — same as the
+   * old `querySparql` + `OPTIONAL` block.
    */
   static async pinnedConversations(
     perspective: PerspectiveProxy,
   ): Promise<{ channelId: string; conversationId?: string }[]> {
-    const sparql = `
-      SELECT ?channelId ?conversationId WHERE {
-        ?channelId <${ENTRY_TYPE}> <${EntryType.Channel}> .
-        ?channelId <${CHANNEL_IS_PINNED}> ?_isPinned .
-        FILTER(STR(<ad4m://fn/parse_literal>(?_isPinned)) = "true")
-        OPTIONAL {
-          ?channelId <ad4m://has_child> ?conversationId .
-          ?conversationId <flux://entry_type> <flux://conversation> .
-        }
-      }
-    `;
-
     try {
-      const results = await perspective.querySparql<PinnedConversationBinding[]>(sparql);
-      // Deduplicate by channelId
-      const seen = new Map<string, { channelId: string; conversationId?: string }>();
-      for (const r of results || []) {
-        const cid = r.channelId;
-        if (!cid || seen.has(cid)) continue;
-        seen.set(cid, {
-          channelId: cid,
-          conversationId: r.conversationId || undefined,
-        });
-      }
-      return Array.from(seen.values());
+      const pinned = await Channel.findAll(perspective, {
+        where: { isPinned: true },
+        include: { conversations: { limit: 1, withMetadata: false } },
+        withMetadata: false,
+        count: false,
+      });
+      return pinned.map((ch) => ({
+        channelId: ch.id,
+        conversationId: ch.conversations?.[0]?.id || undefined,
+      }));
     } catch (error) {
       console.error('Error in Channel.pinnedConversations():', error);
       return [];

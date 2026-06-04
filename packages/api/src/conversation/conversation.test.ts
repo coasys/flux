@@ -121,6 +121,7 @@ vi.mock('./util', () => ({
 
 // Import after mocks are hoisted
 import { Conversation } from './index';
+import ConversationSubgroup from '../conversation-subgroup';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -143,6 +144,10 @@ function createMockPerspective(querySparqlImpl?: (...args: any[]) => any) {
     sparqlCalls,
     addLinksCalls,
     querySparql: vi.fn(impl),
+    // Default to an empty modelQuery result — required since
+    // `Conversation.stats()` post-#846 calls
+    // `ConversationSubgroup.findAllAndCount(...)` instead of raw SPARQL.
+    modelQuery: vi.fn().mockResolvedValue({ instances: [], totalCount: 0 }),
     get: vi.fn().mockResolvedValue([]),
     add: vi.fn().mockResolvedValue({}),
     addLinks: vi.fn(async (...args: any[]) => {
@@ -188,17 +193,24 @@ function createTranscribedItems() {
 // ---------------------------------------------------------------------------
 
 describe('Conversation.stats()', () => {
+  // After the #846 SPARQL→Ad4mModel migration, stats() now calls
+  // `ConversationSubgroup.findAllAndCount` for the subgroup count and
+  // `perspective.get(LinkQuery)` for participants.  We stub
+  // `findAllAndCount` directly because the conversation.test.ts vi.mock
+  // for `@coasys/ad4m` provides a stripped-down `@Model` decorator that
+  // doesn't register the metadata `Ad4mModel.getModelMetadata()` reads
+  // — running the real `findAllAndCount` path against the test mock
+  // would silently fail in the catch block.
+
   it('returns correct subgroup count and participants from query results', async () => {
-    let callCount = 0;
-    const perspective = createMockPerspective(async () => {
-      callCount++;
-      if (callCount === 1) {
-        // subgroups query
-        return [{ sg: 'sg-1' }, { sg: 'sg-2' }, { sg: 'sg-3' }];
-      }
-      // participants query
-      return [{ did: 'did:test:alice' }, { did: 'did:test:bob' }];
-    });
+    const perspective = createMockPerspective();
+    perspective.get.mockResolvedValueOnce([
+      { data: { target: 'did:test:alice' } },
+      { data: { target: 'did:test:bob' } },
+    ]);
+    const findAllAndCountSpy = vi
+      .spyOn(ConversationSubgroup, 'findAllAndCount')
+      .mockResolvedValueOnce({ results: [], totalCount: 3 } as any);
     const conv = new Conversation(perspective as any, 'conv-1');
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
@@ -207,15 +219,20 @@ describe('Conversation.stats()', () => {
 
     expect(stats.totalSubgroups).toBe(3);
     expect(stats.participants).toEqual(['did:test:alice', 'did:test:bob']);
+    findAllAndCountSpy.mockRestore();
   });
 
   it('filters out null/undefined participant dids', async () => {
-    let callCount = 0;
-    const perspective = createMockPerspective(async () => {
-      callCount++;
-      if (callCount === 1) return [];
-      return [{ did: 'did:test:alice' }, { did: null }, { did: undefined }, { did: 'did:test:bob' }];
-    });
+    const perspective = createMockPerspective();
+    perspective.get.mockResolvedValueOnce([
+      { data: { target: 'did:test:alice' } },
+      { data: { target: null } },
+      { data: { target: undefined } },
+      { data: { target: 'did:test:bob' } },
+    ]);
+    const findAllAndCountSpy = vi
+      .spyOn(ConversationSubgroup, 'findAllAndCount')
+      .mockResolvedValueOnce({ results: [], totalCount: 0 } as any);
     const conv = new Conversation(perspective as any, 'conv-1');
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
@@ -223,10 +240,14 @@ describe('Conversation.stats()', () => {
     const stats = await conv.stats();
 
     expect(stats.participants).toEqual(['did:test:alice', 'did:test:bob']);
+    findAllAndCountSpy.mockRestore();
   });
 
   it('returns zero subgroups when query returns empty', async () => {
     const perspective = createMockPerspective();
+    const findAllAndCountSpy = vi
+      .spyOn(ConversationSubgroup, 'findAllAndCount')
+      .mockResolvedValueOnce({ results: [], totalCount: 0 } as any);
     const conv = new Conversation(perspective as any, 'conv-1');
     conv.get = vi.fn().mockResolvedValue(undefined);
     conv.participants = [];
@@ -234,16 +255,20 @@ describe('Conversation.stats()', () => {
     const stats = await conv.stats();
     expect(stats.totalSubgroups).toBe(0);
     expect(stats.participants).toEqual([]);
+    findAllAndCountSpy.mockRestore();
   });
 
   it('handles query errors gracefully', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockRejectedValueOnce(new Error('SPARQL error'));
+    const findAllAndCountSpy = vi
+      .spyOn(ConversationSubgroup, 'findAllAndCount')
+      .mockRejectedValueOnce(new Error('modelQuery error'));
     const conv = new Conversation(perspective as any, 'conv-1');
 
     const stats = await conv.stats();
     expect(stats.totalSubgroups).toBe(0);
     expect(stats.participants).toEqual([]);
+    findAllAndCountSpy.mockRestore();
   });
 });
 

@@ -39,60 +39,37 @@ export default class SemanticRelationship extends Ad4mModel {
   @Property({ through: 'flux://has_relevance' })
   relevance: number; // 0 - 100
 
-  async itemEmbedding(itemId: string): Promise<number[]> {
-    try {
-      const sparqlQuery = `
-        SELECT ?embedding WHERE {
-          ?sr <flux://entry_type> <flux://has_semantic_relationship> .
-          ?sr <flux://has_expression> <${itemId}> .
-          ?sr <flux://has_tag> ?embeddingId .
-          ?embeddingId <flux://entry_type> <flux://has_embedding> .
-          ?embeddingId <flux://embedding> ?embedding .
-        }
-        LIMIT 1
-      `;
-
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
-      if (!sparqlResult?.[0]?.embedding) return [];
-
-      const embeddingExpression = await this.perspective.getExpression(sparqlResult[0].embedding);
-      return JSON.parse(embeddingExpression.data);
-    } catch (error) {
-      console.error('Error getting items embedding', error);
-      return [];
-    }
-  }
-
   /**
-   * Ad4mModel-shaped equivalent of {@link itemEmbedding}. Replaces a raw
-   * SPARQL join + N=1 follow-up `getExpression` with a single
-   * `findAll({ include })` round-trip; the hydrator returns the embedding
-   * vector inline because Embedding's `embedding` property is already a
-   * `@Property` on the Embedding model class.
+   * Fetch the embedding vector attached to a given expression.
    *
-   * Behavioural parity caveat: the raw-SPARQL path calls
-   * `perspective.getExpression()` on the language-resolved embedding URL,
-   * which fetches the actual vector array via the embedding-vector-language
-   * controller. The model-query hydrator does the same via the property's
-   * `resolveLanguage: 'literal'` machinery only if the Embedding model
-   * declares it; otherwise the model variant returns the raw target IRI
-   * and the caller still has to fetch. For now, the model variant returns
-   * the embedding URL (raw IRI) and a follow-up `getExpression` is still
-   * needed. See the bench harness for the side-by-side comparison.
+   * Converted to `findAll` + `include: { embeddingTag }` post-#846.  The
+   * polymorphic-on-same-predicate `@HasOne` for `embeddingTag` (alongside
+   * `topicTag` on the same `flux://has_tag` predicate) resolves to an
+   * Embedding instance only when the conformance filter matches the
+   * Embedding `@Flag` — verified working in wind tunnel S16
+   * (`include actually fires: yes` once SHACL is emitted correctly).
+   *
+   * `withMetadata: false` + `count: false` collapse the model_query
+   * overhead to ~2-3× of the raw SPARQL cost (vs ~5× without them at
+   * medium scale).  The follow-up `getExpression` to the embedding-vector
+   * language controller is unchanged — that data lives outside the
+   * perspective and can't be inlined into a SPARQL.
    */
-  async itemEmbeddingViaModel(itemId: string): Promise<number[]> {
+  async itemEmbedding(itemId: string): Promise<number[]> {
     try {
       const srs = await SemanticRelationship.findAll(this.perspective, {
         where: { expression: itemId },
-        include: { embeddingTag: true },
+        include: { embeddingTag: { withMetadata: false } },
         limit: 1,
+        withMetadata: false,
+        count: false,
       });
       const embeddingUrl = (srs[0] as any)?.embeddingTag?.embedding;
       if (!embeddingUrl) return [];
-      const expr = await this.perspective.getExpression(embeddingUrl);
-      return JSON.parse(expr.data);
+      const embeddingExpression = await this.perspective.getExpression(embeddingUrl);
+      return JSON.parse(embeddingExpression.data);
     } catch (error) {
-      console.error('Error getting item embedding via Ad4mModel:', error);
+      console.error('Error getting items embedding', error);
       return [];
     }
   }
