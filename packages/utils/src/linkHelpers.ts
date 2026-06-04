@@ -2,6 +2,7 @@ import { Ad4mClient, Link, LinkInput } from '@coasys/ad4m';
 import { LinkExpression, Literal } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType, PropertyMap, PredicateMap } from '@coasys/flux-types';
+import { unwrapLiteralValue } from './unwrapLiteralValue';
 
 const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, HAS_REPLY, ZOME } = community;
 
@@ -32,21 +33,10 @@ export function mapLiteralLinks(links: LinkExpression[] | undefined, map: Proper
     const link = links?.find((link) => link.data.predicate === predicate);
 
     if (link) {
-      let data;
-
-      if (link.data.target.startsWith('literal:string:')) {
-        data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith('literal:number:')) {
-        data = Literal.fromUrl(link.data.target).get();
-      } else if (link.data.target.startsWith('literal:json:')) {
-        data = Literal.fromUrl(link.data.target).get().data;
-      } else {
-        data = link.data.target;
-      }
-
+      const decoded = unwrapLiteralValue(link.data.target);
       return {
         ...acc,
-        [key]: data,
+        [key]: decoded ?? link.data.target,
       };
     }
     return acc;

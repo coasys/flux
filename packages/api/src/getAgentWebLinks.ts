@@ -1,5 +1,5 @@
-import { Ad4mClient, LinkExpression, Literal } from '@coasys/ad4m';
-import { mapLiteralLinks } from '@coasys/flux-utils';
+import { Ad4mClient, LinkExpression } from '@coasys/ad4m';
+import { mapLiteralLinks, unwrapLiteralValue } from '@coasys/flux-utils';
 import { profile } from '@coasys/flux-constants';
 import { WebLink } from '@coasys/flux-types';
 
@@ -26,7 +26,7 @@ export default async function getAgentWebLinks(did: string, client: Ad4mClient):
 
     return {
       ...ogData,
-      url: Literal.fromUrl(parentLink.data.target).get().data,
+      url: unwrapLiteralValue(parentLink.data.target) ?? parentLink.data.target,
       id: parentLink.data.target,
     } as WebLink;
   });

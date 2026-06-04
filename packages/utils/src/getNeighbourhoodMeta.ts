@@ -1,6 +1,7 @@
-import { Ad4mClient, LinkExpression, Literal } from '@coasys/ad4m';
+import { Ad4mClient, LinkExpression } from '@coasys/ad4m';
 import { NeighbourhoodMetaData } from '@coasys/flux-types';
 import { community } from '@coasys/flux-constants';
+import { unwrapLiteralValue } from './unwrapLiteralValue';
 
 const { DESCRIPTION, NAME, CREATOR, CREATED_AT } = community;
 
@@ -9,10 +10,12 @@ export function getMetaFromLinks(links: LinkExpression[]): NeighbourhoodMetaData
     (acc, link) => {
       const { predicate, target } = link.data;
       return {
-        name: predicate === NAME ? Literal.fromUrl(target).get().data : acc.name,
-        description: predicate === DESCRIPTION ? Literal.fromUrl(target).get().data : acc.description,
+        name: predicate === NAME ? unwrapLiteralValue(target) ?? acc.name : acc.name,
+        description: predicate === DESCRIPTION ? unwrapLiteralValue(target) ?? acc.description : acc.description,
         author: predicate === CREATOR ? target : acc.author,
-        timestamp: predicate === CREATED_AT ? (target.startsWith('literal:') ? Literal.fromUrl(target).get().data : target) : acc.timestamp,
+        timestamp: predicate === CREATED_AT
+          ? (target.startsWith('literal:') ? unwrapLiteralValue(target) ?? acc.timestamp : target)
+          : acc.timestamp,
       };
     },
     {
