@@ -1,4 +1,5 @@
 import { Model, Ad4mModel, Flag, HasMany, Property, Literal, parseLit } from '@coasys/ad4m';
+import type { AbortOptions } from '../shared/abort';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
@@ -46,7 +47,7 @@ export default class ConversationSubgroup extends Ad4mModel {
   @HasMany({ through: FLUX_PARTICIPANT })
   participants: string[] = [];
 
-  async stats(): Promise<{ totalItems: number; participants: string[] }> {
+  async stats(options?: AbortOptions): Promise<{ totalItems: number; participants: string[] }> {
     // find the total item count and the dids of participants in the subgroup
     try {
       // SPARQL migration
@@ -66,20 +67,21 @@ export default class ConversationSubgroup extends Ad4mModel {
       `;
 
       const [itemsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql<ItemIdBinding[]>(itemsQuery),
-        this.perspective.querySparql<DidBinding[]>(participantsQuery),
+        this.perspective.querySparql<ItemIdBinding[]>(itemsQuery, options),
+        this.perspective.querySparql<DidBinding[]>(participantsQuery, options),
       ]);
 
       const totalItems = itemsResult?.length || 0;
       const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
       return { totalItems, participants };
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting subgroup stats:', error);
       return { totalItems: 0, participants: [] };
     }
   }
 
-  async topics(): Promise<SynergyTopic[]> {
+  async topics(options?: AbortOptions): Promise<SynergyTopic[]> {
     // find the subgroups topics
     try {
       // SPARQL migration
@@ -93,7 +95,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery, options);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, { topicBase: string; topicName: string }>();
@@ -114,12 +116,13 @@ export default class ConversationSubgroup extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting subgroup topics:', error);
       return [];
     }
   }
 
-  async itemsData(): Promise<SynergyItem[]> {
+  async itemsData(options?: AbortOptions): Promise<SynergyItem[]> {
     // find the necissary data to render the subgroups items in timeline components
     try {
       // SPARQL migration
@@ -145,7 +148,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql<SubgroupItemBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<SubgroupItemBinding[]>(sparqlQuery, options);
 
       // Collect items — keep duplicate IDs so the view can detect and clean them up
       const items: SubgroupItem[] = [];
@@ -221,12 +224,13 @@ export default class ConversationSubgroup extends Ad4mModel {
         };
       });
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting subgroup items:', error);
       return [];
     }
   }
 
-  async topicsWithRelevance(): Promise<TopicWithRelevance[]> {
+  async topicsWithRelevance(options?: AbortOptions): Promise<TopicWithRelevance[]> {
     try {
       // SPARQL migration
       const sparqlQuery = `
@@ -240,7 +244,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql<TopicRelevanceBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicRelevanceBinding[]>(sparqlQuery, options);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, { topicBase: string; topicName: string; relevance: string }>();
@@ -261,6 +265,7 @@ export default class ConversationSubgroup extends Ad4mModel {
         relevance: parseInt(relevance, 10) || 0,
       }));
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting subgroup topics with relevance:', error);
       return [];
     }

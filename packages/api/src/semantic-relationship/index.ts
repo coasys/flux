@@ -1,5 +1,6 @@
 import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
+import type { AbortOptions } from '../shared/abort';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 const TYPE_MAP: Record<string, string> = {
@@ -22,7 +23,7 @@ export default class SemanticRelationship extends Ad4mModel {
   @Property({ through: 'flux://has_relevance' })
   relevance: number; // 0 - 100
 
-  async itemEmbedding(itemId: string): Promise<number[]> {
+  async itemEmbedding(itemId: string, options?: AbortOptions): Promise<number[]> {
     try {
       const sparqlQuery = `
         SELECT ?embedding WHERE {
@@ -35,18 +36,19 @@ export default class SemanticRelationship extends Ad4mModel {
         LIMIT 1
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
       if (!sparqlResult?.[0]?.embedding) return [];
 
       const embeddingExpression = await this.perspective.getExpression(sparqlResult[0].embedding);
       return JSON.parse(embeddingExpression.data);
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting items embedding', error);
       return [];
     }
   }
 
-  async allConversationEmbeddings(): Promise<SynergyMatch[]> {
+  async allConversationEmbeddings(options?: AbortOptions): Promise<SynergyMatch[]> {
     try {
       const sparqlQuery = `
         SELECT ?itemId ?embedding ?channelId ?channelName WHERE {
@@ -62,7 +64,7 @@ export default class SemanticRelationship extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       return Promise.all(
         (sparqlResult || []).map(async (binding: any) => {
@@ -77,12 +79,13 @@ export default class SemanticRelationship extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting all conversation embedding', error);
       return [];
     }
   }
 
-  async allSubgroupEmbeddings(): Promise<SynergyMatch[]> {
+  async allSubgroupEmbeddings(options?: AbortOptions): Promise<SynergyMatch[]> {
     try {
       const sparqlQuery = `
         SELECT ?itemId ?embedding ?channelId ?channelName WHERE {
@@ -100,7 +103,7 @@ export default class SemanticRelationship extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       return Promise.all(
         (sparqlResult || []).map(async (binding: any) => {
@@ -115,12 +118,13 @@ export default class SemanticRelationship extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting all subgroup embedding', error);
       return [];
     }
   }
 
-  async allItemEmbeddings(): Promise<SynergyMatch[]> {
+  async allItemEmbeddings(options?: AbortOptions): Promise<SynergyMatch[]> {
     try {
       const sparqlQuery = `
         SELECT ?itemId ?type ?embedding ?channelId ?channelName WHERE {
@@ -137,7 +141,7 @@ export default class SemanticRelationship extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       const typeNameMap: Record<string, string> = {
         'flux://has_message': 'Message',
@@ -158,12 +162,13 @@ export default class SemanticRelationship extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting all item embedding', error);
       return [];
     }
   }
 
-  async allItemEmbeddingsByType(itemType: string): Promise<SynergyMatch[]> {
+  async allItemEmbeddingsByType(itemType: string, options?: AbortOptions): Promise<SynergyMatch[]> {
     // itemType is plural like "Messages", "Posts", "Tasks"
     const singular = itemType.slice(0, -1); // "Message", "Post", "Task"
     const typeUri = TYPE_MAP[singular];
@@ -187,7 +192,7 @@ export default class SemanticRelationship extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       return Promise.all(
         (sparqlResult || []).map(async (binding: any) => {
@@ -202,6 +207,7 @@ export default class SemanticRelationship extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting item embeddings by type', error);
       return [];
     }

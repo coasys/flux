@@ -1,4 +1,5 @@
 import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
+import type { AbortOptions } from '../shared/abort';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
@@ -95,7 +96,7 @@ export class Channel extends Ad4mModel {
   @HasMany(() => Post)
   posts: Post[] = [];
 
-  async allItems(): Promise<SynergyItem[]> {
+  async allItems(options?: AbortOptions): Promise<SynergyItem[]> {
     // Get all items (messages, posts, tasks) in the channel
     try {
       const sparqlQuery = `
@@ -115,7 +116,7 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(sparqlQuery, options);
 
       const mapped = (sparqlResult || []).map((binding) => {
         let text = '';
@@ -145,12 +146,14 @@ export class Channel extends Ad4mModel {
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
       return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
+      // Re-throw AbortError so callers can distinguish cancellation from real failures
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting all channel items:', error);
       return [];
     }
   }
 
-  async unprocessedItems(): Promise<SynergyItem[]> {
+  async unprocessedItems(options?: AbortOptions): Promise<SynergyItem[]> {
     // Get all unprocessed items in the channel using set-difference approach
     // instead of FILTER NOT EXISTS (which is O(N²) in Oxigraph)
     try {
@@ -182,8 +185,8 @@ export class Channel extends Ad4mModel {
       // an item to appear in allItems but not processedSet (or vice-versa).
       // The final VALUES query re-verifies channel membership to mitigate this.
       const [allItemsResult, processedResult] = await Promise.all([
-        this.perspective.querySparql<IdBinding[]>(allItemsQuery),
-        this.perspective.querySparql<IdBinding[]>(processedQuery),
+        this.perspective.querySparql<IdBinding[]>(allItemsQuery, options),
+        this.perspective.querySparql<IdBinding[]>(processedQuery, options),
       ]);
 
       const processedSet = new Set((processedResult || []).map((r) => r.id));
@@ -213,7 +216,7 @@ export class Channel extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(dataQuery);
+      const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(dataQuery, options);
 
       // Deduplicate by id
       const itemMap = new Map<string, ChannelItemBinding>();
@@ -251,12 +254,13 @@ export class Channel extends Ad4mModel {
       // Re-sort by effective timestamp since transcriptStart may differ from link timestamp
       return mapped.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting channel items:', error);
       return [];
     }
   }
 
-  async totalItemCount(): Promise<number> {
+  async totalItemCount(options?: AbortOptions): Promise<number> {
     // Find the total number of items in the channel
     try {
       // SPARQL migration
@@ -268,9 +272,10 @@ export class Channel extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql<CountBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<CountBinding[]>(sparqlQuery, options);
       return parseSparqlCount(sparqlResult);
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting total item count:', error);
       return 0;
     }
@@ -289,6 +294,7 @@ export class Channel extends Ad4mModel {
   static async recentConversations(
     perspective: PerspectiveProxy,
     limit: number = 20,
+    options?: AbortOptions,
   ): Promise<{ channelId: string; conversationId?: string; lastActivity?: string }[]> {
     // Step 1: Find conversation channels + their conversation child (fast, no reifier joins)
     const sparql = `
@@ -303,7 +309,7 @@ export class Channel extends Ad4mModel {
     `;
 
     try {
-      const results = await perspective.querySparql<RecentConversationBinding[]>(sparql);
+      const results = await perspective.querySparql<RecentConversationBinding[]>(sparql, options);
 
       // Filter to only conversation channels and dedup
       const channelMap = new Map<string, { channelId: string; conversationId?: string; lastActivity?: string }>();
@@ -326,6 +332,7 @@ export class Channel extends Ad4mModel {
         Array.from(channelMap.entries()).map(async ([channelId, entry]) => {
           const links = await perspective.get(
             new LinkQuery({ source: channelId, predicate: 'ad4m://has_child' }),
+            options,
           );
           // Find the most recent link timestamp
           let latest = '';
@@ -342,6 +349,7 @@ export class Channel extends Ad4mModel {
         .slice(0, limit);
       return sorted;
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error in Channel.recentConversations():', error);
       return [];
     }
@@ -353,6 +361,7 @@ export class Channel extends Ad4mModel {
    */
   static async pinnedConversations(
     perspective: PerspectiveProxy,
+    options?: AbortOptions,
   ): Promise<{ channelId: string; conversationId?: string }[]> {
     const sparql = `
       SELECT ?channelId ?conversationId WHERE {
@@ -367,7 +376,7 @@ export class Channel extends Ad4mModel {
     `;
 
     try {
-      const results = await perspective.querySparql<PinnedConversationBinding[]>(sparql);
+      const results = await perspective.querySparql<PinnedConversationBinding[]>(sparql, options);
       // Deduplicate by channelId
       const seen = new Map<string, { channelId: string; conversationId?: string }>();
       for (const r of results || []) {
@@ -380,6 +389,7 @@ export class Channel extends Ad4mModel {
       }
       return Array.from(seen.values());
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error in Channel.pinnedConversations():', error);
       return [];
     }
