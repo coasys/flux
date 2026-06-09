@@ -134,7 +134,14 @@ export class SfuManager {
   /** Index into knownParticipantDids for correlating tracks to DIDs */
   private trackDidIndex: number = 0;
 
-  constructor(neighbourhood: any, roomId: string, agentDid: string, neighbourhoodUrl?: string, iceConfig?: SfuIceConfig) {
+  constructor(
+    neighbourhood: any,
+    roomId: string,
+    agentDid: string,
+    neighbourhoodUrl?: string,
+    iceConfig?: SfuIceConfig,
+    sfuConfig?: SfuConfig,
+  ) {
     this.neighbourhood = neighbourhood;
     this.neighbourhoodUrl = neighbourhoodUrl || '';
     this.roomId = roomId;
@@ -152,16 +159,30 @@ export class SfuManager {
       knownParticipantDids: [],
     };
 
-    // Build ICE servers from config or use defaults
-    const servers: RTCIceServer[] = [];
-    if (iceConfig?.stun) {
-      for (const url of iceConfig.stun) {
-        servers.push({ urls: url });
+    // Resolution order for ICE servers:
+    //   1. `sfuConfig.iceServers` — authoritative when set on the
+    //      neighbourhood's SfuConfig.  Production path: the host app
+    //      rotates TURN creds server-side and every peer picks them up
+    //      without a redeploy.
+    //   2. `iceConfig` parameter — legacy override used by tests.
+    //   3. `DEFAULT_ICE_SERVERS` — public STUN fallback.
+    let servers: RTCIceServer[] = [];
+    if (sfuConfig?.iceServers && sfuConfig.iceServers.length > 0) {
+      servers = sfuConfig.iceServers.map((s) => ({
+        urls: s.urls,
+        username: s.username,
+        credential: s.credential,
+      }));
+    } else if (iceConfig) {
+      if (iceConfig.stun) {
+        for (const url of iceConfig.stun) {
+          servers.push({ urls: url });
+        }
       }
-    }
-    if (iceConfig?.turn) {
-      for (const t of iceConfig.turn) {
-        servers.push({ urls: t.urls, username: t.username, credential: t.credential });
+      if (iceConfig.turn) {
+        for (const t of iceConfig.turn) {
+          servers.push({ urls: t.urls, username: t.username, credential: t.credential });
+        }
       }
     }
     this.iceServers = servers.length > 0 ? servers : DEFAULT_ICE_SERVERS;
