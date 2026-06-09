@@ -133,6 +133,12 @@ export class SfuManager {
   private streamToParticipant: Map<string, string> = new Map();
   /** Index into knownParticipantDids for correlating tracks to DIDs */
   private trackDidIndex: number = 0;
+  /**
+   * Unsubscribe handle for the server-pushed renegotiation events_ws
+   * subscription.  Set in `join` after `subscribeCallRenegotiationOffer`,
+   * cleared in `leave` so we don't leak listeners across room cycles.
+   */
+  private renegotiationUnsubscribe: (() => void) | null = null;
 
   constructor(
     neighbourhood: any,
@@ -376,30 +382,56 @@ export class SfuManager {
     const answer = JSON.parse(session.sdpAnswer);
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
 
-    // Subscribe to server-initiated renegotiation offers (for new peers joining)
-    this.neighbourhood.subscribeCallRenegotiationOffer(this.agentDid, async (event: { reason: string; sdpOffer: string; roomId: string }) => {
-      console.info(`SFU: received renegotiation offer (reason: ${event.reason})`);
-      const currentPc = this.state.peerConnection;
-      if (!currentPc) {
-        console.warn("SFU: no peer connection for renegotiation");
-        return;
-      }
-      try {
-        const offerSdp = JSON.parse(event.sdpOffer);
-        await currentPc.setRemoteDescription(new RTCSessionDescription(offerSdp));
-        const renegAnswer = await currentPc.createAnswer();
-        await currentPc.setLocalDescription(renegAnswer);
-        const answerJson = JSON.stringify(currentPc.localDescription);
-        await this.neighbourhood.callAnswerServerOffer(this.neighbourhoodUrl, event.roomId, answerJson);
-        console.info("SFU: renegotiation answer sent successfully");
-      } catch (err) {
-        console.error("SFU: renegotiation failed:", err);
-        this.emit("error", err);
-      }
-    });
+    // Subscribe to server-initiated renegotiation offers — the SFU
+    // pushes a fresh SDP offer whenever its outbound track set
+    // changes for our DID (e.g. another peer joined the room).  We
+    // apply the offer, generate an answer, and post it back via
+    // `sfu.callAnswerServerOffer`.  The payload shape is defined by
+    // `crate::sfu::types::SfuCallRenegotiationOffer` (camelCase).
+    this.renegotiationUnsubscribe = this.neighbourhood.subscribeCallRenegotiationOffer(
+      this.agentDid,
+      async (event: {
+        targetDid: string
+        neighbourhoodUrl: string
+        roomName: string
+        sdpOffer: string
+      }) => {
+        // Double-check filtering — defensive against any future
+        // events-WS fanout regression.
+        if (event.neighbourhoodUrl !== this.neighbourhoodUrl) return
+        if (event.roomName !== this.roomId) return
+
+        console.info(`SFU: received renegotiation offer for ${event.roomName}`)
+        const currentPc = this.state.peerConnection
+        if (!currentPc) {
+          console.warn("SFU: no peer connection for renegotiation")
+          return
+        }
+        try {
+          const offerSdp = JSON.parse(event.sdpOffer)
+          await currentPc.setRemoteDescription(new RTCSessionDescription(offerSdp))
+          const renegAnswer = await currentPc.createAnswer()
+          await currentPc.setLocalDescription(renegAnswer)
+          const answerJson = JSON.stringify(currentPc.localDescription)
+          await this.neighbourhood.callAnswerServerOffer(
+            this.neighbourhoodUrl,
+            event.roomName,
+            answerJson,
+          )
+          console.info("SFU: renegotiation answer sent successfully")
+        } catch (err) {
+          console.error("SFU: renegotiation failed:", err)
+          this.emit("error", err)
+        }
+      },
+    )
   }
 
   async leave(): Promise<void> {
+    if (this.renegotiationUnsubscribe) {
+      try { this.renegotiationUnsubscribe(); } catch { /* swallow */ }
+      this.renegotiationUnsubscribe = null;
+    }
     if (this.state.peerConnection) {
       this.state.peerConnection.close();
       this.state.peerConnection = null;
