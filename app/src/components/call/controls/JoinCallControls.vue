@@ -7,20 +7,21 @@
     <j-button
       variant="primary"
       size="lg"
-      :disabled="audioDisabled"
+      :disabled="streamLoading"
       :loading="joiningCall"
       @click="webrtcStore.joinRoom"
     >
       Join room!
     </j-button>
 
-    <div v-if="!streamLoading && audioDisabled" class="audio-disabled-warning">
+    <div v-if="!streamLoading && audioUnavailable" class="audio-disabled-warning">
       <j-flex gap="300" a="center">
         <j-icon name="mic-mute" size="md" color="warning-500" />
-        <j-text size="500" nomargin color="warning-500"> Audio is disabled </j-text>
+        <j-text size="500" nomargin color="warning-500"> No microphone available </j-text>
       </j-flex>
       <j-text size="400" nomargin color="warning-500">
-        Please enable a microphone in the browser to join the call.
+        You can still join and listen — enable a microphone in the browser
+        if you'd like to speak.
       </j-text>
     </div>
   </div>
@@ -41,8 +42,11 @@ const videoDisabled = computed(() => {
   return !stream.value || streamLoading.value;
 });
 
-const audioDisabled = computed(() => {
-  if (!stream.value || streamLoading.value || typeof stream.value.getAudioTracks !== 'function') return true;
+// Informational only — never gates the join button. Mic-less users can
+// join as listeners; the warning lets them know they won't be heard until
+// they grant mic access.
+const audioUnavailable = computed(() => {
+  if (!stream.value || typeof stream.value.getAudioTracks !== 'function') return true;
   return stream.value.getAudioTracks().length === 0;
 });
 </script>

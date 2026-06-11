@@ -73,8 +73,51 @@ export const useMediaDevicesStore = defineStore(
         const audioConstraints = audioEnabled.value ? { deviceId: audioDeviceId } : false;
         const videoConstraints = videoEnabled.value ? { ...videoDimensions, deviceId: videoDeviceId } : false;
 
-        // Create the stream
-        stream.value = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: videoConstraints });
+        // Always request what the user actually has enabled first.
+        try {
+          stream.value = await navigator.mediaDevices.getUserMedia({
+            audio: audioConstraints,
+            video: videoConstraints,
+          });
+        } catch (firstErr) {
+          // Mic is the most common blocker (browser denial, no device, locked
+          // by another app). If audio was requested and failed, retry without
+          // it so the user can still join the call as a listener / camera-only
+          // participant rather than being stuck on the join screen.
+          //
+          // We only fall back when audio was the offending constraint (i.e.
+          // audioConstraints was truthy). If video was requested and that's
+          // what failed, the existing error path still applies.
+          const isMediaError =
+            firstErr instanceof DOMException &&
+            ['NotAllowedError', 'NotFoundError', 'NotReadableError', 'OverconstrainedError'].includes(firstErr.name);
+
+          if (audioConstraints && isMediaError) {
+            console.warn('Mic unavailable, falling back to no-audio stream:', firstErr);
+            try {
+              stream.value = videoConstraints
+                ? await navigator.mediaDevices.getUserMedia({ audio: false, video: videoConstraints })
+                : null;
+              // Reflect the fallback in the audio toggle so the UI stays
+              // consistent. The user can re-enable later via the device
+              // settings if they grant mic access.
+              audioEnabled.value = false;
+              mediaPermissions.value.microphone.granted = false;
+            } catch (secondErr) {
+              // Even the video-only / no-stream fallback failed (e.g. user
+              // explicitly asked for video and that's also denied, or no
+              // devices at all). Surface a null stream — the join button now
+              // allows joining as a passive listener, so the call can still
+              // proceed without any local media.
+              console.warn('Fallback stream also failed, joining without any local media:', secondErr);
+              stream.value = null;
+              audioEnabled.value = false;
+              videoEnabled.value = false;
+            }
+          } else {
+            throw firstErr;
+          }
+        }
 
         // Update request states
         microphone.requested = microphone.requested || audioEnabled.value;
