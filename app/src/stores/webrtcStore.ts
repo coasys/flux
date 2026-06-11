@@ -280,10 +280,31 @@ export const useWebrtcStore = defineStore(
         const peerConnection = peerConnections.value.get(did);
         if (!peerConnection) return;
 
-        // Check if we already have the stream & update or add accordingly
+        // Append (don't overwrite) — a peer that's sharing their screen
+        // sends both the camera stream and the screenshare stream, and the
+        // old `streams = [stream]` shape silently dropped the camera tile
+        // the moment the screenshare track arrived. New streams append;
+        // tracks added to existing streams update in place.
         const existingStreamIndex = peerConnection.streams.findIndex((s) => s.id === stream.id);
         if (existingStreamIndex >= 0) peerConnection.streams[existingStreamIndex] = stream;
-        else peerConnection.streams = [stream];
+        else peerConnection.streams.push(stream);
+
+        // Drop the stream from this peer's list as soon as all of its tracks
+        // end — guards against stale screenshare tiles after the sender
+        // stops sharing.  We can't rely on the peer connection's own
+        // sender-removal because that fires before the receiving track ends.
+        const onTrackEnded = () => {
+          if (track.readyState !== 'ended') return;
+          const pc = peerConnections.value.get(did);
+          if (!pc) return;
+          const streamRef = pc.streams.find((s) => s.id === stream.id);
+          if (!streamRef) return;
+          const liveTracks = streamRef.getTracks().filter((t) => t.readyState !== 'ended');
+          if (liveTracks.length === 0) {
+            pc.streams = pc.streams.filter((s) => s.id !== stream.id);
+          }
+        };
+        track.addEventListener('ended', onTrackEnded);
 
         // Mark the stream as ready if not already set
         if (!peerConnection.streamReady) peerConnection.streamReady = true;
@@ -419,6 +440,27 @@ export const useWebrtcStore = defineStore(
           }
         } catch (error) {
           console.error(`❌ Failed to remove ${trackToRemove.kind} track for peer ${did}:`, error);
+        }
+      }
+    }
+
+    // Adds a screen-share track to every peer connection as part of a
+    // dedicated MediaStream (rather than replacing the camera sender).
+    // The receiving side's `peer.on('track')` then fires with a distinct
+    // stream id and the per-peer streams array grows by one entry — the
+    // remote UI gets a separate tile for the screenshare while keeping
+    // the camera tile.
+    async function addScreenShareTrack(track: MediaStreamTrack, screenShareStream: MediaStream) {
+      if (!inCall.value) return;
+
+      console.log('🖥️ Adding screen-share track for all peers');
+
+      for (const [did, peerConnection] of peerConnections.value) {
+        try {
+          peerConnection.peer.addTrack(track, screenShareStream);
+          console.log(`✅ Added screen-share track for peer ${did}`);
+        } catch (error) {
+          console.error(`❌ Failed to add screen-share track for peer ${did}:`, error);
         }
       }
     }
@@ -782,6 +824,7 @@ export const useWebrtcStore = defineStore(
       disconnectedAgents,
       hasCopiedLink,
       addTrack,
+      addScreenShareTrack,
       removeTrack,
       replaceAudioTrack,
       replaceVideoTrack,

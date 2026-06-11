@@ -1,8 +1,19 @@
 <template>
   <div
     class="video-grid"
-    :class="[selectedVideoLayout.class, { mobile: isMobile, 'landscape-mobile': isLandscapeMobile }]"
-    :style="{ '--number-of-columns': numberOfColumns }"
+    :class="[
+      selectedVideoLayout.class,
+      {
+        mobile: isMobile,
+        'landscape-mobile': isLandscapeMobile,
+        fullscreen: callWindowFullscreen,
+      },
+    ]"
+    :style="{
+      '--number-of-columns': numberOfColumns,
+      '--number-of-rows': numberOfRows,
+      '--last-row-tiles': lastRowTiles,
+    }"
   >
     <!-- Focused layout -->
     <template v-if="selectedVideoLayout.label === 'Focused'">
@@ -11,7 +22,7 @@
         <div :class="isLandscapeMobile ? 'side-column' : 'bottom-row'">
           <MediaPlayer
             v-for="participant in unfocusedParticipants"
-            :key="`participant-${participant.did}`"
+            :key="`participant-${participantKey(participant)}`"
             :did="participant.did"
             :isMe="participant.isMe"
             :inCall="participant.inCall"
@@ -22,7 +33,7 @@
             :screenShareState="participant.screenShareState"
             :warning="participant.warning"
             :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
-            @click="focusOnVideo(participant.did)"
+            @click="focusOnVideo(participantKey(participant))"
           />
         </div>
       </template>
@@ -30,7 +41,7 @@
       <!-- Main focused video -->
       <MediaPlayer
         v-if="focusedParticipant"
-        :key="`participant-${focusedParticipant.did}`"
+        :key="`participant-${participantKey(focusedParticipant)}`"
         :did="focusedParticipant.did"
         :isMe="focusedParticipant.isMe"
         :inCall="focusedParticipant.inCall"
@@ -48,8 +59,8 @@
     <!-- Other layouts (fixed aspect ratio, flexible) -->
     <template v-else>
       <MediaPlayer
-        v-for="participant in allParticipants"
-        :key="`participant-${participant.did}`"
+        v-for="(participant, index) in allParticipants"
+        :key="`participant-${participantKey(participant)}`"
         :did="participant.did"
         :isMe="participant.isMe"
         :inCall="participant.inCall"
@@ -60,8 +71,12 @@
         :screenShareState="participant.screenShareState"
         :warning="participant.warning"
         :emojis="callEmojis.filter((emoji) => emoji.author === participant.did)"
-        @click="focusOnVideo(participant.did)"
-        :class="{ 'single-participant': unfocusedParticipants.length < 2 }"
+        @click="focusOnVideo(participantKey(participant))"
+        :class="{
+          'single-participant': unfocusedParticipants.length < 2,
+          'last-row-center': isLastRowOffsetTile(index),
+        }"
+        :style="lastRowStyleFor(index)"
       />
     </template>
   </div>
@@ -71,13 +86,13 @@
 import MediaPlayer from '@/components/media-player/MediaPlayer.vue';
 import { useWebrtcStore, useUiStore } from '@/stores';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useVideoLayout } from '../composables/useVideoLayout';
 
 const webrtcStore = useWebrtcStore();
 const uiStore = useUiStore();
 const { callEmojis } = storeToRefs(webrtcStore);
-const { isMobile, isLandscapeMobile } = storeToRefs(uiStore);
+const { isMobile, isLandscapeMobile, callWindowFullscreen } = storeToRefs(uiStore);
 
 const {
   selectedVideoLayout,
@@ -87,13 +102,56 @@ const {
   unfocusedParticipants,
   focusOnVideo,
   closeFocusedVideoLayout,
+  participantKey,
 } = useVideoLayout();
+
+// Centring the trailing row when it doesn't fill all columns means we have
+// to know two things at template time: how many rows the grid will use
+// (so the auto-fit CSS can divide remaining height evenly) and how many
+// tiles land in that final row (so we can shift them inward via
+// `grid-column-start`).
+const numberOfRows = computed(() => {
+  const total = allParticipants.value.length;
+  const cols = numberOfColumns.value;
+  if (total === 0 || cols <= 0) return 1;
+  return Math.ceil(total / cols);
+});
+
+const lastRowTiles = computed(() => {
+  const total = allParticipants.value.length;
+  const cols = numberOfColumns.value;
+  if (total === 0 || cols <= 0) return 0;
+  const remainder = total % cols;
+  return remainder === 0 ? cols : remainder;
+});
+
+const firstTileInLastRowIndex = computed(() => {
+  if (lastRowTiles.value === numberOfColumns.value) return -1;
+  return allParticipants.value.length - lastRowTiles.value;
+});
+
+function isLastRowOffsetTile(index: number): boolean {
+  // Only the very first tile of an incomplete trailing row needs an
+  // explicit column offset; the others fall into the next grid cell
+  // automatically once that first tile is shifted.
+  return index === firstTileInLastRowIndex.value;
+}
+
+function lastRowStyleFor(index: number): Record<string, string> | undefined {
+  if (!isLastRowOffsetTile(index)) return undefined;
+  // Centre the partial row by leaving `(cols - tiles) / 2` empty columns to
+  // its left.  Using `grid-column-start` is enough — subsequent tiles flow
+  // naturally and the trailing row reads as visually centred.
+  const offset = Math.floor((numberOfColumns.value - lastRowTiles.value) / 2);
+  if (offset <= 0) return undefined;
+  return { 'grid-column-start': String(offset + 1) };
+}
 
 // Automatically focus on the first participant when switching to landscape mobile in focused layout
 watch(
   isLandscapeMobile,
   (newVal) => {
-    if (newVal && focusedParticipant.value) focusOnVideo(focusedParticipant.value.did);
+    if (newVal && focusedParticipant.value) focusOnVideo(participantKey(focusedParticipant.value));
   },
   { immediate: true },
 );
@@ -136,6 +194,31 @@ watch(
 
   &:has(.single-participant) {
     justify-items: center;
+  }
+
+  // Fullscreen / expanded grids should make every tile fit on screen
+  // instead of overflowing.  Switch from `min-content` rows to N equal
+  // rows that share the available height, and cap each tile's width by
+  // its 16/9 aspect ratio so they don't stretch into bands when the
+  // available height is the tighter axis.
+  &.fullscreen {
+    height: 100%;
+    overflow: hidden;
+    grid-auto-rows: unset;
+    grid-template-rows: repeat(var(--number-of-rows), 1fr);
+    justify-content: center;
+
+    > div {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      max-width: 100%;
+      // Preserve 16/9: when height is the limiting axis, `min()` clamps
+      // width so tiles don't get letterboxed unevenly within their grid cell.
+      // (CSS aspect-ratio still applies — `min()` is the upper bound.)
+      align-self: center;
+      justify-self: center;
+    }
   }
 
   &.flexible {

@@ -71,6 +71,22 @@
       </j-button>
     </j-tooltip>
 
+    <j-tooltip
+      v-if="!isMobile && inCall"
+      placement="top"
+      :title="selfViewVisible ? 'Hide my video' : 'Show my video'"
+    >
+      <j-button
+        :variant="selfViewVisible ? '' : 'primary'"
+        @click="uiStore.toggleSelfViewVisible"
+        square
+        circle
+        :size="isMobile ? 'md' : 'lg'"
+      >
+        <j-icon :name="selfViewVisible ? 'eye-slash' : 'eye'" :size="isMobile ? 'sm' : 'md'" />
+      </j-button>
+    </j-tooltip>
+
     <j-popover v-if="!isMobile" ref="videoLayoutPopover" placement="top">
       <j-tooltip slot="trigger" placement="top" title="Video layout options">
         <j-button variant="transparent" square circle :disabled="!inCall" :size="isMobile ? 'md' : 'lg'">
@@ -153,7 +169,7 @@ const modalStore = useModalStore();
 const aiStore = useAiStore();
 
 const { me } = storeToRefs(appStore);
-const { callWindowFullscreen, isMobile, isLandscapeMobile } = storeToRefs(uiStore);
+const { callWindowFullscreen, isMobile, isLandscapeMobile, selfViewVisible } = storeToRefs(uiStore);
 const { mediaSettings, availableDevices } = storeToRefs(mediaDeviceStore);
 const { transcriptionEnabled } = storeToRefs(aiStore);
 const { inCall, hasCopiedLink } = storeToRefs(webrtcStore);
