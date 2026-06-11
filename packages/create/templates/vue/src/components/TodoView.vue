@@ -70,20 +70,34 @@ async function loadTodos() {
   todos.value = items;
 }
 
+// Targeted SPARQL subscription: fires only when the set of `ad4m://has_child`
+// links from THIS source changes, instead of waking on every link event in
+// the perspective.  Mirrors the pattern used across the Flux app and views.
+let todoLinksSub: { dispose: () => void } | null = null;
+let unmounted = false;
+
 onMounted(async () => {
   await perspective.ensureSDNASubjectClass(Todo);
   loadTodos();
-  perspective.addListener('link-added', handleLinkAdded);
+  try {
+    const sub = await perspective.subscribeQuery(
+      `SELECT ?id WHERE { <${source}> <ad4m://has_child> ?id . }`,
+    );
+    if (unmounted) {
+      sub.dispose();
+      return;
+    }
+    todoLinksSub = sub;
+    sub.onResult(() => loadTodos());
+  } catch (error) {
+    console.error('Failed to subscribe to todo links:', error);
+  }
 });
 
 onUnmounted(() => {
-  perspective.removeListener('link-added', handleLinkAdded);
+  unmounted = true;
+  todoLinksSub?.dispose();
 });
-
-function handleLinkAdded(link: any) {
-  if (link.data?.source === source && link.data?.predicate === 'ad4m://has_child') loadTodos();
-  return null;
-}
 
 const createTodo = async () => {
   const todo = await Todo.create(perspective, { title: title.value });
