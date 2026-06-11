@@ -517,9 +517,27 @@ export async function createCommunityService(): Promise<CommunityService> {
   }
   perspective.addListener('link-added', handleParticipantTracking);
 
+  // Refetch the members list whenever the signalling service learns about a
+  // DID we don't already have in `members`. The signalling service tracks
+  // every agent that broadcasts a heartbeat (including their "first-broadcast"
+  // on join), so this catches new joiners automatically — without polling
+  // and without waiting for the modal to remount.
+  const membersDidSet = computed(() => new Set(members.value.map((m) => m.did)));
+  const stopMembersWatcher = signallingService
+    ? watch(
+        () => Object.keys(signallingService.agents.value),
+        (signallingDids) => {
+          if (membersLoading.value) return;
+          const hasNew = signallingDids.some((did) => did && !membersDidSet.value.has(did));
+          if (hasNew) getMembers();
+        },
+      )
+    : null;
+
   // Cleanup function to remove all listeners
   function cleanup() {
     perspective.removeListener('link-added', handleParticipantTracking);
+    if (stopMembersWatcher) stopMembersWatcher();
   }
 
   getMembers();
