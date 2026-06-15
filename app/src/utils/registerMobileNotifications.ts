@@ -3,14 +3,19 @@ import { Capacitor } from '@capacitor/core';
 import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } from '@capacitor/push-notifications';
 import { Ad4mClient } from '@coasys/ad4m';
 
+import { publicAppUrl, publicIconUrl } from './publicUrl';
+
 const APP_NAME = 'Flux';
 const DESCRIPTION = 'Mobile push notifications for @-mentions';
 function notificationConfig(perspectiveIds: string[], webhookAuth: string, agentDid: string) {
   return {
     appName: APP_NAME,
     description: DESCRIPTION,
-    appUrl: window.location.origin,
-    appIconPath: window.location.origin + '/icon.png',
+    // `publicAppUrl` returns the public-facing HTTPS deployment, never
+    // `capacitor://localhost` — push-notification deep links must work
+    // when opened on any device. See utils/publicUrl.ts.
+    appUrl: publicAppUrl(),
+    appIconPath: publicIconUrl(),
     trigger: `SELECT ?source ?predicate ?target WHERE {
       ?source ?predicate ?target .
       FILTER(?predicate = <msg://body>)
