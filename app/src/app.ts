@@ -1,4 +1,5 @@
 import { useAppStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { publicAppUrl, publicIconUrl } from '@/utils/publicUrl';
 import { getAd4mConnect, isEmbedded } from '@coasys/ad4m-connect';
 import { createPinia, storeToRefs } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
@@ -56,8 +57,12 @@ vueApp.mount('#app');
       appInfo: {
         name: 'Flux',
         description: 'A Social Toolkit for the New Internet',
-        url: window.location.origin,
-        iconPath: window.location.origin + '/icon.png',
+        // See utils/publicUrl.ts — `window.location.origin` is
+        // `capacitor://localhost` in the mobile build, which the
+        // executor records on the capability token and surfaces in
+        // the connect UI. Use the public deployment URL instead.
+        url: publicAppUrl(),
+        iconPath: publicIconUrl(),
       },
       capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
       hosting: true,
