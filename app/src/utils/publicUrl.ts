@@ -69,7 +69,7 @@ export interface ResolveOptions {
  */
 export function resolvePublicAppUrl(opts: ResolveOptions): string {
   const env = opts.envPublicUrl?.trim();
-  if (env) {
+  if (env && isPublicOrigin(env)) {
     return stripTrailingSlash(env);
   }
   if (isPublicOrigin(opts.windowOrigin)) {
