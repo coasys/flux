@@ -3,7 +3,7 @@
     <video
       ref="videoElement"
       class="video"
-      :muted="isMe"
+      :muted="isMe || muteAudio"
       :style="{ opacity: showVideo ? 1 : 0, transform: flipVideo ? 'scaleX(-1)' : 'none' }"
       autoplay
       playsinline
@@ -82,6 +82,9 @@ export type MediaPlayerWarning = '' | 'mic-disabled' | 'camera-disabled';
 const props = defineProps({
   did: { type: String, default: '' },
   isMe: { type: Boolean, default: false },
+  // Mutes this tile's audio without hiding it — used to dedupe a person who is
+  // in the call from multiple sessions so their devices don't echo each other.
+  muteAudio: { type: Boolean, default: false },
   inCall: { type: Boolean, default: false },
   stream: { type: MediaStream, default: null },
   streamReady: { type: Boolean, default: false },

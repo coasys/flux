@@ -6,6 +6,7 @@ import { AgentData, AgentState, AgentStatus, ProcessingState, SignallingService 
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useTabCoordinator } from './useTabCoordinator';
+import { dedupeByDid, sessionKey } from '@/utils/callSessions';
 
 export const HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 const CLEANUP_INTERVAL = 10000; // 10 seconds between evaluations
@@ -27,6 +28,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   const { currentRoute } = storeToRefs(routeMemoryStore);
   const { aiEnabled } = storeToRefs(aiStore);
 
+  // This tab's stable session id (shared with the tab coordinator) — presence
+  // and WebRTC peers are keyed by `did::sessionId` so one agent can be present
+  // from multiple tabs/devices at once.
+  const mySessionId = tabCoordinator.tabId;
+  const mySessionKey = computed(() => sessionKey(me.value.did, mySessionId));
+
   const signalling = ref(false);
   const myState = ref<AgentState>({
     currentRoute: currentRoute.value,
@@ -37,6 +44,8 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     inCall: false,
     processing: null,
     lastUpdate: Date.now(),
+    did: me.value.did,
+    sessionId: mySessionId,
   });
 
   const sampleAgents = {
@@ -209,11 +218,23 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
         // Try to parse the agent's state and add it to the store
         const agentState = JSON.parse(source);
         if (typeof agentState === 'object' && agentState !== null) {
-          agents.value[author] = { ...agents.value[author], ...agentState, lastUpdate: Date.now() };
+          // Key by session so a single agent present from multiple tabs/devices
+          // gets one entry per session. `author` is the authoritative DID; the
+          // sessionId travels in the payload (defaults keep older clients working).
+          const senderSessionId = typeof agentState.sessionId === 'string' ? agentState.sessionId : author;
+          const key = sessionKey(author, senderSessionId);
+          agents.value[key] = {
+            ...agents.value[key],
+            ...agentState,
+            did: author,
+            sessionId: senderSessionId,
+            lastUpdate: Date.now(),
+          };
         }
       } catch (error) {
         console.error('Error parsing agent state:', error);
-        agents.value[author] = { ...agents.value[author], status: 'unknown', lastUpdate: Date.now() };
+        const key = sessionKey(author, author);
+        agents.value[key] = { ...agents.value[key], did: author, status: 'unknown', lastUpdate: Date.now() };
       }
     }
 
@@ -223,8 +244,10 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
 
   function broadcastState(target = ''): void {
     if (!signalling.value) return;
-    // Only the leader tab broadcasts to the network to prevent duplicate heartbeats
-    if (!tabCoordinator.isLeader.value) return;
+    // The leader tab broadcasts general presence (deduping idle tabs), and any
+    // in-call tab broadcasts its own session presence so a call can run from
+    // multiple tabs/devices independently of which tab is the leader.
+    if (!tabCoordinator.isLeader.value && !inCall.value) return;
 
     // Broadcast my state to the neighbourhood
     const newState = { source: JSON.stringify(myState.value), predicate: NEW_STATE, target };
@@ -236,12 +259,12 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   // TODO: better distinguish between manually set agent status and signalling health
   function evaluateAgents(): void {
     const now = Date.now();
-    Object.keys(agents.value).forEach((did) => {
-      // Skip if agent is me
-      if (did === me.value.did) return;
+    Object.keys(agents.value).forEach((key) => {
+      // Skip my own session
+      if (key === mySessionKey.value) return;
 
       // Mark agents as asleep or offline if their last update is older than the HEARTBEAT_INTERVAL
-      const agent = agents.value[did];
+      const agent = agents.value[key];
       const timeSinceLastUpdate = now - agent.lastUpdate;
 
       // Only evaluate if needed - don't change active to active
@@ -254,7 +277,7 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
       else newStatus = 'offline';
 
       // Only update if status changed
-      if (newStatus !== agent.status) agents.value[did] = { ...agent, status: newStatus };
+      if (newStatus !== agent.status) agents.value[key] = { ...agent, status: newStatus };
     });
   }
 
@@ -274,8 +297,8 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
         scheduleNextHeartbeat(HEARTBEAT_INTERVAL - timeSinceLastUpdate);
       else {
         // Broadcast my state to the neighbourhood and schedule the next heartbeat
-        myState.value = { ...myState.value, lastUpdate: Date.now() };
-        agents.value[me.value.did] = myState.value;
+        myState.value = { ...myState.value, did: me.value.did, lastUpdate: Date.now() };
+        agents.value[mySessionKey.value] = myState.value;
         broadcastState();
         scheduleNextHeartbeat(HEARTBEAT_INTERVAL);
       }
@@ -314,7 +337,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
       if (signalling.value) startBroadcasting();
     });
     unsubLoseLeadership = tabCoordinator.onLoseLeadership(() => {
-      stopBroadcasting();
+      // Keep broadcasting while in a call even after losing leadership — an
+      // in-call tab owns its own session presence regardless of the leader.
+      if (!inCall.value) stopBroadcasting();
     });
   }
 
@@ -322,8 +347,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     if (signalling.value) stopSignalling();
     signalling.value = true;
 
-    // Add my agent state to the agents map
-    agents.value[me.value.did] = myState.value;
+    // Add my agent state to the agents map (keyed by my session)
+    myState.value = { ...myState.value, did: me.value.did };
+    agents.value[mySessionKey.value] = myState.value;
 
     // All tabs listen for signals so the UI stays up-to-date
     neighbourhood.addSignalHandler(onSignal);
@@ -334,8 +360,9 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     // Subscribe (or re-subscribe) to leadership changes
     subscribeLeadership();
 
-    // Only the leader tab broadcasts heartbeats to the network
-    if (tabCoordinator.isLeader.value) startBroadcasting();
+    // The leader broadcasts general presence; an in-call tab broadcasts its own
+    // session presence even when it isn't the leader.
+    if (tabCoordinator.isLeader.value || inCall.value) startBroadcasting();
   }
 
   function stopSignalling(): void {
@@ -364,38 +391,48 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
   }
 
   function getAgentState(did: string): AgentState | undefined {
-    return agents.value[did];
+    // Presence is keyed by session; return the most recently updated session
+    // for the requested agent.
+    return Object.values(agents.value)
+      .filter((agent) => agent.did === did)
+      .sort((a, b) => b.lastUpdate - a.lastUpdate)[0];
   }
 
   function setProcessingState(newState: Partial<ProcessingState> | null): void {
     const processing = newState ? ({ ...myState.value.processing, ...newState } as ProcessingState) : null;
     myState.value = { ...myState.value, processing, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
+    agents.value[mySessionKey.value] = myState.value;
     broadcastState();
   }
 
   function updateMyState(key: string, value: any) {
     myState.value = { ...myState.value, [key]: value, lastUpdate: Date.now() };
-    agents.value[me.value.did] = myState.value;
+    agents.value[mySessionKey.value] = myState.value;
     broadcastState();
   }
 
+  // These getters drive "who is here / in the call" UI, so they present one
+  // entry per person — sessions of the same agent are deduped by DID.
   function getAgentsInChannel(channelId?: string) {
     return computed<AgentData[]>(() => {
-      return agentsWithProfiles.value.filter(
-        (agent) =>
-          !['offline', 'invisible'].includes(agent.status) &&
-          agent.currentRoute?.channelId === stripChannelPrefix(channelId || ''),
+      return dedupeByDid(
+        agentsWithProfiles.value.filter(
+          (agent) =>
+            !['offline', 'invisible'].includes(agent.status) &&
+            agent.currentRoute?.channelId === stripChannelPrefix(channelId || ''),
+        ),
       );
     });
   }
 
   function getAgentsInCall(channelId?: string) {
     return computed<AgentData[]>(() =>
-      agentsWithProfiles.value.filter(
-        (agent) =>
-          !['offline', 'invisible'].includes(agent.status) &&
-          agent.callRoute?.channelId === stripChannelPrefix(channelId || ''),
+      dedupeByDid(
+        agentsWithProfiles.value.filter(
+          (agent) =>
+            !['offline', 'invisible'].includes(agent.status) &&
+            agent.callRoute?.channelId === stripChannelPrefix(channelId || ''),
+        ),
       ),
     );
   }
@@ -406,16 +443,25 @@ export function useSignallingService(neighbourhood: NeighbourhoodProxy): Signall
     async ([newAgents]) => {
       if (!appStore.ad4mClient) return;
 
-      const agentEntries = Object.entries(newAgents);
+      const agentEntries = Object.values(newAgents);
       agentsWithProfiles.value = await Promise.all(
-        agentEntries.map(async ([did, agent]) => ({
+        agentEntries.map(async (agent) => ({
           ...agent,
-          ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
+          ...(await getCachedAgentProfile(agent.did, appStore.ad4mClient)),
         })),
       );
     },
     { deep: true, immediate: true },
   );
+
+  // Run the broadcast loop whenever we're in a call, even if we're not the
+  // leader, so this session's call presence reaches the network. When the call
+  // ends, a non-leader tab goes quiet again.
+  watch(inCall, (nowInCall) => {
+    if (!signalling.value) return;
+    if (nowInCall) startBroadcasting();
+    else if (!tabCoordinator.isLeader.value) stopBroadcasting();
+  });
 
   // Watch for state changes in the stores & broadcast updates to peers
   watch(currentRoute, (newCurrentRoute) => updateMyState('currentRoute', newCurrentRoute));
