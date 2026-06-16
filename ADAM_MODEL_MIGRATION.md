@@ -19,7 +19,8 @@ branch, then migrate Flux against the updated packages.
 | `@ReadOnly({ through, getter })`           | `@Property({ through, readOnly: true, getter })`           |
 | `writable: true`                           | remove (writable is now the default)                       |
 | `writable: false`                          | `readOnly: true`                                           |
-| `resolveLanguage: 'literal'`               | remove (now the implicit default)                          |
+| `resolveLanguage: 'literal'`               | remove entirely (`resolveLiteral: true` is now the default) |
+| `resolveLanguage: <languageAddress>`       | `resolveLiteral: false` (non-literal expression languages)  |
 | `entry.baseExpression`                     | `entry.id`                                                 |
 | `new Model(perspective, id, source)`       | `new Model(perspective, id)` (source arg removed)          |
 | `makeRandomPrologAtom(n)`                  | `makeRandomId(n)`                                          |

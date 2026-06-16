@@ -48,21 +48,18 @@ export default class Todo {
   @Property({
     through: 'rdf://title',
     writable: true,
-    resolveLanguage: 'literal',
   })
   title: string;
 
   @Property({
     through: 'rdf://description',
     writable: true,
-    resolveLanguage: 'literal',
   })
   desc: string;
 
   @Property({
     through: 'rdf://status',
     writable: true,
-    resolveLanguage: 'literal',
   })
   done: boolean;
 }

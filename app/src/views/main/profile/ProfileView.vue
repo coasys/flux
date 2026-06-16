@@ -120,7 +120,8 @@
 import { useAppStore, useModalStore, useThemeStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import Modals from '@/views/main/profile/modals/Modals.vue';
-import { EntanglementProof, LinkExpression, Literal } from '@coasys/ad4m';
+import { EntanglementProof, LinkExpression } from '@coasys/ad4m';
+import { unwrapLiteralValue } from '@coasys/flux-utils';
 import { getAgentWebLinks } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { computed, onBeforeMount, ref, watch } from 'vue';
@@ -230,7 +231,7 @@ async function removeProof(proof: EntanglementProof) {
         return (
           l.data.predicate === 'ad4m://entanglement_proof' &&
           l.data.target.startsWith('literal:') &&
-          Literal.fromUrl(l.data.target).get().data.deviceKey === proof.deviceKey
+          unwrapLiteralValue(l.data.target)?.deviceKey === proof.deviceKey
         );
       }) || [];
 

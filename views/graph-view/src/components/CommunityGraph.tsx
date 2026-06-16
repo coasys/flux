@@ -1,5 +1,6 @@
 import ForceGraph3D, { ForceGraph3DInstance } from '3d-force-graph';
-import { Literal, PerspectiveProxy } from '@coasys/ad4m';
+import { PerspectiveProxy } from '@coasys/ad4m';
+import { unwrapLiteralValue } from '@coasys/flux-utils';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import SpriteText from 'three-spritetext';
 import styles from '../App.module.css';
@@ -127,7 +128,7 @@ export default function CommunityOverview({ perspective, source }: { perspective
       graph.current = ForceGraph3D()(graphEl.current)
         .graphData({ nodes, links })
         .nodeLabel((node: any) => {
-          return node.id.startsWith('literal://') ? Literal.fromUrl(node.id).get().data : node.id;
+          return node.id.startsWith('literal:') ? unwrapLiteralValue(node.id) ?? node.id : node.id;
         })
         .backgroundColor('rgba(0,0,0,0)')
         .nodeAutoColorBy('group')

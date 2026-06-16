@@ -247,8 +247,8 @@ async function buildSHACLShape(
       writable: true,
     };
 
-    if (language) {
-      propShape.resolveLanguage = language;
+    if (language && language !== 'literal') {
+      propShape.resolveLiteral = false;
     }
 
     if (options.length > 0) {
