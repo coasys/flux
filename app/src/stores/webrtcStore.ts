@@ -5,6 +5,7 @@ import popWav from '@/assets/audio/pop.wav';
 import { HEARTBEAT_INTERVAL } from '@/composables/useSignallingService';
 import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
+import { dedupeByDid, sessionKey, shouldInitiate } from '@/utils/callSessions';
 import { PerspectiveExpression } from '@coasys/ad4m';
 import { getDefaultIceServers, IceServer } from '@coasys/flux-utils';
 import { AgentState, AgentStatus, CallHealth, Profile, RouteParams } from '@coasys/flux-types';
@@ -32,6 +33,9 @@ const MAX_RECONNECTION_ATTEMPTS = 3;
 export type MediaState = 'on' | 'off' | 'loading';
 export type PeerConnection = {
   did: string;
+  // The remote session this connection belongs to. A single agent (did) can be
+  // in the call from several sessions (tabs/devices), each its own peer.
+  sessionId: string;
   peer: SimplePeer.Instance;
   streams: MediaStream[];
   initiator: boolean;
@@ -42,6 +46,9 @@ export type PeerConnection = {
   loadingChecks: Map<string, NodeJS.Timeout>;
 };
 export type AgentWithProfile = AgentState & Profile;
+// A call participant at session granularity — `sessionKey` (`did::sessionId`)
+// is the unit peers and presence are keyed by.
+export type CallSession = AgentWithProfile & { sessionKey: string };
 export type CallEmoji = { id: string; author: string; emoji: string };
 
 export const useWebrtcStore = defineStore(
@@ -58,6 +65,12 @@ export const useWebrtcStore = defineStore(
 
     const tabCoordinator = useTabCoordinator();
 
+    // This tab/device's stable session id. Shared with the tab coordinator and
+    // the signalling service so the same agent can be in a call from several
+    // sessions at once, each tracked independently.
+    const mySessionId = tabCoordinator.tabId;
+    const mySessionKey = computed(() => sessionKey(me.value.did, mySessionId));
+
     const popSound = new Howl({ src: [popWav] });
     const guitarSound = new Howl({ src: [guitarWav] });
     const kissSound = new Howl({ src: [kissWav] });
@@ -66,7 +79,11 @@ export const useWebrtcStore = defineStore(
     const joiningCall = ref(false);
     const inCall = ref(false);
     const callRoute = ref<RouteParams>({});
-    const agentsInCall = ref<AgentWithProfile[]>([]);
+    // Every session in the call (one entry per tab/device). Drives peer
+    // connections and signalling.
+    const callSessions = ref<CallSession[]>([]);
+    // One entry per person, for identity UI (avatar groups, "N agents in call").
+    const agentsInCall = computed<AgentWithProfile[]>(() => dedupeByDid(callSessions.value));
     const callHealth = ref<CallHealth>('healthy');
     const callEmojis = ref<CallEmoji[]>([]);
     const peerConnections = ref<Map<string, PeerConnection>>(new Map());
@@ -92,6 +109,14 @@ export const useWebrtcStore = defineStore(
       signallingService.value?.sendSignal({ source, predicate, target: JSON.stringify([did]) });
     }
 
+    function signalSession(sessionId: string, signalData: any): void {
+      // WebRTC signalling is session-precise: it targets a specific session
+      // (so two sessions of the same agent negotiate separately) and carries
+      // our own session id so the receiver keys the peer by our session.
+      const source = JSON.stringify({ signal: signalData, fromSessionId: mySessionId });
+      signallingService.value?.sendSignal({ source, predicate: WEBRTC_SIGNAL, target: JSON.stringify([sessionId]) });
+    }
+
     function signalAgentsInCall(predicate: string, data: any): void {
       // Signals all agents currently in the call via the holochain signalling service
       const target = JSON.stringify(agentsInCall.value.map((agent) => agent.did));
@@ -113,8 +138,9 @@ export const useWebrtcStore = defineStore(
     function checkCallHealth(): void {
       // Check the last update time of each peer to determine if the call is healthy
       const now = Date.now();
-      const { connectionsLost, warnings } = agentsInCall.value.reduce(
+      const { connectionsLost, warnings } = callSessions.value.reduce(
         (health, agent) => {
+          if (agent.sessionKey === mySessionKey.value) return health;
           const timeSinceLastUpdate = now - agent.lastUpdate;
           if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL * 2) health.connectionsLost = true;
           else if (timeSinceLastUpdate > CALL_HEALTH_CHECK_INTERVAL) health.warnings = true;
@@ -178,14 +204,15 @@ export const useWebrtcStore = defineStore(
       peer.loadingChecks.set(mediaType, checkInterval);
     }
 
-    function createPeerConnection(did: string, initiator: boolean): SimplePeer.Instance {
-      console.log(`🌐 Creating peer connection for ${did} (initiator: ${initiator})`);
+    function createPeerConnection(did: string, sessionId: string, initiator: boolean): SimplePeer.Instance {
+      const key = sessionKey(did, sessionId);
+      console.log(`🌐 Creating peer connection for ${key} (initiator: ${initiator})`);
 
-      // Check if we already have a connection for this peer
-      const existingPeer = peerConnections.value.get(did);
+      // Check if we already have a connection for this session
+      const existingPeer = peerConnections.value.get(key);
       if (existingPeer) {
         existingPeer.peer.destroy();
-        peerConnections.value.delete(did);
+        peerConnections.value.delete(key);
       }
 
       // Create a new SimplePeer instance
@@ -197,14 +224,14 @@ export const useWebrtcStore = defineStore(
       }) as Instance;
 
       // Handle peer events
-      peer.on('signal', (data) => signalAgent(did, WEBRTC_SIGNAL, data));
+      peer.on('signal', (data) => signalSession(sessionId, data));
 
       peer.on('connect', () => {
-        console.log(`✅ Peer connection established with ${did}`);
+        console.log(`✅ Peer connection established with ${key}`);
 
-        // Set initial media settings for peer from their agent state in the signalling service (updated later via direct webrtc signals)
-        const peerConnection = peerConnections.value.get(did);
-        const agent = agentsInCall.value.find((a) => a.did === did);
+        // Set initial media settings for peer from their session state in the signalling service (updated later via direct webrtc signals)
+        const peerConnection = peerConnections.value.get(key);
+        const agent = callSessions.value.find((a) => a.sessionKey === key);
         if (peerConnection && agent) {
           peerConnection.audioState = agent.mediaSettings.audioEnabled ? 'on' : 'off';
           peerConnection.videoState = agent.mediaSettings.videoEnabled ? 'on' : 'off';
@@ -223,17 +250,17 @@ export const useWebrtcStore = defineStore(
         try {
           parsedSignal = JSON.parse(signal);
         } catch (error) {
-          console.error(`Invalid JSON from peer ${did}:`, error);
+          console.error(`Invalid JSON from peer ${key}:`, error);
           return;
         }
 
         const { type, data } = parsedSignal;
 
         if (type === WEBRTC_MEDIA_SETTINGS_CHANGED) {
-          console.log(`Received media settings change from ${did}:`, data);
+          console.log(`Received media settings change from ${key}:`, data);
 
           // Find the peer
-          const peer = peerConnections.value.get(did);
+          const peer = peerConnections.value.get(key);
           if (!peer) return;
 
           // Update their media state and start loading checks if necessary
@@ -257,27 +284,27 @@ export const useWebrtcStore = defineStore(
         }
 
         if (type === WEBRTC_LEAVING_CALL) {
-          console.log(`Peer ${did} is leaving the call`);
+          console.log(`Peer ${key} is leaving the call`);
 
-          // Add the agents did to the disconnected agents list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
-          disconnectedAgents.value.push(did);
+          // Add the session to the disconnected list for a full HEARTBEAT_INTERVAL to avoid reconnection attempts until the signalling service is up to date
+          disconnectedAgents.value.push(key);
           setTimeout(
-            () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== did)),
+            () => (disconnectedAgents.value = disconnectedAgents.value.filter((d) => d !== key)),
             HEARTBEAT_INTERVAL + 1000,
           );
 
           // Clean up the peer connection
-          cleanupPeerConnection(did);
+          cleanupPeerConnection(key);
           const peerProfile = await getCachedAgentProfile(did, appStore.ad4mClient);
           appStore.showDangerToast({ message: `👤 ${peerProfile.username || did} has left the call` });
         }
       });
 
       peer.on('track', (track, stream) => {
-        console.log(`🎞️ New ${track.kind} track from ${did}`, track);
+        console.log(`🎞️ New ${track.kind} track from ${key}`, track);
 
         // Find the peer connection
-        const peerConnection = peerConnections.value.get(did);
+        const peerConnection = peerConnections.value.get(key);
         if (!peerConnection) return;
 
         // Append (don't overwrite) — a peer that's sharing their screen
@@ -295,7 +322,7 @@ export const useWebrtcStore = defineStore(
         // sender-removal because that fires before the receiving track ends.
         const onTrackEnded = () => {
           if (track.readyState !== 'ended') return;
-          const pc = peerConnections.value.get(did);
+          const pc = peerConnections.value.get(key);
           if (!pc) return;
           const streamRef = pc.streams.find((s) => s.id === stream.id);
           if (!streamRef) return;
@@ -310,42 +337,42 @@ export const useWebrtcStore = defineStore(
         if (!peerConnection.streamReady) peerConnection.streamReady = true;
       });
 
-      peer.on('close', () => cleanupPeerConnection(did));
+      peer.on('close', () => cleanupPeerConnection(key));
 
-      peer.on('error', () => cleanupPeerConnection(did));
+      peer.on('error', () => cleanupPeerConnection(key));
 
       peer.on('iceStateChange', (state) => {
         // Handle disconnection states
         if (state === 'disconnected' || state === 'failed') {
           // Clear existing reconnection timeout for peer if present
-          if (reconnectionTimeouts.value[did]) clearTimeout(reconnectionTimeouts.value[did]);
+          if (reconnectionTimeouts.value[key]) clearTimeout(reconnectionTimeouts.value[key]);
 
           // Get current attempts or initialize
-          const attempts = reconnectionAttempts.value[did] || 0;
+          const attempts = reconnectionAttempts.value[key] || 0;
 
           if (attempts < MAX_RECONNECTION_ATTEMPTS) {
-            console.warn(`🔄 Reconnection attempt ${attempts + 1} for peer ${did}`);
+            console.warn(`🔄 Reconnection attempt ${attempts + 1} for peer ${key}`);
 
             // Increment attempt counter
-            reconnectionAttempts.value[did] = attempts + 1;
+            reconnectionAttempts.value[key] = attempts + 1;
 
             // Use exponential backoff for retry timing
             const delay = Math.min(1000 * Math.pow(2, attempts), 10000); // 1s, 2s, 4s, 8s, max 10s
 
             // Set timeout for reconnection
-            reconnectionTimeouts.value[did] = setTimeout(() => {
+            reconnectionTimeouts.value[key] = setTimeout(() => {
               if (!inCall.value) return; // Don't reconnect if we've left the call
 
               // Get the connection details
-              const existingConnection = peerConnections.value.get(did);
+              const existingConnection = peerConnections.value.get(key);
               if (existingConnection) {
                 const wasInitiator = existingConnection.initiator;
 
                 // Clean up the existing connection
-                cleanupPeerConnection(did);
+                cleanupPeerConnection(key);
 
                 // Create a new connection with the same initiator status
-                createPeerConnection(did, wasInitiator);
+                createPeerConnection(did, sessionId, wasInitiator);
               }
             }, delay);
           } else {
@@ -353,26 +380,27 @@ export const useWebrtcStore = defineStore(
             appStore.showDangerToast({ message: 'Connection to user lost after multiple attempts' });
 
             // Clean up the connection
-            cleanupPeerConnection(did);
+            cleanupPeerConnection(key);
 
             // Reset the counter for future attempts
-            delete reconnectionAttempts.value[did];
+            delete reconnectionAttempts.value[key];
           }
         } else if (state === 'connected' || state === 'completed') {
           // Connection is good, reset attempt counter
-          if (reconnectionAttempts.value[did]) delete reconnectionAttempts.value[did];
+          if (reconnectionAttempts.value[key]) delete reconnectionAttempts.value[key];
 
           // Clear any pending reconnection attempts
-          if (reconnectionTimeouts.value[did]) {
-            clearTimeout(reconnectionTimeouts.value[did]);
-            delete reconnectionTimeouts.value[did];
+          if (reconnectionTimeouts.value[key]) {
+            clearTimeout(reconnectionTimeouts.value[key]);
+            delete reconnectionTimeouts.value[key];
           }
         }
       });
 
       // Store the peer connection
-      peerConnections.value.set(did, {
+      peerConnections.value.set(key, {
         did,
+        sessionId,
         peer,
         streams: [],
         initiator,
@@ -386,11 +414,11 @@ export const useWebrtcStore = defineStore(
       return peer;
     }
 
-    function cleanupPeerConnection(did: string) {
-      const peerConnection = peerConnections.value.get(did);
+    function cleanupPeerConnection(key: string) {
+      const peerConnection = peerConnections.value.get(key);
       if (!peerConnection) return;
 
-      console.log(`🗑️ Cleaning up peer connection for ${did}`);
+      console.log(`🗑️ Cleaning up peer connection for ${key}`);
 
       try {
         // Clear any loading check intervals
@@ -400,11 +428,11 @@ export const useWebrtcStore = defineStore(
         // Destory their connection
         peerConnection.peer.destroy();
       } catch (e) {
-        console.error(`Error destroying peer ${did}:`, e);
+        console.error(`Error destroying peer ${key}:`, e);
       }
 
       // Remove their entry from the peerConnections map
-      peerConnections.value.delete(did);
+      peerConnections.value.delete(key);
     }
 
     async function addTrack(newTrack: MediaStreamTrack, stream: MediaStream) {
@@ -554,25 +582,36 @@ export const useWebrtcStore = defineStore(
       const { author, data } = link;
       const { source, predicate, target } = data;
 
-      if (predicate === WEBRTC_SIGNAL && link.author !== me.value.did) {
+      if (predicate === WEBRTC_SIGNAL) {
+        let senderKey: string | null = null;
         try {
-          // Parse the signal data
-          const signalData = JSON.parse(source);
-          const recipients = JSON.parse(target) as string[];
-          if (!signalData || typeof signalData !== 'object' || !recipients.includes(me.value.did)) return;
+          // WEBRTC_SIGNAL is session-precise: the payload carries the sender's
+          // session id and the target is a list of recipient session ids.
+          const parsed = JSON.parse(source);
+          const fromSessionId = parsed?.fromSessionId;
+          const signalData = parsed?.signal;
 
-          // Find or create peer connection
+          // Ignore our own session (but DO process our other sessions, so the
+          // same agent can connect across tabs/devices).
+          if (!fromSessionId || fromSessionId === mySessionId) return;
+
+          const recipients = JSON.parse(target) as string[];
+          if (!signalData || typeof signalData !== 'object' || !recipients.includes(mySessionId)) return;
+
+          senderKey = sessionKey(author, fromSessionId);
+
+          // Find or create the peer connection for this session
           let peer: SimplePeer.Instance;
-          const existingConnection = peerConnections.value.get(author);
+          const existingConnection = peerConnections.value.get(senderKey);
 
           if (existingConnection) peer = existingConnection.peer;
-          else peer = createPeerConnection(author, false);
+          else peer = createPeerConnection(author, fromSessionId, false);
 
           // Handle the signal data
           peer.signal(signalData);
         } catch (e) {
           console.error(`❌ Error handling WebRTC signal from ${author}:`, e);
-          cleanupPeerConnection(author);
+          if (senderKey) cleanupPeerConnection(senderKey);
         }
       }
 
@@ -620,15 +659,9 @@ export const useWebrtcStore = defineStore(
       joiningCall.value = true;
 
       try {
-        // Promote this tab to leader so it controls signalling & WebRTC.
-        // claimLeadership waits briefly for a potential 'call-pinned' rejection.
-        const claimed = await tabCoordinator.claimLeadership(true);
-        if (!claimed) {
-          appStore.showDangerToast({ message: 'You are already in a call in another tab.' });
-          tabCoordinator.requestLeaderFocus();
-          joiningCall.value = false;
-          return;
-        }
+        // Calls are no longer pinned to a single tab — this session joins
+        // independently, so the same agent can be in the call from several
+        // tabs/devices at once.
 
         // Update the call route
         callRoute.value = route.params;
@@ -636,16 +669,15 @@ export const useWebrtcStore = defineStore(
         // Add the webrtc signal handler to the signalling service
         signallingService.value?.addSignalHandler(webrtcSignalHandler);
 
-        // Establish connections with the agents in the call
-        if (agentsInCall.value.length > 0) {
-          agentsInCall.value.forEach((agent) => {
-            if (agent.did === me.value.did) return;
+        // Establish connections with every other session already in the call
+        // (including our own other sessions, so their media shows too).
+        callSessions.value.forEach((session) => {
+          if (session.sessionKey === mySessionKey.value) return;
 
-            // Create initiator connections to all peers alphabetically "less than" our did (prevents both sides from being initiators)
-            const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
-            createPeerConnection(agent.did, shouldInitiate);
-          });
-        }
+          // Only one side of each pair initiates — decided by comparing session
+          // keys so two sessions of the same agent don't both wait on each other.
+          createPeerConnection(session.did, session.sessionId, shouldInitiate(mySessionKey.value, session.sessionKey));
+        });
 
         // Set the video layout to focused on mobile for better experience
         if (uiStore.isLandscapeMobile) {
@@ -667,7 +699,7 @@ export const useWebrtcStore = defineStore(
         signalPeers(WEBRTC_LEAVING_CALL);
 
         // Close all peer connections
-        peerConnections.value.forEach((_, did) => cleanupPeerConnection(did));
+        peerConnections.value.forEach((_, key) => cleanupPeerConnection(key));
 
         // Remove the webrtc signal handler from the signalling service
         signallingService.value?.removeSignalHandler(webrtcSignalHandler);
@@ -678,7 +710,6 @@ export const useWebrtcStore = defineStore(
         // Reset state
         inCall.value = false;
         callRoute.value = {};
-        tabCoordinator.setInCall(false);
 
         // Exit fullscreen before closing the call window
         if (uiStore.callWindowFullscreen) {
@@ -721,51 +752,53 @@ export const useWebrtcStore = defineStore(
       },
     );
 
-    // Check for updates to agentsInCall when agentsInCommunity changes
+    // Rebuild the per-session call list whenever community presence or the call
+    // route changes. Each in-call session (one per tab/device) is its own entry.
     watch(
-      agentsInCommunity,
-      async (newAgents) => {
-        const agentsInCallMap = Object.entries(newAgents).filter(
-          ([_, agent]) => agent.inCall && agent.callRoute.channelId === callRoute.value.channelId,
+      [agentsInCommunity, callRoute],
+      async () => {
+        const channelId = callRoute.value.channelId;
+        const sessionEntries = Object.entries(agentsInCommunity.value).filter(
+          ([, agent]) => agent.inCall && agent.callRoute.channelId === channelId,
         );
-        // Merge the agent states with their profiles
-        agentsInCall.value = await Promise.all(
-          agentsInCallMap.map(async ([did, agent]) => ({
+        // Merge the session states with their (DID-level) profiles
+        callSessions.value = await Promise.all(
+          sessionEntries.map(async ([key, agent]) => ({
             ...agent,
-            ...(await getCachedAgentProfile(did, appStore.ad4mClient)),
+            ...(await getCachedAgentProfile(agent.did, appStore.ad4mClient)),
+            sessionKey: key,
           })),
         );
       },
       { deep: true },
     );
 
-    // Create peer connections for new agents in call
+    // Create peer connections for new sessions in the call
     watch(
-      agentsInCall,
-      (newAgents) => {
+      callSessions,
+      (sessions) => {
         if (!inCall.value) return;
 
-        const existingPeerDids = Array.from(peerConnections.value.keys());
+        const existingPeerKeys = Array.from(peerConnections.value.keys());
 
-        // Handle new agents
-        newAgents.forEach((agent) => {
-          // Skip ourselves
-          if (agent.did === me.value.did) return;
+        // Handle new sessions
+        sessions.forEach((session) => {
+          // Skip our own session (but connect to our other sessions)
+          if (session.sessionKey === mySessionKey.value) return;
 
-          // Skip if we already have a connection with this agent
-          if (peerConnections.value.has(agent.did)) return;
+          // Skip if we already have a connection with this session
+          if (peerConnections.value.has(session.sessionKey)) return;
 
-          // Skip if the agent has just disconnected in the last HEARTBEAT_INTERVAL
-          if (disconnectedAgents.value.includes(agent.did)) return;
+          // Skip if the session has just disconnected in the last HEARTBEAT_INTERVAL
+          if (disconnectedAgents.value.includes(session.sessionKey)) return;
 
           // Create a new peer connection
-          const shouldInitiate = me.value.did.localeCompare(agent.did) > 0;
-          createPeerConnection(agent.did, shouldInitiate);
+          createPeerConnection(session.did, session.sessionId, shouldInitiate(mySessionKey.value, session.sessionKey));
         });
 
-        // Remove agents that left the call or are no longer active
-        existingPeerDids.forEach((did) => {
-          if (!newAgents.map((a) => a.did).includes(did)) cleanupPeerConnection(did);
+        // Remove sessions that left the call or are no longer active
+        existingPeerKeys.forEach((key) => {
+          if (!sessions.some((s) => s.sessionKey === key)) cleanupPeerConnection(key);
         });
       },
       { deep: true },
@@ -806,9 +839,6 @@ export const useWebrtcStore = defineStore(
       },
       { immediate: true },
     );
-
-    // Keep the tab coordinator in sync with call state
-    watch(inCall, (nowInCall) => tabCoordinator.setInCall(nowInCall), { immediate: true });
 
     return {
       inCall,

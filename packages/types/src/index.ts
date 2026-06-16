@@ -235,6 +235,13 @@ export interface AgentState {
   inCall: boolean;
   aiEnabled: boolean;
   lastUpdate: number;
+  // The owning agent's DID. Presence is keyed by session (`did::sessionId`) so a
+  // single agent can be present from multiple tabs/devices; `did` carries the
+  // person identity for that session.
+  did: string;
+  // Stable per-tab/per-device id (a UUID held in sessionStorage). Lets the same
+  // agent participate in a call from several sessions simultaneously.
+  sessionId: string;
 }
 
 export type CallHealth = 'healthy' | 'warnings' | 'connections-lost';

@@ -7,12 +7,17 @@ import {
   VideoLayoutOption,
   type MediaState,
 } from '@/stores';
+import { deriveRemoteSessionTiles, type RemoteCallSession } from '@/utils/callSessions';
+import { useTabCoordinator } from '@/composables/useTabCoordinator';
 import { storeToRefs } from 'pinia';
 import { computed, watch } from 'vue';
 
 export type Participant = {
   isMe: boolean;
   did: string;
+  // The session this tile belongs to. One agent can be in the call from several
+  // sessions (tabs/devices); each session's video/screenshare is its own tile.
+  sessionId: string;
   inCall: boolean;
   stream: MediaStream | undefined;
   streamReady: boolean;
@@ -24,6 +29,9 @@ export type Participant = {
   // can be rendered as two participants when they're sharing their screen
   // alongside their webcam.
   streamKind: 'camera' | 'screenshare';
+  // Audio dedupe: when one person is in the call from multiple sessions, only
+  // one of their tiles plays audio so the others don't echo.
+  muteAudio: boolean;
 };
 
 export function useVideoLayout() {
@@ -37,6 +45,8 @@ export function useVideoLayout() {
   const { callWindowWidth, callWindowOpen, selectedVideoLayout, focusedVideoId, selfViewVisible } =
     storeToRefs(uiStore);
   const { inCall, peerConnections, disconnectedAgents } = storeToRefs(webrtcStore);
+
+  const mySessionId = useTabCoordinator().tabId;
 
   const videoLayoutOptions: VideoLayoutOption[] = [
     { label: '16/9 aspect ratio', class: '16-by-9', icon: 'aspect-ratio' },
@@ -62,6 +72,7 @@ export function useVideoLayout() {
       myParticipants.push({
         isMe: true,
         did: me.value.did,
+        sessionId: mySessionId,
         inCall: inCall.value,
         stream: stream.value || undefined,
         streamReady: true,
@@ -72,6 +83,7 @@ export function useVideoLayout() {
         screenShareState: 'off' as MediaState,
         warning,
         streamKind: 'camera',
+        muteAudio: false, // the local tile is always muted via `isMe`
       });
     }
 
@@ -84,6 +96,7 @@ export function useVideoLayout() {
       myParticipants.push({
         isMe: true,
         did: me.value.did,
+        sessionId: mySessionId,
         inCall: inCall.value,
         stream: screenShareStream.value,
         streamReady: true,
@@ -92,59 +105,48 @@ export function useVideoLayout() {
         screenShareState: 'on' as MediaState,
         warning: '' as MediaPlayerWarning,
         streamKind: 'screenshare',
+        muteAudio: false,
       });
     }
 
-    const otherAgents: Participant[] = peers.value.flatMap((peer) => {
-      const streams = peer.streams ?? [];
+    // Remote peers are session-level (one peer connection per session). Derive
+    // render tiles via the shared helper: every video / screenshare feed shows
+    // separately, no-video sessions collapse to one avatar per person, and only
+    // one tile per person carries audio.
+    const remoteSessions: RemoteCallSession<MediaStream>[] = peers.value.map((peer) => ({
+      did: peer.did,
+      sessionId: peer.sessionId,
+      streams: peer.streams ?? [],
+      streamReady: peer.streamReady,
+      audioState: peer.audioState,
+      videoState: peer.videoState,
+      screenShareState: peer.screenShareState,
+    }));
 
-      // Treat a stream as a screenshare when it carries video without audio.
-      // The camera stream always has at least one audio track (mic), so this
-      // distinguishes the two without needing extra signalling.  Falls back
-      // to the legacy single-stream rendering when only one stream exists.
-      const cameraStream = streams.find((s) => s.getAudioTracks().length > 0) ?? streams[0];
-      const screenShareStreams = streams.filter(
-        (s) => s !== cameraStream && s.getVideoTracks().length > 0,
-      );
-
-      const cameraEntry: Participant = {
-        isMe: false,
-        did: peer.did,
-        inCall: true,
-        stream: cameraStream || undefined,
-        streamReady: peer.streamReady,
-        audioState: peer.audioState,
-        videoState: peer.videoState,
-        screenShareState: screenShareStreams.length > 0 ? 'off' : peer.screenShareState,
-        warning: '' as MediaPlayerWarning,
-        streamKind: 'camera',
-      };
-
-      const screenShareEntries: Participant[] = screenShareStreams.map((screenStream) => ({
-        isMe: false,
-        did: peer.did,
-        inCall: true,
-        stream: screenStream,
-        streamReady: peer.streamReady,
-        audioState: 'off' as MediaState,
-        videoState: 'off' as MediaState,
-        screenShareState: 'on' as MediaState,
-        warning: '' as MediaPlayerWarning,
-        streamKind: 'screenshare',
-      }));
-
-      return [cameraEntry, ...screenShareEntries];
-    });
+    const otherAgents: Participant[] = deriveRemoteSessionTiles(remoteSessions).map((tile) => ({
+      isMe: false,
+      did: tile.did,
+      sessionId: tile.sessionId,
+      inCall: true,
+      stream: tile.stream || undefined,
+      streamReady: tile.streamReady,
+      audioState: tile.audioState,
+      videoState: tile.videoState,
+      screenShareState: tile.screenShareState,
+      warning: '' as MediaPlayerWarning,
+      streamKind: tile.streamKind,
+      muteAudio: tile.muteAudio,
+    }));
 
     return [...myParticipants, ...otherAgents];
   });
 
-  // Participants may now share a `did` (a camera tile + a screenshare tile
-  // for the same user), so the focus key is the composite `did:streamKind`.
-  // Plain DIDs from older state still match — they fall through to the
-  // first tile we find for that user, which is the camera tile.
+  // A `did` can now map to several tiles — multiple sessions (tabs/devices),
+  // each with a camera and/or screenshare tile — so the key is the composite
+  // `did:sessionId:streamKind`. Plain DIDs from older state still match via
+  // `matchesFocus`, falling through to the first tile for that user.
   function participantKey(p: Participant): string {
-    return `${p.did}:${p.streamKind}`;
+    return `${p.did}:${p.sessionId}:${p.streamKind}`;
   }
 
   function matchesFocus(p: Participant, focusedId: string): boolean {
@@ -196,13 +198,19 @@ export function useVideoLayout() {
     if (open) closeFocusedVideoLayout();
   });
 
-  // Toggle off focused layout if the focused agent disconnects
+  // Toggle off focused layout if the focused session disconnects.
+  // `disconnectedAgents` holds session keys (`did::sessionId`); the focused id
+  // is a participant key (`did:sessionId:streamKind`) or a bare DID, so match by
+  // the focused tile's actual session.
   watch(
     disconnectedAgents,
     (disconnected) => {
-      if (focusedVideoId.value && disconnected.includes(focusedVideoId.value)) {
-        closeFocusedVideoLayout();
-      }
+      if (!focusedVideoId.value) return;
+      const focused = focusedParticipant.value;
+      const focusedDisconnected =
+        disconnected.includes(focusedVideoId.value) ||
+        (!!focused && disconnected.includes(`${focused.did}::${focused.sessionId}`));
+      if (focusedDisconnected) closeFocusedVideoLayout();
     },
     { deep: true },
   );
