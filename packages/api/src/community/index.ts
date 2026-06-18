@@ -1,9 +1,8 @@
 import { Ad4mModel, HasMany, Flag, Model, Property, fileToDataUri } from '@coasys/ad4m';
-import { community, languages } from '@coasys/flux-constants';
+import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import Channel from '../channel';
 
-const { FILE_STORAGE_LANGUAGE } = languages;
 const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE, CHANNEL } = community;
 
 interface FileData {
@@ -25,14 +24,14 @@ export class Community extends Ad4mModel {
 
   @Property({
     through: IMAGE,
-    resolveLanguage: FILE_STORAGE_LANGUAGE,
+    resolveLiteral: false,
     transform: fileToDataUri,
   })
   image: string | FileData;
 
   @Property({
     through: THUMBNAIL,
-    resolveLanguage: FILE_STORAGE_LANGUAGE,
+    resolveLiteral: false,
     transform: fileToDataUri,
   })
   thumbnail: string | FileData;

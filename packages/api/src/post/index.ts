@@ -1,11 +1,10 @@
 import { Ad4mModel, HasMany, Flag, Model, Property, fileToDataUri } from '@coasys/ad4m';
-import { community, languages } from '@coasys/flux-constants';
+import { community } from '@coasys/flux-constants';
 
 import { EntryType } from '@coasys/flux-types';
 import Message from '../message';
 
 const { BODY, IMAGE, TITLE, URL, ENTRY_TYPE } = community;
-const { FILE_STORAGE_LANGUAGE } = languages;
 
 @Model({ name: 'Post' })
 export class Post extends Ad4mModel {
@@ -20,7 +19,7 @@ export class Post extends Ad4mModel {
 
   @Property({
     through: IMAGE,
-    resolveLanguage: FILE_STORAGE_LANGUAGE,
+    resolveLiteral: false,
     transform: fileToDataUri,
   })
   image: string;
