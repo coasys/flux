@@ -1,4 +1,4 @@
-import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property, parseLit } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, LinkQuery, Literal, Model, Property, parseLit } from '@coasys/ad4m';
 
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
@@ -12,8 +12,6 @@ import { community } from '@coasys/flux-constants';
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
 
 // SPARQL binding shapes — typed via `querySparql<T>()`.
-interface SgBinding { sg: string }
-interface DidBinding { did: string }
 interface TopicBinding { topicBase: string; topicNameRaw?: string }
 interface SubgroupRowBinding {
   id: string;
@@ -54,29 +52,29 @@ export class Conversation extends Ad4mModel {
   subgroupEntities: ConversationSubgroup[] = [];
 
   async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
-    // find the total subgroup count and the dids of participants in the conversation
+    // Converted from two parallel SPARQLs → one `findAllAndCount` count-only
+    // path + one native `LinkQuery` (post-#846).  The subgroup count engages
+    // the count-only fast path (`limit: 0` + `count: true`) so the executor
+    // emits a single `SELECT (COUNT(DISTINCT ?source) AS ?cnt) WHERE { ... }`
+    // — no instance hydration, no reifier-metadata join.  The participants
+    // list bypasses SPARQL entirely via the indexed `queryLinks` path, which
+    // is faster than the historical SPARQL on small/medium result sets
+    // (confirmed by wind tunnel S5 vs S8).
     try {
-      // SPARQL migration
-      const subgroupsQuery = `
-        SELECT ?sg WHERE {
-          <${this.id}> <ad4m://has_child> ?sg .
-          ?sg <flux://entry_type> <flux://conversation_subgroup> .
-        }
-      `;
-
-      const participantsQuery = `
-        SELECT ?did WHERE {
-          <${this.id}> <${FLUX_PARTICIPANT}> ?did .
-        }
-      `;
-
-      const [subgroupsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql<SgBinding[]>(subgroupsQuery),
-        this.perspective.querySparql<DidBinding[]>(participantsQuery),
+      const [{ totalCount: totalSubgroups }, participantLinks] = await Promise.all([
+        ConversationSubgroup.findAllAndCount(this.perspective, {
+          parent: { model: Conversation, id: this.id },
+          limit: 0,
+          count: true,
+          withMetadata: false,
+        }),
+        this.perspective.get(
+          new LinkQuery({ source: this.id, predicate: FLUX_PARTICIPANT }),
+        ),
       ]);
-
-      const totalSubgroups = subgroupsResult?.length || 0;
-      const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
+      const participants = (participantLinks || [])
+        .map((l: any) => l.data?.target)
+        .filter(Boolean);
       return { totalSubgroups, participants };
     } catch (error) {
       console.error('Error getting conversation stats:', error);

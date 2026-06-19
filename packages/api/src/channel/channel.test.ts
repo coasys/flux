@@ -20,6 +20,10 @@ function createMockPerspective(querySparqlImpl?: (...args: any[]) => any) {
   return {
     sparqlCalls,
     querySparql: vi.fn(impl),
+    // Default to an empty modelQuery result so call sites that converted
+    // off querySparql (e.g. `Channel.pinnedConversations()` post-#846) get
+    // back `[]` for the empty case without each test having to opt in.
+    modelQuery: vi.fn().mockResolvedValue({ instances: [], totalCount: 0 }),
     get: vi.fn().mockResolvedValue([]),
     add: vi.fn().mockResolvedValue({}),
   };
@@ -121,29 +125,31 @@ describe('Channel.pinnedConversations()', () => {
 
   it('returns mapped results', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockResolvedValueOnce([
-      { channelId: 'ch-1', conversationId: 'conv-1' },
-    ]);
+    perspective.modelQuery.mockResolvedValueOnce({
+      instances: [{ id: 'ch-1', conversations: [{ id: 'conv-1' }] }],
+      totalCount: 1,
+    });
 
     const results = await Channel.pinnedConversations(perspective as any);
     expect(results).toHaveLength(1);
     expect(results[0]).toEqual({ channelId: 'ch-1', conversationId: 'conv-1' });
   });
 
-  it('deduplicates by channelId', async () => {
+  it('handles channels with no linked conversation', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockResolvedValueOnce([
-      { channelId: 'ch-1', conversationId: 'conv-1' },
-      { channelId: 'ch-1', conversationId: 'conv-2' },
-    ]);
+    perspective.modelQuery.mockResolvedValueOnce({
+      instances: [{ id: 'ch-1', conversations: [] }],
+      totalCount: 1,
+    });
 
     const results = await Channel.pinnedConversations(perspective as any);
     expect(results).toHaveLength(1);
+    expect(results[0]).toEqual({ channelId: 'ch-1', conversationId: undefined });
   });
 
   it('handles errors gracefully', async () => {
     const perspective = createMockPerspective();
-    perspective.querySparql.mockRejectedValueOnce(new Error('SPARQL error'));
+    perspective.modelQuery.mockRejectedValueOnce(new Error('modelQuery error'));
 
     const results = await Channel.pinnedConversations(perspective as any);
     expect(results).toEqual([]);

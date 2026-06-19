@@ -1,4 +1,4 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, Literal, parseLit } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, LinkQuery, Property, Literal, parseLit } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
@@ -7,8 +7,6 @@ import { community } from '@coasys/flux-constants';
 const { FLUX_PARTICIPANT, SUBGROUP_ITEM } = community;
 
 // SPARQL binding shapes — typed via `querySparql<T>()`.
-interface ItemIdBinding { item: string }
-interface DidBinding { did: string }
 interface TopicBinding { topicBase: string; topicNameRaw?: string }
 interface TopicRelevanceBinding extends TopicBinding { relevanceRaw?: string }
 interface SubgroupItemBinding {
@@ -47,31 +45,33 @@ export default class ConversationSubgroup extends Ad4mModel {
   participants: string[] = [];
 
   async stats(): Promise<{ totalItems: number; participants: string[] }> {
-    // find the total item count and the dids of participants in the subgroup
+    // Converted from two parallel SPARQLs to a single parallel block of
+    // (a) one indexed `queryLinks` to enumerate subgroup→item links and
+    // (b) one indexed `queryLinks` for participants.  Both bypass SPARQL
+    // entirely — the historical SPARQL itemsQuery did a multi-type
+    // `FILTER(?type IN (...))` which can't be pushed into a single
+    // Ad4mModel query without three parallel `findAllAndCount` calls
+    // and a sum.  Using indexed link lookup avoids that round-trip
+    // multiplication while keeping the data shape identical to the
+    // original query (the subgroup→item link target is always a
+    // Message/Post/Task by Flux invariant).
     try {
-      // SPARQL migration
-      const itemsQuery = `
-        SELECT DISTINCT ?item WHERE {
-          <${this.id}> <${SUBGROUP_ITEM}> ?item .
-          ?item <flux://entry_type> ?type .
-          FILTER(?type IN (<flux://has_message>, <flux://has_post>, <flux://has_task>))
-        }
-      `;
-
-      // Use targeted SPARQL for participants instead of this.get() which fetches all triples
-      const participantsQuery = `
-        SELECT ?did WHERE {
-          <${this.id}> <${FLUX_PARTICIPANT}> ?did .
-        }
-      `;
-
-      const [itemsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql<ItemIdBinding[]>(itemsQuery),
-        this.perspective.querySparql<DidBinding[]>(participantsQuery),
+      const [itemLinks, participantLinks] = await Promise.all([
+        this.perspective.get(
+          new LinkQuery({ source: this.id, predicate: SUBGROUP_ITEM }),
+        ),
+        this.perspective.get(
+          new LinkQuery({ source: this.id, predicate: FLUX_PARTICIPANT }),
+        ),
       ]);
-
-      const totalItems = itemsResult?.length || 0;
-      const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
+      const totalItems = new Set(
+        (itemLinks || [])
+          .map((l: any) => l.data?.target)
+          .filter(Boolean),
+      ).size;
+      const participants = (participantLinks || [])
+        .map((l: any) => l.data?.target)
+        .filter(Boolean);
       return { totalItems, participants };
     } catch (error) {
       console.error('Error getting subgroup stats:', error);

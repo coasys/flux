@@ -7,19 +7,22 @@ const { EMBEDDING_VECTOR_LANGUAGE } = languages;
 const showLogs = false; // Set to true to enable debug logs
 
 async function findEmbeddingSRId(perspective: PerspectiveProxy, itemId: string): Promise<string | null> {
+  // Converted to `SemanticRelationship.findAll` + `include: { embeddingTag }`
+  // post-#846.  The include only resolves to a value when the tag's
+  // conformance matches Embedding (cf. wind tunnel S16's `include actually
+  // fires: yes` check), so the first SR whose `embeddingTag` is bound is
+  // the one we want.  Withdraws `withMetadata` + `count` to avoid the
+  // reifier-metadata join and the COUNT round trip — neither is read.
   try {
-    const sparqlQuery = `
-      SELECT ?relationship WHERE {
-        ?relationship <flux://entry_type> <flux://has_semantic_relationship> .
-        ?relationship <flux://has_expression> <${itemId}> .
-        ?relationship <flux://has_tag> ?tagId .
-        ?tagId <flux://entry_type> <flux://has_embedding> .
-      }
-      LIMIT 1
-    `;
-
-    const sparqlResult = await perspective.querySparql(sparqlQuery);
-    return sparqlResult?.[0]?.relationship || null;
+    const srs = await SemanticRelationship.findAll(perspective, {
+      where: { expression: itemId },
+      include: { embeddingTag: { withMetadata: false } },
+      limit: 5,
+      withMetadata: false,
+      count: false,
+    });
+    const withEmbedding = srs.find((sr: any) => sr.embeddingTag);
+    return withEmbedding?.id || null;
   } catch (error) {
     console.error('Error finding embedding SR:', error);
     return null;
