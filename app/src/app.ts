@@ -50,7 +50,7 @@ vueApp.mount('#app');
 
 // Read once at module load — survives any hash changes that follow
 const urlParams = new URLSearchParams(window.location.search);
-const demoHost  = urlParams.get('demoHost');
+const demoHost  = urlParams.get('demoHost')?.trim() || null;
 
 const appInfo = {
   name: 'Flux',

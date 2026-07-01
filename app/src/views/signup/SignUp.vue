@@ -62,9 +62,9 @@ const route = useRoute();
 const appStore = useAppStore();
 const uiStore = useUiStore();
 
-const isDemoMode = new URLSearchParams(window.location.search).has('demoHost');
+const isDemoMode = !!new URLSearchParams(window.location.search).get('demoHost')?.trim();
 
-const showSignup = ref(false);
+const showSignup = ref(isDemoMode);
 const profilePicture = ref();
 const isCreatingUser = ref(false);
 const name = ref('');
