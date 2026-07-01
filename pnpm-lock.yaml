@@ -20,7 +20,7 @@ overrides:
   '@coasys/flux-vue': workspace:*
   '@coasys/flux-webrtc': workspace:*
   '@coasys/ad4m': 0.13.0-test-8
-  '@coasys/ad4m-connect': 0.13.0-guest-connect-1
+  '@coasys/ad4m-connect': 0.13.0-guest-connect-2
   '@coasys/ad4m-vue-hooks': 0.13.0-test-8
   '@coasys/ad4m-react-hooks': 0.13.0-test-8
 
@@ -78,8 +78,8 @@ importers:
         specifier: 0.13.0-test-8
         version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-guest-connect-1
-        version: 0.13.0-guest-connect-1
+        specifier: 0.13.0-guest-connect-2
+        version: 0.13.0-guest-connect-2
       '@coasys/ad4m-vue-hooks':
         specifier: 0.13.0-test-8
         version: 0.13.0-test-8(vue@3.5.39(typescript@5.9.3))
@@ -465,8 +465,8 @@ importers:
         specifier: 0.13.0-test-8
         version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-guest-connect-1
-        version: 0.13.0-guest-connect-1
+        specifier: 0.13.0-guest-connect-2
+        version: 0.13.0-guest-connect-2
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -493,8 +493,8 @@ importers:
         specifier: 0.13.0-test-8
         version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-guest-connect-1
-        version: 0.13.0-guest-connect-1
+        specifier: 0.13.0-guest-connect-2
+        version: 0.13.0-guest-connect-2
       '@coasys/flux-api':
         specifier: workspace:*
         version: link:../api
@@ -611,8 +611,8 @@ importers:
         specifier: 0.13.0-test-8
         version: 0.13.0-test-8
       '@coasys/ad4m-connect':
-        specifier: 0.13.0-guest-connect-1
-        version: 0.13.0-guest-connect-1
+        specifier: 0.13.0-guest-connect-2
+        version: 0.13.0-guest-connect-2
       '@coasys/flux-constants':
         specifier: workspace:*
         version: link:../constants
@@ -2039,8 +2039,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
 
-  '@coasys/ad4m-connect@0.13.0-guest-connect-1':
-    resolution: {integrity: sha512-HWZrdoG3WZYRbQfuUOKljtAQkysnN/rnzdVKZhztdaK18ObZIhHqsh0OFYis+zPq+MieoT5AnYzrS5OqbhXzpA==}
+  '@coasys/ad4m-connect@0.13.0-guest-connect-2':
+    resolution: {integrity: sha512-43UvMATyyhUWfr8CWywQXfBdUFkX6DLImwsQ/dwnmtVjI0w5TrRDKStmPl2ng+CYXrj9t3snv6fClf5QiqX85A==}
 
   '@coasys/ad4m-react-hooks@0.13.0-test-8':
     resolution: {integrity: sha512-FJ5xXByc2OTpjU2HZXdd23r+NoGyPSYRlwYTX8wgKMcN7I8PL3HNLk5dzidaz4v9bYn7Gh1CnyBvqUi8QUpCnw==}
@@ -11839,7 +11839,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 7.6.7
 
-  '@coasys/ad4m-connect@0.13.0-guest-connect-1':
+  '@coasys/ad4m-connect@0.13.0-guest-connect-2':
     dependencies:
       '@undecaf/barcode-detector-polyfill': 0.9.23
       '@undecaf/zbar-wasm': 0.9.16
