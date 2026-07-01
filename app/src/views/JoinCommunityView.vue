@@ -1,6 +1,7 @@
 <template>
   <div class="join-call-view">
-    <j-box p="800">
+    <!-- Demo mode: render nothing while auto-join runs silently in onMounted -->
+    <j-box v-if="!isDemoMode" p="800">
       <j-flex direction="column" a="center" gap="600">
         <j-flex gap="400" a="center">
           <j-icon name="people" size="lg" color="primary-500" />
@@ -31,7 +32,7 @@
 import { useAppStore, useUiStore } from '@/stores';
 import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { joinCommunity } from '@coasys/flux-api';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -39,8 +40,16 @@ const router = useRouter();
 const appStore = useAppStore();
 const uiStore = useUiStore();
 
+const isDemoMode = new URLSearchParams(window.location.search).has('demoHost');
 const isJoining = ref(false);
 const error = ref('');
+
+// In demo mode, skip the confirmation UI and join immediately on mount
+onMounted(async () => {
+  if (isDemoMode) {
+    await handleJoin();
+  }
+});
 
 async function handleJoin() {
   isJoining.value = true;

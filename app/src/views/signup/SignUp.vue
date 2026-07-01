@@ -10,21 +10,22 @@
           <FluxLogoIcon width="150px" />
         </j-box>
 
-        <j-text variant="heading"> Create a user </j-text>
+        <j-text variant="heading">{{ isDemoMode ? 'Enter your name' : 'Create a user' }}</j-text>
 
         <AvatarUpload icon="camera" :value="profilePicture" @change="(url) => (profilePicture = url)" />
 
         <j-input
-          label="Username"
+          :label="isDemoMode ? 'Your name' : 'Username'"
           size="xl"
           :value="username"
           @input="(e: any) => (username = e.target.value)"
           :error="usernameError"
           :errortext="usernameErrorMessage"
           @blur="(e: any) => validateUsername()"
+          autofocus
         />
 
-        <j-toggle style="width: 100%" full size="lg" variant="primary" @change="allowNotifications">
+        <j-toggle v-if="!isDemoMode" style="width: 100%" full size="lg" variant="primary" @change="allowNotifications">
           Allow Notifications
         </j-toggle>
 
@@ -38,7 +39,7 @@
           @click="createUser"
         >
           <j-icon slot="end" name="check" />
-          Create user
+          {{ isDemoMode ? 'Continue' : 'Create user' }}
         </j-button>
       </j-flex>
     </div>
@@ -60,6 +61,8 @@ const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
 const uiStore = useUiStore();
+
+const isDemoMode = new URLSearchParams(window.location.search).has('demoHost');
 
 const showSignup = ref(false);
 const profilePicture = ref();
@@ -97,6 +100,13 @@ async function autoFillUser() {
     if (hasFluxAccount) return;
 
     showSignup.value = true;
+
+    if (isDemoMode) {
+      // Pre-fill a short random guest name; the user can overwrite it before tapping Continue
+      username.value = `Guest-${Math.random().toString(36).slice(2, 7)}`;
+      return;
+    }
+
     const ad4mProfile = await getAd4mProfile(appStore.ad4mClient);
     username.value = ad4mProfile.username || '';
     name.value = ad4mProfile.name || '';
@@ -119,21 +129,26 @@ async function createUser() {
   })
     .then(async () => {
       await appStore.refreshMyProfile();
-      
+
       // Check if there's a redirect path (e.g., from a shared community link)
       const redirectPath = route.query.redirect as string;
       if (redirectPath) {
         router.push(redirectPath);
-        // Note: Call window will open automatically via router.afterEach
-        // when user actually enters a channel with an active call
       } else {
         router.push({ name: 'home' });
       }
-      registerNotification(appStore.ad4mClient);
+
+      // Skip notification setup in demo mode — guests are one-time visitors and
+      // the browser permission prompt + potential danger toast is confusing UX
+      if (!isDemoMode) {
+        registerNotification(appStore.ad4mClient);
+      }
     })
     .finally(() => {
       isCreatingUser.value = false;
-      appStore.changeNotificationState(true);
+      if (!isDemoMode) {
+        appStore.changeNotificationState(true);
+      }
     });
 }
 
