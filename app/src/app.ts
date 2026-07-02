@@ -1,6 +1,7 @@
-import { useAppStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
+import { useAppStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from '@/stores';
 import { connectAsGuest, getAd4mConnect, isEmbedded } from '@coasys/ad4m-connect';
-import { createPinia, storeToRefs } from 'pinia';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
@@ -37,6 +38,41 @@ const vueApp = createApp({ render: () => h(App) })
 
 const appStore = useAppStore(pinia);
 const routeMemoryStore = useRouteMemoryStore(pinia);
+
+// Pending perspective navigation from WE, queued if received before initialization completes
+let pendingPerspectiveNavigation: string | null = null;
+
+function handlePerspectiveNavigation(communityId: string): void {
+  const key = restoreNeighbourhoodPrefix(communityId);
+  const privateKey = `private://${communityId}`;
+  const community = appStore.myCommunities[key] ?? appStore.myCommunities[privateKey];
+
+  if (community) {
+    const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
+    router.push(lastRoute ? lastRoute.path : { name: 'community', params: { communityId } });
+  } else {
+    // Perspective exists but has no Flux community — offer to initialise one
+    router.push({ name: 'init-community', params: { communityId } });
+  }
+}
+
+// When embedded in WE: hide Flux sidebar and listen for perspective navigation messages
+if (isEmbedded()) {
+  const uiStore = useUiStore(pinia);
+  uiStore.setAppSidebarOpen(false);
+
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.data?.type !== 'NAVIGATE_PERSPECTIVE') return;
+    const communityId = event.data.communityId as string;
+    if (!communityId) return;
+
+    if (!appStore.initialized) {
+      pendingPerspectiveNavigation = communityId;
+    } else {
+      handlePerspectiveNavigation(communityId);
+    }
+  });
+}
 
 // Tracks the route the user was on when credits ran out, so we can return them after topping up
 let savedPreCreditRoute: typeof routeMemoryStore.currentRoute | null = null;
@@ -114,6 +150,13 @@ const capabilities = [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }];
     // Fallback to signup if no Flux account found
     const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
     if (!hasFluxAccount) return;
+
+    // If WE sent a NAVIGATE_PERSPECTIVE before init completed, handle it now and we're done.
+    if (isEmbedded() && pendingPerspectiveNavigation) {
+      handlePerspectiveNavigation(pendingPerspectiveNavigation);
+      pendingPerspectiveNavigation = null;
+      return;
+    }
 
     // Determine which params to use for navigation (prioritize current params)
     let params = null;

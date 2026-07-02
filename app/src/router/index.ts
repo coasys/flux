@@ -65,6 +65,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'join-community',
         component: () => import('@/views/JoinCommunityView.vue'),
       },
+      {
+        path: 'init-community/:communityId',
+        props: true,
+        name: 'init-community',
+        component: () => import('@/views/main/InitCommunityView.vue'),
+      },
     ],
   },
 ];
