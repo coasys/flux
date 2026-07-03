@@ -4,13 +4,11 @@ const { CREATOR, DESCRIPTION, NAME, SELF, CREATED_AT } = community;
 
 export async function createNeighbourhoodMeta(
   client: Ad4mClient,
+  perspectiveUuid: string,
   name: string,
   description: string,
   author: string,
 ): Promise<LinkExpression[]> {
-  //Create the perspective to hold our meta
-  const perspective = await client.perspective.add(`${name}-meta`);
-
   const nameExpression = await client.expression.create(name, 'literal');
   const createdAtExpression = await client.expression.create(new Date().toISOString(), 'literal');
 
@@ -51,11 +49,17 @@ export async function createNeighbourhoodMeta(
     );
   }
 
-  //Create the links on the perspective
-  await client.perspective.addLinks(perspective.uuid, expressionLinks);
-
-  //Get the signed links back
-  const perspectiveSnapshot = await client.perspective.snapshotByUUID(perspective.uuid);
-  await client.perspective.remove(perspective.uuid);
-  return Object.values(perspectiveSnapshot!.links);
+  // Sign the links by round-tripping them through the community's own perspective
+  // (addLinks already returns fully signed LinkExpressions) instead of a dedicated
+  // scratch perspective. Creating a separate perspective here — even briefly —
+  // registers it with the executor and broadcasts perspective-added/removed events to
+  // every connected client, which is what caused a transient "<name>-meta" entry to
+  // flash in host apps (e.g. WE's sidebar) that list all perspectives.
+  // Status must be 'local': perspectiveUuid may belong to an already-published
+  // neighbourhood (e.g. a WE space Flux is attaching to), and only 'shared' links are
+  // included in the link language's outbound sync — 'local' keeps this transient
+  // signing round-trip from ever reaching peers.
+  const signedLinks = await client.perspective.addLinks(perspectiveUuid, expressionLinks, 'local');
+  await client.perspective.removeLinks(perspectiveUuid, signedLinks);
+  return signedLinks;
 }
