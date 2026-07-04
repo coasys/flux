@@ -47,7 +47,7 @@
       "@coasys/flux-utils": "workspace:*",
       "@coasys/flux-vue": "workspace:*",
       "@coasys/flux-webrtc": "workspace:*",
-      "@coasys/ad4m": "0.13.0-test-8",
+      "@coasys/ad4m": "0.13.0-test-8-profile-cache-fix",
       "@coasys/ad4m-connect": "0.13.0-guest-connect-2",
       "@coasys/ad4m-vue-hooks": "0.13.0-test-8",
       "@coasys/ad4m-react-hooks": "0.13.0-test-8"
