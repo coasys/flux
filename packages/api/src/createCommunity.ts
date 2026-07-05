@@ -64,7 +64,7 @@ export default async function createCommunity({
     const templateAddress = linkLangAddress || langs?.[0];
     if (!templateAddress) throw new Error('No link language templates available to publish neighbourhood.');
     const linkLanguage = await client.languages.applyTemplateAndPublish(templateAddress, templateData);
-    const metaLinks = await createNeighbourhoodMeta(client, name, description, author);
+    const metaLinks = await createNeighbourhoodMeta(client, perspective.uuid, name, description, author);
 
     let sharedUrl = perspective.sharedUrl;
 
