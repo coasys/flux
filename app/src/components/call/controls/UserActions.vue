@@ -25,10 +25,14 @@ const route = useRoute();
 const uiStore = useUiStore();
 const webrtcStore = useWebrtcStore();
 
-const { callWindowOpen } = storeToRefs(uiStore);
+const { callWindowOpen, isMobile } = storeToRefs(uiStore);
 const { inCall } = storeToRefs(webrtcStore);
 
 function goToSettings() {
+  // On mobile the call window is a fullscreen overlay (z-index above the
+  // settings route), so minimise it first — otherwise settings opens behind
+  // the call. The call itself stays alive (inCall is untouched).
+  if (isMobile.value) uiStore.setCallWindowOpen(false);
   router.push({ name: 'settings' });
 }
 

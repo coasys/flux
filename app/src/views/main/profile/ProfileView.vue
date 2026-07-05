@@ -111,7 +111,9 @@
     </div>
   </div>
 
-  <Modals />
+  <Teleport to="body">
+    <Modals />
+  </Teleport>
 
   <RouterView />
 </template>
