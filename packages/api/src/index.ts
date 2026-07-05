@@ -16,6 +16,7 @@ import getMe from './getMe';
 import getPerspectiveMeta from './getPerspectiveMeta';
 import getProfile from './getProfile';
 import joinCommunity from './joinCommunity';
+import { ensureModelsRegistered, isModelRegistered } from './sdnaHelpers';
 import Message from './message';
 import MessageSummary from './message/MessageSummary';
 import Post from './post';
@@ -40,12 +41,14 @@ export {
   createCommunity,
   createProfile,
   Embedding,
+  ensureModelsRegistered,
   getAd4mProfile,
   getAgentLinks,
   getAgentWebLinks,
   getMe,
   getPerspectiveMeta,
   getProfile,
+  isModelRegistered,
   joinCommunity,
   Me,
   Message,
