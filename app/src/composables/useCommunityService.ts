@@ -2,7 +2,7 @@ import { useAiStore, useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { restoreNeighbourhoodPrefix, stripChannelPrefix } from '@/utils/routeUtils';
 import { upsertById } from '@/utils/upsertById';
-import { Ad4mModel, Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
+import { Link, LinkQuery, NeighbourhoodProxy, PerspectiveProxy, PerspectiveState } from '@coasys/ad4m';
 import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
 import {
   App,
@@ -12,6 +12,7 @@ import {
   Conversation,
   ConversationSubgroup,
   Embedding,
+  ensureModelsRegistered,
   getAllFluxApps,
   Message,
   SemanticRelationship,
@@ -118,8 +119,10 @@ export async function createCommunityService(): Promise<CommunityService> {
     ? (perspective.getNeighbourhoodProxy?.() || null)
     : null;
 
-  // Ensure all required SDNA is installed (single batch RPC call)
-  await Ad4mModel.registerAll(perspective, [
+  // Ensure all required SDNA is installed. ensureModelsRegistered diffs against the
+  // perspective's actual state first, so re-mounting this composable (e.g. navigating
+  // between communities) doesn't write a duplicate copy of every shape each time.
+  await ensureModelsRegistered(perspective, [
     Community,
     Channel,
     App,
