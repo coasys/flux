@@ -1,6 +1,7 @@
 import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property, parseLit } from '@coasys/ad4m';
 
 import { getProfile, Topic } from '@coasys/flux-api';
+import type { AbortOptions } from '../shared/abort';
 import { ProcessingState, Profile } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, SynergyTopic } from '@coasys/flux-utils';
 import ConversationSubgroup from '../conversation-subgroup';
@@ -53,7 +54,7 @@ export class Conversation extends Ad4mModel {
   @HasMany(() => ConversationSubgroup)
   subgroupEntities: ConversationSubgroup[] = [];
 
-  async stats(): Promise<{ totalSubgroups: number; participants: string[] }> {
+  async stats(options?: AbortOptions): Promise<{ totalSubgroups: number; participants: string[] }> {
     // find the total subgroup count and the dids of participants in the conversation
     try {
       // SPARQL migration
@@ -71,20 +72,21 @@ export class Conversation extends Ad4mModel {
       `;
 
       const [subgroupsResult, participantsResult] = await Promise.all([
-        this.perspective.querySparql<SgBinding[]>(subgroupsQuery),
-        this.perspective.querySparql<DidBinding[]>(participantsQuery),
+        this.perspective.querySparql<SgBinding[]>(subgroupsQuery, options),
+        this.perspective.querySparql<DidBinding[]>(participantsQuery, options),
       ]);
 
       const totalSubgroups = subgroupsResult?.length || 0;
       const participants = (participantsResult || []).map((r) => r.did).filter(Boolean);
       return { totalSubgroups, participants };
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting conversation stats:', error);
       return { totalSubgroups: 0, participants: [] };
     }
   }
 
-  async topics(): Promise<SynergyTopic[]> {
+  async topics(options?: AbortOptions): Promise<SynergyTopic[]> {
     // find the conversations topics (via its subgroups)
     try {
       // SPARQL migration
@@ -103,7 +105,7 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<TopicBinding[]>(sparqlQuery, options);
 
       // Deduplicate by topicBase
       const uniqueTopics = new Map<string, { topicBase: string; topicName: string }>();
@@ -124,20 +126,21 @@ export class Conversation extends Ad4mModel {
         }),
       );
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting conversation topics:', error);
       return [];
     }
   }
 
-  async subgroups(): Promise<ConversationSubgroup[]> {
+  async subgroups(options?: AbortOptions): Promise<ConversationSubgroup[]> {
     // find the conversations subgroup entities — use parent-scoped query
     // instead of this.get() which fetches all Conversation triples
     return ConversationSubgroup.findAll(this.perspective, {
       parent: { model: Conversation, id: this.id },
-    }) as unknown as Promise<ConversationSubgroup[]>;
+    }, options) as unknown as Promise<ConversationSubgroup[]>;
   }
 
-  async subgroupsData(): Promise<SynergyGroup[]> {
+  async subgroupsData(options?: AbortOptions): Promise<SynergyGroup[]> {
     // find the necissary data to render the conversations subgroups in timeline components (include timestamps for the first and last item in each subgroup)
     try {
       // SPARQL migration
@@ -154,7 +157,7 @@ export class Conversation extends Ad4mModel {
         ORDER BY ?timestamp
       `;
 
-      const sparqlResult = await this.perspective.querySparql<SubgroupRowBinding[]>(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql<SubgroupRowBinding[]>(sparqlQuery, options);
 
       // Deduplicate by id
       const subgroupMap = new Map<string, SubgroupRow>();
@@ -189,7 +192,7 @@ export class Conversation extends Ad4mModel {
         }
       `;
 
-      const batchResults = await this.perspective.querySparql<SubgroupTimestampBinding[]>(batchTimestampQuery);
+      const batchResults = await this.perspective.querySparql<SubgroupTimestampBinding[]>(batchTimestampQuery, options);
 
       // Group timestamps by subgroup ID
       const timestampsBySg = new Map<string, number[]>();
@@ -222,6 +225,7 @@ export class Conversation extends Ad4mModel {
       // Sort by actual content start time, not link creation time
       return subgroups.sort((a, b) => Number(a.start) - Number(b.start));
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting conversation subgroups:', error);
       return [];
     }

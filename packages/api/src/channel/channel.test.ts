@@ -239,6 +239,33 @@ describe('Channel.allItems()', () => {
     expect(typed.timestamp).toBe('2026-04-20T10:02:00.000Z');
     expect(voice.timestamp < typed.timestamp).toBe(true);
   });
+
+  // ── AbortSignal handling ───────────────────────────────────────────
+  //
+  // Two contracts the wrapper must honour:
+  //   1. Forward the `signal` to perspective.querySparql so the executor
+  //      receives `request.cancel`.
+  //   2. Re-throw AbortError instead of swallowing it (other errors are
+  //      swallowed for graceful degradation).  Without this, callers
+  //      can't distinguish cancellation from real failures.
+
+  it('forwards the AbortSignal to perspective.querySparql', async () => {
+    const perspective = createMockPerspective(async () => []);
+    const channel = new Channel(perspective as any, 'channel-1');
+    const controller = new AbortController();
+    await channel.allItems({ signal: controller.signal });
+    expect(perspective.querySparql).toHaveBeenCalledWith(
+      expect.any(String),
+      { signal: controller.signal },
+    );
+  });
+
+  it('re-throws AbortError instead of swallowing it', async () => {
+    const perspective = createMockPerspective();
+    perspective.querySparql.mockRejectedValueOnce(new DOMException('Aborted', 'AbortError'));
+    const channel = new Channel(perspective as any, 'channel-1');
+    await expect(channel.allItems()).rejects.toMatchObject({ name: 'AbortError' });
+  });
 });
 
 // ---------------------------------------------------------------------------

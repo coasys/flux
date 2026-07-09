@@ -29,6 +29,7 @@ import TaskColumn from './task-column';
 import TaskBoard from './task-board';
 import updateProfile from './updateProfile';
 export * from './npmApi';
+export type { AbortOptions } from './shared/abort';
 
 export {
   App,

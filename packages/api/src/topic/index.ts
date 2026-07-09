@@ -1,5 +1,6 @@
 import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
 import { parseLit } from '../utils/parseLit';
+import type { AbortOptions } from '../shared/abort';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
@@ -16,7 +17,7 @@ export default class Topic extends Ad4mModel {
   @Property({ through: 'flux://topic' })
   topic: string;
 
-  async linkedConversations(): Promise<SynergyMatch[]> {
+  async linkedConversations(options?: AbortOptions): Promise<SynergyMatch[]> {
     try {
       const sparqlQuery = `
         SELECT ?convId ?relevance ?channelId ?channelName WHERE {
@@ -32,7 +33,7 @@ export default class Topic extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       // Deduplicate by conversation ID
       const dedupMap = new Map<string, SynergyMatch>();
@@ -50,12 +51,13 @@ export default class Topic extends Ad4mModel {
       }
       return Array.from(dedupMap.values());
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting linked conversations:', error);
       return [];
     }
   }
 
-  async linkedSubgroups(): Promise<SynergyMatch[]> {
+  async linkedSubgroups(options?: AbortOptions): Promise<SynergyMatch[]> {
     try {
       const sparqlQuery = `
         SELECT ?subgroup ?relevance ?channelId ?channelName WHERE {
@@ -71,7 +73,7 @@ export default class Topic extends Ad4mModel {
         }
       `;
 
-      const sparqlResult = await this.perspective.querySparql(sparqlQuery);
+      const sparqlResult = await this.perspective.querySparql(sparqlQuery, options);
 
       // Deduplicate by subgroup ID
       const dedupMap = new Map<string, SynergyMatch>();
@@ -89,6 +91,7 @@ export default class Topic extends Ad4mModel {
       }
       return Array.from(dedupMap.values());
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') throw error;
       console.error('Error getting linked subgroups:', error);
       return [];
     }
