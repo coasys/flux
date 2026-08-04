@@ -131,6 +131,9 @@ export class SfuManager {
   private callbacks: Map<SfuEvent, SfuEventCallback[]> = new Map();
   private iceServers: RTCIceServer[];
   private streamToParticipant: Map<string, string> = new Map();
+  /** Mid-to-DID mapping from server renegotiation offers — the reliable
+   *  correlation path (arrival-order trackDidIndex serves as fallback). */
+  private midToParticipant: Map<string, string> = new Map();
   /** Index into knownParticipantDids for correlating tracks to DIDs */
   private trackDidIndex: number = 0;
   /**
@@ -305,10 +308,18 @@ export class SfuManager {
         (p) => p.stream.id === stream.id
       );
 
-      // Resolve participant DID: try stream mapping first, then known DIDs by order, then fallback
-      let participantDid = this.streamToParticipant.get(stream.id);
+      // Resolve participant DID via three paths (most reliable first):
+      // 1. Mid-based lookup from server track_mapping (deterministic)
+      // 2. Stream-id cache from a prior ontrack for the same stream
+      // 3. Arrival-order index into knownParticipantDids (fragile fallback)
+      let participantDid: string | undefined;
+      const mid = event.transceiver?.mid;
+      if (mid) {
+        participantDid = this.midToParticipant.get(mid);
+        if (participantDid) this.streamToParticipant.set(stream.id, participantDid);
+      }
+      if (!participantDid) participantDid = this.streamToParticipant.get(stream.id);
       if (!participantDid && this.state.knownParticipantDids.length > 0 && this.trackDidIndex < this.state.knownParticipantDids.length) {
-        // Correlate by track arrival order matching the DID list
         participantDid = this.state.knownParticipantDids[this.trackDidIndex];
         this.streamToParticipant.set(stream.id, participantDid);
         this.trackDidIndex++;
@@ -395,11 +406,18 @@ export class SfuManager {
         neighbourhoodUrl: string
         roomName: string
         sdpOffer: string
+        trackMapping?: { mid: string; agentDid: string; mediaKind: string }[]
       }) => {
-        // Double-check filtering — defensive against any future
-        // events-WS fanout regression.
         if (event.neighbourhoodUrl !== this.neighbourhoodUrl) return
         if (event.roomName !== this.roomId) return
+
+        // Populate mid-to-DID attribution before applying the SDP —
+        // ontrack fires synchronously during setRemoteDescription.
+        if (event.trackMapping) {
+          for (const entry of event.trackMapping) {
+            this.midToParticipant.set(entry.mid, entry.agentDid)
+          }
+        }
 
         console.info(`SFU: received renegotiation offer for ${event.roomName}`)
         const currentPc = this.state.peerConnection
@@ -465,5 +483,6 @@ export class SfuManager {
     try { await this.leave(); } catch (e) { console.error("Error during SFU destroy:", e); }
     this.callbacks.clear();
     this.streamToParticipant.clear();
+    this.midToParticipant.clear();
   }
 }
