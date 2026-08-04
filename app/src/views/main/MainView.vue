@@ -14,7 +14,9 @@
       </KeepAlive>
     </RouterView>
 
-    <Modals />
+    <Teleport to="body">
+      <Modals />
+    </Teleport>
   </AppLayout>
 </template>
 

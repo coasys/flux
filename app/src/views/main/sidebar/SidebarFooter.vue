@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '@/stores';
+import { useAppStore, useUiStore } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Profile } from '@coasys/flux-types';
 import { storeToRefs } from 'pinia';
@@ -29,7 +29,9 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const appStore = useAppStore();
+const uiStore = useUiStore();
 const { me } = storeToRefs(appStore);
+const { isMobile } = storeToRefs(uiStore);
 const profile = ref<Profile | null>(null);
 const showBottomOptions = ref(false);
 
@@ -39,6 +41,10 @@ function logOut(): void {
 }
 
 function goToSettings(): void {
+  // On mobile the call window is a fullscreen overlay (z-index above the
+  // settings route), so minimise it first — otherwise settings opens behind
+  // the call. The call itself stays alive (inCall is untouched).
+  if (isMobile.value) uiStore.setCallWindowOpen(false);
   router.push({ name: 'settings' });
   showBottomOptions.value = false;
 }

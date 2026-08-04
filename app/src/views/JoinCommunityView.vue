@@ -1,23 +1,26 @@
 <template>
   <div class="join-call-view">
-    <j-box p="800">
+    <!-- Demo mode: render nothing while auto-join runs silently; surface on failure -->
+    <j-box v-if="!isDemoMode || error" p="800">
       <j-flex direction="column" a="center" gap="600">
-        <j-flex gap="400" a="center">
-          <j-icon name="people" size="lg" color="primary-500" />
-          <j-text nomargin variant="heading-sm">Join Community</j-text>
-        </j-flex>
+        <template v-if="!isDemoMode">
+          <j-flex gap="400" a="center">
+            <j-icon name="people" size="lg" color="primary-500" />
+            <j-text nomargin variant="heading-sm">Join Community</j-text>
+          </j-flex>
 
-        <j-flex direction="column" a="center" gap="200">
-          <j-text color="ui-600" nomargin>You need to join this community to continue.</j-text>
-          <j-text color="ui-600" nomargin>Would you like to join now?</j-text>
-        </j-flex>
+          <j-flex direction="column" a="center" gap="200">
+            <j-text color="ui-600" nomargin>You need to join this community to continue.</j-text>
+            <j-text color="ui-600" nomargin>Would you like to join now?</j-text>
+          </j-flex>
 
-        <j-flex gap="400">
-          <j-button :disabled="isJoining" size="lg" full @click="router.push('/home')"> Cancel </j-button>
-          <j-button :loading="isJoining" :disabled="isJoining" variant="primary" size="lg" full @click="handleJoin">
-            Join Community
-          </j-button>
-        </j-flex>
+          <j-flex gap="400">
+            <j-button :disabled="isJoining" size="lg" full @click="router.push('/home')"> Cancel </j-button>
+            <j-button :loading="isJoining" :disabled="isJoining" variant="primary" size="lg" full @click="handleJoin">
+              Join Community
+            </j-button>
+          </j-flex>
+        </template>
 
         <j-text v-if="error" variant="body" color="danger-600">
           {{ error }}
@@ -31,7 +34,7 @@
 import { useAppStore, useUiStore } from '@/stores';
 import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
 import { joinCommunity } from '@coasys/flux-api';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -39,8 +42,16 @@ const router = useRouter();
 const appStore = useAppStore();
 const uiStore = useUiStore();
 
+const isDemoMode = !!new URLSearchParams(window.location.search).get('demoHost')?.trim();
 const isJoining = ref(false);
 const error = ref('');
+
+// In demo mode, skip the confirmation UI and join immediately on mount
+onMounted(async () => {
+  if (isDemoMode) {
+    await handleJoin();
+  }
+});
 
 async function handleJoin() {
   isJoining.value = true;

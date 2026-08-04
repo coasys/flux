@@ -1,6 +1,7 @@
-import { useAppStore, useRouteMemoryStore, useWebrtcStore } from '@/stores';
-import { getAd4mConnect, isEmbedded } from '@coasys/ad4m-connect';
-import { createPinia, storeToRefs } from 'pinia';
+import { useAppStore, useRouteMemoryStore, useUiStore, useWebrtcStore } from '@/stores';
+import { connectAsGuest, getAd4mConnect, isEmbedded } from '@coasys/ad4m-connect';
+import { restoreNeighbourhoodPrefix } from '@/utils/routeUtils';
+import { createPinia } from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp, h } from 'vue';
 import { version } from '../package.json';
@@ -38,6 +39,41 @@ const vueApp = createApp({ render: () => h(App) })
 const appStore = useAppStore(pinia);
 const routeMemoryStore = useRouteMemoryStore(pinia);
 
+// Pending perspective navigation from WE, queued if received before initialization completes
+let pendingPerspectiveNavigation: string | null = null;
+
+function handlePerspectiveNavigation(communityId: string): void {
+  const key = restoreNeighbourhoodPrefix(communityId);
+  const privateKey = `private://${communityId}`;
+  const community = appStore.myCommunities[key] ?? appStore.myCommunities[privateKey];
+
+  if (community) {
+    const lastRoute = routeMemoryStore.getLastCommunityRoute(communityId);
+    router.push(lastRoute ? lastRoute.path : { name: 'community', params: { communityId } });
+  } else {
+    // Perspective exists but has no Flux community — offer to initialise one
+    router.push({ name: 'init-community', params: { communityId } });
+  }
+}
+
+// When embedded in WE: hide Flux sidebar and listen for perspective navigation messages
+if (isEmbedded()) {
+  const uiStore = useUiStore(pinia);
+  uiStore.setAppSidebarOpen(false);
+
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.data?.type !== 'NAVIGATE_PERSPECTIVE') return;
+    const communityId = event.data.communityId as string;
+    if (!communityId) return;
+
+    if (!appStore.initialized) {
+      pendingPerspectiveNavigation = communityId;
+    } else {
+      handlePerspectiveNavigation(communityId);
+    }
+  });
+}
+
 // Tracks the route the user was on when credits ran out, so we can return them after topping up
 let savedPreCreditRoute: typeof routeMemoryStore.currentRoute | null = null;
 
@@ -48,47 +84,60 @@ const currentParams = router.resolve(window.location.hash.slice(1) || '/').param
 // Mount the app immediately so UI is responsive
 vueApp.mount('#app');
 
+// Read once at module load — survives any hash changes that follow
+const urlParams = new URLSearchParams(window.location.search);
+const demoHost  = urlParams.get('demoHost')?.trim() || null;
+
+const appInfo = {
+  name: 'Flux',
+  description: 'A Social Toolkit for the New Internet',
+  url: window.location.origin,
+  iconPath: window.location.origin + '/icon.png',
+};
+const capabilities = [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }];
+
 // Initialize Ad4m client in an async IIFE to support older browsers
 (async () => {
   try {
-    // Initialize Ad4m client
-    const { client } = getAd4mConnect({
-      appInfo: {
-        name: 'Flux',
-        description: 'A Social Toolkit for the New Internet',
-        url: window.location.origin,
-        iconPath: window.location.origin + '/icon.png',
-      },
-      capabilities: [{ with: { domain: '*', pointers: ['*'] }, can: ['*'] }],
-      hosting: true,
-      allowedOrigins: (import.meta.env.VITE_ALLOWED_ORIGINS as string | undefined)
-        ?.split(',')
-        .map((o) => o.trim())
-        .filter(Boolean),
-      onCreditsDepleted: () => {
-        // Leave any active call first so the transcription widget is cleaned up
-        const webrtcStore = useWebrtcStore(pinia);
-        if (webrtcStore.inCall) webrtcStore.leaveRoom();
+    let ad4mClient;
 
-        // Save current route once per depletion session, then retreat to the splash/home screen.
-        // The community views, signalling heartbeats, and AI task loops all stop naturally
-        // because nothing is mounted at /home.
-        if (!savedPreCreditRoute) {
-          savedPreCreditRoute = { ...routeMemoryStore.currentRoute };
-        }
-        routeMemoryStore.setCurrentRoute({});
-        router.push('/home');
-      },
-      onUseApp: () => {
-        // User explicitly clicked "Use App" after topping up — navigate back to where they were.
-        if (savedPreCreditRoute?.communityId) {
-          const lastRoute = routeMemoryStore.getLastCommunityRoute(savedPreCreditRoute.communityId as string);
-          router.push(lastRoute?.path || '/home');
-        }
-        savedPreCreditRoute = null;
-      },
-    });
-    const ad4mClient = await client;
+    if (demoHost) {
+      // Fast path: silently create/reuse a guest account on the remote host.
+      // No ad4m-connect UI is shown — connectAsGuest handles credential generation
+      // and login/signup automatically, then resolves with a ready Ad4mClient.
+      ad4mClient = await connectAsGuest({ appInfo, capabilities }, demoHost);
+    } else {
+      // Standard path: show the ad4m-connect UI for local or remote connection.
+      const { client } = getAd4mConnect({
+        appInfo,
+        capabilities,
+        hosting: true,
+        allowedOrigins: (import.meta.env.VITE_ALLOWED_ORIGINS as string | undefined)
+          ?.split(',')
+          .map((o) => o.trim())
+          .filter(Boolean),
+        onCreditsDepleted: () => {
+          // Leave any active call first so the transcription widget is cleaned up
+          const webrtcStore = useWebrtcStore(pinia);
+          if (webrtcStore.inCall) webrtcStore.leaveRoom();
+
+          // Save current route once per depletion session, then retreat to home.
+          if (!savedPreCreditRoute) {
+            savedPreCreditRoute = { ...routeMemoryStore.currentRoute };
+          }
+          routeMemoryStore.setCurrentRoute({});
+          router.push('/home');
+        },
+        onUseApp: () => {
+          if (savedPreCreditRoute?.communityId) {
+            const lastRoute = routeMemoryStore.getLastCommunityRoute(savedPreCreditRoute.communityId as string);
+            router.push(lastRoute?.path || '/home');
+          }
+          savedPreCreditRoute = null;
+        },
+      });
+      ad4mClient = await client;
+    }
 
     if (!ad4mClient) throw new Error('Ad4mClient not available');
 
@@ -101,6 +150,13 @@ vueApp.mount('#app');
     // Fallback to signup if no Flux account found
     const hasFluxAccount = appStore.me.perspective?.links.some((e) => e.data.source.startsWith('flux://'));
     if (!hasFluxAccount) return;
+
+    // If WE sent a NAVIGATE_PERSPECTIVE before init completed, handle it now and we're done.
+    if (isEmbedded() && pendingPerspectiveNavigation) {
+      handlePerspectiveNavigation(pendingPerspectiveNavigation);
+      pendingPerspectiveNavigation = null;
+      return;
+    }
 
     // Determine which params to use for navigation (prioritize current params)
     let params = null;

@@ -3,7 +3,7 @@ import { DEFAULT_TESTING_NEIGHBOURHOOD } from '@/constants';
 import { ToastState, UpdateState } from '@/stores';
 import { getCachedAgentProfile } from '@/utils/userProfileCache';
 import { Ad4mClient, Agent, PerspectiveProxy } from '@coasys/ad4m';
-import { Community, joinCommunity } from '@coasys/flux-api';
+import { Community, ensureModelsRegistered, isModelRegistered, joinCommunity } from '@coasys/flux-api';
 import { Profile } from '@coasys/flux-types';
 import { defineStore } from 'pinia';
 import { computed, ref, shallowRef, toRaw } from 'vue';
@@ -97,12 +97,25 @@ export const useAppStore = defineStore(
           toRaw(myPerspectives.value)
             .map(async (perspective) => {
               try {
-                // Ensure SDNA is installed before querying (needed for imported perspectives)
-                await (perspective as PerspectiveProxy).ensureSDNASubjectClass(Community);
-                const allCommunities = await Community.findAll(perspective as PerspectiveProxy);
+                const p = perspective as PerspectiveProxy;
+                if (p.sharedUrl) {
+                  // Shared neighbourhoods may not yet have this agent's local SDNA
+                  // registered (e.g. just joined, not yet synced) — ensureModelsRegistered
+                  // diffs against the perspective's actual state first, so this is safe to
+                  // call on every load without accumulating duplicate SDNA links.
+                  await ensureModelsRegistered(p, [Community]);
+                } else if (!(await isModelRegistered(p, Community))) {
+                  // Local-only perspectives never need installing here: a genuine local
+                  // community already gets its SDNA written at creation time (see
+                  // createCommunity). Anything local that still lacks it was never a Flux
+                  // community — e.g. another app's own perspective (WE's we-root/we-test) —
+                  // so there's nothing to find and nothing to install.
+                  return null;
+                }
+                const allCommunities = await Community.findAll(p);
                 const community = allCommunities[0];
                 if (!community) return null;
-                const key = perspective.sharedUrl || `private://${perspective.uuid}`;
+                const key = p.sharedUrl || `private://${p.uuid}`;
                 return [key, community] as const;
               } catch (e) {
                 console.warn(`Failed to load community from perspective ${perspective.uuid}:`, e);

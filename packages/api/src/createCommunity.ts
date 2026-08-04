@@ -10,6 +10,7 @@ import Conversation from './conversation';
 import ConversationSubgroup from './conversation-subgroup';
 import Embedding from './embedding';
 import Message from './message';
+import { ensureModelsRegistered } from './sdnaHelpers';
 import SemanticRelationship from './semantic-relationship';
 import Topic from './topic';
 import TaskColumn from './task-column';
@@ -43,19 +44,23 @@ export default async function createCommunity({
       : await client.perspective.add(name);
     if (!perspective) throw new Error('Failed to create or retrieve perspective');
 
-    // Add models to the perspectives SDNA
-    await perspective.ensureSDNASubjectClass(Community);
-    await perspective.ensureSDNASubjectClass(Channel);
-    await perspective.ensureSDNASubjectClass(App);
-    await perspective.ensureSDNASubjectClass(Conversation);
-    await perspective.ensureSDNASubjectClass(ConversationSubgroup);
-    await perspective.ensureSDNASubjectClass(Topic);
-    await perspective.ensureSDNASubjectClass(Embedding);
-    await perspective.ensureSDNASubjectClass(SemanticRelationship);
-    await perspective.ensureSDNASubjectClass(Message);
-    await perspective.ensureSDNASubjectClass(TaskBoard);
-    await perspective.ensureSDNASubjectClass(TaskColumn);
-    await perspective.ensureSDNASubjectClass(Task);
+    // Add models to the perspectives SDNA. ensureModelsRegistered diffs against the
+    // perspective's actual state first, so re-running this (e.g. createCommunityFromPerspective
+    // on an already-initialized perspective) doesn't write duplicate SDNA links.
+    await ensureModelsRegistered(perspective, [
+      Community,
+      Channel,
+      App,
+      Conversation,
+      ConversationSubgroup,
+      Topic,
+      Embedding,
+      SemanticRelationship,
+      Message,
+      TaskBoard,
+      TaskColumn,
+      Task,
+    ]);
 
     // Create a neighbourhood from the perspective
     const uid = uuidv4();
@@ -64,7 +69,7 @@ export default async function createCommunity({
     const templateAddress = linkLangAddress || langs?.[0];
     if (!templateAddress) throw new Error('No link language templates available to publish neighbourhood.');
     const linkLanguage = await client.languages.applyTemplateAndPublish(templateAddress, templateData);
-    const metaLinks = await createNeighbourhoodMeta(client, name, description, author);
+    const metaLinks = await createNeighbourhoodMeta(client, perspective.uuid, name, description, author);
 
     let sharedUrl = perspective.sharedUrl;
 
