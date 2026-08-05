@@ -18,6 +18,24 @@ import type {
   CallSessionInfo as CallSession,
 } from "@coasys/ad4m";
 
+/** Minimal interface for the neighbourhood proxy methods used by SfuManager. */
+export interface SfuNeighbourhoodApi {
+  callJoin(neighbourhoodUrl: string, roomName: string, sdpOffer: string): Promise<CallSession>;
+  callLeave(neighbourhoodUrl: string, roomName: string): Promise<boolean>;
+  callSetQualityPreference(neighbourhoodUrl: string, roomName: string, preference: string): Promise<boolean>;
+  callAnswerServerOffer(neighbourhoodUrl: string, roomName: string, sdpAnswer: string): Promise<boolean>;
+  subscribeCallRenegotiationOffer(
+    targetDid: string,
+    callback: (event: {
+      targetDid: string;
+      neighbourhoodUrl: string;
+      roomName: string;
+      sdpOffer: string;
+      trackMapping?: { mid: string; agentDid: string; mediaKind: string }[];
+    }) => void,
+  ): () => void;
+}
+
 export type SfuTopology = "sfu" | "mesh" | "cascaded";
 
 export interface SfuNodeState {
@@ -123,7 +141,7 @@ export async function resolveTopology(
  * SFU call manager. Handles WebRTC connection to the SFU server via the executor's GraphQL API.
  */
 export class SfuManager {
-  private neighbourhood: any; // NeighbourhoodClient or NeighbourhoodProxy
+  private neighbourhood: SfuNeighbourhoodApi;
   private neighbourhoodUrl: string; // URL for NeighbourhoodClient calls
   private roomId: string;
   private agentDid: string;
@@ -131,6 +149,7 @@ export class SfuManager {
   private callbacks: Map<SfuEvent, SfuEventCallback[]> = new Map();
   private iceServers: RTCIceServer[];
   private streamToParticipant: Map<string, string> = new Map();
+  private failoverAttempts: number = 0;
   /** Mid-to-DID mapping from server renegotiation offers — the reliable
    *  correlation path (arrival-order trackDidIndex serves as fallback). */
   private midToParticipant: Map<string, string> = new Map();
@@ -144,7 +163,7 @@ export class SfuManager {
   private renegotiationUnsubscribe: (() => void) | null = null;
 
   constructor(
-    neighbourhood: any,
+    neighbourhood: SfuNeighbourhoodApi,
     roomId: string,
     agentDid: string,
     neighbourhoodUrl?: string,
@@ -208,6 +227,14 @@ export class SfuManager {
   /** Handle SFU node disconnection in cascaded mode — reconnect to another node. */
   private async handleCascadeFailover(): Promise<void> {
     if (this.state.topology !== "cascaded") return;
+
+    this.failoverAttempts++;
+    const maxAttempts = Math.max(this.state.cascadeNodes.length, 3);
+    if (this.failoverAttempts >= maxAttempts) {
+      console.error("Cascade failover exhausted — no healthy nodes");
+      this.emit("error", new Error("Cascade failover exhausted — no healthy nodes"));
+      return;
+    }
 
     const availableNodes = this.state.cascadeNodes.filter(
       n => n.did !== this.state.connectedNodeDid
@@ -392,6 +419,7 @@ export class SfuManager {
 
     const answer = JSON.parse(session.sdpAnswer);
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    this.failoverAttempts = 0;
 
     // Subscribe to server-initiated renegotiation offers — the SFU
     // pushes a fresh SDP offer whenever its outbound track set
@@ -460,6 +488,10 @@ export class SfuManager {
     }
     this.state.participants.clear();
     this.state.participantId = null;
+    this.midToParticipant.clear();
+    this.streamToParticipant.clear();
+    this.trackDidIndex = 0;
+    this.state.knownParticipantDids = [];
   }
 
   async setQualityPreference(preference: QualityPreference): Promise<void> {

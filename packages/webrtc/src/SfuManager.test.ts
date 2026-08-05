@@ -27,6 +27,8 @@ function mockNeighbourhood(overrides: Partial<Record<string, any>> = {}) {
     ),
     callLeave: vi.fn().mockResolvedValue(true),
     callSetQualityPreference: vi.fn().mockResolvedValue(true),
+    callAnswerServerOffer: vi.fn().mockResolvedValue(true),
+    subscribeCallRenegotiationOffer: vi.fn().mockReturnValue(() => {}),
   } as any;
 }
 
@@ -225,5 +227,26 @@ describe("SfuManager", () => {
     manager.on("topology-changed", cb);
     (manager as any).emit("topology-changed", "mesh");
     expect(cb).toHaveBeenCalledWith("mesh");
+  });
+
+  it("cascade failover stops after exhausting nodes", () => {
+    const neighbourhood = mockNeighbourhood();
+    const manager = new SfuManager(neighbourhood, "room1", "did:key:agent");
+    (manager as any).state.topology = "cascaded";
+    (manager as any).state.cascadeNodes = [
+      { did: "a", participantCount: 5, capacityHint: 10 },
+    ];
+    (manager as any).state.connectedNodeDid = "a";
+
+    const errorCb = vi.fn();
+    manager.on("error", errorCb);
+
+    // Simulate multiple failover attempts
+    for (let i = 0; i < 5; i++) {
+      (manager as any).handleCascadeFailover();
+    }
+
+    // Should have emitted error after exhausting nodes
+    expect(errorCb).toHaveBeenCalled();
   });
 });
