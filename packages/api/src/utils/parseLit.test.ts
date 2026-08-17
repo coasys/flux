@@ -27,12 +27,13 @@ describe('parseLit', () => {
     expect(parseLit(url)).toBe('hello world');
   });
 
-  // Note: prior to the typed-RDF-literals refactor, Flux stored message
-  // bodies as `Literal.from({ data: text }).toUrl()` envelopes and this
+  // Prior to the typed-RDF-literals refactor, Flux stored many scalar model
+  // properties as `Literal.from({ data: text }).toUrl()` envelopes and this
   // helper extracted `.data` for legacy read compatibility.  With scalar
-  // properties now stored as deterministic typed literals, envelope-wrapped
-  // objects arriving through SPARQL are treated uniformly — the whole
-  // object is JSON-stringified (matches @coasys/ad4m's `parseLit`).
+  // properties now stored as deterministic typed literals, only Message.body
+  // still uses signed-envelope storage (resolveLanguage: 'literal').  Objects
+  // returned by Literal.fromUrl() are JSON-stringified for display
+  // (matches @coasys/ad4m's parseLit contract).
   it('JSON-stringifies JSON literal objects (including {data: ...} envelopes)', () => {
     const { Literal } = require('@coasys/ad4m');
     const url = Literal.from({ data: 'extracted' }).toUrl();

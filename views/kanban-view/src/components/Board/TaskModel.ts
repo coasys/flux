@@ -4,7 +4,6 @@ import { Ad4mModel, Model, Property, HasMany } from '@coasys/ad4m';
 export class Task extends Ad4mModel {
   @Property({
     through: 'rdf://name',
-    resolveLanguage: 'literal',
     required: true,
     writable: true,
     initial: 'New task',
