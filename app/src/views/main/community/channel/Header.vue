@@ -135,7 +135,7 @@ watch(
   ([channelId, count]) => {
     fluxDebug('ChannelHeader.plugins', 'query.state', {
       channelId,
-      perspectiveUuid: perspective.value?.uuid,
+      perspectiveUuid: perspective?.uuid,
       viewCount: count,
       firstViewPkg: views.value?.[0]?.pkg,
       firstViewName: views.value?.[0]?.name,
