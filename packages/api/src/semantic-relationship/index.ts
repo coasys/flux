@@ -1,5 +1,4 @@
 import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
-import { parseLit } from '../utils/parseLit';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 const TYPE_MAP: Record<string, string> = {
@@ -72,7 +71,8 @@ export default class SemanticRelationship extends Ad4mModel {
             type: 'Conversation',
             embedding: JSON.parse(embeddingExpression.data),
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            // has_channel_name is a typed XSD literal — no decode needed.
+            channelName: binding.channelName ?? '',
           };
         }),
       );
@@ -110,7 +110,8 @@ export default class SemanticRelationship extends Ad4mModel {
             type: 'Subgroup',
             embedding: JSON.parse(embeddingExpression.data),
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            // has_channel_name is a typed XSD literal — no decode needed.
+            channelName: binding.channelName ?? '',
           };
         }),
       );
@@ -153,7 +154,8 @@ export default class SemanticRelationship extends Ad4mModel {
             type: typeNameMap[binding.type] || binding.type,
             embedding: JSON.parse(embeddingExpression.data),
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            // Typed XSD literal.
+            channelName: binding.channelName ?? '',
           };
         }),
       );
@@ -197,7 +199,8 @@ export default class SemanticRelationship extends Ad4mModel {
             type: itemType,
             embedding: JSON.parse(embeddingExpression.data),
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            // Typed XSD literal.
+            channelName: binding.channelName ?? '',
           };
         }),
       );

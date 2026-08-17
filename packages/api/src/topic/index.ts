@@ -1,5 +1,4 @@
 import { Model, Ad4mModel, Flag, Property } from '@coasys/ad4m';
-import { parseLit } from '../utils/parseLit';
 import { SynergyMatch } from '@coasys/flux-utils';
 
 export class TopicWithRelevance {
@@ -42,9 +41,10 @@ export default class Topic extends Ad4mModel {
           dedupMap.set(id, {
             id,
             type: 'Conversation',
-            relevance: parseInt(parseLit(binding.relevance), 10) || 0,
+            // Typed XSD literals — SPARQL bindings give lexical form directly.
+            relevance: parseInt(binding.relevance ?? '', 10) || 0,
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            channelName: binding.channelName ?? '',
           });
         }
       }
@@ -81,9 +81,10 @@ export default class Topic extends Ad4mModel {
           dedupMap.set(id, {
             id,
             type: 'ConversationSubgroup',
-            relevance: parseInt(parseLit(binding.relevance), 10) || 0,
+            // Typed XSD literals — no decode needed.
+            relevance: parseInt(binding.relevance ?? '', 10) || 0,
             channelId: binding.channelId,
-            channelName: parseLit(binding.channelName),
+            channelName: binding.channelName ?? '',
           });
         }
       }
