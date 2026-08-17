@@ -86,8 +86,9 @@ import { useAppStore, useModalStore, useUiStore, useWebrtcStore } from '@/stores
 import { stripChannelPrefix } from '@/utils/routeUtils';
 import { App, Channel, ChannelSummary } from '@coasys/flux-api';
 import { useLiveQuery } from '@coasys/ad4m-vue-hooks';
+import { fluxDebug, fluxDebugWarn } from '@coasys/flux-utils';
 import { storeToRefs } from 'pinia';
-import { computed, onActivated, onMounted } from 'vue';
+import { computed, onActivated, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineOptions({ name: 'Header' });
@@ -123,6 +124,31 @@ const agentsInCall = computed(() => signallingService?.getAgentsInCall(channelId
 const { data: views } = useLiveQuery(App, perspective, {
   parent: { model: Channel, id: channel.value?.id ?? '' },
 });
+
+// Debug: trace every state transition on the channel-view (plugin tabs) query.
+// Symptom we're chasing: on the AD4M typed-RDF-literals branch, the plugin
+// tabs disappear silently — the header renders no <label class="tab"> entries
+// because `views` is empty, and there is no error surfaced to the user. This
+// lets us see whether App.parent=Channel resolution is returning [] and why.
+watch(
+  [() => channel.value?.id, () => views.value?.length ?? -1],
+  ([channelId, count]) => {
+    fluxDebug('ChannelHeader.plugins', 'query.state', {
+      channelId,
+      perspectiveUuid: perspective.value?.uuid,
+      viewCount: count,
+      firstViewPkg: views.value?.[0]?.pkg,
+      firstViewName: views.value?.[0]?.name,
+    });
+    if (channelId && count === 0) {
+      fluxDebugWarn('ChannelHeader.plugins', 'query.empty', {
+        channelId,
+        hint: 'useLiveQuery(App, parent=Channel) returned no plugin views — check that App @Property/@HasMany resolves through the has_child predicate and the SDNA subject class is loaded.',
+      });
+    }
+  },
+  { immediate: true },
+);
 
 function manageChannelPlugins() {
   modalStore.showManageChannelPluginsModal = true;

@@ -1,4 +1,4 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
+import { Model, Ad4mModel, Flag, HasMany, Property, Literal, parseLit } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
@@ -167,7 +167,8 @@ export default class ConversationSubgroup extends Ad4mModel {
           if (!existing.channelTimestamp) {
             existing.channelTimestamp = transcriptStart || channelTs || fallbackTs;
           }
-          if (!existing.messageBody) existing.messageBody = binding.body ?? '';
+          // Message.body is envelope-encoded (resolveLanguage: 'literal'); decode via parseLit.
+          if (!existing.messageBody) existing.messageBody = parseLit(binding.body);
           if (!existing.postTitle) existing.postTitle = binding.title ?? '';
           if (!existing.taskName) existing.taskName = binding.taskName ?? '';
           if (!existing.type) existing.type = binding.type;
@@ -185,7 +186,8 @@ export default class ConversationSubgroup extends Ad4mModel {
           type: binding.type,
           author: binding.author,
           channelTimestamp,
-          messageBody: binding.body ?? '',
+          // Message.body is envelope-encoded (resolveLanguage: 'literal'); decode via parseLit.
+          messageBody: parseLit(binding.body),
           postTitle: binding.title ?? '',
           taskName: binding.taskName ?? '',
         };

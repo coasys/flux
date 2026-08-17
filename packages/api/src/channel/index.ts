@@ -1,7 +1,7 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseSparqlCount, CountBinding } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
-import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
+import { SynergyGroup, SynergyItem, ItemType, icons, fluxDebug, fluxDebugWarn } from '@coasys/flux-utils';
 import App from '../app';
 import Conversation from '../conversation';
 import Message from '../message';
@@ -117,15 +117,37 @@ export class Channel extends Ad4mModel {
 
       const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(sparqlQuery);
 
+      // Debug: log raw SPARQL binding shape. The typed-RDF-literals refactor
+      // in coasys/ad4m#874 changed wire form for scalar values; if body still
+      // arrives as a `literal:string:*` envelope, storage-vs-decode is mismatched.
+      fluxDebug('Channel.allItems', 'sparql.result', {
+        channelId: this.id,
+        rowCount: (sparqlResult || []).length,
+        firstRow: sparqlResult?.[0],
+        types: [...new Set((sparqlResult || []).map((r) => r.type))],
+      });
+      if (sparqlResult?.length) {
+        const envelope = sparqlResult.find((r) => typeof r.body === 'string' && r.body.startsWith('literal:'));
+        if (envelope) {
+          fluxDebugWarn('Channel.allItems', 'sparql.body-is-envelope', {
+            channelId: this.id,
+            sampleBody: envelope.body?.slice(0, 120),
+            hint: 'Message.body arrives as a `literal:*` envelope URI — parseLit() decode is required.',
+          });
+        }
+      }
+
       const mapped = (sparqlResult || []).map((binding) => {
         let text = '';
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
-        // body/title/taskName/transcriptStart are stored as typed XSD
-        // literals; Oxigraph returns their lexical form directly, no decode.
+        // title / taskName / transcriptStart are typed XSD literals — SPARQL
+        // binding returns their lexical form directly, no decode.
+        // Only Message.body is an envelope literal (resolveLanguage: 'literal')
+        // so it still needs parseLit() to unwrap the `.data` field.
         if (itemType === 'flux://has_message') {
-          text = binding.body ?? '';
+          text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
           text = binding.title ?? '';
@@ -230,9 +252,10 @@ export class Channel extends Ad4mModel {
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
-        // Typed XSD literals — no parseLit() decode needed.
+        // Only Message.body needs parseLit() (envelope literal). All other
+        // scalar fields are typed XSD literals and used as-is.
         if (itemType === 'flux://has_message') {
-          text = binding.body ?? '';
+          text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
           text = binding.title ?? '';

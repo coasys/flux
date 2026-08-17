@@ -2,6 +2,7 @@ import { PerspectiveProxy } from '@coasys/ad4m';
 import { useLiveQuery } from '@coasys/ad4m-react-hooks';
 import { AgentClient } from '@coasys/ad4m/lib/src/agent/AgentClient';
 import { Channel, Message } from '@coasys/flux-api';
+import { fluxDebug, fluxDebugWarn } from '@coasys/flux-utils';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Virtuoso } from 'react-virtuoso';
 import MessageItem from '../MessageItem';
@@ -40,6 +41,7 @@ export default function MessageList({
   const {
     data: entries,
     loading,
+    error,
     totalCount,
     loadMore,
   } = useLiveQuery(Message, perspective, {
@@ -47,6 +49,33 @@ export default function MessageList({
     query: { order: { createdAt: 'DESC' } },
     pageSize: PAGE_SIZE,
   });
+
+  // Debug: trace every state transition on the message-list query.
+  // Silent-empty results are the exact failure mode we're chasing against
+  // the AD4M typed-RDF-literals branch (coasys/ad4m#874) — messages disappear
+  // with no error. This lets us see whether entries.length went 0, whether
+  // totalCount is meaningful, and whether an error is being swallowed.
+  useEffect(() => {
+    fluxDebug('MessageList', 'query.state', {
+      source,
+      isThread: !!isThread,
+      parentModel: isThread ? 'Message.thread' : 'Channel',
+      perspectiveUuid: perspective?.uuid,
+      loading,
+      error: error || null,
+      entriesLength: entries.length,
+      totalCount,
+      firstEntryId: entries[0]?.id,
+      firstEntryBodyLen: entries[0]?.body?.length ?? null,
+    });
+    if (!loading && !error && entries.length === 0 && totalCount === 0) {
+      fluxDebugWarn('MessageList', 'query.empty-no-error', {
+        source,
+        parent: isThread ? { model: 'Message', id: source, field: 'thread' } : { model: 'Channel', id: source },
+        hint: 'useLiveQuery returned no messages and no error — check parent scope resolution, SPARQL bindings, and typed-literal storage on Message.body.',
+      });
+    }
+  }, [source, isThread, perspective?.uuid, loading, error, entries.length, totalCount]);
 
   const messages = useMemo(() => {
     // Reverse order after pagination for inverted message scrolling
