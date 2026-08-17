@@ -27,10 +27,16 @@ describe('parseLit', () => {
     expect(parseLit(url)).toBe('hello world');
   });
 
-  it('extracts .data from JSON literal objects', () => {
+  // Note: prior to the typed-RDF-literals refactor, Flux stored message
+  // bodies as `Literal.from({ data: text }).toUrl()` envelopes and this
+  // helper extracted `.data` for legacy read compatibility.  With scalar
+  // properties now stored as deterministic typed literals, envelope-wrapped
+  // objects arriving through SPARQL are treated uniformly — the whole
+  // object is JSON-stringified (matches @coasys/ad4m's `parseLit`).
+  it('JSON-stringifies JSON literal objects (including {data: ...} envelopes)', () => {
     const { Literal } = require('@coasys/ad4m');
     const url = Literal.from({ data: 'extracted' }).toUrl();
-    expect(parseLit(url)).toBe('extracted');
+    expect(parseLit(url)).toBe(JSON.stringify({ data: 'extracted' }));
   });
 
   it('JSON-stringifies objects without .data field', () => {

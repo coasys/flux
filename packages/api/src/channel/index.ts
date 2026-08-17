@@ -1,4 +1,4 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseSparqlCount, CountBinding } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
@@ -122,21 +122,23 @@ export class Channel extends Ad4mModel {
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
+        // body/title/taskName/transcriptStart are stored as typed XSD
+        // literals; Oxigraph returns their lexical form directly, no decode.
         if (itemType === 'flux://has_message') {
-          text = parseLit(binding.body);
+          text = binding.body ?? '';
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title);
+          text = binding.title ?? '';
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName);
+          text = binding.taskName ?? '';
           type = 'Task';
         }
 
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
+          timestamp: new Date(binding.transcriptStart || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] || 'question',
@@ -228,21 +230,22 @@ export class Channel extends Ad4mModel {
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
+        // Typed XSD literals — no parseLit() decode needed.
         if (itemType === 'flux://has_message') {
-          text = parseLit(binding.body);
+          text = binding.body ?? '';
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title);
+          text = binding.title ?? '';
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName);
+          text = binding.taskName ?? '';
           type = 'Task';
         }
 
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
+          timestamp: new Date(binding.transcriptStart || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] || 'question',
@@ -310,8 +313,9 @@ export class Channel extends Ad4mModel {
       for (const r of results || []) {
         const cid = r.channelId;
         if (!cid || channelMap.has(cid)) continue;
-        const parsed = parseLit(r.isConv);
-        if (String(parsed) !== 'true') continue;
+        // CHANNEL_IS_CONVERSATION is a boolean typed literal; SPARQL binding
+        // returns its lexical form directly.
+        if (r.isConv !== 'true') continue;
         channelMap.set(cid, {
           channelId: cid,
           conversationId: r.conversationId || undefined,
