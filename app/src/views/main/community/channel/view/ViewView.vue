@@ -90,7 +90,7 @@ async function onViewClick(e: any) {
     if (!url.startsWith('http')) e.preventDefault();
     if (url.startsWith('neighbourhood://')) onNeighbourhoodClick(url);
     if (url.startsWith('did:')) onAgentClick(url);
-    if (url.startsWith('literal:')) {
+    if (url.startsWith('literal:') || url.startsWith('ad4m://obj/')) {
       const isChannel = await perspective.isSubjectInstance(url, Channel);
       if (isChannel) {
         router.push({ name: 'channel', params: { communityId, channelId: stripChannelPrefix(url) } });
