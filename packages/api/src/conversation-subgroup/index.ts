@@ -1,7 +1,4 @@
-import { Model, Ad4mModel, Flag, HasMany, Property, Literal } from '@coasys/ad4m';
-// Local parseLit: extracts `.data` from signed-envelope literals used by
-// Message.body (see ../utils/parseLit.ts).
-import { parseLit } from '../utils/parseLit';
+import { Model, Ad4mModel, Flag, HasMany, Property, Literal, parseLit } from '@coasys/ad4m';
 import Topic, { TopicWithRelevance } from '../topic';
 import SemanticRelationship from '../semantic-relationship';
 import { SynergyTopic, SynergyItem, ItemType, icons } from '@coasys/flux-utils';

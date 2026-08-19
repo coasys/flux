@@ -1,7 +1,4 @@
-import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseSparqlCount, CountBinding } from '@coasys/ad4m';
-// Local parseLit: extracts `.data` from signed-envelope literals used by
-// Message.body (see ../utils/parseLit.ts).
-import { parseLit } from '../utils/parseLit';
+import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
 import { SynergyGroup, SynergyItem, ItemType, icons, fluxDebug, fluxDebugWarn } from '@coasys/flux-utils';
