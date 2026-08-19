@@ -1,6 +1,22 @@
 /**
  * Local `parseLit` for Flux — extracts `.data` from signed-envelope literals.
  *
+ * Temporary bridge
+ * ----------------
+ * The proper fix lives upstream in @coasys/ad4m (commit c48c9117c on the
+ * `refactor/typed-rdf-literals-and-fn-cleanup-nico-refactor` branch —
+ * "fix(sdk): restore .data unwrap in parseLit for signed-envelope literals").
+ * This shim exists only to bridge the ad4m version currently pinned in
+ * packages/api/package.json (`0.11.1`) and the root workspace
+ * (`0.13.0-test-9`) until a new ad4m dev-test build carrying that fix is
+ * published and the pins are bumped.
+ *
+ * Once Flux consumes an @coasys/ad4m build with the upstream fix, this
+ * file should be reverted to the one-line re-export:
+ *   `export { parseLit } from '@coasys/ad4m';`
+ * and the imports in channel/index.ts + conversation-subgroup/index.ts
+ * should switch back to importing directly from '@coasys/ad4m'.
+ *
  * Context
  * -------
  * The `literal` language in ad4m wraps every value in a signed-expression
@@ -13,17 +29,19 @@
  * deterministic typed XSD literals in coasys/ad4m#874 and does not need
  * any decode step at all.
  *
- * The upstream `parseLit` in `@coasys/ad4m` was tightened as part of that
- * refactor to stop guessing at `.data` unwrapping for the generic case —
- * it now JSON-stringifies any object it decodes. That is correct for the
- * generic helper, but it means `Message.body` renders as the raw envelope
- * JSON (`{"author":..., "timestamp":..., "data":"<p>yo</p>", "proof":...}`)
- * in the chat UI instead of the message HTML.
+ * The upstream `parseLit` in the currently-pinned @coasys/ad4m release was
+ * tightened as part of that refactor to stop guessing at `.data` unwrapping
+ * for the generic case — it now JSON-stringifies any object it decodes.
+ * That is correct for the generic helper against deterministic typed
+ * literals, but it broke `Message.body`: the chat UI rendered the raw
+ * envelope JSON
+ * (`{"author":..., "timestamp":..., "data":"<p>yo</p>", "proof":...}`)
+ * instead of the message HTML.
  *
- * This local shim restores the pre-refactor behaviour just for Flux:
+ * This shim restores the envelope-unwrap behaviour:
  *   - decode the `literal:*` URL
- *   - if the decoded value is a signed-envelope object with a `.data`
- *     field (string), return that string
+ *   - if the decoded value is a signed-envelope object with a string
+ *     `.data` field, return that string
  *   - otherwise fall back to the upstream stringify behaviour
  *
  * Non-envelope literals (`literal:string:*`, `literal:number:*`, primitives
