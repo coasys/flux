@@ -28,12 +28,31 @@ export default function TodoView({ perspective, source }: Props) {
 
   useEffect(() => {
     loadTodos();
-    const handler = (link: any) => {
-      if (link.data?.source === source && link.data?.predicate === 'ad4m://has_child') loadTodos();
-      return null;
+    // Targeted SPARQL subscription: fires only when the set of
+    // `ad4m://has_child` links from THIS source changes, instead of waking
+    // on every link event in the perspective.  Mirrors the pattern used
+    // across the Flux app and views.
+    let sub: { dispose: () => void } | null = null;
+    let unmounted = false;
+    (async () => {
+      try {
+        const s = await perspective.subscribeQuery(
+          `SELECT ?id WHERE { <${source}> <ad4m://has_child> ?id . }`,
+        );
+        if (unmounted) {
+          s.dispose();
+          return;
+        }
+        sub = s;
+        s.onResult(() => loadTodos());
+      } catch (error) {
+        console.error('Failed to subscribe to todo links:', error);
+      }
+    })();
+    return () => {
+      unmounted = true;
+      sub?.dispose();
     };
-    perspective.addListener('link-added', handler);
-    return () => perspective.removeListener('link-added', handler);
   }, [source]);
 
   async function createTodo(event: React.KeyboardEvent<Element>) {

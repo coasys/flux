@@ -21,7 +21,6 @@ import Message from './message';
 import MessageSummary from './message/MessageSummary';
 import Post from './post';
 import SemanticRelationship from './semantic-relationship';
-import subscribeToLinks from './subscribeToLinks';
 import subscribeToSyncState from './subscribeToSyncState';
 import Topic from './topic';
 import Task from './task';
@@ -55,7 +54,6 @@ export {
   MessageSummary,
   Post,
   SemanticRelationship,
-  subscribeToLinks,
   subscribeToSyncState,
   Topic,
   Task,

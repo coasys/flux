@@ -488,41 +488,80 @@ export async function createCommunityService(): Promise<CommunityService> {
   perspective.addSyncStateChangeListener(syncStateListener);
 
   // Track channel participants automatically.
-  // Uses addListener because participant tracking needs link.author metadata,
-  // which isn't available from SPARQL subscription results.
-  // Local dedup set avoids redundant addLinks RPCs — ChannelSummary doesn't
-  // carry participants, so the old channel.participants.includes() check was lost.
+  //
+  // Previously this used `perspective.addListener('link-added', ...)`, which
+  // is a perspective-scoped firehose — every link added anywhere in the
+  // perspective wakes every listener.  We now drive the same logic from a
+  // targeted SPARQL subscription that only fires when the set of distinct
+  // `(channel, author)` pairs over the `flux://has_channel` predicate
+  // changes.  The reified link's author is exposed via
+  // `?_r ad4m:author ?author`, so the subscription observes exactly the
+  // signal we used to read off `link.author`.
+  //
+  // The dedup set keeps `addLinks` RPCs idempotent (the addLink itself is
+  // also idempotent on the executor side, but the dedup avoids the round
+  // trip).  Each subscription fire triggers a single `LinkQuery` refetch so
+  // the handler does not depend on the SPARQL binding shape — robust
+  // against any future result-shape changes.
   const knownParticipants = new Set<string>();
-  function handleParticipantTracking(link: any) {
-    if (link.data.predicate !== CHANNEL) return null;
-    if (!link.author) return null;
+  let channelLinksSub: { dispose: () => void } | null = null;
+  let participantTrackingCancelled = false;
 
-    const channelId = link.data.source;
-    const channel = allChannels.value.find((c) => c.id === channelId);
-    if (!channel) return null;
+  async function refreshParticipantsFromChannelLinks() {
+    try {
+      const links = await perspective.get(new LinkQuery({ predicate: CHANNEL }));
+      for (const link of links) {
+        if (!link.author) continue;
+        const channelId = link.data.source;
+        const channel = allChannels.value.find((c) => c.id === channelId);
+        if (!channel) continue;
 
-    const key = `${channelId}::${link.author}`;
-    if (knownParticipants.has(key)) return null;
-    knownParticipants.add(key);
+        const key = `${channelId}::${link.author}`;
+        if (knownParticipants.has(key)) continue;
+        knownParticipants.add(key);
 
-    perspective
-      .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
-      .catch((error) => {
-        knownParticipants.delete(key);
-        console.error('Failed to add participant to channel:', {
-          channelId,
-          author: link.author,
-          error,
-        });
-      });
-
-    return null;
+        perspective
+          .addLinks([{ source: channelId, predicate: 'flux://has_participant', target: link.author }])
+          .catch((error) => {
+            knownParticipants.delete(key);
+            console.error('Failed to add participant to channel:', {
+              channelId,
+              author: link.author,
+              error,
+            });
+          });
+      }
+    } catch (error) {
+      console.error('Error refreshing channel participants:', error);
+    }
   }
-  perspective.addListener('link-added', handleParticipantTracking);
 
-  // Cleanup function to remove all listeners
+  (async () => {
+    try {
+      // SELECT every distinct `(source, author)` over the `flux://has_channel`
+      // predicate.  The reifier metadata is queried via the RDF 1.2 `reifies`
+      // pattern that the rest of the model query pipeline uses.
+      const sub = await perspective.subscribeQuery(`
+        SELECT DISTINCT ?source ?author WHERE {
+          ?_r <http://www.w3.org/1999/02/22-rdf-syntax-ns#reifies> <<( ?source <${CHANNEL}> ?_target )>> .
+          ?_r <ad4m://ontology/author> ?author .
+        }
+      `);
+      if (participantTrackingCancelled) {
+        sub.dispose();
+        return;
+      }
+      channelLinksSub = sub;
+      sub.onResult(() => refreshParticipantsFromChannelLinks());
+    } catch (error) {
+      console.error('Failed to subscribe to channel-link author pairs:', error);
+    }
+  })();
+
+  // Cleanup function to tear down active subscriptions
   function cleanup() {
-    perspective.removeListener('link-added', handleParticipantTracking);
+    participantTrackingCancelled = true;
+    channelLinksSub?.dispose();
   }
 
   getMembers();
