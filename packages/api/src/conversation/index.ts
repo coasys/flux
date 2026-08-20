@@ -1,4 +1,4 @@
-import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property, parseLit } from '@coasys/ad4m';
+import { Ad4mModel, Ad4mClient, Flag, HasMany, HasManyMethods, Link, Literal, Model, Property } from '@coasys/ad4m';
 
 import { getProfile, Topic } from '@coasys/flux-api';
 import { ProcessingState, Profile } from '@coasys/flux-types';
@@ -112,7 +112,8 @@ export class Conversation extends Ad4mModel {
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw),
+            // Typed XSD literal — SPARQL binding gives lexical form directly.
+            topicName: binding.topicNameRaw ?? '',
           });
         }
       }
@@ -164,8 +165,9 @@ export class Conversation extends Ad4mModel {
           subgroupMap.set(id, {
             id,
             timestamp: binding.timestamp,
-            name: parseLit(binding.nameRaw),
-            summary: parseLit(binding.summaryRaw),
+            // has_name / has_summary are typed XSD literals — no decode.
+            name: binding.nameRaw ?? '',
+            summary: binding.summaryRaw ?? '',
           });
         }
       }
@@ -196,7 +198,8 @@ export class Conversation extends Ad4mModel {
       for (const r of batchResults || []) {
         const sgId = r.sg;
         if (!sgId) continue;
-        const ts = parseLit(r.transcriptStart) || r.channelTs;
+        // transcript_started_at is a typed XSD literal string.
+        const ts = r.transcriptStart || r.channelTs;
         if (ts == null || ts === '') continue;
         const time = new Date(ts).getTime();
         if (isNaN(time)) continue;

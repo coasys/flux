@@ -5,6 +5,7 @@
 
 // Strips neighbourhood URL prefix to get clean community ID
 export function stripNeighbourhoodPrefix(neighbourhoodUrl: string): string {
+  if (!neighbourhoodUrl) return '';
   const prefix = 'neighbourhood://';
   const privatePrefix = 'private://';
   if (neighbourhoodUrl.startsWith(prefix)) return neighbourhoodUrl.slice(prefix.length);
@@ -20,13 +21,20 @@ export function restoreNeighbourhoodPrefix(communityId: string): string {
   return `neighbourhood://${communityId}`;
 }
 
-// Strips literal:string: prefix from channel ID
+// Strips the legacy literal:string: prefix from a channel ID for use in route params.
+// New ad4m://obj/ IDs pass through unchanged — they round-trip via restoreChannelPrefix
+// which detects the :// scheme and returns them as-is.
 export function stripChannelPrefix(channelId: string): string {
+  if (!channelId) return '';
   if (channelId.startsWith('literal:string:')) return channelId.slice('literal:string:'.length);
   return channelId;
 }
 
-// Restores literal:string: prefix to channel ID
+// Restores the instance-ID prefix from a clean route param.
+// IDs that already carry a scheme (ad4m://, literal:, neighbourhood://) pass through unchanged.
+// Bare IDs get the legacy literal:string: prefix for backwards compatibility.
 export function restoreChannelPrefix(channelId: string): string {
+  if (!channelId) return '';
+  if (channelId.includes('://')) return channelId;
   return `literal:string:${channelId}`;
 }

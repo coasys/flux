@@ -1,7 +1,7 @@
 import { Ad4mModel, HasMany, HasManyMethods, Flag, Literal, LinkQuery, Model, Property, PerspectiveProxy, parseLit, parseSparqlCount, CountBinding } from '@coasys/ad4m';
 import { community } from '@coasys/flux-constants';
 import { EntryType } from '@coasys/flux-types';
-import { SynergyGroup, SynergyItem, ItemType, icons } from '@coasys/flux-utils';
+import { SynergyGroup, SynergyItem, ItemType, icons, fluxDebug, fluxDebugWarn } from '@coasys/flux-utils';
 import App from '../app';
 import Conversation from '../conversation';
 import Message from '../message';
@@ -117,26 +117,50 @@ export class Channel extends Ad4mModel {
 
       const sparqlResult = await this.perspective.querySparql<ChannelItemBinding[]>(sparqlQuery);
 
+      // Debug: log raw SPARQL binding shape. The typed-RDF-literals refactor
+      // in coasys/ad4m#874 changed wire form for scalar values; if body still
+      // arrives as a `literal:string:*` envelope, storage-vs-decode is mismatched.
+      fluxDebug('Channel.allItems', 'sparql.result', {
+        channelId: this.id,
+        rowCount: (sparqlResult || []).length,
+        firstRow: sparqlResult?.[0],
+        types: [...new Set((sparqlResult || []).map((r) => r.type))],
+      });
+      if (sparqlResult?.length) {
+        const envelope = sparqlResult.find((r) => typeof r.body === 'string' && r.body.startsWith('literal:'));
+        if (envelope) {
+          fluxDebugWarn('Channel.allItems', 'sparql.body-is-envelope', {
+            channelId: this.id,
+            sampleBody: envelope.body?.slice(0, 120),
+            hint: 'Message.body arrives as a `literal:*` envelope URI — parseLit() decode is required.',
+          });
+        }
+      }
+
       const mapped = (sparqlResult || []).map((binding) => {
         let text = '';
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
+        // title / taskName / transcriptStart are typed XSD literals — SPARQL
+        // binding returns their lexical form directly, no decode.
+        // Only Message.body is an envelope literal (resolveLanguage: 'literal')
+        // so it still needs parseLit() to unwrap the `.data` field.
         if (itemType === 'flux://has_message') {
           text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title);
+          text = binding.title ?? '';
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName);
+          text = binding.taskName ?? '';
           type = 'Task';
         }
 
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
+          timestamp: new Date(binding.transcriptStart || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] || 'question',
@@ -228,21 +252,23 @@ export class Channel extends Ad4mModel {
         let type: ItemType = 'Message';
         const itemType = binding.type;
 
+        // Only Message.body needs parseLit() (envelope literal). All other
+        // scalar fields are typed XSD literals and used as-is.
         if (itemType === 'flux://has_message') {
           text = parseLit(binding.body);
           type = 'Message';
         } else if (itemType === 'flux://has_post') {
-          text = parseLit(binding.title);
+          text = binding.title ?? '';
           type = 'Post';
         } else if (itemType === 'flux://has_task') {
-          text = parseLit(binding.taskName);
+          text = binding.taskName ?? '';
           type = 'Task';
         }
 
         return {
           id: binding.id,
           author: binding.author,
-          timestamp: new Date(parseLit(binding.transcriptStart) || binding.timestamp).toISOString(),
+          timestamp: new Date(binding.transcriptStart || binding.timestamp).toISOString(),
           text,
           type,
           icon: icons[type] || 'question',
@@ -310,8 +336,9 @@ export class Channel extends Ad4mModel {
       for (const r of results || []) {
         const cid = r.channelId;
         if (!cid || channelMap.has(cid)) continue;
-        const parsed = parseLit(r.isConv);
-        if (String(parsed) !== 'true') continue;
+        // CHANNEL_IS_CONVERSATION is a boolean typed literal; SPARQL binding
+        // returns its lexical form directly.
+        if (r.isConv !== 'true') continue;
         channelMap.set(cid, {
           channelId: cid,
           conversationId: r.conversationId || undefined,

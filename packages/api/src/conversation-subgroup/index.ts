@@ -102,7 +102,8 @@ export default class ConversationSubgroup extends Ad4mModel {
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw),
+            // Typed XSD literal — SPARQL binding gives lexical form directly.
+            topicName: binding.topicNameRaw ?? '',
           });
         }
       }
@@ -155,24 +156,27 @@ export default class ConversationSubgroup extends Ad4mModel {
         if (!id) continue;
 
         // Coalesce OPTIONAL fields from multiple SPARQL rows for same id
+        // body/title/taskName/transcriptStart are typed XSD literals; SPARQL
+        // binding returns their lexical form directly, no decode needed.
         if (seen.has(id)) {
           // Merge optional fields from this binding into the existing item
           const existing = seen.get(id)!;
-          const transcriptStart = parseLit(binding.transcriptStart);
+          const transcriptStart = binding.transcriptStart ?? '';
           const channelTs = binding.channelTs;
           const fallbackTs = binding.timestamp;
           if (!existing.channelTimestamp) {
             existing.channelTimestamp = transcriptStart || channelTs || fallbackTs;
           }
+          // Message.body is envelope-encoded (resolveLanguage: 'literal'); decode via parseLit.
           if (!existing.messageBody) existing.messageBody = parseLit(binding.body);
-          if (!existing.postTitle) existing.postTitle = parseLit(binding.title);
-          if (!existing.taskName) existing.taskName = parseLit(binding.taskName);
+          if (!existing.postTitle) existing.postTitle = binding.title ?? '';
+          if (!existing.taskName) existing.taskName = binding.taskName ?? '';
           if (!existing.type) existing.type = binding.type;
           if (!existing.author) existing.author = binding.author;
           continue;
         }
 
-        const transcriptStart = parseLit(binding.transcriptStart);
+        const transcriptStart = binding.transcriptStart ?? '';
         const channelTs = binding.channelTs;
         const fallbackTs = binding.timestamp;
         const channelTimestamp = transcriptStart || channelTs || fallbackTs;
@@ -182,9 +186,10 @@ export default class ConversationSubgroup extends Ad4mModel {
           type: binding.type,
           author: binding.author,
           channelTimestamp,
+          // Message.body is envelope-encoded (resolveLanguage: 'literal'); decode via parseLit.
           messageBody: parseLit(binding.body),
-          postTitle: parseLit(binding.title),
-          taskName: parseLit(binding.taskName),
+          postTitle: binding.title ?? '',
+          taskName: binding.taskName ?? '',
         };
         seen.set(id, item);
         items.push(item);
@@ -249,8 +254,9 @@ export default class ConversationSubgroup extends Ad4mModel {
         if (topicBase && !uniqueTopics.has(topicBase)) {
           uniqueTopics.set(topicBase, {
             topicBase,
-            topicName: parseLit(binding.topicNameRaw),
-            relevance: parseLit(binding.relevanceRaw),
+            // Typed XSD literals — no decode needed.
+            topicName: binding.topicNameRaw ?? '',
+            relevance: binding.relevanceRaw ?? '',
           });
         }
       }
