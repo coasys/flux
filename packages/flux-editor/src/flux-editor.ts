@@ -300,10 +300,16 @@ export default class MyElement extends LitElement {
   }
 
   async getMentionSuggestions(query: string) {
-    const matches = this.members
+    // Protocol-level group mentions
+    const groupMentions: Suggestion[] = [
+      { id: 'ad4m://everyone', label: 'everyone' },
+    ].filter((m) => m.label.toLowerCase().startsWith(query.toLowerCase()));
+
+    const memberMatches = this.members
       .filter((m) => this.getSafeString(m.username).toLowerCase().startsWith(query.toLowerCase()))
-      .map((m) => ({ id: m.did, label: m.username || 'anonymous' }))
-      .slice(0, 10) as Suggestion[];
+      .map((m) => ({ id: m.did, label: m.username || 'anonymous' }));
+
+    const matches = [...groupMentions, ...memberMatches].slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
     return matches;

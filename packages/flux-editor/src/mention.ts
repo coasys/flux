@@ -18,7 +18,7 @@ export default Node.create<MentionOptions>({
     return {
       HTMLAttributes: {},
       renderLabel({ node }) {
-        const isMention = node.attrs.id.startsWith('did:');
+        const isMention = node.attrs.id.startsWith('did:') || node.attrs.id.startsWith('ad4m://');
         return `${isMention ? '@' : '#'}${node.attrs.label ?? node.attrs.id}`;
       },
       suggestion: {
