@@ -25,6 +25,10 @@ export const useUiStore = defineStore(
       icon: 'aspect-ratio',
     });
     const focusedVideoId = ref('');
+    // When false the user's own video tile is hidden from the call grid.
+    // The user can still hear themselves and remains a participant — this is
+    // purely a presentation choice so they can focus on others.
+    const selfViewVisible = ref(true);
     const showGlobalLoading = ref(false);
     const globalError = ref({ show: false, message: '' });
     const windowState = ref<WindowState>('visible');
@@ -102,6 +106,14 @@ export const useUiStore = defineStore(
       focusedVideoId.value = id;
     }
 
+    function toggleSelfViewVisible(): void {
+      selfViewVisible.value = !selfViewVisible.value;
+    }
+
+    function setSelfViewVisible(visible: boolean): void {
+      selfViewVisible.value = visible;
+    }
+
     function setWindowState(state: WindowState): void {
       windowState.value = state;
     }
@@ -166,6 +178,7 @@ export const useUiStore = defineStore(
       callWindowWidth,
       selectedVideoLayout,
       focusedVideoId,
+      selfViewVisible,
       showGlobalLoading,
       globalError,
       windowState,
@@ -183,6 +196,8 @@ export const useUiStore = defineStore(
       setCallWindowWidth,
       setVideoLayout,
       setFocusedVideoId,
+      toggleSelfViewVisible,
+      setSelfViewVisible,
       setWindowState,
       setGlobalLoading,
       setGlobalError,

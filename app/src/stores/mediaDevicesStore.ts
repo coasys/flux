@@ -45,9 +45,12 @@ export const useMediaDevicesStore = defineStore(
     const streamLoading = ref(false);
     const error = ref<Error | null>(null);
     const screenShareEnabled = ref(false);
+    // Held in its own stream so the camera tile and the screenshare tile can
+    // be rendered side-by-side. Peers receive this as a separate track via
+    // `webrtcStore.addScreenShareTrack`.
+    const screenShareStream = ref<MediaStream | null>(null);
     const audioEnabled = ref(true);
     const videoEnabled = ref(false);
-    let savedVideoTrack: MediaStreamTrack | null = null;
 
     // Computed properties
     const cameras = computed(() => availableDevices.value.filter((device) => device.kind === 'videoinput'));
@@ -316,7 +319,10 @@ export const useMediaDevicesStore = defineStore(
       // Reset screen share state
       if (screenShareEnabled.value) {
         screenShareEnabled.value = false;
-        savedVideoTrack = null;
+        if (screenShareStream.value) {
+          screenShareStream.value.getTracks().forEach((t) => t.stop());
+          screenShareStream.value = null;
+        }
       }
     }
 
@@ -386,17 +392,15 @@ export const useMediaDevicesStore = defineStore(
             const newStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
             const newVideoTrack = newStream.getVideoTracks()[0];
 
-            // If screen sharing is enabled, save the new track for later restoration
-            if (screenShareEnabled.value) savedVideoTrack = newVideoTrack;
-            else {
-              // Otherwise, add the new track directly to the stream
-              stream.value.addTrack(newVideoTrack);
+            // Camera + screenshare now coexist as separate streams, so the
+            // newly enabled camera track always lands in the main stream and
+            // is forwarded to peers immediately — no swap-on-screenshare-end
+            // bookkeeping is required.
+            stream.value.addTrack(newVideoTrack);
 
-              // Update peer connections
-              const { useWebrtcStore } = await import('./webrtcStore');
-              const webrtcStore = useWebrtcStore();
-              await webrtcStore.addTrack(newVideoTrack, stream.value);
-            }
+            const { useWebrtcStore } = await import('./webrtcStore');
+            const webrtcStore = useWebrtcStore();
+            await webrtcStore.addTrack(newVideoTrack, stream.value);
 
             console.log('✅ Added new video track');
           } catch (error) {
@@ -409,8 +413,11 @@ export const useMediaDevicesStore = defineStore(
             videoEnabled.value = false;
           }
         }
-      } else if (!screenShareEnabled.value) {
-        // Disabling video - disable tracks with animation delay
+      } else {
+        // Disabling video - disable tracks with animation delay.
+        // The camera tracks are independent of screenshare now, so disabling
+        // the camera while sharing only kills the camera tile without
+        // affecting the screenshare track.
         await new Promise((resolve) => setTimeout(resolve, 300)); // Fade out animation
         existingVideoTracks.forEach((track) => (track.enabled = false));
         console.log('✅ Disabled video tracks');
@@ -421,79 +428,70 @@ export const useMediaDevicesStore = defineStore(
       if (!stream.value) return;
 
       try {
-        // Get the screen share track
-        const screenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const screenShareTrack = screenShareStream.getVideoTracks()[0];
+        // Get the screen share stream as its own MediaStream so peers can
+        // receive it alongside (not in place of) the camera track. The
+        // camera track stays in the existing `stream` ref and continues
+        // sending — both the local user and remote peers see a separate
+        // tile for camera and screenshare.
+        const newScreenShareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenShareTrack = newScreenShareStream.getVideoTracks()[0];
+        if (!screenShareTrack) {
+          // The browser handed us a stream without a video track — rare but
+          // possible if the user immediately cancelled the picker. Bail
+          // cleanly rather than wiring a phantom share.
+          newScreenShareStream.getTracks().forEach((t) => t.stop());
+          return;
+        }
 
-        // Update my media settings
         screenShareEnabled.value = true;
+        screenShareStream.value = newScreenShareStream;
 
-        // Add onended handler to detect when the user stops sharing via browser UI
+        // Detect when the user stops sharing via the browser's native UI
+        // (e.g. the "Stop sharing" bar) and tear the share down cleanly.
         screenShareTrack.onended = () => {
           if (!screenShareEnabled.value) return;
-          screenShareEnabled.value = false;
           turnOffScreenShare();
         };
 
-        // Get existing video track if present
-        const existingVideoTrack = stream.value.getVideoTracks()[0];
-
-        // Save existing video track for later restoration
-        if (existingVideoTrack) {
-          savedVideoTrack = existingVideoTrack;
-          // Remove existing video track from stream
-          stream.value.removeTrack(existingVideoTrack);
-        }
-
-        // Add screen share track to existing stream
-        stream.value.addTrack(screenShareTrack);
-
-        // Update peer connections
+        // Send the screenshare to all peers as its own track + stream so
+        // the receiving side fires a fresh 'track' event with a distinct
+        // stream id, rather than swapping the existing camera sender.
         const { useWebrtcStore } = await import('./webrtcStore');
         const webrtcStore = useWebrtcStore();
-        await webrtcStore.replaceVideoTrack(screenShareTrack, existingVideoTrack);
+        await webrtcStore.addScreenShareTrack(screenShareTrack, newScreenShareStream);
 
         console.log('✅ Successfully started screen share');
       } catch (error) {
         console.error('❌ Error starting screen share:', error);
         screenShareEnabled.value = false;
+        if (screenShareStream.value) {
+          screenShareStream.value.getTracks().forEach((t) => t.stop());
+          screenShareStream.value = null;
+        }
       }
     }
 
     async function turnOffScreenShare() {
-      if (!stream.value) return;
-
       try {
-        // Get current screen share track
-        const screenShareTrack = stream.value.getVideoTracks()[0];
+        const tracks = screenShareStream.value?.getTracks() ?? [];
 
-        // Remove screen share track from stream
-        if (screenShareTrack) {
-          stream.value.removeTrack(screenShareTrack);
-          screenShareTrack.stop();
+        // Stop the OS-level capture before tearing down the peer senders so
+        // the browser's "Stop sharing" indicator goes away immediately.
+        tracks.forEach((t) => t.stop());
+
+        // Remove every screenshare sender from each peer connection.  The
+        // receiving side's 'track ended' handler will surface the stream
+        // disappearing — no replace-back to the camera track is needed.
+        if (tracks.length) {
+          const { useWebrtcStore } = await import('./webrtcStore');
+          const webrtcStore = useWebrtcStore();
+          for (const t of tracks) {
+            await webrtcStore.removeTrack(t);
+          }
         }
 
-        // Update media settings
         screenShareEnabled.value = false;
-
-        // Restore saved video track if it exists
-        if (savedVideoTrack) {
-          // Re-enable the saved track if video should be enabled
-          savedVideoTrack.enabled = videoEnabled.value;
-          stream.value.addTrack(savedVideoTrack);
-
-          // Update peer connections
-          const { useWebrtcStore } = await import('./webrtcStore');
-          const webrtcStore = useWebrtcStore();
-          await webrtcStore.replaceVideoTrack(savedVideoTrack, screenShareTrack);
-
-          savedVideoTrack = null; // Clear the saved track
-        } else {
-          // No saved track - just remove screen share from peers
-          const { useWebrtcStore } = await import('./webrtcStore');
-          const webrtcStore = useWebrtcStore();
-          await webrtcStore.removeTrack(screenShareTrack);
-        }
+        screenShareStream.value = null;
 
         console.log('✅ Successfully stopped screen share');
       } catch (error) {
@@ -533,6 +531,7 @@ export const useMediaDevicesStore = defineStore(
       activeAudioOutputId,
       availableDevices,
       stream,
+      screenShareStream,
       streamLoading,
       error,
       screenShareEnabled,
