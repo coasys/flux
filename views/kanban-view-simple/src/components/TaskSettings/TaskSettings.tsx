@@ -6,6 +6,17 @@ import { Task, TaskColumn } from '@coasys/flux-api';
 import AvatarGroup from '../AvatarGroup';
 import { ColumnWithTasks } from '../Board/Board';
 
+/** Safely parse a JSON string, returning the fallback value on failure. */
+function safeJsonParse<T>(value: string | undefined | null, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    console.warn('Failed to parse JSON value, using fallback:', value?.slice(0, 80));
+    return fallback;
+  }
+}
+
 type Props = {
   perspective: PerspectiveProxy;
   channelId: string;
@@ -59,12 +70,12 @@ export default function TaskSettings({
         const destination = columns.find((col) => col.columnName === taskColumn);
 
         // Update orderedTaskIds in source column
-        const sourceOrderedTaskIds = JSON.parse(source.orderedTaskIds).filter((id) => id !== task.id);
+        const sourceOrderedTaskIds = safeJsonParse<string[]>(source.orderedTaskIds, []).filter((id) => id !== task.id);
         source.orderedTaskIds = JSON.stringify(sourceOrderedTaskIds);
         await source.save(batchId);
 
         // Update orderedTaskIds in destination column
-        const destinationOrderedTaskIds = [...(JSON.parse(destination.orderedTaskIds) || []), task.id];
+        const destinationOrderedTaskIds = [...safeJsonParse<string[]>(destination.orderedTaskIds, []), task.id];
         destination.orderedTaskIds = JSON.stringify(destinationOrderedTaskIds);
         await destination.save(batchId);
       }
@@ -110,7 +121,7 @@ export default function TaskSettings({
 
       // Store the task position in the column
       const columnModel = columns.find((col) => col.columnName === taskColumn);
-      const newOrderedTaskIds = [...(JSON.parse(columnModel.orderedTaskIds) || []), newTaskModel.id];
+      const newOrderedTaskIds = [...safeJsonParse<string[]>(columnModel.orderedTaskIds, []), newTaskModel.id];
       columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
       await columnModel.save(batchId);
 
@@ -138,7 +149,7 @@ export default function TaskSettings({
 
     // Update orderedTaskIds in column
     const columnModel = columns.find((col) => col.id === column.id);
-    const newOrderedTaskIds = JSON.parse(column.orderedTaskIds).filter((id: string) => id !== task.id);
+    const newOrderedTaskIds = safeJsonParse<string[]>(column.orderedTaskIds, []).filter((id: string) => id !== task.id);
     columnModel.orderedTaskIds = JSON.stringify(newOrderedTaskIds);
     await columnModel.save(batchId);
 
